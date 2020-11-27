@@ -1,0 +1,8 @@
+pytorch
+cython
+gdown
+ujson
+dpu_utils
+nltk
+psutil
+ruamel.yaml

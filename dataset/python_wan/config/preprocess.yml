@@ -1,0 +1,28 @@
+preprocess:
+  task: summarization # task', metavar='TASK', default="translation", choices=TASK_REGISTRY.keys(), help='task'
+  source_lang: code_tokens
+  target_lang: docstring_tokens
+  only_source: 0
+  trainpref: ~/.ncc/python_wan/flatten/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/.ncc/python_wan/flatten/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/.ncc/python_wan/flatten/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+
+  # raw dataset
+#  dataset_impl: raw #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+#  destdir: ~/.ncc/python_wan/summarization/data-raw #", metavar="DIR", default="data-bin", help="destination dir"
+  # bin dataset
+  dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+  destdir: ~/.ncc/python_wan/summarization/data-mmap #", metavar="DIR", default="data-bin", help="destination dir"
+
+  only_train: 0 # if set false, generate dictionaries with additional validation datasets. e.g. neural-transformer
+
+#  align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
+  thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
+  srcdict: ~
+  tgtdict: ~
+  nwordssrc: 50000 #", metavar="N", default=-1, type=int, help="number of source words to retain"
+  nwordstgt: 30000
+  alignfile: ~ #", metavar="ALIGN", default=None, help="an alignment file (optional)"
+  joined_dictionary: 0 # ", action="store_true", help="Generate joined dictionary"
+  padding_factor: 8 #", metavar="N", default=8, type=int, help="Pad dictionary size to be multiple of N"
+  workers: 10 # ", metavar="N", default=1, type=int, help="number of parallel workers"

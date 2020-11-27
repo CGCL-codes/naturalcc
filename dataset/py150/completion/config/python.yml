@@ -1,0 +1,23 @@
+preprocess:
+  task: completion # task', metavar='TASK', default="translation", choices=TASK_REGISTRY.keys(), help='task'
+  source_lang: code_tokens
+  trainpref: ~/.ncc/py150/raw/python100k_train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~ #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/.ncc/py150/raw/python50k_eval  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+
+  # raw dataset
+#  dataset_impl: raw #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+#  destdir: ~/.ncc/py150/summarization/data-raw #", metavar="DIR", default="data-bin", help="destination dir"
+  # bin dataset
+  dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+  destdir: ~/.ncc/py150/completion/data-mmap #", metavar="DIR", default="data-bin", help="destination dir"
+  max_len: 200
+
+#  align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
+  thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
+  srcdict: ~
+#  srcdict: ~/.ncc/py150/completion/data-mmap/code_tokens.dict.json
+  nwordssrc: 50000 #", metavar="N", default=-1, type=int, help="number of source words to retain"
+  alignfile: ~ #", metavar="ALIGN", default=None, help="an alignment file (optional)"
+  padding_factor: 8 #", metavar="N", default=8, type=int, help="Pad dictionary size to be multiple of N"
+  workers: 10 # ", metavar="N", default=1, type=int, help="number of parallel workers"
