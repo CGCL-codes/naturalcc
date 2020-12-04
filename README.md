@@ -28,7 +28,7 @@ The project is inspired by [fairseq](https://github.com/pytorch/fairseq).
 - [Code Retrieval](run/retrieval)
     - [NBOW](run/retrieval/nbow/README.md)
 - [Code Prediction](run/completion)
-    - [NBOW](run/completion/seqrnn/README.md)
+    - [SeqRNN](run/completion/seqrnn/README.md)
 - [Type Inference](run/type_prediction)
 
 TBC...
