@@ -90,7 +90,7 @@ pip install --editable ./
 
 
 ## License
-NaturalCC is MIT-licensed. The license applies to the pre-trained models as well.
+NaturalCC is [MIT-licensed](https://github.com/CGCL-codes/naturalcc/blob/master/LICENSE.txt). The license applies to the pre-trained models as well.
 
 ## Citation
 Please cite as:
