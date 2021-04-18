@@ -8,9 +8,9 @@ from typing import Any, Dict, List
 
 from torch.nn.modules.loss import _Loss
 
-# from src import metrics
-from ncc.logging import metrics
 from ncc.utils import utils
+# from src import metrics
+from ncc.utils.logging import metrics
 
 
 class NccCriterion(_Loss):
@@ -18,12 +18,13 @@ class NccCriterion(_Loss):
     def __init__(self, task):
         super().__init__()
         self.task = task
-        if hasattr(task, 'target_dictionary'):
-            # for fairseq
-            tgt_dict = task.target_dictionary
-            self.padding_idx = tgt_dict.pad() if tgt_dict is not None else -100
-            # # for BERT tokenizer
-            # self.padding_idx = task.tokenizer.pad_token_id
+        # pad in target_dictionary is not necessary, e.g. type inference task
+        # if hasattr(task, 'target_dictionary'):
+        #     # for fairseq
+        #     tgt_dict = task.target_dictionary
+        #     self.padding_idx = tgt_dict.pad() if tgt_dict is not None else -100
+        # # for BERT tokenizer
+        # self.padding_idx = task.tokenizer.pad_token_id
 
     @staticmethod
     def add_args(parser):

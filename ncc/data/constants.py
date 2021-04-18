@@ -2,10 +2,14 @@
 
 MODES = ['train', 'valid', 'test']
 
-PAD = "[PAD]"
+PAD = '[PAD]'
+BOS = "<s>"
 EOS = "</s>"
 UNK = "[UNK]"
-BOS = "<s>"
+
+# word-level bpe
+SOW = '<sow>'
+EOW = '<eow>'
 
 MASK = '[MASK]'
 SEP = '[SEP]'
@@ -36,4 +40,13 @@ SP_SPACE = '▁'
 # only for code modality in bert
 INSERTED = '_inserted'
 
-INF = 99999999
+EPS = 1e-8
+# 2**31-1, using a big number as frequency for special symbols to make it rank head of dicionary symbols
+INF = 2147483647
+DEFAULT_MAX_TARGET_POSITIONS = DEFAULT_MAX_SOURCE_POSITIONS = int(1e5)
+
+# ast
+NODE_FIX = 'NODEFIX'
+# sbt
+SBT_LEFT_PARENTHESE = '(_SBT'
+SBT_RIGHT_PARENTHESE = ')_SBT'

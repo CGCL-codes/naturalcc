@@ -1,16 +1,17 @@
 import math
 from typing import Optional, Dict
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from ncc.modules.code2vec.neural_transformer.neural_transformer_encoder_layer import NeuralTransformerEncoderLayer
-from ncc.modules.layer_norm import LayerNorm
-from ncc.modules.code2vec.ncc_encoder import NccEncoder
+
 from ncc.modules.code2vec.ncc_encoder import EncoderOut
+from ncc.modules.code2vec.ncc_encoder import NccEncoder
+from ncc.modules.code2vec.neural_transformer.neural_transformer_encoder_layer import NeuralTransformerEncoderLayer
+from ncc.modules.roberta.learned_positional_embedding import LearnedPositionalEmbedding
 from ncc.modules.roberta.sinusoidal_positional_embedding import SinusoidalPositionalEmbedding
 from ncc.utils import utils
-from collections import OrderedDict
 
 DEFAULT_MAX_SOURCE_POSITIONS = 1e5
 
@@ -33,64 +34,45 @@ class NeuralTransformerEncoder(NccEncoder):
         self.dropout = args['model']['dropout']
         self.encoder_layerdrop = args['model']['encoder_layerdrop']
 
-        embed_dim = embed_tokens.embedding_dim
+        self.embed_dim = embed_tokens.embedding_dim
         self.padding_idx = embed_tokens.padding_idx
         self.max_source_positions = args['model']['max_source_positions']
 
         self.embed_tokens = embed_tokens
+        self.embed_scale = 1.0 if args['model']['no_scale_embedding'] else math.sqrt(self.embed_dim)
 
-        # log: args['model']['no_scale_embedding']=1 => false
-        self.embed_scale = 1.0 if args['model']['no_scale_embedding'] else math.sqrt(embed_dim)
-
+        offset_positions_by_padding = args['model'].get('offset_positions_by_padding', False)
         if args['model']['encoder_positional_embeddings']:
-            self.embed_positions = None
-        else:
             # Option 1
-            if args['model']['position_encoding_version'] == 'ncc_sinusoidal':
-                from ncc.modules.roberta.sinusoidal_positional_embedding import SinusoidalPositionalEmbedding
-                offset_positions_by_padding = False
+            if args['model']['encoder_position_encoding_version'] == 'ncc_sinusoidal':
                 self.embed_positions = SinusoidalPositionalEmbedding(
                     self.embed_dim,
-                    padding_idx=self.padding_idx,  # (self.padding_idx if offset_positions_by_padding else None),
-                    init_size=args['model'][
-                                  'max_source_positions'] + self.padding_idx + 1 if offset_positions_by_padding else
-                    args['model']['max_source_positions'],  # + 1 why?
+                    padding_idx=self.padding_idx if offset_positions_by_padding else None,
+                    init_size=args['model']['max_source_positions'] + self.padding_idx + 1 \
+                        if offset_positions_by_padding else args['model']['max_source_positions'],
                 )
             # Option 2
-            elif args['model']['position_encoding_version'] == 'ncc_learned':
-                from ncc.modules.roberta.learned_positional_embedding import LearnedPositionalEmbedding
-                if self.padding_idx is not None:
-                    num_embeddings = args['model']['max_source_positions'] + self.padding_idx + 1
-                m = LearnedPositionalEmbedding(num_embeddings, self.embed_dim, self.padding_idx)
+            elif args['model']['encoder_position_encoding_version'] == 'ncc_learned':
+                num_embeddings = args['model']['max_source_positions']
+                if offset_positions_by_padding:
+                    num_embeddings += self.padding_idx + 1
+                m = LearnedPositionalEmbedding(num_embeddings, self.embed_dim, padding_idx=None)
                 nn.init.normal_(m.weight, mean=0, std=self.embed_dim ** -0.5)
-                if self.padding_idx is not None:
-                    nn.init.constant_(m.weight[self.padding_idx], 0)
                 self.embed_positions = m
+        else:
+            self.embed_positions = None
 
         self.layer_wise_attention = args['model']['layer_wise_attention']
-
-        self.layers = nn.ModuleList([])
-        self.layers.extend(
-            [NeuralTransformerEncoderLayer(args) for i in range(args['model']['encoder_layers'])]
+        self.layers = nn.ModuleList(
+            [NeuralTransformerEncoderLayer(args) for _ in range(args['model']['encoder_layers'])]
         )
         self.num_layers = len(self.layers)
-
-        if args['model']['encoder_normalize_before']:
-            self.layer_norm = LayerNorm(embed_dim)
-        else:
-            self.layer_norm = None
-        if args['model']['layernorm_embedding']:  # getattr(args, "layernorm_embedding", False):
-            self.layernorm_embedding = LayerNorm(embed_dim)
-        else:
-            self.layernorm_embedding = None
 
     def forward_embedding(self, src_tokens):
         # embed tokens and positions
         x = embed = self.embed_scale * self.embed_tokens(src_tokens)
         if self.embed_positions is not None:
             x = embed + self.embed_positions(src_tokens)
-        if self.layernorm_embedding is not None:
-            x = self.layernorm_embedding(x)
         x = F.dropout(x, p=self.dropout, training=self.training)
         return x, embed
 
@@ -129,12 +111,9 @@ class NeuralTransformerEncoder(NccEncoder):
 
         # B x T x C -> T x B x C
         x = x.transpose(0, 1)
-
         # compute padding mask
         encoder_padding_mask = src_tokens.eq(self.padding_idx)
-
         encoder_states = [] if return_all_hiddens else None
-
         # encoder layers
         for layer in self.layers:
             # add LayerDrop (see https://arxiv.org/abs/1909.11556 for description)
@@ -143,14 +122,13 @@ class NeuralTransformerEncoder(NccEncoder):
                 assert encoder_states is not None
                 encoder_states.append(x)
 
-        if self.layer_norm is not None:
-            x = self.layer_norm(x)
-
         return EncoderOut(
             encoder_out=x,  # T x B x C
             encoder_padding_mask=encoder_padding_mask,  # B x T
             encoder_embedding=encoder_embedding,  # B x T x C
             encoder_states=encoder_states,  # List[T x B x C]
+            src_tokens=src_tokens,
+            src_lengths=src_lengths,
         )
 
     @torch.jit.export
@@ -193,6 +171,8 @@ class NeuralTransformerEncoder(NccEncoder):
             encoder_padding_mask=new_encoder_out["encoder_padding_mask"],  # B x T
             encoder_embedding=new_encoder_out["encoder_embedding"],  # B x T x C
             encoder_states=encoder_states,  # List[T x B x C]
+            src_tokens=encoder_out.src_tokens,
+            src_lengths=encoder_out.src_lengths,
         )
 
     def max_positions(self):
@@ -200,6 +180,16 @@ class NeuralTransformerEncoder(NccEncoder):
         if self.embed_positions is None:
             return self.max_source_positions
         return min(self.max_source_positions, self.embed_positions.max_positions)
+
+    def load_state_dict(self, state_dict, strict=True, args=None):
+        """Copies parameters and buffers from *state_dict* into this module and
+        its descendants.
+
+        Overrides the method in :class:`nn.Module`. Compared with that method
+        this additionally "upgrades" *state_dicts* from old checkpoints.
+        """
+        state_dict = self.upgrade_state_dict(state_dict)
+        return super().load_state_dict(state_dict, strict)
 
     def buffered_future_mask(self, tensor):
         dim = tensor.size(0)
@@ -216,17 +206,6 @@ class NeuralTransformerEncoder(NccEncoder):
                     utils.fill_with_neg_inf(self._future_mask.resize_(dim, dim)), 1
                 )
         return self._future_mask[:dim, :dim]
-
-    def load_state_dict(self, state_dict, strict=True, args=None):
-        """Copies parameters and buffers from *state_dict* into this module and
-        its descendants.
-
-        Overrides the method in :class:`nn.Module`. Compared with that method
-        this additionally "upgrades" *state_dicts* from old checkpoints.
-        """
-        state_dict = self.upgrade_state_dict(state_dict)
-
-        return super().load_state_dict(state_dict, strict)
 
     def upgrade_state_dict(self, state_dict):
         # Upgrade Roberta state dict for new versions of fairseq.
@@ -282,27 +261,4 @@ class NeuralTransformerEncoder(NccEncoder):
             self.layer_norm = None
             self.normalize = False
             state_dict[version_key] = torch.Tensor([1])
-        return state_dict
-
-    def upgrade_state_dict_from_roberta(self, state_dict):
-
-        keys_to_delete = [
-            'decoder.sentence_encoder.emb_layer_norm.weight', 'decoder.sentence_encoder.emb_layer_norm.bias',
-            'decoder.lm_head.weight', 'decoder.lm_head.bias',
-            'decoder.lm_head.dense.weight', 'decoder.lm_head.dense.bias',
-            'decoder.lm_head.layer_norm.weight', 'decoder.lm_head.layer_norm.bias',
-        ]
-
-        for k in keys_to_delete:
-            del state_dict[k]
-
-        component_type = 'decoder.sentence_encoder'
-        component_state_dict = OrderedDict()
-        for key in state_dict.keys():
-            if key.startswith(component_type):
-                # encoder.input_layers.0.0.weight --> input_layers.0.0.weight
-                component_subkey = key[len(component_type) + 1:]
-                component_state_dict[component_subkey] = state_dict[key]
-
-        state_dict = component_state_dict
         return state_dict

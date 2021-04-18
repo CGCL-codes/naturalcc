@@ -1,31 +1,18 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ncc.data.constants import DEFAULT_MAX_SOURCE_POSITIONS
 from ncc.modules.code2vec.ncc_encoder import NccEncoder
-from ncc.modules.embedding import Embedding
+from ncc.modules.common.layers import (
+    Embedding,
+    LSTM,
+)
 from ncc.utils import utils
-
-DEFAULT_MAX_SOURCE_POSITIONS = 1e5
-
-
-def LSTM(input_size, hidden_size, **kwargs):
-    m = nn.LSTM(input_size, hidden_size, **kwargs)
-    for name, param in m.named_parameters():
-        if 'weight' in name or 'bias' in name:
-            param.data.uniform_(-0.1, 0.1)
-    return m
-
-
-def LSTMCell(input_size, hidden_size, **kwargs):
-    m = nn.LSTMCell(input_size, hidden_size, **kwargs)
-    for name, param in m.named_parameters():
-        if 'weight' in name or 'bias' in name:
-            param.data.uniform_(-0.1, 0.1)
-    return m
 
 
 class LSTMEncoder(NccEncoder):
     """LSTM encoder."""
+
     def __init__(
         self, dictionary, embed_dim=512, hidden_size=512, num_layers=1,
         dropout_in=0.1, dropout_out=0.1, bidirectional=False,
@@ -80,7 +67,7 @@ class LSTMEncoder(NccEncoder):
         x = x.transpose(0, 1)
 
         # pack embedded source tokens into a PackedSequence
-        packed_x = nn.utils.rnn.pack_padded_sequence(x, src_lengths.data.tolist())
+        packed_x = nn.utils.rnn.pack_padded_sequence(x, src_lengths.tolist())
 
         # apply LSTM
         if self.bidirectional:
@@ -97,7 +84,6 @@ class LSTMEncoder(NccEncoder):
         assert list(x.size()) == [seqlen, bsz, self.output_units]
 
         if self.bidirectional:
-
             def combine_bidir(outs):
                 out = outs.view(self.num_layers, 2, bsz, -1).transpose(1, 2).contiguous()
                 return out.view(self.num_layers, bsz, -1)

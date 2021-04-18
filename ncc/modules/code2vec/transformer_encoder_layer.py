@@ -1,10 +1,12 @@
 from typing import Optional
+
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch import Tensor
 
-import torch.nn.functional as F
-from ncc.utils import utils
+from ncc.modules.common.activations import get_activation
+from ncc.modules.common.layers import Linear
 
 
 class TransformerEncoderLayer(nn.Module):
@@ -39,9 +41,7 @@ class TransformerEncoderLayer(nn.Module):
 
         self.self_attn_layer_norm = nn.LayerNorm(self.embed_dim)  # LayerNorm(self.embed_dim)
         self.dropout = args['model']['dropout']
-        self.activation_fn = utils.get_activation_fn(
-            activation=args['model']['activation_fn']
-        )
+        self.activation_fn = get_activation(args['model']['activation_fn'])
         self.activation_dropout = args['model']['activation_dropout']  # getattr(args, "activation_dropout", 0)
         if self.activation_dropout == 0:
             # for backwards compatibility with models that use args.relu_dropout
@@ -108,11 +108,3 @@ class TransformerEncoderLayer(nn.Module):
                 if k in state_dict:
                     state_dict["{}.{}.{}".format(name, new, m)] = state_dict[k]
                     del state_dict[k]
-
-
-def Linear(in_features, out_features, bias=True):
-    m = nn.Linear(in_features, out_features, bias)
-    # nn.init.xavier_uniform_(m.weight) # TODO: warning, commented to be consistent with the nn.torch.Transformer version
-    # if bias:
-    #     nn.init.constant_(m.bias, 0.0)
-    return m

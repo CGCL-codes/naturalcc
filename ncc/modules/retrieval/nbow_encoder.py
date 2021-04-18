@@ -1,47 +1,39 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
-
-import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ncc.models import register_model
+
 from ncc.modules.code2vec.ncc_encoder import NccEncoder
-from ncc.modules.embedding import Embedding
+from ncc.modules.common.initializers import (
+    xavier_uniform,
+)
+from ncc.modules.common.layers import (
+    Embedding,
+    Linear,
+)
 from ncc.utils.pooling1d import pooling1d
-
-logger = logging.getLogger(__name__)
-
-
-def Linear(in_features, out_features, bias=True):
-    m = nn.Linear(in_features, out_features, bias)
-    nn.init.xavier_uniform_(m.weight)
-    if bias:
-        nn.init.constant_(m.bias, 0.0)
-    return m
 
 
 class NBOWEncoder(NccEncoder):
     """based on CodeSearchNet """
 
-    def __init__(self, dictionary, embed_dim, **kwargs):
+    def __init__(
+        self,
+        dictionary, embed_dim,
+        pooling='weighted_mean', dropout=0.1,
+        **kwargs,
+    ):
         super().__init__(dictionary)
-        self.embed = nn.Embedding(len(dictionary), embed_dim, padding_idx=self.dictionary.pad())
-        # self.embed = Embedding(len(dictionary), embed_dim, padding_idx=None)
-        self.dropout = kwargs.get('dropout', None)
-        self.embed.weight.data.copy_(F.dropout(self.embed.weight.data, self.dropout))
-        pooling = kwargs.get('pooling', None)
+        self.padding_idx = self.dictionary.pad()
+        self.embed = Embedding(len(dictionary), embed_dim, padding_idx=self.padding_idx, initializer=xavier_uniform())
+        self.dropout = dropout
         self.pooling = pooling1d(pooling)
-        self.dropout = kwargs.get('dropout', None)
         if self.pooling:
-            self.weight_layer = Linear(embed_dim, 1, bias=False) if 'weighted' in pooling else None
+            self.weight_layer = Linear(embed_dim, 1, bias=False, weight_initializer=xavier_uniform()) \
+                if 'weighted' in pooling else None
 
-    def forward(self, tokens, tokens_len=None, tokens_mask=None):
+    def forward(self, tokens, tokens_mask=None, tokens_len=None):
         """
         Args:
             tokens: [batch_size, max_token_len]
@@ -52,11 +44,12 @@ class NBOWEncoder(NccEncoder):
             tokens: [batch_size, max_token_len, embed_dim]
         """
         if tokens_mask is None:
-            tokens_mask = (tokens != self.dictionary.pad()).to(tokens.device)
+            tokens_mask = tokens.new(tokens.size())
+            tokens_mask.data.copy_((tokens != self.padding_idx).int())
         if tokens_len is None:
             tokens_len = tokens_mask.sum(dim=-1)
         tokens = self.embed(tokens)
-        # tokens = F.dropout(tokens, self.dropout, self.training)
+        tokens = F.dropout(tokens, p=self.dropout, training=self.training)
         if self.pooling:
             tokens = self.pooling(
                 input_emb=tokens, input_len=tokens_len, input_mask=tokens_mask, weight_layer=self.weight_layer

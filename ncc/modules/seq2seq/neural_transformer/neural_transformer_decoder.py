@@ -4,12 +4,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from ncc.modules.layer_norm import LayerNorm
+from ncc.modules.roberta.sinusoidal_positional_embedding import SinusoidalPositionalEmbedding
 from ncc.modules.seq2seq.ncc_incremental_decoder import NccIncrementalDecoder
 from ncc.modules.code2vec.ncc_encoder import EncoderOut
-from ncc.modules.roberta.sinusoidal_positional_embedding import SinusoidalPositionalEmbedding
 from ncc.modules.seq2seq.neural_transformer.neural_transformer_decoder_layer import NueralTransformerDecoderLayer
-from ncc.modules.adaptive_softmax import AdaptiveSoftmax
 from ncc.utils import utils
 
 
@@ -45,89 +43,63 @@ class NeuralTransformerDecoder(NccIncrementalDecoder):
 
         self.embed_tokens = embed_tokens
         self.out_proj_bias = nn.Parameter(torch.Tensor(len(dictionary)))
-        nn.init.constant_(self.out_proj_bias, 0.0)
+        nn.init.uniform_(self.out_proj_bias, -0.1, 0.1)
 
         self.embed_scale = 1.0 if args['model']['no_scale_embedding'] else math.sqrt(embed_dim)
 
         self.project_in_dim = (
-            Linear(input_embed_dim, embed_dim, bias=False)
+            nn.Linear(input_embed_dim, embed_dim, bias=False)
             if embed_dim != input_embed_dim
             else None
         )
 
         if args['model']['decoder_positional_embeddings']:
-            self.embed_positions = None
-        else:
             # Option 1
             if args['model']['decoder_position_encoding_version'] == 'ncc_sinusoidal':
                 from ncc.modules.roberta.sinusoidal_positional_embedding import SinusoidalPositionalEmbedding
                 offset_positions_by_padding = False
                 self.embed_positions = SinusoidalPositionalEmbedding(
                     self.embed_dim,
-                    padding_idx=self.padding_idx,  # (self.padding_idx if offset_positions_by_padding else None),
-                    init_size=args['model'][
-                                  'max_source_positions'] + self.padding_idx + 1 if offset_positions_by_padding else
-                    args['model']['max_source_positions'],  # + 1 why?
+                    padding_idx=self.padding_idx,
+                    init_size=args['model']['max_source_positions'] + self.padding_idx + 1 \
+                        if offset_positions_by_padding else args['model']['max_source_positions'],  # + 1 why?
                 )
             # Option 2
             elif args['model']['decoder_position_encoding_version'] == 'ncc_learned':
                 from ncc.modules.roberta.learned_positional_embedding import LearnedPositionalEmbedding
                 if self.padding_idx is not None:
-                    num_embeddings = args['model']['max_target_positions'] + self.padding_idx + 1
-                m = LearnedPositionalEmbedding(num_embeddings, self.embed_dim, self.padding_idx)
+                    num_embeddings = args['model']['max_target_positions'] + self.padding_idx  # + 1
+                # m = LearnedPositionalEmbedding(num_embeddings, self.embed_dim, self.padding_idx)
+                m = LearnedPositionalEmbedding(num_embeddings, self.embed_dim, None)
                 nn.init.normal_(m.weight, mean=0, std=self.embed_dim ** -0.5)
-                if self.padding_idx is not None:
-                    nn.init.constant_(m.weight[self.padding_idx], 0)
+                # if self.padding_idx is not None:
+                #     nn.init.constant_(m.weight[self.padding_idx], 0)
                 self.embed_positions = m
+        else:
+            self.embed_positions = None
 
         self.cross_self_attention = args['model']['cross_self_attention']
         self.layer_wise_attention = args['model']['layer_wise_attention']
 
-        self.layers = nn.ModuleList([])
-        self.layers.extend(
-            [
-                NueralTransformerDecoderLayer(args, no_encoder_attn)
-                for _ in range(args['model']['decoder_layers'])
-            ]
-        )
+        self.layers = nn.ModuleList([
+            NueralTransformerDecoderLayer(args, no_encoder_attn)
+            for _ in range(args['model']['decoder_layers'])
+        ])
         self.num_layers = len(self.layers)
 
         self.adaptive_softmax = None
 
         self.project_out_dim = (
-            Linear(embed_dim, self.output_embed_dim, bias=False)
+            nn.Linear(embed_dim, self.output_embed_dim, bias=False)
             if embed_dim != self.output_embed_dim and not args['model']['tie_adaptive_weights']
             else None
         )
 
-        if args['model']['adaptive_softmax_cutoff'] is not None:
-            self.adaptive_softmax = AdaptiveSoftmax(
-                len(dictionary),
-                self.output_embed_dim,
-                args['model']['adaptive_softmax_cutoff'],
-                # options.eval_str_list(args.adaptive_softmax_cutoff, type=int),
-                dropout=args['model']['adaptive_softmax_dropout'],
-                adaptive_inputs=embed_tokens if args['model']['tie_adaptive_weights'] else None,
-                factor=args['model']['adaptive_softmax_factor'],
-                tie_proj=args['model']['tie_adaptive_proj'],
-            )
-            # self.adaptive_softmax = AdaptiveSoftmax(num_embeddings, hidden_size, adaptive_softmax_cutoff,
-            #                                         dropout=dropout_out)
-        elif not self.share_input_output_embed:
+        if not self.share_input_output_embed:
             self.embed_out = nn.Parameter(
                 torch.Tensor(len(dictionary), self.output_embed_dim)
             )
             nn.init.normal_(self.embed_out, mean=0, std=self.output_embed_dim ** -0.5)
-
-        if args['model']['decoder_normalize_before'] and not args['model'][
-            'no_decoder_final_norm']:  # getattr(args, "no_decoder_final_norm", False)
-            self.layer_norm = LayerNorm(embed_dim)
-        else:
-            self.layer_norm = None
-        if args['model']['layernorm_embedding']:  # getattr(args, "layernorm_embedding", False):
-            self.layernorm_embedding = LayerNorm(embed_dim)
-        else:
-            self.layernorm_embedding = None
 
     def forward(
         self,
@@ -215,7 +187,7 @@ class NeuralTransformerDecoder(NccIncrementalDecoder):
         # embed positions
         positions = (
             self.embed_positions(
-                prev_output_tokens, incremental_state=incremental_state
+                prev_output_tokens, incremental_state=incremental_state,
             )
             if self.embed_positions is not None
             else None
@@ -228,16 +200,10 @@ class NeuralTransformerDecoder(NccIncrementalDecoder):
 
         # embed tokens and positions
         x = self.embed_scale * self.embed_tokens(prev_output_tokens)
-
         if self.project_in_dim is not None:
             x = self.project_in_dim(x)
-
         if positions is not None:
             x += positions
-
-        if self.layernorm_embedding is not None:
-            x = self.layernorm_embedding(x)
-
         x = F.dropout(x, p=self.dropout, training=self.training)
 
         # B x T x C -> T x B x C
@@ -277,9 +243,6 @@ class NeuralTransformerDecoder(NccIncrementalDecoder):
             # average probabilities over heads
             attn = attn.mean(dim=0)
 
-        if self.layer_norm is not None:
-            x = self.layer_norm(x)
-
         # T x B x C -> B x T x C
         x = x.transpose(0, 1)
 
@@ -305,6 +268,16 @@ class NeuralTransformerDecoder(NccIncrementalDecoder):
             return self.max_target_positions
         return min(self.max_target_positions, self.embed_positions.max_positions)
 
+    @torch.jit.export
+    def reorder_incremental_state(
+        self,
+        incremental_state: Dict[str, Dict[str, Optional[Tensor]]],
+        new_order: Tensor,
+    ):
+        """Scriptable reorder incremental state in the transformer."""
+        for layer in self.layers:
+            layer.reorder_incremental_state(incremental_state, new_order)
+
     def buffered_future_mask(self, tensor):
         dim = tensor.size(0)
         # self._future_mask.device != tensor.device is not working in TorchScript. This is a workaround.
@@ -318,17 +291,6 @@ class NeuralTransformerDecoder(NccIncrementalDecoder):
             )
         self._future_mask = self._future_mask.to(tensor)
         return self._future_mask[:dim, :dim]
-
-    # Overwirte the method to temporaily soppurt jit scriptable in Transformer
-    @torch.jit.export
-    def reorder_incremental_state(
-        self,
-        incremental_state: Dict[str, Dict[str, Optional[Tensor]]],
-        new_order: Tensor,
-    ):
-        """Scriptable reorder incremental state in the transformer."""
-        for layer in self.layers:
-            layer.reorder_incremental_state(incremental_state, new_order)
 
     def upgrade_state_dict_named(self, state_dict, name):
         """Upgrade a (possibly old) state dict for new versions of fairseq."""
@@ -364,11 +326,3 @@ class NeuralTransformerDecoder(NccIncrementalDecoder):
             state_dict[version_key] = torch.Tensor([1])
 
         return state_dict
-
-
-def Linear(in_features, out_features, bias=True):
-    m = nn.Linear(in_features, out_features, bias)
-    nn.init.xavier_uniform_(m.weight)
-    if bias:
-        nn.init.constant_(m.bias, 0.0)
-    return m

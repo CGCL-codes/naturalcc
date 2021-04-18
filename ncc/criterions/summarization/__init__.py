@@ -1,0 +1,4 @@
+from .be_cross_entropy import BECrossEntropyCriterion
+from .bos_cross_entropy import BosCrossEntropyCriterion
+from .codenn_cross_entropy import CodeNNCrossEntropyCriterion
+from .neural_transformer_loss import NeuralTransformerCriterion

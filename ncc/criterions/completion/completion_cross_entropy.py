@@ -4,13 +4,13 @@
 # LICENSE file in the root directory of this source tree.
 
 import math
-import torch
+
 import torch.nn.functional as F
-import numpy as np
-# from fairseq import metrics, utils
-from ncc.logging import metrics
-from ncc.utils import utils
+
 from ncc.criterions import NccCriterion, register_criterion
+from ncc.data.dictionary import Dictionary
+from ncc.utils import utils
+from ncc.utils.logging import metrics
 
 
 @register_criterion('completion_cross_entropy')
@@ -18,6 +18,9 @@ class CompletionCrossEntropyCriterion(NccCriterion):
 
     def __init__(self, task, sentence_avg):
         super().__init__(task)
+        if hasattr(task, 'target_dictionary'):
+            tgt_dict = task.target_dictionary
+            self.padding_idx = tgt_dict.pad() if (tgt_dict is not None) and isinstance(tgt_dict, Dictionary) else -100
         self.sentence_avg = sentence_avg
 
     def forward(self, model, sample, reduce=True):
@@ -41,10 +44,7 @@ class CompletionCrossEntropyCriterion(NccCriterion):
 
     def compute_loss(self, model, net_output, sample, reduce=True):
         # ignore pad
-        idx = sample['net_input']['src_tokens'].view(-1) != sample['pad']
-        # ignore UNK in tgt because predict UNK is meaningless
-        # while feed UNK into modle and predict non-UNK tokens still make sense
-        idx[sample['target'].view(-1) == sample['unk']] = 0
+        idx = sample['net_input']['src_tokens'].view(-1) != self.padding_idx
 
         # ignore overlapping tokens
         max_len = sample['target'].size(-1)

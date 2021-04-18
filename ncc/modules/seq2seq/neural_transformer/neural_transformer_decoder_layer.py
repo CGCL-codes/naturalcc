@@ -1,11 +1,14 @@
 from typing import Dict, List, Optional
+
 import torch
 import torch.nn as nn
-from torch import Tensor
-from ncc.modules.layer_norm import LayerNorm
-from ncc.modules.attention.relative_multihead_attention import RelativeMultiheadAttention
 import torch.nn.functional as F
-from ncc.utils import utils
+from torch import Tensor
+
+from ncc.modules.attention.relative_multihead_attention import RelativeMultiheadAttention
+from ncc.modules.common.activations import get_activation
+from ncc.modules.common.layer_norm import NCCLayerNorm as LayerNorm
+from ncc.modules.common.layers import Linear
 
 
 class NueralTransformerDecoderLayer(nn.Module):
@@ -41,20 +44,16 @@ class NueralTransformerDecoderLayer(nn.Module):
             maximum_relative_position=args['model']['decoder_max_relative_len'],
         )
         self.dropout = args['model']['dropout']
-        self.activation_fn = utils.get_activation_fn(
-            activation=args['model']['activation_fn']
-        )
+        self.activation_fn = get_activation(args['model']['activation_fn'])
         self.activation_dropout = args['model']['activation_dropout']
         if self.activation_dropout == 0:
             # for backwards compatibility with models that use args.relu_dropout
             self.activation_dropout = args['model']['relu_dropout']
-        self.normalize_before = args['model']['decoder_normalize_before']
 
         # use layerNorm rather than FusedLayerNorm for exporting.
         # char_inputs can be used to determint this.
         # TODO  remove this once we update apex with the fix
-        export = False  # getattr(args, "char_inputs", False) #TODO: what does char_inputs mean?
-        self.self_attn_layer_norm = LayerNorm(self.embed_dim, export=export)
+        self.self_attn_layer_norm = LayerNorm(self.embed_dim)
 
         if no_encoder_attn:
             self.encoder_attn = None
@@ -63,17 +62,17 @@ class NueralTransformerDecoderLayer(nn.Module):
             self.encoder_attn = RelativeMultiheadAttention(
                 self.embed_dim,
                 args['model']['decoder_attention_heads'],
-                kdim=args['model']['encoder_embed_dim'],  # getattr(args, "encoder_embed_dim", None),
-                vdim=args['model']['encoder_embed_dim'],  # getattr(args, "encoder_embed_dim", None),
+                kdim=args['model']['encoder_embed_dim'],
+                vdim=args['model']['encoder_embed_dim'],
                 dropout=args['model']['attention_dropout'],
                 encoder_decoder_attention=True,
             )
-            self.encoder_attn_layer_norm = LayerNorm(self.embed_dim, export=export)
+            self.encoder_attn_layer_norm = LayerNorm(self.embed_dim)
 
         self.fc1 = Linear(self.embed_dim, args['model']['decoder_ffn_embed_dim'])
         self.fc2 = Linear(args['model']['decoder_ffn_embed_dim'], self.embed_dim)
 
-        self.final_layer_norm = LayerNorm(self.embed_dim, export=export)
+        self.ff_layer_norm = LayerNorm(self.embed_dim)
         self.need_attn = True
 
     def forward(
@@ -106,8 +105,6 @@ class NueralTransformerDecoderLayer(nn.Module):
             need_attn = True
 
         residual = x
-        if self.normalize_before:
-            x = self.self_attn_layer_norm(x)
         if prev_self_attn_state is not None:
             prev_key, prev_value = prev_self_attn_state[:2]
             saved_state: Dict[str, Optional[Tensor]] = {
@@ -154,13 +151,10 @@ class NueralTransformerDecoderLayer(nn.Module):
         )
         x = F.dropout(x, p=self.dropout, training=self.training)
         x = residual + x
-        if not self.normalize_before:
-            x = self.self_attn_layer_norm(x)
+        x = self.self_attn_layer_norm(x)
 
         if self.encoder_attn is not None:
             residual = x
-            if self.normalize_before:
-                x = self.encoder_attn_layer_norm(x)
             if prev_attn_state is not None:
                 prev_key, prev_value = prev_attn_state[:2]
                 saved_state: Dict[str, Optional[Tensor]] = {
@@ -184,25 +178,16 @@ class NueralTransformerDecoderLayer(nn.Module):
             )
             x = F.dropout(x, p=self.dropout, training=self.training)
             x = residual + x
-            if not self.normalize_before:
-                x = self.encoder_attn_layer_norm(x)
+            x = self.encoder_attn_layer_norm(x)
 
         residual = x
-        if self.normalize_before:
-            x = self.final_layer_norm(x)
-
-        # x = self.final_layer_norm(x)#NueralSum, TODO: check whether transformer still works when we annotate this line
+        x = self.ff_layer_norm(x)
         x = self.activation_fn(self.fc1(x))
         x = F.dropout(x, p=float(self.activation_dropout), training=self.training)
         x = self.fc2(x)
         x = F.dropout(x, p=self.dropout, training=self.training)
         x = residual + x
-        if not self.normalize_before:
-            x = self.final_layer_norm(x)
         return x, attn, None
-
-    def make_generation_fast_(self, need_attn: bool = False, **kwargs):
-        self.need_attn = need_attn
 
     @torch.jit.export
     def reorder_incremental_state(
@@ -215,11 +200,3 @@ class NueralTransformerDecoderLayer(nn.Module):
 
         if self.encoder_attn is not None:
             self.encoder_attn.reorder_incremental_state(incremental_state, new_order)
-
-
-def Linear(in_features, out_features, bias=True):
-    m = nn.Linear(in_features, out_features, bias)
-    nn.init.xavier_uniform_(m.weight)
-    if bias:
-        nn.init.constant_(m.bias, 0.0)
-    return m

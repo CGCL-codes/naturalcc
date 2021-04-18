@@ -1,7 +1,12 @@
-from dataset.python_wan import (RAW_DATA_DIR)
-
 import os
+
 import ujson
+
+from dataset.python_wan import (RAW_DIR)
+from ncc.utils.file_ops import (
+    file_io,
+    json_io,
+)
 
 
 def clean_code(raw_code):
@@ -12,12 +17,12 @@ def clean_code(raw_code):
 
 
 def generate_pairs():
-    _RAW_DATA_DIR = os.path.expanduser(RAW_DATA_DIR)
-    with open(os.path.join(_RAW_DATA_DIR, 'code.json'), 'w') as code_file, \
-        open(os.path.join(_RAW_DATA_DIR, 'data_ps.declbodies'), 'r') as declbodies_file:
+    _RAW_DATA_DIR = os.path.expanduser(RAW_DIR)
+    with file_io.open(os.path.join(_RAW_DATA_DIR, 'code.json'), 'w') as code_file, \
+        file_io.open(os.path.join(_RAW_DATA_DIR, 'data_ps.declbodies'), 'r') as declbodies_file:
         for line in declbodies_file:
             code = clean_code(line)
-            print(ujson.dumps(code), file=code_file)
+            print(json_io.json_dumps(code), file=code_file)
 
 
 if __name__ == '__main__':

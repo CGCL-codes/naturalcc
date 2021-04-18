@@ -8,7 +8,11 @@ from typing import *
 import re
 import os
 import torch
+import ujson
 from collections import Counter
+from ncc.utils.file_ops.file_io import (
+    safe_readline,
+)
 
 SPACE_NORMALIZER = re.compile(r"\s+")
 
@@ -17,16 +21,6 @@ def tokenize_string(line):
     line = SPACE_NORMALIZER.sub(" ", line)
     line = line.strip()
     return line.split()
-
-
-def safe_readline(f):
-    pos = f.tell()
-    while True:
-        try:
-            return f.readline()
-        except UnicodeDecodeError:
-            pos -= 1
-            f.seek(pos)  # search where this character begins
 
 
 class Binarizer:
@@ -41,6 +35,7 @@ class Binarizer:
         offset=0,
         end=-1,
         already_numberized=False,
+        **kwargs,
     ):
         nseq, ntok = 0, 0  # nseq = sentence number, ntok = token number
         replaced = Counter()  # un-recorded tokens
@@ -73,6 +68,7 @@ class Binarizer:
                         consumer=replaced_consumer,
                         append_eos=append_eos,
                         reverse_order=reverse_order,
+                        **kwargs,
                     )
                 nseq += 1
                 ntok += len(ids)
@@ -86,6 +82,59 @@ class Binarizer:
         }
 
     @staticmethod
+    def binarize_bpe(
+        filename,
+        dict,
+        consumer,
+        reverse_order=False,
+        offset=0,
+        end=-1,
+    ):
+        nseq, ntok = 0, 0  # nseq = sentence number, ntok = token number
+        replaced = Counter()  # un-recorded tokens
+
+        with open(filename, "r", encoding="utf-8") as f:
+            f.seek(offset)
+            # next(f) breaks f.tell(), hence readline() must be used
+            line = safe_readline(f)
+            while line:
+                if end > 0 and f.tell() > end:
+                    break
+                line = ujson.loads(line)
+                line = ' '.join(line) if isinstance(line, list) else line
+                ids = dict.encode_ids(line)
+                if reverse_order:
+                    words = list(reversed(words))
+                ids = torch.IntTensor(ids)
+
+                nseq += 1
+                ntok += len(ids)
+                consumer(ids)
+                line = f.readline()
+        return {
+            "nseq": nseq,
+            "nunk": sum(replaced.values()),
+            "ntok": ntok,
+            "replaced": replaced,
+        }
+
+    @staticmethod
+    def binarize_alignments(filename, alignment_parser, consumer, offset=0, end=-1):
+        nseq = 0
+
+        with open(filename, "r") as f:
+            f.seek(offset)
+            line = safe_readline(f)
+            while line:
+                if end > 0 and f.tell() > end:
+                    break
+                ids = alignment_parser(line)
+                nseq += 1
+                consumer(ids)
+                line = f.readline()
+        return {"nseq": nseq}
+
+    @staticmethod
     def find_offsets(filename, num_chunks):
         with open(filename, "r", encoding="utf-8") as f:
             size = os.fstat(f.fileno()).st_size
@@ -96,3 +145,51 @@ class Binarizer:
                 safe_readline(f)
                 offsets[i] = f.tell()
             return offsets
+
+    @staticmethod
+    def binarize_trav_trans(
+        filename,
+        dicts,  # (token_dict, mask_dict)
+        consumer,  # (data, ext, ids, )
+        tokenize=tokenize_string,
+        offset=0,
+        end=-1,
+    ):
+        nseq, ntok = 0, 0  # nseq = sentence number, ntok = token number
+        token_dict, mask_dict = dicts
+        replaced = Counter()  # un-recorded tokens
+
+        def replaced_consumer(word, idx):
+            """save un-recorded token"""
+            if idx == token_dict.unk_index and word != token_dict.unk_word:
+                replaced.update([word])
+
+        with open(filename, "r", encoding="utf-8") as f:
+            f.seek(offset)
+            # next(f) breaks f.tell(), hence readline() must be used
+            line = safe_readline(f)
+            while line:
+                if end > 0 and f.tell() > end:
+                    break
+                for data, ext, ids, mask in tokenize(line):
+                    data = token_dict.encode_list(data, add_if_not_exist=False, consumer=replaced_consumer)
+                    ext = torch.IntTensor([ext])
+                    if ids:
+                        for key, value in ids.items():
+                            if len(value) == 0:
+                                ids[key] = torch.IntTensor([-1])
+                            else:
+                                ids[key] = torch.IntTensor(value)
+                    if mask:
+                        mask = mask_dict.encode_list(mask, add_if_not_exist=False)
+
+                    consumer(data, ext, ids, mask)
+                    nseq += 1
+                    ntok += len(data)
+                line = f.readline()
+        return {
+            "nseq": nseq,
+            "nunk": sum(replaced.values()),
+            "ntok": ntok,
+            "replaced": replaced,
+        }

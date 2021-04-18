@@ -1,12 +1,7 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
 from typing import Dict, List, Optional, Tuple
 
 import torch.nn as nn
-from ncc.utils import utils
+import torch.nn.functional as F
 from torch import Tensor
 
 
@@ -74,9 +69,9 @@ class NccDecoder(nn.Module):
 
         logits = net_output[0]
         if log_probs:
-            return utils.log_softmax(logits, dim=-1, onnx_trace=self.onnx_trace)
+            return F.log_softmax(logits, dim=-1)
         else:
-            return utils.softmax(logits, dim=-1, onnx_trace=self.onnx_trace)
+            return F.softmax(logits, dim=-1)
 
     def max_positions(self):
         """Maximum input length supported by the decoder."""

@@ -1,9 +1,5 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
 import torch
+
 from ncc.data.dictionary import Dictionary
 
 
@@ -21,6 +17,7 @@ class CompletionDictionary(Dictionary):
         consumer=None,
         append_eos=True,
         reverse_order=False,
+        **kwargs,
     ):
         def _tensor(words):
             words, ext = words
@@ -41,8 +38,8 @@ class CompletionDictionary(Dictionary):
                 ids[nwords] = self.eos_index
             return (ids, ext)
 
-        word_list = line_tokenizer(line) if line_tokenizer else line
-        word_list = [_tensor(words) for words in word_list]
+        word_list = line_tokenizer(line) if line_tokenizer is not None else line
+        word_list = [_tensor(words) for words in word_list if len(words[0]) > 0]
         return word_list
 
     def encode_string(

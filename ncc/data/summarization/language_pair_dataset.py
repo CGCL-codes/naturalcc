@@ -4,9 +4,10 @@
 # LICENSE file in the root directory of this source tree.
 import numpy as np
 import torch
-from ncc.data.tools import data_utils
-from ncc.data.ncc_dataset import NccDataset
+
 from ncc import LOGGER
+from ncc.data.ncc_dataset import NccDataset
+from ncc.data.tools import data_utils
 
 
 def collate(
@@ -266,13 +267,11 @@ class LanguagePairDataset(NccDataset):
     def ordered_indices(self):
         """Return an ordered list of indices. Batches will be constructed based
         on this order."""
+        sizes_gt_0 = (self.src_sizes > 0) & (self.tgt_sizes > 0)
+        indices = super(LanguagePairDataset, self).ordered_indices()[sizes_gt_0]
         if self.shuffle:
-            indices = np.random.permutation(len(self))
-        else:
-            indices = np.arange(len(self))
-        if self.tgt_sizes is not None:
-            indices = indices#[np.argsort(self.tgt_sizes[indices], kind='mergesort')]# TODO: debug
-        return indices#[np.argsort(self.src_sizes[indices], kind='mergesort')] # TODO: debug
+            np.random.shuffle(indices)
+        return indices
 
     @property
     def supports_prefetch(self):

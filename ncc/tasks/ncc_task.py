@@ -4,15 +4,20 @@
 # LICENSE file in the root directory of this source tree.
 
 import warnings
+from collections import OrderedDict
+
 import torch
-from ncc.utils import utils
-from ncc.logging import metrics
-from ncc.data.tools import data_utils
-from ncc.data import iterators
+
+from ncc.data import (
+    constants,
+    iterators,
+)
 from ncc.data.dictionary import Dictionary
 from ncc.data.ncc_dataset import NccDataset
-from ncc.eval import search
-from ncc.data.tokenizers import space_tokenizer
+from ncc.data.tools import data_utils
+from ncc.tokenizers import tokenization
+from ncc.utils import utils
+from ncc.utils.logging import metrics
 
 
 class NccTask(object):
@@ -47,14 +52,12 @@ class NccTask(object):
         Args:
             filename (str): the filename
         """
-        if filename.endswith('.txt'):
-            return Dictionary.load(filename)
-        else:
-            return Dictionary.load_json(filename)
+        return Dictionary.load(filename)
 
     @classmethod
     def build_dictionary(
-        cls, filenames, workers=1, threshold=-1, nwords=-1, padding_factor=8
+        cls, filenames, workers=1, threshold=-1, nwords=-1, padding_factor=8,
+        **kwargs,
     ):
         """Build the dictionary
 
@@ -68,10 +71,16 @@ class NccTask(object):
                 multiple of 8, which is important on some hardware (e.g., Nvidia
                 Tensor Cores).
         """
-        d = Dictionary()
+        d = Dictionary(
+            pad=kwargs.get('pad', constants.PAD),
+            bos=kwargs.get('bos', constants.BOS),
+            eos=kwargs.get('eos', constants.EOS),
+            unk=kwargs.get('unk', constants.UNK),
+            extra_special_symbols=kwargs.get('extra_special_symbols', None),
+        )
         for filename in filenames:
             Dictionary.add_file_to_dictionary(
-                filename, d, space_tokenizer, d.eos_word, workers
+                filename, d, tokenization.tokenize_line, d.eos_word, workers
             )
         d.finalize(threshold=threshold, nwords=nwords, padding_factor=padding_factor)
         return d
@@ -169,6 +178,15 @@ class NccTask(object):
         with data_utils.numpy_seed(seed):
             indices = dataset.ordered_indices()
 
+        # filter examples that are too large
+        if max_positions is not None:
+            indices = data_utils.filter_by_size(
+                indices,
+                dataset,
+                max_positions,
+                raise_exception=(not ignore_invalid_inputs),
+            )
+
         # create mini-batches with given size constraints
         batch_sampler = data_utils.batch_by_size(
             indices,
@@ -222,148 +240,29 @@ class NccTask(object):
 
         return criterions.build_criterion(args, self)
 
-    def build_tokenizer(self, args):
-        """
-        Build the :class:`~fairseq.criterions.NccCriterion` instance for
-        this task.
-
-        Args:
-            args (argparse.Namespace): parsed command-line arguments
-
-        Returns:
-            a :class:`~fairseq.criterions.NccCriterion` instance
-        """
-        from ncc.data import tokenizers
-
-        return tokenizers.build_tokenization(args, self)
-
-    def build_generator(self, args, extra_gen_cls_kwargs=None):
-        if args['model']['arch'] in ['neural_transformer_summarization']:
-            from ncc.eval.sequence_generator import TransformerSequenceGenerator
-            return TransformerSequenceGenerator(
-                self.target_dictionary,
-                beam_size=args['eval']['beam'],  # getattr(args, "beam", 5),
-                max_len_a=args['eval']['max_len_a'],  # getattr(args, "max_len_a", 0),
-                max_len_b=args['eval']['max_len_b'],  # getattr(args, "max_len_b", 200),
-                min_len=args['eval']['min_len'],  # getattr(args, "min_len", 1),
-                normalize_scores=(not args['eval']['unnormalized']),  # (not getattr(args, "unnormalized", False)),
-                len_penalty=args['eval']['lenpen'],  # getattr(args, "lenpen", 1),
-                unk_penalty=args['eval']['unkpen'],  # getattr(args, "unkpen", 0),
-                temperature=args['eval']['temperature'],  # getattr(args, "temperature", 1.0),
-                match_source_len=args['eval']['match_source_len'],  # getattr(args, "match_source_len", False),
-                no_repeat_ngram_size=args['eval']['no_repeat_ngram_size'],  # getattr(args, "no_repeat_ngram_size", 0),
-                # search_strategy=search_strategy,
-                # **extra_gen_cls_kwargs,
-            )
-        elif args['model']['arch'] in ['seq2seq']:
-            from ncc.eval.sequence_generator import LSTMSequenceGenerator
-            return LSTMSequenceGenerator(
-                self.target_dictionary,
-                beam_size=args['eval']['beam'],  # getattr(args, "beam", 5),
-                max_len_a=args['eval']['max_len_a'],  # getattr(args, "max_len_a", 0),
-                max_len_b=args['eval']['max_len_b'],  # getattr(args, "max_len_b", 200),
-                min_len=args['eval']['min_len'],  # getattr(args, "min_len", 1),
-                normalize_scores=(not args['eval']['unnormalized']),  # (not getattr(args, "unnormalized", False)),
-                len_penalty=args['eval']['lenpen'],  # getattr(args, "lenpen", 1),
-                unk_penalty=args['eval']['unkpen'],  # getattr(args, "unkpen", 0),
-                temperature=args['eval']['temperature'],  # getattr(args, "temperature", 1.0),
-                match_source_len=args['eval']['match_source_len'],  # getattr(args, "match_source_len", False),
-                no_repeat_ngram_size=args['eval']['no_repeat_ngram_size'],  # getattr(args, "no_repeat_ngram_size", 0),
-                # search_strategy=search_strategy,
-                # **extra_gen_cls_kwargs,
-            )
-
-    def build_generator_fair(
-        self, args,
-        seq_gen_cls=None, extra_gen_cls_kwargs=None
-    ):
-        if args['eval']['score_reference']:
-            from ncc.eval.sequence_scorer import SequenceScorer
-
-            return SequenceScorer(
-                self.target_dictionary,
-                compute_alignment=getattr(args['eval'], "print_alignment", False),
-            )
-
-        from ncc.eval.sequence_generator_fair import (
-            SequenceGenerator,
-            SequenceGeneratorWithAlignment,
-        )
-
-        # Choose search strategy. Defaults to Beam Search.
-        sampling = args['eval']['sampling']  # getattr(args, "sampling", False)
-        sampling_topk = args['eval']['sampling_topk']  # getattr(args, "sampling_topk", -1)
-        sampling_topp = args['eval']['sampling_topp']  # getattr(args, "sampling_topp", -1.0)
-        diverse_beam_groups = args['eval']['diverse_beam_groups']  # getattr(args, "diverse_beam_groups", -1)
-        diverse_beam_strength = args['eval']['diverse_beam_strength']  # getattr(args, "diverse_beam_strength", 0.5)
-        match_source_len = args['eval']['match_source_len']  # getattr(args, "match_source_len", False)
-        diversity_rate = args['eval']['diversity_rate']  # getattr(args, "diversity_rate", -1)
-        if (
-            sum(
-                int(cond)
-                for cond in [
-                    sampling,
-                    diverse_beam_groups > 0,
-                    match_source_len,
-                    diversity_rate > 0,
-                ]
-            )
-            > 1
-        ):
-            raise ValueError("Provided Search parameters are mutually exclusive.")
-        assert sampling_topk < 0 or sampling, "--sampling-topk requires --sampling"
-        assert sampling_topp < 0 or sampling, "--sampling-topp requires --sampling"
-
-        if sampling:
-            search_strategy = search.Sampling(
-                self.target_dictionary, sampling_topk, sampling_topp
-            )
-        elif diverse_beam_groups > 0:
-            search_strategy = search.DiverseBeamSearch(
-                self.target_dictionary, diverse_beam_groups, diverse_beam_strength
-            )
-        elif match_source_len:
-            # this is useful for tagging applications where the output
-            # length should match the input length, so we hardcode the
-            # length constraints for simplicity
-            search_strategy = search.LengthConstrainedBeamSearch(
-                self.target_dictionary,
-                min_len_a=1,
-                min_len_b=0,
-                max_len_a=1,
-                max_len_b=0,
-            )
-        elif diversity_rate > -1:
-            search_strategy = search.DiverseSiblingsSearch(
-                self.target_dictionary, diversity_rate
-            )
+    def build_generator(self, models, args, **extra_gen_cls_kwargs):
+        if args['model']['arch'] in ['codenn']:
+            from ncc.eval.summarization.codenn_generator import CodeNNGenerator
+            return CodeNNGenerator(self.target_dictionary, **extra_gen_cls_kwargs)
+        # elif 'transformer' in args['model']['arch']:
+        #     from ncc.eval.summarization.transformer_generator import TransformerGenerator
+        #     return TransformerGenerator(self.target_dictionary, **extra_gen_cls_kwargs)
+        # elif args['model']['arch'] in ['deepcom']:
+        #     from ncc.eval.generator.deepcom_generator import DeepComGenerator
+        #     return DeepComGenerator(self.target_dictionary, **extra_gen_cls_kwargs)
         else:
+            from ncc.eval.summarization.sequence_generator_fair import SequenceGenerator
+            from ncc.eval.summarization import search
             search_strategy = search.BeamSearch(self.target_dictionary)
-
-        if seq_gen_cls is None:
-            if getattr(args['eval'], "print_alignment", False):
-                seq_gen_cls = SequenceGeneratorWithAlignment  # TBC
-            else:
-                seq_gen_cls = SequenceGenerator
-        extra_gen_cls_kwargs = extra_gen_cls_kwargs or {}
-        return seq_gen_cls(
-            self.target_dictionary,
-            beam_size=args['eval']['beam'],  # getattr(args, "beam", 5),
-            max_len_a=args['eval']['max_len_a'],  # getattr(args, "max_len_a", 0),
-            max_len_b=args['eval']['max_len_b'],  # getattr(args, "max_len_b", 200),
-            min_len=args['eval']['min_len'],  # getattr(args, "min_len", 1),
-            normalize_scores=(not args['eval']['unnormalized']),  # (not getattr(args, "unnormalized", False)),
-            len_penalty=args['eval']['lenpen'],  # getattr(args, "lenpen", 1),
-            unk_penalty=args['eval']['unkpen'],  # getattr(args, "unkpen", 0),
-            temperature=args['eval']['temperature'],  # getattr(args, "temperature", 1.0),
-            match_source_len=args['eval']['match_source_len'],  # getattr(args, "match_source_len", False),
-            no_repeat_ngram_size=args['eval']['no_repeat_ngram_size'],  # getattr(args, "no_repeat_ngram_size", 0),
-            search_strategy=search_strategy,
-            **extra_gen_cls_kwargs,
-        )
+            return SequenceGenerator(
+                self.target_dictionary,
+                beam_size=extra_gen_cls_kwargs.get('beam', args['eval']['beam']),
+                max_len_b=extra_gen_cls_kwargs.get('max_len_b', args['eval']['max_len_b']),
+                search_strategy=search_strategy,
+            )
 
     def build_completor(self, models, args):
-        from ncc.eval.sequence_completor import SequenceCompletor
+        from ncc.eval.completion.sequence_completor import SequenceCompletor
 
         return SequenceCompletor()
 
@@ -404,9 +303,9 @@ class NccTask(object):
             loss, sample_size, logging_output = criterion(model, sample)
         return loss, sample_size, logging_output
 
-    def inference_step(self, generator, models, sample, prefix_tokens=None):
+    def inference_step(self, generator, models, sample, **kwargs):
         with torch.no_grad():
-            return generator.generate(models, sample)  # , prefix_tokens=prefix_tokens
+            return generator.generate(models, sample, **kwargs)
 
     def begin_epoch(self, epoch, model):
         """Hook function called before the start of each epoch."""
@@ -489,3 +388,25 @@ class NccTask(object):
             decode the outputput into "addition operator"
         """
         raise NotImplementedError(f"decode_output function of {self} has not been implemented.")
+
+
+class NccComplTask(NccTask):
+
+    @classmethod
+    def load_dictionaries(cls, filenames):
+        dicts = OrderedDict({})
+        for key, filename in filenames.items():
+            dicts[key] = cls.load_dictionary(filename)
+        return dicts
+
+    @property
+    def source_dictionary(self, key):
+        """Return the source :class:`~fairseq.data.Dictionary` (if applicable
+        for this task)."""
+        raise NotImplementedError
+
+    @property
+    def target_dictionary(self, key):
+        """Return the target :class:`~fairseq.data.Dictionary` (if applicable
+        for this task)."""
+        raise NotImplementedError

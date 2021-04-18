@@ -8,6 +8,16 @@ import torch.nn as nn
 from typing import List, NamedTuple, Optional
 from torch import Tensor
 
+# EncoderOut = NamedTuple(
+#     "EncoderOut",
+#     [
+#         ("encoder_out", Tensor),  # T x B x C
+#         ("encoder_padding_mask", Tensor),  # B x T
+#         ("encoder_embedding", Tensor),  # B x T x C
+#         ("encoder_states", Optional[List[Tensor]]),  # List[T x B x C]
+#     ],
+# )
+
 EncoderOut = NamedTuple(
     "EncoderOut",
     [
@@ -15,9 +25,10 @@ EncoderOut = NamedTuple(
         ("encoder_padding_mask", Tensor),  # B x T
         ("encoder_embedding", Tensor),  # B x T x C
         ("encoder_states", Optional[List[Tensor]]),  # List[T x B x C]
+        ("src_tokens", Optional[Tensor]),  # B x T
+        ("src_lengths", Optional[Tensor]),  # B x 1
     ],
 )
-
 
 class NccEncoder(nn.Module):
     """Base class for encoders."""

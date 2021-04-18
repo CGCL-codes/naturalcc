@@ -1,27 +1,23 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
-import os
 import json
-from ncc.logging import metrics
-from ncc import LOGGER
-from ncc.data.dictionary import Dictionary
-from ncc.tasks.ncc_task import NccTask
-from ncc.tasks import register_task
-from ncc.utils import utils
-from ncc.data import (
-    tokenizers, indexed_dataset
-)
-from ncc.data.tokenizers.tokenizer_funcs import _dpu_sub_tokenizer
-from ncc.data.wrappers.append_token_dataset import AppendTokenDataset
-from ncc.data.wrappers.truncate_dataset import TruncateDataset
-from ncc.data.wrappers.prepend_token_dataset import PrependTokenDataset
-from ncc.data.summarization.be_language_pair_dataset import BELanguagePairDataset
-from ncc.eval import eval_utils
+import os
 
 import torch
+
+from ncc import (
+    tokenizers,
+    LOGGER,
+)
+from ncc.data import indexed_dataset
+from ncc.data.dictionary import Dictionary
+from ncc.data.summarization.be_codenn_language_pair_dataset import BELanguagePairDataset
+from ncc.data.wrappers.append_token_dataset import AppendTokenDataset
+from ncc.data.wrappers.prepend_token_dataset import PrependTokenDataset
+from ncc.data.wrappers.truncate_dataset import TruncateDataset
+from ncc.eval.summarization import summarization_metrics
+from ncc.tasks import register_task
+from ncc.tasks.ncc_task import NccTask
+from ncc.utils import utils
+from ncc.utils.logging import metrics
 
 EVAL_BLEU_ORDER = 4
 
@@ -45,30 +41,37 @@ def load_langpair_dataset(
     # combine, dataset_impl, upsample_primary,
     left_pad_source, left_pad_target,
     max_source_positions, max_target_positions,
-    prepend_bos=False, load_alignments=False,
-    truncate_source=False, append_source_id=False,
+    prepend_bos=True,
+    append_eos=True,
+    load_alignments=False,
+    truncate_source=False,
+    append_source_id=False,
     truncate_target=False,
-    append_eos_to_target=False,
 ):
+    # truncate sentence for prepend <bos> and append <eos>
+    max_target_positions -= int(prepend_bos) + int(append_eos)
+
     # load source dataset
     src_path = os.path.join(data_path, '{}.{}'.format(split, src))
     src_dataset = _load_dataset(path=src_path, impl=dataset_impl, dict=src_dict)
 
     if truncate_source:
         # sntn => sntn[:max_source_positions]
+        LOGGER.info('truncate {}.{} to {}'.format(split, src, max_source_positions))
         src_dataset = TruncateDataset(src_dataset, max_source_positions)
 
     # load target dataset
     tgt_path = os.path.join(data_path, '{}.{}'.format(split, tgt))
     tgt_dataset = _load_dataset(path=tgt_path, impl=dataset_impl, dict=tgt_dict)
     if truncate_target:
-        # sntn => sntn[:max_target_positions-2]
-        tgt_dataset = TruncateDataset(tgt_dataset, max_target_positions - 2)  # 2 for BOS and EOS
-    # sntn[:max_target_positions-2] => <bos> sntn[:max_target_positions-2] <eos>
-    tgt_dataset = PrependTokenDataset(
-        AppendTokenDataset(tgt_dataset, token=tgt_dict.eos()),
-        tgt_dict.bos()
-    )
+        # sntn => sntn[:max_target_positions]
+        LOGGER.info('truncate {}.{} to {}'.format(split, tgt, max_target_positions))
+        tgt_dataset = TruncateDataset(tgt_dataset, max_target_positions)  # 2 for BOS and EOS
+    # sntn[:max_target_positions] => <bos> sntn[:max_target_positions]
+    if prepend_bos:
+        tgt_dataset = PrependTokenDataset(tgt_dataset, token=tgt_dict.bos())
+    if append_eos:
+        tgt_dataset = AppendTokenDataset(tgt_dataset, token=tgt_dict.eos())
     tgt_dataset_sizes = tgt_dataset.sizes if tgt_dataset is not None else None
 
     LOGGER.info('loaded {} examples from: {}'.format(len(src_dataset), src_path))
@@ -80,11 +83,11 @@ def load_langpair_dataset(
         left_pad_target=left_pad_target,
         max_source_positions=max_source_positions,
         max_target_positions=max_target_positions,
-        align_dataset=None, eos=src_dict.eos(),
-        remove_eos_from_source=True,
-        append_eos_to_target=append_eos_to_target,
-        shuffle=True,
-        # shuffle=False,  # debug
+        align_dataset=None,
+        bos=src_dict.bos(),
+        eos=src_dict.eos(),
+        # shuffle=True,
+        shuffle=False,  # debug
     )
 
 
@@ -114,8 +117,8 @@ class BESummarizationTask(NccTask):
         paths = utils.split_paths(args['task']['data'])
         assert len(paths) > 0
         # load dictionaries
-        src_dict = cls.load_dictionary(os.path.join(paths[0], '{}.dict.json'.format(args['task']['source_lang'])))
-        tgt_dict = cls.load_dictionary(os.path.join(paths[0], '{}.dict.json'.format(args['task']['target_lang'])))
+        src_dict = cls.load_dictionary(os.path.join(paths[0], '{}.dict.jsonl'.format(args['task']['source_lang'])))
+        tgt_dict = cls.load_dictionary(os.path.join(paths[0], '{}.dict.jsonl'.format(args['task']['target_lang'])))
         assert src_dict.pad() == tgt_dict.pad()
         assert src_dict.eos() == tgt_dict.eos()
         assert src_dict.unk() == tgt_dict.unk()
@@ -126,8 +129,9 @@ class BESummarizationTask(NccTask):
 
     @classmethod
     def build_dictionary(
-        cls, filenames, tokenize_func=None,
-        workers=1, threshold=-1, nwords=-1, padding_factor=8
+        cls, filenames, tokenize_func,
+        workers=1, threshold=-1, nwords=-1, padding_factor=8,
+        **special_symbols,
     ):
         """Build the dictionary
 
@@ -141,7 +145,14 @@ class BESummarizationTask(NccTask):
                 multiple of 8, which is important on some hardware (e.g., Nvidia
                 Tensor Cores).
         """
-        d = Dictionary()
+        from ncc.data import constants
+        d = Dictionary(
+            pad=special_symbols.get('pad', constants.PAD),
+            bos=special_symbols.get('bos', constants.BOS),
+            eos=special_symbols.get('eos', constants.EOS),
+            unk=special_symbols.get('unk', constants.UNK),
+            extra_special_symbols=special_symbols.get('extra_special_symbols', None),
+        )
 
         for filename in filenames:
             Dictionary.add_token_to_dictionary(
@@ -174,6 +185,7 @@ class BESummarizationTask(NccTask):
             load_alignments=self.args['task']['load_alignments'],
             truncate_source=self.args['task']['truncate_source'],
             truncate_target=self.args['task']['truncate_target'],
+            prepend_bos=kwargs.get('prepend_bos', True),
         )
 
     def build_dataset_for_inference(self, src_tokens, src_lengths):
@@ -181,18 +193,19 @@ class BESummarizationTask(NccTask):
 
     def build_model(self, args):
         model = super().build_model(args)
-        if args['task']['eval_bleu'] or args['task']['eval_rouge']:
+        if args['task']['eval_bleu']:
             assert args['task']['eval_bleu_detok'] is not None, (
                 '--eval-bleu-detok is required if using --eval-bleu; '
                 'try --eval-bleu-detok=moses (or --eval-bleu-detok=space '
                 'to disable detokenization, e.g., when using sentencepiece)'
             )
-            detok_args = json.loads(args['task']['eval_bleu_detok_args'] or '{}')
-            self.tokenizer = tokenizers.build_tokenizer(
-                dict(tokenizer=args['task']['eval_bleu_detok'], **detok_args)
+            detok_args = json.loads(
+                args['task']['eval_bleu_detok_args'] if args['task']['eval_bleu_detok_args'] else '{}'
             )
-            # self.sequence_generator = self.build_generator(Namespace(**gen_args))
-            self.sequence_generator = self.build_generator(args)
+            self.tokenizer = tokenizers.build_tokenizer(
+                dict(tokenizer=args['task'].get('eval_bleu_detok', '{}'), **detok_args)
+            )
+            self.sequence_generator = self.build_generator([model], args)
 
         return model
 
@@ -243,22 +256,20 @@ class BESummarizationTask(NccTask):
                 s = self.tokenizer.decode(s)
             return s
 
-        # gen_out = self.inference_step(generator, [model], sample, None)
-        gen_out = self.sequence_generator.generate([model], sample)
+        gen_out = self.inference_step(self.sequence_generator, [model], sample, bos_token=self.target_dictionary.bos())
         ids = sample['id'].tolist()
         hyps, refs = [], []
         for i in range(len(gen_out)):
-            # hyps.append(decode(gen_out[i][0]['tokens']))
-            hyps.append(decode(utils.strip_eos(gen_out[i][0]['tokens'], self.tgt_dict.eos())))
+            hyps.append(decode(gen_out[i][0]['tokens']))
             refs.append(decode(
                 utils.strip_pad(sample['target'][i], self.tgt_dict.pad()),
                 escape_unk=True,  # don't count <unk> as matches to the hypo
             ))
 
         bleu, rouge_l, meteor = self._inference_score(hyps, refs, ids)
-        logging_output['bleu'] = bleu
-        logging_output['rouge_l'] = rouge_l
-        logging_output['meteor'] = meteor
+        logging_output['bleu'] = round(bleu, 4)
+        logging_output['rouge_l'] = round(rouge_l, 4)
+        logging_output['meteor'] = round(meteor, 4)
 
         return loss, sample_size, logging_output
 
@@ -268,7 +279,7 @@ class BESummarizationTask(NccTask):
             def sum_logs(key):
                 return sum(log.get(key, 0) for log in logging_outputs)
 
-            metrics.log_scalar('bleu', sum_logs('bleu'))
+            metrics.log_scalar('bleu', sum_logs('bleu'), round=6)
 
     def max_positions(self):
         """Return the max sentence length allowed by the task."""
@@ -291,11 +302,15 @@ class BESummarizationTask(NccTask):
             hypotheses[key] = [pred]
             references[key] = tgt if isinstance(tgt, list) else [tgt]
 
-        bleu, rouge_l, meteor = eval_utils.eval_accuracies(hypotheses, references, filename='pred.txt')
+        # if self.args['model']['arch'] in ['codenn']:
+        #     bleu, rouge_l, meteor = eval_utils.eval_accuracies(hypotheses, references, mode='test')
+        # else:
+        #     bleu, rouge_l, meteor = eval_utils.eval_accuracies(hypotheses, references)
+        bleu, rouge_l, meteor = summarization_metrics.eval_accuracies(hypotheses, references)
 
         return bleu, rouge_l, meteor
 
-    def encode_input(self, input, tokenize=_dpu_sub_tokenizer):
+    def encode_input(self, input, tokenize):
         if tokenize:
             input = ''.join(char if str.isalnum(char) else ' ' for char in input)  # for python_wan dataset
             input = tokenize(input)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) HUST, UTS and ZJU.
+# Copyright (c) HUST, UTS, UIC and Salesforce.
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -7,6 +7,8 @@
 import os
 from setuptools import setup, find_packages, Extension
 import sys
+import glob
+import subprocess
 
 if sys.version_info < (3, 6):
     sys.exit('Sorry, Python >= 3.6 is required for natural code.')
@@ -89,12 +91,31 @@ try:
 except ImportError:
     pass
 
+import setuptools.command.build_py
+class generate_proto(setuptools.command.build_py.build_py):
+  """Custom build command."""
+
+  def run(self):
+      print('running proto')
+      # generate proto files
+      proto_path = 'third_party/programl/programl/proto'
+      # clean proto files
+      subprocess.run(["rm -f {}/*.py".format(proto_path)], shell=True, )
+      print(glob.glob('{}/*'.format(proto_path)))
+      for file in glob.glob('{}/*'.format(proto_path)):
+
+          args = "--proto_path=. --python_out=. --grpc_python_out=. {}".format(file)
+          result = subprocess.call("python -m grpc_tools.protoc " + args, shell=True)
+          print("grpc generation result for '{0}': code {1}".format(file, result))
+
+
+cmdclass['generate_proto'] = generate_proto
+
 if 'clean' in sys.argv[1:]:
     # Source: https://bit.ly/2NLVsgE
     print("deleting Cython files...")
-    import subprocess
-
     subprocess.run(['rm -f ncc/*.so ncc/**/*.so ncc/*.pyd ncc/**/*.pyd'], shell=True)
+
 
 setup(
     name='ncc',

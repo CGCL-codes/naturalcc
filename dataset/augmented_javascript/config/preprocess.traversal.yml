@@ -1,0 +1,40 @@
+preprocess:
+  seed: 1 # default=1, type=int, metavar='N', help='pseudo random number generator seed'
+  min_loss_scale: 1e-4 #', default=1e-4, type=float, metavar='D', help='minimum FP16 loss scale, after which training is stopped'
+  threshold_loss_scale: ~ #', type=float, help='threshold FP16 loss scale from below'
+  user_dir: ~ #, default=None, help='path to a python module containing custom extensions (tasks and/or architectures)'
+  empty_cache_freq: 0 #', default=0, type=int, help='how often to clear the PyTorch CUDA cache (0 to disable)'
+  all_gather_list_size: 16384 #', default=16384, type=int, help='number of bytes reserved for gathering stats from workers'
+
+  task: masked_code_roberta # task', metavar='TASK', default="translation", choices=TASK_REGISTRY.keys(), help='task'
+  source_lang:
+    - traversal
+  target_lang: ~ # docstring #", default=None, metavar="TARGET", help="target language"
+  # ~ path for dataset default. e.g.  for CodeSearchNet, ~/flatten = ~/.ncc/CodeSearchNet/flatten
+  trainpref: ~/.ncc/augmented_javascript/codebert/traverse_roberta/filter/javascript/train.ast #", metavar="FP", default=None, help="train file prefix"
+#  trainpref: /export/share/jianguo/scodebert/augmented_javascript/codebert/traverse_roberta/filter/javascript/train.ast #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~ #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~ #", metavar="FP", default=None, help="comma separated, test file prefixes"
+
+  align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
+  destdir: ~/.ncc/augmented_javascript/codebert/traverse_roberta/filter/javascript/data-mmap #", metavar="DIR", default="data-bin", help="destination dir"
+#  destdir: ~/.ncc/augmented_javascript/codebert/traverse_roberta/filter/javascript/data-raw #", metavar="DIR", default="data-bin", help="destination dir"
+#  destdir: /export/share/jianguo/scodebert/augmented_javascript/codebert/traverse_roberta/filter/javascript/data-mmap #", metavar="DIR", default="data-bin", help="destination dir"
+  thresholdtgt: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
+  thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
+  tgtdict: ~ # ", metavar="FP", help="reuse given target dictionary"
+  srcdict: ~/.ncc/augmented_javascript/codebert/traverse_roberta/filter/javascript/data-mmap/traversal.dict.txt #", metavar="FP", help="reuse given source dictionary"
+#  srcdict: /export/share/jianguo/scodebert/augmented_javascript/contracode/data-raw/csnjs_8k_9995p_unigram_url.dict.txt #", metavar="FP", help="reuse given source dictionary"
+  src_sp: ~/.ncc/augmented_javascript/codebert/traverse_roberta/filter/javascript/data-mmap/traversal.model
+#  src_sp: /export/share/jianguo/scodebert/augmented_javascript/contracode/data-raw/csnjs_8k_9995p_unigram_url.model
+  tgt_sp: ~
+  nwordstgt: -1 #", metavar="N", default=-1, type=int, help="number of target words to retain"
+  nwordssrc: -1 #", metavar="N", default=-1, type=int, help="number of source words to retain"
+  alignfile: ~ #", metavar="ALIGN", default=None, help="an alignment file (optional)"
+  dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+#  dataset_impl: raw #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+  joined_dictionary: 1 # ", action="store_true", help="Generate joined dictionary"
+  only_source: 1 # ", action="store_true", help="Only process the source language"
+  padding_factor: 8 #", metavar="N", default=8, type=int, help="Pad dictionary size to be multiple of N"
+  workers: 56 # ", metavar="N", default=1, type=int, help="number of parallel workers"
+  inserted: 0

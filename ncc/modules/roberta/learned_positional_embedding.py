@@ -3,6 +3,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from typing import Optional
+
 import torch.nn as nn
 
 from ncc.utils import utils
@@ -20,7 +22,7 @@ class LearnedPositionalEmbedding(nn.Embedding):
         self,
         num_embeddings: int,
         embedding_dim: int,
-        padding_idx: int,
+        padding_idx: Optional[int],
     ):
         super().__init__(num_embeddings, embedding_dim, padding_idx)
         if self.padding_idx is not None:
@@ -38,7 +40,10 @@ class LearnedPositionalEmbedding(nn.Embedding):
             if incremental_state is not None:
                 # positions is the same for every token when decoding a single step
                 # Without the int() cast, it doesn't work in some cases when exporting to ONNX
-                positions = input.data.new(input.size(0), 1).fill_(int(self.padding_idx + input.size(1)))
+                if self.padding_idx is None:
+                    positions = input.data.new(input.size(0), 1).fill_(int(input.size(1)))
+                else:
+                    positions = input.data.new(input.size(0), 1).fill_(int(self.padding_idx + input.size(1)))
             else:
                 positions = utils.make_positions(input, self.padding_idx)
         return super().forward(positions)

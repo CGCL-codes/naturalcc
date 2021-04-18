@@ -9,7 +9,7 @@ DEFAULT_MAX_SOURCE_POSITIONS = 1e5
 DEFAULT_MAX_TARGET_POSITIONS = 1e5
 
 
-@register_model('neural_transformer_summarization')
+@register_model('neural_transformer')
 class NeuralTransformerModel(NccEncoderDecoderModel):
     """
         Neural Transformer model

@@ -3,7 +3,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import logging
 import os
 import pickle
 import socket
@@ -16,11 +15,8 @@ from typing import Any, Dict, Mapping
 import torch
 import torch.distributed as dist
 
-from . import utils
-
-
-logger = logging.getLogger(__name__)
-
+from ncc import LOGGER
+import logging
 
 def is_master(args):
     return args['distributed_training']['distributed_rank'] == 0
@@ -85,7 +81,7 @@ def distributed_init(args):
     if torch.distributed.is_initialized():
         warnings.warn('Distributed is already initialized, cannot initialize twice!')
     else:
-        logger.info('distributed init (rank {}): {}'.format(
+        LOGGER.info('distributed init (rank {}): {}'.format(
             args['distributed_training']['distributed_rank'], args['distributed_training']['distributed_init_method'],
         ))
         dist.init_process_group(
@@ -94,7 +90,7 @@ def distributed_init(args):
             world_size=args['distributed_training']['distributed_world_size'],
             rank=args['distributed_training']['distributed_rank'],
         )
-        logger.info('initialized host {} as rank {}'.format(
+        LOGGER.info('initialized host {} as rank {}'.format(
             socket.gethostname(), args['distributed_training']['distributed_rank'],
         ))
 
@@ -105,9 +101,9 @@ def distributed_init(args):
             dist.all_reduce(torch.zeros(1))
 
         if is_master(args):
-            logging.getLogger().setLevel(logging.INFO)
+            LOGGER.setLevel(logging.INFO)
         else:
-            logging.getLogger().setLevel(logging.WARNING)
+            LOGGER.setLevel(logging.WARNING)
 
     args['distributed_training']['distributed_rank'] = torch.distributed.get_rank()
     return args['distributed_training']['distributed_rank']
@@ -148,7 +144,7 @@ def all_gather_list(data, group=None, max_size=16384):
 
     buffer_size = max_size * world_size
     if not hasattr(all_gather_list, '_buffer') or \
-            all_gather_list._buffer.numel() < buffer_size:
+        all_gather_list._buffer.numel() < buffer_size:
         all_gather_list._buffer = torch.cuda.ByteTensor(buffer_size)
         all_gather_list._cpu_buffer = torch.ByteTensor(max_size).pin_memory()
     buffer = all_gather_list._buffer

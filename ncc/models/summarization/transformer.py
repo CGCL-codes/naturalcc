@@ -4,6 +4,9 @@ from ncc.modules.code2vec.transformer_encoder import TransformerEncoder
 from ncc.modules.seq2seq.transformer_decoder import TransformerDecoder
 from ncc.models import register_model
 from ncc.utils import utils
+
+import torch
+
 DEFAULT_MAX_SOURCE_POSITIONS = 1e5
 DEFAULT_MAX_TARGET_POSITIONS = 1e5
 
@@ -50,6 +53,9 @@ class TransformerModel(NccEncoderDecoderModel):
 
         src_dict, tgt_dict = task.source_dictionary, task.target_dictionary
 
+        torch.manual_seed(1)
+        torch.cuda.manual_seed(1)
+
         def build_embedding(dictionary, embed_dim, path=None):
             num_embeddings = len(dictionary)
             padding_idx = dictionary.pad()
@@ -68,7 +74,7 @@ class TransformerModel(NccEncoderDecoderModel):
                     "--share-all-embeddings requires --encoder-embed-dim to match --decoder-embed-dim"
                 )
             if args['model']['decoder_embed_path'] and (
-                    args['model']['decoder_embed_path'] != args['model']['encoder_embed_path']
+                args['model']['decoder_embed_path'] != args['model']['encoder_embed_path']
             ):
                 raise ValueError(
                     "--share-all-embeddings not compatible with --decoder-embed-path"

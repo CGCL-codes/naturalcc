@@ -9,18 +9,15 @@ except ImportError:
     from collections import Iterable
 import contextlib
 import itertools
-import logging
 import os
 import sys
 import types
 import torch
 import random
 import numpy as np
+from ncc import LOGGER
 
 np.get_include()
-
-logger = logging.getLogger(__name__)
-
 from multiprocessing import set_start_method
 
 try:
@@ -53,6 +50,28 @@ def collate_tokens(values, pad_idx, eos_idx=None, left_pad=False, move_eos_to_be
             else:
                 dst[0] = eos_idx
             dst[1:] = src[:-1]
+        else:
+            dst.copy_(src)
+
+    for i, v in enumerate(values):
+        copy_tensor(v, res[i][size - len(v):] if left_pad else res[i][:len(v)])
+    return res
+
+
+def collate_be_tokens(values, pad_idx, bos_idx=None, eos_idx=None, left_pad=False,
+                      remove_bos_to_target=True):
+    """
+    Convert a list of 1d tensors into a padded 2d tensor.
+    values: sentences starting with <BOS>
+    """
+    size = max(v.size(0) for v in values)
+    res = values[0].new(len(values), size).fill_(pad_idx)
+
+    def copy_tensor(src, dst):
+        assert dst.numel() == src.numel() and src[0].item() == bos_idx
+        if remove_bos_to_target:
+            dst[:-1] = src[1:]
+            dst[-1] = eos_idx
         else:
             dst.copy_(src)
 
@@ -102,7 +121,7 @@ def load_indexed_dataset(path, modality='text', dictionary=None, tokenizer=None,
             combine 'data-bin/train', 'data-bin/train1', ... and return a
             single ConcatDataset instance.
     """
-    from ncc.data.concat_dataset import ConcatDataset
+    from ncc.data.wrappers.concat_dataset import ConcatDataset
     import ncc.data.indexed_dataset as indexed_dataset
 
     datasets = []
@@ -125,7 +144,7 @@ def load_indexed_dataset(path, modality='text', dictionary=None, tokenizer=None,
         )
         if dataset is None:
             break
-        logger.info('loaded {} examples from: {}'.format(len(dataset), path_k))
+        LOGGER.info('loaded {} examples from: {}'.format(len(dataset), path_k))
         datasets.append(dataset)
         if not combine:
             break
@@ -151,7 +170,7 @@ def load_bert_dataset(path, dictionary, dataset_impl=None, combine=False, defaul
             combine 'data-bin/train', 'data-bin/train1', ... and return a
             single ConcatDataset instance.
     """
-    from ncc.data.concat_dataset import ConcatDataset
+    from ncc.data.wrappers.concat_dataset import ConcatDataset
     import ncc.data.indexed_dataset as indexed_dataset
 
     datasets = []
@@ -170,7 +189,7 @@ def load_bert_dataset(path, dictionary, dataset_impl=None, combine=False, defaul
         )
         if dataset is None:
             break
-        logger.info('loaded {} examples from: {}'.format(len(dataset), path_k))
+        LOGGER.info('loaded {} examples from: {}'.format(len(dataset), path_k))
         datasets.append(dataset)
         if not combine:
             break
@@ -280,7 +299,7 @@ def filter_by_size(indices, dataset, max_positions, raise_exception=False):
                             'skip this example with --skip-invalid-size-inputs-valid-test'
                         ).format(ignored[0], dataset.size(ignored[0]), max_positions))
     if len(ignored) > 0:
-        logger.warning((
+        LOGGER.warning((
                            '{} samples have invalid sizes and will be skipped, '
                            'max_positions={}, first few sample ids={}'
                        ).format(len(ignored), max_positions, ignored[:10]))
@@ -306,17 +325,15 @@ def batch_by_size(
         required_batch_size_multiple (int, optional): require batch size to
             be a multiple of N (default: 1).
     """
-    # try:
-
-    import pyximport
-    pyximport.install()
-    from ncc.data.tools.data_utils_fast import batch_by_size_fast
-
-    # except ImportError:
-    #    raise ImportError(
-    # 'Please build Cython components with: `pip install --editable .` '
-    # 'or `python setup.py build_ext --inplace`'
-    #    )
+    try:
+        import pyximport
+        pyximport.install()
+        from ncc.data.tools.data_utils_fast import batch_by_size_fast
+    except ImportError:
+        raise ImportError(
+            'Please build Cython components with: `pip install --editable .` '
+            'or `python setup.py build_ext --inplace`'
+        )
 
     max_tokens = max_tokens if max_tokens is not None else -1
     max_sentences = max_sentences if max_sentences is not None else -1
@@ -328,11 +345,44 @@ def batch_by_size(
     return batch_by_size_fast(indices, num_tokens_fn, max_tokens, max_sentences, bsz_mult)
 
 
-def process_bpe_symbol(sentence: str, bpe_symbol: str):
-    if bpe_symbol == 'sentencepiece':
-        sentence = sentence.replace(' ', '').replace('\u2581', ' ').strip()
-    elif bpe_symbol == '_EOW':
-        sentence = sentence.replace(' ', '').replace('_EOW', ' ').strip()
-    elif bpe_symbol is not None:
-        sentence = (sentence + ' ').replace(bpe_symbol, '').rstrip()
+def batch(
+    indices, max_sentences=None, required_batch_size_multiple=1,
+):
+    try:
+        import pyximport
+        pyximport.install()
+        from ncc.data.tools.data_utils_fast import batch_fast
+    except ImportError:
+        raise ImportError(
+            'Please build Cython components with: `pip install --editable .` '
+            'or `python setup.py build_ext --inplace`'
+        )
+
+    max_sentences = max_sentences if max_sentences is not None else -1
+    bsz_mult = required_batch_size_multiple
+
+    if isinstance(indices, types.GeneratorType):
+        indices = np.fromiter(indices, dtype=np.int64, count=-1)
+
+    sampler = batch_fast(indices, max_sentences, bsz_mult)
+    return sampler
+
+
+def process_bpe_symbol(sentence: str, symbol: str):
+    if symbol == "sentencepiece":
+        sentence = sentence.replace(" ", "").replace("\u2581", " ").strip()
+    elif symbol == "wordpiece":
+        sentence = sentence.replace(" ", "").replace("_", " ").strip()
+    elif symbol == "letter":
+        sentence = sentence.replace(" ", "").replace("|", " ").strip()
+    elif symbol == "_EOW":
+        sentence = sentence.replace(" ", "").replace("_EOW", " ").strip()
+    elif symbol in {"subword_nmt", "@@ ", "@@"}:
+        if symbol == "subword_nmt":
+            symbol = "@@ "
+        sentence = (sentence + " ").replace(symbol, "").rstrip()
+    elif symbol == "none":
+        pass
+    elif symbol is not None:
+        raise NotImplementedError(f"Unknown post_process option: {symbol}")
     return sentence

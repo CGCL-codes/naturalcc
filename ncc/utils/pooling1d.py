@@ -3,6 +3,11 @@
 import torch
 import torch.nn.functional as F
 
+from ncc.data.constants import (
+    EPS,
+    INF,
+)
+
 
 def pooling1d(pooling1d):
     """
@@ -48,13 +53,11 @@ def pooling1d(pooling1d):
         # return weighted_input_emb
         input_weights = input_weights * kwargs['input_mask'].unsqueeze(dim=-1)  # B x T x 1
         input_emb_weighted_sum = (input_emb * input_weights).sum(dim=1)  # B x D
-        return input_emb_weighted_sum / (input_weights.sum(dim=1) + 1e-8)  # B x D
+        return input_emb_weighted_sum / (input_weights.sum(dim=1) + EPS)  # B x D
 
     if pooling1d == 'mean':
         return _mean_pooling1d
     elif pooling1d == 'max':
-        # INF = float('inf')
-        INF = 999999
         return _max_pooling1d
     elif pooling1d == 'weighted_mean':
         return _weighted_mean_pooling1d

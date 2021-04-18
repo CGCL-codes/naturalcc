@@ -1,22 +1,24 @@
 # -*- coding: utf-8 -*-
 
 import os
-from dataset import (
-    HOSTNAME, USERNAME, DEFAULT_DIR, LIBS_DIR, LOGGER,
+from ncc import (
+    __CACHE_DIR__,
+    __BPE_DIR__, __LIBS_DIR__,
+    LOGGER,
 )
 
 DATASET_NAME = 'py150'
-DATASET_DIR = os.path.join(DEFAULT_DIR, DATASET_NAME)
-RAW_DATA_DIR = os.path.join(DATASET_DIR, 'raw')
-FLATTEN_DIR = os.path.join(DATASET_DIR, 'flatten')
-REFINE_DIR = os.path.join(DATASET_DIR, 'refine')
-FILTER_DIR = os.path.join(DATASET_DIR, 'filter')
+DATASET_DIR = os.path.join(__CACHE_DIR__, DATASET_NAME)
 
-LANGUAGES = ['python', ]
+RAW_DIR = os.path.join(DATASET_DIR, 'raw')
+ATTRIBUTES_DIR = os.path.join(DATASET_DIR, 'attributes')
+BPE_DIR = __BPE_DIR__
+LIBS_DIR = __LIBS_DIR__
+
 MODES = ['train', 'test']
 
 __all__ = (
     DATASET_NAME,
-    RAW_DATA_DIR, LIBS_DIR, FLATTEN_DIR, REFINE_DIR, FILTER_DIR,
-    LANGUAGES, MODES,
+    RAW_DIR, BPE_DIR, LIBS_DIR, ATTRIBUTES_DIR,
+    MODES, LOGGER,
 )

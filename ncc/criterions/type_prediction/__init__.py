@@ -1,0 +1,2 @@
+from .type_prediction_cross_entropy import TypePredictionCrossEntropyCriterion
+from .typilus import TypilusCriterion

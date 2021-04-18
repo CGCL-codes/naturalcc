@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
-
 try:
     from amp_C import multi_tensor_l2norm
 
@@ -10,179 +7,58 @@ try:
 except ImportError:
     multi_tensor_l2norm_available = False
 
+import contextlib
+import copy
+import importlib
+import os
+import sys
 import time
+import warnings
+from itertools import accumulate
+from typing import (
+    List, Dict, Optional,
+)
+
 import torch
+import torch.nn.functional as F
+from torch import Tensor
 
-import json
-from typing import *
-import itertools
-
-import multiprocessing as mp
-
-# from ncc.data.dict import Dict as _Dict
-from ncc.utils.constants import *
-
-
-def save_json(output, output_path):
-    with open(output_path, 'w', encoding='utf-8') as json_file:
-        json.dump(output, json_file, ensure_ascii=False)
-
-
-def load_json(path):
-    with open(path, 'r', encoding='utf-8') as json_file:
-        aa = json_file.readlines()[0]
-        output = json.loads(aa)
-    return output
+from ncc import LOGGER
+from ncc.data.constants import (
+    PAD, EOS, UNK,
+)
+from ncc.utils.logging.meters import safe_round
+from dgl import DGLGraph
 
 
 def now() -> str:
     return time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime(time.time()))
 
 
-def mkdir(dir_path):
-    # create dir with recursion
-    if os.path.exists(dir_path):
-        pass
-    else:
-        try:
-            os.makedirs(dir_path)
-        except Exception as err:
-            print(str(err).strip())
+def apply_to_sample(f, sample):
+    if len(sample) == 0:
+        return {}
 
-
-def merge_dict(dicts: List[Dict]) -> Dict:
-    keys = list(set(list(itertools.chain(*[list(dct.keys()) for dct in dicts]))))
-    new_dict = dict()
-    for key in keys:
-        new_dict[key] = []
-        for dct in dicts:
-            if key in dct:
-                new_dict[key].append(dct[key])
-            else:
-                continue
-    return new_dict
-
-
-# ================ write/read dict elements ================ #
-def load_flatten_dict(file_dir: str, load_keys=List[str],
-                      mpool=None) -> Dict:
-    '''
-
-    :param file_dir:
-    :param load_keys:
-    :param mpool:
-    :return:
-    '''
-    filenames = {
-        key: os.path.join(file_dir, '{}.pt'.format(key, ))
-        for key in load_keys
-    }
-    if mpool is None:
-        return {
-            key: torch.load(fl_name)
-            for key, fl_name in filenames.items()
-        }
-
-    else:
-        key_data = mpool.map(torch.load, filenames.values())
-        return {
-            key: data
-            for key, data in zip(filenames.keys(), key_data)
-        }
-
-
-def dump_flatten_dict(obj: Dict, file_dir: str,
-                      mpool=None) -> None:
-    '''
-    flatten dict and then write them to pt files with multi-processing
-    :param obj:
-    :param file_dir:
-    :param mpool: multi-processing flag
-    :return:
-    '''
-    mkdir(file_dir)
-    params = [{
-        'obj': value,
-        'filename': os.path.join(file_dir, '{}.pt'.format(key, )),
-    } for key, value in obj.items()]
-    if mpool is None:
-        for prms in params:
-            torch.save(*prms)
-    else:
-        mpool.map(mp_torch_save, params)
-
-
-# ================ write/read dict elements ================ #
-
-def mp_torch_save(params: Dict) -> None:
-    # for multi-processing
-    obj, filename, = params.values()
-    torch.save(obj, filename)
-
-
-def flatten_dict_list(dict_list: List[Dict]) -> Dict:
-    '''
-    dict list -> dict
-    :param dict_list:
-    :return:
-    '''
-    dict_keys = dict_list[0].keys()
-    dict_values = zip(*map(lambda dct: dct.values(), dict_list))
-    new_dict = {
-        key: list(value)
-        for key, value in zip(dict_keys, dict_values)
-    }
-    return new_dict
-
-
-def mpool(core_num=None) -> mp.Pool:
-    '''
-    create multi-processing pool
-    :param core_num:
-    :return:
-    '''
-    # maximize processor number
-    if core_num is None:
-        core_num = mp.cpu_count()
-    else:
-        core_num = core_num if mp.cpu_count() > core_num else mp.cpu_count()
-    mp_pool = mp.Pool(processes=core_num)
-    return mp_pool
-
-
-def extend_dict(words: List, dict: Any):
-    ids = []
-    oovs = []
-    for w in words:
-        # print('w: ', w)
-        idx = dict.lookup_ind(w, default=UNK)
-        # print('idx: ', idx)
-        if idx == UNK:  # If w is OOV
-            if w not in oovs:  # Add to list of OOVs
-                oovs.append(w)
-            oov_num = oovs.index(w)  # This is 0 for the first article OOV, 1 for the second article OOV...
-            # print('dict.size:', dict.size, ' oovs: ', oovs)
-            ids.append(dict.size + oov_num)  # This is e.g. 50000 for the first article OOV, 50001 for the second...
+    def _apply(x):
+        if torch.is_tensor(x):
+            return f(x)
+        elif isinstance(x, dict):
+            return {key: _apply(value) for key, value in x.items()}
+        elif isinstance(x, list):
+            return [_apply(x) for x in x]
+        elif isinstance(x, DGLGraph):
+            return x.to(torch.device('cuda'))
         else:
-            ids.append(idx)
-    # print('ids: ', ids)
-    # print('oovs: ', oovs)
-    return ids, oovs
+            return x
+
+    return _apply(sample)
 
 
-def extend_dict_with_oovs(words, dict, oovs):
-    ids = []
-    for w in words:
-        idx = dict.lookup_ind(w, default=UNK)
-        if idx == UNK:  # If w is an OOV word
-            if w in oovs:  # If w is an in-article OOV
-                dict_idx = dict.size + oovs.index(w)  # Map to its temporary article OOV number
-                ids.append(dict_idx)
-            else:  # If w is an out-of-article OOV
-                ids.append(UNK)  # Map to the UNK token id
-        else:
-            ids.append(idx)
-    return ids
+def move_to_cuda(sample):
+    def _move_to_cuda(tensor):
+        return tensor.cuda()
+
+    return apply_to_sample(_move_to_cuda, sample)
 
 
 def clean_up_sentence(sentence: torch.Tensor, remove_UNK=False, remove_EOS=False):
@@ -202,22 +78,6 @@ def clean_up_sentence(sentence: torch.Tensor, remove_UNK=False, remove_EOS=False
             sentence = sentence[:-1]
 
     return sentence
-
-
-# def indices_to_words(src_list: List, vocab: _Dict, oov_vocab: List) -> List:
-#     pred_list = [None] * len(src_list)  # src_list.size(0)
-#     for ind, src_index in enumerate(src_list):
-#         p = vocab.lookup_label(src_index)
-#         if p is None and oov_vocab:
-#             oov_index = src_index - vocab.size
-#             try:
-#                 pred_list[ind] = oov_vocab[oov_index]
-#             except:
-#                 print(oov_index)
-#                 assert False
-#         else:
-#             pred_list[ind] = p
-#     return pred_list
 
 
 def masked_softmax(vector: torch.Tensor,
@@ -256,35 +116,6 @@ def masked_softmax(vector: torch.Tensor,
     return result
 
 
-# utils from fairseq.utils.py
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
-import contextlib
-import copy
-import importlib.util
-import logging
-import math
-import os
-import sys
-import warnings
-from collections import defaultdict
-from itertools import accumulate
-from typing import Callable, Dict, List, Optional
-
-import numpy as np
-import torch
-import torch.nn.functional as F
-from ncc.logging.meters import safe_round
-from ncc.modules.gelu import gelu, gelu_accurate
-from ncc.modules.attention.multihead_attention import MultiheadAttention
-from torch import Tensor
-
-logger = logging.getLogger(__name__)
-
-
 def split_paths(paths: str) -> List[str]:
     return paths.split(os.pathsep) if "://" not in paths else paths.split("|")
 
@@ -301,32 +132,8 @@ def load_ensemble_for_inference(filenames, task, model_arg_overrides=None):
     )
 
 
-def apply_to_sample(f, sample):
-    if len(sample) == 0:
-        return {}
-
-    def _apply(x):
-        if torch.is_tensor(x):
-            return f(x)
-        elif isinstance(x, dict):
-            return {key: _apply(value) for key, value in x.items()}
-        elif isinstance(x, list):
-            return [_apply(x) for x in x]
-        else:
-            return x
-
-    return _apply(sample)
-
-
-def move_to_cuda(sample):
-    def _move_to_cuda(tensor):
-        return tensor.cuda()
-
-    return apply_to_sample(_move_to_cuda, sample)
-
-
 def get_incremental_state(
-    module: MultiheadAttention,
+    module,
     incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]],
     key: str,
 ) -> Optional[Dict[str, Optional[Tensor]]]:
@@ -335,7 +142,7 @@ def get_incremental_state(
 
 
 def set_incremental_state(
-    module: MultiheadAttention,
+    module,
     incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]],
     key: str,
     value: Dict[str, Optional[Tensor]],
@@ -369,67 +176,7 @@ def print_embed_overlap(embed_dict, vocab_dict):
     embed_keys = set(embed_dict.keys())
     vocab_keys = set(vocab_dict.symbols)
     overlap = len(embed_keys & vocab_keys)
-    logger.info("found {}/{} types in embedding file".format(overlap, len(vocab_dict)))
-
-
-def parse_embedding(embed_path):
-    """Parse embedding text file into a dictionary of word and embedding tensors.
-
-    The first line can have vocabulary size and dimension. The following lines
-    should contain word and embedding separated by spaces.
-
-    Example:
-        2 5
-        the -0.0230 -0.0264  0.0287  0.0171  0.1403
-        at -0.0395 -0.1286  0.0275  0.0254 -0.0932
-    """
-    embed_dict = {}
-    with open(embed_path) as f_embed:
-        next(f_embed)  # skip header
-        for line in f_embed:
-            pieces = line.rstrip().split(" ")
-            embed_dict[pieces[0]] = torch.Tensor(
-                [float(weight) for weight in pieces[1:]]
-            )
-    return embed_dict
-
-
-def load_embedding(embed_dict, vocab, embedding):
-    for idx in range(len(vocab)):
-        token = vocab[idx]
-        if token in embed_dict:
-            embedding.weight.data[idx] = embed_dict[token]
-    return embedding
-
-
-def replace_unk(hypo_str, src_str, alignment, align_dict, unk):
-    from ncc.data import tokenizers
-
-    # Tokens are strings here
-    hypo_tokens = tokenizers.tokenize_line(hypo_str)
-    # TODO: Very rare cases where the replacement is '<eos>' should be handled gracefully
-    src_tokens = tokenizers.tokenize_line(src_str) + ["<eos>"]
-    for i, ht in enumerate(hypo_tokens):
-        if ht == unk:
-            src_token = src_tokens[alignment[i]]
-            # Either take the corresponding value in the aligned dictionary or just copy the original value.
-            hypo_tokens[i] = align_dict.get(src_token, src_token)
-    return " ".join(hypo_tokens)
-
-
-def post_process_prediction(
-    hypo_tokens, src_str, alignment, align_dict, tgt_dict, remove_bpe=None
-):
-    hypo_str = tgt_dict.string(hypo_tokens, remove_bpe)
-    if align_dict is not None:
-        hypo_str = replace_unk(
-            hypo_str, src_str, alignment, align_dict, tgt_dict.unk_string()
-        )
-    if align_dict is not None or remove_bpe is not None:
-        # Convert back to tokens for evaluating with unk replacement or without BPE
-        # Note that the dictionary can be modified inside the method.
-        hypo_tokens = tgt_dict.encode_line(hypo_str, add_if_not_exist=True)
-    return hypo_tokens, hypo_str, alignment
+    LOGGER.info("found {}/{} types in embedding file".format(overlap, len(vocab_dict)))
 
 
 def make_positions(tensor, padding_idx: int):
@@ -441,9 +188,14 @@ def make_positions(tensor, padding_idx: int):
     # balanced to both work with ONNX export and XLA. In particular XLA
     # prefers ints, cumsum defaults to output longs, and ONNX doesn't know
     # how to handle the dtype kwarg in cumsum.
-    mask = tensor.ne(padding_idx).int()
-    # mask = torch.ones(tensor.size()).int().cuda()
-    return (torch.cumsum(mask, dim=1).type_as(mask) * mask).long() + padding_idx
+    if padding_idx is None:
+        positional_ids = tensor.new(*tensor.size())
+        positional_ids.data.copy_(torch.arange(start=0, end=tensor.size(1)).expand(tensor.size()))
+        return positional_ids
+    else:
+        mask = tensor.ne(padding_idx).int()
+        # mask = torch.ones(tensor.size()).int().cuda()
+        return (torch.cumsum(mask, dim=1).type_as(mask) * mask).long() + padding_idx
 
 
 def make_positions_hibert(tensor, padding_idx, left_pad):
@@ -545,43 +297,6 @@ def multi_tensor_total_norm(grads, chunk_size=2048 * 32) -> torch.Tensor:
     return total_norm
 
 
-def clip_grad_norm_(params, max_norm, aggregate_norm_fn=None) -> torch.Tensor:
-    if isinstance(params, torch.Tensor):
-        params = [params]
-    params = list(params)
-    grads = [p.grad.detach() for p in filter(lambda p: p.grad is not None, params)]
-    if len(grads) == 0:
-        if len(params) > 0:
-            return params[0].new_tensor(0.)
-        else:
-            return torch.tensor(0.)
-
-    if len(grads) == 1:
-        total_norm = torch.norm(grads[0], p=2, dtype=torch.float32)
-    else:
-        if multi_tensor_l2norm_available:
-            total_norm = multi_tensor_total_norm(grads)
-        else:
-            if torch.cuda.is_available():
-                warnings.warn(
-                    "amp_C fused kernels unavailable, disabling multi_tensor_l2norm; "
-                    "you may get better performance by installing NVIDIA's apex library"
-                )
-            total_norm = torch.norm(
-                torch.stack([torch.norm(g, p=2, dtype=torch.float32) for g in grads])
-            )
-
-    if aggregate_norm_fn is not None:
-        total_norm = aggregate_norm_fn(total_norm)
-
-    if max_norm > 0:
-        max_norm = float(max_norm)
-        clip_coef = (max_norm / (total_norm + 1e-6)).clamp_(max=1)
-        for g in grads:
-            g.mul_(clip_coef)
-    return total_norm
-
-
 def fill_with_neg_inf(t):
     """FP16-compatible function that fills a tensor with -inf."""
     return t.float().fill_(float("-inf")).type_as(t)
@@ -664,20 +379,6 @@ def import_user_module(args):
             sys.path.pop(0)
 
 
-def softmax(x, dim: int, onnx_trace: bool = False):
-    if onnx_trace:
-        return F.softmax(x.float(), dim=dim)
-    else:
-        return F.softmax(x, dim=dim, dtype=torch.float32)
-
-
-def log_softmax(x, dim: int, onnx_trace: bool = False):
-    if onnx_trace:
-        return F.log_softmax(x.float(), dim=dim)
-    else:
-        return F.log_softmax(x, dim=dim, dtype=torch.float32)
-
-
 def get_perplexity(loss, round=2, base=2):
     if loss is None:
         return 0.
@@ -690,38 +391,6 @@ def get_perplexity(loss, round=2, base=2):
 def deprecation_warning(message, stacklevel=3):
     # don't use DeprecationWarning, since it's ignored by default
     warnings.warn(message, stacklevel=stacklevel)
-
-
-def get_activation_fn(activation: str) -> Callable:
-    """ Returns the activation function corresponding to `activation` """
-    if activation == "relu":
-        return F.relu
-    elif activation == "gelu":
-        return gelu
-    elif activation == "gelu_fast":
-        deprecation_warning(
-            "--activation-fn=gelu_fast has been renamed to gelu_accurate"
-        )
-        return gelu_accurate
-    elif activation == "gelu_accurate":
-        return gelu_accurate
-    elif activation == "tanh":
-        return torch.tanh
-    elif activation == "linear":
-        return lambda x: x
-    else:
-        raise RuntimeError("--activation-fn {} not supported".format(activation))
-
-
-def get_available_activation_fns() -> List:
-    return [
-        "relu",
-        "gelu",
-        "gelu_fast",  # deprecated
-        "gelu_accurate",
-        "tanh",
-        "linear",
-    ]
 
 
 @contextlib.contextmanager
@@ -738,25 +407,6 @@ def has_parameters(module):
         return True
     except StopIteration:
         return False
-
-
-def set_torch_seed(seed):
-    # Set seed based on args.seed and the update number so that we get
-    # reproducible results when resuming from checkpoints
-    assert isinstance(seed, int)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-
-
-@contextlib.contextmanager
-def with_torch_seed(seed):
-    assert isinstance(seed, int)
-    rng_state = torch.get_rng_state()
-    cuda_rng_state = torch.cuda.get_rng_state()
-    set_torch_seed(seed)
-    yield
-    torch.set_rng_state(rng_state)
-    torch.cuda.set_rng_state(cuda_rng_state)
 
 
 def parse_alignment(line):
@@ -816,3 +466,33 @@ def new_arange(x, *size):
     if len(size) == 0:
         size = x.size()
     return torch.arange(size[-1], device=x.device).expand(*size).contiguous()
+
+
+def parse_embedding(embed_path):
+    """Parse embedding text file into a dictionary of word and embedding tensors.
+
+    The first line can have vocabulary size and dimension. The following lines
+    should contain word and embedding separated by spaces.
+
+    Example:
+        2 5
+        the -0.0230 -0.0264  0.0287  0.0171  0.1403
+        at -0.0395 -0.1286  0.0275  0.0254 -0.0932
+    """
+    embed_dict = {}
+    with open(embed_path) as f_embed:
+        next(f_embed)  # skip header
+        for line in f_embed:
+            pieces = line.rstrip().split(" ")
+            embed_dict[pieces[0]] = torch.Tensor(
+                [float(weight) for weight in pieces[1:]]
+            )
+    return embed_dict
+
+
+def load_embedding(embed_dict, vocab, embedding):
+    for idx in range(len(vocab)):
+        token = vocab[idx]
+        if token in embed_dict:
+            embedding.weight.data[idx] = embed_dict[token]
+    return embedding

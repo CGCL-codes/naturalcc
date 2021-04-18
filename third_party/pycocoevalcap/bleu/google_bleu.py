@@ -106,6 +106,12 @@ def compute_bleu(reference_corpus, translation_corpus, max_order=4,
         ZeroDivisionError: float division by zero
         """
         bp = math.exp(1 - 1. / ratio)
+        # try:
+        #     bp = math.exp(1 - 1. / ratio)
+        # except Exception as err:
+        #     print('ref:', reference_corpus)
+        #     print('hyp:', translation_corpus)
+        #     raise err
 
     bleu = geo_mean * bp
 

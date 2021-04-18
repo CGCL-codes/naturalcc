@@ -3,18 +3,34 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import *
+from typing import (
+    Optional,
+    Dict,
+    Any,
+)
 
 import os
-import ujson
 from collections import Counter
 from multiprocessing import Pool
 
 import torch
-from ncc.data.tools.binarizer import safe_readline
-from ncc.data.tools import data_utils
+
 from ncc.data import constants
-from ncc.utils.file_io import PathManager
+from ncc.utils.file_ops import (
+    file_io,
+    json_io,
+)
+from ncc.utils.path_manager import PathManager
+from ncc.utils.file_ops.file_io import safe_readline
+from ncc.data.tools import data_utils
+
+
+def item(tensor):
+    if hasattr(tensor, "item"):
+        return tensor.item()
+    if hasattr(tensor, "__getitem__"):
+        return tensor[0]
+    return tensor
 
 
 class Dictionary(object):
@@ -23,22 +39,26 @@ class Dictionary(object):
     def __init__(
         self,
         pad=constants.PAD,
+        bos=constants.BOS,
         eos=constants.EOS,
         unk=constants.UNK,
-        bos=constants.BOS,
         extra_special_symbols=None,
     ):
         self.bos_word, self.unk_word, self.pad_word, self.eos_word = bos, unk, pad, eos
         self.symbols = []
         self.count = []
         self.indices = {}
-        self.pad_index = self.add_symbol(pad)
-        self.bos_index = self.add_symbol(bos)
-        self.eos_index = self.add_symbol(eos)
-        self.unk_index = self.add_symbol(unk)
+        if pad is not None:
+            self.pad_index = self.add_symbol(pad, n=constants.INF)
+        if bos is not None:
+            self.bos_index = self.add_symbol(bos, n=constants.INF)
+        if eos is not None:
+            self.eos_index = self.add_symbol(eos, n=constants.INF)
+        if unk is not None:
+            self.unk_index = self.add_symbol(unk, n=constants.INF)
         if extra_special_symbols:
             for s in extra_special_symbols:
-                self.add_symbol(s)
+                self.add_symbol(s, n=constants.INF)
         self.nspecial = len(self.symbols)
 
     def __eq__(self, other):
@@ -63,42 +83,49 @@ class Dictionary(object):
             return self.indices[sym]
         return self.unk_index
 
-    # TODO: modified, tobe checked
-    def string(self, tensor, bpe_symbol=None, escape_unk=False, trunc_eos=False):
+    def string(
+        self,
+        tensor,
+        bpe_symbol=None,
+        escape_unk=False,
+        extra_symbols_to_ignore=None,
+        unk_string=None,
+        trunc_eos=False,
+    ):
         """Helper for converting a tensor of token indices to a string.
-
         Can optionally remove BPE symbols or escape <unk> words.
         """
         if torch.is_tensor(tensor) and tensor.dim() == 2:
-            return "\n".join(self.string(t, bpe_symbol, escape_unk, trunc_eos) for t in tensor)
+            return "\n".join(
+                self.string(t, bpe_symbol, escape_unk, extra_symbols_to_ignore, trunc_eos=trunc_eos)
+                for t in tensor
+            )
+
+        extra_symbols_to_ignore = set(extra_symbols_to_ignore or [])
+        extra_symbols_to_ignore.add(self.eos())
 
         def token_string(i):
             if i == self.unk():
-                return self.unk_string(escape_unk)
+                if unk_string is not None:
+                    return unk_string
+                else:
+                    return self.unk_string(escape_unk)
             else:
                 return self[i]
 
         if hasattr(self, "bos_index"):
-            sent = []
-            for i in tensor:
-                if i == self.eos():
-                    break
-                elif (i != self.bos()):
-                    sent.append(token_string(i))
-            sent = " ".join(sent)
-        else:
-            sent = []
-            for i in tensor:
-                if i == self.eos():
-                    break
-                else:
-                    sent.append(token_string(i))
-            sent = " ".join(sent)
+            extra_symbols_to_ignore.add(self.bos())
+
+        sent = " ".join(
+            token_string(i)
+            for i in tensor
+            if item(i) not in extra_symbols_to_ignore
+        )
 
         return data_utils.process_bpe_symbol(sent, bpe_symbol)
 
     def unk_string(self, escape=False):
-        """Return unknown string, optionally escaped as: <<unk>>"""
+        """Return unknown string, optionally escaped as: <[unk]>"""
         if escape:
             return "<{}>".format(self.unk_word)
         else:
@@ -130,7 +157,7 @@ class Dictionary(object):
                 self.symbols.append(word)
                 self.count.append(new_dict.count[idx2])
 
-    def finalize(self, threshold=-1, nwords=-1, padding_factor=8):
+    def finalize(self, threshold=-1, nwords=-1, padding_factor=1):
         """Sort symbols by frequency in descending order, ignoring special ones.
 
         Args:
@@ -153,7 +180,9 @@ class Dictionary(object):
                 sorted(zip(self.symbols[self.nspecial:], self.count[self.nspecial:]))
             )
         )
-        for symbol, count in c.most_common(nwords - self.nspecial):
+
+        most_common = c.most_common(nwords - self.nspecial)
+        for symbol, count in most_common:
             if count >= threshold:
                 new_indices[symbol] = len(new_symbols)
                 new_symbols.append(symbol)
@@ -180,31 +209,46 @@ class Dictionary(object):
 
     def bos(self):
         """Helper to get index of beginning-of-sentence symbol"""
-        return self.bos_index
+        return getattr(self, 'bos_index', None)
 
     def pad(self):
         """Helper to get index of pad symbol"""
-        return self.pad_index
+        return getattr(self, 'pad_index', None)
 
     def eos(self):
         """Helper to get index of end-of-sentence symbol"""
-        return self.eos_index
+        return getattr(self, 'eos_index', None)
 
     def unk(self):
         """Helper to get index of unk symbol"""
-        return self.unk_index
+        return getattr(self, 'unk_index', None)
 
     @classmethod
     def load(cls, f):
         """Loads the dictionary from a text file with the format:
-        ```
-        <symbol0> <count0>
-        <symbol1> <count1>
+        [<symbol0>, <count0>]\n
+        [<symbol1>, <count1>]\n
         ...
-        ```
         """
-        d = cls()
+        d = cls(pad=None, bos=None, eos=None, unk=None)
         d.add_from_file(f)
+        # set pad/bos/eos/unk indices
+        if constants.PAD in d.indices:
+            d.pad_index = d.indices[constants.PAD]
+            d.pad_word = constants.PAD
+            d.nspecial += 1
+        if constants.BOS in d.indices:
+            d.bos_index = d.indices[constants.BOS]
+            d.bos_word = constants.BOS
+            d.nspecial += 1
+        if constants.EOS in d.indices:
+            d.eos_index = d.indices[constants.EOS]
+            d.eos_word = constants.EOS
+            d.nspecial += 1
+        if constants.UNK in d.indices:
+            d.unk_index = d.indices[constants.UNK]
+            d.unk_word = constants.UNK
+            d.nspecial += 1
         return d
 
     def add_from_file(self, f):
@@ -214,69 +258,8 @@ class Dictionary(object):
         """
         if isinstance(f, str):
             try:
-                with PathManager.open(f, "r", encoding="utf-8") as fd:
+                with file_io.open(f, "r") as fd:
                     self.add_from_file(fd)
-            except FileNotFoundError as fnfe:
-                raise fnfe
-            except UnicodeError:
-                raise Exception(
-                    "Incorrect encoding detected in {}, please "
-                    "rebuild the dataset".format(f)
-                )
-            return
-
-        lines = f.readlines()
-        indices_start_line = self._load_meta(lines)
-
-        for idx, line in enumerate(lines[indices_start_line:]):
-            try:
-                line, field = line.rstrip().rsplit(" ", 1)
-                if field == "#fairseq:overwrite":
-                    overwrite = True
-                    line, field = line.rsplit(" ", 1)
-                else:
-                    overwrite = False
-                count = int(field)
-                word = line
-                if word in self and not overwrite:
-                    raise RuntimeError(
-                        "Duplicate word found when loading Dictionary: '{}'. "
-                        "Duplicate words can overwrite earlier ones by adding the "
-                        "#fairseq:overwrite flag at the end of the corresponding row "
-                        "in the dictionary file. If using the Camembert model, please "
-                        "download an updated copy of the model file."
-                            .format(word)
-                    )
-                self.add_symbol(word, n=count, overwrite=overwrite)
-            except ValueError:
-                raise ValueError(
-                    "Incorrect dictionary format, expected '<token> <cnt> [flags]'"
-                )
-
-    @classmethod
-    def load_json(cls, f):
-        """Loads the dictionary from a text file with the format:
-        ```
-        <symbol0> <count0>
-        <symbol1> <count1>
-        ...
-        ```
-        """
-        if str.endswith(f, '.txt'):
-            f = f.replace('.txt', '.json')
-        d = cls()
-        d.add_from_json_file(f)
-        return d
-
-    def add_from_json_file(self, f):
-        """
-        Loads a pre-existing dictionary from a text file and adds its symbols
-        to this instance.
-        """
-        if isinstance(f, str):
-            try:
-                with PathManager.open(f, "r", encoding="utf-8") as fd:
-                    self.add_from_json_file(fd)
             except FileNotFoundError as fnfe:
                 raise fnfe
             except UnicodeError:
@@ -291,7 +274,7 @@ class Dictionary(object):
 
         for line in lines[indices_start_line:]:
             try:
-                raw_line = ujson.loads(line.rstrip())
+                raw_line = json_io.json_loads(line.rstrip())
                 line, field = raw_line[:-1], raw_line[-1]
                 if field == "#fairseq:overwrite":
                     overwrite = True
@@ -318,19 +301,11 @@ class Dictionary(object):
 
     def _save(self, f, kv_iterator):
         if isinstance(f, str):
-            PathManager.mkdirs(os.path.dirname(f))
-            with PathManager.open(f, "w", encoding="utf-8") as fd:
+            PathManager.mkdir(os.path.dirname(f))
+            with file_io.open(f, "w") as fd:
                 return self.save(fd)
         for k, v in kv_iterator:
-            print("{} {}".format(k, v), file=f)
-
-    def _save_json(self, f, kv_iterator):
-        if isinstance(f, str):
-            PathManager.mkdirs(os.path.dirname(f))
-            with PathManager.open(f, "w", encoding="utf-8") as fd:
-                return self.save_json(fd)
-        for k, v in kv_iterator:
-            print(ujson.dumps([k, v], ensure_ascii=False), file=f)
+            print(json_io.json_dumps([k, v]), file=f)
 
     def _get_meta(self):
         return [], []
@@ -339,26 +314,16 @@ class Dictionary(object):
         return 0
 
     def save(self, f):
-        """Stores dictionary into a text file"""
+        """
+        Stores dictionary into a text file
+        only pad/bos/eos/unk are auto-saved/load, user defined special tokens are saved into file
+        """
         ex_keys, ex_vals = self._get_meta()
         self._save(
             f,
             zip(
-                ex_keys + self.symbols[self.nspecial:],
-                ex_vals + self.count[self.nspecial:],
-            ),
-        )
-
-    def save_json(self, f):
-        """Stores dictionary into a text file"""
-        if isinstance(f, str) and str.endswith(f, '.txt'):
-            f = f.replace('.txt', '.json')
-        ex_keys, ex_vals = self._get_meta()
-        self._save_json(
-            f,
-            zip(
-                ex_keys + self.symbols[self.nspecial:],
-                ex_vals + self.count[self.nspecial:],
+                ex_keys + self.symbols,
+                ex_vals + self.count,
             ),
         )
 
@@ -370,13 +335,60 @@ class Dictionary(object):
     def encode_line(
         self,
         line,
-        line_tokenizer=None,
+        line_tokenizer,
         add_if_not_exist=True,
         consumer=None,
         append_eos=True,
         reverse_order=False,
     ):
-        words = line_tokenizer(line) if line_tokenizer else line
+        words = line_tokenizer(line, vocab=self) if line_tokenizer is not None else line
+        if reverse_order:
+            words = list(reversed(words))
+        nwords = len(words)
+        ids = torch.IntTensor(nwords + 1 if append_eos else nwords)
+
+        for i, word in enumerate(words):
+            if add_if_not_exist:
+                idx = self.add_symbol(word)
+            else:
+                idx = self.index(word)
+                # assert idx != self.unk_index, (line, word)
+            if consumer is not None:
+                consumer(word, idx)
+            ids[i] = idx
+        if append_eos:
+            ids[nwords] = self.eos_index
+        return ids
+
+    def encode_list(
+        self,
+        words,
+        add_if_not_exist=True,
+        consumer=None,
+    ):
+        """In some cases, line have been tokenized already."""
+        nwords = len(words)
+        ids = torch.IntTensor(nwords)
+        for i, word in enumerate(words):
+            if add_if_not_exist:
+                idx = self.add_symbol(word)
+            else:
+                idx = self.index(word)
+            if consumer is not None:
+                consumer(word, idx)
+            ids[i] = idx
+        return ids
+
+    def encode_tok(
+        self,
+        line,
+        # line_tokenizer,  # =tokenizer.tokenize_line
+        add_if_not_exist=True,
+        consumer=None,
+        append_eos=True,
+        reverse_order=False,
+    ):
+        words = line  # line_tokenizer(line)
         if reverse_order:
             words = list(reversed(words))
         nwords = len(words)
@@ -397,10 +409,10 @@ class Dictionary(object):
     @staticmethod
     def _add_file_to_dictionary_single_worker(
         filename: str, tokenize: Any,
-        eos_word: Optional[str] = None, worker_id: int = 0, num_workers: int = 1
+        eos_word: Optional[str], worker_id: int = 0, num_workers: int = 1
     ) -> Counter:
         counter = Counter()
-        with open(PathManager.get_local_path(filename), "r", encoding="utf-8") as f:
+        with file_io.open(filename, "r") as f:
             size = os.fstat(f.fileno()).st_size
             chunk_size = size // num_workers
             offset = worker_id * chunk_size
@@ -410,7 +422,7 @@ class Dictionary(object):
                 safe_readline(f)  # drop first incomplete line
             line = f.readline()
             while line:
-                tokens = tokenize(line) if tokenize else line
+                tokens = tokenize(line)
                 counter.update(tokens)
                 if eos_word is not None:
                     counter.update([eos_word])
@@ -420,8 +432,7 @@ class Dictionary(object):
         return counter
 
     @staticmethod
-    def add_file_to_dictionary(filename: str, dict, tokenize: Any,
-                               eos_word: Optional[str] = None, num_workers: int = 1):
+    def add_file_to_dictionary(filename: str, dict, tokenize: Any, eos_word: Optional[str], num_workers: int):
         def merge_result(counter: Counter):
             for w, c in sorted(counter.items()):
                 dict.add_symbol(w, c)
@@ -444,6 +455,58 @@ class Dictionary(object):
             merge_result(
                 Dictionary._add_file_to_dictionary_single_worker(
                     filename, tokenize, eos_word
+                )
+            )
+
+    @staticmethod
+    def _add_tok_to_dictionary_single_worker(
+        filename: str, tokenize: Any,
+        eos_word: Optional[str], worker_id: int = 0, num_workers: int = 1,
+    ) -> Counter:
+        counter = Counter()
+        with file_io.open(filename, "r") as f:
+            size = os.fstat(f.fileno()).st_size
+            chunk_size = size // num_workers
+            offset = worker_id * chunk_size
+            end = offset + chunk_size
+            f.seek(offset)
+            if offset > 0:
+                safe_readline(f)  # drop first incomplete line
+            line = f.readline()
+            while line:
+                tokens = tokenize(line)
+                counter.update(tokens)
+                if eos_word is not None:
+                    counter.update([eos_word])
+                if f.tell() > end:
+                    break
+                line = f.readline()
+        return counter
+
+    @staticmethod
+    def add_token_to_dictionary(filename, dict, tokenize, num_workers):
+        def merge_result(counter):
+            for w, c in sorted(counter.items()):
+                dict.add_symbol(w, c)
+
+        if num_workers > 1:
+            pool = Pool(processes=num_workers)
+            results = []
+            for worker_id in range(num_workers):
+                results.append(
+                    pool.apply_async(
+                        Dictionary._add_tok_to_dictionary_single_worker,
+                        (filename, tokenize, None, worker_id, num_workers),
+                    )
+                )
+            pool.close()
+            pool.join()
+            for r in results:
+                merge_result(r.get())
+        else:
+            merge_result(
+                Dictionary._add_tok_to_dictionary_single_worker(
+                    filename, tokenize, eos_word=None,
                 )
             )
 

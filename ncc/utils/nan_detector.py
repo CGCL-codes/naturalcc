@@ -3,10 +3,9 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import logging
 import torch
 
-logger = logging.getLogger(__name__)
+from ncc import LOGGER
 
 
 class NanDetector:
@@ -67,7 +66,7 @@ class NanDetector:
                     )
 
                 has_printed_attr = 'has_printed_b' if backward else 'has_printed_f'
-                logger.warning(err)
+                LOGGER.warning(err)
                 setattr(self, has_printed_attr, True)
         elif isinstance(x, dict):
             for v in x.values():

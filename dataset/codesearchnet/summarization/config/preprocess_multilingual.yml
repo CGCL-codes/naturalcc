@@ -1,0 +1,61 @@
+preprocess:
+  task: summarization # task', metavar='TASK', default="translation", choices=TASK_REGISTRY.keys(), help='task'
+  source_lang:
+    # list, ujson.loads
+    - code_tokens
+    - docstring_tokens
+    - sbt
+    - sbtao
+    # path and path.terminals
+    - path
+    - path.terminals
+#    - binary_ast # traverse ast's leaf node info
+    - traversal
+  target_lang: ~ #", default=None, metavar="TARGET", help="target language"
+  # ~ path for dataset default. e.g.  for code_search_net, ~/filter = ~/.ncc/code_search_net/filter
+  dataprefs:
+    ruby:
+      trainpref: ~/.ncc/code_search_net/filter/ruby/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/.ncc/code_search_net/filter/ruby/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/.ncc/code_search_net/filter/ruby/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+    go:
+      trainpref: ~/.ncc/code_search_net/filter/go/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/.ncc/code_search_net/filter/go/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/.ncc/code_search_net/filter/go/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+    java:
+      trainpref: ~/.ncc/code_search_net/filter/java/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/.ncc/code_search_net/filter/java/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/.ncc/code_search_net/filter/java/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+    javascript:
+      trainpref: ~/.ncc/code_search_net/filter/javascript/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/.ncc/code_search_net/filter/javascript/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/.ncc/code_search_net/filter/javascript/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+    python:
+      trainpref: ~/.ncc/code_search_net/filter/python/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/.ncc/code_search_net/filter/python/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/.ncc/code_search_net/filter/python/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+    php:
+      trainpref: ~/.ncc/code_search_net/filter/php/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/.ncc/code_search_net/filter/php/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/.ncc/code_search_net/filter/php/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+    csharp:
+      trainpref: ~/.ncc/codenn/filter/csharp/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/.ncc/codenn/filter/csharp/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/.ncc/codenn/filter/csharp/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+
+  dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+  destdir: ~/.ncc/kd/summarization/ #", metavar="DIR", default="data-bin", help="destination dir"
+  # word frequency
+  thresholdtgt: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
+  thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
+  # word number
+  #  nwordstgt: -1 #", metavar="N", default=-1, type=int, help="number of target words to retain"
+  #  nwordssrc: -1 #", metavar="N", default=-1, type=int, help="number of source words to retain"
+  nwordstgt: 50000 #", metavar="N", default=-1, type=int, help="number of target words to retain"
+  nwordssrc: 50000 #", metavar="N", default=-1, type=int, help="number of source words to retain"
+  alignfile: ~ #", metavar="ALIGN", default=None, help="an alignment file (optional)"
+
+  joined_dictionary: 0 # ", action="store_true", help="Generate joined dictionary"
+  only_source: 0 # ", action="store_true", help="Only process the source language"
+  padding_factor: 8 #", metavar="N", default=8, type=int, help="Pad dictionary size to be multiple of N"
+  workers: 24 # ", metavar="N", default=1, type=int, help="number of parallel workers"

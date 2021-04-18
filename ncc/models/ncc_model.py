@@ -44,10 +44,10 @@ class BaseNccModel(nn.Module):
         return sample["target"]
 
     def get_normalized_probs(
-            self,
-            net_output: Tuple[Tensor, Dict[str, List[Optional[Tensor]]]],
-            log_probs: bool,
-            sample: Optional[Dict[str, Tensor]] = None,
+        self,
+        net_output: Tuple[Tensor, Dict[str, List[Optional[Tensor]]]],
+        log_probs: bool,
+        sample: Optional[Dict[str, Tensor]] = None,
     ):
         """Get normalized probabilities (or log probs) from a net's output."""
         return self.get_normalized_probs_scriptable(net_output, log_probs, sample)
@@ -57,10 +57,10 @@ class BaseNccModel(nn.Module):
     # Current workaround is to add a helper function with different name and
     # call the helper function from scriptable Subclass.
     def get_normalized_probs_scriptable(
-            self,
-            net_output: Tuple[Tensor, Dict[str, List[Optional[Tensor]]]],
-            log_probs: bool,
-            sample: Optional[Dict[str, Tensor]] = None,
+        self,
+        net_output: Tuple[Tensor, Dict[str, List[Optional[Tensor]]]],
+        log_probs: bool,
+        sample: Optional[Dict[str, Tensor]] = None,
     ):
         """Scriptable helper function for get_normalized_probs in ~BaseNccModel"""
         if hasattr(self, "decoder"):
@@ -147,9 +147,9 @@ class BaseNccModel(nn.Module):
 
         def apply_make_generation_fast_(module):
             if (
-                    module != self
-                    and hasattr(module, "make_generation_fast_")
-                    and module not in seen
+                module != self
+                and hasattr(module, "make_generation_fast_")
+                and module not in seen
             ):
                 seen.add(module)
                 module.make_generation_fast_(**kwargs)
@@ -170,9 +170,9 @@ class BaseNccModel(nn.Module):
 
         def apply_prepare_for_onnx_export_(module):
             if (
-                    module != self
-                    and hasattr(module, "prepare_for_onnx_export_")
-                    and module not in seen
+                module != self
+                and hasattr(module, "prepare_for_onnx_export_")
+                and module not in seen
             ):
                 seen.add(module)
                 module.prepare_for_onnx_export_(**kwargs)
@@ -181,44 +181,13 @@ class BaseNccModel(nn.Module):
 
     @classmethod
     def from_pretrained(
-            cls,
-            model_name_or_path,
-            checkpoint_file="model.pt",
-            data_name_or_path=".",
-            **kwargs,
+        cls,
+        model_name_or_path,
+        checkpoint_file="model.pt",
+        data_name_or_path=".",
+        **kwargs,
     ):
-        """
-        Load a :class:`~fairseq.models.NccModel` from a pre-trained model
-        file. Downloads and caches the pre-trained model file if needed.
-
-        The base implementation returns a
-        :class:`~fairseq.hub_utils.GeneratorHubInterface`, which can be used to
-        generate translations or sample from language models. The underlying
-        :class:`~fairseq.models.NccModel` can be accessed via the
-        *generator.models* attribute.
-
-        Other models may override this to implement custom hub interfaces.
-
-        Args:
-            model_name_or_path (str): either the name of a pre-trained model to
-                load or a path/URL to a pre-trained model state dict
-            checkpoint_file (str, optional): colon-separated list of checkpoint
-                files in the model archive to ensemble (default: 'model.pt')
-            data_name_or_path (str, optional): point args.data to the archive
-                at the given path/URL. Can start with '.' or './' to reuse the
-                model archive path.
-        """
-        from ncc.utils import hub_utils
-
-        x = hub_utils.from_pretrained(
-            model_name_or_path,
-            checkpoint_file,
-            data_name_or_path,
-            archive_map=cls.hub_models(),
-            **kwargs,
-        )
-        logger.info(x["args"])
-        return hub_utils.GeneratorHubInterface(x["args"], x["task"], x["models"])
+        raise NotImplementedError
 
     @classmethod
     def hub_models(cls):
@@ -331,11 +300,11 @@ class NccMultiModel(BaseNccModel):
 
     @staticmethod
     def build_shared_embeddings(
-            dicts: Dict[str, Dictionary],
-            langs: List[str],
-            embed_dim: int,
-            build_embedding: callable,
-            pretrained_embed_path: Optional[str] = None,
+        dicts: Dict[str, Dictionary],
+        langs: List[str],
+        embed_dim: int,
+        build_embedding: callable,
+        pretrained_embed_path: Optional[str] = None,
     ):
         """
         Helper function to build shared embeddings for a set of languages after
@@ -513,20 +482,16 @@ class NccRetrievalModel(BaseNccModel):
     """Base class for a simple encoder-encoder retrieval models.
 
     Args:
-        src_encoder (NccEncoder): the encoder
-        tgt_encoder (NccEncoder): the encoder
+        src_encoders (NccEncoder): the encoder
+        tgt_encoders (NccEncoder): the encoder
     """
 
-    def __init__(self, src_encoder, tgt_encoder):
+    def __init__(self, src_encoders, tgt_encoders):
         super().__init__()
-        self.src_encoder = src_encoder
-        self.tgt_encoder = tgt_encoder
-        assert isinstance(self.src_encoder, NccEncoder) and isinstance(self.tgt_encoder, NccEncoder)
+        self.src_encoders = src_encoders
+        self.tgt_encoders = tgt_encoders
 
-    def forward(self,
-                src_tokens, src_tokens_len, src_tokens_mask,
-                tgt_tokens, tgt_tokens_len, tgt_tokens_mask,
-                ):
+    def forward(self, *args, **kwargs):
         """
         Run the forward pass for a encoder-only model.
 
@@ -539,8 +504,7 @@ class NccRetrievalModel(BaseNccModel):
         Returns:
             the encoder's output, typically of shape `(batch, src_len, features)`
         """
-        return self.src_encoder(src_tokens, src_tokens_len, src_tokens_mask), \
-               self.tgt_encoder(tgt_tokens, tgt_tokens_len, tgt_tokens_mask),
+        raise NotImplementedError
 
 
 class NccMoCoModel(BaseNccModel):

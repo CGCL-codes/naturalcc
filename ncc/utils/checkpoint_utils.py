@@ -4,19 +4,19 @@
 # LICENSE file in the root directory of this source tree.
 
 import collections
-import logging
 import os
 import re
 import traceback
 from collections import OrderedDict
 from typing import Union
-import torch
-from .file_io import PathManager
-from torch.serialization import default_restore_location
-from ncc.modules.code2vec.ncc_encoder import NccEncoder
-from ncc.modules.seq2seq.ncc_decoder import NccDecoder
 
-logger = logging.getLogger(__name__)
+import torch
+from torch.serialization import default_restore_location
+
+from ncc import LOGGER
+from ncc.utils import utils
+from ncc.utils.path_manager import PathManager
+from ncc.utils.file_ops import file_io
 
 
 def save_checkpoint(args, trainer, epoch_itr, val_loss):
@@ -73,11 +73,11 @@ def save_checkpoint(args, trainer, epoch_itr, val_loss):
     if len(checkpoints) > 0:
         trainer.save_checkpoint(checkpoints[0], extra_state)
         for cp in checkpoints[1:]:
-            PathManager.copy(checkpoints[0], cp, overwrite=True)
+            PathManager.copy(checkpoints[0], cp)
 
         write_timer.stop()
-        logger.info(
-            "saved checkpoint {} (epoch {} @ {} updates, score {}) (writing took {} seconds)".format(
+        LOGGER.info(
+            "saved checkpoint {} (epoch {} @ {} updates, score {}) (writing took {:.6f} seconds)".format(
                 checkpoints[0], epoch, updates, val_loss, write_timer.sum
             )
         )
@@ -155,13 +155,61 @@ def load_checkpoint(args, trainer, **passthrough_args):
         )
 
     trainer.lr_step(epoch_itr.epoch)
-
     return extra_state, epoch_itr
+
+
+def load_meta_checkpoint(args, trainer, **passthrough_args):
+    """
+    Load a checkpoint and restore the training iterator.
+
+    *passthrough_args* will be passed through to
+    ``trainer.get_train_iterator``.
+    """
+    # only one worker should attempt to create the required dir
+    if args['distributed_training']['distributed_rank'] == 0:
+        os.makedirs(args['checkpoint']['save_dir'], exist_ok=True)
+
+    if args['checkpoint']['restore_file'] == "checkpoint_last.pt":
+        checkpoint_path = os.path.join(args['checkpoint']['save_dir'], "checkpoint_last.pt")
+    else:
+        checkpoint_path = args['checkpoint']['restore_file']
+
+    extra_state = trainer.load_checkpoint(
+        checkpoint_path,
+        args['checkpoint']['reset_optimizer'],
+        args['checkpoint']['reset_lr_scheduler'],
+        eval(args['checkpoint']['optimizer_overrides']),
+        reset_meters=args['checkpoint']['reset_meters'],
+    )
+
+    if (
+        extra_state is not None
+        and "best" in extra_state
+        and not args['checkpoint']['reset_optimizer']
+        and not args['checkpoint']['reset_meters']
+    ):
+        save_checkpoint.best = extra_state["best"]
+
+    if extra_state is not None and not args['checkpoint']['reset_dataloader']:
+        # restore iterator from checkpoint
+        itr_state = extra_state["train_iterator"]
+        task_sampler, epoch_itr = trainer.get_meta_train_iterator(
+            epoch=itr_state["epoch"], load_dataset=True, **passthrough_args
+        )
+        epoch_itr.load_state_dict(itr_state)
+    else:
+        task_sampler, epoch_itr = trainer.get_meta_train_iterator(
+            epoch=1, load_dataset=True, **passthrough_args
+        )
+
+    trainer.lr_step(epoch_itr.epoch)
+    trainer.meta_lr_step(epoch_itr.epoch)
+    return extra_state, task_sampler, epoch_itr
 
 
 def load_checkpoint_to_cpu(path, arg_overrides=None):
     """Loads a checkpoint to CPU (with upgrading for backward compatibility)."""
-    with PathManager.open(path, "rb") as f:
+    with file_io.open(path, "rb") as f:
         state = torch.load(
             f, map_location=lambda s, l: default_restore_location(s, "cpu")
         )
@@ -236,7 +284,7 @@ def torch_persistent_save(*args, **kwargs):
             return torch.save(*args, **kwargs)
         except Exception:
             if i == 2:
-                logger.error(traceback.format_exc())
+                LOGGER.error(traceback.format_exc())
 
 
 def convert_state_dict_type(state_dict, ttype=torch.FloatTensor):
@@ -264,15 +312,14 @@ def save_state(
     optim_history=None,
     extra_state=None,
 ):
-    from ncc.utils import utils
-    from ncc.utils.yaml import recursive_contractuser
+    # from ncc.utils import utils
 
     if optim_history is None:
         optim_history = []
     if extra_state is None:
         extra_state = {}
     state_dict = {
-        "args": recursive_contractuser(args),
+        "args": args,
         "model": model_state_dict if model_state_dict else {},
         "optimizer_history": optim_history
                              + [
@@ -292,7 +339,7 @@ def save_state(
             optimizer.state_dict()
         )
 
-    with PathManager.open(os.path.expanduser(filename), "wb") as f:
+    with file_io.open(filename, "wb") as f:
         torch_persistent_save(state_dict, f)
 
 
@@ -404,7 +451,7 @@ def prune_state_dict(state_dict, args):
         return state_dict
 
     # apply pruning
-    logger.info(
+    LOGGER.info(
         "Pruning model to specified layer configuration - this works best if the model was trained with LayerDrop"
     )
 
@@ -462,37 +509,6 @@ def prune_state_dict(state_dict, args):
     return new_state_dict
 
 
-def load_pretrained_component_from_model(
-    component: Union[NccEncoder, NccDecoder], checkpoint: str
-):
-    """
-    Load a pretrained NccEncoder or NccDecoder from checkpoint into the
-    provided `component` object. If state_dict fails to load, there may be a
-    mismatch in the architecture of the corresponding `component` found in the
-    `checkpoint` file.
-    """
-    if not PathManager.exists(checkpoint):
-        raise IOError("Model file not found: {}".format(checkpoint))
-    state = load_checkpoint_to_cpu(checkpoint)
-    if isinstance(component, NccEncoder):
-        component_type = "encoder"
-    elif isinstance(component, NccDecoder):
-        component_type = "decoder"
-    else:
-        raise ValueError(
-            "component to load must be either a NccEncoder or "
-            "NccDecoder. Loading other component types are not supported."
-        )
-    component_state_dict = OrderedDict()
-    for key in state["model"].keys():
-        if key.startswith(component_type):
-            # encoder.input_layers.0.0.weight --> input_layers.0.0.weight
-            component_subkey = key[len(component_type) + 1:]
-            component_state_dict[component_subkey] = state["model"][key]
-    component.load_state_dict(component_state_dict, strict=True)
-    return component
-
-
 def verify_checkpoint_directory(save_dir: str) -> None:
     if not os.path.exists(save_dir):
         os.makedirs(save_dir, exist_ok=True)
@@ -501,7 +517,7 @@ def verify_checkpoint_directory(save_dir: str) -> None:
         with open(temp_file_path, "w"):
             pass
     except OSError as e:
-        logger.warning("Unable to access checkpoint save directory: {}".format(save_dir))
+        LOGGER.warning("Unable to access checkpoint save directory: {}".format(save_dir))
         raise e
     else:
         os.remove(temp_file_path)

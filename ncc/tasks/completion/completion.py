@@ -1,20 +1,19 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
 import os
-from ncc import LOGGER
-import torch
-import numpy as np
-from ncc.logging import metrics
-from ncc.tasks.ncc_task import NccTask
-from ncc.tasks import register_task
-from ncc.utils import utils
-from ncc.data.completion.seqrnn_dataset import SeqRNNDataset
-from ncc.data.completion.completion_dictionary import CompletionDictionary as Dictionary
-from ncc.data import indexed_dataset
 import re
+
+import numpy as np
+import torch
+
+from ncc import LOGGER
+from ncc.data import constants
+from ncc.data import indexed_dataset
+from ncc.data.completion.completion_dataset import CompletionDataset
+from ncc.data.completion.completion_dictionary import CompletionDictionary as Dictionary
+from ncc.data.wrappers.truncate_dataset import TruncateDataset
+from ncc.tasks import register_task
+from ncc.tasks.ncc_task import NccTask
+from ncc.utils import utils
+from ncc.utils.logging import metrics
 
 
 def _load_dataset(path, impl, dict=None):
@@ -28,21 +27,54 @@ def _load_dataset(path, impl, dict=None):
     return src_dataset
 
 
-def load_token_dataset(data_path, split, tgt, tgt_dict, ext, dataset_impl, max_target_positions):
+def load_token_dataset(
+    data_path, split, tgt, tgt_dict, dataset_impl,
+    attrs=None, attr_dict=None,
+    attrs_mapping=None, reversed_attrs_mapping=None,
+    truncate_target=False, max_target_positions=None,
+    shuffle=True,
+):
+    # load tokens
     tgt_path = os.path.join(data_path, '{}.{}'.format(split, tgt))
     tgt_dataset = _load_dataset(tgt_path, dataset_impl)
+    if truncate_target:
+        tgt_dataset = TruncateDataset(tgt_dataset, max_target_positions)
+        LOGGER.info('Truncate dataset into max length: {}'.format(max_target_positions))
     LOGGER.info('loaded {} examples from: {}'.format(len(tgt_dataset), tgt_path))
-
-    if ext is not None:
-        ext_path = os.path.join(data_path, '{}.{}'.format(split, ext))
-        ext_dataset = _load_dataset(ext_path, dataset_impl)
-        LOGGER.info('loaded {} examples from: {}'.format(len(ext_dataset), ext_path))
+    # load tokens.ext
+    tgt_ext_path = os.path.join(data_path, '{}.{}.ext'.format(split, tgt))
+    if indexed_dataset.SeqIndexedDataset.exists(tgt_ext_path):
+        tgt_ext_dataset = indexed_dataset.SeqIndexedDataset(tgt_ext_path)
+        if truncate_target:
+            tgt_ext_dataset.clip(max_position=max_target_positions)
+        assert len(tgt_dataset) == len(tgt_ext_dataset), (len(tgt_dataset), len(tgt_ext_dataset))
     else:
-        ext_dataset = None
+        tgt_ext_dataset = None
+    # load attrs
+    if attrs is None:
+        attr_dataset = None
+    else:
+        attr_path = os.path.join(data_path, '{}.code_types'.format(split))
+        attr_dataset = _load_dataset(attr_path, dataset_impl)
+        if truncate_target:
+            tgt_dataset = TruncateDataset(tgt_dataset, max_target_positions)
+            LOGGER.info('Truncate dataset\'s attributes into max length: {}'.format(max_target_positions))
+        LOGGER.info('loaded {} examples from: {}'.format(len(attr_dataset), attr_path))
+        # load attr.ext
+        attr_ext_path = os.path.join(data_path, '{}.code_types.ext'.format(split))
+        if indexed_dataset.SeqIndexedDataset.exists(attr_ext_path):
+            attr_ext_dataset = indexed_dataset.SeqIndexedDataset(attr_ext_path)
+            if truncate_target:
+                attr_ext_dataset.clip(max_position=max_target_positions)
+            assert np.all(tgt_ext_dataset == attr_ext_dataset)
+            del attr_ext_dataset
 
-    return SeqRNNDataset(
-        tgt_dataset, tgt_dataset.sizes, tgt_dict, extends=ext_dataset,
+    return CompletionDataset(
+        tgt_dataset, tgt_dataset.sizes, tgt_dict, extends=tgt_ext_dataset,
+        attrs=attrs, attr_indices=attr_dataset, attr_dict=attr_dict,
+        attrs_mapping=attrs_mapping, reversed_attrs_mapping=reversed_attrs_mapping,
         max_target_positions=max_target_positions,
+        shuffle=shuffle,
     )
 
 
@@ -50,9 +82,10 @@ def load_token_dataset(data_path, split, tgt, tgt_dict, ext, dataset_impl, max_t
 class CompletionTask(NccTask):
     """Task for training masked language models (e.g., BERT, RoBERTa)."""
 
-    def __init__(self, args, dictionary):
+    def __init__(self, args, dictionary, token_dictionary=None):
         super().__init__(args)
         self.dictionary = dictionary
+        self.token_dictionary = token_dictionary
 
     @classmethod
     def setup_task(cls, args, **kwargs):
@@ -65,14 +98,23 @@ class CompletionTask(NccTask):
         paths = utils.split_paths(args['task']['data'])
         assert len(paths) > 0
         # load dictionaries
-        dictionary = cls.load_dictionary(os.path.join(paths[0], '{}.dict.json'.format(args['task']['target_lang'])))
+        dict_file = os.path.join(paths[0], '{}.dict.jsonl'.format(args['task']['target_lang']))
+        dictionary = cls.load_dictionary(dict_file)
         LOGGER.info('[{}] dictionary: {} types'.format(args['task']['target_lang'], len(dictionary)))
-        return cls(args, dictionary)
+        token_file = os.path.join(paths[0], 'code_types.dict.jsonl')
+        if os.path.exists(token_file):
+            token_dictionary = cls.load_dictionary(token_file)
+            LOGGER.info('[code_tokens] dictionary: {} types'.format(len(token_dictionary)))
+        else:
+            token_dictionary = None
+        return cls(args, dictionary, token_dictionary)
 
     @classmethod
     def build_dictionary(
-        cls, filenames, tokenize_func=None,
-        workers=1, threshold=-1, nwords=-1, padding_factor=8
+        cls, filenames, tokenize_func,
+        workers=1, threshold=-1, nwords=-1, padding_factor=8,
+        **kwargs,
+
     ):
         """Build the dictionary
 
@@ -86,10 +128,18 @@ class CompletionTask(NccTask):
                 multiple of 8, which is important on some hardware (e.g., Nvidia
                 Tensor Cores).
         """
-        d = Dictionary()
+        d = Dictionary(
+            pad=kwargs.get('pad', constants.PAD),
+            bos=kwargs.get('bos', constants.BOS),
+            eos=kwargs.get('eos', constants.EOS),
+            unk=kwargs.get('unk', constants.UNK),
+            extra_special_symbols=kwargs.get('extra_special_symbols', None),
+        )
 
         for filename in filenames:
-            Dictionary.add_file_to_dictionary(filename, d, tokenize_func, num_workers=workers)
+            Dictionary.add_token_to_dictionary(
+                filename, d, tokenize_func, workers,
+            )
 
         d.finalize(threshold=threshold, nwords=nwords, padding_factor=padding_factor)
         return d
@@ -104,55 +154,78 @@ class CompletionTask(NccTask):
         assert len(paths) > 0
         data_path = paths[(epoch - 1) % len(paths)]
 
-        if self.args['model']['arch'] == 'seqrnn':
-            self.datasets[split] = load_token_dataset(
-                data_path, split, self.args['task']['target_lang'], self.target_dictionary,
-                dataset_impl=self.args['dataset']['dataset_impl'], ext=self.args['task']['ext'],
-                max_target_positions=self.max_positions())
+        if self.args['task']['target_lang'] == 'code_tokens' and self.args['task'].get('code_types', False):
+            attrs_mapping = {
+                'attr': {self.token_dictionary.index('attr')},
+                'num': {self.token_dictionary.index('Num')},
+                'name': {self.token_dictionary.index('NameStore'),
+                         self.token_dictionary.index('NameLoad')},
+                'param': {self.token_dictionary.index('arg'),
+                          self.token_dictionary.index('kwarg'),
+                          self.token_dictionary.index('vararg')},
+            }
+        elif self.args['task']['target_lang'] == 'ast' and self.args['task'].get('code_types', False):
+            attrs_mapping = {
+                'attr': {self.token_dictionary.index('attr')},
+                'num': {self.token_dictionary.index('Num')},
+                'name': {self.token_dictionary.index('NameStore'),
+                         self.token_dictionary.index('NameLoad')},
+                'param': {self.token_dictionary.index('NameParam')},
+            }
+        else:
+            attrs_mapping = None
+
+        if attrs_mapping:
+            reversed_attrs_mapping = {}
+            for k, vs in attrs_mapping.items():
+                if len(vs) > 1:
+                    for v in vs:
+                        reversed_attrs_mapping[v] = k
+                else:
+                    reversed_attrs_mapping[list(vs)[0]] = k
+        else:
+            reversed_attrs_mapping = None
+
+        self.datasets[split] = load_token_dataset(
+            data_path, split, self.args['task']['target_lang'], self.target_dictionary,
+            attrs_mapping=attrs_mapping, reversed_attrs_mapping=reversed_attrs_mapping,
+            attrs=self.args['task'].get('code_types', None),
+            attr_dict=self.token_dictionary,
+            dataset_impl=self.args['dataset']['dataset_impl'],
+            truncate_target=self.args['dataset'].get('truncate_target', False),
+            max_target_positions=self.max_positions(),
+            shuffle=kwargs.get('shuffle', True),
+        )
 
     def build_dataset_for_inference(self, src_tokens, src_lengths):
-        return SeqRNNDataset(src_tokens, src_lengths, self.target_dictionary)  # TODO: bug
+        return CompletionDataset(src_tokens, src_lengths, self.target_dictionary)  # TODO: bug
 
     def build_model(self, args):
         model = super().build_model(args)
-
-        if args['task']['eval_accuracy'] or args['task']['eval_last_accuracy'] or args['task']['eval_mrr']:
-            self.sequence_completor = self.build_completor([model], args)
-
+        self.sequence_completor = self.build_completor([model], args)
         return model
 
     def valid_step(self, sample, model, criterion):
-        # print('valid_step...')
         loss, sample_size, logging_output = super().valid_step(sample, model, criterion)
         with torch.no_grad():
             net_output = self.sequence_completor.complete([model], sample, prefix_tokens=None)
 
-        # ignore pad
-        idx = sample['net_input']['src_tokens'].view(-1) != self.target_dictionary.pad()
-        # ignore UNK in tgt because predict UNK is meaningless
-        # while feed UNK into modle and predict non-UNK tokens still make sense
-        idx[sample['target'].view(-1) == self.target_dictionary.unk()] = 0
-        # ignore overlapping tokens
-        max_len = sample['target'].size(-1)
-        for i, ext_i in enumerate(sample['extends']):
-            idx[i * max_len:i * max_len + ext_i] = 0
+            # ignore pad
+            idx = sample['net_input']['src_tokens'].view(-1) != self.target_dictionary.pad()
+            # ignore overlapping tokens
+            max_len = sample['target'].size(-1)
+            for i, ext_i in enumerate(sample['extends']):
+                idx[i * max_len:i * max_len + ext_i] = 0
 
-        lprobs = model.get_normalized_probs(net_output, log_probs=True)
-        last_lprobs = torch.stack([lprobs[idx, last_idx, :] for idx, last_idx in enumerate(sample['src_last_idx'])])
-        lprobs = lprobs.view(-1, lprobs.size(-1))[idx]
-        target = model.get_targets(sample, net_output).view(-1)[idx]
+            lprobs = model.get_normalized_probs(net_output, log_probs=True)
+            lprobs = lprobs.view(-1, lprobs.size(-1))[idx]
+            target = model.get_targets(sample, net_output).view(-1)[idx]
 
-        rank = torch.argmax(lprobs, dim=-1)
-        last_rank = torch.argmax(last_lprobs, dim=-1)
-        accuracy = 1. * torch.sum(rank == target) / sample['ntokens']
-        last_gt = torch.stack([sample['target'][idx, last_idx] for idx, last_idx in enumerate(sample['tgt_last_idx'])])
-        last_accuracy = 1. * torch.sum(last_rank == last_gt) / len(last_rank)
-        logging_output['accuracy'] = accuracy
-        logging_output['last_accuracy'] = last_accuracy
-
-        mrr = np.mean([1. / (r.item() + 1) for r in rank.view(-1)])
-        logging_output['mrr'] = mrr
-
+            rank = torch.argmax(lprobs, dim=-1)
+            accuracy = rank == target
+            logging_output['accuracy'] = accuracy.sum().float()
+            # 1. / (lprobs >= torch.stack([lprobs[idx, gt] for idx, gt in enumerate(target.tolist())]).unsqueeze(dim=-1)).sum(-1)).sum()
+            logging_output['mrr'] = (1. / (lprobs >= lprobs[:, target].diag().unsqueeze(dim=-1)).sum(-1)).sum()
         return loss, sample_size, logging_output
 
     def reduce_metrics(self, logging_outputs, criterion):
@@ -161,16 +234,13 @@ class CompletionTask(NccTask):
         def sum_logs(key):
             return sum(log.get(key, 0) for log in logging_outputs)
 
-        if self.args['task']['eval_accuracy']:
-            if sum_logs('accuracy') > 0:  # ==0: no accuracy items in the logging outputs, it means the training stage
-                metrics.log_scalar('accuracy', sum_logs('accuracy'))
-        if self.args['task']['eval_last_accuracy']:
-            if sum_logs(
-                'last_accuracy') > 0:  # ==0: no accuracy items in the logging outputs, it means the training stage
-                metrics.log_scalar('last_accuracy', sum_logs('last_accuracy'))
+        ntokens = sum_logs('ntokens')
+        accuracy_sum = sum_logs('accuracy')
+        metrics.log_scalar('accuracy', accuracy_sum / ntokens, ntokens, round=6)
+
         if self.args['task']['eval_mrr']:
-            if sum_logs('mrr') > 0:
-                metrics.log_scalar('mrr', sum_logs('mrr'))
+            mrr_sum = sum_logs('mrr')
+            metrics.log_scalar('mrr', mrr_sum / ntokens, ntokens, round=6)
 
     def max_positions(self):
         """Return the max sentence length allowed by the task."""
@@ -191,10 +261,7 @@ class CompletionTask(NccTask):
         Args:
             filename (str): the filename
         """
-        if filename.endswith('.txt'):
-            return Dictionary.load(filename)
-        else:
-            return Dictionary.load_json(filename)
+        return Dictionary.load(filename)
 
     def encode_input(self, input):
         input = input.replace('lambda', ' ').replace('if', ' ').replace('is', ' ').replace('not', ' '). \
@@ -212,7 +279,7 @@ class CompletionTask(NccTask):
 
     def decode_output(self, output, k=5):
         output = torch.softmax(output[0][0, -1, :], dim=0)
-        topk_prob, topk_idx = output.topk(k=10)
+        topk_prob, topk_idx = output.topk(k=k)
 
         output = []
         for prob, idx in zip(topk_prob, topk_idx):
@@ -220,4 +287,4 @@ class CompletionTask(NccTask):
             # if token == 'None':
             #     continue
             output.append((token, prob))
-        return output[:k]
+        return output

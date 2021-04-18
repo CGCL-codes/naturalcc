@@ -190,20 +190,20 @@ class MultiheadAttention(nn.Module):
 
         q = (
             q.contiguous()
-            .view(tgt_len, bsz * self.num_heads, self.head_dim)
-            .transpose(0, 1)
+                .view(tgt_len, bsz * self.num_heads, self.head_dim)
+                .transpose(0, 1)
         )
         if k is not None:
             k = (
                 k.contiguous()
-                .view(-1, bsz * self.num_heads, self.head_dim)
-                .transpose(0, 1)
+                    .view(-1, bsz * self.num_heads, self.head_dim)
+                    .transpose(0, 1)
             )
         if v is not None:
             v = (
                 v.contiguous()
-                .view(-1, bsz * self.num_heads, self.head_dim)
-                .transpose(0, 1)
+                    .view(-1, bsz * self.num_heads, self.head_dim)
+                    .transpose(0, 1)
             )
 
         if saved_state is not None:
@@ -298,9 +298,7 @@ class MultiheadAttention(nn.Module):
         if before_softmax:
             return attn_weights, v
 
-        attn_weights_float = utils.softmax(
-            attn_weights, dim=-1, onnx_trace=self.onnx_trace
-        )
+        attn_weights_float = F.softmax(attn_weights, dim=-1)
         attn_weights = attn_weights_float.type_as(attn_weights)
         attn_probs = F.dropout(
             attn_weights_float.type_as(attn_weights),
@@ -408,8 +406,8 @@ class MultiheadAttention(nn.Module):
                 # in_proj_weight used to be q + k + v with same dimensions
                 dim = int(state_dict[k].shape[0] / 3)
                 items_to_add[prefix + "q_proj.weight"] = state_dict[k][:dim]
-                items_to_add[prefix + "k_proj.weight"] = state_dict[k][dim : 2 * dim]
-                items_to_add[prefix + "v_proj.weight"] = state_dict[k][2 * dim :]
+                items_to_add[prefix + "k_proj.weight"] = state_dict[k][dim: 2 * dim]
+                items_to_add[prefix + "v_proj.weight"] = state_dict[k][2 * dim:]
 
                 keys_to_remove.append(k)
 
@@ -418,9 +416,9 @@ class MultiheadAttention(nn.Module):
                     dim = int(state_dict[k].shape[0] / 3)
                     items_to_add[prefix + "q_proj.bias"] = state_dict[k_bias][:dim]
                     items_to_add[prefix + "k_proj.bias"] = state_dict[k_bias][
-                        dim : 2 * dim
-                    ]
-                    items_to_add[prefix + "v_proj.bias"] = state_dict[k_bias][2 * dim :]
+                                                           dim: 2 * dim
+                                                           ]
+                    items_to_add[prefix + "v_proj.bias"] = state_dict[k_bias][2 * dim:]
 
                     keys_to_remove.append(prefix + "in_proj_bias")
 

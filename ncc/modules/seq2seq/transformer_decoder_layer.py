@@ -1,11 +1,13 @@
 from typing import Dict, List, Optional
+
 import torch
 import torch.nn as nn
-from torch import Tensor
-from ncc.modules.layer_norm import LayerNorm
-from ncc.modules.attention.multihead_attention import MultiheadAttention
 import torch.nn.functional as F
-from ncc.utils import utils
+from torch import Tensor
+
+from ncc.modules.attention.multihead_attention import MultiheadAttention
+from ncc.modules.common.activations import get_activation
+from ncc.modules.common.layers import Linear
 
 
 class TransformerDecoderLayer(nn.Module):
@@ -41,20 +43,14 @@ class TransformerDecoderLayer(nn.Module):
             # maximum_relative_position=args['model']['decoder_max_relative_len'],
         )
         self.dropout = args['model']['dropout']
-        self.activation_fn = utils.get_activation_fn(
-            activation=args['model']['activation_fn']
-        )
+        self.activation_fn = get_activation(args['model']['activation_fn'])
         self.activation_dropout = args['model']['activation_dropout']
         if self.activation_dropout == 0:
             # for backwards compatibility with models that use args.relu_dropout
             self.activation_dropout = args['model']['relu_dropout']
         self.normalize_before = args['model']['decoder_normalize_before']
 
-        # use layerNorm rather than FusedLayerNorm for exporting.
-        # char_inputs can be used to determint this.
-        # TODO  remove this once we update apex with the fix
-        export = False  # getattr(args, "char_inputs", False) #TODO: what does char_inputs mean?
-        self.self_attn_layer_norm = LayerNorm(self.embed_dim, export=export)
+        self.self_attn_layer_norm = nn.LayerNorm(self.embed_dim)
 
         if no_encoder_attn:
             self.encoder_attn = None
@@ -63,17 +59,17 @@ class TransformerDecoderLayer(nn.Module):
             self.encoder_attn = MultiheadAttention(
                 self.embed_dim,
                 args['model']['decoder_attention_heads'],
-                kdim=args['model']['encoder_embed_dim'],  # getattr(args, "encoder_embed_dim", None),
-                vdim=args['model']['encoder_embed_dim'],  # getattr(args, "encoder_embed_dim", None),
+                kdim=args['model']['encoder_embed_dim'],
+                vdim=args['model']['encoder_embed_dim'],
                 dropout=args['model']['attention_dropout'],
                 encoder_decoder_attention=True,
             )
-            self.encoder_attn_layer_norm = LayerNorm(self.embed_dim, export=export)
+            self.encoder_attn_layer_norm = nn.LayerNorm(self.embed_dim)
 
         self.fc1 = Linear(self.embed_dim, args['model']['decoder_ffn_embed_dim'])
         self.fc2 = Linear(args['model']['decoder_ffn_embed_dim'], self.embed_dim)
 
-        self.final_layer_norm = LayerNorm(self.embed_dim, export=export)
+        self.final_layer_norm = nn.LayerNorm(self.embed_dim)
         self.need_attn = True
 
         self.onnx_trace = False
@@ -196,7 +192,6 @@ class TransformerDecoderLayer(nn.Module):
         if self.normalize_before:
             x = self.final_layer_norm(x)
 
-        # x = self.final_layer_norm(x)#NueralSum, TODO: check whether transformer still works when we annotate this line
         x = self.activation_fn(self.fc1(x))
         x = F.dropout(x, p=float(self.activation_dropout), training=self.training)
         x = self.fc2(x)
@@ -232,11 +227,3 @@ class TransformerDecoderLayer(nn.Module):
 
         if self.encoder_attn is not None:
             self.encoder_attn.reorder_incremental_state(incremental_state, new_order)
-
-
-def Linear(in_features, out_features, bias=True):
-    m = nn.Linear(in_features, out_features, bias)
-    nn.init.xavier_uniform_(m.weight)
-    if bias:
-        nn.init.constant_(m.bias, 0.0)
-    return m

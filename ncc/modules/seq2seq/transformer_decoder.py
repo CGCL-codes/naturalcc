@@ -1,16 +1,18 @@
 import math
 from typing import Optional, Dict, List, Any
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from ncc.modules.seq2seq.ncc_incremental_decoder import NccIncrementalDecoder
+
 from ncc.modules.code2vec.ncc_encoder import EncoderOut
+from ncc.modules.common.layers import Linear
+from ncc.modules.roberta.learned_positional_embedding import LearnedPositionalEmbedding
 from ncc.modules.roberta.sinusoidal_positional_embedding import SinusoidalPositionalEmbedding
+from ncc.modules.seq2seq.ncc_incremental_decoder import NccIncrementalDecoder
 from ncc.modules.seq2seq.transformer_decoder_layer import TransformerDecoderLayer
-from ncc.modules.adaptive_softmax import AdaptiveSoftmax
 from ncc.utils import utils
-from ncc.modules.layer_norm import LayerNorm
 
 
 class TransformerDecoder(NccIncrementalDecoder):
@@ -53,37 +55,25 @@ class TransformerDecoder(NccIncrementalDecoder):
             else None
         )
 
-        # self.embed_positions = (
-        #     PositionalEmbedding(
-        #         args['task']['max_target_positions'],
-        #         embed_dim,
-        #         self.padding_idx,
-        #         learned=args['model']['decoder_learned_pos'],
-        #     )
-        #     if not args['model']['no_token_positional_embeddings']
-        #     else None
-        # )
-
+        offset_positions_by_padding = args['model'].get('offset_positions_by_padding', True)
         if args['model']['decoder_positional_embeddings']:
             self.embed_positions = None
         else:
             # Option 1
             if args['model']['decoder_position_encoding_version'] == 'ncc_sinusoidal':
-                from ncc.modules.roberta.sinusoidal_positional_embedding import SinusoidalPositionalEmbedding
-                offset_positions_by_padding = False
                 self.embed_positions = SinusoidalPositionalEmbedding(
                     self.embed_dim,
-                    padding_idx=self.padding_idx,  # (self.padding_idx if offset_positions_by_padding else None),
-                    init_size=args['model'][
-                                  'max_source_positions'] + self.padding_idx + 1 if offset_positions_by_padding else
-                    args['model']['max_source_positions'],  # + 1 why?
+                    padding_idx=self.padding_idx if offset_positions_by_padding else None,
+                    init_size=args['model']['max_target_positions'] + self.padding_idx + 1 \
+                        if offset_positions_by_padding else args['model']['max_target_positions'],
                 )
             # Option 2
             elif args['model']['decoder_position_encoding_version'] == 'ncc_learned':
-                from ncc.modules.roberta.learned_positional_embedding import LearnedPositionalEmbedding
-                if self.padding_idx is not None:
-                    num_embeddings = args['model']['max_source_positions'] + self.padding_idx + 1
-                m = LearnedPositionalEmbedding(num_embeddings, self.embed_dim, self.padding_idx)
+                num_embeddings = args['model']['max_target_positions']
+                if offset_positions_by_padding:
+                    num_embeddings += self.padding_idx + 1
+                m = LearnedPositionalEmbedding(num_embeddings, self.embed_dim,
+                                               padding_idx=self.padding_idx if offset_positions_by_padding else None)
                 nn.init.normal_(m.weight, mean=0, std=self.embed_dim ** -0.5)
                 if self.padding_idx is not None:
                     nn.init.constant_(m.weight[self.padding_idx], 0)
@@ -98,40 +88,22 @@ class TransformerDecoder(NccIncrementalDecoder):
         ])
         self.num_layers = len(self.layers)
 
-        self.adaptive_softmax = None
-
         self.project_out_dim = (
             Linear(embed_dim, self.output_embed_dim, bias=False)
             if embed_dim != self.output_embed_dim and not args['model']['tie_adaptive_weights']
             else None
         )
 
-        if args['model']['adaptive_softmax_cutoff'] is not None:
-            self.adaptive_softmax = AdaptiveSoftmax(
-                len(dictionary),
-                self.output_embed_dim,
-                args['model']['adaptive_softmax_cutoff'],
-                # options.eval_str_list(args.adaptive_softmax_cutoff, type=int),
-                dropout=args['model']['adaptive_softmax_dropout'],
-                adaptive_inputs=embed_tokens if args['model']['tie_adaptive_weights'] else None,
-                factor=args['model']['adaptive_softmax_factor'],
-                tie_proj=args['model']['tie_adaptive_proj'],
-            )
-            # self.adaptive_softmax = AdaptiveSoftmax(num_embeddings, hidden_size, adaptive_softmax_cutoff,
-            #                                         dropout=dropout_out)
-        elif not self.share_input_output_embed:
-            self.embed_out = nn.Parameter(
-                torch.Tensor(len(dictionary), self.output_embed_dim)
-            )
-            nn.init.normal_(self.embed_out, mean=0, std=self.output_embed_dim ** -0.5)
+        self.out_generator = Linear(embed_dim, len(dictionary), bias=args['model']['decoder_out_embed_bias'])
+        if self.share_input_output_embed:
+            self.out_generator.weight = self.embed_tokens.weight
 
-        if args['model']['decoder_normalize_before'] and not args['model'][
-            'no_decoder_final_norm']:  # getattr(args, "no_decoder_final_norm", False)
-            self.layer_norm = LayerNorm(embed_dim)
+        if args['model']['decoder_normalize_before'] and not args['model']['no_decoder_final_norm']:
+            self.layer_norm = nn.LayerNorm(embed_dim)
         else:
             self.layer_norm = None
-        if args['model']['layernorm_embedding']:  # getattr(args, "layernorm_embedding", False):
-            self.layernorm_embedding = LayerNorm(embed_dim)
+        if args['model']['layernorm_embedding']:
+            self.layernorm_embedding = nn.LayerNorm(embed_dim)
         else:
             self.layernorm_embedding = None
 
@@ -296,14 +268,7 @@ class TransformerDecoder(NccIncrementalDecoder):
 
     def output_layer(self, features):
         """Project features to the vocabulary size."""
-        if self.adaptive_softmax is None:
-            # project back to size of vocabulary
-            if self.share_input_output_embed:
-                return F.linear(features, self.embed_tokens.weight)
-            else:
-                return F.linear(features, self.embed_out)
-        else:
-            return features
+        return self.out_generator(features)
 
     def max_positions(self):
         """Maximum output length supported by the decoder."""
@@ -370,11 +335,3 @@ class TransformerDecoder(NccIncrementalDecoder):
             state_dict[version_key] = torch.Tensor([1])
 
         return state_dict
-
-
-def Linear(in_features, out_features, bias=True):
-    m = nn.Linear(in_features, out_features, bias)
-    nn.init.xavier_uniform_(m.weight)
-    if bias:
-        nn.init.constant_(m.bias, 0.0)
-    return m

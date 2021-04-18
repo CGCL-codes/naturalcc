@@ -1,16 +1,50 @@
 import math
+from collections import OrderedDict
 from typing import Optional, Dict, Tuple
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from ncc.modules.code2vec.transformer_encoder_layer import TransformerEncoderLayer
-from ncc.modules.code2vec.ncc_encoder import NccEncoder
+
 from ncc.modules.code2vec.ncc_encoder import EncoderOut
+from ncc.modules.code2vec.ncc_encoder import NccEncoder
+from ncc.modules.code2vec.transformer_encoder_layer import TransformerEncoderLayer
+from ncc.modules.roberta.learned_positional_embedding import LearnedPositionalEmbedding
+from ncc.modules.roberta.sinusoidal_positional_embedding import SinusoidalPositionalEmbedding
 from ncc.utils import utils
-from collections import OrderedDict
 
 DEFAULT_MAX_SOURCE_POSITIONS = 1e5
+
+from ncc.modules.attention.multihead_attention import MultiheadAttention
+
+
+def init_bert_params(module):
+    """
+    Initialize the weights specific to the BERT Model.
+    This overrides the default initializations depending on the specified arguments.
+        1. If normal_init_linear_weights is set then weights of linear
+           layer will be initialized using the normal distribution and
+           bais will be set to the specified value.
+        2. If normal_init_embed_weights is set then weights of embedding
+           layer will be initialized using the normal distribution.
+        3. If normal_init_proj_weights is set then weights of
+           in_project_weight for MultiHeadAttention initialized using
+           the normal distribution (to be validated).
+    """
+
+    if isinstance(module, nn.Linear):
+        module.weight.data.normal_(mean=0.0, std=0.02)
+        if module.bias is not None:
+            module.bias.data.zero_()
+    if isinstance(module, nn.Embedding):
+        module.weight.data.normal_(mean=0.0, std=0.02)
+        if module.padding_idx is not None:
+            module.weight.data[module.padding_idx].zero_()
+    if isinstance(module, MultiheadAttention):
+        module.q_proj.weight.data.normal_(mean=0.0, std=0.02)
+        module.k_proj.weight.data.normal_(mean=0.0, std=0.02)
+        module.v_proj.weight.data.normal_(mean=0.0, std=0.02)
 
 
 class TransformerEncoder(NccEncoder):
@@ -29,7 +63,7 @@ class TransformerEncoder(NccEncoder):
         args,
         dictionary,
         embed_tokens,
-        num_segments: int = 2,
+        num_segments: int = 1,
         offset_positions_by_padding: bool = False,  # True,
         # apply_bert_init: bool = False,
         # freeze_embeddings: bool = False,
@@ -51,54 +85,44 @@ class TransformerEncoder(NccEncoder):
         self.embed_tokens = embed_tokens
         self.embed_scale = 1.0 if args['model']['no_scale_embedding'] else math.sqrt(self.embed_dim)
 
-        # Option 1
-        if args['model']['position_encoding_version'] == 'ncc_sinusoidal':
-            from ncc.modules.roberta.sinusoidal_positional_embedding import SinusoidalPositionalEmbedding
-            self.embed_positions = SinusoidalPositionalEmbedding(
-                self.embed_dim,
-                padding_idx=self.padding_idx,  # (self.padding_idx if offset_positions_by_padding else None),
-                init_size=args['model'][
-                              'max_source_positions'] + self.padding_idx + 1 if offset_positions_by_padding else
-                args['model']['max_source_positions'],  # + 1 why?
-            )
-        # Option 2
-        elif args['model']['position_encoding_version'] == 'ncc_learned':
-            from ncc.modules.roberta.learned_positional_embedding import LearnedPositionalEmbedding
-            if self.padding_idx is not None:
-                num_embeddings = args['model']['max_source_positions'] + self.padding_idx + 1
-            m = LearnedPositionalEmbedding(num_embeddings, self.embed_dim, self.padding_idx)
-            nn.init.normal_(m.weight, mean=0, std=self.embed_dim ** -0.5)
-            if self.padding_idx is not None:
-                nn.init.constant_(m.weight[self.padding_idx], 0)
-            self.embed_positions = m
-        # Option 3
-        elif args['model']['position_encoding_version'] == 'contracode':
-            from ncc.modules.roberta.sinusoidal_positional_embedding_simple import SinusoidalPositionalEmbedding_Simple
-            self.embed_positions = SinusoidalPositionalEmbedding_Simple(self.embed_dim, args['model']['dropout'],
-                                                                        max_len=args['model']['max_source_positions'])
+        offset_positions_by_padding = args['model'].get('offset_positions_by_padding', True)
+        if args['model']['encoder_positional_embeddings']:
+            self.embed_positions = None
+        else:
+            # Option 1
+            if args['model']['encoder_position_encoding_version'] == 'ncc_sinusoidal':
+                self.embed_positions = SinusoidalPositionalEmbedding(
+                    self.embed_dim,
+                    padding_idx=self.padding_idx if offset_positions_by_padding else None,
+                    init_size=args['model']['max_source_positions'] + self.padding_idx + 1 \
+                        if offset_positions_by_padding else args['model']['max_source_positions'],
+                )
+            # Option 2
+            elif args['model']['encoder_position_encoding_version'] == 'ncc_learned':
+                num_embeddings = args['model']['max_source_positions']
+                if offset_positions_by_padding:
+                    num_embeddings += self.padding_idx + 1
+                m = LearnedPositionalEmbedding(num_embeddings, self.embed_dim,
+                                               padding_idx=self.padding_idx if offset_positions_by_padding else None)
+                nn.init.normal_(m.weight, mean=0, std=self.embed_dim ** -0.5)
+                if self.padding_idx is not None:
+                    nn.init.constant_(m.weight[self.padding_idx], 0)
+                self.embed_positions = m
 
         self.num_segments = num_segments
-        self.segment_embeddings = (
-            nn.Embedding(self.num_segments, self.embed_dim, padding_idx=None)
-            if self.num_segments > 0
-            else None
-        )
-        torch.manual_seed(1)
-        # Option 1
-        # encoder_layer = nn.TransformerEncoderLayer(self.embed_dim, args['model']['encoder_attention_heads'],
-        #                                            args['model']['encoder_ffn_embed_dim'], 0, args['model']['activation_fn']) # args['model']['dropout']
-        # self.layers = nn.ModuleList([encoder_layer for i in range(args['model']['encoder_layers'])])
-        # Option 2
-        encoder_layer = TransformerEncoderLayer(args)
-        self.layers = nn.ModuleList([encoder_layer for i in range(args['model']['encoder_layers'])])
-        # Option 3: This will create different TransformerEncoderLayer for different i
-        # self.layers = nn.ModuleList([TransformerEncoderLayer(args) for i in range(args['model']['encoder_layers'])])
+        if num_segments > 1:
+            self.segment_embeddings = (
+                nn.Embedding(self.num_segments, self.embed_dim, padding_idx=None)
+                if self.num_segments > 0
+                else None
+            )
+        self.layers = nn.ModuleList([TransformerEncoderLayer(args) for _ in range(args['model']['encoder_layers'])])
 
         self.num_layers = len(self.layers)
-        # if args['model']['encoder_normalize_before']:
-        self.layer_norm = nn.LayerNorm(self.embed_dim)  # LayerNorm(self.embed_dim) TODO
-        # else:
-        #     self.layer_norm = None
+        if args['model']['encoder_normalize_before']:
+            self.layer_norm = nn.LayerNorm(self.embed_dim)  # LayerNorm(self.embed_dim) TODO
+        else:
+            self.layer_norm = None
         if args['model']['layernorm_embedding']:
             self.layernorm_embedding = nn.LayerNorm(self.embed_dim)  # LayerNorm(self.embed_dim, export=export) TODO
         else:
@@ -113,22 +137,22 @@ class TransformerEncoder(NccEncoder):
             x = embed = x * self.embed_scale
 
         if self.embed_positions is not None:
-            if self.args['model']['position_encoding_version'] == 'contracode':
+            if self.args['model']['encoder_position_encoding_version'] == 'contracode':
                 x += self.embed_positions(src_tokens)
-            elif self.args['model']['position_encoding_version'] == 'ncc_sinusoidal':
+            elif self.args['model']['encoder_position_encoding_version'] == 'ncc_sinusoidal':
                 x += self.embed_positions(src_tokens, positions=positions)
+            elif self.args['model']['encoder_position_encoding_version'] == 'ncc_learned':
+                x += self.embed_positions(src_tokens)
 
-        if self.segment_embeddings is not None and segment_labels is not None:
+        if self.num_segments > 1 and segment_labels is not None:
             x += self.segment_embeddings(segment_labels)
 
         if self.layernorm_embedding is not None:
             x = self.layernorm_embedding(x)
 
-        # x = F.dropout(x, p=self.dropout, training=self.training) #TODO, position里面如果已经dropout了，这里就没必要了
-        # # account for padding while computing the representation
-        # if padding_mask is not None:
-        #     x *= 1 - padding_mask.unsqueeze(-1).type_as(x)
-
+        # TODO, position里面如果已经dropout了，这里就没必要了
+        # TODO, not all positional encodings have dropout
+        x = F.dropout(x, p=self.dropout, training=self.training)
         return x, embed
 
     def forward(
@@ -163,25 +187,17 @@ class TransformerEncoder(NccEncoder):
             if not last_state_only:
                 encoder_states.append(x)
 
-        # if self.layer_norm is not None:
-        x = self.layer_norm(x)
+        if self.layer_norm is not None:
+            x = self.layer_norm(x)
 
         return EncoderOut(
             encoder_out=x,  # T x B x C
             encoder_padding_mask=encoder_padding_mask,  # B x T
             encoder_embedding=encoder_embedding,  # B x T x C
             encoder_states=encoder_states,  # List[T x B x C]
+            src_tokens=src_tokens,
+            src_lengths=src_lengths,
         )
-
-        # sentence_rep = x[0, :, :]  # <CLS> presentation
-        #
-        # if last_state_only:
-        #     encoder_states = [x]
-        #
-        # if self.traceable:
-        #     return torch.stack(encoder_states), sentence_rep
-        # else:
-        #     return encoder_states, sentence_rep
 
     @torch.jit.export
     def reorder_encoder_out(self, encoder_out: EncoderOut, new_order):

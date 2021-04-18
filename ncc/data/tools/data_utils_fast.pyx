@@ -66,3 +66,35 @@ cpdef list batch_by_size_fast(
     if len(batch) > 0:
         batches.append(batch)
     return batches
+
+cdef _is_batch_full_simple(list batch, long max_sentences):
+    if len(batch) == 0:
+        return 0
+    if max_sentences > 0 and len(batch) == max_sentences:
+        return 1
+    return 0
+
+@cython.cdivision(True)
+cpdef list batch_fast(
+    np.ndarray[DTYPE_t, ndim=1] indices,
+    long max_sentences,
+    int bsz_mult,
+):
+    cdef list batch = []
+    cdef list batches = []
+    cdef long i
+    cdef long idx
+    cdef DTYPE_t[:] indices_view = indices
+    for i in range(len(indices_view)):
+        idx = indices_view[i]
+        if _is_batch_full_simple(batch, max_sentences):
+            mod_len = max(
+                bsz_mult * (len(batch) // bsz_mult),
+                len(batch) % bsz_mult,
+            )
+            batches.append(batch[:mod_len])
+            batch = batch[mod_len:]
+        batch.append(idx)
+    if len(batch) > 0:
+        batches.append(batch)
+    return batches

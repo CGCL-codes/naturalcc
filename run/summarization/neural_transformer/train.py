@@ -1,27 +1,20 @@
-#!/usr/bin/env python3 -u
-# Copyright (c) Facebook, Inc. and its affiliates.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-"""
-Train a new model on one or across multiple GPUs.
-"""
-
-import os
 import math
+import os
 import random
-import numpy as np
+
 import torch
+
 from ncc import LOGGER
 from ncc import tasks
-from ncc.logging import meters
-from ncc.trainer.ncc_trainer import Trainer
-from ncc.utils import checkpoint_utils, distributed_utils
-from ncc.utils.yaml import load_yaml
-from ncc.logging import metrics, progress_bar
-from ncc.utils import utils
-from ncc.utils.file_utils import remove_files
 from ncc.data import iterators
+from ncc.trainers.ncc_trainers import Trainer
+from ncc.utils import checkpoint_utils, distributed_utils
+from ncc.utils import set_seed
+from ncc.utils import utils
+from ncc.utils.file_ops.yaml_io import load_yaml
+from ncc.utils.logging import meters
+from ncc.utils.logging import metrics, progress_bar
+from ncc.utils.path_manager import PathManager
 
 
 @metrics.aggregate('train')
@@ -30,7 +23,8 @@ def train(args, trainer, task, epoch_itr):
     # Initialize data iterator
     itr = epoch_itr.next_epoch_itr(
         fix_batches_to_gpus=args['distributed_training']['fix_batches_to_gpus'],
-        shuffle=(epoch_itr.next_epoch_idx > args['dataset']['curriculum']),
+        # shuffle=(epoch_itr.next_epoch_idx > args['dataset']['curriculum']),
+        shuffle=False,
     )
     update_freq = (
         args['optimization']['update_freq'][epoch_itr.epoch - 1]
@@ -54,6 +48,7 @@ def train(args, trainer, task, epoch_itr):
 
     valid_subsets = args['dataset']['valid_subset'].split(',')
     max_update = args['optimization']['max_update'] or math.inf
+    num_updates = 0  # init as 0, for zero-shot learning
     for samples in progress:
         with metrics.aggregate('train_inner'):
             log_output = trainer.train_step(samples)
@@ -94,7 +89,7 @@ def validate(args, trainer, task, epoch_itr, subsets):
 
     if args['dataset']['fixed_validation_seed'] is not None:
         # set fixed seed for every validation
-        utils.set_torch_seed(args['dataset']['fixed_validation_seed'])
+        set_seed.set_torch_seed(args['dataset']['fixed_validation_seed'])
 
     valid_losses = []
     for subset in subsets:
@@ -194,10 +189,7 @@ def single_main(args, init_distributed=False):
     # 0. Initialize CUDA and distributed training
     if torch.cuda.is_available() and not args['common']['cpu']:
         torch.cuda.set_device(args['distributed_training']['device_id'])
-    random.seed(args['common']['seed'])
-    np.random.seed(args['common']['seed'])
-    torch.manual_seed(args['common']['seed'])
-    torch.cuda.manual_seed(args['common']['seed'])
+    set_seed.set_seed(args['common']['seed'])
     if init_distributed:
         args['distributed_training']['distributed_rank'] = distributed_utils.distributed_init(args)
 
@@ -205,7 +197,7 @@ def single_main(args, init_distributed=False):
     if distributed_utils.is_master(args):
         save_dir = args['checkpoint']['save_dir']
         checkpoint_utils.verify_checkpoint_directory(save_dir)
-        remove_files(save_dir, 'pt')  # this code will remove pre-trained models
+        PathManager.rm(os.path.join(save_dir, '*.pt'))  # this code will remove pre-trained models
 
     # 1. Setup task, e.g., translation, language modeling, etc.
     task = tasks.setup_task(args)
@@ -290,7 +282,8 @@ def cli_main():
     parser = argparse.ArgumentParser(
         description="Downloading/Decompressing code_search_net dataset(s) or Tree-Sitter Library(ies)")
     parser.add_argument(
-        "--yaml_file", "-f", type=str, help="load {yaml_file}.yml for train", default='config/python_wan'
+        "--yaml_file", "-f", type=str, help="load {yaml_file}.yml for train",
+        default='relative/csn_feng/python'
     )
     args = parser.parse_args()
     yaml_file = os.path.join(os.path.dirname(__file__), '{}.yml'.format(args.yaml_file))
@@ -330,8 +323,4 @@ def cli_main():
 
 
 if __name__ == '__main__':
-    """
-    Examples:
-        CUDA_VISIBALE_DEVICES=0,1,2,3 python -m run.summarization.neural_transformer.train -f config/python_wan
-    """
     cli_main()

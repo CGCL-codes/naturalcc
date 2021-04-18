@@ -5,7 +5,6 @@
 
 import argparse
 
-
 REGISTRIES = {}
 
 

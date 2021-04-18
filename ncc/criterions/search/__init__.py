@@ -1,1 +1,0 @@
-from .softmax import SearchSoftmaxCriterion

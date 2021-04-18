@@ -105,7 +105,7 @@ class EpochBatchIterating(object):
 
 class StreamingEpochBatchIterator(EpochBatchIterating):
     def __init__(
-            self, dataset, epoch=1, num_shards=1, shard_id=0,
+        self, dataset, epoch=1, num_shards=1, shard_id=0,
     ):
         assert isinstance(dataset, torch.utils.data.IterableDataset)
         self.dataset = dataset
@@ -182,8 +182,8 @@ class EpochBatchIterator(EpochBatchIterating):
     """
 
     def __init__(
-            self, dataset, collate_fn, batch_sampler, seed=1, num_shards=1, shard_id=0,
-            num_workers=0, epoch=1,
+        self, dataset, collate_fn, batch_sampler, seed=1, num_shards=1, shard_id=0,
+        num_workers=0, epoch=1,
     ):
         assert isinstance(dataset, torch.utils.data.Dataset)
         self.dataset = dataset

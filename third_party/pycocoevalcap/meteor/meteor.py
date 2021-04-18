@@ -13,6 +13,8 @@ import threading
 
 import psutil
 
+from ncc import __JAVA_HOME__
+
 # Assumes meteor-1.5.jar is in the same directory as meteor.py.  Change as needed.
 METEOR_JAR = 'meteor-1.5.jar'
 
@@ -39,15 +41,7 @@ class Meteor:
                             "If you have problems using Meteor, "
                             "then you can try to lower the `mem` variable in meteor.py")
             mem = '1G'
-
-        from dataset import HOSTNAME
-        if HOSTNAME in ['GS65']:
-            java_path = '/home/yang/Documents/jdk1.8.0_60/bin/java'
-        elif HOSTNAME in ['node14']:
-            java_path = '/usr/bin/java'
-        else:
-            java_path = 'java'
-        meteor_cmd = [java_path, '-jar', '-Xmx2G', METEOR_JAR,
+        meteor_cmd = [__JAVA_HOME__, '-jar', '-Xmx2G', METEOR_JAR,
                       '-', '-', '-stdio', '-l', 'en', '-norm']
         env = os.environ.copy()
         env['LC_ALL'] = "C"
