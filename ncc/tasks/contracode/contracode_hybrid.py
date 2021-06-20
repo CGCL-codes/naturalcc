@@ -12,7 +12,6 @@ import torch
 
 from ncc import LOGGER
 from ncc.data import constants
-from ncc.data.contracode.contracode_dataset import ContraCodeDataset
 from ncc.data.dictionary import Dictionary
 from ncc.data.ncc_dataset import NccDataset
 from ncc.tasks import register_task
