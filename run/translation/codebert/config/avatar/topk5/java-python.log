@@ -1,0 +1,443 @@
+nohup: ignoring input
+Using backend: pytorch
+The tokenizer class you load from this checkpoint is not the same type as the class this function is called from. It may result in unexpected tokenization. 
+The tokenizer class you load from this checkpoint is 'RobertaTokenizer'. 
+The class this function is called from is 'TransformersDictionary'.
+[2021-11-05 18:54:39]    INFO >> No /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt to initialize model (train.py:86, <module>())
+[2021-11-05 18:54:39]    INFO >> Start training epoch   1/100, best bleu4: 0.00 (train.py:88, <module>())
+/home/wanyao/anaconda3/envs/py37/lib/python3.7/site-packages/torch/optim/lr_scheduler.py:134: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  "https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate", UserWarning)
+[2021-11-05 19:00:18]    INFO >> Epoch   1/100, Batch 500/10106, train loss: 1874.1457 (train.py:125, train())
+[2021-11-05 19:04:59]    INFO >> Epoch   1/100, Batch 1000/10106, train loss: 1479.7951 (train.py:125, train())
+[2021-11-05 19:09:38]    INFO >> Epoch   1/100, Batch 1500/10106, train loss: 1286.7392 (train.py:125, train())
+[2021-11-05 19:14:25]    INFO >> Epoch   1/100, Batch 2000/10106, train loss: 1158.4874 (train.py:125, train())
+[2021-11-05 19:19:11]    INFO >> Epoch   1/100, Batch 2500/10106, train loss: 1068.3986 (train.py:125, train())
+[2021-11-05 19:23:54]    INFO >> Epoch   1/100, Batch 3000/10106, train loss: 995.3097 (train.py:125, train())
+[2021-11-05 19:28:36]    INFO >> Epoch   1/100, Batch 3500/10106, train loss: 939.3052 (train.py:125, train())
+[2021-11-05 19:33:17]    INFO >> Epoch   1/100, Batch 4000/10106, train loss: 894.5527 (train.py:125, train())
+[2021-11-05 19:38:04]    INFO >> Epoch   1/100, Batch 4500/10106, train loss: 855.3546 (train.py:125, train())
+[2021-11-05 19:42:49]    INFO >> Epoch   1/100, Batch 5000/10106, train loss: 824.7731 (train.py:125, train())
+[2021-11-05 19:47:43]    INFO >> Epoch   1/100, Batch 5500/10106, train loss: 797.2720 (train.py:125, train())
+[2021-11-05 19:52:31]    INFO >> Epoch   1/100, Batch 6000/10106, train loss: 772.7433 (train.py:125, train())
+[2021-11-05 19:56:57]    INFO >> Epoch   1/100, Batch 6500/10106, train loss: 751.5504 (train.py:125, train())
+[2021-11-05 20:01:59]    INFO >> Epoch   1/100, Batch 7000/10106, train loss: 733.2186 (train.py:125, train())
+[2021-11-05 20:06:20]    INFO >> Epoch   1/100, Batch 7500/10106, train loss: 716.2474 (train.py:125, train())
+[2021-11-05 20:10:54]    INFO >> Epoch   1/100, Batch 8000/10106, train loss: 700.9343 (train.py:125, train())
+[2021-11-05 20:15:47]    INFO >> Epoch   1/100, Batch 8500/10106, train loss: 686.5503 (train.py:125, train())
+[2021-11-05 20:20:37]    INFO >> Epoch   1/100, Batch 9000/10106, train loss: 673.3885 (train.py:125, train())
+[2021-11-05 20:25:27]    INFO >> Epoch   1/100, Batch 9500/10106, train loss: 661.1375 (train.py:125, train())
+[2021-11-05 20:30:19]    INFO >> Epoch   1/100, Batch 10000/10106, train loss: 649.7792 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-05 20:31:30]    INFO >> Epoch   1/100, train loss: 647.4233 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-05 20:41:39]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-05 20:41:39]    INFO >> Epoch   1/100, valid loss: 0.0000, valid bleu4: 10.19, best bleu4: 10.19 (train.py:210, <module>())
+[2021-11-05 20:41:49]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-05 20:47:50]    INFO >> Epoch   2/100, Batch 500/10106, train loss: 403.4525 (train.py:125, train())
+[2021-11-05 20:51:56]    INFO >> Epoch   2/100, Batch 1000/10106, train loss: 409.1301 (train.py:125, train())
+[2021-11-05 20:56:19]    INFO >> Epoch   2/100, Batch 1500/10106, train loss: 405.1750 (train.py:125, train())
+[2021-11-05 21:00:36]    INFO >> Epoch   2/100, Batch 2000/10106, train loss: 402.5015 (train.py:125, train())
+[2021-11-05 21:04:55]    INFO >> Epoch   2/100, Batch 2500/10106, train loss: 397.4003 (train.py:125, train())
+[2021-11-05 21:09:30]    INFO >> Epoch   2/100, Batch 3000/10106, train loss: 394.8333 (train.py:125, train())
+[2021-11-05 21:14:11]    INFO >> Epoch   2/100, Batch 3500/10106, train loss: 392.9529 (train.py:125, train())
+[2021-11-05 21:18:50]    INFO >> Epoch   2/100, Batch 4000/10106, train loss: 389.2078 (train.py:125, train())
+[2021-11-05 21:23:32]    INFO >> Epoch   2/100, Batch 4500/10106, train loss: 385.8279 (train.py:125, train())
+[2021-11-05 21:28:14]    INFO >> Epoch   2/100, Batch 5000/10106, train loss: 382.2614 (train.py:125, train())
+[2021-11-05 21:33:00]    INFO >> Epoch   2/100, Batch 5500/10106, train loss: 379.6328 (train.py:125, train())
+[2021-11-05 21:37:47]    INFO >> Epoch   2/100, Batch 6000/10106, train loss: 377.0871 (train.py:125, train())
+[2021-11-05 21:42:32]    INFO >> Epoch   2/100, Batch 6500/10106, train loss: 374.6941 (train.py:125, train())
+[2021-11-05 21:46:47]    INFO >> Epoch   2/100, Batch 7000/10106, train loss: 372.3113 (train.py:125, train())
+[2021-11-05 21:51:00]    INFO >> Epoch   2/100, Batch 7500/10106, train loss: 369.7739 (train.py:125, train())
+[2021-11-05 21:55:37]    INFO >> Epoch   2/100, Batch 8000/10106, train loss: 366.7417 (train.py:125, train())
+[2021-11-05 21:59:33]    INFO >> Epoch   2/100, Batch 8500/10106, train loss: 364.7464 (train.py:125, train())
+[2021-11-05 22:03:55]    INFO >> Epoch   2/100, Batch 9000/10106, train loss: 362.1450 (train.py:125, train())
+[2021-11-05 22:08:33]    INFO >> Epoch   2/100, Batch 9500/10106, train loss: 359.9081 (train.py:125, train())
+[2021-11-05 22:13:10]    INFO >> Epoch   2/100, Batch 10000/10106, train loss: 357.6352 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-05 22:14:07]    INFO >> Epoch   2/100, train loss: 357.1641 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-05 22:26:34]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-05 22:26:34]    INFO >> Epoch   2/100, valid loss: 0.0000, valid bleu4: 14.72, best bleu4: 14.72 (train.py:210, <module>())
+[2021-11-05 22:26:52]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-05 22:32:56]    INFO >> Epoch   3/100, Batch 500/10106, train loss: 302.6362 (train.py:125, train())
+[2021-11-05 22:36:57]    INFO >> Epoch   3/100, Batch 1000/10106, train loss: 300.2628 (train.py:125, train())
+[2021-11-05 22:41:18]    INFO >> Epoch   3/100, Batch 1500/10106, train loss: 297.8537 (train.py:125, train())
+[2021-11-05 22:46:00]    INFO >> Epoch   3/100, Batch 2000/10106, train loss: 299.7125 (train.py:125, train())
+[2021-11-05 22:49:54]    INFO >> Epoch   3/100, Batch 2500/10106, train loss: 300.1029 (train.py:125, train())
+[2021-11-05 22:54:05]    INFO >> Epoch   3/100, Batch 3000/10106, train loss: 298.2361 (train.py:125, train())
+[2021-11-05 22:58:45]    INFO >> Epoch   3/100, Batch 3500/10106, train loss: 297.4909 (train.py:125, train())
+[2021-11-05 23:03:38]    INFO >> Epoch   3/100, Batch 4000/10106, train loss: 295.9928 (train.py:125, train())
+[2021-11-05 23:08:31]    INFO >> Epoch   3/100, Batch 4500/10106, train loss: 293.8812 (train.py:125, train())
+[2021-11-05 23:13:28]    INFO >> Epoch   3/100, Batch 5000/10106, train loss: 292.1442 (train.py:125, train())
+[2021-11-05 23:18:07]    INFO >> Epoch   3/100, Batch 5500/10106, train loss: 292.4696 (train.py:125, train())
+[2021-11-05 23:22:41]    INFO >> Epoch   3/100, Batch 6000/10106, train loss: 290.8797 (train.py:125, train())
+[2021-11-05 23:27:26]    INFO >> Epoch   3/100, Batch 6500/10106, train loss: 289.1431 (train.py:125, train())
+[2021-11-05 23:32:18]    INFO >> Epoch   3/100, Batch 7000/10106, train loss: 287.9159 (train.py:125, train())
+[2021-11-05 23:37:04]    INFO >> Epoch   3/100, Batch 7500/10106, train loss: 286.8221 (train.py:125, train())
+[2021-11-05 23:41:51]    INFO >> Epoch   3/100, Batch 8000/10106, train loss: 285.7567 (train.py:125, train())
+[2021-11-05 23:46:34]    INFO >> Epoch   3/100, Batch 8500/10106, train loss: 284.6516 (train.py:125, train())
+[2021-11-05 23:51:14]    INFO >> Epoch   3/100, Batch 9000/10106, train loss: 283.6431 (train.py:125, train())
+[2021-11-05 23:55:29]    INFO >> Epoch   3/100, Batch 9500/10106, train loss: 282.7834 (train.py:125, train())
+[2021-11-06 00:01:15]    INFO >> Epoch   3/100, Batch 10000/10106, train loss: 281.2429 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 00:02:25]    INFO >> Epoch   3/100, train loss: 280.9289 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 00:11:10]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-06 00:11:10]    INFO >> Epoch   3/100, valid loss: 0.0000, valid bleu4: 14.83, best bleu4: 14.83 (train.py:210, <module>())
+[2021-11-06 00:11:26]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 00:17:09]    INFO >> Epoch   4/100, Batch 500/10106, train loss: 257.6447 (train.py:125, train())
+[2021-11-06 00:21:47]    INFO >> Epoch   4/100, Batch 1000/10106, train loss: 252.1524 (train.py:125, train())
+[2021-11-06 00:25:57]    INFO >> Epoch   4/100, Batch 1500/10106, train loss: 248.1906 (train.py:125, train())
+[2021-11-06 00:29:30]    INFO >> Epoch   4/100, Batch 2000/10106, train loss: 247.6871 (train.py:125, train())
+[2021-11-06 00:33:08]    INFO >> Epoch   4/100, Batch 2500/10106, train loss: 245.9130 (train.py:125, train())
+[2021-11-06 00:36:37]    INFO >> Epoch   4/100, Batch 3000/10106, train loss: 244.4815 (train.py:125, train())
+[2021-11-06 00:40:09]    INFO >> Epoch   4/100, Batch 3500/10106, train loss: 243.5025 (train.py:125, train())
+[2021-11-06 00:43:43]    INFO >> Epoch   4/100, Batch 4000/10106, train loss: 242.8625 (train.py:125, train())
+[2021-11-06 00:47:19]    INFO >> Epoch   4/100, Batch 4500/10106, train loss: 241.8741 (train.py:125, train())
+[2021-11-06 00:50:49]    INFO >> Epoch   4/100, Batch 5000/10106, train loss: 241.4224 (train.py:125, train())
+[2021-11-06 00:54:19]    INFO >> Epoch   4/100, Batch 5500/10106, train loss: 241.2263 (train.py:125, train())
+[2021-11-06 00:58:01]    INFO >> Epoch   4/100, Batch 6000/10106, train loss: 240.5225 (train.py:125, train())
+[2021-11-06 01:01:28]    INFO >> Epoch   4/100, Batch 6500/10106, train loss: 240.2203 (train.py:125, train())
+[2021-11-06 01:05:05]    INFO >> Epoch   4/100, Batch 7000/10106, train loss: 239.0957 (train.py:125, train())
+[2021-11-06 01:08:43]    INFO >> Epoch   4/100, Batch 7500/10106, train loss: 238.5804 (train.py:125, train())
+[2021-11-06 01:12:21]    INFO >> Epoch   4/100, Batch 8000/10106, train loss: 237.3083 (train.py:125, train())
+[2021-11-06 01:16:16]    INFO >> Epoch   4/100, Batch 8500/10106, train loss: 236.4717 (train.py:125, train())
+[2021-11-06 01:21:32]    INFO >> Epoch   4/100, Batch 9000/10106, train loss: 235.8751 (train.py:125, train())
+[2021-11-06 01:27:44]    INFO >> Epoch   4/100, Batch 9500/10106, train loss: 235.2384 (train.py:125, train())
+[2021-11-06 01:30:24]    INFO >> Epoch   4/100, Batch 10000/10106, train loss: 234.6740 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 01:31:17]    INFO >> Epoch   4/100, train loss: 234.3626 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 01:41:11]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-06 01:41:11]    INFO >> Epoch   4/100, valid loss: 0.0000, valid bleu4: 16.69, best bleu4: 16.69 (train.py:210, <module>())
+[2021-11-06 01:41:28]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 01:45:46]    INFO >> Epoch   5/100, Batch 500/10106, train loss: 213.0889 (train.py:125, train())
+[2021-11-06 01:49:19]    INFO >> Epoch   5/100, Batch 1000/10106, train loss: 214.0004 (train.py:125, train())
+[2021-11-06 01:53:59]    INFO >> Epoch   5/100, Batch 1500/10106, train loss: 213.9155 (train.py:125, train())
+[2021-11-06 01:58:58]    INFO >> Epoch   5/100, Batch 2000/10106, train loss: 212.4073 (train.py:125, train())
+[2021-11-06 02:03:18]    INFO >> Epoch   5/100, Batch 2500/10106, train loss: 210.3837 (train.py:125, train())
+[2021-11-06 02:07:02]    INFO >> Epoch   5/100, Batch 3000/10106, train loss: 209.5408 (train.py:125, train())
+[2021-11-06 02:10:37]    INFO >> Epoch   5/100, Batch 3500/10106, train loss: 209.2785 (train.py:125, train())
+[2021-11-06 02:14:06]    INFO >> Epoch   5/100, Batch 4000/10106, train loss: 208.2908 (train.py:125, train())
+[2021-11-06 02:17:37]    INFO >> Epoch   5/100, Batch 4500/10106, train loss: 208.1743 (train.py:125, train())
+[2021-11-06 02:21:10]    INFO >> Epoch   5/100, Batch 5000/10106, train loss: 207.0090 (train.py:125, train())
+[2021-11-06 02:24:39]    INFO >> Epoch   5/100, Batch 5500/10106, train loss: 206.5543 (train.py:125, train())
+[2021-11-06 02:28:08]    INFO >> Epoch   5/100, Batch 6000/10106, train loss: 206.0516 (train.py:125, train())
+[2021-11-06 02:31:42]    INFO >> Epoch   5/100, Batch 6500/10106, train loss: 204.7553 (train.py:125, train())
+[2021-11-06 02:35:09]    INFO >> Epoch   5/100, Batch 7000/10106, train loss: 203.8640 (train.py:125, train())
+[2021-11-06 02:38:39]    INFO >> Epoch   5/100, Batch 7500/10106, train loss: 203.0296 (train.py:125, train())
+[2021-11-06 02:42:15]    INFO >> Epoch   5/100, Batch 8000/10106, train loss: 202.2829 (train.py:125, train())
+[2021-11-06 02:45:45]    INFO >> Epoch   5/100, Batch 8500/10106, train loss: 201.6654 (train.py:125, train())
+[2021-11-06 02:49:58]    INFO >> Epoch   5/100, Batch 9000/10106, train loss: 200.7242 (train.py:125, train())
+[2021-11-06 02:54:22]    INFO >> Epoch   5/100, Batch 9500/10106, train loss: 200.4124 (train.py:125, train())
+[2021-11-06 02:57:23]    INFO >> Epoch   5/100, Batch 10000/10106, train loss: 199.6985 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 02:58:13]    INFO >> Epoch   5/100, train loss: 199.5199 (train.py:134, <module>())
+[2021-11-06 02:58:19]    INFO >> save /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/5.pt (train.py:200, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 03:08:15]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-06 03:08:15]    INFO >> Epoch   5/100, valid loss: 0.0000, valid bleu4: 17.79, best bleu4: 17.79 (train.py:210, <module>())
+[2021-11-06 03:08:27]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 03:12:39]    INFO >> Epoch   6/100, Batch 500/10106, train loss: 183.2756 (train.py:125, train())
+[2021-11-06 03:16:10]    INFO >> Epoch   6/100, Batch 1000/10106, train loss: 180.6128 (train.py:125, train())
+[2021-11-06 03:19:44]    INFO >> Epoch   6/100, Batch 1500/10106, train loss: 178.5231 (train.py:125, train())
+[2021-11-06 03:23:19]    INFO >> Epoch   6/100, Batch 2000/10106, train loss: 178.3804 (train.py:125, train())
+[2021-11-06 03:26:50]    INFO >> Epoch   6/100, Batch 2500/10106, train loss: 178.7418 (train.py:125, train())
+[2021-11-06 03:30:22]    INFO >> Epoch   6/100, Batch 3000/10106, train loss: 177.5718 (train.py:125, train())
+[2021-11-06 03:33:56]    INFO >> Epoch   6/100, Batch 3500/10106, train loss: 176.1159 (train.py:125, train())
+[2021-11-06 03:37:27]    INFO >> Epoch   6/100, Batch 4000/10106, train loss: 176.2688 (train.py:125, train())
+[2021-11-06 03:40:59]    INFO >> Epoch   6/100, Batch 4500/10106, train loss: 175.6686 (train.py:125, train())
+[2021-11-06 03:44:23]    INFO >> Epoch   6/100, Batch 5000/10106, train loss: 175.0705 (train.py:125, train())
+[2021-11-06 03:48:05]    INFO >> Epoch   6/100, Batch 5500/10106, train loss: 174.9829 (train.py:125, train())
+[2021-11-06 03:51:41]    INFO >> Epoch   6/100, Batch 6000/10106, train loss: 174.4233 (train.py:125, train())
+[2021-11-06 03:55:17]    INFO >> Epoch   6/100, Batch 6500/10106, train loss: 174.3436 (train.py:125, train())
+[2021-11-06 03:58:57]    INFO >> Epoch   6/100, Batch 7000/10106, train loss: 173.6299 (train.py:125, train())
+[2021-11-06 04:02:29]    INFO >> Epoch   6/100, Batch 7500/10106, train loss: 173.4763 (train.py:125, train())
+[2021-11-06 04:06:07]    INFO >> Epoch   6/100, Batch 8000/10106, train loss: 173.2046 (train.py:125, train())
+[2021-11-06 04:09:46]    INFO >> Epoch   6/100, Batch 8500/10106, train loss: 172.7922 (train.py:125, train())
+[2021-11-06 04:14:04]    INFO >> Epoch   6/100, Batch 9000/10106, train loss: 172.2735 (train.py:125, train())
+[2021-11-06 04:18:19]    INFO >> Epoch   6/100, Batch 9500/10106, train loss: 171.5427 (train.py:125, train())
+[2021-11-06 04:20:46]    INFO >> Epoch   6/100, Batch 10000/10106, train loss: 171.1361 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 04:21:34]    INFO >> Epoch   6/100, train loss: 171.0909 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 04:31:51]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-06 04:31:51]    INFO >> Epoch   6/100, valid loss: 0.0000, valid bleu4: 19.18, best bleu4: 19.18 (train.py:210, <module>())
+[2021-11-06 04:32:07]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 04:36:06]    INFO >> Epoch   7/100, Batch 500/10106, train loss: 149.1289 (train.py:125, train())
+[2021-11-06 04:39:29]    INFO >> Epoch   7/100, Batch 1000/10106, train loss: 151.2458 (train.py:125, train())
+[2021-11-06 04:42:53]    INFO >> Epoch   7/100, Batch 1500/10106, train loss: 151.4401 (train.py:125, train())
+[2021-11-06 04:46:19]    INFO >> Epoch   7/100, Batch 2000/10106, train loss: 151.8576 (train.py:125, train())
+[2021-11-06 04:49:42]    INFO >> Epoch   7/100, Batch 2500/10106, train loss: 150.8928 (train.py:125, train())
+[2021-11-06 04:53:07]    INFO >> Epoch   7/100, Batch 3000/10106, train loss: 150.9324 (train.py:125, train())
+[2021-11-06 04:56:30]    INFO >> Epoch   7/100, Batch 3500/10106, train loss: 150.7532 (train.py:125, train())
+[2021-11-06 04:59:53]    INFO >> Epoch   7/100, Batch 4000/10106, train loss: 150.5355 (train.py:125, train())
+[2021-11-06 05:03:17]    INFO >> Epoch   7/100, Batch 4500/10106, train loss: 150.5805 (train.py:125, train())
+[2021-11-06 05:06:40]    INFO >> Epoch   7/100, Batch 5000/10106, train loss: 150.4689 (train.py:125, train())
+[2021-11-06 05:10:03]    INFO >> Epoch   7/100, Batch 5500/10106, train loss: 149.6044 (train.py:125, train())
+[2021-11-06 05:13:26]    INFO >> Epoch   7/100, Batch 6000/10106, train loss: 149.1663 (train.py:125, train())
+[2021-11-06 05:16:49]    INFO >> Epoch   7/100, Batch 6500/10106, train loss: 149.0383 (train.py:125, train())
+[2021-11-06 05:20:12]    INFO >> Epoch   7/100, Batch 7000/10106, train loss: 148.5892 (train.py:125, train())
+[2021-11-06 05:23:36]    INFO >> Epoch   7/100, Batch 7500/10106, train loss: 148.4433 (train.py:125, train())
+[2021-11-06 05:27:00]    INFO >> Epoch   7/100, Batch 8000/10106, train loss: 148.0795 (train.py:125, train())
+[2021-11-06 05:30:32]    INFO >> Epoch   7/100, Batch 8500/10106, train loss: 147.8468 (train.py:125, train())
+[2021-11-06 05:34:40]    INFO >> Epoch   7/100, Batch 9000/10106, train loss: 147.5804 (train.py:125, train())
+[2021-11-06 05:38:49]    INFO >> Epoch   7/100, Batch 9500/10106, train loss: 147.3925 (train.py:125, train())
+[2021-11-06 05:41:13]    INFO >> Epoch   7/100, Batch 10000/10106, train loss: 147.1041 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 05:42:00]    INFO >> Epoch   7/100, train loss: 147.0314 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 05:52:33]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-06 05:52:33]    INFO >> Epoch   7/100, valid loss: 0.0000, valid bleu4: 22.31, best bleu4: 22.31 (train.py:210, <module>())
+[2021-11-06 05:52:49]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 05:56:45]    INFO >> Epoch   8/100, Batch 500/10106, train loss: 133.3140 (train.py:125, train())
+[2021-11-06 06:00:09]    INFO >> Epoch   8/100, Batch 1000/10106, train loss: 131.5074 (train.py:125, train())
+[2021-11-06 06:03:35]    INFO >> Epoch   8/100, Batch 1500/10106, train loss: 132.4646 (train.py:125, train())
+[2021-11-06 06:06:58]    INFO >> Epoch   8/100, Batch 2000/10106, train loss: 132.1132 (train.py:125, train())
+[2021-11-06 06:10:22]    INFO >> Epoch   8/100, Batch 2500/10106, train loss: 131.8547 (train.py:125, train())
+[2021-11-06 06:13:46]    INFO >> Epoch   8/100, Batch 3000/10106, train loss: 132.6052 (train.py:125, train())
+[2021-11-06 06:17:10]    INFO >> Epoch   8/100, Batch 3500/10106, train loss: 131.6684 (train.py:125, train())
+[2021-11-06 06:20:37]    INFO >> Epoch   8/100, Batch 4000/10106, train loss: 131.6638 (train.py:125, train())
+[2021-11-06 06:24:03]    INFO >> Epoch   8/100, Batch 4500/10106, train loss: 130.8188 (train.py:125, train())
+[2021-11-06 06:27:27]    INFO >> Epoch   8/100, Batch 5000/10106, train loss: 130.8013 (train.py:125, train())
+[2021-11-06 06:30:52]    INFO >> Epoch   8/100, Batch 5500/10106, train loss: 130.7732 (train.py:125, train())
+[2021-11-06 06:34:15]    INFO >> Epoch   8/100, Batch 6000/10106, train loss: 131.1050 (train.py:125, train())
+[2021-11-06 06:37:41]    INFO >> Epoch   8/100, Batch 6500/10106, train loss: 131.0843 (train.py:125, train())
+[2021-11-06 06:41:10]    INFO >> Epoch   8/100, Batch 7000/10106, train loss: 130.6236 (train.py:125, train())
+[2021-11-06 06:44:35]    INFO >> Epoch   8/100, Batch 7500/10106, train loss: 130.0025 (train.py:125, train())
+[2021-11-06 06:48:00]    INFO >> Epoch   8/100, Batch 8000/10106, train loss: 129.7349 (train.py:125, train())
+[2021-11-06 06:51:45]    INFO >> Epoch   8/100, Batch 8500/10106, train loss: 129.8205 (train.py:125, train())
+[2021-11-06 06:55:53]    INFO >> Epoch   8/100, Batch 9000/10106, train loss: 129.7318 (train.py:125, train())
+[2021-11-06 06:59:26]    INFO >> Epoch   8/100, Batch 9500/10106, train loss: 129.3451 (train.py:125, train())
+[2021-11-06 07:02:21]    INFO >> Epoch   8/100, Batch 10000/10106, train loss: 129.1276 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 07:03:09]    INFO >> Epoch   8/100, train loss: 129.0777 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 07:13:47]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-06 07:13:47]    INFO >> Epoch   8/100, valid loss: 0.0000, valid bleu4: 22.42, best bleu4: 22.42 (train.py:210, <module>())
+[2021-11-06 07:14:03]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 07:18:28]    INFO >> Epoch   9/100, Batch 500/10106, train loss: 112.8269 (train.py:125, train())
+[2021-11-06 07:22:00]    INFO >> Epoch   9/100, Batch 1000/10106, train loss: 112.1794 (train.py:125, train())
+[2021-11-06 07:25:34]    INFO >> Epoch   9/100, Batch 1500/10106, train loss: 112.5793 (train.py:125, train())
+[2021-11-06 07:29:05]    INFO >> Epoch   9/100, Batch 2000/10106, train loss: 115.3627 (train.py:125, train())
+[2021-11-06 07:32:39]    INFO >> Epoch   9/100, Batch 2500/10106, train loss: 114.6523 (train.py:125, train())
+[2021-11-06 07:36:10]    INFO >> Epoch   9/100, Batch 3000/10106, train loss: 115.0730 (train.py:125, train())
+[2021-11-06 07:39:42]    INFO >> Epoch   9/100, Batch 3500/10106, train loss: 114.6990 (train.py:125, train())
+[2021-11-06 07:43:15]    INFO >> Epoch   9/100, Batch 4000/10106, train loss: 114.5834 (train.py:125, train())
+[2021-11-06 07:46:48]    INFO >> Epoch   9/100, Batch 4500/10106, train loss: 114.2802 (train.py:125, train())
+[2021-11-06 07:50:19]    INFO >> Epoch   9/100, Batch 5000/10106, train loss: 113.5386 (train.py:125, train())
+[2021-11-06 07:53:52]    INFO >> Epoch   9/100, Batch 5500/10106, train loss: 113.2473 (train.py:125, train())
+[2021-11-06 07:57:21]    INFO >> Epoch   9/100, Batch 6000/10106, train loss: 113.3295 (train.py:125, train())
+[2021-11-06 08:00:52]    INFO >> Epoch   9/100, Batch 6500/10106, train loss: 113.2059 (train.py:125, train())
+[2021-11-06 08:04:21]    INFO >> Epoch   9/100, Batch 7000/10106, train loss: 113.1882 (train.py:125, train())
+[2021-11-06 08:07:49]    INFO >> Epoch   9/100, Batch 7500/10106, train loss: 112.7347 (train.py:125, train())
+[2021-11-06 08:11:20]    INFO >> Epoch   9/100, Batch 8000/10106, train loss: 112.4662 (train.py:125, train())
+[2021-11-06 08:14:54]    INFO >> Epoch   9/100, Batch 8500/10106, train loss: 112.2051 (train.py:125, train())
+[2021-11-06 08:19:34]    INFO >> Epoch   9/100, Batch 9000/10106, train loss: 111.9743 (train.py:125, train())
+[2021-11-06 08:23:26]    INFO >> Epoch   9/100, Batch 9500/10106, train loss: 111.6882 (train.py:125, train())
+[2021-11-06 08:26:32]    INFO >> Epoch   9/100, Batch 10000/10106, train loss: 111.4946 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 08:27:21]    INFO >> Epoch   9/100, train loss: 111.4122 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 08:37:15]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-06 08:37:15]    INFO >> Epoch   9/100, valid loss: 0.0000, valid bleu4: 25.10, best bleu4: 25.10 (train.py:210, <module>())
+[2021-11-06 08:37:31]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 08:41:51]    INFO >> Epoch  10/100, Batch 500/10106, train loss: 94.8680 (train.py:125, train())
+[2021-11-06 08:45:27]    INFO >> Epoch  10/100, Batch 1000/10106, train loss: 96.5991 (train.py:125, train())
+[2021-11-06 08:49:01]    INFO >> Epoch  10/100, Batch 1500/10106, train loss: 95.8839 (train.py:125, train())
+[2021-11-06 08:52:31]    INFO >> Epoch  10/100, Batch 2000/10106, train loss: 96.5227 (train.py:125, train())
+[2021-11-06 08:56:03]    INFO >> Epoch  10/100, Batch 2500/10106, train loss: 96.4194 (train.py:125, train())
+[2021-11-06 08:59:38]    INFO >> Epoch  10/100, Batch 3000/10106, train loss: 96.8437 (train.py:125, train())
+[2021-11-06 09:03:14]    INFO >> Epoch  10/100, Batch 3500/10106, train loss: 96.9629 (train.py:125, train())
+[2021-11-06 09:08:29]    INFO >> Epoch  10/100, Batch 4000/10106, train loss: 97.5640 (train.py:125, train())
+[2021-11-06 09:12:06]    INFO >> Epoch  10/100, Batch 4500/10106, train loss: 97.5137 (train.py:125, train())
+[2021-11-06 09:15:38]    INFO >> Epoch  10/100, Batch 5000/10106, train loss: 97.2472 (train.py:125, train())
+[2021-11-06 09:19:09]    INFO >> Epoch  10/100, Batch 5500/10106, train loss: 97.2698 (train.py:125, train())
+[2021-11-06 09:22:44]    INFO >> Epoch  10/100, Batch 6000/10106, train loss: 97.2254 (train.py:125, train())
+[2021-11-06 09:26:26]    INFO >> Epoch  10/100, Batch 6500/10106, train loss: 97.2184 (train.py:125, train())
+[2021-11-06 09:30:25]    INFO >> Epoch  10/100, Batch 7000/10106, train loss: 96.9301 (train.py:125, train())
+[2021-11-06 09:35:43]    INFO >> Epoch  10/100, Batch 7500/10106, train loss: 97.0613 (train.py:125, train())
+[2021-11-06 09:41:00]    INFO >> Epoch  10/100, Batch 8000/10106, train loss: 97.1088 (train.py:125, train())
+[2021-11-06 09:46:59]    INFO >> Epoch  10/100, Batch 8500/10106, train loss: 96.8065 (train.py:125, train())
+[2021-11-06 09:53:54]    INFO >> Epoch  10/100, Batch 9000/10106, train loss: 96.6308 (train.py:125, train())
+[2021-11-06 09:59:11]    INFO >> Epoch  10/100, Batch 9500/10106, train loss: 96.4352 (train.py:125, train())
+[2021-11-06 10:04:50]    INFO >> Epoch  10/100, Batch 10000/10106, train loss: 96.2449 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 10:06:16]    INFO >> Epoch  10/100, train loss: 96.1714 (train.py:134, <module>())
+[2021-11-06 10:06:37]    INFO >> save /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/10.pt (train.py:200, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 10:14:51]    INFO >> Epoch  10/100, valid loss: 0.0000, valid bleu4: 24.36, best bleu4: 25.10 (train.py:210, <module>())
+[2021-11-06 10:15:16]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 10:20:36]    INFO >> Epoch  11/100, Batch 500/10106, train loss: 81.8450 (train.py:125, train())
+[2021-11-06 10:25:30]    INFO >> Epoch  11/100, Batch 1000/10106, train loss: 81.8896 (train.py:125, train())
+[2021-11-06 10:30:00]    INFO >> Epoch  11/100, Batch 1500/10106, train loss: 84.0613 (train.py:125, train())
+[2021-11-06 10:34:39]    INFO >> Epoch  11/100, Batch 2000/10106, train loss: 83.8214 (train.py:125, train())
+[2021-11-06 10:39:03]    INFO >> Epoch  11/100, Batch 2500/10106, train loss: 84.0536 (train.py:125, train())
+[2021-11-06 10:44:00]    INFO >> Epoch  11/100, Batch 3000/10106, train loss: 84.4689 (train.py:125, train())
+[2021-11-06 10:49:06]    INFO >> Epoch  11/100, Batch 3500/10106, train loss: 84.5938 (train.py:125, train())
+[2021-11-06 10:54:03]    INFO >> Epoch  11/100, Batch 4000/10106, train loss: 84.7248 (train.py:125, train())
+[2021-11-06 10:58:59]    INFO >> Epoch  11/100, Batch 4500/10106, train loss: 83.9884 (train.py:125, train())
+[2021-11-06 11:04:02]    INFO >> Epoch  11/100, Batch 5000/10106, train loss: 84.0322 (train.py:125, train())
+[2021-11-06 11:09:07]    INFO >> Epoch  11/100, Batch 5500/10106, train loss: 88.4336 (train.py:125, train())
+[2021-11-06 11:14:04]    INFO >> Epoch  11/100, Batch 6000/10106, train loss: 92.3042 (train.py:125, train())
+[2021-11-06 11:19:12]    INFO >> Epoch  11/100, Batch 6500/10106, train loss: 94.9958 (train.py:125, train())
+[2021-11-06 11:23:58]    INFO >> Epoch  11/100, Batch 7000/10106, train loss: 97.0511 (train.py:125, train())
+[2021-11-06 11:28:49]    INFO >> Epoch  11/100, Batch 7500/10106, train loss: 98.9252 (train.py:125, train())
+[2021-11-06 11:33:01]    INFO >> Epoch  11/100, Batch 8000/10106, train loss: 100.2950 (train.py:125, train())
+[2021-11-06 11:38:11]    INFO >> Epoch  11/100, Batch 8500/10106, train loss: 101.3670 (train.py:125, train())
+[2021-11-06 11:44:59]    INFO >> Epoch  11/100, Batch 9000/10106, train loss: 102.4641 (train.py:125, train())
+[2021-11-06 11:49:17]    INFO >> Epoch  11/100, Batch 9500/10106, train loss: 103.1998 (train.py:125, train())
+[2021-11-06 11:54:09]    INFO >> Epoch  11/100, Batch 10000/10106, train loss: 103.7761 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 11:55:26]    INFO >> Epoch  11/100, train loss: 103.9471 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 12:03:16]    INFO >> Epoch  11/100, valid loss: 0.0000, valid bleu4: 10.68, best bleu4: 25.10 (train.py:210, <module>())
+[2021-11-06 12:03:40]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 12:10:19]    INFO >> Epoch  12/100, Batch 500/10106, train loss: 107.2453 (train.py:125, train())
+[2021-11-06 12:15:21]    INFO >> Epoch  12/100, Batch 1000/10106, train loss: 108.1390 (train.py:125, train())
+[2021-11-06 12:19:25]    INFO >> Epoch  12/100, Batch 1500/10106, train loss: 107.7815 (train.py:125, train())
+[2021-11-06 12:23:50]    INFO >> Epoch  12/100, Batch 2000/10106, train loss: 107.9866 (train.py:125, train())
+[2021-11-06 12:27:26]    INFO >> Epoch  12/100, Batch 2500/10106, train loss: 107.7627 (train.py:125, train())
+[2021-11-06 12:31:00]    INFO >> Epoch  12/100, Batch 3000/10106, train loss: 106.9766 (train.py:125, train())
+[2021-11-06 12:34:30]    INFO >> Epoch  12/100, Batch 3500/10106, train loss: 106.8519 (train.py:125, train())
+[2021-11-06 12:38:06]    INFO >> Epoch  12/100, Batch 4000/10106, train loss: 106.7481 (train.py:125, train())
+[2021-11-06 12:41:43]    INFO >> Epoch  12/100, Batch 4500/10106, train loss: 106.3709 (train.py:125, train())
+[2021-11-06 12:45:46]    INFO >> Epoch  12/100, Batch 5000/10106, train loss: 105.9235 (train.py:125, train())
+[2021-11-06 12:49:59]    INFO >> Epoch  12/100, Batch 5500/10106, train loss: 105.6525 (train.py:125, train())
+[2021-11-06 12:54:19]    INFO >> Epoch  12/100, Batch 6000/10106, train loss: 105.6415 (train.py:125, train())
+[2021-11-06 12:58:35]    INFO >> Epoch  12/100, Batch 6500/10106, train loss: 105.2171 (train.py:125, train())
+[2021-11-06 13:02:49]    INFO >> Epoch  12/100, Batch 7000/10106, train loss: 104.7724 (train.py:125, train())
+[2021-11-06 13:06:58]    INFO >> Epoch  12/100, Batch 7500/10106, train loss: 103.4845 (train.py:125, train())
+[2021-11-06 13:11:09]    INFO >> Epoch  12/100, Batch 8000/10106, train loss: 102.2866 (train.py:125, train())
+[2021-11-06 13:15:24]    INFO >> Epoch  12/100, Batch 8500/10106, train loss: 100.6450 (train.py:125, train())
+[2021-11-06 13:19:31]    INFO >> Epoch  12/100, Batch 9000/10106, train loss: 99.2533 (train.py:125, train())
+[2021-11-06 13:23:50]    INFO >> Epoch  12/100, Batch 9500/10106, train loss: 98.0023 (train.py:125, train())
+[2021-11-06 13:28:04]    INFO >> Epoch  12/100, Batch 10000/10106, train loss: 96.8551 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 13:29:09]    INFO >> Epoch  12/100, train loss: 96.5786 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 13:37:22]    INFO >> Epoch  12/100, valid loss: 0.0000, valid bleu4: 25.08, best bleu4: 25.10 (train.py:210, <module>())
+[2021-11-06 13:37:39]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 13:44:54]    INFO >> Epoch  13/100, Batch 500/10106, train loss: 65.3384 (train.py:125, train())
+[2021-11-06 13:49:04]    INFO >> Epoch  13/100, Batch 1000/10106, train loss: 66.3603 (train.py:125, train())
+[2021-11-06 13:53:35]    INFO >> Epoch  13/100, Batch 1500/10106, train loss: 66.6833 (train.py:125, train())
+[2021-11-06 13:58:20]    INFO >> Epoch  13/100, Batch 2000/10106, train loss: 66.9935 (train.py:125, train())
+[2021-11-06 14:02:37]    INFO >> Epoch  13/100, Batch 2500/10106, train loss: 67.1770 (train.py:125, train())
+[2021-11-06 14:07:08]    INFO >> Epoch  13/100, Batch 3000/10106, train loss: 66.8713 (train.py:125, train())
+[2021-11-06 14:11:43]    INFO >> Epoch  13/100, Batch 3500/10106, train loss: 66.5306 (train.py:125, train())
+[2021-11-06 14:16:08]    INFO >> Epoch  13/100, Batch 4000/10106, train loss: 66.4340 (train.py:125, train())
+[2021-11-06 14:20:39]    INFO >> Epoch  13/100, Batch 4500/10106, train loss: 66.7838 (train.py:125, train())
+[2021-11-06 14:25:05]    INFO >> Epoch  13/100, Batch 5000/10106, train loss: 66.9533 (train.py:125, train())
+[2021-11-06 14:29:34]    INFO >> Epoch  13/100, Batch 5500/10106, train loss: 66.8669 (train.py:125, train())
+[2021-11-06 14:34:05]    INFO >> Epoch  13/100, Batch 6000/10106, train loss: 66.7445 (train.py:125, train())
+[2021-11-06 14:38:38]    INFO >> Epoch  13/100, Batch 6500/10106, train loss: 66.6453 (train.py:125, train())
+[2021-11-06 14:43:10]    INFO >> Epoch  13/100, Batch 7000/10106, train loss: 66.3292 (train.py:125, train())
+[2021-11-06 14:47:45]    INFO >> Epoch  13/100, Batch 7500/10106, train loss: 66.2577 (train.py:125, train())
+[2021-11-06 14:52:19]    INFO >> Epoch  13/100, Batch 8000/10106, train loss: 66.1311 (train.py:125, train())
+[2021-11-06 14:56:57]    INFO >> Epoch  13/100, Batch 8500/10106, train loss: 66.0258 (train.py:125, train())
+[2021-11-06 15:01:29]    INFO >> Epoch  13/100, Batch 9000/10106, train loss: 65.7215 (train.py:125, train())
+[2021-11-06 15:06:02]    INFO >> Epoch  13/100, Batch 9500/10106, train loss: 65.9705 (train.py:125, train())
+[2021-11-06 15:10:39]    INFO >> Epoch  13/100, Batch 10000/10106, train loss: 65.9893 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 15:11:51]    INFO >> Epoch  13/100, train loss: 65.9800 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 15:20:39]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-06 15:20:39]    INFO >> Epoch  13/100, valid loss: 0.0000, valid bleu4: 26.96, best bleu4: 26.96 (train.py:210, <module>())
+[2021-11-06 15:21:01]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 15:26:39]    INFO >> Epoch  14/100, Batch 500/10106, train loss: 55.6811 (train.py:125, train())
+[2021-11-06 15:31:08]    INFO >> Epoch  14/100, Batch 1000/10106, train loss: 54.7507 (train.py:125, train())
+[2021-11-06 15:35:43]    INFO >> Epoch  14/100, Batch 1500/10106, train loss: 54.3667 (train.py:125, train())
+[2021-11-06 15:42:18]    INFO >> Epoch  14/100, Batch 2000/10106, train loss: 54.8713 (train.py:125, train())
+[2021-11-06 15:46:39]    INFO >> Epoch  14/100, Batch 2500/10106, train loss: 55.5016 (train.py:125, train())
+[2021-11-06 15:51:07]    INFO >> Epoch  14/100, Batch 3000/10106, train loss: 55.2671 (train.py:125, train())
+[2021-11-06 15:55:45]    INFO >> Epoch  14/100, Batch 3500/10106, train loss: 55.1198 (train.py:125, train())
+[2021-11-06 16:00:27]    INFO >> Epoch  14/100, Batch 4000/10106, train loss: 55.3711 (train.py:125, train())
+[2021-11-06 16:05:07]    INFO >> Epoch  14/100, Batch 4500/10106, train loss: 55.3936 (train.py:125, train())
+[2021-11-06 16:09:44]    INFO >> Epoch  14/100, Batch 5000/10106, train loss: 55.5566 (train.py:125, train())
+[2021-11-06 16:14:02]    INFO >> Epoch  14/100, Batch 5500/10106, train loss: 55.4738 (train.py:125, train())
+[2021-11-06 16:17:38]    INFO >> Epoch  14/100, Batch 6000/10106, train loss: 55.3441 (train.py:125, train())
+[2021-11-06 16:21:11]    INFO >> Epoch  14/100, Batch 6500/10106, train loss: 55.1746 (train.py:125, train())
+[2021-11-06 16:24:53]    INFO >> Epoch  14/100, Batch 7000/10106, train loss: 54.9135 (train.py:125, train())
+[2021-11-06 16:28:33]    INFO >> Epoch  14/100, Batch 7500/10106, train loss: 54.7727 (train.py:125, train())
+[2021-11-06 16:32:07]    INFO >> Epoch  14/100, Batch 8000/10106, train loss: 54.7572 (train.py:125, train())
+[2021-11-06 16:35:43]    INFO >> Epoch  14/100, Batch 8500/10106, train loss: 54.7838 (train.py:125, train())
+[2021-11-06 16:39:15]    INFO >> Epoch  14/100, Batch 9000/10106, train loss: 54.6700 (train.py:125, train())
+[2021-11-06 16:42:50]    INFO >> Epoch  14/100, Batch 9500/10106, train loss: 54.6141 (train.py:125, train())
+[2021-11-06 16:46:22]    INFO >> Epoch  14/100, Batch 10000/10106, train loss: 54.5376 (train.py:125, train())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 16:47:11]    INFO >> Epoch  14/100, train loss: 54.4740 (train.py:134, <module>())
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+[2021-11-06 16:56:06]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/best_checkpoint.pt (train.py:208, <module>())
+[2021-11-06 16:56:06]    INFO >> Epoch  14/100, valid loss: 0.0000, valid bleu4: 29.20, best bleu4: 29.20 (train.py:210, <module>())
+[2021-11-06 16:56:23]    INFO >> update /home/wanyao/yang/ncc_data/avatar/translation/top5/codebert/data-mmap/java-python/last_checkpoint.pt (train.py:215, <module>())
+[2021-11-06 17:01:04]    INFO >> Epoch  15/100, Batch 500/10106, train loss: 46.5952 (train.py:125, train())
+[2021-11-06 17:04:37]    INFO >> Epoch  15/100, Batch 1000/10106, train loss: 47.2116 (train.py:125, train())
+[2021-11-06 17:08:07]    INFO >> Epoch  15/100, Batch 1500/10106, train loss: 46.9004 (train.py:125, train())
+[2021-11-06 17:11:43]    INFO >> Epoch  15/100, Batch 2000/10106, train loss: 47.2266 (train.py:125, train())
+[2021-11-06 17:15:20]    INFO >> Epoch  15/100, Batch 2500/10106, train loss: 46.8954 (train.py:125, train())
+[2021-11-06 17:18:57]    INFO >> Epoch  15/100, Batch 3000/10106, train loss: 46.6085 (train.py:125, train())
+[2021-11-06 17:22:42]    INFO >> Epoch  15/100, Batch 3500/10106, train loss: 46.5414 (train.py:125, train())
+[2021-11-06 17:27:50]    INFO >> Epoch  15/100, Batch 4000/10106, train loss: 46.3910 (train.py:125, train())
+[2021-11-06 17:31:30]    INFO >> Epoch  15/100, Batch 4500/10106, train loss: 46.4958 (train.py:125, train())
+[2021-11-06 17:34:56]    INFO >> Epoch  15/100, Batch 5000/10106, train loss: 46.5189 (train.py:125, train())
+[2021-11-06 17:38:35]    INFO >> Epoch  15/100, Batch 5500/10106, train loss: 46.4441 (train.py:125, train())
+[2021-11-06 17:42:17]    INFO >> Epoch  15/100, Batch 6000/10106, train loss: 46.2646 (train.py:125, train())
+[2021-11-06 17:45:55]    INFO >> Epoch  15/100, Batch 6500/10106, train loss: 46.1588 (train.py:125, train())
+[2021-11-06 17:49:32]    INFO >> Epoch  15/100, Batch 7000/10106, train loss: 46.0994 (train.py:125, train())
+[2021-11-06 17:53:09]    INFO >> Epoch  15/100, Batch 7500/10106, train loss: 46.2229 (train.py:125, train())
