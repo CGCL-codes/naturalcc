@@ -106,7 +106,7 @@ def collate_paths(head, body, tail,
     return [head, body, tail]
 
 
-def load_indexed_dataset(path, modality='text', dictionary=None, tokenizer=None, dataset_impl=None, combine=False,
+def load_indexed_dataset(path, dictionary=None, tokenizer=None, dataset_impl=None, combine=False,
                          default='cached'):
     """A helper function for loading indexed datasets.
 
@@ -122,7 +122,7 @@ def load_indexed_dataset(path, modality='text', dictionary=None, tokenizer=None,
             single ConcatDataset instance.
     """
     from ncc.data.wrappers.concat_dataset import ConcatDataset
-    import ncc.data.indexed_dataset as indexed_dataset
+    from ncc.data import indexed_dataset
 
     datasets = []
     for k in itertools.count():
@@ -137,7 +137,6 @@ def load_indexed_dataset(path, modality='text', dictionary=None, tokenizer=None,
         dataset = indexed_dataset.make_dataset(
             path_k,
             impl=dataset_impl_k or default,
-            modality=modality,
             fix_lua_indexing=True,
             dictionary=dictionary,
             tokenizer=tokenizer,

@@ -3,7 +3,7 @@ import os
 from collections import Counter
 from multiprocessing import Pool
 
-from dataset.py150.utils import py150_util
+from dataset.py150 import py150_util
 from ncc import LOGGER
 from ncc import tasks
 from ncc.data import (
@@ -16,8 +16,8 @@ from ncc.utils.file_ops import (
     json_io,
 )
 from ncc.utils.file_ops.yaml_io import load_yaml
-from ncc.utils.pathos_pool import PPool
 from ncc.utils.path_manager import PathManager
+from ncc.utils.pathos_pool import PPool
 
 MAX_BATCH_SIZE = 5000
 

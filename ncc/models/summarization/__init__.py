@@ -1,27 +1,17 @@
-from .seq2seq import Seq2SeqModel
-from .nary_tree2seq import NaryTree2SeqModel
-from .mm2seq import MM2SeqModel
+from .child_sum_tree2seq import ChildSumTree2Seq
 from .code2seq import Code2Seq
-from .hi_transformer_summarization import HiTransformerSummarizationModel
-from .transformer import TransformerModel
-# from .transformer_summarization_ft import TransformerFtModel
-from .neural_transformer import NeuralTransformerModel
-from .transformer_from_roberta import TransformerFromRobertaModel
-from .codenn import CodeNNModel
-from .deepcom import DeepComModel
-
-from .debug import DebugModel
+from .codenn import CodeNN
+from .deepcom import DeepCom
+from .mm2seq import MM2Seq
+from .nary_tree2seq import NaryTree2Seq
+from .seq2seq import Seq2Seq
 
 __all__ = [
-    'Seq2SeqModel',
-    'NaryTree2SeqModel',
-    'MM2SeqModel',
-    'HiTransformerSummarizationModel',
-    'TransformerModel',
-    'NeuralTransformerModel',
-    'TransformerFromRobertaModel',
+    'Seq2Seq',
+    'NaryTree2Seq',
+    'ChildSumTree2Seq',
+    'MM2Seq',
+    'DeepCom',
+    'CodeNN',
     'Code2Seq',
-    'CodeNNModel',
-    'DeepComModel',
-    'DebugModel'
 ]

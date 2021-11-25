@@ -3,8 +3,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import argparse
-
 REGISTRIES = {}
 
 
@@ -13,8 +11,6 @@ def setup_registry(
     base_class=None,
     default=None,
 ):
-    # assert registry_name.startswith('--')
-    # registry_name = registry_name[2:].replace('-', '_')
     registry_name = registry_name.replace('-', '_')
 
     REGISTRY = {}
@@ -62,20 +58,6 @@ def setup_registry(
     return build_x, register_x, REGISTRY
 
 
-def set_defaults(args, cls):
+def set_defaults(*args, **kwargs):
     """Helper to set default arguments based on *add_args*."""
     pass
-    # if not hasattr(cls, 'add_args'):
-    #     return
-    # parser = argparse.ArgumentParser(argument_default=argparse.SUPPRESS, allow_abbrev=False)
-    # cls.add_args(parser)
-    # # copied from argparse.py:
-    # defaults = argparse.Namespace()
-    # for action in parser._actions:
-    #     if action.dest is not argparse.SUPPRESS:
-    #         if not hasattr(defaults, action.dest):
-    #             if action.default is not argparse.SUPPRESS:
-    #                 setattr(defaults, action.dest, action.default)
-    # for key, default_value in vars(defaults).items():
-    #     if not hasattr(args, key):
-    #         setattr(args, key, default_value)

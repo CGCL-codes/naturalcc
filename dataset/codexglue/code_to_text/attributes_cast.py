@@ -6,8 +6,8 @@ from multiprocessing import Pool, cpu_count
 
 from dataset.codexglue.code_to_text import (
     LANGUAGES, RAW_DIR, ATTRIBUTES_DIR,
-    LOGGER,
 )
+from ncc import LOGGER
 from ncc.utils.file_ops import (
     file_io,
     json_io,
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         "--attrs", "-a",
-        default=['code', 'code_tokens', 'docstring', 'docstring_tokens'],
+        default=['code', 'code_tokens', 'docstring', 'docstring_tokens', 'func_name'],
         type=str, nargs='+',
         help="attrs: code, code_tokens, docstring",
     )

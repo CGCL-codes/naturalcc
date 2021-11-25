@@ -219,19 +219,16 @@ class HybridRetrievalTask(NccTask):
         else:
             src_aux, tgt_aux = None, None
 
-        if self.args['model']['arch'] in ['nbow', 'conv1d_res', 'birnn', 'self_attn']:
-            self.datasets[split] = load_tokens_dataset(
-                data_path, split, src, self.source_dictionary, tgt, self.target_dictionary,
-                dataset_impl=self.args['dataset']['dataset_impl'],
-                src_max_tokens=self.args['dataset']['code_max_tokens'],
-                tgt_max_tokens=self.args['dataset']['query_max_tokens'],
-                src_aux=src_aux, tgt_aux=tgt_aux,
-                fraction_using_func_name=self.args['task']['fraction_using_func_name'],
-                labels=self.args['dataset'].get('langs', None),
-                shuffle=(split == 'train'),
-            )
-        else:
-            raise NotImplementedError
+        self.datasets[split] = load_tokens_dataset(
+            data_path, split, src, self.source_dictionary, tgt, self.target_dictionary,
+            dataset_impl=self.args['dataset']['dataset_impl'],
+            src_max_tokens=self.args['dataset']['code_max_tokens'],
+            tgt_max_tokens=self.args['dataset']['query_max_tokens'],
+            src_aux=src_aux, tgt_aux=tgt_aux,
+            fraction_using_func_name=self.args['task']['fraction_using_func_name'],
+            labels=self.args['dataset'].get('langs', None),
+            shuffle=(split == 'train'),
+        )
 
     @property
     def source_dictionary(self):
@@ -291,3 +288,13 @@ class HybridRetrievalTask(NccTask):
 
                 metrics.log_scalar('mrr', sum_logs('mrr'))
                 metrics.log_scalar('sample_size', sum_logs('sample_size'))
+
+    def encode_query_input(self, query):
+        from ncc.tokenizers import tokenization
+        if query[-1] == '.':
+            query = query[:-1] + ' .'
+        query = query.split()
+        query_ids = self.tgt_dict.encode_line(query, tokenization._lower_tokenizer,
+                                              func_name=None, min_func_len=None)
+        query_ids = query_ids[:self.args['dataset']['query_max_tokens']]
+        return query_ids

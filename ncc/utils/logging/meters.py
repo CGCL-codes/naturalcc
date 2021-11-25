@@ -4,8 +4,8 @@
 # LICENSE file in the root directory of this source tree.
 
 import bisect
-from collections import OrderedDict
 import time
+from collections import OrderedDict
 from typing import Dict, Optional
 
 try:

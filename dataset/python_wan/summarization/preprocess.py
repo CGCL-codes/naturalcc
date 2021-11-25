@@ -182,8 +182,8 @@ def main(args):
                 temp_file_path = "{}{}".format(output_file, worker_id)
                 ds.merge_file_(temp_file_path)
                 # idx, txt
-                os.remove(indexed_dataset.data_file_path(temp_file_path))
-                os.remove(indexed_dataset.index_file_path(temp_file_path))
+                os.remove(indexed_dataset.mmap_indexed_dataset.data_file_path(temp_file_path))
+                os.remove(indexed_dataset.mmap_indexed_dataset.index_file_path(temp_file_path))
         ds.finalize('{}.idx'.format(output_file))
 
         LOGGER.info(
@@ -238,7 +238,7 @@ def cli_main():
         default='config/preprocess'
     )
     args = parser.parse_args()
-    yaml_file = os.path.join(os.path.dirname(__file__), args.yaml)
+    yaml_file = os.path.join(os.path.dirname(__file__), f"{args.yaml_file}.yml")
     LOGGER.info('Load arguments in {}'.format(yaml_file))
     args = load_yaml(yaml_file)
     LOGGER.info(args)

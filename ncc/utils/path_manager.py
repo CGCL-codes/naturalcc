@@ -6,11 +6,12 @@
 # LICENSE file in the root directory of this source tree.
 
 
-import os
-import shutil
 import glob
-import itertools
-from ncc import __DEFAULT_DIR__
+import os
+import platform
+import shutil
+
+from ncc import __NCC_DIR__
 
 
 class PathManager:
@@ -51,20 +52,31 @@ class PathManager:
 
     @staticmethod
     def ls(path):
-        if PathManager.is_dir(path):
-            return glob.glob(os.path.join(path, '*'))
+        system = platform.uname().system
+        if system in ['Linux', 'Unix']:
+            cmd = 'ls'
+        elif system in ['Windows']:
+            cmd = 'dir'
         else:
-            if '*' in path:
-                paths = []
-                head, tail = path.split('*', 1)
-                heads = glob.glob(head + '*')
-                if len(tail) > 0:
-                    paths.extend(list(itertools.chain(*
-                                                      [PathManager.ls(h + tail) for h in heads]
-                                                      )))
-                return paths
-            else:
-                return [path]
+            raise NotImplementedError("Unkown System")
+        out = os.popen(f"{cmd} {path}")
+        out = [line.rstrip('\n') for line in out.readlines()]
+        return out
+
+    @staticmethod
+    def cp(src_dir, dst_dir):
+        system = platform.uname().system
+        if system in ['Linux', 'Unix', 'Windows']:
+            cmd = 'cp'
+        else:
+            raise NotImplementedError("Unkown System")
+        if os.path.isdir(dst_dir):
+            PathManager.mkdir(dst_dir)
+        else:
+            PathManager.mkdir(os.path.dirname(dst_dir))
+        out = os.popen(f"{cmd} -fr {src_dir} {dst_dir}")
+        out = [line.rstrip('\n') for line in out.readlines()]
+        return out
 
     @staticmethod
     def mkdir(path):
@@ -83,10 +95,15 @@ class PathManager:
     @staticmethod
     def expanduser(path):
         if str.startswith(path, '~/'):
-            return os.path.join(__DEFAULT_DIR__, path[2:])
+            return os.path.join(__NCC_DIR__, path[2:])
         else:
             return path
 
     @staticmethod
     def copyfileobj(fsrc, fdst):
         shutil.copyfileobj(fsrc, fdst)
+
+    @staticmethod
+    def is_empty(path):
+        files = PathManager.ls(path)
+        return len(files) == 0

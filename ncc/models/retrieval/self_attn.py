@@ -5,7 +5,7 @@ import torch.nn as nn
 
 from ncc.models import register_model
 from ncc.models.ncc_model import NccRetrievalModel
-from ncc.modules.retrieval.self_attn_encoder import SelfAttnEncoder
+from ncc.modules.encoders.retrieval.self_attn_encoder import SelfAttnEncoder
 
 
 @register_model('self_attn')

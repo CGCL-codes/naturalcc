@@ -6,20 +6,17 @@
 Base classes for various fairseq models.
 """
 
-import logging
 from typing import Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ncc.utils import utils
-from ncc.utils.checkpoint_utils import prune_state_dict
-from ncc.data import Dictionary
-from ncc.modules.code2vec.ncc_encoder import NccEncoder
-from ncc.modules.seq2seq import NccDecoder
 from torch import Tensor
 
-logger = logging.getLogger(__name__)
+from ncc.data import Dictionary
+from ncc.modules.decoders.ncc_decoder import NccDecoder
+from ncc.modules.encoders.ncc_encoder import NccEncoder
+from ncc.utils.checkpoint_utils import prune_state_dict
 
 
 class BaseNccModel(nn.Module):
@@ -28,11 +25,6 @@ class BaseNccModel(nn.Module):
     def __init__(self):
         super().__init__()
         self._is_generation_fast = False
-
-    @staticmethod
-    def add_args(parser):
-        """Add model-specific arguments to the parser."""
-        pass
 
     @classmethod
     def build_model(cls, args, task):
@@ -270,16 +262,6 @@ class NccEncoderDecoderModel(BaseNccModel):
         return self.decoder.max_positions()
 
 
-class NccModel(NccEncoderDecoderModel):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        utils.deprecation_warning(
-            "NccModel is deprecated, please use NccEncoderDecoderModel "
-            "or BaseNccModel instead",
-            stacklevel=4,
-        )
-
-
 class NccMultiModel(BaseNccModel):
     """Base class for combining multiple encoder-decoder models."""
 
@@ -476,6 +458,35 @@ class NccEncoderModel(BaseNccModel):
     def max_positions(self):
         """Maximum length supported by the model."""
         return self.encoder.max_positions()
+
+
+class NccMultiEncoderMultiDecoder(BaseNccModel):
+    """Base class for a simple encoder-encoder retrieval models.
+
+    Args:
+        src_encoders (NccEncoder): the encoder
+        tgt_encoders (NccEncoder): the encoder
+    """
+
+    def __init__(self, src_encoders, tgt_encoders):
+        super().__init__()
+        self.src_encoders = src_encoders
+        self.tgt_encoders = tgt_encoders
+
+    def forward(self, *args, **kwargs):
+        """
+        Run the forward pass for a encoder-only model.
+
+        Feeds a batch of tokens through the encoder to generate features.
+
+        Args:
+            src_tokens (LongTensor): input tokens of shape `(batch, src_len)`
+            tgt_tokens (LongTensor): input tokens of shape `(batch, src_len)`
+
+        Returns:
+            the encoder's output, typically of shape `(batch, src_len, features)`
+        """
+        raise NotImplementedError
 
 
 class NccRetrievalModel(BaseNccModel):

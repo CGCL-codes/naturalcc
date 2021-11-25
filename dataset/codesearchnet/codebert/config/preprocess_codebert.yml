@@ -20,22 +20,22 @@ preprocess:
   task: summarization # task', metavar='TASK', default="translation", choices=TASK_REGISTRY.keys(), help='task'
   source_lang: code
   target_lang: ~ # docstring #", default=None, metavar="TARGET", help="target language"
-  # ~ path for dataset default. e.g.  for code_search_net, ~/flatten = ~/.ncc/code_search_net/flatten
-  trainpref: ~/.ncc/code_search_net/flatten/ruby/train #", metavar="FP", default=None, help="train file prefix"
-  validpref: ~/.ncc/code_search_net/flatten/ruby/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-  testpref:  ~/.ncc/code_search_net/flatten/ruby/test #", metavar="FP", default=None, help="comma separated, test file prefixes"
-#  trainpref: ~/.ncc/CodeSearchNet/codebert/data-raw/ruby/docstring_path #", metavar="FP", default=None, help="train file prefix"
-#  validpref: ~/.ncc/CodeSearchNet/codebert/data-raw/ruby/docstring_path #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-#  testpref:  ~/.ncc/CodeSearchNet/codebert/data-raw/ruby/docstring_path #", metavar="FP", default=None, help="comma separated, test file prefixes"
+  # ~ path for dataset default. e.g.  for code_search_net, ~/flatten = ~/code_search_net/flatten
+  trainpref: ~/code_search_net/flatten/ruby/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/code_search_net/flatten/ruby/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/code_search_net/flatten/ruby/test #", metavar="FP", default=None, help="comma separated, test file prefixes"
+#  trainpref: ~/CodeSearchNet/codebert/data-raw/ruby/docstring_path #", metavar="FP", default=None, help="train file prefix"
+#  validpref: ~/CodeSearchNet/codebert/data-raw/ruby/docstring_path #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+#  testpref:  ~/CodeSearchNet/codebert/data-raw/ruby/docstring_path #", metavar="FP", default=None, help="comma separated, test file prefixes"
 
   align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
-#  destdir: ~/.ncc/CodeSearchNet/codebert/data-mmap/ruby/docstring_path/ #", metavar="DIR", default="data-bin", help="destination dir"
-  destdir: ~/.ncc/code_search_net/codebert/data-raw/ruby/code #", metavar="DIR", default="data-bin", help="destination dir"
+#  destdir: ~/CodeSearchNet/codebert/data-mmap/ruby/docstring_path/ #", metavar="DIR", default="data-bin", help="destination dir"
+  destdir: ~/code_search_net/codebert/data-raw/ruby/code #", metavar="DIR", default="data-bin", help="destination dir"
   thresholdtgt: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
   thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
-  srcdict: ~/.ncc/code_search_net/codebert/data-raw/ruby/codesearchnet_ruby.dict.txt
+  srcdict: ~/code_search_net/codebert/data-raw/ruby/codesearchnet_ruby.dict.txt
   tgtdict: ~ # ", metavar="FP", help="reuse given target dictionary"
-  src_sp: ~/.ncc/code_search_net/codebert/data-raw/ruby/codesearchnet_ruby.model
+  src_sp: ~/code_search_net/codebert/data-raw/ruby/codesearchnet_ruby.model
   tgt_sp: ~
   nwordstgt: -1 #", metavar="N", default=-1, type=int, help="number of target words to retain"
   nwordssrc: -1 #", metavar="N", default=-1, type=int, help="number of source words to retain"

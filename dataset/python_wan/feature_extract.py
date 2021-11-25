@@ -3,21 +3,19 @@
 import argparse
 import itertools
 import os
-import random
 import re
 from multiprocessing import Pool, cpu_count
 
-from dataset.python_wan import (
-    LANGUAGES, LIBS_DIR, ATTRIBUTES_DIR,
-    LOGGER,
-
-    PATH_NUM, MAX_SUB_TOKEN_LEN, MODES
-)
-from dataset.python_wan.parser._parser import CodeParser
-from dataset.python_wan.utils import (
+from dataset.ast_parser.tree_sitter.parser import TreeSitterASTParser
+from dataset.ast_parser.tree_sitter.utils import (
     util_ast,
     util_path,
     util_traversal,
+)
+from dataset.python_wan import (
+    LANGUAGES, LIBS_DIR, ATTRIBUTES_DIR,
+    LOGGER,
+    MAX_SUB_TOKEN_LEN, MODES
 )
 from ncc.utils.file_ops import (
     file_io,
@@ -134,7 +132,7 @@ class AttrFns:
         so_dir = kwargs.get('so_dir')
 
         so_filename = os.path.join(os.path.expanduser(so_dir), '{}.so'.format(lang))
-        parser = CodeParser(so_filename, lang)
+        parser = TreeSitterASTParser(so_filename, lang)
         dest_filename = dest_filename + str(idx)
         with file_io.open(filename, "r") as reader, file_io.open(dest_filename, 'w') as writer:
             reader.seek(start)
@@ -173,9 +171,8 @@ class AttrFns:
     def path_fn(filename, dest_filename, idx, start=0, end=-1, *args):
         kwargs = args[0][0]  # canot feed dict parameters in multi-processing
 
-        dest_filename_terminals, dest_filename = dest_filename + '.terminals' + str(idx), dest_filename + str(idx)
-        with file_io.open(filename, "r") as reader, file_io.open(dest_filename_terminals, 'w') as writer_terminals, \
-            file_io.open(dest_filename, 'w') as writer:
+        dest_filename = dest_filename + str(idx)
+        with file_io.open(filename, "r") as reader, file_io.open(dest_filename, 'w') as writer:
             reader.seek(start)
             line = safe_readline(reader)
             while line:
@@ -183,26 +180,8 @@ class AttrFns:
                     break
                 ast = json_io.json_loads(line)
                 if ast:
-                    paths = util_path.ast_to_path(ast, MAX_PATH=PATH_NUM)
-                    if paths is None:
-                        paths = [[None] * 3] * PATH_NUM
-                    else:
-                        # copy paths size to PATH_NUM
-                        if len(paths) < PATH_NUM:
-                            supply_ids = list(range(len(paths))) * ((PATH_NUM - len(paths)) // len(paths)) \
-                                         + random.sample(range(len(paths)), ((PATH_NUM - len(paths)) % len(paths)))
-                            paths.extend([paths[idx] for idx in supply_ids])
-                    random.shuffle(paths)
-                    assert len(paths) == PATH_NUM
-                    head, body, tail = zip(*paths)
-                else:
-                    head, body, tail = [None] * PATH_NUM, [None] * PATH_NUM, [None] * PATH_NUM
-                # terminals
-                for terminal in itertools.chain(*zip(head, tail)):
-                    print(json_io.json_dumps(terminal), file=writer_terminals)
-                # path
-                for b in body:
-                    print(json_io.json_dumps(b), file=writer)
+                    paths = util_path.ast_to_path(ast)
+                    print(json_io.json_dumps(paths), file=writer)
                 line = safe_readline(reader)
 
     @staticmethod
@@ -331,8 +310,6 @@ def process(src_filename, tgt_filename, num_workers=cpu_count(), **kwargs):
                 PathManager.rm(src_filename)
 
     _cat_and_remove(tgt_filename, num_workers)
-    if modality == 'path':
-        _cat_and_remove(tgt_filename + '.terminals', num_workers)
 
 
 if __name__ == '__main__':
@@ -351,9 +328,7 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         "--attrs", "-a",
-        default=[
-            'raw_ast', 'binary_ast',
-        ],
+        default=['raw_ast', 'ast', 'path', ],
         type=str, nargs='+', help="attrs: raw_ast, ...",
     )
     parser.add_argument(
@@ -375,8 +350,15 @@ if __name__ == '__main__':
     """
 
     dest_raw_attrs = {
+        'new.code_tokens': 'code_tokens',
+        'new.docstring_tokens': 'docstring_tokens',
         'raw_ast': 'code',
-        'bin_ast': 'raw_ast',
+        'ast': 'raw_ast',
+        'path': 'ast',
+        'sbt': 'raw_ast',
+        'sbtao': 'raw_ast',
+        'binary_ast': 'raw_ast',
+        'traversal': 'ast',
     }
 
     for lang, mode in itertools.product(args.languages, MODES):

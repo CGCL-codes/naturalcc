@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
 
-import re
 import itertools
+import re
+
 from dpu_utils.codeutils import split_identifier_into_parts
 
 from ncc import LOGGER
-from ncc.utils.file_ops import json_io
 from ncc.data import constants
+from ncc.utils.file_ops import json_io
 
 NEWLINE_REGEX = re.compile(r"\n")
-WHITESPACE_REGEX = re.compile(r"[ \t\n]+")
+WHITESPACE_REGEX = re.compile(r"[ \r\t\n]+")
 SPACE_SPLITTER = re.compile(r"\s+")
 DPU_IDENTIFIER_SPLITTER = re.compile('[:@_a-zA-Z][_a-zA-Z0-9]*')
 URL_REGEX = re.compile(r"https?://\S+\b")
+
+SINGLE_LINE_COMMENT_EXP = r'//[^\n]*'
+MULTI_LINE_COMMENT_EXP = r'/\*.*?\*/'
+LITERAL_STRING_EXP = r'"([^\\"]|\\.)*?"'
+COMMENT_REMOVER = LITERAL_STRING_EXP + '|' + SINGLE_LINE_COMMENT_EXP + '|' + MULTI_LINE_COMMENT_EXP
 
 _filter_tokens = lambda tokens: [tok.strip() for tok in tokens if len(tok) > 0]
 
@@ -34,6 +40,13 @@ def space_tokenizer(line, **kwargs):
     """json string => list"""
     line = json_io.json_loads(line)
     return _space_tokenizer(line)
+
+
+def _lower_tokenizer(line, **kwargs):
+    """json string => list"""
+    tokens = _filter_tokens(line)
+    tokens = [str.lower(token) for token in tokens]
+    return tokens
 
 
 def lower_tokenizer(line, **kwargs):

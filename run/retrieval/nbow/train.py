@@ -47,18 +47,11 @@ def train(args, trainer, task, epoch_itr):
 
     valid_subsets = args['dataset']['valid_subset'].split(',')
     max_update = args['optimization']['max_update'] or math.inf
-    num_updates = 0  # init as 0, for zero-shot learning
-    sum_mrr, sample_sizes = 0., 0.
     for samples in progress:
-        # drop last
-        if len(samples[-1]['id']) != args['dataset']['max_sentences']:
-            continue
         with metrics.aggregate('train_inner'):
             log_output = trainer.train_step(samples)
             if log_output is None:  # OOM, overflow, ...
                 continue
-            sum_mrr += log_output['mrr']
-            sample_sizes += log_output['sample_size']
 
         # log mid-epoch stats
         num_updates = trainer.get_num_updates()
@@ -80,9 +73,9 @@ def train(args, trainer, task, epoch_itr):
 
         if num_updates >= max_update:
             break
+
     # log end-of-epoch stats
     stats = get_training_stats(metrics.get_smoothed_values('train'))
-    stats['mrr'] = round(sum_mrr / sample_sizes, 6)
     progress.print(stats, tag='train', step=num_updates)
 
     # reset epoch-level meters
@@ -97,7 +90,6 @@ def validate(args, trainer, task, epoch_itr, subsets):
         set_seed.set_torch_seed(args['dataset']['fixed_validation_seed'])
 
     valid_losses = []
-    sum_mrr, sample_sizes = 0., 0.
     for subset in subsets:
         # Initialize data iterator
         itr = task.get_batch_iterator(
@@ -131,16 +123,10 @@ def validate(args, trainer, task, epoch_itr, subsets):
         # don't pollute other aggregators (e.g., train meters)
         with metrics.aggregate(new_root=True) as agg:
             for sample in progress:
-                # drop last
-                if len(sample['id']) != args['dataset']['max_sentences_valid']:
-                    continue
                 log_output = trainer.valid_step(sample)
-                sum_mrr += log_output['mrr']
-                sample_sizes += log_output['sample_size']
 
         # log validation stats
         stats = get_valid_stats(args, trainer, agg.get_smoothed_values())
-        stats['mrr'] = round(sum_mrr / sample_sizes, 6)
         progress.print(stats, tag=subset, step=trainer.get_num_updates())
 
         valid_losses.append(stats[args['checkpoint']['best_checkpoint_metric']])
@@ -296,6 +282,7 @@ def cli_main():
         description="Downloading/Decompressing code_search_net dataset(s) or Tree-Sitter Library(ies)")
     parser.add_argument(
         "--yaml_file", "-f", type=str, help="load {yaml_file}.yml for train",
+        default='config/csn/all'
     )
     args = parser.parse_args()
     yaml_file = os.path.join(os.path.dirname(__file__), '{}.yml'.format(args.yaml_file))

@@ -4,14 +4,14 @@ preprocess:
     - code_tokens
     - docstring_tokens
     - traversal
-  # ~ path for dataset default. e.g.  for code_search_net, ~/filter = ~/.ncc/code_search_net/filter
-  trainpref: ~/.ncc/code_search_net/filter/php/train #", metavar="FP", default=None, help="train file prefix"
-  validpref: ~/.ncc/code_search_net/filter/php/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-  testpref:  ~/.ncc/code_search_net/filter/php/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+  # ~ path for dataset default. e.g.  for code_search_net, ~/filter = ~/code_search_net/filter
+  trainpref: ~/code_search_net/filter/php/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/code_search_net/filter/php/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/code_search_net/filter/php/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
 
   align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
-#  destdir: ~/.ncc/code_search_net/summarization/data-raw/php/ #", metavar="DIR", default="data-bin", help="destination dir"
-  destdir: ~/.ncc/code_search_net/codebert/traverse_roberta/data-mmap/php #", metavar="DIR", default="data-bin", help="destination dir"
+#  destdir: ~/code_search_net/summarization/data-raw/php/ #", metavar="DIR", default="data-bin", help="destination dir"
+  destdir: ~/code_search_net/codebert/traverse_roberta/data-mmap/php #", metavar="DIR", default="data-bin", help="destination dir"
   thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
   srcdict: ~
   #  nwordssrc: -1 #", metavar="N", default=-1, type=int, help="number of source words to retain"

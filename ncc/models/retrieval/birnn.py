@@ -5,7 +5,7 @@ import torch.nn as nn
 
 from ncc.models import register_model
 from ncc.models.ncc_model import NccRetrievalModel
-from ncc.modules.retrieval.rnn_encoder import RNNEncoder
+from ncc.modules.encoders.retrieval import RNNEncoder
 
 
 @register_model('birnn')

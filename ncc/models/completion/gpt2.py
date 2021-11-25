@@ -4,11 +4,11 @@ import torch.nn.functional as F
 
 from ncc.models import register_model
 from ncc.models.ncc_model import NccLanguageModel
-from ncc.modules.common.activations import get_activation
-from ncc.modules.common.layer_norm import LayerNorm
-from ncc.modules.common.layers import (
+from ncc.modules.base.activations import get_activation
+from ncc.modules.base.layer_norm import LayerNorm
+from ncc.modules.base.layers import (
     Embedding, Linear, )
-from ncc.modules.seq2seq.ncc_decoder import NccDecoder
+from ncc.modules.decoders.ncc_decoder import NccDecoder
 
 
 class MultiheadAttention(nn.Module):
@@ -149,12 +149,7 @@ class TransformerDecoder(NccDecoder):
         self.num_layers = args['model']['decoder_layers']
         self.out_layer_norm = LayerNorm(embed_dim)
 
-    def forward(
-        self,
-        prev_output_tokens,
-        encoder_out=None,
-        **kwargs
-    ):
+    def extract_features(self, prev_output_tokens, encoder_out=None, **kwargs):
         x = self.embed_tokens(prev_output_tokens)  # bsz, max_len, dim
         # x = F.dropout(x, p=self.dropout, training=self.training)
 
@@ -162,8 +157,18 @@ class TransformerDecoder(NccDecoder):
             x = layer(x)
 
         x = self.out_layer_norm(x)
-        x = F.linear(x, self.embed_tokens.weight, bias=None)
-        return [x]
+        return x
+
+    def forward(
+        self,
+        prev_output_tokens,
+        encoder_out=None,
+        **kwargs
+    ):
+        hidden_repr = self.extract_features(prev_output_tokens, encoder_out, **kwargs)
+        # x = F.linear(hidden_repr, self.embed_tokens.weight, bias=None)
+        x = F.linear(hidden_repr, self.embed_tokens.weight, bias=None)
+        return x, hidden_repr
 
 
 @register_model('completion_gpt2')

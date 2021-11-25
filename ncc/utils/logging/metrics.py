@@ -11,14 +11,12 @@ on the aggregation context in which the logging occurs. See the
 :func:`aggregate` context manager for more details.
 """
 
-from collections import defaultdict, OrderedDict
 import contextlib
-import time
-from typing import Callable, Dict, List, Optional
 import uuid
+from collections import defaultdict
+from typing import Callable, List, Optional
 
 from .meters import *
-
 
 # Aggregation contexts are considered "active" when inside the scope
 # created by the :func:`aggregate` context manager.

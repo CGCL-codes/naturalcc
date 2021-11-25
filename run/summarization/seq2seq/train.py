@@ -9,11 +9,11 @@ from ncc import tasks
 from ncc.data import iterators
 from ncc.trainers.ncc_trainers import Trainer
 from ncc.utils import checkpoint_utils, distributed_utils
+from ncc.utils import deractors
 from ncc.utils import set_seed
 from ncc.utils import utils
 from ncc.utils.file_ops.yaml_io import load_yaml
-from ncc.utils.logging import meters
-from ncc.utils.logging import metrics, progress_bar
+from ncc.utils.logging import meters, metrics, progress_bar
 from ncc.utils.path_manager import PathManager
 
 
@@ -47,7 +47,6 @@ def train(args, trainer, task, epoch_itr):
 
     valid_subsets = args['dataset']['valid_subset'].split(',')
     max_update = args['optimization']['max_update'] or math.inf
-    num_updates = 0  # init as 0, for zero-shot learning
     for samples in progress:
         with metrics.aggregate('train_inner'):
             log_output = trainer.train_step(samples)
@@ -180,6 +179,7 @@ def should_stop_early(args, valid_loss):
         return should_stop_early.num_runs >= args['checkpoint']['patience']
 
 
+@deractors.pre()
 def single_main(args, init_distributed=False):
     assert args['dataset']['max_tokens'] is not None or args['dataset']['max_sentences'] is not None, \
         'Must specify batch size either with --max-tokens or --max-sentences'
@@ -196,6 +196,8 @@ def single_main(args, init_distributed=False):
     if distributed_utils.is_master(args):
         save_dir = args['checkpoint']['save_dir']
         checkpoint_utils.verify_checkpoint_directory(save_dir)
+        if not PathManager.is_empty(os.path.join(save_dir, '*.pt')):
+            LOGGER.warning(f"{save_dir} contains checkpoint files.")
         PathManager.rm(os.path.join(save_dir, '*.pt'))  # this code will remove pre-trained models
 
     # 1. Setup task, e.g., translation, language modeling, etc.

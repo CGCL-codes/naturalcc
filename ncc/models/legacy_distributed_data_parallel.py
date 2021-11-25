@@ -1,4 +1,3 @@
-
 # Copyright (c) Facebook, Inc. and its affiliates.
 #
 # This source code is licensed under the MIT license found in the
@@ -15,10 +14,12 @@ This version also supports the *no_sync* context manager, which allows faster
 training with `--update-freq`.
 """
 
+from collections import OrderedDict
 from contextlib import contextmanager
 import copy
 
 import torch
+import torch.distributed as dist
 from torch import nn
 from torch.autograd import Variable
 
@@ -42,7 +43,7 @@ class LegacyDistributedDataParallel(nn.Module):
             performing all-reduce (default: 256M).
     """
 
-    def __init__(self, module, world_size, process_group=None, buffer_size=2**28):
+    def __init__(self, module, world_size, process_group=None, buffer_size=2 ** 28):
         super().__init__()
 
         self.module = module
@@ -60,6 +61,15 @@ class LegacyDistributedDataParallel(nn.Module):
         # We can also forcibly accumulate grads locally and only do the
         # all-reduce at some later time
         self.accumulate_grads = False
+
+        # make per-device lists of parameters
+        paramlists = OrderedDict()
+        for param in self.module.parameters():
+            device = param.device
+            if paramlists.get(device) is None:
+                paramlists[device] = []
+            paramlists[device] += [param]
+        self.per_device_params = list(paramlists.values())
 
         # For NCCL backend, since every single NCCL call is asynchoronous, we
         # therefore directly enqueue all the NCCL reduction calls to the
@@ -102,10 +112,10 @@ class LegacyDistributedDataParallel(nn.Module):
                 for p in params:
                     sz = p.numel()
                     if p.grad is not None:
-                        buffer[offset:offset+sz].copy_(p.grad.data.view(-1))
+                        buffer[offset:offset + sz].copy_(p.grad.data.view(-1))
                         nonzero_buffer = True
                     else:
-                        buffer[offset:offset+sz].zero_()
+                        buffer[offset:offset + sz].zero_()
                     offset += sz
             else:
                 # we only have a single grad to all-reduce
@@ -129,9 +139,9 @@ class LegacyDistributedDataParallel(nn.Module):
             for p in params:
                 sz = p.numel()
                 if p.grad is not None:
-                    p.grad.data.copy_(buffer[offset:offset+sz].view_as(p))
+                    p.grad.data.copy_(buffer[offset:offset + sz].view_as(p))
                 else:
-                    p.grad = buffer[offset:offset+sz].view_as(p).clone()
+                    p.grad = buffer[offset:offset + sz].view_as(p).clone()
                 offset += sz
 
         def reduction_fn():
@@ -179,3 +189,104 @@ class LegacyDistributedDataParallel(nn.Module):
 
             if p.requires_grad:
                 p.register_hook(allreduce_hook)
+
+    def all_reduce_grads(self):
+        """
+        This function must be called explicitly after backward to reduce
+        gradients. There is no automatic hook like c10d.
+        """
+
+        def all_reduce_params(params):
+            buffer = self.buffer
+            nonzero_buffer = False
+            if len(params) > 1:
+                offset = 0
+                for p in params:
+                    sz = p.numel()
+                    if p.grad is not None:
+                        buffer[offset: offset + sz].copy_(p.grad.data.view(-1))
+                        nonzero_buffer = True
+                    else:
+                        buffer[offset: offset + sz].zero_()
+                    offset += sz
+            else:
+                # we only have a single grad to all-reduce
+                p = params[0]
+                if p.grad is not None:
+                    buffer = p.grad.data
+                    nonzero_buffer = True
+                elif p.numel() <= self.buffer.numel():
+                    buffer = buffer[: p.numel()]
+                    buffer.zero_()
+                else:
+                    buffer = torch.zeros_like(p)
+
+            if nonzero_buffer:
+                buffer.div_(self.world_size)
+
+            def all_reduce(tensor, group, op="sum"):
+                if op == "sum":
+                    op = dist.ReduceOp.SUM
+                elif op == "max":
+                    op = dist.ReduceOp.MAX
+                else:
+                    raise NotImplementedError
+                dist.all_reduce(tensor, op=op, group=group)
+                return tensor
+
+            all_reduce(buffer, self.process_group)
+
+            # copy all-reduced grads back into their original place
+            offset = 0
+            for p in params:
+                sz = p.numel()
+                if p.grad is not None:
+                    p.grad.data.copy_(buffer[offset: offset + sz].view_as(p))
+                else:
+                    p.grad = buffer[offset: offset + sz].view_as(p).clone()
+                offset += sz
+
+        def reduction_fn():
+            # This function only needs to be called once
+            if self.accumulate_grads:
+                return
+
+            if self.buffer is None:
+                self.buffer = next(self.module.parameters()).new(self.buffer_size)
+
+            for params in self.per_device_params:
+                # All-reduce the gradients in buckets
+                offset = 0
+                buffered_params = []
+                for param in params:
+                    if not param.requires_grad:
+                        continue
+                    if param.grad is None:
+                        param.grad = torch.zeros_like(param)
+
+                    if hasattr(param, 'expert'):
+                        # Skip gradient sync for unshared parameters
+                        continue
+
+                    if param.grad.requires_grad:
+                        raise RuntimeError(
+                            "DistributedDataParallel only works "
+                            "with gradients that don't require "
+                            "grad"
+                        )
+                    sz = param.numel()
+                    if sz > self.buffer.numel():
+                        # all-reduce big params directly
+                        all_reduce_params([param])
+                    else:
+                        if offset + sz > self.buffer.numel():
+                            all_reduce_params(buffered_params)
+                            offset = 0
+                            buffered_params.clear()
+                        buffered_params.append(param)
+                        offset += sz
+
+                if len(buffered_params) > 0:
+                    all_reduce_params(buffered_params)
+
+        reduction_fn()

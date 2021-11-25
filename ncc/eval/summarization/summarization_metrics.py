@@ -13,8 +13,10 @@ except ImportError as err:
 
     download('pycocoevalcap')
 
+from .smoothed_bleu import compute_smoothed_bleu
 
-def eval_accuracies(hypotheses, references, sources=None, filename=None, mode='dev'):
+
+def eval_accuracies(hypotheses, references, sources=None, filename=None, mode='dev', smoothed_blue=False):
     """An unofficial evalutation helper.
      Arguments:
         hypotheses: A mapping from instance id to predicted sequences.
@@ -26,8 +28,18 @@ def eval_accuracies(hypotheses, references, sources=None, filename=None, mode='d
     """
     assert (sorted(references.keys()) == sorted(hypotheses.keys()))
 
-    # Compute BLEU scores
-    _, bleu, ind_bleu = corpus_bleu(hypotheses, references)
+    # Compute BLEU-4 scores
+    _, bleu4, ind_bleu = corpus_bleu(hypotheses, references)
+
+    # smoothed blue
+    if smoothed_blue:
+        refs, hyps = [], []
+        for idx in range(len(references)):
+            refs.append([line.split() for line in references[idx]])
+            hyps.append([line.split() for line in hypotheses[idx]][0])
+        sbleu = compute_smoothed_bleu(reference_corpus=refs, translation_corpus=hyps)
+    else:
+        sbleu = 0.0
 
     # Compute ROUGE scores
     rouge_calculator = Rouge()
@@ -56,4 +68,9 @@ def eval_accuracies(hypotheses, references, sources=None, filename=None, mode='d
             print(json.dumps(logobj), file=fw)
 
     if fw: fw.close()
-    return bleu * 100, rouge_l * 100, meteor * 100
+
+    sbleu, bleu4, rouge_l, meteor = map(lambda score: round(score * 100, 2), (sbleu, bleu4, rouge_l, meteor))
+    if smoothed_blue:
+        return bleu4, rouge_l, meteor, sbleu
+    else:
+        return bleu4, rouge_l, meteor

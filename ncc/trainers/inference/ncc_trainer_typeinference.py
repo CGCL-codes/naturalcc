@@ -1,20 +1,18 @@
-
-import logging
 import sys
 from itertools import chain
 from typing import Any, Dict, List
 
 import torch
 
+from ncc import LOGGER
 from ncc import models
 from ncc import optimizers
 from ncc.utils import checkpoint_utils, distributed_utils, utils
 from ncc.utils.file_ops.yaml_io import PathManager
 from ncc.utils.logging import meters, metrics
 
-logger = logging.getLogger(__name__)
-
 from torch.optim.lr_scheduler import LambdaLR
+
 
 def get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_training_steps, last_epoch=-1):
     """ Create a schedule with a learning rate that decreases linearly after
@@ -146,7 +144,7 @@ class Trainer(object):
 
         if self.args['common']['fp16']:
             if self.cuda and torch.cuda.get_device_capability(0)[0] < 7:
-                logger.info(
+                LOGGER.info(
                     "NOTE: your device does NOT support faster training with --fp16, "
                     "please switch to FP32 which is likely to be faster"
                 )
@@ -158,8 +156,8 @@ class Trainer(object):
                 self._optimizer = optimizers.FP16Optimizer.build_optimizer(self.args, params)
         else:
             if self.cuda and torch.cuda.get_device_capability(0)[0] >= 7:
-                logger.info("NOTE: your device may support faster training with --fp16")
-            self._optimizer = optimizers.build_optimizer(self.args, self.model.parameters()) # params
+                LOGGER.info("NOTE: your device may support faster training with --fp16")
+            self._optimizer = optimizers.build_optimizer(self.args, self.model.parameters())  # params
 
         if self.args['optimization']['use_bmuf']:
             self._optimizer = optimizers.FairseqBMUF(self.args, self._optimizer)
@@ -168,9 +166,9 @@ class Trainer(object):
         # building the optimizer, so that the initial learning rate is set.
         # self._lr_scheduler = lr_scheduler.build_lr_scheduler(self.args, self.optimizer)
         # self._lr_scheduler.step_update(0)
-        self._optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args['optimization']['lr'][0], betas=(0.9, 0.98), eps=1e-6, weight_decay=0)
+        self._optimizer = torch.optim.Adam(self.model.parameters(), lr=self.args['optimization']['lr'][0],
+                                           betas=(0.9, 0.98), eps=1e-6, weight_decay=0)
         self._lr_scheduler = get_linear_schedule_with_warmup(self._optimizer, 5000, 200000)
-
 
     def save_checkpoint(self, filename, extra_state):
         """Save all training state in a checkpoint file."""
@@ -255,7 +253,7 @@ class Trainer(object):
 
         if extra_state is not None:
             epoch = extra_state["train_iterator"]["epoch"]
-            logger.info(
+            LOGGER.info(
                 "loaded checkpoint {} (epoch {} @ {} updates)".format(
                     filename, epoch, self.get_num_updates()
                 )
@@ -273,7 +271,7 @@ class Trainer(object):
                     if isinstance(meter, meters.TimeMeter):
                         meter.reset()
         else:
-            logger.info("no existing checkpoint found {}".format(filename))
+            LOGGER.info("no existing checkpoint found {}".format(filename))
 
         return extra_state
 
@@ -287,7 +285,7 @@ class Trainer(object):
     ):
         """Return an EpochBatchIterator over the training set for a given epoch."""
         if load_dataset:
-            logger.info("loading train data for epoch {}".format(epoch))
+            LOGGER.info("loading train data for epoch {}".format(epoch))
             self.task.load_dataset(
                 self.args['dataset']['train_subset'],
                 epoch=epoch,
@@ -377,7 +375,7 @@ class Trainer(object):
                 self.lr_scheduler.step()
                 # logging_outputs.append(logging_output)
                 # sample_size += sample_size_i
-    
+
                 # emptying the CUDA cache after the first step can
                 # reduce the chance of OOM
                 # if self.cuda and self.get_num_updates() == 0:
@@ -387,7 +385,7 @@ class Trainer(object):
                     self._log_oom(e)
                     if raise_oom:
                         raise e
-                    logger.warning(
+                    LOGGER.warning(
                         "attempting to recover from OOM in forward/backward pass"
                     )
                     ooms += 1
@@ -427,13 +425,13 @@ class Trainer(object):
         #         pass
         # except:
         #     pass
-            # with torch.autograd.profiler.record_function("clip-grads"):
-            #     # clip grads
-            #     grad_norm = self.clip_grad_norm(self.args['optimization']['clip_norm'])
-            #
-            # # check that grad norms are consistent across workers
-            # if not self.args['optimization']['use_bmuf']:
-            #     self._check_grad_norms(grad_norm)
+        # with torch.autograd.profiler.record_function("clip-grads"):
+        #     # clip grads
+        #     grad_norm = self.clip_grad_norm(self.args['optimization']['clip_norm'])
+        #
+        # # check that grad norms are consistent across workers
+        # if not self.args['optimization']['use_bmuf']:
+        #     self._check_grad_norms(grad_norm)
 
         #     # take an optimization step
         #     self.optimizer.step()
@@ -464,13 +462,13 @@ class Trainer(object):
         #         )
         #     raise
         # except OverflowError as e:
-        #     logger.info("NOTE: overflow detected, " + str(e))
+        #     LOGGER.info("NOTE: overflow detected, " + str(e))
         #     self.zero_grad()
         #     logging_output = None
         # except RuntimeError as e:
         #     if "out of memory" in str(e):
         #         self._log_oom(e)
-        #         logger.error("OOM during optimization, irrecoverable")
+        #         LOGGER.error("OOM during optimization, irrecoverable")
         #     raise e
         #
         # if self.args['common']['fp16']:
@@ -508,7 +506,7 @@ class Trainer(object):
                 if "out of memory" in str(e):
                     self._log_oom(e)
                     if not raise_oom:
-                        logger.warning(
+                        LOGGER.warning(
                             "ran out of memory in validation step, retrying batch"
                         )
                         for p in self.model.parameters():
@@ -670,10 +668,10 @@ class Trainer(object):
 
     def _log_oom(self, exc):
         msg = "OOM: Ran out of memory with exception: {}".format(exc)
-        logger.warning(msg)
+        LOGGER.warning(msg)
         if torch.cuda.is_available() and hasattr(torch.cuda, "memory_summary"):
             for device_idx in range(torch.cuda.device_count()):
-                logger.warning(torch.cuda.memory_summary(device=device_idx))
+                LOGGER.warning(torch.cuda.memory_summary(device=device_idx))
         sys.stderr.flush()
 
     def _aggregate_logging_outputs(

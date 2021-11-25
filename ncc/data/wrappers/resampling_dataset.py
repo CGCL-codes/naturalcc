@@ -4,8 +4,9 @@
 # LICENSE file in the root directory of this source tree.
 
 import numpy as np
-from ncc.data.wrappers.base_wrapper_dataset import BaseWrapperDataset
+
 from ncc.data.tools import plasma_utils
+from ncc.data.wrappers.base_wrapper_dataset import BaseWrapperDataset
 
 
 class ResamplingDataset(BaseWrapperDataset):

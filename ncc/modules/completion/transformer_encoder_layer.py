@@ -1,9 +1,10 @@
 import torch
 import torch.nn as nn
-from ncc.modules.common.layer_norm import LayerNorm
-from ncc.modules.attention.path_multihead_attention import PathMultiheadAttention
 import torch.nn.functional as F
-from ncc.utils import utils
+
+from ncc.modules.attention import PathMultiheadAttention
+from ncc.modules.base.layer_norm import LayerNorm
+from ncc.utils.activations import get_activation
 
 
 class TransformerEncoderLayer(nn.Module):
@@ -29,7 +30,7 @@ class TransformerEncoderLayer(nn.Module):
         self.activation_dropout = activation_dropout
         self.context_size = context_size
         # Initialize blocks
-        self.activation_fn = utils.get_activation_fn(activation_fn)
+        self.activation_fn = get_activation(activation_fn)
         self.self_attn = PathMultiheadAttention(
             self.embedding_dim,
             self.context_size,

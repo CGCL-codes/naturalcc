@@ -121,7 +121,7 @@ class CompletionDataset(NccDataset):
 
     def ordered_indices(self):
         indices = super().ordered_indices()
-        indices = indices[self.tgt_sizes > 1]
+        indices = indices[self.tgt_sizes < 256]
         if self.shuffle:
             random.shuffle(indices)
         return indices

@@ -4,11 +4,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import os
-from setuptools import setup, find_packages, Extension
-import sys
 import glob
+import os
 import subprocess
+import sys
+
+from setuptools import setup, find_packages, Extension
 
 if sys.version_info < (3, 6):
     sys.exit('Sorry, Python >= 3.6 is required for natural code.')
@@ -92,21 +93,22 @@ except ImportError:
     pass
 
 import setuptools.command.build_py
+
+
 class generate_proto(setuptools.command.build_py.build_py):
-  """Custom build command."""
+    """Custom build command."""
 
-  def run(self):
-      print('running proto')
-      # generate proto files
-      proto_path = 'third_party/programl/programl/proto'
-      # clean proto files
-      subprocess.run(["rm -f {}/*.py".format(proto_path)], shell=True, )
-      print(glob.glob('{}/*'.format(proto_path)))
-      for file in glob.glob('{}/*'.format(proto_path)):
-
-          args = "--proto_path=. --python_out=. --grpc_python_out=. {}".format(file)
-          result = subprocess.call("python -m grpc_tools.protoc " + args, shell=True)
-          print("grpc generation result for '{0}': code {1}".format(file, result))
+    def run(self):
+        print('running proto')
+        # generate proto files
+        proto_path = 'third_party/programl/programl/proto'
+        # clean proto files
+        subprocess.run(["rm -f {}/*.py".format(proto_path)], shell=True, )
+        print(glob.glob('{}/*'.format(proto_path)))
+        for file in glob.glob('{}/*'.format(proto_path)):
+            args = "--proto_path=. --python_out=. --grpc_python_out=. {}".format(file)
+            result = subprocess.call("python -m grpc_tools.protoc " + args, shell=True)
+            print("grpc generation result for '{0}': code {1}".format(file, result))
 
 
 cmdclass['generate_proto'] = generate_proto
@@ -116,11 +118,12 @@ if 'clean' in sys.argv[1:]:
     print("deleting Cython files...")
     subprocess.run(['rm -f ncc/*.so ncc/**/*.so ncc/*.pyd ncc/**/*.pyd'], shell=True)
 
+from ncc import __VERSION__
 
 setup(
     name='ncc',
-    version='0.4.0',
-    description='NaturalCode: A Benchmark towards Understanding theNaturalness of Source Code and Comment',
+    version=__VERSION__,
+    description='NaturalCode: A Benchmark towards Understanding the Naturalness of Source Code Comprehension',
     url='https://github.com/xcodemind/naturalcc',
     classifiers=[
         'Intended Audience :: Science/Research',

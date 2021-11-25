@@ -5,6 +5,9 @@ import os
 
 from ncc.optimizers.ncc_optimizer import NccOptimizer
 from ncc.optimizers.bmuf import NccBMUF
+from ncc.optimizers.amp_optimizer import (
+    AMPOptimizer,
+)
 from ncc.optimizers.fp16_optimizer import (
     FP16Optimizer,
     MemoryEfficientFP16Optimizer,

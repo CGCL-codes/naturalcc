@@ -42,6 +42,10 @@ class NccOptimizer(object):
             for p in param_group['params']:
                 yield p
 
+    @property
+    def param_groups(self):
+        return self.optimizer.param_groups
+
     def __getstate__(self):
         return self._optimizer.__getstate__()
 
@@ -50,9 +54,12 @@ class NccOptimizer(object):
         return self.optimizer.param_groups[0]['lr']
 
     def set_lr(self, lr):
-        """Set the learning rate."""
+        """
+        Set the learning rate.
+        lr_factor: different learning rates for modules
+        """
         for param_group in self.optimizer.param_groups:
-            param_group['lr'] = lr
+            param_group['lr'] = lr * param_group['lr_factor'] if param_group.get('lr_factor', None) is not None else lr
 
     def state_dict(self):
         """Return the optimizer's state dict."""
@@ -77,10 +84,17 @@ class NccOptimizer(object):
         """Computes the sum of gradients of the given tensor w.r.t. graph leaves."""
         loss.backward()
 
+    def all_reduce_grads(self, module):
+        """Manually all-reduce gradients (if required)."""
+        if hasattr(module, "all_reduce_grads"):
+            module.all_reduce_grads()
+
     def multiply_grads(self, c):
         """Multiplies grads by a constant *c*."""
         for p in self.params:
             if p.grad is not None:
+                if torch.is_tensor(c):
+                    c = c.to(p.grad.device)
                 p.grad.data.mul_(c)
 
     def clip_grad_norm(self, max_norm, aggregate_norm_fn=None):

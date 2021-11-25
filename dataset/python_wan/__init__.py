@@ -2,27 +2,28 @@
 
 import os
 from ncc import (
-    __CACHE_DIR__,
-    __BPE_DIR__, __LIBS_DIR__,
-    LOGGER,
+    __NCC_DIR__,
+    __BPE_DIR__, __TREE_SITTER_LIBS_DIR__,
+)
+from ncc.data.constants import (
+    RAW, ATTRIBUTES,
 )
 
 DATASET_NAME = 'python_wan'
-DATASET_DIR = os.path.join(__CACHE_DIR__, DATASET_NAME)
+DATASET_DIR = os.path.join(__NCC_DIR__, DATASET_NAME)
 
-RAW_DIR = os.path.join(DATASET_DIR, 'raw')
-ATTRIBUTES_DIR = os.path.join(DATASET_DIR, 'attributes')
+RAW_DIR = os.path.join(DATASET_DIR, RAW)
+ATTRIBUTES_DIR = os.path.join(DATASET_DIR, ATTRIBUTES)
 BPE_DIR = __BPE_DIR__
-LIBS_DIR = __LIBS_DIR__
+LIBS_DIR = __TREE_SITTER_LIBS_DIR__
 
 LANGUAGES = ['python']
 MODES = ['train', 'valid', 'test']
 
 RECURSION_DEPTH = 999  # dfs recursion limitation
 # path modality
-PATH_NUM = 300  # path modality number
+PATH_NUM = 200  # path modality number
 # sbt modality
-MAX_SUB_TOKEN_LEN = 5  # we only consider the first 5 sub-tokens from tokenizer
 NODE_TMP = 'TMP'
 
 MEANINGLESS_TOKENS = set(['(', ')', '[', ']', '{', '}', ';', '@', '#', ':', '()', '<>', '{}'])
@@ -32,10 +33,9 @@ MAX_CODE_TOKEN_LEN = 70
 NO_METHOD = '<NO_METHOD>'
 
 __all__ = (
-    DATASET_NAME,
-    RAW_DIR, LIBS_DIR, ATTRIBUTES_DIR,
-    LANGUAGES, MODES,
-    LOGGER,
+    "DATASET_NAME",
+    "RAW_DIR", "LIBS_DIR", "ATTRIBUTES_DIR",
+    "LANGUAGES", "MODES",
 
-    RECURSION_DEPTH, MAX_SUB_TOKEN_LEN, NODE_TMP,
+    "RECURSION_DEPTH", "NODE_TMP",
 )

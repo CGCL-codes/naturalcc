@@ -11,7 +11,7 @@ common:
   log_interval: 500 # type=int, default=100, metavar='N', help='log progress every N batches (when progress bar is disabled)'
   log_format: simple # default=None, help='log format to use', choices=['json', 'none', 'simple', 'tqdm']
   tensorboard_logdir: '' # default='', help='path to save logs for tensorboard, should match --logdir of running tensorboard (default: no tensorboard logging)'
-  memory_efficient_fp16: 1 # action='store_true', help='use a memory-efficient version of FP16 training; implies --fp16'
+  memory_efficient_fp16: 0 # action='store_true', help='use a memory-efficient version of FP16 training; implies --fp16'
   fp16_no_flatten_grads: 1 # action='store_true', help='don\'t flatten FP16 grads tensor'
   fp16_init_scale: 128 # 2 ** 7 # default=2 ** 7, type=int, help='default FP16 loss scale'
   fp16_scale_window: ~ # type=int, help='number of updates before increasing loss scale'
@@ -25,8 +25,15 @@ common:
   cpu: 0 # action='store_true', help='use CPU instead of CUDA'
   fp16: 0 # action='store_true', help='use FP16'
   fp16_opt_level: '01' # type=str, default="O1", help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']. See details at https://nvidia.github.io/apex/amp.html",
+  bf16: 0 # '--bf16', action='store_true', help='use bfloat16; implies --tpu'
+  memory_efficient_bf16: 0 # 'use a memory-efficient version of BF16 training; implies --bf16
   server_ip: '' # type=str, default="", help="For distant debugging."
   server_port: '' # type=str, default="", help="For distant debugging."
+
+  amp: 0 # type=bool, default=False, help="use automatic mixed precision"
+  amp_batch_retries: 2 # type=int, default=2, help="number of retries of same batch after reducing loss scale with AMP"
+  amp_init_scale: 2 ** 7 # type=int, default=2 ** 7, help="default AMP loss scale"
+  amp_scale_window: ~ # type=Optional[int], default=None, help="number of updates before increasing AMP loss scale"
 
 dataset:
   num_workers: 3 # default=1, type=int, metavar='N', help='how many subprocesses to use for data loading'
@@ -72,10 +79,7 @@ distributed_training:
 
 
 task:
-  # raw data
-#  data: ~/ncc_data/python_wan/summarization/data-raw # help='colon separated path to data directories list, will be iterated upon during epochs in round-robin manner'
-  # bin data
-  data: ~/ncc_data/python_wan/summarization/data-mmap # help='colon separated path to data directories list, will be iterated upon during epochs in round-robin manner'
+  data: ~/python_wan/summarization/data-mmap # help='colon separated path to data directories list, will be iterated upon during epochs in round-robin manner'
 
   # for summarization
   source_lang: code_tokens
@@ -185,7 +189,7 @@ checkpoint:
   best_checkpoint_metric: bleu # type=str, default='loss', help='metric to use for saving "best" checkpoints'
   maximize_best_checkpoint_metric: 1 # action='store_true', help='select the largest metric value for saving "best" checkpoints'
   patience: 10 # type=int, default=-1, metavar='N', help=('early stop training if valid performance doesn\'t improve for N consecutive validation runs; note that this is influenced by --validate-interval')
-  save_dir: ~/ncc_data/python_wan/summarization/data-mmap/seq2seq/checkpoints # type=str, required=True, help="The output directory where the model predictions and checkpoints will be written.",
+  save_dir: ~/python_wan/summarization/data-mmap/seq2seq/checkpoints # type=str, required=True, help="The output directory where the model predictions and checkpoints will be written.",
   should_continue: 0 # action="store_true", help="Whether to continue from latest checkpoint in output_dir"
   model_name_or_path: ~ # default=None, type=str, help="The model checkpoint for weights initialization. Leave None if you want to train a model from scratch.",
   cache_dir: ~ # default=None, type=str, help="Optional directory to store the pre-trained models downloaded from s3 (instead of the default one)",
@@ -197,13 +201,13 @@ checkpoint:
 
 
 eval:
-  path: ~/ncc_data/python_wan/summarization/data-mmap/seq2seq/checkpoints/checkpoint_best.pt # , metavar='FILE', help='path(s) to model file(s), colon separated'
+  path: ~/python_wan/summarization/data-mmap/seq2seq/checkpoints/checkpoint_best.pt # , metavar='FILE', help='path(s) to model file(s), colon separated'
   result_path: ~
   remove_bpe: ~ # ', nargs='?', const='@@ ', default=None, help='remove BPE tokens before scoring (can be set to sentencepiece)'
   quiet: 0 # ', action='store_true', help='only print final scores'
   model_overrides: '{}' # default="{}", type=str, metavar='DICT', help='a dictionary used to override model args at generation '
 
-  max_sentences: 2048 # evaluation batch size, because while evaluation, it will not cost much ram, we can increase the batch size
+  max_sentences: 64 # evaluation batch size, because while evaluation, it will not cost much ram, we can increase the batch size
   beam: 1 # ', default=5, type=int, metavar='N', help='beam size')
   nbest: 1 # ', default=1, type=int, metavar='N', help='number of hypotheses to output')
   max_len_a: 0 #', default=0, type=float, metavar='N', help=('generate sequences of maximum length ax + b, where x is the source length'))

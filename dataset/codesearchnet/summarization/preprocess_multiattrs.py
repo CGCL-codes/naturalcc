@@ -12,7 +12,7 @@ import ujson
 import shutil
 from collections import namedtuple
 from multiprocessing import Pool
-from ncc.utils.util_graph import (build_graph, tree2dgl)
+from ncc.utils.graph import (build_graph, tree2dgl)
 from ncc import tasks
 from collections import Counter
 from ncc.data import (
@@ -20,8 +20,8 @@ from ncc.data import (
     indexed_dataset,
 )
 from ncc.data.tools.binarizer import Binarizer
-from ncc.utils import tokenizer
-from ncc.utils.util_file import load_yaml
+from ncc.tokenizers import tokenization
+from ncc.utils.file_ops.yaml_io import load_yaml
 from ncc import LOGGER
 from collections import OrderedDict
 
@@ -35,7 +35,7 @@ def binarize(args: Dict, filename: str, dict: Dictionary, in_file: str, attr: st
     def consumer(tensor):
         ds.add_item(tensor)
 
-    res = Binarizer.binarize(filename, dict, consumer, tokenize=tokenizer.tokenize_list,
+    res = Binarizer.binarize(filename, dict, consumer, tokenize=tokenization.json_tokenizer,
                              append_eos=append_eos, offset=offset, end=end)
     ds.finalize('{}.idx'.format(in_file))
     return res
@@ -64,9 +64,9 @@ def main(args):
     def build_dictionary(filenames, modality, src=False, tgt=False):
         assert src ^ tgt
         if modality in ['binary_ast']:
-            tokenize_func = tokenizer.tokenize_tree
+            tokenize_func = tokenization.json_tokenizer
         elif modality in ['code_tokens', 'docstring_tokens', 'sbt', 'sbtao', 'path', 'path.terminals', 'traversal']:
-            tokenize_func = tokenizer.tokenize_list
+            tokenize_func = tokenization.json_tokenizer
         else:
             raise NotImplementedError("{}".format(modality))
 
@@ -136,7 +136,7 @@ def main(args):
         merge_result(
             Binarizer.binarize(
                 input_file, vocab, lambda t: ds.add_item(t),
-                tokenize=tokenizer.tokenize_list, offset=0, end=offsets[1], append_eos=False,
+                tokenize=tokenization.json_tokenizer, offset=0, end=offsets[1], append_eos=False,
             )
         )
         if num_workers > 1:

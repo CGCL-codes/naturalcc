@@ -47,7 +47,7 @@ dataset:
   fixed_validation_seed: ~ # default=None, type=int, metavar='N', help='specified random seed for validation'
   disable_validation: 0 # 1 # action='store_true',help='disable validation'
   max_tokens_valid: ~ # type=int, metavar='N', help='maximum number of tokens in a validation batch (defaults to --max-tokens)'
-  max_sentences_valid: 64 # type=int, metavar='N', help='maximum number of sentences in a validation batch (defaults to --max-sentences)'
+  max_sentences_valid: 32 # type=int, metavar='N', help='maximum number of sentences in a validation batch (defaults to --max-sentences)'
   curriculum: 5 # default=0, type=int, metavar='N', help='don\'t shuffle batches for first N epochs'
   gen_subset: test # default='test', metavar='SPLIT', help='data subset to generate (train, valid, test)'
   num_shards: 1 # default=1, type=int, metavar='N', help='shard generation over N shards'
@@ -56,7 +56,7 @@ dataset:
   truncate_target: 1
 
 distributed_training:
-  distributed_world_size: 4 # default=max(1, torch.cuda.device_count()
+  distributed_world_size: 1 # default=max(1, torch.cuda.device_count()
   distributed_rank: 0 # default=0, type=int, help='rank of the current worker'
   distributed_backend: nccl # default='nccl', type=str, help='distributed backend'
   distributed_init_method: ~ # default=None, type=str,help='typically tcp://hostname:port that will be used to establish initial connetion'
@@ -84,7 +84,7 @@ task:
 #    - name
 #    - param
 
-  max_target_positions: 513 #', default=1024, type=int, metavar='N', help='max number of tokens in the target sequence'
+  max_target_positions: 256 #', default=1024, type=int, metavar='N', help='max number of tokens in the target sequence'
   add_bos_token: 0 #', action='store_true', help='prepend beginning of sentence token (<s>)'
 
   # options for reporting BLEU during validation
@@ -106,7 +106,7 @@ model:
   decoder_hidden_size: 300 #', type=int, metavar='N', help='decoder hidden size'
   decoder_layers: 6 # type=int, metavar='N', help='num decoder layers'
   decoder_attention_heads: 6 # ', type=int, metavar='N', help='num decoder attention heads')
-  max_target_positions: 513
+  max_target_positions: 256
   activation_fn: gelu
   decoder_ffn_embed_dim: 1200
 
@@ -154,7 +154,7 @@ checkpoint:
   reset_optimizer: ~ # action='store_true', help='if set, does not load optimizer state from the checkpoint'
   optimizer_overrides: '{}' # default="{}", type=str, metavar='DICT', help='a dictionary used to override optimizer args when loading a checkpoint'
   save_interval: 1 # type=int, default=1, metavar='N', help='save a checkpoint every N epochs'
-  save_interval_updates: 0 # type=int, default=0, metavar='N', help='save a checkpoint (and validate) every N updates'
+  save_interval_updates: 500 # type=int, default=0, metavar='N', help='save a checkpoint (and validate) every N updates'
   keep_interval_updates: 0 # type=int, default=-1, metavar='N', help='keep the last N checkpoints saved with --save-interval-updates'
   keep_last_epochs: -1 # type=int, default=-1, metavar='N', help='keep last N epoch checkpoints'
   keep_best_checkpoints: -1 # type=int, default=-1, metavar='N', help='keep best N checkpoints based on scores'
@@ -164,7 +164,7 @@ checkpoint:
   no_save_optimizer_state: ~ # action='store_true', help='don\'t save optimizer-state as part of checkpoint'
   best_checkpoint_metric: mrr # type=str, default='loss', help='metric to use for saving "best" checkpoints'
   maximize_best_checkpoint_metric: 1 # action='store_true', help='select the largest metric value for saving "best" checkpoints'
-  patience: 5 # type=int, default=-1, metavar='N', help=('early stop training if valid performance doesn\'t improve for N consecutive validation runs; note that this is influenced by --validate-interval')
+  patience: 3 # type=int, default=-1, metavar='N', help=('early stop training if valid performance doesn\'t improve for N consecutive validation runs; note that this is influenced by --validate-interval')
   should_continue: 0 # action="store_true", help="Whether to continue from latest checkpoint in output_dir"
   model_name_or_path: ~ # default=None, type=str, help="The model checkpoint for weights initialization. Leave None if you want to train a model from scratch.",
   cache_dir: ~ # default=None, type=str, help="Optional directory to store the pre-trained models downloaded from s3 (instead of the default one)",
@@ -178,8 +178,8 @@ eval:
   path: ~/ncc_data/codexglue/code_to_text/completion/data-mmap/java/gpt2/checkpoints/checkpoint_best.pt # , metavar='FILE', help='path(s) to model file(s), colon separated'
   model_overrides: '{}' # default="{}", type=str, metavar='DICT', help='a dictionary used to override model args at generation '
   checkpoint_suffix: '' # default='', help='Suffix to add to the checkpoint file name'
-  max_sentences_eval: 64
+  max_sentences_eval: 32
 
 kd:
-  gen_topk: 5 # generate top-k probabilities and indices for KD task
-  distill_topk: 3 # only use distill_topk probabilities and indices for KD training
+  gen_topk: 20 # generate top-k probabilities and indices for KD task
+  distill_topk: 20 # only use distill_topk probabilities and indices for KD training

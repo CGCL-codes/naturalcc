@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import gdown
 import os
 import tarfile
+
+import gdown
 
 from ncc import (
     __BPE_DIR__,

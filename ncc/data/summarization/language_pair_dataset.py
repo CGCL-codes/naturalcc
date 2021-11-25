@@ -6,6 +6,10 @@ import numpy as np
 import torch
 
 from ncc import LOGGER
+from ncc.data.constants import (
+    DEFAULT_MAX_SOURCE_POSITIONS,
+    DEFAULT_MAX_TARGET_POSITIONS,
+)
 from ncc.data.ncc_dataset import NccDataset
 from ncc.data.tools import data_utils
 
@@ -151,7 +155,7 @@ class LanguagePairDataset(NccDataset):
         self, src, src_sizes, src_dict,
         tgt=None, tgt_sizes=None, tgt_dict=None,
         left_pad_source=True, left_pad_target=False,
-        max_source_positions=1024, max_target_positions=1024,
+        max_source_positions=DEFAULT_MAX_SOURCE_POSITIONS, max_target_positions=DEFAULT_MAX_TARGET_POSITIONS,
         shuffle=True, input_feeding=True,
         remove_eos_from_source=False, append_eos_to_target=False,
         align_dataset=None,
@@ -264,14 +268,23 @@ class LanguagePairDataset(NccDataset):
         filtering a dataset with ``--max-positions``."""
         return (self.src_sizes[index], self.tgt_sizes[index] if self.tgt_sizes is not None else 0)
 
-    def ordered_indices(self):
-        """Return an ordered list of indices. Batches will be constructed based
-        on this order."""
-        sizes_gt_0 = (self.src_sizes > 0) & (self.tgt_sizes > 0)
-        indices = super(LanguagePairDataset, self).ordered_indices()[sizes_gt_0]
-        if self.shuffle:
-            np.random.shuffle(indices)
-        return indices
+    # def ordered_indices(self):
+    #     """Return an ordered list of indices. Batches will be constructed based
+    #     on this order."""
+    #     indices = np.arange(len(self))
+    #     if getattr(self, "src_sizes", False) and getattr(self, "tgt_sizes", False):
+    #         # ignore the data pairs which contains invalid sentence
+    #         valid_indices = (self.src_sizes > 0) & (self.tgt_sizes > 0)
+    #         indices = indices[valid_indices]
+    #     if self.shuffle:
+    #         # sort by target length, then source length
+    #         if self.tgt_sizes is not None:
+    #             indices = indices[
+    #                 np.argsort(self.tgt_sizes[indices], kind='mergesort')
+    #             ]
+    #         return indices[np.argsort(self.src_sizes[indices], kind='mergesort')]
+    #     else:
+    #         return indices
 
     @property
     def supports_prefetch(self):

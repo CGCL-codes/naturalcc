@@ -1,8 +1,10 @@
 import os
 import shutil
+
 import torch
-from ncc.data import constants
 from sentencepiece import SentencePieceProcessor
+
+from ncc.data import constants
 
 SENTENCEPIECE = 'sentencepiece'
 
@@ -93,7 +95,7 @@ class BPE_Dictionary(object):
 
 
 if __name__ == '__main__':
-    bpe_dict = BPE_Dictionary(dict='~/.ncc/sentencepiece/csn', dict_type=SENTENCEPIECE)
+    bpe_dict = BPE_Dictionary(dict='~/sentencepiece/csn', dict_type=SENTENCEPIECE)
     string = 'def return_ip_address()'
     ids = bpe_dict.encode_ids(string)
     tokens = bpe_dict.encode_tokens(string)

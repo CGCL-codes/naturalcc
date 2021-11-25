@@ -3,10 +3,9 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import logging
 import os
 from ncc.data.tools import data_utils
-from ncc.data.tools.token_block_dataset import TokenBlockDataset
+from ncc.data.wrappers.token_block_dataset import TokenBlockDataset
 from ncc.tasks.ncc_task import NccTask
 from ncc.tasks import register_task
 from ncc.tokenizers.utils import get_whole_word_mask

@@ -7,7 +7,7 @@ from functools import lru_cache
 import numpy as np
 from ncc.data.tools import data_utils
 from ncc.data.wrappers.sort_dataset import SortDataset
-from ncc.data.tools.token_block_dataset import TokenBlockDataset
+from ncc.data.wrappers.token_block_dataset import TokenBlockDataset
 from ncc.tasks import register_task
 from ncc.tokenizers.utils import get_whole_word_mask
 from ncc.data.wrappers.prepend_token_dataset import PrependTokenDataset
@@ -206,10 +206,11 @@ class MultilingualDenoisingTask(DenoisingTask):
             dataset = TokenBlockDataset(
                 dataset,
                 dataset.sizes,
-                self.args['task']['tokens_per_sample'] - 2,  # one less for <s>
+                self.args['task']['tokens_per_sample'] - 2,  # one less for <s> and one for </s>
                 pad=self.source_dictionary.pad(),
                 eos=end_token,
                 break_mode=self.args['task']['sample_break_mode'],
+                document_sep_len=0,
             )
             LOGGER.info('| loaded {} blocks from: {}'.format(len(dataset), split_path))
 

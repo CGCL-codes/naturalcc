@@ -6,38 +6,31 @@
 """
 Data pre-processing: build vocabularies and binarize training data.
 """
-from typing import Dict, List
-
-import argparse
-
-import os
-import re
-import ujson
 import itertools
 import logging
+import os
 import shutil
-from dgl.data.utils import save_graphs
-from collections import namedtuple
-from multiprocessing import Pool, cpu_count
-from ncc.utils.pathos_pool import PPool
-from ncc.utils import util_graph
-
-from ncc import tasks
 from collections import (
     Counter,
     OrderedDict,
 )
+from collections import namedtuple
+from multiprocessing import Pool, cpu_count
+from typing import Dict
+
+import ujson
+from dgl.data.utils import save_graphs
+
+from ncc import LOGGER
+from ncc import tasks
 from ncc.data import (
     Dictionary,
-    constants,
     indexed_dataset,
 )
 from ncc.data.tools.binarizer import Binarizer
-from ncc.utils import (
-    utils, tokenizer
-)
-from ncc.utils.util_file import load_yaml
-from ncc import LOGGER
+from ncc.tokenizers import tokenization
+from ncc.utils import graph_utils
+from ncc.utils.file_ops.yaml_io import load_yaml
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +44,7 @@ def binarize(args: Dict, filename: str, dict: Dictionary, in_file: str, attr: st
     def consumer(tensor):
         ds.add_item(tensor)
 
-    res = Binarizer.binarize(filename, dict, consumer, tokenize=tokenizer.tokenize_list,
+    res = Binarizer.binarize(filename, dict, consumer, tokenize=tokenization.json_tokenizer,
                              append_eos=append_eos, offset=offset, end=end)
     ds.finalize('{}.idx'.format(in_file))
     return res
@@ -78,7 +71,7 @@ def binarize_dgl(args: Dict, filename: str, dict: Dictionary, in_file: str, offs
             if end > 0 and reader.tell() > end:
                 break
             ast = ujson.loads(line)
-            graph = util_graph.tree2dgl(ast, dict)
+            graph = graph_utils.build_graph(ast, dict)
             graphes.append(graph)
             line = reader.readline()
     save_graphs(in_file + '.bin', graphes)
@@ -103,9 +96,9 @@ def main(args):
         """
         assert src ^ tgt
         if modality in ['binary_ast']:
-            tokenize_func = tokenizer.tokenize_tree
+            tokenize_func = tokenization.json_tokenizer
         elif modality in ['code_tokens', 'docstring_tokens', 'path', 'path.terminals', 'sbt', 'sbtao', 'traversal']:
-            tokenize_func = tokenizer.tokenize_list
+            tokenize_func = tokenization.json_tokenizer
         else:
             raise NotImplementedError("{}".format(modality))
 
@@ -225,7 +218,7 @@ def main(args):
         merge_result(
             Binarizer.binarize(
                 input_file, dict, lambda t: ds.add_item(t),
-                tokenize=tokenizer.tokenize_list, offset=0, end=offsets[1], append_eos=False,
+                tokenize=tokenization.json_tokenizer, offset=0, end=offsets[1], append_eos=False,
             )
         )
         if num_workers > 1:

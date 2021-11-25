@@ -5,7 +5,7 @@ from typing import Dict
 
 import ruamel.yaml as yaml
 
-from ncc import __CACHE_NAME__
+from ncc import __NCC_DIR__
 from ncc.utils.path_manager import PathManager
 
 
@@ -22,16 +22,18 @@ def recursive_expanduser(obj):
     return obj
 
 
-def contractuser(string, old_cache_name=__CACHE_NAME__, new_cache_name=__CACHE_NAME__):
+def contractuser(string, old_cache_name=__NCC_DIR__, new_cache_name=__NCC_DIR__):
     # linux
-    dst_dir = string.rsplit(old_cache_name, maxsplit=1)[-1]
-    if str.startswith(dst_dir, os.path.sep):
-        dst_dir = dst_dir[len(os.path.sep):]
-    contract_string = os.path.join('~', new_cache_name, dst_dir)
+    string = str.replace(string, '.ncc', 'ncc_data')
+    # dst_dir = string.rsplit(old_cache_name, maxsplit=1)[-1]
+    # if str.startswith(dst_dir, os.path.sep):
+    #     dst_dir = dst_dir[len(os.path.sep):]
+    # contract_string = os.path.join('~', new_cache_name, dst_dir)
+    contract_string = '~' + string.split('ncc_data', maxsplit=1)[-1]
     return contract_string
 
 
-def recursive_contractuser(obj, old_cache_name=__CACHE_NAME__, new_cache_name=__CACHE_NAME__):
+def recursive_contractuser(obj, old_cache_name=__NCC_DIR__, new_cache_name=__NCC_DIR__):
     if isinstance(obj, dict):
         for key, value in obj.items():
             obj[key] = recursive_contractuser(value, old_cache_name=old_cache_name, new_cache_name=new_cache_name)

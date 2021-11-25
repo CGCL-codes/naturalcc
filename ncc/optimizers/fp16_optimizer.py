@@ -271,6 +271,10 @@ class FP16Optimizer(_FP16OptimizerMixin, optimizers.NccOptimizer):
         self.fp32_optimizer.optimizer = optimizer
 
     @property
+    def lr_scheduler(self):
+        return getattr(self.fp32_optimizer, "lr_scheduler", None)
+
+    @property
     def optimizer_config(self):
         return self.fp32_optimizer.optimizer_config
 
@@ -279,6 +283,13 @@ class FP16Optimizer(_FP16OptimizerMixin, optimizers.NccOptimizer):
 
     def set_lr(self, lr):
         self.fp32_optimizer.set_lr(lr)
+
+    def all_reduce_grads(self, module):
+        self.fp32_optimizer.all_reduce_grads(module)
+
+    @property
+    def supports_flat_params(self):
+        return self.fp32_optimizer.supports_flat_params
 
 
 class _MemoryEfficientFP16OptimizerMixin(object):
@@ -444,7 +455,7 @@ class MemoryEfficientFP16Optimizer(_MemoryEfficientFP16OptimizerMixin, optimizer
             args (argparse.Namespace): fairseq args
             params (iterable): iterable of parameters to optimize
         """
-        fp16_optimizer = optimizer.setup_optimizer(args, params)
+        fp16_optimizer = optimizers.setup_optimizer(args, params)
         return cls(args, params, fp16_optimizer)
 
     @property

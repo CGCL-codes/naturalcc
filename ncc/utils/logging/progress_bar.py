@@ -9,7 +9,6 @@ Wrapper around various loggers and progress bars (e.g., tqdm).
 
 import atexit
 import json
-import logging
 import os
 import sys
 from collections import OrderedDict
@@ -19,10 +18,8 @@ from typing import Optional
 
 import torch
 
+from . import LOGGER
 from .meters import AverageMeter, StopwatchMeter, TimeMeter
-
-
-logger = logging.getLogger(__name__)
 
 
 def progress_bar(
@@ -104,6 +101,7 @@ def format_stat(stat):
 
 class BaseProgressBar(object):
     """Abstract class for progress bars."""
+
     def __init__(self, iterable, epoch=None, prefix=None):
         self.iterable = iterable
         self.offset = getattr(iterable, 'offset', 0)
@@ -188,8 +186,8 @@ class JsonProgressBar(BaseProgressBar):
                 else None
             )
             stats = self._format_stats(stats, epoch=self.epoch, update=update)
-            with rename_logger(logger, tag):
-                logger.info(json.dumps(stats))
+            with rename_logger(LOGGER, tag):
+                LOGGER.info(json.dumps(stats))
 
     def print(self, stats, tag=None, step=None):
         """Print end-of-epoch stats."""
@@ -197,8 +195,8 @@ class JsonProgressBar(BaseProgressBar):
         if tag is not None:
             self.stats = OrderedDict([(tag + '_' + k, v) for k, v in self.stats.items()])
         stats = self._format_stats(self.stats, epoch=self.epoch)
-        with rename_logger(logger, tag):
-            logger.info(json.dumps(stats))
+        with rename_logger(LOGGER, tag):
+            LOGGER.info(json.dumps(stats))
 
     def _format_stats(self, stats, epoch=None, update=None):
         postfix = OrderedDict()
@@ -256,17 +254,17 @@ class SimpleProgressBar(BaseProgressBar):
         ):
             stats = self._format_stats(stats)
             postfix = self._str_commas(stats)
-            with rename_logger(logger, tag):
-                logger.info(
+            with rename_logger(LOGGER, tag):
+                LOGGER.info(
                     '{}:  {:5d} / {:d} {}'
-                    .format(self.prefix, self.i + 1, self.size, postfix)
+                        .format(self.prefix, self.i + 1, self.size, postfix)
                 )
 
     def print(self, stats, tag=None, step=None):
         """Print end-of-epoch stats."""
         postfix = self._str_pipes(self._format_stats(stats))
-        with rename_logger(logger, tag):
-            logger.info('{} | {}'.format(self.prefix, postfix))
+        with rename_logger(LOGGER, tag):
+            LOGGER.info('{} | {}'.format(self.prefix, postfix))
 
 
 class TqdmProgressBar(BaseProgressBar):
@@ -313,7 +311,7 @@ class TensorboardProgressBarWrapper(BaseProgressBar):
         self.tensorboard_logdir = tensorboard_logdir
 
         if SummaryWriter is None:
-            logger.warning(
+            LOGGER.warning(
                 "tensorboard or required dependencies not found, please see README "
                 "for using tensorboard. (e.g. pip install tensorboardX)"
             )

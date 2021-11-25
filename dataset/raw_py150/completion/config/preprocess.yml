@@ -6,13 +6,13 @@ preprocess:
   joined_dictionary: 0
   only_train: 1
 
-  trainpref: ~/ncc_data/raw_py150/attributes/train #", metavar="FP", default=None, help="train file prefix"
+  trainpref: ~/raw_py150/attributes/train #", metavar="FP", default=None, help="train file prefix"
   validpref: ~ #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-  testpref:  ~/ncc_data/raw_py150/attributes/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+  testpref:  ~/raw_py150/attributes/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
 
   # bin dataset
   dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
-  destdir: ~/ncc_data/raw_py150/completion/data-mmap #", metavar="DIR", default="data-bin", help="destination dir"
+  destdir: ~/raw_py150/completion/data-mmap #", metavar="DIR", default="data-bin", help="destination dir"
   max_len: 500
 
 #  align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"

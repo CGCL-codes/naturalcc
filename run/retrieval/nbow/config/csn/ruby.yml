@@ -36,7 +36,7 @@ dataset:
   code_max_tokens: 200 # type=int, if code_max_tokens>0 truncate code tokens to code_max_tokens; if code_max_tokens<=0, contain all code_tokens
   query_max_tokens: 30 # type=int, if query_max_tokens>0 truncate query tokens to query_max_tokens; if query_max_tokens<=0, contain all query_tokens
 
-  required_batch_size_multiple: 8 # default=8, type=int, metavar='N', help='batch size will be a multiplier of this value'
+  required_batch_size_multiple: 1000 # default=8, type=int, metavar='N', help='batch size will be a multiplier of this value'
   #  dataset_impl: raw # choices=get_available_dataset_impl(), help='output dataset implementation'
   dataset_impl: mmap # choices=get_available_dataset_impl(), help='output dataset implementation'
   train_subset: train # train # default='train', metavar='SPLIT', help='data subset to use for training (e.g. train, valid, test)'

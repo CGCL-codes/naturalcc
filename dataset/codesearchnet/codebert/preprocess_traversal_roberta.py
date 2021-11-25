@@ -12,7 +12,7 @@ import ujson
 import shutil
 from collections import namedtuple
 from multiprocessing import Pool
-from ncc.utils.util_graph import (build_graph, tree2dgl)
+from ncc.utils.graph import (build_graph, tree2dgl)
 from ncc import tasks
 from collections import Counter
 from ncc.data import (

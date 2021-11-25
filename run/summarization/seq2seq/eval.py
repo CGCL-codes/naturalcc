@@ -9,10 +9,11 @@ from ncc.utils import checkpoint_utils
 from ncc.utils import utils
 from ncc.utils.file_ops.yaml_io import load_yaml
 from ncc.utils.logging import progress_bar
-from ncc.utils.logging.meters import StopwatchMeter
 from ncc.utils.utils import move_to_cuda
+from ncc.utils import deractors
 
 
+@deractors.pre()
 def main(args, out_file=None):
     use_cuda = torch.cuda.is_available() and not args['common']['cpu']
 
@@ -69,7 +70,6 @@ def main(args, out_file=None):
     )
 
     # Initialize generator
-    gen_timer = StopwatchMeter()
     generator = task.build_generator(models, args)
 
     sources, hypotheses, references = dict(), dict(), dict()
@@ -81,10 +81,7 @@ def main(args, out_file=None):
         if 'net_input' not in sample:
             continue
 
-        gen_timer.start()
         hypos = task.inference_step(generator, models, sample)
-        num_generated_tokens = sum(len(h[0]['tokens']) for h in hypos)  # TODO: warning
-        gen_timer.stop(num_generated_tokens)
 
         for i, sample_id in enumerate(sample['id'].tolist()):
             has_target = sample['target'] is not None
@@ -110,9 +107,9 @@ def main(args, out_file=None):
             hypotheses[sample_id] = [hypo_str]
             references[sample_id] = [target_str]
 
-    bleu, rouge_l, meteor = \
-        summarization_metrics.eval_accuracies(hypotheses, references, filename=out_file, mode='test')
-    LOGGER.info('BLEU: {:.2f}\t ROUGE-L: {:.2f}\t METEOR: {:.2f}'.format(bleu, rouge_l, meteor))
+    bleu, rouge_l, meteor, smoothed_blue = summarization_metrics. \
+        eval_accuracies(hypotheses, references, filename=out_file, mode='test', smoothed_blue=True)
+    LOGGER.info(f'BLEU-4: {bleu}\t ROUGE-L: {rouge_l}\t METEOR: {meteor}\t SmoothedBLEU: {smoothed_blue}')
 
 
 def cli_main():
@@ -136,8 +133,6 @@ def cli_main():
                 .format(yaml_file, out_file))
     args = load_yaml(yaml_file)
     LOGGER.info(args)
-
-    torch.cuda.set_device(args['distributed_training']['device_id'])
     main(args, out_file)
 
 

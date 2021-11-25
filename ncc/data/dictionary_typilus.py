@@ -1,10 +1,8 @@
-from collections import Counter
 import typing
-from typing import Iterable, Dict, Sized, List, FrozenSet, Union, Optional
+from collections import Counter
+from typing import Iterable, Dict, List, FrozenSet, Optional
 
 import numpy as np
-
-# __all__ = ['Dictionary']
 
 
 class Dictionary(object):
@@ -22,7 +20,7 @@ class Dictionary(object):
        * To get the string representation for a given id use `v.get_name_for_id(the_id)`.
     """
 
-    def __init__(self, add_unk: bool=True, add_pad: bool=False) -> None:
+    def __init__(self, add_unk: bool = True, add_pad: bool = False) -> None:
         self.token_to_id = {}  # type: Dict[str, int]
         self.id_to_token = []  # type: List[str]
         if add_pad:
@@ -122,7 +120,7 @@ class Dictionary(object):
         vocab.__batch_add_from_counter(token_counter, count_threshold, max_size - num_base_tokens)
         return vocab
 
-    def update(self, token_counter: typing.Counter[str], max_size: int, count_threshold: int=5):
+    def update(self, token_counter: typing.Counter[str], max_size: int, count_threshold: int = 5):
         assert len(self) < max_size, 'Dictionary is already larger than max_size.'
         self.__batch_add_from_counter(token_counter, count_threshold=count_threshold, max_size=max_size)
 

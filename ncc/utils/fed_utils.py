@@ -1,13 +1,14 @@
-import glob
 import hashlib
 import os
-import torch
-from tqdm import tqdm
-from ncc.utils import utils, distributed_utils
-import numpy as np
-import ujson as json
-from ncc import LOGGER
 import struct
+
+import numpy as np
+import torch
+import ujson as json
+from tqdm import tqdm
+
+from ncc import LOGGER
+from ncc.utils import utils, distributed_utils
 
 FED_VERSION_FN = 'fed_version.v3.idx'
 

@@ -12,39 +12,39 @@ preprocess:
 #    - binary_ast # traverse ast's leaf node info
     - traversal
   target_lang: ~ #", default=None, metavar="TARGET", help="target language"
-  # ~ path for dataset default. e.g.  for code_search_net, ~/filter = ~/.ncc/code_search_net/filter
+  # ~ path for dataset default. e.g.  for code_search_net, ~/filter = ~/code_search_net/filter
   dataprefs:
     ruby:
-      trainpref: ~/.ncc/code_search_net/filter/ruby/train #", metavar="FP", default=None, help="train file prefix"
-      validpref: ~/.ncc/code_search_net/filter/ruby/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-      testpref:  ~/.ncc/code_search_net/filter/ruby/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+      trainpref: ~/code_search_net/filter/ruby/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/code_search_net/filter/ruby/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/code_search_net/filter/ruby/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
     go:
-      trainpref: ~/.ncc/code_search_net/filter/go/train #", metavar="FP", default=None, help="train file prefix"
-      validpref: ~/.ncc/code_search_net/filter/go/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-      testpref:  ~/.ncc/code_search_net/filter/go/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+      trainpref: ~/code_search_net/filter/go/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/code_search_net/filter/go/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/code_search_net/filter/go/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
     java:
-      trainpref: ~/.ncc/code_search_net/filter/java/train #", metavar="FP", default=None, help="train file prefix"
-      validpref: ~/.ncc/code_search_net/filter/java/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-      testpref:  ~/.ncc/code_search_net/filter/java/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+      trainpref: ~/code_search_net/filter/java/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/code_search_net/filter/java/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/code_search_net/filter/java/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
     javascript:
-      trainpref: ~/.ncc/code_search_net/filter/javascript/train #", metavar="FP", default=None, help="train file prefix"
-      validpref: ~/.ncc/code_search_net/filter/javascript/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-      testpref:  ~/.ncc/code_search_net/filter/javascript/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+      trainpref: ~/code_search_net/filter/javascript/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/code_search_net/filter/javascript/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/code_search_net/filter/javascript/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
     python:
-      trainpref: ~/.ncc/code_search_net/filter/python/train #", metavar="FP", default=None, help="train file prefix"
-      validpref: ~/.ncc/code_search_net/filter/python/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-      testpref:  ~/.ncc/code_search_net/filter/python/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+      trainpref: ~/code_search_net/filter/python/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/code_search_net/filter/python/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/code_search_net/filter/python/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
     php:
-      trainpref: ~/.ncc/code_search_net/filter/php/train #", metavar="FP", default=None, help="train file prefix"
-      validpref: ~/.ncc/code_search_net/filter/php/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-      testpref:  ~/.ncc/code_search_net/filter/php/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+      trainpref: ~/code_search_net/filter/php/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/code_search_net/filter/php/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/code_search_net/filter/php/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
     csharp:
-      trainpref: ~/.ncc/codenn/filter/csharp/train #", metavar="FP", default=None, help="train file prefix"
-      validpref: ~/.ncc/codenn/filter/csharp/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-      testpref:  ~/.ncc/codenn/filter/csharp/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+      trainpref: ~/codenn/filter/csharp/train #", metavar="FP", default=None, help="train file prefix"
+      validpref: ~/codenn/filter/csharp/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+      testpref:  ~/codenn/filter/csharp/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
 
   dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
-  destdir: ~/.ncc/kd/summarization/ #", metavar="DIR", default="data-bin", help="destination dir"
+  destdir: ~/kd/summarization/ #", metavar="DIR", default="data-bin", help="destination dir"
   # word frequency
   thresholdtgt: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
   thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"

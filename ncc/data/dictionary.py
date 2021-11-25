@@ -3,26 +3,24 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from typing import (
-    Optional,
-    Dict,
-    Any,
-)
-
 import os
 from collections import Counter
 from multiprocessing import Pool
+from typing import (
+    Optional,
+    Any,
+)
 
 import torch
 
 from ncc.data import constants
+from ncc.data.tools import data_utils
 from ncc.utils.file_ops import (
     file_io,
     json_io,
 )
-from ncc.utils.path_manager import PathManager
 from ncc.utils.file_ops.file_io import safe_readline
-from ncc.data.tools import data_utils
+from ncc.utils.path_manager import PathManager
 
 
 def item(tensor):
@@ -50,12 +48,20 @@ class Dictionary(object):
         self.indices = {}
         if pad is not None:
             self.pad_index = self.add_symbol(pad, n=constants.INF)
+        else:
+            self.pad_index = -1
         if bos is not None:
             self.bos_index = self.add_symbol(bos, n=constants.INF)
+        else:
+            self.bos_index = -1
         if eos is not None:
             self.eos_index = self.add_symbol(eos, n=constants.INF)
+        else:
+            self.eos_index = -1
         if unk is not None:
             self.unk_index = self.add_symbol(unk, n=constants.INF)
+        else:
+            self.unk_index = -1
         if extra_special_symbols:
             for s in extra_special_symbols:
                 self.add_symbol(s, n=constants.INF)
@@ -340,8 +346,9 @@ class Dictionary(object):
         consumer=None,
         append_eos=True,
         reverse_order=False,
+        **kwargs,
     ):
-        words = line_tokenizer(line, vocab=self) if line_tokenizer is not None else line
+        words = line_tokenizer(line, vocab=self, **kwargs) if line_tokenizer is not None else line
         if reverse_order:
             words = list(reversed(words))
         nwords = len(words)
@@ -529,3 +536,103 @@ class TruncatedDictionary(object):
         if i < self.length:
             return self.wrapped_dict[i]
         return self.wrapped_dict.unk()
+
+
+import itertools
+from transformers import RobertaTokenizer
+
+
+class TransformersDictionary(RobertaTokenizer):
+
+    def pad(self):
+        return self.pad_idx
+
+    @property
+    def pad_idx(self):
+        return self.pad_token_id
+
+    def bos(self):
+        return self.bos_idx
+
+    @property
+    def bos_idx(self):
+        return self.bos_token_id
+
+    def eos(self):
+        return self.eos_idx
+
+    @property
+    def eos_idx(self):
+        return self.eos_token_id
+
+    def unk(self):
+        return self.unk_idx
+
+    @property
+    def unk_idx(self):
+        return self.unk_token_id
+
+    def cls(self):
+        return self.cls_idx
+
+    @property
+    def cls_idx(self):
+        return self.cls_token_id
+
+    def sep(self):
+        return self.sep_idx
+
+    @property
+    def sep_idx(self):
+        return self.sep_token_id
+
+    def mask(self):
+        return self.mask_idx
+
+    @property
+    def mask_idx(self):
+        return self.mask_token_id
+
+    def subtokenize(self, tokens):
+        """
+        to further tokenize List[str]
+        """
+        tokens = [
+            self.tokenize('@ ' + tok)[1:] if idx != 0 else self.tokenize(tok) \
+            for idx, tok in enumerate(tokens)
+        ]
+        tokens = list(itertools.chain(*tokens))
+        return tokens
+
+    def tokens_to_indices(self, tokens):
+        return self.convert_tokens_to_ids(tokens)
+
+    def tokens_to_string(self, tokens):
+        return self.convert_tokens_to_string(tokens)
+
+    def indices_to_tokens(self, indices):
+        return self.convert_ids_to_tokens(indices)
+
+    def indices_to_string(self, indices):
+        tokens = self.indices_to_tokens(indices)
+        string = self.tokens_to_string(tokens)
+        return string
+
+    def string_to_tokens(self, string):
+        return self.tokenize(string)
+
+    def string_to_indices(self, string):
+        tokens = self.string_to_tokens(string)
+        indices = self.tokens_to_indices(tokens)
+        return indices
+
+    def add_symbol(self, token, special_tokens=False):
+        self.add_tokens(token, special_tokens=special_tokens)
+        return self.index(token)
+
+    def index(self, string):
+        return self.get_vocab()[string]
+
+    def string(self, indices, **kwargs):
+        indices = indices.tolist()
+        return self.indices_to_string(indices)

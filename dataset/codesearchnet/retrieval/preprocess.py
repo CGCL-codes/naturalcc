@@ -10,8 +10,8 @@ from ncc.data import indexed_dataset
 from ncc.data.dictionary import Dictionary
 from ncc.data.retrieval import tokenizers
 from ncc.data.retrieval.hybrid.hybrid_retrieval_binarizer import HybridRetrievalBinarizer as Binarizer
-from ncc.utils.file_ops.yaml_io import load_yaml
 from ncc.utils.file_ops.file_io import find_offsets
+from ncc.utils.file_ops.yaml_io import load_yaml
 from ncc.utils.path_manager import PathManager
 
 
@@ -99,8 +99,9 @@ def main(args):
     else:
         tgt_dict = None
 
-    src_dict.save(dict_path(args['preprocess']['source_lang']))
-    tgt_dict.save(dict_path(args['preprocess']['target_lang']))
+    # src_dict.save(dict_path(args['preprocess']['source_lang']))
+    # tgt_dict.save(dict_path(args['preprocess']['target_lang']))
+    # tgt_dict.save(dict_path("func_name"))  # save target_lang dict for func_name
 
     # 2. ***************build dataset********************
     def make_binary_dataset(vocab: Dictionary, input_file, output_file, use_func, num_workers: int):
@@ -209,19 +210,18 @@ def main(args):
         if args['preprocess']['trainpref']:
             make_dataset(vocab, args['preprocess']['trainpref'], "train", lang,
                          num_workers=args['preprocess']['workers'], use_func=use_func)
-        if lang in ['code_tokens', 'docstring_tokens'] and not use_func:
-            if args['preprocess']['validpref']:
-                make_dataset(vocab, args['preprocess']['validpref'], "valid", lang,
-                             num_workers=args['preprocess']['workers'], use_func=use_func)
-            if args['preprocess']['testpref']:
-                make_dataset(vocab, args['preprocess']['testpref'], "test", lang,
-                             num_workers=args['preprocess']['workers'], use_func=use_func)
+        if args['preprocess']['validpref']:
+            make_dataset(vocab, args['preprocess']['validpref'], "valid", lang,
+                         num_workers=args['preprocess']['workers'], use_func=use_func)
+        if args['preprocess']['testpref']:
+            make_dataset(vocab, args['preprocess']['testpref'], "test", lang,
+                         num_workers=args['preprocess']['workers'], use_func=use_func)
 
     make_all(args['preprocess']['source_lang'], src_dict)
     make_all(args['preprocess']['source_lang'], src_dict, use_func=True)
     if target:
         make_all(args['preprocess']['target_lang'], tgt_dict)
-        make_all('func_name', tgt_dict)
+        make_all('func_name', tgt_dict)  # func_name as query
 
 
 def cli_main():
@@ -230,6 +230,7 @@ def cli_main():
         description="Downloading/Decompressing CodeSearchNet dataset(s) or Tree-Sitter Library(ies)")
     parser.add_argument(
         "--yaml_file", "-f", help="load {yaml_file}.yml for train", type=str,
+        default='config/all'
     )
     args = parser.parse_args()
     yaml_file = os.path.join(os.path.dirname(__file__), '{}.yml'.format(args.yaml_file))

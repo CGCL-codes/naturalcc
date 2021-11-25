@@ -2,6 +2,7 @@
 
 import math
 
+import torch
 import torch.nn.functional as F
 
 from ncc.criterions import NccCriterion, register_criterion
@@ -26,12 +27,13 @@ class TripletCriterion(NccCriterion):
         3) logging outputs to display while training
         """
         net_output = model(**sample['net_input'])
-        loss, _ = self.compute_loss(model, net_output, reduce=reduce)
+        loss, mrr = self.compute_loss(model, net_output, reduce=reduce)
         sample_size = sample['nsentences']
         logging_output = {
             'loss': loss.data,
             'nsentences': sample['nsentences'],
             'sample_size': sample_size,
+            'mrr': mrr,
         }
         return loss, sample_size, logging_output
 
@@ -43,21 +45,24 @@ class TripletCriterion(NccCriterion):
         pos_dist = self.cos_similarity(src_repr, pos_repr)  # B X 1
         neg_dist = self.cos_similarity(src_repr, neg_repr)  # B X 1
         loss = (self.margin - pos_dist + neg_dist).clamp(EPS).sum()
-        return loss, loss
+        with torch.no_grad():
+            src_norm_repr = src_repr / torch.norm(src_repr, dim=-1)[..., None]
+            pos_norm_repr = pos_repr / torch.norm(pos_repr, dim=-1)[..., None]
+            logits = pos_norm_repr @ src_norm_repr.t()
+            correct_scores = logits.diag()
+            compared_scores = logits >= correct_scores.unsqueeze(dim=-1)
+            mrr = round((1 / compared_scores.sum(dim=-1)).sum().item(), 6)
+        return loss, mrr
 
     @staticmethod
     def reduce_metrics(logging_outputs) -> None:
         """Aggregate logging outputs from data parallel training."""
         loss_sum = sum(log.get('loss', 0) for log in logging_outputs)
-        ntokens = sum(log.get('ntokens', 0) for log in logging_outputs)
         sample_size = sum(log.get('sample_size', 0) for log in logging_outputs)
+        metrics.log_scalar('loss', loss_sum / sample_size, sample_size, round=3)
 
-        metrics.log_scalar('loss', loss_sum / sample_size / math.log(2), sample_size, round=6)
-        if sample_size != ntokens:
-            metrics.log_scalar('nll_loss', loss_sum / ntokens / math.log(2), ntokens, round=6)
-            metrics.log_derived('ppl', lambda meters: utils.get_perplexity(meters['nll_loss'].avg))
-        else:
-            metrics.log_derived('ppl', lambda meters: utils.get_perplexity(meters['loss'].avg))
+        mrr_sum = sum(log.get('mrr', 0) for log in logging_outputs)
+        metrics.log_scalar('mrr', mrr_sum / sample_size, sample_size, round=6)
 
     @staticmethod
     def logging_outputs_can_be_summed() -> bool:

@@ -1,7 +1,5 @@
 import os
 
-import ujson
-
 from dataset.python_wan import (RAW_DIR)
 from ncc.utils.file_ops import (
     file_io,

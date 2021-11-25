@@ -86,8 +86,9 @@ class DeepCSLanguagePairDataset(NccDataset):
     def __init__(
         self, srcs, src_sizes, src_dicts,
         tgts, tgt_sizes, tgt_dicts,
-        pad=None, shuffle=True,
+        pad=None,
         src_max_tokens=None, tgt_max_tokens=None,
+        shuffle=True,
         **kwargs
     ):
         self.srcs = srcs

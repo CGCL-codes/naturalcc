@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import random
-import torch
-import numpy as np
 import contextlib
+import random
+
+import numpy as np
+import torch
 
 
 def set_seed(seed):

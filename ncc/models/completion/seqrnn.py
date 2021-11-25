@@ -1,10 +1,9 @@
 from ncc.models import register_model
 from ncc.models.ncc_model import NccLanguageModel
-from ncc.modules.common.layers import (
+from ncc.modules.base.layers import (
     Embedding, Linear, LSTM
 )
-from ncc.modules.seq2seq.ncc_decoder import NccDecoder
-import torch.nn.functional as F
+from ncc.modules.decoders.ncc_decoder import NccDecoder
 
 
 class LSTMDecoder(NccDecoder):

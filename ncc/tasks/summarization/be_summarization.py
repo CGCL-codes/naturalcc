@@ -9,7 +9,7 @@ from ncc import (
 )
 from ncc.data import indexed_dataset
 from ncc.data.dictionary import Dictionary
-from ncc.data.summarization.be_codenn_language_pair_dataset import BELanguagePairDataset
+from ncc.data.summarization.be_language_pair_dataset import BELanguagePairDataset
 from ncc.data.wrappers.append_token_dataset import AppendTokenDataset
 from ncc.data.wrappers.prepend_token_dataset import PrependTokenDataset
 from ncc.data.wrappers.truncate_dataset import TruncateDataset
@@ -86,8 +86,7 @@ def load_langpair_dataset(
         align_dataset=None,
         bos=src_dict.bos(),
         eos=src_dict.eos(),
-        # shuffle=True,
-        shuffle=False,  # debug
+        shuffle=(split == 'train'),
     )
 
 
@@ -191,7 +190,7 @@ class BESummarizationTask(NccTask):
     def build_dataset_for_inference(self, src_tokens, src_lengths):
         return BELanguagePairDataset(src_tokens, src_lengths, self.source_dictionary)
 
-    def build_model(self, args):
+    def build_model(self, args, **extra_gen_cls_kwargs):
         model = super().build_model(args)
         if args['task']['eval_bleu']:
             assert args['task']['eval_bleu_detok'] is not None, (
@@ -205,7 +204,7 @@ class BESummarizationTask(NccTask):
             self.tokenizer = tokenizers.build_tokenizer(
                 dict(tokenizer=args['task'].get('eval_bleu_detok', '{}'), **detok_args)
             )
-            self.sequence_generator = self.build_generator([model], args)
+            self.sequence_generator = self.build_generator([model], args, **extra_gen_cls_kwargs)
 
         return model
 
@@ -310,10 +309,10 @@ class BESummarizationTask(NccTask):
 
         return bleu, rouge_l, meteor
 
-    def encode_input(self, input, tokenize):
-        if tokenize:
+    def encode_input(self, input, tokenizer=None):
+        if tokenizer is not None:
             input = ''.join(char if str.isalnum(char) else ' ' for char in input)  # for python_wan dataset
-            input = tokenize(input)
+            input = tokenizer(input)
         input = input[:self.args['task']['max_source_positions']]
         input = torch.Tensor([self.src_dict.index(token) for token in input]).long()
         input = {
@@ -326,6 +325,7 @@ class BESummarizationTask(NccTask):
 
     def decode_output(self, output):
         output = output[0][0]['tokens']
+        output = utils.strip_eos(output, self.tgt_dict.eos())
         output = self.tgt_dict.string(output)
         if not str.endswith(output, "."):
             output += "."

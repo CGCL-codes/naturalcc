@@ -26,10 +26,7 @@ def string_sub_tokenizer(tokens: list):
 
 def func_name_tokenizer(tokens, **kwargs):
     tokens = ujson.loads(tokens)
-    if len(tokens) >= kwargs['min_func_len']:
-        tokens = split_identifier_into_parts(tokens)
-    else:
-        tokens = []
+    tokens = split_identifier_into_parts(tokens)[:kwargs['min_func_len']]
     return tokens
 
 

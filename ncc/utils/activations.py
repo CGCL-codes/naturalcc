@@ -50,3 +50,8 @@ def get_activation(activation_string):
                 activation_string, list(ACT2FN.keys())
             )
         )
+
+
+__all__ = [
+    "ACT2FN", "get_activation",
+]

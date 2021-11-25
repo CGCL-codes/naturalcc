@@ -6,8 +6,10 @@
 import warnings
 from collections import OrderedDict
 
+import os
 import torch
 
+from ncc import LOGGER
 from ncc.data import (
     constants,
     iterators,
@@ -15,9 +17,10 @@ from ncc.data import (
 from ncc.data.dictionary import Dictionary
 from ncc.data.ncc_dataset import NccDataset
 from ncc.data.tools import data_utils
-from ncc.tokenizers import tokenization
+from ncc.tokenizers.tokenization import SPACE_SPLITTER
 from ncc.utils import utils
 from ncc.utils.logging import metrics
+from ncc.optimizers.amp_optimizer import AMPOptimizer
 
 
 class NccTask(object):
@@ -25,11 +28,6 @@ class NccTask(object):
     Tasks store dictionaries and provide helpers for loading/iterating over
     Datasets, initializing the Model/Criterion and calculating the loss.
     """
-
-    @staticmethod
-    def add_args(parser):
-        """Add task-specific arguments to the parser."""
-        pass
 
     @staticmethod
     def logging_outputs_can_be_summed(criterion) -> bool:
@@ -57,6 +55,7 @@ class NccTask(object):
     @classmethod
     def build_dictionary(
         cls, filenames, workers=1, threshold=-1, nwords=-1, padding_factor=8,
+        tokenize_func=SPACE_SPLITTER,
         **kwargs,
     ):
         """Build the dictionary
@@ -80,7 +79,7 @@ class NccTask(object):
         )
         for filename in filenames:
             Dictionary.add_file_to_dictionary(
-                filename, d, tokenization.tokenize_line, d.eos_word, workers
+                filename, d, tokenize_func, d.eos_word, workers
             )
         d.finalize(threshold=threshold, nwords=nwords, padding_factor=padding_factor)
         return d
@@ -93,6 +92,9 @@ class NccTask(object):
             args (argparse.Namespace): parsed command-line arguments
         """
         return cls(args, **kwargs)
+
+    def has_sharded_data(self, split):
+        return (os.pathsep in getattr(self.args, "data", ""))
 
     def load_dataset(self, split, combine=False, **kwargs):
         """Load a given dataset split.
@@ -112,13 +114,45 @@ class NccTask(object):
         Returns:
             a :class:`~fairseq.data.NccDataset` corresponding to *split*
         """
-        # from ncc.data.fairseq_dataset import NccDataset
 
         if split not in self.datasets:
             raise KeyError("Dataset not loaded: " + split)
         if not isinstance(self.datasets[split], NccDataset):
             raise TypeError("Datasets are expected to be of type NccDataset")
         return self.datasets[split]
+
+    def filter_indices_by_size(
+        self, indices, dataset, max_positions=None, ignore_invalid_inputs=False
+    ):
+        """
+        Filter examples that are too large
+
+        Args:
+            indices (np.array): original array of sample indices
+            dataset (~fairseq.data.FairseqDataset): dataset to batch
+            max_positions (optional): max sentence length supported by the
+                model (default: None).
+            ignore_invalid_inputs (bool, optional): don't raise Exception for
+                sentences that are too long (default: False).
+        Returns:
+            np.array: array of filtered sample indices
+        """
+        indices, ignored = dataset.filter_indices_by_size(indices, max_positions)
+        if len(ignored) > 0:
+            if not ignore_invalid_inputs:
+                raise Exception(
+                    (
+                        "Size of sample #{} is invalid (={}) since max_positions={}, "
+                        "skip this example with --skip-invalid-size-inputs-valid-test"
+                    ).format(ignored[0], dataset.size(ignored[0]), max_positions)
+                )
+            LOGGER.warning(
+                (
+                    "{:,} samples have invalid sizes and will be skipped, "
+                    "max_positions={}, first few sample ids={}"
+                ).format(len(ignored), max_positions, ignored[:10])
+            )
+        return indices
 
     def get_batch_iterator(
         self,
@@ -169,6 +203,7 @@ class NccTask(object):
         # setting.
         if dataset in self.dataset_to_epoch_iter:
             return self.dataset_to_epoch_iter[dataset]
+
         assert isinstance(dataset, NccDataset)
 
         # initialize the dataset with the correct starting epoch
@@ -181,9 +216,7 @@ class NccTask(object):
         # filter examples that are too large
         if max_positions is not None:
             indices = data_utils.filter_by_size(
-                indices,
-                dataset,
-                max_positions,
+                indices, dataset, max_positions,
                 raise_exception=(not ignore_invalid_inputs),
             )
 
@@ -244,12 +277,32 @@ class NccTask(object):
         if args['model']['arch'] in ['codenn']:
             from ncc.eval.summarization.codenn_generator import CodeNNGenerator
             return CodeNNGenerator(self.target_dictionary, **extra_gen_cls_kwargs)
-        # elif 'transformer' in args['model']['arch']:
+        elif args['model']['arch'] in ['code2seq']:
+            from ncc.eval.summarization.code2seq_generator import Code2SeqGenerator
+            return Code2SeqGenerator(self.target_dictionary, **extra_gen_cls_kwargs)
+        # elif 'transformer' in args['model']['arch'] or 'bart' in args['model']['arch']:
         #     from ncc.eval.summarization.transformer_generator import TransformerGenerator
-        #     return TransformerGenerator(self.target_dictionary, **extra_gen_cls_kwargs)
+        #     return TransformerGenerator(
+        #         self.target_dictionary,
+        #         # max_len_b=extra_gen_cls_kwargs.get('max_len_b', args['eval']['max_len_b']),
+        #         **extra_gen_cls_kwargs,
+        #     )
+        elif args['model']['arch'] in ['CodeDisen']:
+            from ncc.eval.translation.code_disen_generator import CodeDisenGenerator
+            return CodeDisenGenerator(self.target_dictionary, **extra_gen_cls_kwargs)
         # elif args['model']['arch'] in ['deepcom']:
         #     from ncc.eval.generator.deepcom_generator import DeepComGenerator
         #     return DeepComGenerator(self.target_dictionary, **extra_gen_cls_kwargs)
+        elif args['model']['arch'] in ['disen_plbart', 'disen_concate_plbart']:
+            from ncc.eval.disentangle.disen_plbart_generator import SequenceGenerator
+            from ncc.eval.summarization import search
+            search_strategy = search.BeamSearch(self.target_dictionary)
+            return SequenceGenerator(
+                self.target_dictionary,
+                beam_size=extra_gen_cls_kwargs.get('beam', args['eval']['beam']),
+                max_len_b=extra_gen_cls_kwargs.get('max_len_b', args['eval']['max_len_b']),
+                search_strategy=search_strategy,
+            )
         else:
             from ncc.eval.summarization.sequence_generator_fair import SequenceGenerator
             from ncc.eval.summarization import search
@@ -291,10 +344,13 @@ class NccTask(object):
         """
         model.train()
         model.set_num_updates(update_num)
-        loss, sample_size, logging_output = criterion(model, sample)
+        with torch.autograd.profiler.record_function("forward"):
+            with torch.cuda.amp.autocast(enabled=(isinstance(optimizer, AMPOptimizer))):
+                loss, sample_size, logging_output = criterion(model, sample)
         if ignore_grad:
             loss *= 0
-        optimizer.backward(loss)
+        with torch.autograd.profiler.record_function("backward"):
+            optimizer.backward(loss)
         return loss, sample_size, logging_output
 
     def valid_step(self, sample, model, criterion):
@@ -410,3 +466,15 @@ class NccComplTask(NccTask):
         """Return the target :class:`~fairseq.data.Dictionary` (if applicable
         for this task)."""
         raise NotImplementedError
+
+
+class SKLearnTask(object):
+    def __init__(self, model, datasets):
+        self.model = model
+        self.datasets = datasets
+
+    def train(self, features, ground_truth, **kwargs):
+        self.model.fit(X=features, y=ground_truth, **kwargs)
+
+    def predict(self, features):
+        return self.model.predict(features)

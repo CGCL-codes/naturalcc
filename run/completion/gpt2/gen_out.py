@@ -15,7 +15,7 @@ from ncc.utils import checkpoint_utils
 from ncc.utils import utils
 from ncc.utils.file_ops.yaml_io import load_yaml
 from ncc.utils.logging import progress_bar
-from ncc.utils.to_cuda import move_to_cuda
+from ncc.utils.utils import move_to_cuda
 
 
 def main(args):
@@ -51,15 +51,16 @@ def _main(args, output_file):
 
     sequence_completor = task.build_completor(models, args)
 
-    subsets = [args['dataset']['train_subset'], args['dataset']['valid_subset'], args['dataset']['gen_subset']]
+    subsets = [args['dataset']['train_subset'], args['dataset']['valid_subset'], args['dataset']['gen_subset'], ]
     for subset in subsets:
         task.load_dataset(subset, shuffle=False)
+        task.dataset(subset).shuffle = False
 
         # Load dataset (possibly sharded)
         itr = task.get_batch_iterator(
             dataset=task.dataset(subset),
             max_tokens=args['dataset']['max_tokens'],
-            max_sentences=args['eval']['max_sentences_eval'] * 2,
+            max_sentences=args['eval']['max_sentences_eval'],
             max_positions=utils.resolve_max_positions(
                 task.max_positions(),
                 *[model.max_positions() for model in models]

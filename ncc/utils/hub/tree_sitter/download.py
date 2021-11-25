@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import gdown
 import os
 
+import gdown
+
 from ncc import (
-    __LIBS_DIR__,
+    __TREE_SITTER_LIBS_DIR__,
     LOGGER,
 )
+from ncc.utils.path_manager import PathManager
 
-os.makedirs(__LIBS_DIR__, exist_ok=True)
+PathManager.mkdir(__TREE_SITTER_LIBS_DIR__)
 
 TREE_SITTER_SO_FILE_ARCHIVE_MAP = {
+    "c": "https://drive.google.com/uc?id=1Ce0Wp_IYw4a69dMAd4RbaOqRK-DD592G",
+    "cpp": "https://drive.google.com/uc?id=1Ip-_lW95I7DU_wj96CR-j31VehLtJLz2",
     "csharp": "https://drive.google.com/uc?id=1fCnNd3WiU1aVqgYZ9ygydTgedHq09pzw",
     "go": "https://drive.google.com/uc?id=18nIHKBahzkK4Xgm5mHRCOY2npiTC2NLd",
     "java": "https://drive.google.com/uc?id=1lP-H7D0IpqijmaseigcyqkKBzxWdwmYH",
@@ -28,7 +32,7 @@ def download(name):
     if name in TREE_SITTER_SO_FILE_ARCHIVE_MAP:
         url = TREE_SITTER_SO_FILE_ARCHIVE_MAP[name]
         LOGGER.info(f"Download {name}.so from {url}")
-        gdown.download(url=url, output=os.path.join(__LIBS_DIR__, f"{name}.so"))
+        gdown.download(url=url, output=os.path.join(__TREE_SITTER_LIBS_DIR__, f"{name}.so"))
     else:
         raise FileExistsError(
             f"{name}.so has not been uploaded to the server. Please, build {name}.so with " \

@@ -1,19 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import getpass
-import logging
 import os
 import socket
 import sys
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='[%(asctime)-15s] %(levelname)7s >> %(message)s (%(filename)s:%(lineno)d, %(funcName)s())',
-    datefmt='%Y-%m-%d %H:%M:%S',
-)
-LOGGER = logging.getLogger(__name__)
-
-# backwards compatibility to support `from fairseq.meters import AverageMeter`
+from ncc.utils.logging import LOGGER
 from ncc.utils.logging import meters, metrics, progress_bar  # noqa
 
 sys.modules['ncc.meters'] = meters
@@ -23,40 +15,50 @@ sys.modules['ncc.progress_bar'] = progress_bar
 # ============== NCC Library info ============== #
 # library properties
 __NAME__ = 'NaturalCC'
-__FULL_NAME__ = 'Natural Code and Comment Lib.'
+__FULL_NAME__ = 'Natural Code Comprehension Lib.'
 __DESCRIPTION__ = '''
 NaturalCC: A Toolkit to Naturalize the Source Code Corpus.
 '''
 # __VERSION__ = ‘x,y(a,b,c)’, e.g. '1.2c'
 # x for framework update or a considerable update,
 # y for internal update, e.g. naturalcodev3 is our 3rd Version of coding,
-__VERSION__ = '0.5b'
+__VERSION__ = '0.6'
 
 # directories to save/download dataset or files
-_HOSTNAME = socket.gethostname()
-_USERNAME = getpass.getuser()
+__HOSTNAME__ = socket.gethostname()
+__USERNAME__ = getpass.getuser()
+__NCC_DIR__ = os.environ.get('NCC', '~')
+assert __NCC_DIR__, FileNotFoundError("No such directory")
 """
 Pycharm cannot get user-defined environment variables, if you want to use user-defined variables.
 PLZ, launch pycharm at {your pycharm directory}/pycharm.sh.
 """
-__DEFAULT_DIR__ = os.environ.get('NCC', '~')
-if str.endswith(_HOSTNAME, '.uts.edu.au'):
-    __DEFAULT_DIR__ = '/data/yanghe'
-elif _HOSTNAME == 'GS65':
-    __DEFAULT_DIR__ = '/data'
-elif _HOSTNAME == 'node14':
-    __DEFAULT_DIR__ = '/mnt/wanyao'
-elif _HOSTNAME == 'node13':
-    __DEFAULT_DIR__ = '/mnt/wanyao'
 
-__DEFAULT_DIR__ = os.path.expanduser(__DEFAULT_DIR__)
-__CACHE_NAME__ = 'ncc_data'
-__CACHE_DIR__ = os.path.join(__DEFAULT_DIR__, __CACHE_NAME__)
-__LIBS_DIR__ = os.path.join(__CACHE_DIR__, 'tree_sitter_libs')
-__BPE_DIR__ = os.path.join(__CACHE_DIR__, 'byte_pair_encoding')
+if str.endswith(__HOSTNAME__, '.uts.edu.au'):
+    __NCC_DIR__ = '/data/yanghe/ncc_data'
+elif __HOSTNAME__ == 'GS65':
+    __NCC_DIR__ = '/data/ncc_data'
+elif __HOSTNAME__ == 'node14':
+    __NCC_DIR__ = '/mnt/wanyao/ncc_data'
+elif __HOSTNAME__ == 'node13':
+    __NCC_DIR__ = '/mnt/wanyao/ncc_data'
+elif __HOSTNAME__ == 'node12':
+    __NCC_DIR__ = '/mnt/wanyao/ncc_data'
+elif __HOSTNAME__ == 'node15':
+    __NCC_DIR__ = '/home/wanyao/yang/ncc_data'
+__TREE_SITTER_LIBS_DIR__ = os.path.join(__NCC_DIR__, 'tree_sitter_libs')
+__BPE_DIR__ = os.path.join(__NCC_DIR__, 'byte_pair_encoding')
 __JAVA_HOME__ = os.path.join(os.getenv('JAVA_HOME', '/usr'), 'bin/java')
-LOGGER.debug(
-    f"Host Name: {_HOSTNAME}; User Name: {_USERNAME}; Data directory: {__DEFAULT_DIR__}; " \
-    f"Cache directory: {__CACHE_DIR__}; TreeSitter directory: {__LIBS_DIR__}; BPE directory: {__BPE_DIR__}; " \
-    f"Java_home: {__JAVA_HOME__}; "
-)
+
+LOGGER.debug(f"Host name: {__HOSTNAME__}; user name: {__USERNAME__}")
+LOGGER.debug(f"{__NAME__} version: {__VERSION__}, Data directory: {__NCC_DIR__};")
+LOGGER.debug(f"TreeSitter so directory: {__TREE_SITTER_LIBS_DIR__};")
+LOGGER.debug(f"BytePairEncoding dictionaries directory: {__BPE_DIR__}; ")
+LOGGER.debug(f"JAVA_HOME(for Meteor): {__JAVA_HOME__};")
+
+__all__ = [
+    "LOGGER",
+    "__NAME__", "__VERSION__",
+    "__HOSTNAME__", "__USERNAME__", "__NCC_DIR__",
+    "__TREE_SITTER_LIBS_DIR__", "__BPE_DIR__", "__JAVA_HOME__",
+]

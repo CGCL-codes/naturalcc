@@ -7,14 +7,14 @@ preprocess:
     - path.terminals
     - sbt
     - traversal
-  # ~ path for dataset default. e.g.  for codenn, ~/filter = ~/.ncc/codenn/filter
-  trainpref: ~/.ncc/codenn/filter/csharp/train #", metavar="FP", default=None, help="train file prefix"
-  validpref: ~/.ncc/codenn/filter/csharp/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-  testpref:  ~/.ncc/codenn/filter/csharp/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+  # ~ path for dataset default. e.g.  for codenn, ~/filter = ~/codenn/filter
+  trainpref: ~/codenn/filter/csharp/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/codenn/filter/csharp/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/codenn/filter/csharp/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
 
   align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
-#  destdir: ~/.ncc/codenn/summarization/data-raw/csharp/ #", metavar="DIR", default="data-bin", help="destination dir"
-  destdir: ~/.ncc/codenn/summarization/data-mmap/csharp #", metavar="DIR", default="data-bin", help="destination dir"
+#  destdir: ~/codenn/summarization/data-raw/csharp/ #", metavar="DIR", default="data-bin", help="destination dir"
+  destdir: ~/codenn/summarization/data-mmap/csharp #", metavar="DIR", default="data-bin", help="destination dir"
   thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
   srcdict: ~
   #  nwordssrc: -1 #", metavar="N", default=-1, type=int, help="number of source words to retain"

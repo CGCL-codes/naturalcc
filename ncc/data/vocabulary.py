@@ -1,10 +1,8 @@
-from collections import Counter
 import typing
-from typing import Iterable, Dict, Sized, List, FrozenSet, Union, Optional
+from collections import Counter
+from typing import Iterable, Dict, List, FrozenSet, Union, Optional
 
 import numpy as np
-
-# __all__ = ['Vocabulary']
 
 
 class Vocabulary(object):

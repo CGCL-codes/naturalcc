@@ -9,6 +9,7 @@ import torch.utils.data
 
 class EpochListening:
     """Mixin for receiving updates whenever the epoch increments."""
+
     def set_epoch(self, epoch):
         """Will receive the updated epoch number at the beginning of the epoch.
         """
@@ -17,6 +18,9 @@ class EpochListening:
 
 class NccDataset(torch.utils.data.Dataset, EpochListening):
     """A dataset that provides helpers for batching."""
+
+    # default: shuffle indices
+    shuffle = True
 
     def __getitem__(self, index):
         raise NotImplementedError
@@ -48,7 +52,23 @@ class NccDataset(torch.utils.data.Dataset, EpochListening):
     def ordered_indices(self):
         """Return an ordered list of indices. Batches will be constructed based
         on this order."""
-        return np.arange(len(self))
+        # return np.arange(len(self))
+        indices = np.arange(len(self))
+        src_sizes = getattr(self, "src_sizes", None)
+        tgt_sizes = getattr(self, "tgt_sizes", None)
+        if src_sizes is not None and tgt_sizes is not None:
+            # ignore the data pairs which contains invalid sentence
+            valid_indices = (src_sizes > 0) & (tgt_sizes > 0)
+            indices = indices[valid_indices]
+        if self.shuffle:
+            # sort by target length, then source length
+            if tgt_sizes is not None:
+                indices = indices[
+                    np.argsort(tgt_sizes[indices], kind='mergesort')
+                ]
+            return indices[np.argsort(src_sizes[indices], kind='mergesort')]
+        else:
+            return indices
 
     @property
     def supports_prefetch(self):

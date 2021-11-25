@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 if [ -z $NCC ]; then
-  CACHE_DIR=~/ncc_data
+  CACHE_DIR=~
 else
-  CACHE_DIR=$NCC/ncc_data
+  CACHE_DIR=$NCC
 fi
 
 data_names=python_wan

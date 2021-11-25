@@ -11,7 +11,7 @@ import os
 from multiprocessing import Pool
 from collections import (namedtuple, Counter)
 from ncc.data import (Dictionary, indexed_dataset)
-from ncc.utils.util_file import load_yaml
+from ncc.utils.file_ops.yaml_io import load_yaml
 from ncc import tasks
 from ncc.data.tools.binarizer import Binarizer
 from dataset.csn.utils.util import normalize_program

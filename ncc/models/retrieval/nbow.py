@@ -6,7 +6,7 @@ import torch.nn as nn
 
 from ncc.models import register_model
 from ncc.models.ncc_model import NccRetrievalModel
-from ncc.modules.retrieval.nbow_encoder import NBOWEncoder
+from ncc.modules.encoders.retrieval.nbow_encoder import NBOWEncoder
 
 
 @register_model('nbow')

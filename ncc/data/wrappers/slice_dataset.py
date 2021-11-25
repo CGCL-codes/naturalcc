@@ -2,9 +2,6 @@ from ncc.data.wrappers.base_wrapper_dataset import BaseWrapperDataset
 
 
 class SliceDataset(BaseWrapperDataset):
-    """
-    ```portion``` ahead part of dataset
-    """
 
     def __init__(self, dataset, start=0, end=None):
         super().__init__(dataset)

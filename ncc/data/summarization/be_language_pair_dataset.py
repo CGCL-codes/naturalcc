@@ -89,10 +89,10 @@ class BELanguagePairDataset(NccDataset):
         align_dataset=None,
         bos=None, eos=None,
     ):
-        # if tgt_dict is not None:
-        #     assert src_dict.pad() == tgt_dict.pad()
-        #     assert src_dict.eos() == tgt_dict.eos()
-        #     assert src_dict.unk() == tgt_dict.unk()
+        if tgt_dict is not None:
+            assert src_dict.pad() == tgt_dict.pad()
+            assert src_dict.eos() == tgt_dict.eos()
+            assert src_dict.unk() == tgt_dict.unk()
         self.src = src
         self.tgt = tgt
         self.src_sizes = np.array(src_sizes)

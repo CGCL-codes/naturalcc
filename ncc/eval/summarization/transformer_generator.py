@@ -104,8 +104,8 @@ class TransformerGenerator(object):
 
         encoder_out = model.encoder(sample['net_input']['src_tokens'], src_lengths=sample['net_input']['src_lengths'])
 
-        prev_output_tokens = torch.zeros(bsz, 1).long().fill_(self.bos).to(device)
-        # prev_output_tokens = torch.zeros(bsz, 1).long().fill_(self.eos).to(device)
+        # prev_output_tokens = torch.zeros(bsz, 1).long().fill_(self.bos).to(device)
+        prev_output_tokens = torch.zeros(bsz, 1).long().fill_(self.eos).to(device)
 
         dec_preds = []
         # 2. generate

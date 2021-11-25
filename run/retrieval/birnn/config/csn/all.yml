@@ -101,7 +101,7 @@ task:
 
   source_aux_lang: code_tokens.wo_func
   target_aux_lang: func_name
-  fraction_using_func_name: 0.3 # 0.1 probability to chose func_name as docstring_tokens
+  fraction_using_func_name: 0.1 # 0.1 probability to chose func_name as docstring_tokens
 
   load_alignments: 0 #', action='store_true', help='load the binarized alignments'
   left_pad_source: 1 #', default='True', type=str, metavar='BOOL', help='pad the source on the left'
@@ -187,7 +187,7 @@ checkpoint:
   no_save_optimizer_state: ~ # action='store_true', help='don\'t save optimizer-state as part of checkpoint'
   best_checkpoint_metric: mrr # type=str, default='loss', help='metric to use for saving "best" checkpoints'
   maximize_best_checkpoint_metric: 1 # action='store_true', help='select the largest metric value for saving "best" checkpoints'
-  patience: 10 # type=int, default=-1, metavar='N', help=('early stop training if valid performance doesn\'t improve for N consecutive validation runs; note that this is influenced by --validate-interval')
+  patience: 5 # type=int, default=-1, metavar='N', help=('early stop training if valid performance doesn\'t improve for N consecutive validation runs; note that this is influenced by --validate-interval')
 
 
 eval:
@@ -195,4 +195,4 @@ eval:
   quiet: 1 # ', action='store_true', help='only print final scores'
   max_sentences: 1000 # evaluation batch size, because while evaluation, it will not cost much ram, we can increase the batch size
   model_overrides: '{}' # default="{}", type=str, metavar='DICT', help='a dictionary used to override model args at generation '
-  eval_size: 1000
+  eval_size: -1

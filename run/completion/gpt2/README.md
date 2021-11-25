@@ -29,6 +29,19 @@ CodeXGlue(code-to-text, csn_feng) dataset
 | acc | 0.638678 | 0.531883 | 0.731481 | 0.747818 | 0.71073 | 0.659851   |
 | mrr | 0.733002 | 0.64119 | 0.802455 | 0.823614 | 0.792368 | 0.750832   |
 
+# sentence length: 256
+
+| single | python   | ruby     | go       | php      | java     | javascript |
+|-----|----------|----------|----------|----------|----------|------------|
+| acc | 0.6287 | 0.448355 | 0.708251 | 0.73665 | 0.696034 | 0.617656   |
+| mrr | 0.724431 | 0.563861 | 0.7831 | 0.814299 | 0.778502 | 0.71414   |
+| train_size | 251820 | 24927 | 167288 | 241241 | 164923 | 58025  |
+
+| multi_task | python   | ruby     | go       | php      | java     | javascript |
+|-----|----------|----------|----------|----------|----------|------------|
+| acc | 0.634384 | 0.519304 | 0.726514 | 0.74291 | 0.705808 | 0.649352   |
+| mrr | 0.729622 | 0.632337 | 0.798286 | 0.819752 | 0.788361 | 0.742858   |
+
 ```shell script
 # python
 CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.completion.gpt2.train -f config/csn_feng/python > run/completion/gpt2/config/csn_feng/python.log 2>&1 &
@@ -83,6 +96,29 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.completion.gpt2.train -f config
 # eval
 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.completion.gpt2.eval -f config/csn_feng/all
 
+# javascript_php_python
+CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.completion.gpt2.train -f config/csn_feng/javascript_php_python > run/completion/gpt2/config/csn_feng/javascript_php_python.log 2>&1 &
+# eval
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.completion.gpt2.eval -f config/csn_feng/javascript_php_python
 
-# predictor
+# ruby_js
+CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.completion.gpt2.train -f config/csn_feng/ruby_js > run/completion/gpt2/config/csn_feng/ruby_js.log 2>&1 &
+# eval
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.completion.gpt2.eval -f config/csn_feng/ruby_js
+
+# ruby_js_java
+CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.completion.gpt2.train -f config/csn_feng/ruby_js_java > run/completion/gpt2/config/csn_feng/ruby_js_java.log 2>&1 &
+# eval
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.completion.gpt2.eval -f config/csn_feng/ruby_js_java
+
+# ruby_js_java_go
+CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.completion.gpt2.train -f config/csn_feng/ruby_js_java_go > run/completion/gpt2/config/csn_feng/ruby_js_java_go.log 2>&1 &
+# eval
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.completion.gpt2.eval -f config/csn_feng/ruby_js_java_go
+
+# ruby_js_java_go_php
+CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.completion.gpt2.train -f config/csn_feng/ruby_js_java_go_php > run/completion/gpt2/config/csn_feng/ruby_js_java_go_php.log 2>&1 &
+# eval
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.completion.gpt2.eval -f config/csn_feng/ruby_js_java_go_php
+
 ```

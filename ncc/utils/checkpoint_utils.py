@@ -8,15 +8,14 @@ import os
 import re
 import traceback
 from collections import OrderedDict
-from typing import Union
 
 import torch
 from torch.serialization import default_restore_location
 
 from ncc import LOGGER
 from ncc.utils import utils
-from ncc.utils.path_manager import PathManager
 from ncc.utils.file_ops import file_io
+from ncc.utils.path_manager import PathManager
 
 
 def save_checkpoint(args, trainer, epoch_itr, val_loss):
@@ -345,7 +344,7 @@ def save_state(
 
 def _upgrade_state_dict(state):
     """Helper for upgrading old model checkpoints."""
-    from ncc import models, registry, tasks
+    from ncc import registry
 
     # add optimizer_history
     if "optimizer_history" not in state:
@@ -395,16 +394,10 @@ def _upgrade_state_dict(state):
             "iterations_in_epoch": state["extra_state"].get("batch_offset", 0),
         }
     # default to translation task
-    # if not hasattr(state["args"], "task"):
     if 'task' not in state["args"]['common']:
         state["args"]['common']["task"] = "translation"
-    # --raw-text and --lazy-load are deprecated
-    # if getattr(state["args"], "raw_text", False):
     if 'dataset_impl' not in state['args']['dataset']:
         state["args"]['dataset']["dataset_impl"] = "raw"
-    # elif getattr(state["args"], "lazy_load", False):
-    # if ["args"]['dataset']['lazy_load']:
-    #     state["args"]['dataset']["dataset_impl"] = "lazy"
     # epochs start at 1
     if state["extra_state"]["train_iterator"] is not None:
         state["extra_state"]["train_iterator"]["epoch"] = max(
@@ -412,10 +405,7 @@ def _upgrade_state_dict(state):
             1,
         )
 
-    # TODO: to be checked
     # set any missing default values in the task, model or other registries
-    # registry.set_defaults(state["args"], tasks.TASK_REGISTRY[state["args"].task])
-    # registry.set_defaults(state["args"], models.ARCH_MODEL_REGISTRY[state["args"].arch])
     for registry_name, REGISTRY in registry.REGISTRIES.items():
         choice = getattr(state["args"], registry_name, None)
         if choice is not None:

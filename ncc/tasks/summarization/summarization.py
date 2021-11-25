@@ -167,8 +167,7 @@ def load_langpair_dataset(
         align_dataset=None, eos=eos,
         remove_eos_from_source=True,
         append_eos_to_target=append_eos_to_target,
-        shuffle=True,
-        # shuffle=False,  # debug
+        shuffle=(split == 'train'),
     )
 
 
@@ -454,10 +453,10 @@ class SummarizationTask(NccTask):
 
         return bleu, rouge_l, meteor
 
-    def encode_input(self, input, tokenize):
-        if tokenize:
+    def encode_input(self, input, tokenizer=None):
+        if tokenizer is not None:
             input = ''.join(char if str.isalnum(char) else ' ' for char in input)  # for python_wan dataset
-            input = tokenize(input)
+            input = tokenizer(input)
         input = input[:self.args['task']['max_source_positions']]
         input = [self.src_dict.index(token) for token in input] + [self.src_dict.eos()]
         input = torch.Tensor(input).long()  # [bsz, len]

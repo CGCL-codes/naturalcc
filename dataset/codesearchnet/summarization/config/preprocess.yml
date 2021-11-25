@@ -2,14 +2,14 @@ preprocess:
   task: summarization # task', metavar='TASK', default="translation", choices=TASK_REGISTRY.keys(), help='task'
   source_lang: code_tokens # sbt, sbtao, path, bin_ast
   target_lang: docstring_tokens #", default=None, metavar="TARGET", help="target language"
-  # ~ path for dataset default. e.g.  for CodeSearchNet, ~/flatten = ~/.ncc/CodeSearchNet/flatten
-  trainpref: ~/.ncc/code_search_net/filter/ruby/train #", metavar="FP", default=None, help="train file prefix"
-  validpref: ~/.ncc/code_search_net/filter/ruby/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-  testpref:  ~/.ncc/code_search_net/filter/ruby/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+  # ~ path for dataset default. e.g.  for CodeSearchNet, ~/flatten = ~/CodeSearchNet/flatten
+  trainpref: ~/code_search_net/filter/ruby/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/code_search_net/filter/ruby/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/code_search_net/filter/ruby/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
 
   align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
-#  destdir: ~/.ncc/CodeSearchNet/summarization/data-raw/ruby/ #", metavar="DIR", default="data-bin", help="destination dir"
-  destdir: ~/.ncc/code_search_net/summarization/data-mmap/ruby #", metavar="DIR", default="data-bin", help="destination dir"
+#  destdir: ~/CodeSearchNet/summarization/data-raw/ruby/ #", metavar="DIR", default="data-bin", help="destination dir"
+  destdir: ~/code_search_net/summarization/data-mmap/ruby #", metavar="DIR", default="data-bin", help="destination dir"
   thresholdtgt: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
   thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
   srcdict: ~

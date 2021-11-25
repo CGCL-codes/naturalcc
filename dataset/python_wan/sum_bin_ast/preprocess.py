@@ -2,20 +2,20 @@ import os
 import shutil
 from multiprocessing import Pool
 
-import ujson
 import dgl
+import ujson
 from dgl.data.utils import (load_graphs, save_graphs)
 
 from ncc import LOGGER
 from ncc import tasks
+from ncc.tokenizers import tokenization
+from ncc.utils.file_ops import json_io
 from ncc.utils.file_ops.file_io import (
     safe_readline,
     find_offsets,
 )
-from ncc.utils.file_ops import json_io
-from ncc.tokenizers import tokenization
 from ncc.utils.file_ops.yaml_io import load_yaml
-from ncc.utils.graph import (
+from ncc.utils.graph_utils import (
     tree2dgl,
 )
 

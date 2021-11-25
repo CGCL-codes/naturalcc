@@ -47,8 +47,15 @@ class Trainer(object):
         self._criterion = criterion
         self._model = model
         if args['common']['fp16']:
+            assert not args['common'].get('amp', False), "Cannot use fp16 and AMP together"
             self._criterion = self._criterion.half()
             self._model = self._model.half()
+        elif args['common']['bf16']:
+            self._criterion = self._criterion.to(dtype=torch.bfloat16)
+            self._model = self._model.to(dtype=torch.bfloat16)
+        elif args['common'].get('amp', False):
+            self._amp_retries = 0
+
         self._criterion = self._criterion.to(device=self.device)
         self._model = self._model.to(device=self.device)
 
@@ -66,6 +73,21 @@ class Trainer(object):
         else:
             self._grad_norm_buf = None
 
+        # get detailed cuda environment
+        if self.cuda:
+            self.cuda_env = utils.CudaEnvironment()
+            if self.data_parallel_world_size > 1:
+                self.cuda_env_arr = distributed_utils.all_gather_list(
+                    self.cuda_env, group=distributed_utils.get_global_group()
+                )
+            else:
+                self.cuda_env_arr = [self.cuda_env]
+            if self.data_parallel_rank == 0:
+                utils.CudaEnvironment.pretty_print_cuda_env_list(self.cuda_env_arr)
+        else:
+            self.cuda_env = None
+            self.cuda_env_arr = None
+
         metrics.log_start_time("wall", priority=790, round=0)
 
     def reinitialize(self):
@@ -77,7 +99,7 @@ class Trainer(object):
 
     @property
     def data_parallel_world_size(self):
-        return self.args.distributed_world_size
+        return self.args['distributed_training']['distributed_world_size']
 
     @property
     def data_parallel_process_group(self):
@@ -85,7 +107,7 @@ class Trainer(object):
 
     @property
     def data_parallel_rank(self):
-        return self.args.distributed_rank
+        return self.args['distributed_training']['distributed_rank']
 
     @property
     def is_data_parallel_master(self):
@@ -130,32 +152,35 @@ class Trainer(object):
             self._setup_optimizer()  # this will initialize self._lr_scheduler
         return self._lr_scheduler
 
-    def _setup_optimizer(self):
-        params = list(
-            filter(
-                lambda p: p.requires_grad,
-                chain(self.model.parameters(), self.criterion.parameters()),
+    def _setup_optimizer(self, params=None):
+        """
+        params: None, set learning rates, decay factors for parameters
+        """
+        if params is None:
+            params = list(
+                filter(
+                    lambda p: p.requires_grad,
+                    chain(self.model.parameters(), self.criterion.parameters()),
+                )
             )
-        )
 
-        if self.args['common']['fp16']:
+        if self.args['common']['fp16'] or self.args['common']['bf16'] or self.args['common'].get('amp', False):
             if self.cuda and torch.cuda.get_device_capability(0)[0] < 7:
                 LOGGER.info(
-                    "NOTE: your device does NOT support faster training with fp16, "
+                    "NOTE: your device does NOT support faster training with fp16 or --amp, "
                     "please switch to FP32 which is likely to be faster"
                 )
-            if self.args['common']['memory_efficient_fp16']:
+            if self.args['common']['memory_efficient_fp16'] or self.args['common']['memory_efficient_bf16']:
                 self._optimizer = optimizers.MemoryEfficientFP16Optimizer.setup_optimizer(
                     self.args, params
                 )
+            elif self.args['common'].get('amp', False):
+                self._optimizer = optimizers.AMPOptimizer.setup_optimizer(self.args, params)
             else:
                 self._optimizer = optimizers.FP16Optimizer.setup_optimizer(self.args, params)
         else:
             if self.cuda and torch.cuda.get_device_capability(0)[0] >= 7:
-                LOGGER.info("NOTE: your device may support faster training with fp16")
-            # from ncc import optimizer
-            # self._optimizer = optimizer.setup_optimizer(self.args, params)
-            # self._optimizer = torch_optimizer.build_torch_optimizer(self.args, params)
+                LOGGER.info("NOTE: your device may support faster training with fp16 or --amp")
             self._optimizer = optimizers.setup_optimizer(self.args, params)
 
         if self.args['optimization']['use_bmuf']:
@@ -165,6 +190,10 @@ class Trainer(object):
         # building the optimizer, so that the initial learning rate is set.
         self._lr_scheduler = lr_schedulers.build_lr_scheduler(self.args, self.optimizer)
         self._lr_scheduler.step_update(0)
+
+    @property
+    def is_fsdp(self):
+        return self.args['distributed_training']['ddp_backend'] == "fully_sharded"
 
     def save_checkpoint(self, filename, extra_state):
         """Save all training state in a checkpoint file."""
@@ -325,14 +354,7 @@ class Trainer(object):
         # forward and backward pass
         logging_outputs, sample_size, ooms = [], 0, 0
         for i, sample in enumerate(samples):
-            sample = self._prepare_sample(sample)
-            if sample is None:
-                # when sample is None, run forward/backward on a dummy batch
-                # and ignore the resulting gradients
-                sample = self._prepare_sample(self._dummy_batch)
-                is_dummy_batch = True
-            else:
-                is_dummy_batch = False
+            sample, is_dummy_batch = self._prepare_sample(sample)
 
             def maybe_no_sync():
                 """
@@ -386,12 +408,16 @@ class Trainer(object):
                 else:
                     raise e
 
+        if is_dummy_batch:
+            if torch.is_tensor(sample_size):
+                sample_size.zero_()
+            else:
+                sample_size *= 0.0  # multiply by 0 to preserve device
+
         if torch.is_tensor(sample_size):
             sample_size = sample_size.float()
         else:
             sample_size = float(sample_size)
-        if is_dummy_batch:
-            sample_size *= 0.  # multiply by 0 to preserve device
 
         # gather logging outputs from all replicas
         if self._sync_stats():
@@ -399,17 +425,29 @@ class Trainer(object):
                 logging_outputs, sample_size, ooms, ignore=is_dummy_batch,
             )
 
+        overflow = False
         try:
-            # multiply gradients by (# GPUs / sample_size) since DDP
-            # already normalizes by the number of GPUs. Thus we get
-            # (sum_of_gradients / sample_size).
-            if not self.args['optimization']['use_bmuf']:
-                self.optimizer.multiply_grads(
-                    self.args['distributed_training']['distributed_world_size'] / sample_size
+            with torch.autograd.profiler.record_function("reduce-grads"):
+                # reduce gradients across workers
+                self.optimizer.all_reduce_grads(self.model)
+                if utils.has_parameters(self.criterion):
+                    self.optimizer.all_reduce_grads(self.criterion)
+
+            with torch.autograd.profiler.record_function("multiply-grads"):
+                # multiply gradients by (data_parallel_size / sample_size) since
+                # DDP normalizes by the number of data parallel workers for
+                # improved fp16 precision.
+                # Thus we get (sum_of_gradients / sample_size) at the end.
+                # In case of fp16, this step also undoes loss scaling.
+                # (Debugging note: Some optimizers perform this scaling on the
+                # fly, so inspecting model.parameters() or optimizer.params may
+                # still show the original, unscaled gradients.)
+                num = (
+                    self.args['distributed_training']['distributed_world_size']
+                    if not self.args['optimization']['use_bmuf'] or self._sync_stats()
+                    else 1
                 )
-            elif sample_size > 0:  # BMUF needs to check sample size
-                num = self.args['distributed_training']['distributed_world_size'] if self._sync_stats() else 1
-                self.optimizer.multiply_grads(num / sample_size)
+                self.optimizer.multiply_grads(num / (sample_size or 1.0))
 
             with torch.autograd.profiler.record_function("clip-grads"):
                 # clip grads
@@ -418,13 +456,64 @@ class Trainer(object):
             # check that grad norms are consistent across workers
             if not self.args['optimization']['use_bmuf']:
                 self._check_grad_norms(grad_norm)
+            if not torch.isfinite(grad_norm).all():
+                if self.args['common'].get('amp', False):
+                    overflow = True
+                else:
+                    raise FloatingPointError("gradients are Nan/Inf")
 
-            # take an optimization step
-            self.optimizer.step()
+            with torch.autograd.profiler.record_function("optimizer"):
+                # take an optimization step
+                self.optimizer.step()
+                if self.args['common'].get('amp', False) and overflow:
+                    if self._amp_retries == self.args['common']['amp_batch_retries']:
+                        LOGGER.info("AMP: skipping this batch.")
+                        self._amp_retries = 0
+                    else:
+                        self._amp_retries += 1
+                        return self.train_step(samples, raise_oom)  # recursion to feed in same batch
 
-            # TODO: Warning, the learning rate will be updated by its scheduler here, commented currently
-            # must set. plz, update learning rate by other methods
+        except FloatingPointError:
+            # re-run the forward and backward pass with hooks attached to print
+            # out where it fails
+            self.zero_grad()
+            with NanDetector(self._model):
+                for _, sample in enumerate(samples):
+                    sample, _ = self._prepare_sample(sample)
+                    self.task.train_step(
+                        sample,
+                        self.model,
+                        self.criterion,
+                        self.optimizer,
+                        self.get_num_updates(),
+                        ignore_grad=False
+                    )
+            raise
+        except OverflowError as e:
+            overflow = True
+            LOGGER.info(
+                f"NOTE: gradient overflow detected, ignoring gradient, {str(e)}"
+            )
+            grad_norm = torch.tensor(0.0).cuda()
+            self.zero_grad()
+        except RuntimeError as e:
+            if "out of memory" in str(e):
+                self._log_oom(e)
+                LOGGER.error("OOM during optimization, irrecoverable")
+            raise e
+
+        logging_output = None
+        if not overflow:
             self.set_num_updates(self.get_num_updates() + 1)
+
+            if self.cuda and self.cuda_env is not None:
+                # log minimum free memory over the iteration
+                gb_used = torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024
+                torch.cuda.reset_peak_memory_stats()
+                gb_free = self.cuda_env.total_memory_in_GB - gb_used
+                metrics.log_scalar(
+                    "gb_free", gb_free, priority=1500, round=1, weight=0
+                )
 
             # log stats
             logging_output = self._reduce_and_log_stats(
@@ -433,39 +522,30 @@ class Trainer(object):
 
             # clear CUDA cache to reduce memory fragmentation
             if (
-                self.args['common']['empty_cache_freq'] > 0
+                self.cuda
+                and self.args['common']['empty_cache_freq'] > 0
                 and (
                 (self.get_num_updates() + self.args['common']['empty_cache_freq'] - 1)
                 % self.args['common']['empty_cache_freq']
-            ) == 0
-                and torch.cuda.is_available()
-                and not self.args['common']['cpu']
+            )
+                == 0
             ):
                 torch.cuda.empty_cache()
 
-        except FloatingPointError:
-            # re-run the forward and backward pass with hooks attached to print out where it fails
-            with NanDetector(self.model):
-                self.task.train_step(
-                    sample, self.model, self.criterion, self.optimizer, self.get_num_updates(),
-                    ignore_grad=False
-                )
-            raise
-        except OverflowError as e:
-            LOGGER.info("NOTE: overflow detected, " + str(e))
-            self.zero_grad()
-            logging_output = None
-        except RuntimeError as e:
-            if "out of memory" in str(e):
-                self._log_oom(e)
-                LOGGER.error("OOM during optimization, irrecoverable")
-            raise e
-
-        if self.args['common']['fp16']:
-            metrics.log_scalar("loss_scale", self.optimizer.scaler.loss_scale, priority=700, round=4)
+        if self.args['common']['fp16'] or self.args['common'].get('amp', False):
+            metrics.log_scalar(
+                "loss_scale",
+                (
+                    self.optimizer.scaler.loss_scale
+                    if self.args['common']['fp16']
+                    else self.optimizer.scaler.get_scale()
+                ),
+                priority=700,
+                round=4,
+                weight=0,
+            )
 
         metrics.log_stop_time("train_wall")
-
         return logging_output
 
     def clip_grad_norm(self, clip_norm):
@@ -475,19 +555,11 @@ class Trainer(object):
     @metrics.aggregate("valid")
     def valid_step(self, sample, raise_oom=False):
         """Do forward pass in evaluation mode."""
-        if self._dummy_batch == "DUMMY":
-            self._dummy_batch = sample
-
         with torch.no_grad():
             self.model.eval()
             self.criterion.eval()
 
-            sample = self._prepare_sample(sample)
-            if sample is None:
-                sample = self._prepare_sample(self._dummy_batch)
-                is_dummy_batch = True
-            else:
-                is_dummy_batch = False
+            sample, is_dummy_batch = self._prepare_sample(sample)
 
             try:
                 _loss, sample_size, logging_output = self.task.valid_step(
@@ -510,7 +582,10 @@ class Trainer(object):
 
             logging_outputs = [logging_output]
             if is_dummy_batch:
-                sample_size *= 0  # multiply by 0 to preserve device
+                if torch.is_tensor(sample_size):
+                    sample_size.zero_()
+                else:
+                    sample_size *= 0.0
 
         # gather logging outputs from all replicas
         if self.args['distributed_training']['distributed_world_size'] > 1:
@@ -612,7 +687,26 @@ class Trainer(object):
         self.lr_step_update()
         metrics.log_scalar("num_updates", self._num_updates, weight=0, priority=200, round=6)
 
-    def _prepare_sample(self, sample):
+    def _fp_convert_sample(self, sample):
+        def apply_half(t):
+            if t.dtype is torch.float32:
+                return t.to(dtype=torch.half)
+            return t
+
+        def apply_bfloat16(t):
+            if t.dtype is torch.float32:
+                return t.to(dtype=torch.bfloat16)
+            return t
+
+        if self.args['common']['fp16']:
+            sample = utils.apply_to_sample(apply_half, sample)
+
+        if self.args['common']['fp16']:
+            sample = utils.apply_to_sample(apply_bfloat16, sample)
+
+        return sample
+
+    def _prepare_sample(self, sample, is_dummy=False):
         if sample == "DUMMY":
             raise Exception(
                 "Trying to use an uninitialized 'dummy' batch. This usually indicates "
@@ -621,20 +715,25 @@ class Trainer(object):
             )
 
         if sample is None or len(sample) == 0:
-            return None
+            assert (
+                self._dummy_batch is not None and len(self._dummy_batch) > 0
+            ), "Invalid dummy batch: {}".format(self._dummy_batch)
+            sample, _ = self._prepare_sample(self._dummy_batch, is_dummy=True)
+            return sample, True
+
+        if self.args['common'].get('on_cpu_convert_precision', False):
+            sample = self._fp_convert_sample(sample)
 
         if self.cuda:
             sample = move_to_cuda(sample)
 
-        def apply_half(t):
-            if t.dtype is torch.float32:
-                return t.half()
-            return t
+        if not self.args['common'].get('on_cpu_convert_precision', False):
+            sample = self._fp_convert_sample(sample)
 
-        if self.args['common']['fp16']:
-            sample = utils.apply_to_sample(apply_half, sample)
+        if self._dummy_batch == "DUMMY":
+            self._dummy_batch = sample
 
-        return sample
+        return sample, False
 
     def _set_seed(self):
         # Set seed based on args.seed and the update number so that we get
@@ -758,6 +857,8 @@ class Trainer(object):
                 return (
                     not torch.isfinite(tensor).any()
                     or (max_abs_diff / (tensor[0] + 1e-6) < 1e-6).all()
+                    or
+                    (self.args['common'].get('amp', False) and not torch.isfinite(tensor).all())
                 )
 
             if not is_consistent(self._grad_norm_buf):

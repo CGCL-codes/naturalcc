@@ -7,7 +7,7 @@ filelock
 ruamel.yaml
 wget
 pathos
-tree-sitter==0.2.2
+tree-sitter==0.19.0
 jsonlines
 dpu_utils
 sentencepiece
@@ -23,3 +23,8 @@ Deprecated
 h5py
 tables
 mkdocs
+pandas
+ujson
+colorlog
+absl
+pynvml

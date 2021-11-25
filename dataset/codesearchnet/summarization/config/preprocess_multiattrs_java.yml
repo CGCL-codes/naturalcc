@@ -7,14 +7,14 @@ preprocess:
 #    - path.terminals
 #    - sbt
     - traversal
-  # ~ path for dataset default. e.g.  for CodeSearchNet, ~/filter = ~/.ncc/CodeSearchNet/filter
-  trainpref: ~/.ncc/code_search_net/filter/java/train #", metavar="FP", default=None, help="train file prefix"
-  validpref: ~/.ncc/code_search_net/filter/java/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-  testpref:  ~/.ncc/code_search_net/filter/java/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+  # ~ path for dataset default. e.g.  for CodeSearchNet, ~/filter = ~/CodeSearchNet/filter
+  trainpref: ~/code_search_net/filter/java/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/code_search_net/filter/java/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/code_search_net/filter/java/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
 
   align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
-#  destdir: ~/.ncc/CodeSearchNet/summarization/data-raw/java/ #", metavar="DIR", default="data-bin", help="destination dir"
-  destdir: ~/.ncc/CodeSearchNet/summarization/data-mmap/java #", metavar="DIR", default="data-bin", help="destination dir"
+#  destdir: ~/CodeSearchNet/summarization/data-raw/java/ #", metavar="DIR", default="data-bin", help="destination dir"
+  destdir: ~/CodeSearchNet/summarization/data-mmap/java #", metavar="DIR", default="data-bin", help="destination dir"
   thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
   srcdict: ~
   #  nwordssrc: -1 #", metavar="N", default=-1, type=int, help="number of source words to retain"

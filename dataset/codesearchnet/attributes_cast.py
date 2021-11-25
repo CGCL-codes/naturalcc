@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import os
 import argparse
 import itertools
+import os
 import shutil
 from multiprocessing import Pool, cpu_count
 
 from dataset.codesearchnet import (
     LANGUAGES, MODES,
     RAW_DIR, ATTRIBUTES_DIR,
-    LOGGER,
 )
+from ncc import LOGGER
 from ncc.utils.file_ops import (
     file_io,
     json_io,

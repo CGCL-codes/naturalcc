@@ -138,7 +138,7 @@ def cli_main():
         description="Downloading/Decompressing CodeSearchNet dataset(s) or Tree-Sitter Library(ies)")
     parser.add_argument(
         "--yaml_file", "-f", type=str, help="load {yaml_file}.yml for train",
-        default='config/raw_py150/python'
+        default='config/csn_feng/ruby'
     )
     args = parser.parse_args()
     yaml_file = os.path.join(os.path.dirname(__file__), '{}.yml'.format(args.yaml_file))

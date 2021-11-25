@@ -1,6 +1,6 @@
 import torch
 
-from ncc.modules.seq2seq.ncc_incremental_decoder import NccIncrementalDecoder
+from ncc.modules.decoders.ncc_incremental_decoder import NccIncrementalDecoder
 
 
 class SequenceCompletor(object):

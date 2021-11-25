@@ -3,13 +3,13 @@ preprocess:
   source_lang: code.spm
   target_lang: docstring.spm
   only_source: 0
-  trainpref: ~/ncc_data/python_wan/attributes/train #", metavar="FP", default=None, help="train file prefix"
-  validpref: ~/ncc_data/python_wan/attributes/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-  testpref:  ~/ncc_data/python_wan/attributes/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+  trainpref: ~/python_wan/attributes/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/python_wan/attributes/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/python_wan/attributes/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
 
   # bin dataset
   dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
-  destdir: ~/ncc_data/python_wan/bpe_summarization/data-mmap #", metavar="DIR", default="data-bin", help="destination dir"
+  destdir: ~/python_wan/bpe_summarization/data-mmap #", metavar="DIR", default="data-bin", help="destination dir"
 
   only_train: 1 # if set false, generate dictionaries with additional validation datasets. e.g. neural-transformer
 

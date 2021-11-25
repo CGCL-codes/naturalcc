@@ -5,30 +5,35 @@ import gzip
 import pickle
 import numpy as np
 import builtins
+import h5py
 
 
 def open(file, mode=None, data=None, **kwargs):
-    name_seps = os.path.basename(file).split('.', 1)
+    name_seps = os.path.basename(file).rsplit('.')
     if len(name_seps) > 1:
         file_type = name_seps[-1]
 
         if file_type == 'jsonl.gz':
             return gzip.GzipFile(file, mode=mode, **kwargs)
 
-
+        # standard reader/writer
         elif file_type in ['npy', 'txt', 'json', 'jsonl', 'jsonlines']:
             return builtins.open(file, mode=mode, **kwargs)
 
-        elif file_type == 'mmap':
-            # numpy.mmap file
-            if mode == 'r':
-                # read
-                return np.memmap(file, dtype=kwargs.get('dtype', np.uint16), mode=mode, order='C')
-            elif mode == 'w':
-                # write with open
-                return builtins.open(file, mode=mode, **kwargs)
-            else:
-                raise NotImplementedError(f"Numpy cannot handle file with {mode}")
+        #
+        elif file_type in ['h5']:
+            return h5py.File(file, mode=mode, **kwargs)
+
+        # elif file_type == 'mmap':
+        #     # numpy.mmap file
+        #     if mode == 'r':
+        #         # read
+        #         return np.memmap(file, dtype=kwargs.get('dtype', np.uint16), mode=mode, order='C')
+        #     elif mode == 'w':
+        #         # write with open
+        #         return builtins.open(file, mode=mode, **kwargs)
+        #     else:
+        #         raise NotImplementedError(f"Numpy cannot handle file with {mode}")
 
         elif file_type == 'pkl':
             # cannot read/writer pkl line by line
@@ -38,6 +43,7 @@ def open(file, mode=None, data=None, **kwargs):
             elif mode == 'wb':
                 with builtins.open(file, mode, **kwargs) as writer:
                     pickle.dump(data, writer)
+                    return
             else:
                 raise NotImplementedError(f"pickle cannot handle file with {mode}")
 

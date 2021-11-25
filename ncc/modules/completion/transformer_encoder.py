@@ -1,10 +1,12 @@
+import random
+from typing import Optional
+
 import torch
 import torch.nn as nn
-from ncc.modules.completion.transformer_encoder_layer import TransformerEncoderLayer
-from ncc.modules.common.layer_norm import LayerNorm
-from typing import Optional
 import torch.nn.functional as F
-import random
+
+from ncc.modules.base.layer_norm import LayerNorm
+from .transformer_encoder_layer import TransformerEncoderLayer
 
 
 class PathLSTM(nn.Module):

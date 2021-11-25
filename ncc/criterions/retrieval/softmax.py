@@ -57,6 +57,9 @@ class SearchSoftmaxCriterion(NccCriterion):
         sample_size = sum(log.get('sample_size', 0) for log in logging_outputs)
         metrics.log_scalar('loss', loss_sum / sample_size, sample_size, round=3)
 
+        mrr_sum = sum(log.get('mrr', 0) for log in logging_outputs)
+        metrics.log_scalar('mrr', mrr_sum / sample_size, sample_size, round=6)
+
     @staticmethod
     def logging_outputs_can_be_summed() -> bool:
         """

@@ -1,17 +1,17 @@
-from ncc.models.ncc_model import NccEncoderDecoderModel
-from ncc.modules.embedding import Embedding
-# from ncc.modules.code2vec.lstm_encoder import LSTMEncoder
-from ncc.modules.code2vec.nary_tree_lstm import NaryTreeLSTMEncoder
-from ncc.modules.seq2seq.lstm_decoder import LSTMDecoder
+from ncc.data.constants import (
+    DEFAULT_MAX_SOURCE_POSITIONS,
+    DEFAULT_MAX_TARGET_POSITIONS
+)
 from ncc.models import register_model
+from ncc.models.ncc_model import NccEncoderDecoderModel
+from ncc.modules.base.layers import Embedding
+from ncc.modules.decoders.base import LSTMDecoder
+from ncc.modules.encoders.tree import NaryTreeLSTMEncoder
 from ncc.utils import utils
-
-DEFAULT_MAX_SOURCE_POSITIONS = 1e5
-DEFAULT_MAX_TARGET_POSITIONS = 1e5
 
 
 @register_model('nary_tree2seq')
-class NaryTree2SeqModel(NccEncoderDecoderModel):
+class NaryTree2Seq(NccEncoderDecoderModel):
     def __init__(self, encoder, decoder):
         super().__init__(encoder, decoder)
 

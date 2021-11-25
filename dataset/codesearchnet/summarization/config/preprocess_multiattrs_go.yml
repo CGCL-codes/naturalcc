@@ -7,14 +7,14 @@ preprocess:
 #    - path.terminals
 #    - sbt
     - traversal
-  # ~ path for dataset default. e.g.  for CodeSearchNet, ~/filter = ~/.ncc/CodeSearchNet/filter
-  trainpref: ~/.ncc/CodeSearchNet/filter/go/train #", metavar="FP", default=None, help="train file prefix"
-  validpref: ~/.ncc/CodeSearchNet/filter/go/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-  testpref:  ~/.ncc/CodeSearchNet/filter/go/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+  # ~ path for dataset default. e.g.  for code_search_net, ~/filter = ~/code_search_net/filter
+  trainpref: ~/code_search_net/filter/go/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/code_search_net/filter/go/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/code_search_net/filter/go/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
 
   align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
-#  destdir: ~/.ncc/CodeSearchNet/summarization/data-raw/go/ #", metavar="DIR", default="data-bin", help="destination dir"
-  destdir: ~/.ncc/CodeSearchNet/summarization/data-mmap/go #", metavar="DIR", default="data-bin", help="destination dir"
+#  destdir: ~/code_search_net/summarization/data-raw/go/ #", metavar="DIR", default="data-bin", help="destination dir"
+  destdir: ~/code_search_net/summarization/data-mmap/go #", metavar="DIR", default="data-bin", help="destination dir"
   thresholdsrc: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
   srcdict: ~
   #  nwordssrc: -1 #", metavar="N", default=-1, type=int, help="number of source words to retain"

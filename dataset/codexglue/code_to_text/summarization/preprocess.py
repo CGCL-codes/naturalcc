@@ -1,20 +1,20 @@
-from typing import Dict
 import os
-import ujson
 import shutil
-from multiprocessing import Pool
-from ncc import tasks
 from collections import Counter
+from multiprocessing import Pool
+from typing import Dict
+
+from ncc import LOGGER
+from ncc import tasks
 from ncc.data import (
     Dictionary,
     indexed_dataset,
 )
-from ncc.tokenizers import tokenization
 from ncc.data.tools.binarizer import Binarizer
-from ncc.utils.file_ops.yaml_io import load_yaml
+from ncc.tokenizers import tokenization
 from ncc.utils.file_ops import (json_io)
+from ncc.utils.file_ops.yaml_io import load_yaml
 from ncc.utils.path_manager import PathManager
-from ncc import LOGGER
 
 
 def binarize(args: Dict, filename: str, dict: Dictionary, in_file: str,

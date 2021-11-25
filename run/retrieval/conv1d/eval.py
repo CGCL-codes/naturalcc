@@ -166,6 +166,7 @@ def cli_main():
         description="Downloading/Decompressing CodeSearchNet dataset(s) or Tree-Sitter Library(ies)")
     parser.add_argument(
         "--yaml_file", "-f", type=str, help="load {language}.yml for train",
+        default='config/csn_feng/ruby'
     )
     parser.add_argument(
         '--out_file', '-o', type=str, help='output generated file', default=None,

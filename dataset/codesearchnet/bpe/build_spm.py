@@ -23,7 +23,7 @@ def spm_train(input: str, model_prefix: str, vocab_size: int, character_coverage
 
 
 if __name__ == "__main__":
-    # python -m dataset.csn.codebert.run_sentencepiece --src-dir ~/.ncc/CodeSearchNet/flatten --tgt-dir ~/.ncc/CodeSearchNet/codebert/ --vocab-size 50000 --model-type bpe --model-prefix codesearchnet
+    # python -m dataset.csn.codebert.run_sentencepiece --src-dir ~/CodeSearchNet/flatten --tgt-dir ~/CodeSearchNet/codebert/ --vocab-size 50000 --model-type bpe --model-prefix codesearchnet
     parser = argparse.ArgumentParser()
     parser.add_argument("--format", type=str, default='piece', help='id(num)/piece(str)')
     parser.add_argument("--vocab-size", type=int, default=50000, help='token dictionary size')

@@ -8,7 +8,6 @@ import inspect
 import torch.nn as nn
 
 from ncc.models.legacy_distributed_data_parallel import LegacyDistributedDataParallel
-from ncc.models import BaseNccModel
 
 
 def DistributedNccModel(args, model):

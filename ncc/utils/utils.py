@@ -19,8 +19,10 @@ from typing import (
     List, Dict, Optional,
 )
 
+import pynvml
 import torch
 import torch.nn.functional as F
+from dgl import DGLGraph
 from torch import Tensor
 
 from ncc import LOGGER
@@ -28,11 +30,13 @@ from ncc.data.constants import (
     PAD, EOS, UNK,
 )
 from ncc.utils.logging.meters import safe_round
-from dgl import DGLGraph
+from ncc.utils.path_manager import PathManager
+
+pynvml.nvmlInit()
 
 
 def now() -> str:
-    return time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime(time.time()))
+    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 
 
 def apply_to_sample(f, sample):
@@ -496,3 +500,59 @@ def load_embedding(embed_dict, vocab, embedding):
         if token in embed_dict:
             embedding.weight.data[idx] = embed_dict[token]
     return embedding
+
+
+class CudaEnvironment(object):
+    def __init__(self):
+        cur_device = torch.cuda.current_device()
+        prop = torch.cuda.get_device_properties("cuda:{}".format(cur_device))
+        handle = pynvml.nvmlDeviceGetHandleByIndex(cur_device)
+        meminfo = pynvml.nvmlDeviceGetMemoryInfo(handle)
+        self.name = prop.name
+        self.major = prop.major
+        self.minor = prop.minor
+        self.total_memory_in_MB = int(meminfo.total / 1024 / 1024)
+        self.used_memory_in_MB = int(meminfo.used / 1024 / 1024)
+        self.free_memory_in_MB = int(meminfo.free / 1024 / 1024)
+
+    @staticmethod
+    def pretty_print_cuda_env_list(cuda_env_list):
+        """
+        Given a list of CudaEnviorments, pretty print them
+        """
+        num_workers = len(cuda_env_list)
+        center = "CUDA enviroments for all {} workers".format(num_workers)
+        banner_len = 40 - len(center) // 2
+        first_line = "*" * banner_len + center + "*" * banner_len
+        LOGGER.info(first_line)
+        for r, env in enumerate(cuda_env_list):
+            LOGGER.info(
+                "rank {:3d}: ".format(r)
+                + "capabilities = {:2d}.{:<2d} ; ".format(env.major, env.minor)
+                + "total memory = {:d} MB ; ".format(env.total_memory_in_MB)
+                + "free memory = {:d} MB ; ".format(env.free_memory_in_MB)
+                + "used memory = {:d} MB ; ".format(env.used_memory_in_MB)
+                + "name = {:40s}".format(env.name)
+            )
+        LOGGER.info(first_line)
+
+
+def initialize_from_checkpoint(args, model):
+    if args['checkpoint'].get('init_checkpoint', False) and PathManager.exists(args['checkpoint']['init_checkpoint']):
+        with open(args['checkpoint']['init_checkpoint'], 'rb') as reader:
+            state = torch.load(reader)
+            pretrained_params = state['model']
+            del state
+        init_params = model.state_dict()
+        for module_name, module_param in pretrained_params.items():
+            if module_name in init_params:
+                if init_params[module_name].data.size() == module_param.data.size():
+                    init_params[module_name].data.copy_(module_param.data)
+                else:
+                    # emebedding
+                    token_num = module_param.size(0)
+                    # init token embedding
+                    init_params[module_name].data[:token_num, ...].copy_(module_param.data[:token_num, ...])
+        LOGGER.info(f"Restore parameters from {args['checkpoint']['init_checkpoint']}.")
+    else:
+        LOGGER.info(f"{args['checkpoint']['init_checkpoint']} does not exist.")

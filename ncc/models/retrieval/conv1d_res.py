@@ -5,7 +5,7 @@ import torch.nn as nn
 
 from ncc.models import register_model
 from ncc.models.ncc_model import NccRetrievalModel
-from ncc.modules.retrieval.conv1d_res_encoder import Conv1dResEncoder
+from ncc.modules.encoders.retrieval import Conv1dResEncoder
 
 
 @register_model('conv1d_res')

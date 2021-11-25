@@ -28,7 +28,7 @@ common:
   task: hybrid_retrieval # task
 
 dataset:
-  num_workers: 1 # default=1, type=int, metavar='N', help='how many subprocesses to use for data loading'
+  num_workers: 3 # default=1, type=int, metavar='N', help='how many subprocesses to use for data loading'
   skip_invalid_size_inputs_valid_test: 0 # action='store_true', help='ignore too long or too short lines in valid and test set'
   max_tokens: ~ # type=int, metavar='N', help='maximum number of tokens in a batch'
   max_sentences: 1000 # '--batch-size', type=int, metavar='N', help='maximum number of sentences in a batch'
@@ -101,7 +101,7 @@ task:
 
   source_aux_lang: code_tokens.wo_func
   target_aux_lang: func_name
-  fraction_using_func_name: 0.3 # 0.1 probability to chose func_name as docstring_tokens
+  fraction_using_func_name: 0.1
 
   load_alignments: 0 #', action='store_true', help='load the binarized alignments'
   left_pad_source: 1 #', default='True', type=str, metavar='BOOL', help='pad the source on the left'
@@ -125,7 +125,7 @@ model:
 optimization:
   max_epoch: 300 # '--me', default=0, type=int, metavar='N', help='force stop training at specified epoch'
   max_update: 0 # '--mu', default=0, type=int, metavar='N', help='force stop training at specified update'
-#  clip_norm_version: tf_clip_by_global_norm
+  clip_norm_version: tf_clip_by_global_norm
   clip_norm: 1 # default=25, type=float, metavar='NORM', help='clip threshold of gradients'
   sentence_avg: 0 # action='store_true', help='normalize gradients by the number of sentences in a batch (default is to normalize by number of tokens)'
   update_freq: # default='1', metavar='N1,N2,...,N_K', type=lambda uf: eval_str_list(uf, type=int), help='update parameters every N_i batches, when in epoch i'
@@ -169,7 +169,7 @@ checkpoint:
   no_save_optimizer_state: ~ # action='store_true', help='don\'t save optimizer-state as part of checkpoint'
   best_checkpoint_metric: mrr # type=str, default='loss', help='metric to use for saving "best" checkpoints'
   maximize_best_checkpoint_metric: 1 # action='store_true', help='select the largest metric value for saving "best" checkpoints'
-  patience: 10 # type=int, default=-1, metavar='N', help=('early stop training if valid performance doesn\'t improve for N consecutive validation runs; note that this is influenced by --validate-interval')
+  patience: 5 # type=int, default=-1, metavar='N', help=('early stop training if valid performance doesn\'t improve for N consecutive validation runs; note that this is influenced by --validate-interval')
 
 
 eval:
@@ -177,4 +177,4 @@ eval:
   quiet: 1 # ', action='store_true', help='only print final scores'
   max_sentences: 1000 # evaluation batch size, because while evaluation, it will not cost much ram, we can increase the batch size
   model_overrides: '{}' # default="{}", type=str, metavar='DICT', help='a dictionary used to override model args at generation '
-  eval_size: 1000
+  eval_size: -1

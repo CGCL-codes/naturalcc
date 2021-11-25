@@ -1,13 +1,10 @@
 import numpy as np
 
-from ncc.data.wrappers.base_wrapper_dataset import BaseWrapperDataset
 from ncc.data.constants import INF
+from ncc.data.wrappers.base_wrapper_dataset import BaseWrapperDataset
 
 
 class PlaceholderDataset(BaseWrapperDataset):
-    """
-    ```portion``` ahead part of dataset
-    """
 
     def __init__(self, placeholder=None, length=INF):
         super().__init__(None)

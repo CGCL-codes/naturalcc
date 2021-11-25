@@ -1,33 +1,31 @@
 # -*- coding: utf-8 -*-
 
-import os
-import re
-import random
 import argparse
 import itertools
-import shutil
+import os
+import random
+import re
 from multiprocessing import Pool, cpu_count
 
-from dataset.codesearchnet import (
-    LANGUAGES, MODES,
-    RAW_DIR, LIBS_DIR, ATTRIBUTES_DIR,
-    LOGGER,
-
-    PATH_NUM, MAX_SUB_TOKEN_LEN, MODES
-)
-from dataset.codesearchnet.parser._parser import CodeParser
-from dataset.codesearchnet.utils import (
+from dataset.ast_parser.tree_sitter.parser import TreeSitterASTParser
+from dataset.ast_parser.tree_sitter.utils import (
     util_ast,
     util_path,
     util_traversal,
 )
-from ncc.utils.file_ops.file_io import (
-    safe_readline,
-    find_offsets,
+from dataset.codesearchnet import (
+    LANGUAGES, LIBS_DIR, ATTRIBUTES_DIR,
+
+    PATH_NUM, MAX_SUB_TOKEN_LEN, MODES
 )
+from ncc import LOGGER
 from ncc.utils.file_ops import (
     file_io,
     json_io,
+)
+from ncc.utils.file_ops.file_io import (
+    safe_readline,
+    find_offsets,
 )
 from ncc.utils.path_manager import PathManager
 
@@ -136,7 +134,7 @@ class AttrFns:
         so_dir = kwargs.get('so_dir')
 
         so_filename = os.path.join(os.path.expanduser(so_dir), '{}.so'.format(lang))
-        parser = CodeParser(so_filename, lang)
+        parser = TreeSitterASTParser(so_filename, lang)
         dest_filename = dest_filename + str(idx)
         with file_io.open(filename, "r") as reader, file_io.open(dest_filename, 'w') as writer:
             reader.seek(start)

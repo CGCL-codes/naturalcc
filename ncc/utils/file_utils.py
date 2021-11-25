@@ -2,6 +2,8 @@
 Utilities for working with the local dataset cache.
 This file is adapted from the AllenNLP library at https://github.com/allenai/allennlp
 Copyright by the AllenNLP authors.
+
+This file is to restore model or bpe from cloud. The property will be supported later.
 """
 
 import fnmatch
@@ -26,9 +28,8 @@ from botocore.exceptions import ClientError
 from filelock import FileLock
 from tqdm.auto import tqdm
 
+from ncc import LOGGER
 from ncc import __VERSION__
-
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 try:
     USE_TF = os.environ.get("USE_TF", "AUTO").upper()
@@ -37,9 +38,9 @@ try:
         import torch
 
         _torch_available = True  # pylint: disable=invalid-name
-        logger.debug("PyTorch version {} available.".format(torch.__version__))
+        LOGGER.debug("PyTorch version {} available.".format(torch.__version__))
     else:
-        logger.info("Disabling PyTorch because USE_TF is set")
+        LOGGER.info("Disabling PyTorch because USE_TF is set")
         _torch_available = False
 except ImportError:
     _torch_available = False  # pylint: disable=invalid-name
@@ -53,9 +54,9 @@ try:
 
         assert hasattr(tf, "__version__") and int(tf.__version__[0]) >= 2
         _tf_available = True  # pylint: disable=invalid-name
-        logger.info("TensorFlow version {} available.".format(tf.__version__))
+        LOGGER.info("TensorFlow version {} available.".format(tf.__version__))
     else:
-        logger.info("Disabling Tensorflow because USE_TORCH is set")
+        LOGGER.info("Disabling Tensorflow because USE_TORCH is set")
         _tf_available = False
 except (ImportError, AssertionError):
     _tf_available = False  # pylint: disable=invalid-name
@@ -368,7 +369,7 @@ def http_get(url, temp_file, proxies=None, resume_size=0, user_agent=None):
         total=total,
         initial=resume_size,
         desc="Downloading",
-        disable=bool(logger.getEffectiveLevel() == logging.NOTSET),
+        disable=bool(LOGGER.getEffectiveLevel() == logging.NOTSET),
     )
     for chunk in response.iter_content(chunk_size=1024):
         if chunk:  # filter out keep-alive new chunks
@@ -474,20 +475,20 @@ def get_from_cache(
         # Download to temporary file, then copy to cache dir once finished.
         # Otherwise you get corrupt cache entries if the download gets interrupted.
         with temp_file_manager() as temp_file:
-            logger.info("%s not found in cache or force_download set to True, downloading to %s", url, temp_file.name)
+            LOGGER.info("%s not found in cache or force_download set to True, downloading to %s", url, temp_file.name)
 
             # GET file object
             if url.startswith("s3://"):
                 if resume_download:
-                    logger.warn('Warning: resumable downloads are not implemented for "s3://" urls')
+                    LOGGER.warn('Warning: resumable downloads are not implemented for "s3://" urls')
                 s3_get(url, temp_file, proxies=proxies)
             else:
                 http_get(url, temp_file, proxies=proxies, resume_size=resume_size, user_agent=user_agent)
 
-        logger.info("storing %s in cache at %s", url, cache_path)
+        LOGGER.info("storing %s in cache at %s", url, cache_path)
         os.rename(temp_file.name, cache_path)
 
-        logger.info("creating metadata file for %s", cache_path)
+        LOGGER.info("creating metadata file for %s", cache_path)
         meta = {"url": url, "etag": etag}
         meta_path = cache_path + ".json"
         with open(meta_path, "w") as meta_file:

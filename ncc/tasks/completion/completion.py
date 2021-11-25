@@ -194,7 +194,7 @@ class CompletionTask(NccTask):
             dataset_impl=self.args['dataset']['dataset_impl'],
             truncate_target=self.args['dataset'].get('truncate_target', False),
             max_target_positions=self.max_positions(),
-            shuffle=kwargs.get('shuffle', True),
+            shuffle=(split == 'train'),
         )
 
     def build_dataset_for_inference(self, src_tokens, src_lengths):
@@ -246,7 +246,7 @@ class CompletionTask(NccTask):
         """Return the max sentence length allowed by the task."""
         return self.args['task']['max_target_positions']
 
-    def build_generator(self, args):
+    def build_generator(self, models, args):
         return self.sequence_completor
 
     @property
@@ -263,11 +263,14 @@ class CompletionTask(NccTask):
         """
         return Dictionary.load(filename)
 
-    def encode_input(self, input):
-        input = input.replace('lambda', ' ').replace('if', ' ').replace('is', ' ').replace('not', ' '). \
-            replace('return', ' ')
-        input = re.split(r'[\s|\.|)|(|,|:|\[|\]]+', input.strip())
-        input = [token for token in input if len(token) > 1]
+    def encode_input(self, input, tokenizer=None):
+        # input = input.replace('lambda', ' ').replace('if', ' ').replace('is', ' ').replace('not', ' '). \
+        #     replace('return', ' ')
+        # input = re.split(r'[\s|\.|)|(|,|:|\[|\]]+', input.strip())
+        # input = re.split(r'[\s]+', input.strip())
+        # input = [token for token in input]
+        if tokenizer is not None:
+            input = tokenizer(input)
         input = [self.target_dictionary.index(token) for token in input]
         input = torch.Tensor(input).long().unsqueeze(dim=0)
         input = {

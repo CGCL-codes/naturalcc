@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-from ncc.utils.constants import NEG_INF
+from typing import Any
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import Any
+
+from ncc.data.constants import INF
 
 
 class SelfAttention(nn.Module):
@@ -64,7 +66,7 @@ class SelfAttention(nn.Module):
         attention = self.ws2(y1).transpose(1, 2).contiguous()
         # print(attention.size())
         # print(input_origin.size())
-        attention = attention + (NEG_INF * (input_origin == 0).float())  # remove the weight on padding token.
+        attention = attention + (-INF * (input_origin == 0).float())  # remove the weight on padding token.
         attention = F.softmax(attention, 2)  # [baz ,hop, len]
         return torch.bmm(attention, input), self._penalization(attention)  # output1 --> [baz ,hop ,nhid]
 

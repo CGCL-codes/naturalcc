@@ -195,7 +195,7 @@ def single_main(args, init_distributed=False):
     if distributed_utils.is_master(args):
         save_dir = args['checkpoint']['save_dir']
         checkpoint_utils.verify_checkpoint_directory(save_dir)
-        PathManager.rm(os.path.join(save_dir, '*.pt'))  # this code will remove pre-trained models
+        # PathManager.rm(os.path.join(save_dir, '*.pt'))  # this code will remove pre-trained models
 
     # Print args
     LOGGER.info(args)
@@ -205,6 +205,7 @@ def single_main(args, init_distributed=False):
 
     # 2. Load valid dataset (we load training data below, based on the latest checkpoint)
     task.load_dataset(args['dataset']['valid_subset'], combine=False, epoch=1)
+    task.load_dataset(args['dataset']['gen_subset'], combine=False, epoch=1)
 
     # 3. Build model and criterion
     model = task.build_model(args)
@@ -284,7 +285,7 @@ def cli_main():
         description="Downloading/Decompressing code_search_net dataset(s) or Tree-Sitter Library(ies)")
     parser.add_argument(
         "--yaml_file", "-f", type=str, help="load {yaml_file}.yml for train",
-        default='config/csn_feng/all',
+        default='config/csn_feng/python',
     )
     args = parser.parse_args()
     yaml_file = os.path.join(os.path.dirname(__file__), '{}.yml'.format(args.yaml_file))
