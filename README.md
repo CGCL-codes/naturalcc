@@ -213,7 +213,7 @@ Dataset: [OpenCL (Grewe et al.)](dataset/opencl/README.md)
 
 > All the running commands here should be executed in the root of project folder (the path of your `naturalcc`). For example, in my environment I will stay at `/data/wanyao/Dropbox/ghproj-v100/naturalcc`.
 > 
-> We also have more detailed [READMEs]((examples)) to start your tutorial of NaturalCC.
+> We also have more detailed [READMEs](examples) to start your tutorial of NaturalCC.
 
 ### Step 1: Download and process a dataset from ```datasets```, and follow the instructions from the README.md file.
 ```shell
