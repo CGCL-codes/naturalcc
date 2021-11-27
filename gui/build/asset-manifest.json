@@ -1,0 +1,29 @@
+{
+  "files": {
+    "main.css": "/static/css/main.0ae96c4d.chunk.css",
+    "main.js": "/static/js/main.7b59df13.chunk.js",
+    "main.js.map": "/static/js/main.7b59df13.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.39fc3997.js",
+    "runtime-main.js.map": "/static/js/runtime-main.39fc3997.js.map",
+    "static/css/2.91f5ce95.chunk.css": "/static/css/2.91f5ce95.chunk.css",
+    "static/js/2.a4472b67.chunk.js": "/static/js/2.a4472b67.chunk.js",
+    "static/js/2.a4472b67.chunk.js.map": "/static/js/2.a4472b67.chunk.js.map",
+    "index.html": "/index.html",
+    "static/css/2.91f5ce95.chunk.css.map": "/static/css/2.91f5ce95.chunk.css.map",
+    "static/css/main.0ae96c4d.chunk.css.map": "/static/css/main.0ae96c4d.chunk.css.map",
+    "static/js/2.a4472b67.chunk.js.LICENSE.txt": "/static/js/2.a4472b67.chunk.js.LICENSE.txt",
+    "static/media/add-14px.96cf0db9.svg": "/static/media/add-14px.96cf0db9.svg",
+    "static/media/annotate-14px.bd47b597.svg": "/static/media/annotate-14px.bd47b597.svg",
+    "static/media/other-14px.37e4f5bd.svg": "/static/media/other-14px.37e4f5bd.svg",
+    "static/media/parse-14px.a9e3eb6a.svg": "/static/media/parse-14px.a9e3eb6a.svg",
+    "static/media/passage-14px.9065f40e.svg": "/static/media/passage-14px.9065f40e.svg",
+    "static/media/question-14px.48c5ad5e.svg": "/static/media/question-14px.48c5ad5e.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.39fc3997.js",
+    "static/css/2.91f5ce95.chunk.css",
+    "static/js/2.a4472b67.chunk.js",
+    "static/css/main.0ae96c4d.chunk.css",
+    "static/js/main.7b59df13.chunk.js"
+  ]
+}

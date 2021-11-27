@@ -1,0 +1,22 @@
+.passage.model__content__summary {
+  line-height: 1.875em;
+  font-size: 1.125em;
+}
+
+.highlight__answer,
+.highlight__num_1,
+.highlight__num_-1 {
+  font-weight: 700;
+  background: #40affd;
+  color: #fff;
+  padding: .1875em;
+  margin: 0 .125em;
+}
+
+.highlight__num_1 {
+  background: #1a9850;
+}
+
+.highlight__num_-1 {
+  background: #d73027;
+}
