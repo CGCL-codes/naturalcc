@@ -172,7 +172,7 @@ Dataset: [Python (Wan et al.)](dataset/python_wan/README.md)
 ### [Code Retrieval](run/retrieval)
 Dataset: [CodeSearchNet (Husain et al.)](dataset/codesearchnet/README.md)
 
-| MMR      | Go    | Java  | JS    | PHP   | Python | Ruby  | Cost    | Logs    |
+| MRR      | Go    | Java  | JS    | PHP   | Python | Ruby  | Cost    | Logs    |
 |----------|-------|-------|-------|-------|--------|-------|---------|---------|
 | NBOW     | 66.59 | 59.92 | 47.15 | 54.75 | 63.33  | 42.86 | 0.16s/b | [click here](run/retrieval/nbow/config/csn/all.log) |
 | ConV1d   | 70.87 | 60.49 | 38.81 | 61.92 | 67.29  | 36.53 | 0.30s/b | [click here](run/retrieval/conv1d/config/csn/all.log) |
@@ -183,7 +183,7 @@ Dataset: [CodeSearchNet (Husain et al.)](dataset/codesearchnet/README.md)
 ### [Code Completion](run/completion)
 Dataset: Py150 [(official processed)](dataset/py150/README.md) [(raw)](dataset/raw_py150/README.md)
 
-| MMR@10    | Attr  | Num   | Name   | Param | Tokens | Cost    | Logs    |
+| MRR@10    | Attr  | Num   | Name   | Param | Tokens | Cost    | Logs    |
 |-----------|-------|-------|--------|-------|--------|---------|---------|
 | LSTM      | 51.67 | 47.45 | 46.52  | 66.06 | 73.73  | 0.31s/b | [click here](run/completion/seqrnn/config/raw_py150/python.log) |
 | GTP-2     | 70.37 | 62.20 | 63.84  | 73.54 | 82.17  | 0.43s/b | [click here](run/completion/gpt2/config/raw_py150/python.log) |
