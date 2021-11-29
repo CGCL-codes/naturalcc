@@ -183,7 +183,7 @@ Dataset: [CodeSearchNet (Husain et al.)](dataset/codesearchnet/README.md)
 ### [Code Completion](run/completion)
 Dataset: Py150 [(official processed)](dataset/py150/README.md) [(raw)](dataset/raw_py150/README.md)
 
-| MRR@10    | Attr  | Num   | Name   | Param | Tokens | Cost    | Logs    |
+| MRR       | Attr  | Num   | Name   | Param | Tokens | Cost    | Logs    |
 |-----------|-------|-------|--------|-------|--------|---------|---------|
 | LSTM      | 51.67 | 47.45 | 46.52  | 66.06 | 73.73  | 0.31s/b | [click here](run/completion/seqrnn/config/raw_py150/python.log) |
 | GTP-2     | 70.37 | 62.20 | 63.84  | 73.54 | 82.17  | 0.43s/b | [click here](run/completion/gpt2/config/raw_py150/python.log) |
