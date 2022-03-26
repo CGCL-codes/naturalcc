@@ -34,7 +34,7 @@ Pycharm cannot get user-defined environment variables, if you want to use user-d
 PLZ, launch pycharm at {your pycharm directory}/pycharm.sh.
 """
 
- __NCC_DIR__ = '/data/ncc_data'
+__NCC_DIR__ = '/data/ncc_data'
 __TREE_SITTER_LIBS_DIR__ = os.path.join(__NCC_DIR__, 'tree_sitter_libs')
 __BPE_DIR__ = os.path.join(__NCC_DIR__, 'byte_pair_encoding')
 __JAVA_HOME__ = os.path.join(os.getenv('JAVA_HOME', '/usr'), 'bin/java')
