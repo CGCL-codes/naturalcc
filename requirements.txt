@@ -26,5 +26,5 @@ mkdocs
 pandas
 ujson
 colorlog
-absl
+absl-py
 pynvml
