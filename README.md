@@ -56,7 +56,7 @@ Our vision is to bridge the gap between programming language and natural languag
 #### 1. Install prerequisite libraries
 
 ```shell
-git clone https://github.com/xcodemind/naturalcc && cd naturalcc
+git clone https://github.com/CGCL-codes/naturalcc && cd naturalcc
 pip install -r requirements.txt
 ```
 
