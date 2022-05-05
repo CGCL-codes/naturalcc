@@ -267,5 +267,21 @@ About us: [XCodeMind](https://xcodemind.github.io/team) <br>
 Please cite as:
 
 ```
-under reviewing
+@inproceedings{wan2022naturalcc,
+              author    = {Yao Wan and
+                           Yang He and
+                           Zhangqian Bi and
+                           Jianguo Zhang and
+                           Yulei Sui and
+                           Hongyu Zhang and
+                           Kazuma Hashimoto and
+                           Hai Jin and
+                           Guandong Xu and
+                           Caiming Xiong and
+                           Philip S. Yu},
+              title     = {NaturalCC: An Open-Source Toolkit for Code Intelligence},
+              booktitle   = {Proceedings of 44th International Conference on Software Engineering, Companion Volume},
+              publisher = ACM,
+              year      = {2022}
+            }
 ```
