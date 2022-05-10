@@ -1,12 +1,10 @@
 """Contains classes describing linguistic tasks of interest on annotated data."""
-"""包含描述对注释数据感兴趣的语言任务的类"""
 
 import numpy as np
 import torch
 
 class Task:
   """Abstract class representing a linguistic task mapping texts to labels."""
-  """表示语言任务的抽象类，将文本映射到标签。"""
   @staticmethod
   def labels(observation):
     """Maps an observation to a matrix of labels.
@@ -17,7 +15,6 @@ class Task:
 
 class ParseDistanceTask(Task):
   """Maps observations to dependency parse distances between words."""
-  """将观察结果映射到依存关系以解析单词之间的距离"""
   @staticmethod
   def labels(observation):
     """Computes the distances between all pairs of words; returns them as a torch tensor.
@@ -27,10 +24,10 @@ class ParseDistanceTask(Task):
     Returns:
       A torch tensor of shape (sentence_length, sentence_length) of distances
       in the parse tree as specified by the observation annotation.
-      由观察注释指定的解析树中距离的形状（句子长度，句子长度）的火炬张量。
+ 
     """
     sigle_dict_ast=observation[0]
-    code_head_indices = []  # 将每一个点的父节点找到
+    code_head_indices = []  
     dict_code = []
     for item in sigle_dict_ast:
       if sigle_dict_ast[item]['parent'] == 'null':
@@ -60,7 +57,6 @@ class ParseDistanceTask(Task):
   @staticmethod
   def distance_between_pairs(i, j, head_indices=None):
     '''Computes path distance between a pair of words
-    计算一对单词之间的路径距离
 
     TODO: It would be (much) more efficient to compute all pairs' distances at once;
           this pair-by-pair method is an artefact of an older design, but
