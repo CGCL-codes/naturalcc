@@ -22,11 +22,6 @@ class SimpleDataset:
   Reads the data from conllx files into namedtuple form to keep annotation
   information, and provides PyTorch dataloaders and padding/batch collation
   to provide access to train, dev, and test splits.
-  读取conllx文件以提供PyTorch数据加载器
-
-   将conllx文件中的数据读取为namedtuple形式以保留注释
-   信息，并提供PyTorch数据加载器和填充/批处理排序规则
-   提供访问训练，开发和测试分组的权限。
 
   Attributes:
     args: the global yaml-derived experiment config dictionary
@@ -47,10 +42,6 @@ class SimpleDataset:
     
     as specified by the yaml arguments dictionary and 
     optionally adds pre-constructed embeddings for them.
-    从conllx格式的文件中读取观察结果
-
-     如yaml参数字典所指定的，以及
-     （可选）为其添加预构建的嵌入。
 
     Returns:
       A 3-tuple: (train, dev, test) where each element in the
