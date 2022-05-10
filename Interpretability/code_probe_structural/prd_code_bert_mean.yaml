@@ -1,0 +1,47 @@
+dataset:
+  observation_fieldnames:
+    - code_ast
+    - code_tokens
+    - embeddings
+  corpus:
+    root: ../../data/code_java/java_ast_new
+    train_path: train.ast
+    dev_path: valid.ast
+    test_path: test.ast
+  embeddings:
+    type: token #{token,subword}
+    root: ../../data/code_java/code_probe
+    train_path: code_bert_train.hdf5
+    dev_path: code_bert_valid.hdf5
+    test_path: code_bert_test.hdf5
+  batch_size: 40
+model:
+  hidden_dim: 768 # ELMo hidden dim
+  #embedding_dim: 1024 # ELMo word embedding dim
+  model_type: CodeBert-disk # CodeBert-disk or GraphCodeBert-disk
+  use_disk: True
+  model_layer: 11
+  # Code_bert:0,1..11
+probe:
+  task_signature: word_pair # word_pair
+  task_name: parse-distance
+  maximum_rank: 32
+  psd_parameters: True
+  diagonal: False
+  params_path: predictor.params  #将探针保存的路径
+probe_training:
+  epochs: 100
+  loss: L1
+reporting:
+  root: ../../data/code_java/probe_result
+  observation_paths:
+    train_path: train.observations
+    dev_path: dev.observations
+    test_path: test.observations
+  prediction_paths:
+    train_path: train.predictions
+    dev_path: dev.predictions
+    test_path: test.predictions
+  reporting_methods:
+    - spearmanr
+    - image_examples
