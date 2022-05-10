@@ -225,75 +225,6 @@ def evaluate(args):
             score.update(ps, gold_spans, gold_tags)
         score.derive_final_score()
         scores.append(score)
-    print(scores)
-        #     measure.scores[m].update(pred_spans, gold_spans, gold_tags)
-        #
-        # measure.derive_final_score()
-        # scores[pretrained_weights] = measure.scores
-        #
-        # if not os.path.exists(args.result_path):
-        #     os.makedirs(args.result_path)
-        #
-        # with open(f'{args.result_path}/{pretrained_weights.split("/")[-1]}.txt', 'w') as f:
-        #     print('Model name:', pretrained_weights, file=f)
-        #     print('Experiment time:', args.time, file=f)
-        #     print('# of layers:', n_layers, file=f)
-        #     print('# of attentions:', n_att, file=f)
-        #     print('# of hidden dimensions:', n_hidden, file=f)
-        #     print('# of processed sents:', data.cnt, file=f)
-        #     max_corpus_f1, max_sent_f1 = 0, 0
-        #     for n in range(n_layers):
-        #         print(f'[Layer {n + 1}]', file=f)
-        #         print('-' * (119 + measure.max_m_len), file=f)
-        #         for m, s in measure.scores.items():
-        #             if m in measure.h_measures + measure.a_avg_measures:
-        #                 print(
-        #                     f'| {m.upper()} {" " * (measure.max_m_len - len(m))} '
-        #                     f'| Corpus F1: {s.corpus_f1[n] * 100:.2f} '
-        #                     f'| Sent F1: {s.sent_f1[n] * 100:.2f} ',
-        #                     end='', file=f)
-        #                 for z in range(len(s.label_recalls[0])):
-        #                     print(
-        #                         f'| {s.labels[z]}: '
-        #                         f'{s.label_recalls[n][z] * 100:.2f} ',
-        #                         end='', file=f)
-        #                 print('|', file=f)
-        #                 if s.sent_f1[n] > max_sent_f1:
-        #                     max_corpus_f1 = s.corpus_f1[n]
-        #                     max_sent_f1 = s.sent_f1[n]
-        #                     max_measure = m
-        #                     max_layer = n + 1
-        #             else:
-        #                 for i in range(n_att):
-        #                     m_att = str(i) if i > 9 else '0' + str(i)
-        #                     m_att = m + m_att + " " * (
-        #                             measure.max_m_len - len(m))
-        #                     i_att = n_att * n + i
-        #                     print(
-        #                         f'| {m_att.upper()}'
-        #                         f'| Corpus F1: {s.corpus_f1[i_att] * 100:.2f} '
-        #                         f'| Sent F1: {s.sent_f1[i_att] * 100:.2f} ',
-        #                         end='', file=f)
-        #                     for z in range(len(s.label_recalls[0])):
-        #                         print(f'| {s.labels[z]}: '
-        #                               f'{s.label_recalls[i_att][z] * 100:.2f} ',
-        #                               end='', file=f)
-        #                     print('|', file=f)
-        #                     if s.sent_f1[i_att] > max_sent_f1:
-        #                         max_corpus_f1 = s.corpus_f1[i_att]
-        #                         max_sent_f1 = s.sent_f1[i_att]
-        #                         max_measure = m_att
-        #                         max_layer = n + 1
-        #             print('-' * (119 + measure.max_m_len), file=f)
-        #     print(f'[MAX]: | Layer: {max_layer} '
-        #           f'| {max_measure.upper()} '
-        #           f'| Corpus F1: {max_corpus_f1 * 100:.2f} '
-        #           f'| Sent F1: {max_sent_f1 * 100:.2f} |')
-        #     print(f'[MAX]: | Layer: {max_layer} '
-        #           f'| {max_measure.upper()} '
-        #           f'| Corpus F1: {max_corpus_f1 * 100:.2f} '
-        #           f'| Sent F1: {max_sent_f1 * 100:.2f} |', file=f)
-
     return scores
 
 
@@ -302,8 +233,6 @@ def main():
     parser.add_argument('--data-path',
                         default='../data/code_new/python_ast_new_new/valid_all.ast', type=str)
     parser.add_argument('--result-path', default='outputs', type=str)
-    # parser.add_argument('--lm-cache-path',
-    #                     default='/data/transformers', type=str)
     parser.add_argument('--from-scratch', default=False, action='store_true')
     parser.add_argument('--gpu', default=0, type=int)
     parser.add_argument('--bias', default=0, type=float,
