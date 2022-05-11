@@ -258,7 +258,7 @@ pre-trained models as well. This project is also highly inspired by [Fairseq](ht
 and [AllenNLP](https://allennlp.org).
 
 ## 🔗 Related Links
- [Paper](https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf)
+[Paper](https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf) <br>
 [NaturalCC-demo](http://121.43.116.104:3000/) <br>
 About us: [XCodeMind](https://xcodemind.github.io/team) <br>
 
