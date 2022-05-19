@@ -24,6 +24,8 @@ Our vision is to bridge the gap between programming language and natural languag
 </p>
 <hr>
 
+## 🔖 News 
+- [May 10] We have merged the source code of "What Do They Capture? - A Structural Analysis of Pre-Trained Language Models for Source Code" into NaturalCC.
 
 ## ⭐ Features
 
@@ -155,6 +157,9 @@ Currently, we have processed the following datasets:
 - [GraphCodeBERT](run/translation/graphcodebert/model.py)
 - [PLBART](ncc/models/transfomer)
 
+#### Structural Analysis of Pre-Trained Language Models for Source Code
+- [ICSE 2022](examples/structural_analysis/)
+  
 ## 📋 Experiments
 
 ### [Code Summarization](run/summarization)
