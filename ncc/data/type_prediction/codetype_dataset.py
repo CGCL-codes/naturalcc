@@ -7,7 +7,7 @@ import numpy as np
 from ncc.data.tools import data_utils
 from ncc.data.ncc_dataset import NccDataset
 import jsbeautifier
-from dataset.augmented_javascript.utils.util import normalize_program
+# from dataset.augmented_javascript.utils.util import normalize_program
 import torch
 
 TYPED_MARKER_START = "__LS__"
