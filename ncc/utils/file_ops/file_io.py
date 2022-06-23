@@ -13,7 +13,8 @@ def open(file, mode=None, data=None, **kwargs):
     if len(name_seps) > 1:
         file_type = name_seps[-1]
 
-        if file_type == 'jsonl.gz':
+        # if file_type == 'jsonl.gz':
+        if file_type == 'gz':
             return gzip.GzipFile(file, mode=mode, **kwargs)
 
         # standard reader/writer
