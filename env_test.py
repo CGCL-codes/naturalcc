@@ -68,7 +68,7 @@ def check_version(libraries):
             try:
                 version = lib.__version__
             except Exception as err:
-                LOGGER.error(f"Cannot get version of [{library.key}], please check it via \"pip list\"")
+                LOGGER.info(f"Cannot get version of [{library.key}], please check it via \"pip list\"")
                 return
         current_version = parse_version(version)
         try:

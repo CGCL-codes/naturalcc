@@ -50,8 +50,8 @@ Our vision is to bridge the gap between programming language and natural languag
 - PyTorch version >= 1.6.0
 - Python version >= 3.6
 - GCC/G++ > 5.0
-- For training new models, you'll also need an NVIDIA GPU and NCCL
-- (optional) For faster training, you need to install NVIDIA's apex library.
+- For training new models, you'll also need an NVIDIA GPU, NCCL and Cuda Toolkit installed.
+- (optional) For faster training, you need to install NVIDIA's ```apex``` library.
 
 [comment]: <> "  with the --cuda_ext and --deprecated_fused_adam options"
 

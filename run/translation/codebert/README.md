@@ -1,8 +1,7 @@
 # codebert in Code Translation Task
 
 ```shell
-topk5
-node15
+# top k = 5
 # java -> python
 CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.translation.codebert.train --SRC_LANG java --TGT_LANG python --topk 5 --dataset avatar > run/translation/codebert/config/avatar/topk5/java-python.log 2>&1 &
 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.translation.codebert.eval --SRC_LANG java --TGT_LANG python --topk 5 --dataset avatar -o run/translation/codebert/config/avatar/topk5/java-python.pred
@@ -10,8 +9,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.translation.codebert.eval --SRC_LANG 
 CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.translation.codebert.train --SRC_LANG python --TGT_LANG java --topk 5 --dataset avatar > run/translation/codebert/config/avatar/topk5/python-java.log 2>&1 &
 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.translation.codebert.eval --SRC_LANG python --TGT_LANG java --topk 5 --dataset avatar -o run/translation/codebert/config/avatar/topk5/python-java.pred
 
-topk3
-node13
+# top k = 3
 # java -> python
 CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.translation.codebert.train --SRC_LANG java --TGT_LANG python --topk 3 --dataset avatar > run/translation/codebert/config/avatar/topk3/java-python.log 2>&1 &
 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.translation.codebert.eval --SRC_LANG java --TGT_LANG python --topk 3 --dataset avatar -o run/translation/codebert/config/avatar/topk3/java-python.pred
@@ -19,7 +17,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.translation.codebert.eval --SRC_LANG 
 CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.translation.codebert.train --SRC_LANG python --TGT_LANG java --topk 3 --dataset avatar > run/translation/codebert/config/avatar/topk3/python-java.log 2>&1 &
 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.translation.codebert.eval --SRC_LANG python --TGT_LANG java --topk 3 --dataset avatar -o run/translation/codebert/config/avatar/topk3/python-java.pred
 
-topk1 
+# top k = 1 
 # java -> python
 CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.translation.codebert.train --SRC_LANG java --TGT_LANG python --topk 1 --dataset avatar > run/translation/codebert/config/avatar/topk1/java-python.log 2>&1 &
 CUDA_VISIBLE_DEVICES=0,1,2,3 python -m run.translation.codebert.eval --SRC_LANG java --TGT_LANG python --topk 1 --dataset avatar -o run/translation/codebert/config/avatar/topk1/java-python.pred

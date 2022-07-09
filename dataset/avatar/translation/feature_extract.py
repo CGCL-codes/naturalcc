@@ -122,7 +122,7 @@ def process(src_filename, tgt_filename, num_workers=cpu_count(), **kwargs):
     modality = tgt_filename.split('.')[-1]
     attr_fn = getattr(AttrFns, '{}_fn'.format(modality))
     offsets = find_offsets(src_filename, num_workers)
-
+    print(f"src_filename ={src_filename}, tgt_filename ={tgt_filename}")
     # # for debug
     # idx = 0
     # attr_fn(src_filename, tgt_filename, idx, offsets[idx], offsets[idx + 1], [kwargs])

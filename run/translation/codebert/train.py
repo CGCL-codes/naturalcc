@@ -14,7 +14,8 @@ from ncc import LOGGER
 from ncc.data import constants
 from ncc.utils.path_manager import PathManager
 from ncc.utils.utils import move_to_cuda
-from run.translation.bleu import compute_bleu
+# from run.translation.bleu import compute_bleu
+from third_party.pycocoevalcap.bleu.google_bleu import compute_bleu
 from run.translation.codebert.cross_pair_dataset import CrossPairDataset, collater
 from run.translation.codebert.model import (
     CodeBERT,

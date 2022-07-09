@@ -9,7 +9,7 @@ from ncc.data.constants import (
 )
 
 DATASET_NAME = 'avatar'
-DATASET_DIR = os.path.join(__NCC_DIR__, DATASET_NAME, "translation")
+DATASET_DIR = os.path.join(__NCC_DIR__, DATASET_NAME)
 
 RAW_DIR = os.path.join(DATASET_DIR, RAW)
 ATTRIBUTES_DIR = os.path.join(DATASET_DIR, ATTRIBUTES)

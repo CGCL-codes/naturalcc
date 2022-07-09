@@ -11,7 +11,7 @@ from ncc import LOGGER
 
 from ncc.data import constants
 from ncc.data.dictionary import TransformersDictionary
-from ncc.modules.common.layers import (Linear, )
+from ncc.modules.base.layers import (Linear, )
 from ncc.utils.file_ops import file_io
 from ncc.utils.path_manager import PathManager
 

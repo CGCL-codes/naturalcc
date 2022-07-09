@@ -13,6 +13,7 @@ src/test.py
 *.o
 build/*
 *.so
+*.log
 ncc/data/tools/data_utils_fast.cpp
 ncc/data/tools/token_block_utils_fast.cpp
 ncc/data/tools/token_block_utils_fast.cpython-37m-x86_64-linux-gnu.so
