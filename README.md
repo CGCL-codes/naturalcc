@@ -68,10 +68,13 @@ Once you installed prerequisite libraries, you can check them via
 #### 2. Build or install NaturalCC
 
 Export your NaturalCC cache directory (data and models will be saved in this directory) to user
-variables(```~/.bashrc``` or  ```~/.zshrc```).
+variables(```~/.bashrc``` or  ```~/.zshrc``` in Linux, ```~/.zsh_profile``` or ```~/.bash_profile``` in macOS).
 
 ```shell
-echo "export NCC=/data/ncc_data" >> ~/.bashrc
+# Linux
+echo "export NCC=<path_to_store ncc_data>" >> ~/.bashrc
+# macOS
+echo "export NCC=<path_to_store ncc_data>" >> ~/.bash_profile
 ```
 
 > Note: PyCharm cannot get environment variables and, therefore, we recommend you to register your NCC variable at ```ncc/__init__.py```.
