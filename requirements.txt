@@ -28,3 +28,6 @@ ujson
 colorlog
 absl-py
 pynvml
+
+# zendoo dataset download
+zenodo-get==1.0.0
