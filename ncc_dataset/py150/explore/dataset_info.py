@@ -3,7 +3,7 @@
 import itertools
 import os
 
-from dataset.py150 import (
+from ncc_dataset.py150 import (
     ATTRIBUTES_DIR,
     MODES,
 )

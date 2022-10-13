@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 
 from tree_sitter import Language, Parser
-from dataset.avatar.translation.dfg.utils import (
+from ncc_dataset.avatar.translation.dfg.utils import (
     remove_comments_and_docstrings,
     tree_to_token_index,
     index_to_code_token,

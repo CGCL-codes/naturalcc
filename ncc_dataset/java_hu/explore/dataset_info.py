@@ -9,7 +9,7 @@ from ncc.utils.file_ops import (
     json_io,
 )
 
-from dataset.java_hu import (
+from ncc_dataset.java_hu import (
     ATTRIBUTES_DIR,
     MODES,
 )

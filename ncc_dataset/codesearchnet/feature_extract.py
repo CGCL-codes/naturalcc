@@ -7,13 +7,13 @@ import random
 import re
 from multiprocessing import Pool, cpu_count
 
-from dataset.ast_parser.tree_sitter.parser import TreeSitterASTParser
-from dataset.ast_parser.tree_sitter.utils import (
+from ncc_dataset.ast_parser.tree_sitter.parser import TreeSitterASTParser
+from ncc_dataset.ast_parser.tree_sitter.utils import (
     util_ast,
     util_path,
     util_traversal,
 )
-from dataset.codesearchnet import (
+from ncc_dataset.codesearchnet import (
     LANGUAGES, LIBS_DIR, ATTRIBUTES_DIR,
 
     PATH_NUM, MAX_SUB_TOKEN_LEN, MODES

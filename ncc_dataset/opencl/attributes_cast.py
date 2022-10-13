@@ -7,12 +7,12 @@ import re
 
 import pandas as pd
 
-from dataset.opencl import (
+from ncc_dataset.opencl import (
     LANGUAGES, RAW_DIR, ATTRIBUTES_DIR,
     MODES,
 )
-from dataset.opencl.inst2vec import inst2vec_preprocess
-from dataset.opencl.inst2vec import task_utils
+from ncc_dataset.opencl.inst2vec import inst2vec_preprocess
+from ncc_dataset.opencl.inst2vec import task_utils
 from ncc import LOGGER
 from ncc.utils.file_ops import (
     file_io,

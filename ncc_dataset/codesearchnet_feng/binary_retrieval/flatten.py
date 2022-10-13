@@ -1,7 +1,7 @@
 import os
 
 try:
-    from dataset.codesearchnet_feng import (
+    from ncc_dataset.codesearchnet_feng import (
         LANGUAGES, MODES,
         RAW_DATA_DIR, LIBS_DIR, FLATTEN_DIR,
         RETRIEVAL_RAW_DATA_DIR, RETRIEVAL_SPLITTER,

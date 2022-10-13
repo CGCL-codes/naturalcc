@@ -3,7 +3,7 @@
 import itertools
 import os
 
-from dataset.avatar.translation import (
+from ncc_dataset.avatar.translation import (
     MODES,
 )
 from ncc import LOGGER

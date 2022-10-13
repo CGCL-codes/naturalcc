@@ -5,7 +5,7 @@ import os
 
 import ujson
 
-from dataset.codesearchnet_feng import LANGUAGES
+from ncc_dataset.codesearchnet_feng import LANGUAGES
 
 MODALITIES = [
     'code', 'docstring',

@@ -3,7 +3,7 @@ import pickle
 import shutil
 from multiprocessing import Pool
 
-from dataset.codesearchnet import (
+from ncc_dataset.codesearchnet import (
     LANGUAGES,
     RAW_DIR,
     DEDUPE_DIR,

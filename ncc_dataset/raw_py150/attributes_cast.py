@@ -5,11 +5,11 @@ import os
 import shutil
 from multiprocessing import Pool, cpu_count
 
-from dataset.raw_py150 import (
+from ncc_dataset.raw_py150 import (
     MODES,
     RAW_DIR, ATTRIBUTES_DIR,
 )
-from dataset.raw_py150.utils import parse_file
+from ncc_dataset.raw_py150.utils import parse_file
 from ncc import LOGGER
 from ncc.data.constants import PAD
 from ncc.utils.file_ops import (

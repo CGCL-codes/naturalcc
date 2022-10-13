@@ -158,7 +158,7 @@ def __collect_all_and_save(asts, args, output_file):
 
 
 def main():
-    from dataset.py150 import (RAW_DIR, ATTRIBUTES_DIR, )
+    from ncc_dataset.py150 import (RAW_DIR, ATTRIBUTES_DIR, )
     from ncc.utils.path_manager import PathManager
 
     parser = argparse.ArgumentParser()

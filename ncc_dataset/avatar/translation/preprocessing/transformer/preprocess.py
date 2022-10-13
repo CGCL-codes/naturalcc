@@ -7,7 +7,7 @@ from multiprocessing import Pool
 import sentencepiece as spm
 import torch
 
-from dataset.avatar.translation import (
+from ncc_dataset.avatar.translation import (
     MODES,
     BPE_DIR,
 )

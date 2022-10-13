@@ -3,7 +3,7 @@ import os
 
 import sentencepiece as spm
 
-from dataset.codesearchnet import DEDUPE_DIR
+from ncc_dataset.codesearchnet import DEDUPE_DIR
 from ncc import LOGGER
 from ncc.data import constants
 

@@ -32,7 +32,7 @@ from multiprocessing import Pool
 
 import networkx as nx
 
-import dataset.opencl.inst2vec.rgx_utils as rgx
+import ncc_dataset.opencl.inst2vec.rgx_utils as rgx
 
 # disable multiprocessing and possibly print more verbose output
 DEBUG = False

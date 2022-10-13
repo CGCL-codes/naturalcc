@@ -8,7 +8,7 @@ from multiprocessing import (
 
 import sentencepiece as spm
 
-from dataset.python_wan import (
+from ncc_dataset.python_wan import (
     BPE_DIR, ATTRIBUTES_DIR,
     LANGUAGES, MODES,
 )

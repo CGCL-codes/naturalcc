@@ -3,10 +3,10 @@
 import os
 from collections import Counter
 
-from dataset.avatar.translation import (
+from ncc_dataset.avatar.translation import (
     MODES,
 )
-from dataset.avatar.translation.dfg import (
+from ncc_dataset.avatar.translation.dfg import (
     extract_dataflow, parsers,
 )
 from ncc import LOGGER

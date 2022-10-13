@@ -4,7 +4,7 @@ from collections import Counter
 from multiprocessing import Pool
 from typing import Dict
 
-from dataset.raw_py150.utils import (
+from ncc_dataset.raw_py150.utils import (
     separate_list,
 )
 from ncc import LOGGER

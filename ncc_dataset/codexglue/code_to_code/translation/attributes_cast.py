@@ -10,9 +10,9 @@ from ncc.utils.file_ops import (
     file_io, json_io
 )
 from ncc.utils.path_manager import PathManager
-from dataset.codexglue.parser._parser import CodeParser
+from ncc_dataset.codexglue.parser._parser import CodeParser
 
-from dataset.codexglue.code_to_code.translation import (
+from ncc_dataset.codexglue.code_to_code.translation import (
     LANGUAGES, MODES,
     RAW_DIR, LIBS_DIR, ATTRIBUTES_DIR,
     LOGGER,

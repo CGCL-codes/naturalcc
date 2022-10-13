@@ -6,7 +6,7 @@ import os
 import shutil
 from multiprocessing import Pool, cpu_count
 
-from dataset.codesearchnet import (
+from ncc_dataset.codesearchnet import (
     LANGUAGES, MODES,
     RAW_DIR, ATTRIBUTES_DIR,
 )

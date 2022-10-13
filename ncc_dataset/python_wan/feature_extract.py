@@ -6,13 +6,13 @@ import os
 import re
 from multiprocessing import Pool, cpu_count
 
-from dataset.ast_parser.tree_sitter.parser import TreeSitterASTParser
-from dataset.ast_parser.tree_sitter.utils import (
+from ncc_dataset.ast_parser.tree_sitter.parser import TreeSitterASTParser
+from ncc_dataset.ast_parser.tree_sitter.utils import (
     util_ast,
     util_path,
     util_traversal,
 )
-from dataset.python_wan import (
+from ncc_dataset.python_wan import (
     LANGUAGES, LIBS_DIR, ATTRIBUTES_DIR,
     LOGGER,
     MAX_SUB_TOKEN_LEN, MODES

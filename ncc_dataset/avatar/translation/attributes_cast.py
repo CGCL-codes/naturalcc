@@ -4,7 +4,7 @@ import argparse
 import os
 from multiprocessing import cpu_count
 
-from dataset.avatar.translation import (
+from ncc_dataset.avatar.translation import (
     LANGUAGES, MODES,
     RAW_DIR, ATTRIBUTES_DIR,
 )

@@ -11,7 +11,7 @@ from ncc import LOGGER
 from collections import OrderedDict
 from ncc.data.tools import data_utils
 from ncc.data.ncc_dataset import NccDataset
-from dataset.csn import PATH_NUM
+from ncc_dataset.csn import PATH_NUM
 
 
 def collate(

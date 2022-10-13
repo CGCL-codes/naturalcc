@@ -10,8 +10,8 @@ import os
 import sentencepiece as spm
 import ujson
 
-from dataset.augmented_javascript.utils.jsonl_dataset import normalize_docstring
-from dataset.augmented_javascript.utils.util import normalize_program
+from ncc_dataset.augmented_javascript.utils.jsonl_dataset import normalize_docstring
+from ncc_dataset.augmented_javascript.utils.util import normalize_program
 from ncc import LOGGER
 from ncc.data import constants
 

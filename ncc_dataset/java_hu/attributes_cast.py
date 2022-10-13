@@ -1,4 +1,4 @@
-from dataset.java_hu import (
+from ncc_dataset.java_hu import (
     RAW_DIR, ATTRIBUTES_DIR,
     MODES,
 )

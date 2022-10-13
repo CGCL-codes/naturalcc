@@ -6,7 +6,7 @@ from copy import deepcopy
 
 import ujson
 
-from dataset.stackoverflow import (
+from ncc_dataset.stackoverflow import (
     RAW_DIR, ATTRIBUTES_DIR,
     LANGUAGES, MODES,
 )

@@ -5,7 +5,7 @@ import os
 import itertools
 import shutil
 
-from dataset.codexglue.code_to_text import (
+from ncc_dataset.codexglue.code_to_text import (
     LANGUAGES, MODES,
 )
 from ncc import tasks

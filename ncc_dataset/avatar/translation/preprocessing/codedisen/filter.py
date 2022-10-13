@@ -3,7 +3,7 @@
 import os
 import itertools
 
-from dataset.avatar.translation import (
+from ncc_dataset.avatar.translation import (
     LANGUAGES,
     DATASET_DIR,
     ATTRIBUTES_DIR,

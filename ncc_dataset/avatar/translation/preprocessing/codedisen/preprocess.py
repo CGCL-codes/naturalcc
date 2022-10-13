@@ -6,7 +6,7 @@ from multiprocessing import Pool
 
 import torch
 
-from dataset.codexglue.code_to_code.translation import (
+from ncc_dataset.codexglue.code_to_code.translation import (
     DATASET_DIR,
     MODES,
 )

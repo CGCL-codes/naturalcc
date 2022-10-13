@@ -3,7 +3,7 @@
 import itertools
 import os
 
-from dataset.codexglue.code_to_text import (
+from ncc_dataset.codexglue.code_to_text import (
     MODES,
     LANGUAGES,
     ATTRIBUTES_DIR,

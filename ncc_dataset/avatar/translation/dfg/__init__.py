@@ -2,7 +2,7 @@
 
 import os
 from tree_sitter import Language, Parser
-from dataset.clcdsa.dfg.DFG import (
+from ncc_dataset.clcdsa.dfg.DFG import (
     DFG_python, DFG_java, DFG_ruby, DFG_go, DFG_php, DFG_javascript, DFG_cpp, DFG_csharp,
 )
 
@@ -27,7 +27,7 @@ for lang in dfg_function:
     parser = [parser, dfg_function[lang]]
     parsers[lang] = parser
 
-from dataset.clcdsa.dfg.utils import (
+from ncc_dataset.clcdsa.dfg.utils import (
     remove_comments_and_docstrings,
     tree_to_token_index,
     index_to_code_token,

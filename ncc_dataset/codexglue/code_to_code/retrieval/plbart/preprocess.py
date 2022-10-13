@@ -6,10 +6,10 @@ from collections import Counter
 import sentencepiece as spm
 import torch
 
-from dataset.clcdsa import (
+from ncc_dataset.clcdsa import (
     MODES,
 )
-from dataset.clcdsa.plbart import (
+from ncc_dataset.clcdsa.plbart import (
     SPM_VOCAB_FILE,
 )
 from ncc import LOGGER

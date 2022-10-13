@@ -2,7 +2,7 @@
 
 import os
 
-from dataset.codesearchnet_feng import (
+from ncc_dataset.codesearchnet_feng import (
     DATASET_NAME,
     DATASET_DIR,
     RAW_DIR,

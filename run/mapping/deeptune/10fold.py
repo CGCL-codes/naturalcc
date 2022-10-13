@@ -10,7 +10,7 @@ from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from dataset.opencl import (
+from ncc_dataset.opencl import (
     LANGUAGES,
     DATASET_DIR,
 )

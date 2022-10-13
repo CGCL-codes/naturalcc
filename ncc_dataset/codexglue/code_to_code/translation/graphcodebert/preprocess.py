@@ -3,10 +3,10 @@
 import itertools
 import os
 
-from dataset.clcdsa.dfg import (
+from ncc_dataset.clcdsa.dfg import (
     extract_dataflow, parsers,
 )
-from dataset.codexglue.code_to_code.translation import (
+from ncc_dataset.codexglue.code_to_code.translation import (
     MODES,
 )
 from ncc import LOGGER

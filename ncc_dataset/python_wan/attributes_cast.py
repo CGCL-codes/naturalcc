@@ -2,7 +2,7 @@
 
 import os
 
-from dataset.codesearchnet import (
+from ncc_dataset.codesearchnet import (
     MODES,
     RAW_DIR, ATTRIBUTES_DIR,
 )

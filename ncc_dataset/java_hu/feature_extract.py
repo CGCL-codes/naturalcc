@@ -7,13 +7,13 @@ import random
 import re
 from multiprocessing import Pool, cpu_count
 
-from dataset.java_hu import (
+from ncc_dataset.java_hu import (
     LANGUAGES, LIBS_DIR, ATTRIBUTES_DIR,
     LOGGER,
     MAX_SUB_TOKEN_LEN, MODES
 )
-from dataset.python_wan.parser._parser import CodeParser
-from dataset.python_wan.utils import (
+from ncc_dataset.python_wan.parser._parser import CodeParser
+from ncc_dataset.python_wan.utils import (
     util_ast,
     util_path,
     util_traversal,

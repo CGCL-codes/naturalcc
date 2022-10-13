@@ -9,7 +9,7 @@ import shutil
 from tree_sitter import Language
 
 try:
-    from dataset.java_hu import (
+    from ncc_dataset.java_hu import (
         RAW_DATA_DIR, LIBS_DIR, LOGGER,
     )
 except ImportError:

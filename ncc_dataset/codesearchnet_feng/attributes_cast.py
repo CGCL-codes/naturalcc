@@ -11,7 +11,7 @@ import ujson
 from ncc import LOGGER
 
 try:
-    from dataset.codesearchnet_feng import (
+    from ncc_dataset.codesearchnet_feng import (
         LANGUAGES, MODES,
         RAW_DIR, LIBS_DIR, ATTRIBUTES_DIR,
     )

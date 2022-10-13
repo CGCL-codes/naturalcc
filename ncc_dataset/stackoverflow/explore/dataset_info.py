@@ -3,7 +3,7 @@
 import itertools
 import os
 
-from dataset.stackoverflow import (
+from ncc_dataset.stackoverflow import (
     ATTRIBUTES_DIR,
     LANGUAGES,
     MODES,

@@ -7,9 +7,9 @@ import re
 from multiprocessing import Pool, cpu_count
 
 import ujson
-from dataset.stackoverflow.py2x import parse_csharp_code
+from ncc_dataset.stackoverflow.py2x import parse_csharp_code
 
-from dataset.stackoverflow import (
+from ncc_dataset.stackoverflow import (
     ATTRIBUTES_DIR,
     MODES,
 )

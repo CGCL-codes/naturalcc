@@ -2,7 +2,7 @@
 
 import os
 
-from dataset.codexglue import DATASET_DIR
+from ncc_dataset.codexglue import DATASET_DIR
 from ncc import (
     __BPE_DIR__,
     __TREE_SITTER_LIBS_DIR__,

@@ -3,7 +3,7 @@
 import itertools
 import os
 
-from dataset.codesearchnet import (
+from ncc_dataset.codesearchnet import (
     ATTRIBUTES_DIR,
     LANGUAGES,
     MODES,

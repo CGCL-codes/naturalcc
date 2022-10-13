@@ -14,7 +14,7 @@ import os
 import matplotlib.pyplot as plt
 import ujson
 
-from dataset.codesearchnet_feng import LANGUAGES, MODES
+from ncc_dataset.codesearchnet_feng import LANGUAGES, MODES
 
 MODALITIES = [
     'code', 'docstring',

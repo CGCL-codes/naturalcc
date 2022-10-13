@@ -12,11 +12,11 @@ from ncc.tokenizers.tokenization import (
     normalize_docstring,
 )
 
-from dataset.codexglue.code_to_text import (
+from ncc_dataset.codexglue.code_to_text import (
     BPE_DIR, ATTRIBUTES_DIR,
     LANGUAGES, MODES,
 )
-from dataset.codexglue.code_to_text.python_tokenizer import python_code_tokenize
+from ncc_dataset.codexglue.code_to_text.python_tokenizer import python_code_tokenize
 from ncc.utils.file_ops import (
     file_io,
     json_io,

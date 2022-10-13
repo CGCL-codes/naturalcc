@@ -56,7 +56,7 @@ def main(args):
 
     target = not args['preprocess']['only_source']
 
-    from dataset.codexglue.code_to_text import BPE_DIR
+    from ncc_dataset.codexglue.code_to_text import BPE_DIR
 
     source_dict_file = os.path.join(BPE_DIR, 'csn/csn.spm.vocab')
     target_dict_file = os.path.join(os.path.dirname(args['preprocess']['destdir']), 'dict.jsonl')

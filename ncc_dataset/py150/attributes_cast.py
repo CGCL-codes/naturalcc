@@ -4,7 +4,7 @@ import os
 import shutil
 from multiprocessing import Pool, cpu_count
 
-from dataset.py150 import (
+from ncc_dataset.py150 import (
     RAW_DIR,
     ATTRIBUTES_DIR,
     MODES,

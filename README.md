@@ -118,16 +118,16 @@ conda activate XXX
 
 Currently, we have processed the following datasets:
 
-- [Python (Wan et al.)](dataset/python_wan/README.md)
-- [CodeSearchNet (Husain et al.)](dataset/codesearchnet/README.md)
-- [CodeXGlue (Feng et al.)](dataset/codexglue/code_to_text/README.md)
-- Py150 [(official processed)](dataset/py150/README.md) [(raw)](dataset/raw_py150/README.md)
-- [OpenCL (Grewe et al.)](dataset/opencl/README.md)
-- [Java (Hu et, al.)](dataset/java_hu/README.md)
-- [Stack Overflow](dataset/stackoverflow/README.md)
-- [DeepCS (Gu et al.)](dataset/deepcs)
-- [AVATAR (Ahmad et al.)](dataset/avatar)
-- [StackOverflow (Iyer et al.)](dataset/stackoverflow)
+- [Python (Wan et al.)](ncc_dataset/python_wan/README.md)
+- [CodeSearchNet (Husain et al.)](ncc_dataset/codesearchnet/README.md)
+- [CodeXGlue (Feng et al.)](ncc_dataset/codexglue/code_to_text/README.md)
+- Py150 [(official processed)](ncc_dataset/py150/README.md) [(raw)](ncc_dataset/raw_py150/README.md)
+- [OpenCL (Grewe et al.)](ncc_dataset/opencl/README.md)
+- [Java (Hu et, al.)](ncc_dataset/java_hu/README.md)
+- [Stack Overflow](ncc_dataset/stackoverflow/README.md)
+- [DeepCS (Gu et al.)](ncc_dataset/deepcs)
+- [AVATAR (Ahmad et al.)](ncc_dataset/avatar)
+- [StackOverflow (Iyer et al.)](ncc_dataset/stackoverflow)
 
 ## 🤖 Implementations
 
@@ -166,7 +166,7 @@ Currently, we have processed the following datasets:
 ## 📋 Experiments
 
 ### [Code Summarization](run/summarization)
-Dataset: [Python (Wan et al.)](dataset/python_wan/README.md)
+Dataset: [Python (Wan et al.)](ncc_dataset/python_wan/README.md)
 
 |                 | BLEU-4 | METEOR | ROUGE-L | Cost    | Logs    |
 |-----------------|--------|--------|---------|---------|---------|
@@ -178,7 +178,7 @@ Dataset: [Python (Wan et al.)](dataset/python_wan/README.md)
 
 
 ### [Code Retrieval](run/retrieval)
-Dataset: [CodeSearchNet (Husain et al.)](dataset/codesearchnet/README.md)
+Dataset: [CodeSearchNet (Husain et al.)](ncc_dataset/codesearchnet/README.md)
 
 | MRR      | Go    | Java  | JS    | PHP   | Python | Ruby  | Cost    | Logs    |
 |----------|-------|-------|-------|-------|--------|-------|---------|---------|
@@ -189,7 +189,7 @@ Dataset: [CodeSearchNet (Husain et al.)](dataset/codesearchnet/README.md)
 
 
 ### [Code Completion](run/completion)
-Dataset: Py150 [(official processed)](dataset/py150/README.md) [(raw)](dataset/raw_py150/README.md)
+Dataset: Py150 [(official processed)](ncc_dataset/py150/README.md) [(raw)](ncc_dataset/raw_py150/README.md)
 
 | MRR       | Attr  | Num   | Name   | Param | Tokens | Cost    | Logs    |
 |-----------|-------|-------|--------|-------|--------|---------|---------|
@@ -198,7 +198,7 @@ Dataset: Py150 [(official processed)](dataset/py150/README.md) [(raw)](dataset/r
 | TravTrans | 72.08 | 68.55 | 76.33  | 71.08 | 83.17  | 0.43s/b | [click here](run/completion/trav_trans/config/py150/python.log) |
 
 ### [Type Inference](run/type_prediction)
-Dataset: [CodeSearchNet-Java (Husain et al.)](dataset/codesearchnet/README.md)
+Dataset: [CodeSearchNet-Java (Husain et al.)](ncc_dataset/codesearchnet/README.md)
 
 |             | Acc@1 (All types) | Acc@5 (All types) | Acc@1 (Any types) | Acc@5 (Any types) | Cost    | Logs    |
 |-------------|-------------------|-------------------|-------------------|-------------------|---------|---------|
@@ -206,7 +206,7 @@ Dataset: [CodeSearchNet-Java (Husain et al.)](dataset/codesearchnet/README.md)
 | Transformer | 0.32              | 0.64              | 0.37              | 0.75              | 0.85s/b | [TBC]() |
 
 ### [Heterogeneous Mapping](run/mapping)
-Dataset: [OpenCL (Grewe et al.)](dataset/opencl/README.md)
+Dataset: [OpenCL (Grewe et al.)](ncc_dataset/opencl/README.md)
 
 | Accuracy        | AMD      | NVIDIA  |
 |-----------------|----------|---------|

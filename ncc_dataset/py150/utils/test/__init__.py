@@ -1,7 +1,7 @@
 import os
 import glob
 
-from dataset import LIBS_DIR
+from ncc_dataset import LIBS_DIR
 
 SO_FILES = [so_file for so_file in glob.glob(f'{LIBS_DIR}/*') if so_file.endswith('.so')]
 LANGUAGES = [os.path.basename(so_file[:so_file.find('.so')]) for so_file in SO_FILES]

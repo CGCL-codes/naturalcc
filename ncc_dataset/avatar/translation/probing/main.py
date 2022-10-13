@@ -8,10 +8,10 @@ from multiprocessing import Pool, cpu_count
 
 import numpy as np
 
-from dataset.avatar.translation import (
+from ncc_dataset.avatar.translation import (
     ATTRIBUTES_DIR, MODES
 )
-from dataset.avatar.translation.probing.diversity import (
+from ncc_dataset.avatar.translation.probing.diversity import (
     edit_distance, lexical_distance, )
 from ncc.utils.file_ops import json_io
 

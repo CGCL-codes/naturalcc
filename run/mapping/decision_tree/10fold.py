@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
 
-from dataset.opencl import (
+from ncc_dataset.opencl import (
     LANGUAGES,
     ATTRIBUTES_DIR,
 )

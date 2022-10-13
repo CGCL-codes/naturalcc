@@ -1,6 +1,6 @@
 import os
 
-from dataset.python_wan import (RAW_DIR)
+from ncc_dataset.python_wan import (RAW_DIR)
 from ncc.utils.file_ops import (
     file_io,
     json_io,

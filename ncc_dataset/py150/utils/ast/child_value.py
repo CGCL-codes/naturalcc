@@ -5,7 +5,7 @@ from ncc.data.constants import (
     SBT_LEFT_PARENTHESE,
     SBT_RIGHT_PARENTHESE,
 )
-from dataset.utils.constants import (
+from ncc_dataset.utils.constants import (
     RECURSION_DEPTH,
     MAX_SUBTOKEN_LEN,
 )

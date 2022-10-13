@@ -7,7 +7,7 @@ import re
 import os
 import itertools
 from tree_sitter import Language, Parser
-from dataset.codesearchnet import (
+from ncc_dataset.codesearchnet import (
     RECURSION_DEPTH,
     MEANINGLESS_TOKENS,
     COMMENT_END_TOKENS,
@@ -19,7 +19,7 @@ from dataset.codesearchnet import (
 # ignore those ast whose size is too large. Therefore set it as a small number
 sys.setrecursionlimit(RECURSION_DEPTH)  # recursion depth
 
-from dataset.codesearchnet.utils import (
+from ncc_dataset.codesearchnet.utils import (
     util,
     util_ast,
     util_path,

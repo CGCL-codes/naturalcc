@@ -1,7 +1,7 @@
 from pprint import pprint
 
-from dataset.utils.parser import CodeParser
-from dataset.utils.test import (LANGUAGES, SO_FILES_MAP)
+from ncc_dataset.utils.parser import CodeParser
+from ncc_dataset.utils.test import (LANGUAGES, SO_FILES_MAP)
 
 LANG = 'python'
 

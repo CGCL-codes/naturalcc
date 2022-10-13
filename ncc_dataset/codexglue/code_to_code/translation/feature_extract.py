@@ -5,7 +5,7 @@ import os
 import argparse
 import itertools
 from multiprocessing import Pool, cpu_count
-from dataset.codexglue.code_to_code.translation import (
+from ncc_dataset.codexglue.code_to_code.translation import (
     LANGUAGES,
     ATTRIBUTES_DIR,
     LOGGER,
@@ -22,7 +22,7 @@ from ncc.utils.file_ops.file_io import (
 )
 from ncc.utils.path_manager import PathManager
 from ncc.data import constants
-from dataset.codexglue.parser._parser import CodeParser
+from ncc_dataset.codexglue.parser._parser import CodeParser
 
 import sys
 

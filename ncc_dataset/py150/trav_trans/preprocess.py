@@ -3,7 +3,7 @@ import os
 from collections import Counter
 from multiprocessing import Pool
 
-from dataset.py150 import py150_util
+from ncc_dataset.py150 import py150_util
 from ncc import LOGGER
 from ncc import tasks
 from ncc.data import (

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from dataset.avatar import DATASET_DIR
+from ncc_dataset.avatar import DATASET_DIR
 
 SEED = 123456
 

@@ -6,7 +6,7 @@ ref: https://github.com/tech-srl/code2seq/blob/master/Python150kExtractor/extrac
 import re
 import itertools
 from random import shuffle
-from dataset.codesearchnet import MAX_SUB_TOKEN_LEN
+from ncc_dataset.codesearchnet import MAX_SUB_TOKEN_LEN
 from ncc import LOGGER
 
 MAX_PATH_LENTH = 8

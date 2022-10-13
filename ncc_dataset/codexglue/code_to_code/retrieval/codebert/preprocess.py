@@ -4,7 +4,7 @@ import itertools
 import os
 from collections import Counter
 
-from dataset.clcdsa import (
+from ncc_dataset.clcdsa import (
     MODES,
 )
 from ncc import LOGGER

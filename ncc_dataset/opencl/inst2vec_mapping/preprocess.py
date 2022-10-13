@@ -5,7 +5,7 @@ from collections import Counter
 from multiprocessing import Pool
 from typing import Dict
 
-from dataset.opencl import (
+from ncc_dataset.opencl import (
     INST2VEC_VOCAB,
     INST2VEC_STMTS,
 )

@@ -9,7 +9,7 @@ from ncc.utils.file_ops import (
     json_io,
 )
 
-from dataset.raw_py150 import (
+from ncc_dataset.raw_py150 import (
     ATTRIBUTES_DIR,
     MODES,
 )

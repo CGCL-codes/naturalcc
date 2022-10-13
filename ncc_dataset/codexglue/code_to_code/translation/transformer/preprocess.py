@@ -6,7 +6,7 @@ from collections import Counter
 
 import torch
 
-from dataset.clcdsa import (
+from ncc_dataset.clcdsa import (
     MODES,
     ATTRIBUTES_DIR,
 )
@@ -26,7 +26,7 @@ from ncc.utils.file_ops.yaml_io import load_yaml
 from ncc.utils.path_manager import PathManager
 
 import sentencepiece as spm
-from dataset.clcdsa.plbart import (
+from ncc_dataset.clcdsa.plbart import (
     SPM_VOCAB_FILE,
 )
 from multiprocessing import Pool

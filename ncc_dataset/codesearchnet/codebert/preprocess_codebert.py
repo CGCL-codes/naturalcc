@@ -14,7 +14,7 @@ from ncc.data import (Dictionary, indexed_dataset)
 from ncc.utils.file_ops.yaml_io import load_yaml
 from ncc import tasks
 from ncc.data.tools.binarizer import Binarizer
-from dataset.csn.utils.util import normalize_program
+from ncc_dataset.csn.utils.util import normalize_program
 import sentencepiece as spm
 import ujson
 from ncc import LOGGER

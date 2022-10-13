@@ -7,8 +7,8 @@ import os
 import sys
 from multiprocessing import Pool, cpu_count
 
-from dataset.ast_parser.tree_sitter import TreeSitterASTParser
-from dataset.avatar.translation import (
+from ncc_dataset.ast_parser.tree_sitter import TreeSitterASTParser
+from ncc_dataset.avatar.translation import (
     LANGUAGES,
     ATTRIBUTES_DIR,
     MODES,

@@ -6,12 +6,12 @@ import os
 import re
 from multiprocessing import Pool, cpu_count
 
-from dataset.ast_parser.tree_sitter.parser import TreeSitterASTParser
-from dataset.ast_parser.tree_sitter.utils import (
+from ncc_dataset.ast_parser.tree_sitter.parser import TreeSitterASTParser
+from ncc_dataset.ast_parser.tree_sitter.utils import (
     util_ast,
     util_traversal,
 )
-from dataset.stackoverflow import (
+from ncc_dataset.stackoverflow import (
     LANGUAGES, MODES,
     LIBS_DIR, ATTRIBUTES_DIR,
 )

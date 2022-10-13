@@ -12,7 +12,7 @@ import ujson
 from tqdm import tqdm
 
 try:
-    from dataset.codesearchnet_feng.proj_oriented import (
+    from ncc_dataset.codesearchnet_feng.proj_oriented import (
         LANGUAGES, MODES,
         RAW_DATA_DIR,
         RAW_PROJ_DATA_DIR, LIBS_DIR, FLATTEN_PROJ_DATA_DIR,

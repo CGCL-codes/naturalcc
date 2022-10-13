@@ -4,7 +4,7 @@ import argparse
 import os
 from multiprocessing import Pool, cpu_count
 
-from dataset.codexglue.code_to_text import (
+from ncc_dataset.codexglue.code_to_text import (
     LANGUAGES, RAW_DIR, ATTRIBUTES_DIR,
 )
 from ncc import LOGGER

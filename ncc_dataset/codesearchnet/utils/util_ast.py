@@ -3,7 +3,7 @@ import sys
 from copy import deepcopy
 from typing import List, Dict
 
-from dataset.codesearchnet import (
+from ncc_dataset.codesearchnet import (
     RECURSION_DEPTH,
     NODE_TMP,
 )

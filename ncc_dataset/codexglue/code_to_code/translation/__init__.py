@@ -5,7 +5,7 @@ from ncc import (
     __BPE_DIR__, __LIBS_DIR__,
     LOGGER,
 )
-from dataset.codexglue.code_to_code import (
+from ncc_dataset.codexglue.code_to_code import (
     DATASET_DIR
 )
 

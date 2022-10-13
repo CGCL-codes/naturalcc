@@ -5,7 +5,7 @@ import os
 
 import ujson
 
-from dataset.codesearchnet import LANGUAGES
+from ncc_dataset.codesearchnet import LANGUAGES
 
 MODALITIES = [
     'code', 'docstring',
