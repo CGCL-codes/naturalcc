@@ -2,6 +2,7 @@
 
 import os
 
+
 from ncc import (
     __NCC_DIR__,
     __BPE_DIR__, __TREE_SITTER_LIBS_DIR__,
@@ -9,6 +10,10 @@ from ncc import (
 from ncc.data.constants import (
     RAW, ATTRIBUTES, MODES,
 )
+
+from ncc_dataset.codesearchnet import dataset_download
+def download():
+    dataset_download.download()
 
 DATASET_NAME = 'codesearchnet'
 DATASET_DIR = os.path.join(__NCC_DIR__, DATASET_NAME)
@@ -46,3 +51,5 @@ __all__ = [
     "MAX_COMMENT_TOKEN_LIST_LEN",
     "NO_METHOD",
 ]
+
+
