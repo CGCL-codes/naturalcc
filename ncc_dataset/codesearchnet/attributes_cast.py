@@ -4,6 +4,7 @@ import argparse
 import itertools
 import os
 import shutil
+import time
 from multiprocessing import Pool, cpu_count
 
 from ncc_dataset.codesearchnet import (
@@ -79,6 +80,25 @@ def merge_attr_files(flatten_dir, lang, mode, attrs):
     PathManager.rm(os.path.join(flatten_dir, lang, mode))
 
 
+def attributes_cast(languages=LANGUAGES,
+                    raw_dataset_dir=RAW_DIR,
+                    attributes_dir=ATTRIBUTES_DIR,
+                    attrs=['code', 'code_tokens', 'docstring', 'docstring_tokens', 'func_name'],
+                    cores=cpu_count()
+                    ):
+
+
+    for lang, mode in itertools.product(languages, MODES):
+        if(os.path.exists(os.path.join(attributes_dir, lang))):
+            print(f"CodeSearchNet-{lang}-{mode} is prepared.")
+            time.sleep(0.2)
+            continue
+        print(f"Preprocessing the CodeSearchNet-{lang}-{mode} dataset.")
+        flatten(raw_dir=raw_dataset_dir, lang=lang, mode=mode, flatten_dir=attributes_dir, attrs=attrs,
+                num_cores=cores)
+        merge_attr_files(flatten_dir=attributes_dir, lang=lang, mode=mode, attrs=attrs)
+
+
 if __name__ == '__main__':
     """
     This script is to flatten attributes of code_search_net dataset
@@ -104,9 +124,10 @@ if __name__ == '__main__':
         "--cores", "-c", default=cpu_count(), type=int, help="cpu cores for flatten raw data attributes",
     )
     args = parser.parse_args()
-    # print(args)
 
-    for lang, mode in itertools.product(args.languages, MODES):
-        flatten(raw_dir=args.raw_dataset_dir, lang=lang, mode=mode, flatten_dir=args.attributes_dir, attrs=args.attrs,
-                num_cores=args.cores)
-        merge_attr_files(flatten_dir=args.attributes_dir, lang=lang, mode=mode, attrs=args.attrs)
+    # print(args)
+    attributes_cast(languages=args.languages,
+                    raw_dataset_dir=args.raw_dataset_dir,
+                    attributes_dir=args.attributes_dir,
+                    attrs=args.attrs,
+                    cores=args.cores)

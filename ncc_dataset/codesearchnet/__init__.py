@@ -11,9 +11,6 @@ from ncc.data.constants import (
     RAW, ATTRIBUTES, MODES,
 )
 
-from ncc_dataset.codesearchnet import dataset_download
-def download():
-    dataset_download.download()
 
 DATASET_NAME = 'codesearchnet'
 DATASET_DIR = os.path.join(__NCC_DIR__, DATASET_NAME)
