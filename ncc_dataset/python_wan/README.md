@@ -1,6 +1,7 @@
-# Dataset: Python-code-docstring
+# Dataset: [Python-code-docstring](https://arxiv.org/abs/1811.07234) [![Python-code-docstring](https://zenodo.org/badge/DOI/10.5281/zenodo.7202649.svg)](https://doi.org/10.5281/zenodo.7202649)   
 
-For Python dataset, its original codes are not runnable in python3. An optional way to deal with such problem is that we
+
+For Python dataset, its original codes are not executable in python3. An optional way to deal with such problem is that we
 can acquire runnable Python codes from [raw data](https://github.com/wanyao1992/code_summarization_public).
 
 ## Step 1: Download pre-processed and raw (python_wan) dataset.

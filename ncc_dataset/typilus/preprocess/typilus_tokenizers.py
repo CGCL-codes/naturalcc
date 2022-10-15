@@ -1,6 +1,6 @@
 import ujson
 import itertools
-from dataset.typilus.utils import (
+from ncc_dataset.typilus.utils import (
     TokenEmbedder,
     ignore_type_annotation,
 )

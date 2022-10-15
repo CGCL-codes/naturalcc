@@ -5,17 +5,17 @@ import os
 
 import ujson
 
-from dataset.typilus import (
+from ncc_dataset.typilus import (
     RAW_DIR, ATTRIBUTES_DIR,
     MODES,
 )
 from ncc.utils.path_manager import PathManager
-
+from ncc.utils.logging import LOGGER
 PathManager.mkdir(RAW_DIR)
 PathManager.mkdir(ATTRIBUTES_DIR)
 
 
-def flatten(attrs):
+def __flatten(attrs):
     for mode in MODES:
         raw_files = sorted(glob.glob(os.path.join(RAW_DIR, mode, '*')))
 
@@ -38,20 +38,29 @@ def flatten(attrs):
                                 print(ujson.dumps(None, ensure_ascii=False), file=attr_writers[attr])
 
 
+def flatten(attrs = ['nodes', 'edges', 'token-sequence', 'supernodes', 'filename']):
+    if(os.path.exists(os.path.join(ATTRIBUTES_DIR, "train.code"))):
+        LOGGER.info(f"The typilus dataset is already flattened, "
+                    f"to re-flatten the dataset, please delete the directory '{ATTRIBUTES_DIR}'.")
+        return
+    LOGGER.info("Flattening the typilus dataset...")
+    __flatten(attrs)
+    LOGGER.info("The flatten process is finished.")
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Flatten Typilus datasets")
     # parser.add_argument(
     #     "--language", "-l", type=str, nargs='+', help="languages constain [{}]".format(LANGUAGES),
     #     default=LANGUAGES,
     # )
-    parser.add_argument(
-        "--dataset_dir", "-d", type=str, help="raw dataset download directory",
-        default=RAW_DIR,
-    )
-    parser.add_argument(
-        "--ATTRIBUTES_DIR", "-f", type=str, help="data directory of flatten attribute",
-        default=ATTRIBUTES_DIR,
-    )
+    # parser.add_argument(
+    #     "--dataset_dir", "-d", type=str, help="raw dataset download directory",
+    #     default=RAW_DIR,
+    # )
+    # parser.add_argument(
+    #     "--ATTRIBUTES_DIR", "-f", type=str, help="data directory of flatten attribute",
+    #     default=ATTRIBUTES_DIR,
+    # )
     parser.add_argument(
         "--attrs", "-a",
         default=['nodes', 'edges', 'token-sequence', 'supernodes', 'filename'],
@@ -59,4 +68,4 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    flatten(args.attrs)
+    __flatten(args.attrs)

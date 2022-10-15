@@ -10,7 +10,7 @@ import os
 import torch
 import ujson
 from collections import Counter
-from ncc_dataset.csn.utils.util import normalize_program
+# from ncc_dataset.csn.utils.util import normalize_program
 from ncc.data.tools.binarizer import Binarizer
 import dgl
 

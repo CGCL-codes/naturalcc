@@ -8,6 +8,7 @@ from ncc import (
 from ncc.data.constants import (
     RAW, ATTRIBUTES,
 )
+from . import dataset_download
 
 DATASET_NAME = 'python_wan'
 DATASET_DIR = os.path.join(__NCC_DIR__, DATASET_NAME)

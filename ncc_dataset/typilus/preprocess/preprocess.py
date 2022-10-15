@@ -14,11 +14,11 @@ import ujson
 import shutil
 from tqdm import tqdm
 from multiprocessing import Pool
-from dataset.typilus.utils import (
+from ncc_dataset.typilus.utils import (
     TokenEmbedder,
     ignore_type_annotation,
 )
-from dataset.typilus.preprocess import typilus_tokenizers
+from ncc_dataset.typilus.preprocess import typilus_tokenizers
 from ncc import tasks
 from collections import Counter
 from ncc.data import (
@@ -119,15 +119,20 @@ def main(args):
         return "{}{}".format(args['preprocess']['validpref'], ("." + lang) if lang else "")
 
     def file_name(prefix, lang):
+        """
+        $prefix.$lang
+        """
         fname = prefix
         if lang is not None:
             fname += ".{lang}".format(lang=lang)
         return fname
 
     def dest_path(prefix, lang):
+        """ $destdir/$prefix.$lang """
         return os.path.join(args['preprocess']['destdir'], file_name(prefix, lang))
 
     def dict_path(lang):
+        """ $lang -> $destdir/$lang.dict.json """
         return dest_path(lang, "dict") + ".json"
 
     for idx, lang in enumerate(args['preprocess']['langs']):
@@ -167,6 +172,7 @@ def main(args):
             else:
                 raise NotImplementedError
 
+            print(filenames)
             lang_dict = task.build_dictionary(
                 filenames,
                 tokenize_func=tokenizer,

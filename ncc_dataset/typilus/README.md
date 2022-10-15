@@ -11,5 +11,5 @@ TBC
 # Step 2
 Dataset preprocessing
 ```shell
-python -m dataset.typilus.preprocess.preprocess
+python -m ncc_dataset.typilus.preprocess.preprocess
 ```
