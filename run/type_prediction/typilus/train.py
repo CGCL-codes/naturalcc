@@ -16,6 +16,7 @@ from ncc.utils.file_ops.yaml_io import load_yaml
 from ncc.utils.file_utils import remove_files
 from ncc.utils.logging import meters
 from ncc.utils.logging import metrics, progress_bar
+import torch.multiprocessing
 
 
 @metrics.aggregate('train')
@@ -281,6 +282,7 @@ def distributed_main(i, args, start_rank=0):
 
 
 def cli_main():
+    # torch.multiprocessing.set_sharing_strategy('file_system')
     import argparse
     parser = argparse.ArgumentParser(
         description="Downloading/Decompressing code_search_net dataset(s) or Tree-Sitter Library(ies)")
@@ -326,4 +328,5 @@ def cli_main():
 
 
 if __name__ == '__main__':
+
     cli_main()

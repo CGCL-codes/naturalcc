@@ -1,7 +1,7 @@
 #registry
 criterion: typilus
 #criterion: cross_entropy
-optimizer: 'adam'
+optimizer: 'torch_adam'
 lr_scheduler: 'fixed'
 tokenizer: ~ # default=None
 bpe: ~ # default=None
@@ -28,9 +28,10 @@ common:
   fp16_opt_level: '01' # type=str, default="O1", help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']. See details at https://nvidia.github.io/apex/amp.html",
   server_ip: '' # type=str, default="", help="For distant debugging."
   server_port: '' # type=str, default="", help="For distant debugging."
-
+  bf16: 0 # bfloat16
+  
 dataset:
-  num_workers: 3 # default=1, type=int, metavar='N', help='how many subprocesses to use for data loading'
+  num_workers: 0 # default=1, type=int, metavar='N', help='how many subprocesses to use for data loading'
   skip_invalid_size_inputs_valid_test: 1 # action='store_true', help='ignore too long or too short lines in valid and test set'
   max_tokens: ~ # type=int, metavar='N', help='maximum number of tokens in a batch'
   max_sentences: 32 # default = 512 # '--batch-size', type=int, metavar='N', help='maximum number of sentences in a batch'
@@ -74,7 +75,7 @@ distributed_training:
 
 task:
   # bin data
-  data: ~/.ncc/typilus/type_inference/data-mmap # help='colon separated path to data directories list, will be iterated upon during epochs in round-robin manner'
+  data: ~/typilus/type_inference/data-mmap # help='colon separated path to data directories list, will be iterated upon during epochs in round-robin manner'
 
   # for summarization
   source_langs:
@@ -129,7 +130,7 @@ optimization:
   clip_norm: 25 # default=25, type=float, metavar='NORM', help='clip threshold of gradients'
   update_freq: # default='1', metavar='N1,N2,...,N_K', type=lambda uf: eval_str_list(uf, type=int), help='update parameters every N_i batches, when in epoch i'
     - 1
-  lr: # '--learning-rate', default='0.25', type=eval_str_list, metavar='LR_1,LR_2,...,LR_N', help='learning rate for the first N epochs; all epochs >N using LR_N (note: this may be interpreted differently depending on --lr-scheduler)'
+  lrs: # '--learning-rate', default='0.25', type=eval_str_list, metavar='LR_1,LR_2,...,LR_N', help='learning rate for the first N epochs; all epochs >N using LR_N (note: this may be interpreted differently depending on --lr-scheduler)'
     - 4e-4
   min_lr: -1 # default=-1, type=float, metavar='LR', help='stop training when the learning rate reaches this minimum'
   use_bmuf: 1 # default=False, action='store_true', help='specify global optimizer for syncing models on different GPUs/shards'
@@ -173,7 +174,7 @@ checkpoint:
   no_epoch_checkpoints: 1 # action='store_true', help='only store last and best checkpoints'
   no_last_checkpoints: 0 # action='store_true', help='don\'t store last checkpoints'
   no_save_optimizer_state: ~ # action='store_true', help='don\'t save optimizer-state as part of checkpoint'
-  best_checkpoint_metric: bleu # type=str, default='loss', help='metric to use for saving "best" checkpoints'
+  best_checkpoint_metric: loss # bleu # type=str, default='loss', help='metric to use for saving "best" checkpoints'
   maximize_best_checkpoint_metric: 1 # action='store_true', help='select the largest metric value for saving "best" checkpoints'
   patience: 10 # type=int, default=-1, metavar='N', help=('early stop training if valid performance doesn\'t improve for N consecutive validation runs; note that this is influenced by --validate-interval')
   save_dir: ~/.ncc/stack_overflow/summarization/csharp/data-mmap/seq2seq/checkpoints # type=str, required=True, help="The output directory where the model predictions and checkpoints will be written.",

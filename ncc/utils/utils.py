@@ -514,6 +514,9 @@ class CudaEnvironment(object):
         self.total_memory_in_MB = int(meminfo.total / 1024 / 1024)
         self.used_memory_in_MB = int(meminfo.used / 1024 / 1024)
         self.free_memory_in_MB = int(meminfo.free / 1024 / 1024)
+        self.total_memory_in_GB = int(meminfo.total / 1024 / 1024 / 1024)
+        self.used_memory_in_GB = int(meminfo.used / 1024 / 1024 / 1024)
+        self.free_memory_in_GB = int(meminfo.free / 1024 / 1024 / 1024)
 
     @staticmethod
     def pretty_print_cuda_env_list(cuda_env_list):

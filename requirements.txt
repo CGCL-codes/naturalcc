@@ -11,7 +11,8 @@ tree-sitter==0.19.0
 jsonlines
 dpu_utils
 sentencepiece
-dgl-cu102
+# dgl-cu102
+# Please install dgl manually
 rouge
 nltk
 jsbeautifier
@@ -32,3 +33,5 @@ pynvml
 # zendoo dataset download
 zenodo-get==1.0.0
 zenodo-client
+
+transformers

@@ -150,7 +150,8 @@ class TypilusTask(NccComplTask):
         if filename.endswith('.txt'):
             return Dictionary.load(filename)
         else:
-            return Dictionary.load_json(filename)
+            return Dictionary.load(filename)
+            # return Dictionary.load_json(filename)
 
     def load_dataset(self, split, epoch=1, combine=False, **kwargs):
         paths = utils.split_paths(self.args['task']['data'])
