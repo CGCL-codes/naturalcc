@@ -35,3 +35,5 @@ zenodo-get==1.0.0
 zenodo-client
 
 transformers
+
+docker
