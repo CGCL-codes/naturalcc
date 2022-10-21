@@ -23,3 +23,12 @@ Preprocessing the dataset for naturalcc.
 import ncc_dataset
 ncc_dataset.prepare_dataset("typilus", typilus_path=<<typilus_data_store_path>>)
 ```
+
+# Special
+To generate typilus graph for any customized dataset, please use the `make_dataset` method.
+```python
+import ncc_dataset
+ncc_dataset.make_dataset("raw", "typilus",
+                         <raw_data_directory>)
+```
+**Note: You can add your username to `docker` group to run `docker` without root permission.**
