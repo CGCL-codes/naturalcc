@@ -18,7 +18,7 @@ This section describes how to reproduce the experiments in the paper.
 
 ## Attention analysis
 
-First, we release the attention distribution of Python AST in [Google Drive](https://drive.google.com/file/d/1BD8BCmGi3mds9su3eWMZYi8ybGB4UEJE/view?usp=sharing), where the value is 1 if two nodes are under the same parent node and are not neighbor.
+First, we release the attention distribution of Python AST in [Google Drive](https://drive.google.com/file/d/1FCDcl7eRm_H30-huqnWe7rVSCd7Jx0nl/view?usp=share_link), where the value is 1 if two nodes are under the same parent node and are not neighbor.
 
 Second, navigate to appropriate directory:
 
