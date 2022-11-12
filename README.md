@@ -194,7 +194,7 @@ Dataset: Py150 [(official processed)](ncc_dataset/py150/README.md) [(raw)](ncc_d
 | MRR       | Attr  | Num   | Name   | Param | Tokens | Cost    | Logs    |
 |-----------|-------|-------|--------|-------|--------|---------|---------|
 | LSTM      | 51.67 | 47.45 | 46.52  | 66.06 | 73.73  | 0.31s/b | [click here](run/completion/seqrnn/config/raw_py150/python.log) |
-| GTP-2     | 70.37 | 62.20 | 63.84  | 73.54 | 82.17  | 0.43s/b | [click here](run/completion/gpt2/config/raw_py150/python.log) |
+| GPT-2     | 70.37 | 62.20 | 63.84  | 73.54 | 82.17  | 0.43s/b | [click here](run/completion/gpt2/config/raw_py150/python.log) |
 | TravTrans | 72.08 | 68.55 | 76.33  | 71.08 | 83.17  | 0.43s/b | [click here](run/completion/trav_trans/config/py150/python.log) |
 
 ### [Type Inference](run/type_prediction)
