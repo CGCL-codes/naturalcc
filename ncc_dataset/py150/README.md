@@ -16,7 +16,7 @@ flatten py150 into new ast data
 python -m dataset.py150.attributes_cast
 ```
 
-## step 2
+## step 3
 
 preprocess travtrans dataset
 
