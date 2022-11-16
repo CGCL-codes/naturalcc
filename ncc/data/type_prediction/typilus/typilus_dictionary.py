@@ -44,15 +44,20 @@ class TypilusDictionary(Dictionary):
     ):
         edges = line_tokenizer(line) if line_tokenizer is not None else line
         data = {}
+
         for et in self.symbols:
-            if et in edges:
-                src, dst = zip(*[(int(src), dst) for src, dsts in edges[et].items() for dst in dsts])
-            else:
-                src, dst = [], []
-            src, dst = torch.IntTensor(src), torch.IntTensor(dst)
-            data[('node', et, 'node')] = (src, dst)
-            if backward:
-                data[('node', '_' + et, 'node')] = (dst, src)
+            try:
+                if et in edges:
+                    src, dst = zip(*[(int(src), dst) for src, dsts in edges[et].items() for dst in dsts])
+                else:
+                    src, dst = [], []
+                src, dst = torch.IntTensor(src), torch.IntTensor(dst)
+                data[('node', et, 'node')] = (src, dst)
+                if backward:
+                    data[('node', '_' + et, 'node')] = (dst, src)
+            except ValueError as ex:
+                print(ex)
+                continue
         return data
 
     def encode_supernodes_line(
