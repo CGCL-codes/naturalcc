@@ -4,9 +4,9 @@ preprocess:
     - nodes
     - edges
     - supernodes.annotation
-  trainpref: ~/typilus/flatten/train #", metavar="FP", default=None, help="train file prefix"
-  validpref: ~/typilus/flatten/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
-  testpref:  ~/typilus/flatten/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+  trainpref: ~/typilus/attributes/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/typilus/attributes/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/typilus/attributes/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
 
   # raw dataset
 #  dataset_impl: raw #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
@@ -34,4 +34,4 @@ preprocess:
     - 99
     - 99 # 99 for annotation types, 4 for bos/eos/unk/pad
   padding_factor: 1 #", metavar="N", default=8, type=int, help="Pad dictionary size to be multiple of N"
-  workers: 40 # ", metavar="N", default=1, type=int, help="number of parallel workers"
+  workers: 1 # ", metavar="N", default=1, type=int, help="number of parallel workers"
