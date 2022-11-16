@@ -417,6 +417,8 @@ def cli_main():
     LOGGER.info(args)
     main(args)
 
+def dataset_binarize():
+    cli_main()
 
 if __name__ == "__main__":
     cli_main()
