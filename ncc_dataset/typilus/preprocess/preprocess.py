@@ -182,7 +182,8 @@ def main(args):
                 padding_factor=args['preprocess']['padding_factor'],
                 pad=pad, bos=bos, eos=eos, unk=unk, extra_special_symbols=extra_special_symbols,
             )
-            lang_dict.save_json(dict_path(lang))
+            # lang_dict.save_json(dict_path(lang))
+            lang_dict.save(dict_path(lang))
             lang_dicts[lang] = lang_dict
 
     # 2. ***************build dataset********************
