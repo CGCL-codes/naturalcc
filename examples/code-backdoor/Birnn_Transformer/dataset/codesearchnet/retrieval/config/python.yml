@@ -1,0 +1,31 @@
+preprocess:
+  task: hybrid_retrieval # task', metavar='TASK', default="translation", choices=TASK_REGISTRY.keys(), help='task'
+  source_lang: code_tokens
+  target_lang: docstring_tokens
+
+  min_func_len: 12
+
+  source_bpe_portion: 0.5
+  target_bpe_portion: 0.5
+  # not support subtoken by now
+#  source_subtoken: 0
+#  target_subtoken: 0
+  only_source: 0
+
+  trainpref: ~/ncc_data/pattern_number_50/attributes/python/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/ncc_data/pattern_number_50/attributes/python/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/ncc_data/pattern_number_50/attributes/python/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+
+  # bin dataset
+  dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+  destdir: ~/ncc_data/pattern_number_50/retrieval/data-mmap/python #", metavar="DIR", default="data-bin", help="destination dir"
+
+#  align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
+  thresholdsrc: 10 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
+  srcdict: ~ # code_tokens
+  tgtdict: ~ # query_tokens
+  nwordssrc: 10000 #", metavar="N", default=-1, type=int, help="number of source words to retain"
+  nwordstgt: 10000
+  alignfile: ~ #", metavar="ALIGN", default=None, help="an alignment file (optional)"
+  workers: 40 # ", metavar="N", default=1, type=int, help="number of parallel workers"
+  padding_factor: 1
