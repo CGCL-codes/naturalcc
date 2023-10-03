@@ -7,7 +7,7 @@ import numpy as np
 from ncc.data.tools import data_utils
 from ncc.data.ncc_dataset import NccDataset
 import jsbeautifier
-from ncc_dataset.augmented_javascript.utils.util import normalize_program
+from preprocess.augmented_javascript.utils.util import normalize_program
 import torch
 from ncc.data.type_prediction.utils import enforce_not_None
 import torch

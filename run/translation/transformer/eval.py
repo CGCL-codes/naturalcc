@@ -112,7 +112,7 @@ def main(args, out_file=None, topk=1):
                 references[sample_id] = [target_str]
 
     if 'avatar' in args['eval']['path']:
-        from ncc_dataset.avatar import RAW_DIR
+        from preprocess.avatar import RAW_DIR
         references = dict()
         with open(os.path.join(RAW_DIR, '{}.jsonl'.format(args['dataset']['gen_subset'])), 'r') as reader:
             for idx, line in enumerate(reader):

@@ -2,7 +2,7 @@
 
 import os
 
-from ncc_dataset.avatar.translation import (
+from preprocess.avatar.translation import (
     ATTRIBUTES_DIR,
 )
 from ncc.eval.summarization.smoothed_bleu import compute_smoothed_bleu

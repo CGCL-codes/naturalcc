@@ -10,7 +10,7 @@ from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from ncc_dataset.opencl import (
+from preprocess.opencl import (
     LANGUAGES,
     DATASET_DIR,
 )
@@ -29,7 +29,7 @@ from ncc.eval.mapping import mapping_metrics
 from ncc.models.mapping.deeptune import DeepTuneEncoder
 from ncc.modules.common.initializers import xavier_normal
 from ncc.utils.utils import move_to_cuda
-from ncc_dataset.opencl import INST2VEC_EMBEDDING
+from preprocess.opencl import INST2VEC_EMBEDDING
 
 
 def init(model):
