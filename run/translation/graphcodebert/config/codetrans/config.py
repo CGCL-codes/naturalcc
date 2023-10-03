@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from preprocess.codexglue.code_to_code.translation import DATASET_DIR
+from preprocessing.codexglue.code_to_code.translation import DATASET_DIR
 
 SEED = 123456
 

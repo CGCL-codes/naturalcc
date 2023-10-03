@@ -35,7 +35,7 @@ class CrossPairDataset:
         tgt_data = file_io.open(tgt_file, 'rb')
 
         if dataset == 'avatar':
-            from preprocess.avatar import RAW_DIR
+            from preprocessing.avatar import RAW_DIR
             raw_file = os.path.join(RAW_DIR, "test.jsonl")
             with file_io.open(raw_file, 'r') as reader:
                 tgt_code = [json_io.json_loads(line)[tgt_lang][:topk] for line in reader]

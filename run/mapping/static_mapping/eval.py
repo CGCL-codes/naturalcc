@@ -7,7 +7,7 @@ import torch
 from sklearn.model_selection import StratifiedKFold
 import torch
 
-from preprocess.opencl_large import (
+from preprocessing.opencl_large import (
     ATTRIBUTES_DIR,
 )
 from ncc.utils.file_ops import json_io

@@ -5,7 +5,7 @@ import pandas as pd
 import torch
 from sklearn.model_selection import StratifiedKFold
 
-from preprocess.opencl import (
+from preprocessing.opencl import (
     LANGUAGES,
     ATTRIBUTES_DIR,
 )

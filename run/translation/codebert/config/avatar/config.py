@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from preprocess.avatar import DATASET_DIR
+from preprocessing.avatar import DATASET_DIR
 
 SEED = 123456
 
