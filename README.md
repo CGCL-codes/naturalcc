@@ -160,7 +160,10 @@ Currently, we have processed the following datasets:
 
 #### Structural Analysis of Pre-Trained Language Models for Source Code
 - [ICSE 2022](examples/structural_analysis/)
-  
+
+#### Poisoning Vulnerabilities in Neural Code Search
+- [FSE 2022](examples/code-backdoor/)
+
 ## 📋 Experiments
 
 ### [Code Summarization](run/summarization)
