@@ -8,10 +8,10 @@ import torch
 
 from ncc import (
     models,
-    optimizers,
+    optim,
     LOGGER,
 )
-from ncc.optimizers import lr_schedulers
+from ncc.optim import lr_scheduler
 from ncc.utils import (
     checkpoint_utils,
     distributed_utils,
@@ -171,24 +171,24 @@ class Trainer(object):
                     "please switch to FP32 which is likely to be faster"
                 )
             if self.args['common']['memory_efficient_fp16'] or self.args['common']['memory_efficient_bf16']:
-                self._optimizer = optimizers.MemoryEfficientFP16Optimizer.setup_optimizer(
+                self._optimizer = optim.MemoryEfficientFP16Optimizer.setup_optimizer(
                     self.args, params
                 )
             elif self.args['common'].get('amp', False):
-                self._optimizer = optimizers.AMPOptimizer.setup_optimizer(self.args, params)
+                self._optimizer = optim.AMPOptimizer.setup_optimizer(self.args, params)
             else:
-                self._optimizer = optimizers.FP16Optimizer.setup_optimizer(self.args, params)
+                self._optimizer = optim.FP16Optimizer.setup_optimizer(self.args, params)
         else:
             if self.cuda and torch.cuda.get_device_capability(0)[0] >= 7:
                 LOGGER.info("NOTE: your device may support faster training with fp16 or --amp")
-            self._optimizer = optimizers.setup_optimizer(self.args, params)
+            self._optimizer = optim.setup_optimizer(self.args, params)
 
         if self.args['optimization']['use_bmuf']:
-            self._optimizer = optimizers.NccBMUF(self.args, self._optimizer)
+            self._optimizer = optim.NccBMUF(self.args, self._optimizer)
 
         # We should initialize the learning rate scheduler immediately after
         # building the optimizer, so that the initial learning rate is set.
-        self._lr_scheduler = lr_schedulers.build_lr_scheduler(self.args, self.optimizer)
+        self._lr_scheduler = lr_scheduler.build_lr_scheduler(self.args, self.optimizer)
         self._lr_scheduler.step_update(0)
 
     @property

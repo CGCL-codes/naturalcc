@@ -68,7 +68,7 @@ def cli_main():
     pattern = re.compile(r"\s+")
     tokenized_code = pattern.sub("_", code).lower().split("_")
     print(tokenized_code)
-    from ncc_dataset.csn.utils.util import split_identifier
+    from preprocessing.csn.utils.util import split_identifier
     import itertools
     tokenized_code = [split_identifier(token) for token in tokenized_code if len(token) > 0]
     tokenized_code = list(itertools.chain(*tokenized_code))

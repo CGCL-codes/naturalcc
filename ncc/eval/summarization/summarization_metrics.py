@@ -11,7 +11,7 @@ except ImportError as err:
     LOGGER.warning(err)
     from third_party.download import download
 
-    download('pycocoevalcap')
+    # download('pycocoevalcap')
 
 from .smoothed_bleu import compute_smoothed_bleu
 

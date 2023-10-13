@@ -20,3 +20,7 @@ ncc/data/tools/token_block_utils_fast.cpython-37m-x86_64-linux-gnu.so
 ncc/data/tools/data_utils_fast.cpython-37m-x86_64-linux-gnu.so
 ncc/libbleu.cpython-37m-x86_64-linux-gnu.so
 ncc/libnat.cpython-37m-x86_64-linux-gnu.so
+
+examples/code_completion/raw_py150/*
+
+examples/language_model/wikitext-103/*

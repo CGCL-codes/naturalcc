@@ -9,15 +9,12 @@ Our vision is to bridge the gap between programming language and natural languag
   <a href="https://xcodemind.github.io/">
     <img src="https://img.shields.io/badge/NaturalCC-0.6.0-green" alt="Version">
   </a>
-
   <a href="https://www.python.org/downloads/release/python-360/">
     <img src="https://img.shields.io/badge/Python->=3.6-3776AB?logo=python" alt="Python">
   </a>
-
   <a href="https://github.com/pytorch/pytorch">
     <img src="https://img.shields.io/badge/PyTorch->=1.4-FF6F00?logo=pytorch" alt="pytorch">
   </a>
-
   <a href="https://github.com/EdisonLeeeee/GraphGallery/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/EdisonLeeeee/GraphGallery" alt="license">
   </a>       
@@ -25,7 +22,8 @@ Our vision is to bridge the gap between programming language and natural languag
 <hr>
 
 ## 🔖 News 
-- [May 10] We have merged the source code of "What Do They Capture? - A Structural Analysis of Pre-Trained Language Models for Source Code" into NaturalCC.
+- [April 19, 2023] We have merged the source code of "You See What I Want You to See: Poisoning Vulnerabilities in Neural Code Search" into NaturalCC.
+- [May 10, 2022] We have merged the source code of "What Do They Capture? - A Structural Analysis of Pre-Trained Language Models for Source Code" into NaturalCC.
 
 ## ⭐ Features
 
@@ -162,7 +160,10 @@ Currently, we have processed the following datasets:
 
 #### Structural Analysis of Pre-Trained Language Models for Source Code
 - [ICSE 2022](examples/structural_analysis/)
-  
+
+#### Poisoning Vulnerabilities in Neural Code Search
+- [FSE 2022](examples/code-backdoor/)
+
 ## 📋 Experiments
 
 ### [Code Summarization](run/summarization)

@@ -3,8 +3,8 @@
 import torch
 
 from ncc import LOGGER
-from ncc import optimizers
-from ncc.optimizers import lr_schedulers
+from ncc import optim
+from ncc.optim import lr_scheduler
 from ..ncc_trainers import Trainer
 
 
@@ -27,14 +27,14 @@ class DeepCS_Trainer(Trainer):
 
         if self.cuda and torch.cuda.get_device_capability(0)[0] >= 7:
             LOGGER.info("NOTE: your device may support faster training with --fp16")
-        self._optimizer = optimizers.setup_optimizer(self.args, params)
+        self._optimizer = optim.setup_optimizer(self.args, params)
 
         if self.args['optimization']['use_bmuf']:
-            self._optimizer = optimizers.NccBMUF(self.args, self._optimizer)
+            self._optimizer = optim.NccBMUF(self.args, self._optimizer)
 
         # We should initialize the learning rate scheduler immediately after
         # building the optimizer, so that the initial learning rate is set.
-        self._lr_scheduler = lr_schedulers.build_lr_scheduler(self.args, self.optimizer)
+        self._lr_scheduler = lr_scheduler.build_lr_scheduler(self.args, self.optimizer)
         if getattr(self._lr_scheduler, 'period', None) == -1:
             import math
             self._lr_scheduler.period = \

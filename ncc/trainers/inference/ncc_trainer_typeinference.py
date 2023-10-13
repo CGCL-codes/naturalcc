@@ -6,7 +6,7 @@ import torch
 
 from ncc import LOGGER
 from ncc import models
-from ncc import optimizers
+from ncc import optim
 from ncc.utils import checkpoint_utils, distributed_utils, utils
 from ncc.utils.file_ops.yaml_io import PathManager
 from ncc.utils.logging import meters, metrics
@@ -149,18 +149,18 @@ class Trainer(object):
                     "please switch to FP32 which is likely to be faster"
                 )
             if self.args['common']['memory_efficient_fp16']:
-                self._optimizer = optimizers.MemoryEfficientFP16Optimizer.build_optimizer(
+                self._optimizer = optim.MemoryEfficientFP16Optimizer.build_optimizer(
                     self.args, params
                 )
             else:
-                self._optimizer = optimizers.FP16Optimizer.build_optimizer(self.args, params)
+                self._optimizer = optim.FP16Optimizer.build_optimizer(self.args, params)
         else:
             if self.cuda and torch.cuda.get_device_capability(0)[0] >= 7:
                 LOGGER.info("NOTE: your device may support faster training with --fp16")
-            self._optimizer = optimizers.build_optimizer(self.args, self.model.parameters())  # params
+            self._optimizer = optim.build_optimizer(self.args, self.model.parameters())  # params
 
         if self.args['optimization']['use_bmuf']:
-            self._optimizer = optimizers.FairseqBMUF(self.args, self._optimizer)
+            self._optimizer = optim.FairseqBMUF(self.args, self._optimizer)
 
         # We should initialize the learning rate scheduler immediately after
         # building the optimizer, so that the initial learning rate is set.

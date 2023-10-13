@@ -1,0 +1,3 @@
+[console_scripts]
+ncc-run = run.main:main
+ncc-train = ncc_cli.train:cli_main

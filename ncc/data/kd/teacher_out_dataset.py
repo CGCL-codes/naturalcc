@@ -19,7 +19,7 @@ class TeacherOutDataset(IndexedCachedDataset):
         super().__init__(prefix, fix_lua_indexing=False)
 
     @staticmethod
-    def save_bin(prefix, data_list, dtype=np.float):
+    def save_bin(prefix, data_list, dtype=np.float64):
         bin_path = prefix + '.mmap'
         idx_path = prefix + '.idx'
         builder = TeacherOutDatasetBuilder(bin_path, dtype)

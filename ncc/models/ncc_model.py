@@ -6,17 +6,34 @@
 Base classes for various fairseq models.
 """
 
+import logging
+from argparse import Namespace
 from typing import Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from ncc.utils import utils
+from ncc.data import Dictionary
+from ncc.dataclass.utils import (
+    convert_namespace_to_omegaconf,
+    gen_parser_from_dataclass,
+)
+from ncc.models import NccDecoder, NccEncoder
+from omegaconf import DictConfig
 from torch import Tensor
 
-from ncc.data import Dictionary
-from ncc.modules.decoders.ncc_decoder import NccDecoder
-from ncc.modules.encoders.ncc_encoder import NccEncoder
-from ncc.utils.checkpoint_utils import prune_state_dict
+
+logger = logging.getLogger(__name__)
+
+
+def check_type(module, expected_type):
+    if hasattr(module, "unwrapped_module"):
+        assert isinstance(
+            module.unwrapped_module, expected_type
+        ), f"{type(module.unwrapped_module)} != {expected_type}"
+    else:
+        assert isinstance(module, expected_type), f"{type(module)} != {expected_type}"
 
 
 class BaseNccModel(nn.Module):
@@ -25,6 +42,14 @@ class BaseNccModel(nn.Module):
     def __init__(self):
         super().__init__()
         self._is_generation_fast = False
+
+    @classmethod
+    def add_args(cls, parser):
+        """Add model-specific arguments to the parser."""
+        dc = getattr(cls, "__dataclass", None)
+        if dc is not None:
+            # do not set defaults so that settings defaults from various architectures still works
+            gen_parser_from_dataclass(parser, dc(), delete_default=True)
 
     @classmethod
     def build_model(cls, args, task):
@@ -37,7 +62,7 @@ class BaseNccModel(nn.Module):
 
     def get_normalized_probs(
         self,
-        net_output: Tuple[Tensor, Dict[str, List[Optional[Tensor]]]],
+        net_output: Tuple[Tensor, Optional[Dict[str, List[Optional[Tensor]]]]],
         log_probs: bool,
         sample: Optional[Dict[str, Tensor]] = None,
     ):
@@ -50,14 +75,16 @@ class BaseNccModel(nn.Module):
     # call the helper function from scriptable Subclass.
     def get_normalized_probs_scriptable(
         self,
-        net_output: Tuple[Tensor, Dict[str, List[Optional[Tensor]]]],
+        net_output: Tuple[Tensor, Optional[Dict[str, List[Optional[Tensor]]]]],
         log_probs: bool,
         sample: Optional[Dict[str, Tensor]] = None,
     ):
-        """Scriptable helper function for get_normalized_probs in ~BaseNccModel"""
+        """Scriptable helper function for get_normalized_probs in ~BaseFairseqModel"""
         if hasattr(self, "decoder"):
             return self.decoder.get_normalized_probs(net_output, log_probs, sample)
         elif torch.is_tensor(net_output):
+            # syntactic sugar for simple models which don't have a decoder
+            # (e.g., the classification tutorial)
             logits = net_output.float()
             if log_probs:
                 return F.log_softmax(logits, dim=-1)
@@ -73,15 +100,31 @@ class BaseNccModel(nn.Module):
         """Maximum length supported by the model."""
         return None
 
-    def load_state_dict(self, state_dict, strict=True, args=None):
+    def load_state_dict(
+        self,
+        state_dict,
+        strict=True,
+        model_cfg: Optional[DictConfig] = None,
+        args: Optional[Namespace] = None,
+    ):
         """Copies parameters and buffers from *state_dict* into this module and
         its descendants.
 
         Overrides the method in :class:`nn.Module`. Compared with that method
         this additionally "upgrades" *state_dicts* from old checkpoints.
         """
+
+        if model_cfg is None and args is not None:
+            logger.warn(
+                "using 'args' is deprecated, please update your code to use dataclass config"
+            )
+            model_cfg = convert_namespace_to_omegaconf(args).model
+
         self.upgrade_state_dict(state_dict)
-        new_state_dict = prune_state_dict(state_dict, args)
+
+        from ncc.checkpoint_utils import prune_state_dict
+
+        new_state_dict = prune_state_dict(state_dict, model_cfg)
         return super().load_state_dict(new_state_dict, strict)
 
     def upgrade_state_dict(self, state_dict):
@@ -112,16 +155,35 @@ class BaseNccModel(nn.Module):
         do_upgrade(self, name)
 
     def set_num_updates(self, num_updates):
-        """ State from trainer to pass along to model at every update """
-
-        def _apply(m):
-            if hasattr(m, 'set_num_updates') and m != self:
+        """State from trainer to pass along to model at every update."""
+        for m in self.modules():
+            if hasattr(m, "set_num_updates") and m != self:
                 m.set_num_updates(num_updates)
 
-        self.apply(_apply)
+    def set_epoch(self, epoch):
+        for m in self.modules():
+            if hasattr(m, "set_epoch") and m != self:
+                m.set_epoch(epoch)
+
+    def prepare_for_inference_(self, cfg: DictConfig):
+        """Prepare model for inference."""
+        kwargs = {}
+        kwargs["beamable_mm_beam_size"] = (
+            None
+            if getattr(cfg.generation, "no_beamable_mm", False)
+            else getattr(cfg.generation, "beam", 5)
+        )
+        kwargs["need_attn"] = getattr(cfg.generation, "print_alignment", False)
+        if getattr(cfg.generation, "retain_dropout", False):
+            kwargs["retain_dropout"] = cfg.generation.retain_dropout
+            kwargs["retain_dropout_modules"] = cfg.generation.retain_dropout_modules
+        self.make_generation_fast_(**kwargs)
 
     def make_generation_fast_(self, **kwargs):
-        """Optimize model for faster generation."""
+        """
+        Legacy entry point to optimize model for faster generation.
+        Prefer prepare_for_inference_.
+        """
         if self._is_generation_fast:
             return  # only apply once
         self._is_generation_fast = True
@@ -130,23 +192,28 @@ class BaseNccModel(nn.Module):
         def apply_remove_weight_norm(module):
             try:
                 nn.utils.remove_weight_norm(module)
-            except ValueError:  # this module didn't have weight norm
+            except (AttributeError, ValueError):  # this module didn't have weight norm
                 return
 
         self.apply(apply_remove_weight_norm)
 
-        seen = set()
+        def apply_make_generation_fast_(module, prefix):
+            if len(prefix) > 0:
+                prefix += "."
 
-        def apply_make_generation_fast_(module):
-            if (
-                module != self
-                and hasattr(module, "make_generation_fast_")
-                and module not in seen
-            ):
-                seen.add(module)
-                module.make_generation_fast_(**kwargs)
+            base_func = BaseNccModel.make_generation_fast_
+            for n, m in module.named_modules():
+                if (
+                    m != self
+                    and hasattr(m, "make_generation_fast_")
+                    # don't call this implementation again, e.g., if
+                    # children modules also inherit from BaseFairseqModel
+                    and m.make_generation_fast_.__func__ is not base_func
+                ):
+                    name = prefix + n
+                    m.make_generation_fast_(name=name, **kwargs)
 
-        self.apply(apply_make_generation_fast_)
+        apply_make_generation_fast_(self, "")
 
         def train(mode=True):
             if mode:
@@ -179,7 +246,38 @@ class BaseNccModel(nn.Module):
         data_name_or_path=".",
         **kwargs,
     ):
-        raise NotImplementedError
+        """
+        Load a :class:`~fairseq.models.FairseqModel` from a pre-trained model
+        file. Downloads and caches the pre-trained model file if needed.
+
+        The base implementation returns a
+        :class:`~fairseq.hub_utils.GeneratorHubInterface`, which can be used to
+        generate translations or sample from language models. The underlying
+        :class:`~fairseq.models.FairseqModel` can be accessed via the
+        *generator.models* attribute.
+
+        Other models may override this to implement custom hub interfaces.
+
+        Args:
+            model_name_or_path (str): either the name of a pre-trained model to
+                load or a path/URL to a pre-trained model state dict
+            checkpoint_file (str, optional): colon-separated list of checkpoint
+                files in the model archive to ensemble (default: 'model.pt')
+            data_name_or_path (str, optional): point args.data to the archive
+                at the given path/URL. Can start with '.' or './' to reuse the
+                model archive path.
+        """
+        from ncc import hub_utils
+
+        x = hub_utils.from_pretrained(
+            model_name_or_path,
+            checkpoint_file,
+            data_name_or_path,
+            archive_map=cls.hub_models(),
+            **kwargs,
+        )
+        logger.info(x["args"])
+        return hub_utils.GeneratorHubInterface(x["args"], x["task"], x["models"])
 
     @classmethod
     def hub_models(cls):
@@ -190,8 +288,8 @@ class NccEncoderDecoderModel(BaseNccModel):
     """Base class for encoder-decoder models.
 
     Args:
-        encoder (NccEncoder): the encoder
-        decoder (NccDecoder): the decoder
+        encoder (FairseqEncoder): the encoder
+        decoder (FairseqDecoder): the decoder
     """
 
     def __init__(self, encoder, decoder):
@@ -199,8 +297,9 @@ class NccEncoderDecoderModel(BaseNccModel):
 
         self.encoder = encoder
         self.decoder = decoder
-        assert isinstance(self.encoder, NccEncoder)
-        assert isinstance(self.decoder, NccDecoder)
+
+        check_type(self.encoder, NccEncoder)
+        check_type(self.decoder, NccDecoder)
 
     def forward(self, src_tokens, src_lengths, prev_output_tokens, **kwargs):
         """
@@ -262,6 +361,16 @@ class NccEncoderDecoderModel(BaseNccModel):
         return self.decoder.max_positions()
 
 
+class NccModel(NccEncoderDecoderModel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        utils.deprecation_warning(
+            "FairseqModel is deprecated, please use FairseqEncoderDecoderModel "
+            "or BaseFairseqModel instead",
+            stacklevel=4,
+        )
+
+
 class NccMultiModel(BaseNccModel):
     """Base class for combining multiple encoder-decoder models."""
 
@@ -270,8 +379,8 @@ class NccMultiModel(BaseNccModel):
         assert encoders.keys() == decoders.keys()
         self.keys = list(encoders.keys())
         for key in self.keys:
-            assert isinstance(encoders[key], NccEncoder)
-            assert isinstance(decoders[key], NccDecoder)
+            check_type(encoders[key], NccEncoder)
+            check_type(decoders[key], NccDecoder)
 
         self.models = nn.ModuleDict(
             {
@@ -311,13 +420,7 @@ class NccMultiModel(BaseNccModel):
         return build_embedding(shared_dict, embed_dim, pretrained_embed_path)
 
     def forward(self, src_tokens, src_lengths, prev_output_tokens, **kwargs):
-        decoder_outs = {}
-        for key in self.keys:
-            encoder_out = self.models[key].encoder(src_tokens, src_lengths, **kwargs)
-            decoder_outs[key] = self.models[key].decoder(
-                prev_output_tokens, encoder_out, **kwargs
-            )
-        return decoder_outs
+        raise NotImplementedError
 
     def max_positions(self):
         """Maximum length supported by the model."""
@@ -344,15 +447,31 @@ class NccMultiModel(BaseNccModel):
     def forward_decoder(self, prev_output_tokens, **kwargs):
         return self.decoder(prev_output_tokens, **kwargs)
 
-    def load_state_dict(self, state_dict, strict=True, args=None):
+    def load_state_dict(
+        self,
+        state_dict,
+        strict=True,
+        model_cfg=None,
+        args: Optional[Namespace] = None,
+    ):
         """Copies parameters and buffers from *state_dict* into this module and
         its descendants.
 
         Overrides the method in :class:`nn.Module`. Compared with that method
         this additionally "upgrades" *state_dicts* from old checkpoints.
         """
+
+        if model_cfg is None and args is not None:
+            logger.warn(
+                "using 'args' is deprecated, please update your code to use dataclass config"
+            )
+            model_cfg = convert_namespace_to_omegaconf(args).model
+
         self.upgrade_state_dict(state_dict)
-        new_state_dict = prune_state_dict(state_dict, args)
+
+        from ncc.checkpoint_utils import prune_state_dict
+
+        new_state_dict = prune_state_dict(state_dict, model_cfg)
         return super().load_state_dict(new_state_dict, strict)
 
 
@@ -360,13 +479,13 @@ class NccLanguageModel(BaseNccModel):
     """Base class for decoder-only models.
 
     Args:
-        decoder (NccDecoder): the decoder
+        decoder (FairseqDecoder): the decoder
     """
 
     def __init__(self, decoder):
         super().__init__()
         self.decoder = decoder
-        assert isinstance(self.decoder, NccDecoder)
+        check_type(self.decoder, NccDecoder)
 
     def forward(self, src_tokens, **kwargs):
         """
@@ -421,13 +540,13 @@ class NccEncoderModel(BaseNccModel):
     """Base class for encoder-only models.
 
     Args:
-        encoder (NccEncoder): the encoder
+        encoder (FairseqEncoder): the encoder
     """
 
     def __init__(self, encoder):
         super().__init__()
         self.encoder = encoder
-        assert isinstance(self.encoder, NccEncoder)
+        check_type(self.encoder, NccEncoder)
 
     def forward(self, src_tokens, src_lengths, **kwargs):
         """
@@ -460,94 +579,8 @@ class NccEncoderModel(BaseNccModel):
         return self.encoder.max_positions()
 
 
-class NccMultiEncoderMultiDecoder(BaseNccModel):
-    """Base class for a simple encoder-encoder retrieval models.
-
-    Args:
-        src_encoders (NccEncoder): the encoder
-        tgt_encoders (NccEncoder): the encoder
-    """
-
-    def __init__(self, src_encoders, tgt_encoders):
-        super().__init__()
-        self.src_encoders = src_encoders
-        self.tgt_encoders = tgt_encoders
-
-    def forward(self, *args, **kwargs):
-        """
-        Run the forward pass for a encoder-only model.
-
-        Feeds a batch of tokens through the encoder to generate features.
-
-        Args:
-            src_tokens (LongTensor): input tokens of shape `(batch, src_len)`
-            tgt_tokens (LongTensor): input tokens of shape `(batch, src_len)`
-
-        Returns:
-            the encoder's output, typically of shape `(batch, src_len, features)`
-        """
-        raise NotImplementedError
 
 
 class NccRetrievalModel(BaseNccModel):
-    """Base class for a simple encoder-encoder retrieval models.
-
-    Args:
-        src_encoders (NccEncoder): the encoder
-        tgt_encoders (NccEncoder): the encoder
-    """
-
-    def __init__(self, src_encoders, tgt_encoders):
-        super().__init__()
-        self.src_encoders = src_encoders
-        self.tgt_encoders = tgt_encoders
-
-    def forward(self, *args, **kwargs):
-        """
-        Run the forward pass for a encoder-only model.
-
-        Feeds a batch of tokens through the encoder to generate features.
-
-        Args:
-            src_tokens (LongTensor): input tokens of shape `(batch, src_len)`
-            tgt_tokens (LongTensor): input tokens of shape `(batch, src_len)`
-
-        Returns:
-            the encoder's output, typically of shape `(batch, src_len, features)`
-        """
-        raise NotImplementedError
-
-
-class NccMoCoModel(BaseNccModel):
-    """Base class for a simple encoder-encoder retrieval models.
-
-    Args:
-        src_encoder (NccEncoder): the encoder
-        tgt_encoder (NccEncoder): the encoder
-    """
-
-    def __init__(self, encoder_q, encoder_k):
-        super().__init__()
-        self.encoder_q = encoder_q
-        self.encoder_k = encoder_k
-        assert isinstance(self.encoder_q, NccEncoder) and isinstance(self.encoder_k, NccEncoder)
-
-    def forward(self,
-                src_tokens, src_tokens_len, src_tokens_mask,
-                tgt_tokens, tgt_tokens_len, tgt_tokens_mask,
-                ):
-        """
-        Run the forward pass for a encoder-only model.
-
-        Feeds a batch of tokens through the encoder to generate features.
-
-        Args:
-            src_tokens (LongTensor): input tokens of shape `(batch, src_len)`
-            tgt_tokens (LongTensor): input tokens of shape `(batch, src_len)`
-
-        Returns:
-            the encoder's output, typically of shape `(batch, src_len, features)`
-        """
-        # return self.q_encoder(src_tokens, src_tokens_len, src_tokens_mask), \
-        #        self.k_encoder(tgt_tokens, tgt_tokens_len, tgt_tokens_mask),
-        raise NotImplementedError
+    def test():
+        raise ValueError
