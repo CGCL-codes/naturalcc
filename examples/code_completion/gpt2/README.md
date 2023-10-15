@@ -1,6 +1,29 @@
-python -m examples.code_completion.gpt2.train --task code_completion \
-  data-bin/wikitext-103 \
-  --save-dir checkpoints/transformer_wikitext-103 \
+### Step 1: Download the raw_py150 dataset
+```
+bash download.sh
+```
+
+### Step 2: Flatten the dataset
+```
+python -m preprocessing.raw_py150.attributes_cast --raw_dataset_dir /home/wanyao/raw_py150/raw --attributes_dir /home/wanyao/raw_py150/attributes --cores 4
+```
+
+### Step 3: Binarize the dataset
+```
+ncc-preprocess --source-lang code_tokens --trainpref /home/wanyao/raw_py150/attributes/train --testpref /home/wanyao/raw_py150/attributes/test --only-source --destdir /mnt/silver/yanrunbang/naturalcc/data-bin/raw_py150 --workers 4
+```
+
+### Step 4: Postprocess the dataset for code compeltion task
+```
+python -m preprocessing.raw_py150.postprocess --dataset-dir /mnt/silver/yanrunbang/naturalcc/data-bin/raw_py150 --language code_tokens
+```
+
+
+### Step 5: Train your model
+```
+ncc-train --task code_completion \
+  /mnt/silver/yanrunbang/naturalcc/data-bin/raw_py150 \
+  --save-dir checkpoints/transformer_raw_py150 \
   --arch transformer_lm --share-decoder-input-output-embed \
   --dropout 0.1 \
   --optimizer adam --adam-betas '(0.9, 0.98)' --weight-decay 0.01 --clip-norm 0.0 \
@@ -8,7 +31,10 @@ python -m examples.code_completion.gpt2.train --task code_completion \
   --tokens-per-sample 512 --sample-break-mode none \
   --max-tokens 2048 --update-freq 16 \
   --fp16 \
-  --max-update 50000
+  --max-update 50000 \
+  --disable-validation
+```
+
 
 
 

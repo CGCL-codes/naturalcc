@@ -1,3 +1,4 @@
 [console_scripts]
+ncc-preprocess = ncc_cli.preprocess:cli_main
 ncc-run = run.main:main
 ncc-train = ncc_cli.train:cli_main

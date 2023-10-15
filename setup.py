@@ -219,6 +219,7 @@ def do_setup(package_data):
             'console_scripts': [
                 'ncc-run = run.main:main',
                 "ncc-train = ncc_cli.train:cli_main",
+                "ncc-preprocess = ncc_cli.preprocess:cli_main"
             ],
         },
         cmdclass=cmdclass,

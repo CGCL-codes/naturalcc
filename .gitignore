@@ -24,3 +24,6 @@ ncc/libnat.cpython-37m-x86_64-linux-gnu.so
 examples/code_completion/raw_py150/*
 
 examples/language_model/wikitext-103/*
+
+data-bin/*
+*.pt
