@@ -27,3 +27,4 @@ examples/language_model/wikitext-103/*
 
 data-bin/*
 *.pt
+ncc/data/.nfs*
