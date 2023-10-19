@@ -89,7 +89,7 @@ def attributes_cast(languages=LANGUAGES,
 
 
     for lang, mode in itertools.product(languages, MODES):
-        if(os.path.exists(os.path.join(attributes_dir, lang))):
+        if(os.path.exists(os.path.join(attributes_dir, lang, mode))):
             print(f"CodeSearchNet-{lang}-{mode} is prepared.")
             time.sleep(0.2)
             continue
@@ -109,10 +109,10 @@ if __name__ == '__main__':
         "--languages", "-l", default=LANGUAGES, type=str, nargs='+', help="languages constain [{}]".format(LANGUAGES),
     )
     parser.add_argument(
-        "--raw_dataset_dir", "-r", default=RAW_DIR, type=str, help="raw dataset download directory",
+        "--raw-dataset-dir", "-r", default=RAW_DIR, type=str, help="raw dataset download directory",
     )
     parser.add_argument(
-        "--attributes_dir", "-d", default=ATTRIBUTES_DIR, type=str, help="data directory of attributes directory",
+        "--attributes-dir", "-d", default=ATTRIBUTES_DIR, type=str, help="data directory of attributes directory",
     )
     parser.add_argument(
         "--attrs", "-a",
