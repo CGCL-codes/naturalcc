@@ -84,7 +84,6 @@ def load_checkpoint(
             checkpoint = converter(checkpoint)
         except (KeyError, ValueError) as ex:
             raise_error(ex)
-
     return checkpoint
 
 
@@ -132,7 +131,8 @@ def upgrade_fairseq_checkpoint(
     :returns:
         A converted checkpoint that is compatible with fairseq2.
     """
-    old_state_dict = checkpoint["model"]
+    # old_state_dict = checkpoint["model"]
+    old_state_dict = checkpoint
 
     new_state_dict = convert_model_state_dict(old_state_dict, key_map)
 

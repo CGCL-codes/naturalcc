@@ -8,6 +8,8 @@ from typing import AbstractSet, Callable, Dict, Generic, Protocol, TypeVar
 
 ModelConfigT = TypeVar("ModelConfigT", covariant=True)
 
+REGISTER_ARCH = {}
+
 
 class ModelConfigFactory(Protocol[ModelConfigT]):
     """Constructs instances of ``ModelConfigT``."""
@@ -28,7 +30,7 @@ class ArchitectureRegistry(Generic[ModelConfigT]):
             The type of the model for which architectures will be registered.
         """
         self.model_type = model_type
-
+        
         self.configs = {}
 
     def register(

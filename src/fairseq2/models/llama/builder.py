@@ -74,8 +74,8 @@ llama_archs = ArchitectureRegistry[LLaMAConfig]("llama")
 
 llama_arch = llama_archs.marker
 
-@llama_arch("7b-code")
-def _7b() -> LLaMAConfig:
+@llama_arch("7b_code")
+def _7b_code() -> LLaMAConfig:
     return LLaMAConfig(
         model_dim=4096,
         max_seq_len=2048,
@@ -86,6 +86,22 @@ def _7b() -> LLaMAConfig:
         num_attn_heads=32,
         num_key_value_heads=32,
         ffn_inner_dim=4096 * 4,
+        ffn_inner_dim_to_multiple=256,
+        dropout_p=0.1,
+    )
+
+@llama_arch("13b_code")
+def _13b_code() -> LLaMAConfig:
+    return LLaMAConfig(
+        model_dim=5120,
+        max_seq_len=2048,
+        vocab_info=VocabularyInfo(
+            size=32016, unk_idx=0, bos_idx=1, eos_idx=2, pad_idx=None
+        ),
+        num_layers=40,
+        num_attn_heads=40,
+        num_key_value_heads=40,
+        ffn_inner_dim=5120 * 4,
         ffn_inner_dim_to_multiple=256,
         dropout_p=0.1,
     )
