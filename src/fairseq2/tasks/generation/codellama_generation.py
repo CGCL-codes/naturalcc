@@ -1,6 +1,8 @@
 from .generation import GenerationTask
 from fairseq2.models.llama.builder import llama_archs
+from fairseq2.tasks import register_task
 
+@register_task('codellama_generation')
 class CodellamaGenerationTask(GenerationTask):
     def load_state(self,ckpt_path):
         key_map = {}

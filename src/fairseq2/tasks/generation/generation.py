@@ -7,6 +7,7 @@ from torch.utils.data import Dataset,DataLoader
 import json
 import os
 from tqdm import tqdm
+from fairseq2.tasks import register_task
 
 class NccDataset(Dataset):
     def __init__(self,input):
@@ -23,7 +24,7 @@ class NccDataset(Dataset):
         }
         return sample
 
-
+@register_task('generation')
 class GenerationTask(NccTask):
     @classmethod
     def generate(self,input,max_length=100,top_k=10,top_p=0.95,temperature=0.2,penalty_weight=0.5,penalty_decay=0.95,seed=None,bos_token_id=1,eos_token_id=2,unkown_token_id=0,tokenizer=None):
