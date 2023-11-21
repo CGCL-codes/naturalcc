@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from dataclasses import dataclass, field
 import json
 import os
+from typing import Optional
+from argparse import Namespace
+from omegaconf import II
+
+
 
 import torch
 
@@ -18,12 +24,13 @@ from ncc.data.wrappers import (
     TruncateDataset,
     StripTokenDataset,
 )
+from ncc.data.indexed_dataset import get_available_dataset_impl
 from ncc.eval.summarization import summarization_metrics
 from ncc.tasks import register_task
 from ncc.tasks.ncc_task import NccTask
 from ncc.utils import utils
 from ncc.utils.logging import metrics
-
+from ncc.dataclass import ChoiceEnum ,NccDataclass
 
 def load_langpair_dataset(
     data_path, split,
@@ -105,7 +112,100 @@ def load_langpair_dataset(
     )
 
 
-@register_task('translation')
+@dataclass
+class TranslationConfig(NccDataclass):
+    data: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "colon separated path to data directories list, will be iterated upon during epochs "
+            "in round-robin manner; however, valid and test data are always in the first directory "
+            "to avoid the need for repeating them in all directories"
+        },
+    )
+    source_lang: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "source language",
+            "argparse_alias": "-s",
+        },
+    )
+    target_lang: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "target language",
+            "argparse_alias": "-t",
+        },
+    )
+    load_alignments: bool = field(
+        default=False, metadata={"help": "load the binarized alignments"}
+    )
+    left_pad_source: bool = field(
+        default=True, metadata={"help": "pad the source on the left"}
+    )
+    left_pad_target: bool = field(
+        default=False, metadata={"help": "pad the target on the left"}
+    )
+    max_source_positions: int = field(
+        default=1024, metadata={"help": "max number of tokens in the source sequence"}
+    )
+    max_target_positions: int = field(
+        default=1024, metadata={"help": "max number of tokens in the target sequence"}
+    )
+    upsample_primary: int = field(
+        default=-1, metadata={"help": "the amount of upsample primary dataset"}
+    )
+    truncate_source: bool = field(
+        default=False, metadata={"help": "truncate source to max-source-positions"}
+    )
+    num_batch_buckets: int = field(
+        default=0,
+        metadata={
+            "help": "if >0, then bucket source and target lengths into "
+            "N buckets and pad accordingly; this is useful on TPUs to minimize the number of compilations"
+        },
+    )
+    train_subset: str = II("dataset.train_subset")
+    dataset_impl: Optional[ChoiceEnum(get_available_dataset_impl())] = II(
+        "dataset.dataset_impl"
+    )
+    required_seq_len_multiple: int = II("dataset.required_seq_len_multiple")
+
+    # options for reporting BLEU during validation
+    eval_bleu: bool = field(
+        default=False, metadata={"help": "evaluation with BLEU scores"}
+    )
+    eval_bleu_args: Optional[str] = field(
+        default="{}",
+        metadata={
+            "help": 'generation args for BLUE scoring, e.g., \'{"beam": 4, "lenpen": 0.6}\', as JSON string'
+        },
+    )
+    eval_bleu_detok: str = field(
+        default="space",
+        metadata={
+            "help": "detokenize before computing BLEU (e.g., 'moses'); required if using --eval-bleu; "
+            "use 'space' to disable detokenization; see fairseq.data.encoders for other options"
+        },
+    )
+    eval_bleu_detok_args: Optional[str] = field(
+        default="{}",
+        metadata={"help": "args for building the tokenizer, if needed, as JSON string"},
+    )
+    eval_tokenized_bleu: bool = field(
+        default=False, metadata={"help": "compute tokenized BLEU instead of sacrebleu"}
+    )
+    eval_bleu_remove_bpe: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "remove BPE before computing BLEU",
+            "argparse_const": "@@ ",
+        },
+    )
+    eval_bleu_print_samples: bool = field(
+        default=False, metadata={"help": "print sample generations during validation"}
+    )
+
+@register_task('translation',dataclass=TranslationConfig)
 class TranslationTask(NccTask):
     """
     This task`SummarizationTask` will handle file as follows:
@@ -122,28 +222,35 @@ class TranslationTask(NccTask):
         self.tgt_dict = tgt_dict
 
     @classmethod
-    def setup_task(cls, args, **kwargs):
+    def setup_task(cls, cfg: TranslationConfig, **kwargs):
         """Setup the task (e.g., load dictionaries).
 
         Args:
             args (argparse.Namespace): parsed command-line arguments
         """
-        paths = utils.split_paths(args['task']['data'])
+        paths = utils.split_paths(cfg.data)
         assert len(paths) > 0
-
-        share_dict = args['task'].get('share_dict', False)
-        if share_dict:
-            src_dict = tgt_dict = cls.load_dictionary(os.path.join(paths[0], "dict.jsonl"))
-        else:
-            # load dictionaries
-            src_dict = cls.load_dictionary(os.path.join(paths[0], f"{args['task']['source_lang']}.dict.jsonl"))
-            tgt_dict = cls.load_dictionary(os.path.join(paths[0], f"{args['task']['target_lang']}.dict.jsonl"))
-            assert src_dict.pad() == tgt_dict.pad()
-            assert src_dict.eos() == tgt_dict.eos()
-            assert src_dict.unk() == tgt_dict.unk()
-            LOGGER.info('[{}] dictionary: {} types'.format(args['task']['source_lang'], len(src_dict)))
-            LOGGER.info('[{}] dictionary: {} types'.format(args['task']['target_lang'], len(tgt_dict)))
-        return cls(args, src_dict, tgt_dict)
+        # find language pair automatically
+        if cfg.source_lang is None or cfg.target_lang is None:
+            cfg.source_lang, cfg.target_lang = data_utils.infer_language_pair(paths[0])
+        if cfg.source_lang is None or cfg.target_lang is None:
+            raise Exception(
+                "Could not infer language pair, please provide it explicitly"
+            )
+        
+        # load dictionaries
+        src_dict = cls.load_dictionary(
+            os.path.join(paths[0], "dict.{}.txt".format(cfg.source_lang))
+        )
+        tgt_dict = cls.load_dictionary(
+            os.path.join(paths[0], "dict.{}.txt".format(cfg.target_lang))
+        )
+        assert src_dict.pad() == tgt_dict.pad()
+        assert src_dict.eos() == tgt_dict.eos()
+        assert src_dict.unk() == tgt_dict.unk()
+        LOGGER.info('[{}] dictionary: {} types'.format(cfg.source_lang, len(src_dict)))
+        LOGGER.info('[{}] dictionary: {} types'.format(cfg.target_lang, len(tgt_dict)))
+        return cls(cfg, src_dict, tgt_dict)
 
     def load_dataset(self, split, epoch=1, combine=False, **kwargs):
         """Load a given dataset split.
@@ -151,24 +258,35 @@ class TranslationTask(NccTask):
         Args:
             split (str): name of the split (e.g., train, valid, test)
         """
-        paths = utils.split_paths(self.args['task']['data'])
+        paths = utils.split_paths(self.cfg.data)
         assert len(paths) > 0
+        if split != self.cfg.train_subset:
+            # if not training data set, use the first shard for valid and test
+            paths = paths[:1]
         data_path = paths[(epoch - 1) % len(paths)]
 
         # infer langcode
-        src, tgt = self.args['task']['source_lang'], self.args['task']['target_lang']
+        src, tgt = self.cfg.source_lang, self.cfg.target_lang
 
         self.datasets[split] = load_langpair_dataset(
-            data_path, split, src, self.src_dict, tgt, self.tgt_dict,
-            dataset_impl=self.args['dataset']['dataset_impl'],
-            left_pad_source=self.args['task']['left_pad_source'],
-            left_pad_target=self.args['task']['left_pad_target'],
-            max_source_positions=self.args['task']['max_source_positions'],
-            max_target_positions=self.args['task']['max_target_positions'],
-            truncate_source=self.args['task']['truncate_source'],
-            truncate_target=self.args['task']['truncate_target'],
-            append_eos_to_target=self.args['task']['append_eos_to_target'],
-            portion=self.args['dataset'].get('portion', None),
+            data_path,
+            split,
+            src,
+            self.src_dict,
+            tgt,
+            self.tgt_dict,
+            combine=combine,
+            dataset_impl=self.cfg.dataset_impl,
+            upsample_primary=self.cfg.upsample_primary,
+            left_pad_source=self.cfg.left_pad_source,
+            left_pad_target=self.cfg.left_pad_target,
+            max_source_positions=self.cfg.max_source_positions,
+            max_target_positions=self.cfg.max_target_positions,
+            load_alignments=self.cfg.load_alignments,
+            truncate_source=self.cfg.truncate_source,
+            num_buckets=self.cfg.num_batch_buckets,
+            shuffle=(split != "test"),
+            pad_to_multiple=self.cfg.required_seq_len_multiple,
         )
 
     def build_dataset_for_inference(self, src_tokens, src_lengths):

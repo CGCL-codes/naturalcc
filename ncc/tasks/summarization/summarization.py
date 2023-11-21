@@ -6,6 +6,10 @@ from functools import lru_cache
 
 import numpy as np
 import torch
+from dataclasses import dataclass, field
+
+import logging
+from typing import Optional
 
 from ncc import (
     tokenizers,
@@ -14,6 +18,7 @@ from ncc import (
 from ncc.data import (
     indexed_dataset,
 )
+from ncc.dataclass import ChoiceEnum, NccDataclass
 from ncc.data.dictionary import Dictionary
 from ncc.data.ncc_dataset import NccDataset
 from ncc.data.summarization.language_pair_dataset import LanguagePairDataset
@@ -28,67 +33,16 @@ from ncc.tokenizers import tokenization
 from ncc.utils import utils
 from ncc.utils.logging import metrics
 
+from omegaconf import II
+
+
 EVAL_BLEU_ORDER = 4
 
-
-class IndexedRawTextDataset(NccDataset):
-    """Takes a text file as input and binarizes it in memory at instantiation.
-    Original lines are also kept in memory"""
-
-    def __init__(self, path, dictionary, append_eos=True, reverse_order=False):
-        self.tokens_list = []
-        self.lines = []
-        self.sizes = []
-        self.append_eos = append_eos
-        self.reverse_order = reverse_order
-        self.read_data(path, dictionary)
-        self.size = len(self.tokens_list)
-
-    def read_data(self, path, dictionary):
-        with open(path, 'r', encoding='utf-8') as f:
-            for line in f:
-                self.lines.append(line.strip('\n'))
-                tokens = dictionary.encode_line(
-                    line, tokenization._space_tokenizer, add_if_not_exist=False,
-                    append_eos=self.append_eos, reverse_order=self.reverse_order,
-                ).long()
-                self.tokens_list.append(tokens)
-                self.sizes.append(len(tokens))
-        self.sizes = np.array(self.sizes)
-
-    def check_index(self, i):
-        if i < 0 or i >= self.size:
-            raise IndexError('index out of range')
-
-    @lru_cache(maxsize=8)
-    def __getitem__(self, i):
-        self.check_index(i)
-        return self.tokens_list[i]
-
-    def get_original_text(self, i):
-        self.check_index(i)
-        return self.lines[i]
-
-    def __del__(self):
-        pass
-
-    def __len__(self):
-        return self.size
-
-    def num_tokens(self, index):
-        return self.sizes[index]
-
-    def size(self, index):
-        return self.sizes[index]
-
-    @staticmethod
-    def exists(path):
-        return os.path.exists(path)
 
 
 def _load_dataset(path, impl, dict):
     if impl == 'raw':
-        src_dataset = IndexedRawTextDataset(path=path, dictionary=dict)
+        src_dataset = indexed_dataset.IndexedRawTextDataset(path=path, dictionary=dict, tokenization=tokenization._space_tokenizer)
     elif impl == 'mmap':
         # mmap dataset has been numberized, no need for dict
         src_dataset = indexed_dataset.MMapIndexedDataset(path=path)
@@ -113,6 +67,7 @@ def load_langpair_dataset(
 ):
     # load source dataset
     src_path = os.path.join(data_path, '{}.{}'.format(split, src))
+    print("!!!!" + src_path)
     src_dataset = _load_dataset(path=src_path, impl=dataset_impl, dict=src_dict)
 
     if truncate_source:
@@ -170,8 +125,118 @@ def load_langpair_dataset(
         shuffle=(split == 'train'),
     )
 
+@dataclass
+class SummarizationConfig(NccDataclass):
+    data: str = field(
+        default = "none", 
+        metadata = {"help": "path to data directory"}
+    )
+    dataset_impl: Optional[ChoiceEnum(indexed_dataset.get_available_dataset_impl())] = field(
+        default = "mmap",
+        metadata = {"help": "implementation of dataset"}
+    )
+    dict: Optional[str] = field(
+        default = None,
+        metadata = {"help": "path to already existed dict"}
+    )
+    dict_type: Optional[str] = field(
+        default = None,
+        metadata = {"help": "type of existed dict"}
+    )
+    source_lang: str = field(
+        default = "code_tokens",
+        metadata = {"help": "source language"}
+    )
+    target_lang: str = field(
+        default = "docstring_tokens",
+        metadata = {"help": "target language"}
+    )
+    load_alignments: bool = field(
+        default = False,
+        metadata = {"help": "load the binarized alignments"},
+    )
+    left_pad_source: bool = field(
+        default = True,
+        metadata = {"help": "pad the source on the left"}
+    )
+    left_pad_target: bool = field(
+        default = False,
+        metadata = {"help": "pad the target on the left"}
+    )
+    max_source_positions: int = field(
+        default = 1024,
+        metadata = {"help": "max number of tokens in the source sequence"}
+    )
+    max_target_positions: int = field(
+        default = 1024,
+        metadata = {"help": "max number of tokens in the target sequence"}
+    )
+    upsample_primary: int = field(
+        default = 1,
+        metadata = {"help": "amount to upsample primary dataset"}
+    )
+    truncate_source: bool = field(
+        default = False,
+        metadata = {"help": "truncate source to max-source-positions"},
+    )
+    truncate_target: bool = field(
+        default = False,
+        metadata = {"help": "truncate target to max-target-positions"},
+    )
+    eval_bleu: bool = field(
+        default = False,
+        metadata = {"help": "evaluation with BLEU scores"}
+    )
+    eval_bleu_detok: str = field(
+        default = 'space',
+        metadata = {"help": "detokenizer before computing BLEU. use 'space' to disable detokenization"}
+    )
+    eval_bleu_detok_args: str = field(
+        default = '',
+        metadata = {"help": "args for building the tokenizer, if needed"}
+    )
+    eval_tokenized_bleu: bool = field(
+        default = False,
+        metadata = {"help": "if setting, we compute tokenized BLEU instead of sacrebleu"}
+    )
+    eval_bleu_remove_bpe: bool = field(
+        default = False,
+        metadata = {"help": "remove BPE before computing BLEU"}
+    )
+    eval_bleu_args: str = field(
+        default = '',
+        metadata = {
+            "help": "generation args for BLUE scoring",
+            "e.g.": '\'{"beam": 4, "lenpen": 0.6}\''
+        }
+    )
+    eval_bleu_print_samples: bool = field(
+        default = False,
+        metadata = {"help": "print sample generations during validation"}
+    )
+    eval_with_sacrebleu: bool = field(
+        default = False,
+        metadata = {"help": "evalate with sacrebleu"}
+    )
+    append_eos_to_target: bool = field(
+        default = True,
+        metadata = {"help": "whether to append eos to target"}
+    )
+    portion: Optional[float] = field(
+        default = None
+    )
+    
+    
+    # TODO common vars below add to parent
+    seed: int = II("common.seed")
+    batch_size: Optional[int] = II("dataset.batch_size")
+    batch_size_valid: Optional[int] = II("dataset.batch_size_valid")
+    data_buffer_size: int = II("dataset.data_buffer_size")
+    tpu: bool = II("common.tpu")
+    use_plasma_view: bool = II("common.use_plasma_view")
+    plasma_path: str = II("common.plasma_path")
 
-@register_task('summarization')
+@register_task('summarization', dataclass=SummarizationConfig)
 class SummarizationTask(NccTask):
     """
     This task`SummarizationTask` will handle file as follows:
@@ -186,6 +251,7 @@ class SummarizationTask(NccTask):
         super().__init__(args)
         self.src_dict = src_dict
         self.tgt_dict = tgt_dict
+        self.args = args
 
     @classmethod
     def setup_task(cls, args, **kwargs):
@@ -194,20 +260,20 @@ class SummarizationTask(NccTask):
         Args:
             args (argparse.Namespace): parsed command-line arguments
         """
-        paths = utils.split_paths(args['task']['data'])
+        paths = utils.split_paths(args.data)
         assert len(paths) > 0
 
-        dict = args['task'].get('dict', None)
-        dict_type = args['task'].get('dict_type', None)
+        dict = args.dict
+        dict_type = args.dict_type
         if dict is None and dict_type is None:
             # load dictionaries
-            src_dict = cls.load_dictionary(os.path.join(paths[0], '{}.dict.jsonl'.format(args['task']['source_lang'])))
-            tgt_dict = cls.load_dictionary(os.path.join(paths[0], '{}.dict.jsonl'.format(args['task']['target_lang'])))
+            src_dict = cls.load_dictionary(os.path.join(paths[0], '{}.dict.jsonl'.format(args.source_lang)))
+            tgt_dict = cls.load_dictionary(os.path.join(paths[0], '{}.dict.jsonl'.format(args.target_lang)))
             assert src_dict.pad() == tgt_dict.pad()
             assert src_dict.eos() == tgt_dict.eos()
             assert src_dict.unk() == tgt_dict.unk()
-            LOGGER.info('[{}] dictionary: {} types'.format(args['task']['source_lang'], len(src_dict)))
-            LOGGER.info('[{}] dictionary: {} types'.format(args['task']['target_lang'], len(tgt_dict)))
+            LOGGER.info('[{}] dictionary: {} types'.format(args.source_lang, len(src_dict)))
+            LOGGER.info('[{}] dictionary: {} types'.format(args.target_lang, len(tgt_dict)))
         else:
             raise NotImplementedError
         return cls(args, src_dict, tgt_dict)
@@ -253,25 +319,24 @@ class SummarizationTask(NccTask):
         Args:
             split (str): name of the split (e.g., train, valid, test)
         """
-        paths = utils.split_paths(self.args['task']['data'])
+        paths = utils.split_paths(self.args.data)
         assert len(paths) > 0
         data_path = paths[(epoch - 1) % len(paths)]
 
         # infer langcode
-        src, tgt = self.args['task']['source_lang'], self.args['task']['target_lang']
-
+        src, tgt = self.args.source_lang, self.args.target_lang
         self.datasets[split] = load_langpair_dataset(
             data_path, split, src, self.src_dict, tgt, self.tgt_dict,
-            dataset_impl=self.args['dataset']['dataset_impl'],
-            left_pad_source=self.args['task']['left_pad_source'],
-            left_pad_target=self.args['task']['left_pad_target'],
-            max_source_positions=self.args['task']['max_source_positions'],
-            max_target_positions=self.args['task']['max_target_positions'],
-            load_alignments=self.args['task']['load_alignments'],
-            truncate_source=self.args['task']['truncate_source'],
-            truncate_target=self.args['task']['truncate_target'],
-            append_eos_to_target=self.args['task']['append_eos_to_target'],
-            portion=self.args['dataset'].get('portion', None),
+            dataset_impl=self.args.dataset_impl,
+            left_pad_source=self.args.left_pad_source,
+            left_pad_target=self.args.left_pad_target,
+            max_source_positions=self.args.max_source_positions,
+            max_target_positions=self.args.max_target_positions,
+            load_alignments=self.args.load_alignments,
+            truncate_source=self.args.truncate_source,
+            truncate_target=self.args.truncate_target,
+            append_eos_to_target=self.args.append_eos_to_target,
+            portion=self.args.portion,
         )
 
     def build_dataset_for_inference(self, src_tokens, src_lengths):
@@ -279,8 +344,8 @@ class SummarizationTask(NccTask):
 
     def build_model(self, args):
         model = super().build_model(args)
-        if args['task']['eval_bleu']:
-            assert args['task']['eval_bleu_detok'] is not None, (
+        if args.eval_bleu:
+            assert args.eval_bleu_detok is not None, (
                 '--eval-bleu-detok is required if using --eval-bleu; '
                 'try --eval-bleu-detok=moses (or --eval-bleu-detok=space '
                 'to disable detokenization, e.g., when using sentencepiece)'
@@ -295,10 +360,10 @@ class SummarizationTask(NccTask):
             #         dict(tokenizer=args['task'].get('eval_bleu_detok', '{}'), **detok_args)
             #     )
             detok_args = json.loads(
-                args['task']['eval_bleu_detok_args'] if args['task']['eval_bleu_detok_args'] else '{}'
+                args.eval_bleu_detok_args if args.eval_bleu_detok_args else '{}'
             )
             self.tokenizer = tokenizers.build_tokenizer(
-                dict(tokenizer=args['task'].get('eval_bleu_detok', '{}'), **detok_args)
+                dict(tokenizer=args.eval_bleu_detok or '{}', **detok_args)
             )
             self.sequence_generator = self.build_generator([model], args)
         return model
@@ -340,7 +405,7 @@ class SummarizationTask(NccTask):
         def decode(toks, escape_unk=False, trunc_eos=True):
             s = self.tgt_dict.string(
                 toks.int().cpu(),
-                self.args['task']['eval_bleu_remove_bpe'],
+                self.args.eval_bleu_remove_bpe,
                 escape_unk=escape_unk,
                 trunc_eos=trunc_eos,
             )
@@ -350,7 +415,7 @@ class SummarizationTask(NccTask):
                 s = '0'  # if predict sentence is null, use '0'
             return s
 
-        if self.args['task']['eval_bleu']:
+        if self.args.eval_bleu:
             gen_out = self.inference_step(self.sequence_generator, [model], sample)
             ids = sample['id'].tolist()
             hyps, refs = [], []
@@ -360,9 +425,9 @@ class SummarizationTask(NccTask):
                     utils.strip_pad(sample['target'][i], self.tgt_dict.pad()),
                     escape_unk=True,  # don't count <unk> as matches to the hypo
                 ))
-            if self.args['task']['eval_with_sacrebleu']:
+            if self.args.eval_with_sacrebleu:
                 import sacrebleu
-                tokenize = sacrebleu.DEFAULT_TOKENIZER if not self.args['task']['eval_tokenized_bleu'] else 'none'
+                tokenize = sacrebleu.DEFAULT_TOKENIZER if not self.args.eval_tokenized_bleu else 'none'
                 bleu = sacrebleu.corpus_bleu(hyps, [refs], tokenize=tokenize)
                 logging_output['_bleu_sys_len'] = bleu.sys_len
                 logging_output['_bleu_ref_len'] = bleu.ref_len
@@ -381,9 +446,9 @@ class SummarizationTask(NccTask):
 
     def reduce_metrics(self, logging_outputs, criterion):
         super().reduce_metrics(logging_outputs, criterion)
-        if self.args['task']['eval_bleu']:
+        if self.args.eval_bleu:
 
-            if self.args['task']['eval_with_sacrebleu']:
+            if self.args.eval_with_sacrebleu:
                 def sum_logs(key):
                     import torch
                     result = sum(log.get(key, 0) for log in logging_outputs)
@@ -430,7 +495,7 @@ class SummarizationTask(NccTask):
 
     def max_positions(self):
         """Return the max sentence length allowed by the task."""
-        return (self.args['task']['max_source_positions'], self.args['task']['max_target_positions'])
+        return (self.args.max_source_positions, self.args.max_target_positions)
 
     @property
     def source_dictionary(self):
@@ -457,7 +522,7 @@ class SummarizationTask(NccTask):
         if tokenizer is not None:
             input = ''.join(char if str.isalnum(char) else ' ' for char in input)  # for python_wan dataset
             input = tokenizer(input)
-        input = input[:self.args['task']['max_source_positions']]
+        input = input[:self.args.max_source_positions]
         input = [self.src_dict.index(token) for token in input] + [self.src_dict.eos()]
         input = torch.Tensor(input).long()  # [bsz, len]
         input = {

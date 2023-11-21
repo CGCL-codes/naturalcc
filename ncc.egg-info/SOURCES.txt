@@ -3,6 +3,7 @@ README.md
 setup.py
 gui/__init__.py
 ncc/__init__.py
+ncc/binarizer.py
 ncc/checkpoint_utils.py
 ncc/file_chunker_utils.py
 ncc/file_io.py
@@ -331,23 +332,31 @@ ncc/examples/code_completion/predictor.py
 ncc/examples/code_completion/gpt2/README.md
 ncc/examples/code_completion/gpt2/__init__.py
 ncc/examples/code_completion/gpt2/astunparser.py
+<<<<<<< HEAD
 ncc/examples/code_completion/gpt2/attributes_cast.py
+=======
+ncc/examples/code_completion/gpt2/download.sh
+>>>>>>> 08ba10613bdb8766772276e9fa5ab2c1beb8fdc2
 ncc/examples/code_completion/gpt2/eval.py
 ncc/examples/code_completion/gpt2/gen_out.py
 ncc/examples/code_completion/gpt2/preprocess.py
 ncc/examples/code_completion/gpt2/train.py
 ncc/examples/code_completion/gpt2/utils.py
 ncc/examples/code_completion/gpt2/config/preprocess.yml
+<<<<<<< HEAD
 ncc/examples/code_completion/raw_py150/README.md
 ncc/examples/code_completion/raw_py150/data.tar.gz
 ncc/examples/code_completion/raw_py150/github_repos.txt
 ncc/examples/code_completion/raw_py150/py150_files.tar.gz
 ncc/examples/code_completion/raw_py150/python100k_train.txt
 ncc/examples/code_completion/raw_py150/python50k_eval.txt
+=======
+>>>>>>> 08ba10613bdb8766772276e9fa5ab2c1beb8fdc2
 ncc/examples/code_completion/seqrnn/README.md
 ncc/examples/code_completion/seqrnn/__init__.py
 ncc/examples/code_completion/seqrnn/eval.py
 ncc/examples/code_completion/seqrnn/train.py
+<<<<<<< HEAD
 ncc/examples/code_completion/seqrnn/config/csn_feng/seq1lrnn/ruby.log
 ncc/examples/code_completion/seqrnn/config/csn_feng/seq1lrnn/ruby.yml
 ncc/examples/code_completion/seqrnn/config/csn_feng/seq3lrnn/ruby.log
@@ -355,6 +364,14 @@ ncc/examples/code_completion/seqrnn/config/csn_feng/seq3lrnn/ruby.yml
 ncc/examples/code_completion/seqrnn/config/raw_py150/python.log
 ncc/examples/code_completion/seqrnn/config/raw_py150/python.yml
 ncc/examples/code_search/retrieval.md
+=======
+ncc/examples/code_completion/seqrnn/config/csn_feng/seq1lrnn/ruby.yml
+ncc/examples/code_completion/seqrnn/config/csn_feng/seq3lrnn/ruby.yml
+ncc/examples/code_completion/seqrnn/config/raw_py150/python.yml
+ncc/examples/code_search/retrieval.md
+ncc/examples/code_summarization/download.sh
+ncc/examples/code_summarization/readme.md
+>>>>>>> 08ba10613bdb8766772276e9fa5ab2c1beb8fdc2
 ncc/examples/code_summarization/seq2seq/summarization.md
 ncc/examples/device_mapping/mapping.md
 ncc/examples/language_model/README.md
@@ -904,6 +921,7 @@ preprocessing/python_wan/utils/util_traversal.py
 preprocessing/raw_py150/__init__.py
 preprocessing/raw_py150/astunparser.py
 preprocessing/raw_py150/attributes_cast.py
+preprocessing/raw_py150/postprocess.py
 preprocessing/raw_py150/utils.py
 preprocessing/raw_py150/completion/__init__.py
 preprocessing/raw_py150/completion/preprocess.py
@@ -933,6 +951,8 @@ run/completion/gpt2/train.py
 run/completion/seqrnn/__init__.py
 run/completion/seqrnn/eval.py
 run/completion/seqrnn/train.py
+run/generation/__init__.py
+run/generation/gen.py
 run/mapping/__init__.py
 run/mapping/decision_tree/10fold.py
 run/mapping/decision_tree/__init__.py

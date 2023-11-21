@@ -1,11 +1,7 @@
-# <center> NaturalCC
-
-
-NaturalCC is a sequence modeling toolkit that allows researchers and developers to train custom models for many software
-engineering tasks, e.g., code summarization, code retrieval, code completion, code clone detection and type inference.
-Our vision is to bridge the gap between programming language and natural language through machine learning techniques.
-
 <p align=center>
+  <img src="docs/naturalcc_logo.png" width="250">
+  <br />
+  <br />
   <a href="https://xcodemind.github.io/">
     <img src="https://img.shields.io/badge/NaturalCC-0.6.0-green" alt="Version">
   </a>
@@ -20,6 +16,13 @@ Our vision is to bridge the gap between programming language and natural languag
   </a>       
 </p>
 <hr>
+
+<!-- # <center> NaturalCC -->
+
+NaturalCC is a sequence modeling toolkit that allows researchers and developers to train custom models for many software
+engineering tasks, e.g., code summarization, code retrieval, code completion, code clone detection and type inference.
+Our vision is to bridge the gap between programming language and natural language through machine learning techniques.
+
 
 ## 🔖 News 
 - [April 19, 2023] We have merged the source code of "You See What I Want You to See: Poisoning Vulnerabilities in Neural Code Search" into NaturalCC.

@@ -4,11 +4,11 @@
 {
     "distutils": {
         "depends": [
-            "/home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/core/include/numpy/arrayobject.h",
-            "/home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/core/include/numpy/arrayscalars.h",
-            "/home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/core/include/numpy/ndarrayobject.h",
-            "/home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/core/include/numpy/ndarraytypes.h",
-            "/home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/core/include/numpy/ufuncobject.h"
+            "/home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/core/include/numpy/arrayobject.h",
+            "/home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/core/include/numpy/arrayscalars.h",
+            "/home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/core/include/numpy/ndarrayobject.h",
+            "/home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/core/include/numpy/ndarraytypes.h",
+            "/home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/core/include/numpy/ufuncobject.h"
         ],
         "extra_compile_args": [
             "-std=c++11",
@@ -21,16 +21,16 @@
             "-D_GLIBCXX_USE_CXX11_ABI=0"
         ],
         "include_dirs": [
-            "/home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/core/include",
-            "/home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/core/include"
+            "/home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/core/include",
+            "/home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/core/include"
         ],
         "language": "c++",
-        "name": "fairseq.data.token_block_utils_fast",
+        "name": "ncc.data.token_block_utils_fast",
         "sources": [
-            "fairseq/data/token_block_utils_fast.pyx"
+            "ncc/data/token_block_utils_fast.pyx"
         ]
     },
-    "module_name": "fairseq.data.token_block_utils_fast"
+    "module_name": "ncc.data.token_block_utils_fast"
 }
 END: Cython Metadata */
 
@@ -1189,8 +1189,8 @@ static CYTHON_INLINE float __PYX_NAN() {
     #define __PYX_EXTERN_C extern "C++"
 #endif
 
-#define __PYX_HAVE__fairseq__data__token_block_utils_fast
-#define __PYX_HAVE_API__fairseq__data__token_block_utils_fast
+#define __PYX_HAVE__ncc__data__token_block_utils_fast
+#define __PYX_HAVE_API__ncc__data__token_block_utils_fast
 /* Early includes */
 #include <math.h>
 #include <string.h>
@@ -1490,7 +1490,7 @@ static const char *__pyx_filename;
 /* #### Code section: filename_table ### */
 
 static const char *__pyx_f[] = {
-  "fairseq/data/token_block_utils_fast.pyx",
+  "ncc/data/token_block_utils_fast.pyx",
   "<stringsource>",
   "__init__.cython-30.pxd",
   "type.pxd",
@@ -1638,7 +1638,7 @@ typedef struct {
 
 /* #### Code section: numeric_typedefs ### */
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":730
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":730
  * # in Cython to enable them only on the right systems.
  * 
  * ctypedef npy_int8       int8_t             # <<<<<<<<<<<<<<
@@ -1647,7 +1647,7 @@ typedef struct {
  */
 typedef npy_int8 __pyx_t_5numpy_int8_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":731
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":731
  * 
  * ctypedef npy_int8       int8_t
  * ctypedef npy_int16      int16_t             # <<<<<<<<<<<<<<
@@ -1656,7 +1656,7 @@ typedef npy_int8 __pyx_t_5numpy_int8_t;
  */
 typedef npy_int16 __pyx_t_5numpy_int16_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":732
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":732
  * ctypedef npy_int8       int8_t
  * ctypedef npy_int16      int16_t
  * ctypedef npy_int32      int32_t             # <<<<<<<<<<<<<<
@@ -1665,7 +1665,7 @@ typedef npy_int16 __pyx_t_5numpy_int16_t;
  */
 typedef npy_int32 __pyx_t_5numpy_int32_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":733
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":733
  * ctypedef npy_int16      int16_t
  * ctypedef npy_int32      int32_t
  * ctypedef npy_int64      int64_t             # <<<<<<<<<<<<<<
@@ -1674,7 +1674,7 @@ typedef npy_int32 __pyx_t_5numpy_int32_t;
  */
 typedef npy_int64 __pyx_t_5numpy_int64_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":737
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":737
  * #ctypedef npy_int128     int128_t
  * 
  * ctypedef npy_uint8      uint8_t             # <<<<<<<<<<<<<<
@@ -1683,7 +1683,7 @@ typedef npy_int64 __pyx_t_5numpy_int64_t;
  */
 typedef npy_uint8 __pyx_t_5numpy_uint8_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":738
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":738
  * 
  * ctypedef npy_uint8      uint8_t
  * ctypedef npy_uint16     uint16_t             # <<<<<<<<<<<<<<
@@ -1692,7 +1692,7 @@ typedef npy_uint8 __pyx_t_5numpy_uint8_t;
  */
 typedef npy_uint16 __pyx_t_5numpy_uint16_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":739
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":739
  * ctypedef npy_uint8      uint8_t
  * ctypedef npy_uint16     uint16_t
  * ctypedef npy_uint32     uint32_t             # <<<<<<<<<<<<<<
@@ -1701,7 +1701,7 @@ typedef npy_uint16 __pyx_t_5numpy_uint16_t;
  */
 typedef npy_uint32 __pyx_t_5numpy_uint32_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":740
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":740
  * ctypedef npy_uint16     uint16_t
  * ctypedef npy_uint32     uint32_t
  * ctypedef npy_uint64     uint64_t             # <<<<<<<<<<<<<<
@@ -1710,7 +1710,7 @@ typedef npy_uint32 __pyx_t_5numpy_uint32_t;
  */
 typedef npy_uint64 __pyx_t_5numpy_uint64_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":744
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":744
  * #ctypedef npy_uint128    uint128_t
  * 
  * ctypedef npy_float32    float32_t             # <<<<<<<<<<<<<<
@@ -1719,7 +1719,7 @@ typedef npy_uint64 __pyx_t_5numpy_uint64_t;
  */
 typedef npy_float32 __pyx_t_5numpy_float32_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":745
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":745
  * 
  * ctypedef npy_float32    float32_t
  * ctypedef npy_float64    float64_t             # <<<<<<<<<<<<<<
@@ -1728,7 +1728,7 @@ typedef npy_float32 __pyx_t_5numpy_float32_t;
  */
 typedef npy_float64 __pyx_t_5numpy_float64_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":754
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":754
  * # The int types are mapped a bit surprising --
  * # numpy.int corresponds to 'l' and numpy.long to 'q'
  * ctypedef npy_long       int_t             # <<<<<<<<<<<<<<
@@ -1737,7 +1737,7 @@ typedef npy_float64 __pyx_t_5numpy_float64_t;
  */
 typedef npy_long __pyx_t_5numpy_int_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":755
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":755
  * # numpy.int corresponds to 'l' and numpy.long to 'q'
  * ctypedef npy_long       int_t
  * ctypedef npy_longlong   longlong_t             # <<<<<<<<<<<<<<
@@ -1746,7 +1746,7 @@ typedef npy_long __pyx_t_5numpy_int_t;
  */
 typedef npy_longlong __pyx_t_5numpy_longlong_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":757
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":757
  * ctypedef npy_longlong   longlong_t
  * 
  * ctypedef npy_ulong      uint_t             # <<<<<<<<<<<<<<
@@ -1755,7 +1755,7 @@ typedef npy_longlong __pyx_t_5numpy_longlong_t;
  */
 typedef npy_ulong __pyx_t_5numpy_uint_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":758
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":758
  * 
  * ctypedef npy_ulong      uint_t
  * ctypedef npy_ulonglong  ulonglong_t             # <<<<<<<<<<<<<<
@@ -1764,7 +1764,7 @@ typedef npy_ulong __pyx_t_5numpy_uint_t;
  */
 typedef npy_ulonglong __pyx_t_5numpy_ulonglong_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":760
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":760
  * ctypedef npy_ulonglong  ulonglong_t
  * 
  * ctypedef npy_intp       intp_t             # <<<<<<<<<<<<<<
@@ -1773,7 +1773,7 @@ typedef npy_ulonglong __pyx_t_5numpy_ulonglong_t;
  */
 typedef npy_intp __pyx_t_5numpy_intp_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":761
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":761
  * 
  * ctypedef npy_intp       intp_t
  * ctypedef npy_uintp      uintp_t             # <<<<<<<<<<<<<<
@@ -1782,7 +1782,7 @@ typedef npy_intp __pyx_t_5numpy_intp_t;
  */
 typedef npy_uintp __pyx_t_5numpy_uintp_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":763
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":763
  * ctypedef npy_uintp      uintp_t
  * 
  * ctypedef npy_double     float_t             # <<<<<<<<<<<<<<
@@ -1791,7 +1791,7 @@ typedef npy_uintp __pyx_t_5numpy_uintp_t;
  */
 typedef npy_double __pyx_t_5numpy_float_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":764
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":764
  * 
  * ctypedef npy_double     float_t
  * ctypedef npy_double     double_t             # <<<<<<<<<<<<<<
@@ -1800,7 +1800,7 @@ typedef npy_double __pyx_t_5numpy_float_t;
  */
 typedef npy_double __pyx_t_5numpy_double_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":765
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":765
  * ctypedef npy_double     float_t
  * ctypedef npy_double     double_t
  * ctypedef npy_longdouble longdouble_t             # <<<<<<<<<<<<<<
@@ -1809,14 +1809,14 @@ typedef npy_double __pyx_t_5numpy_double_t;
  */
 typedef npy_longdouble __pyx_t_5numpy_longdouble_t;
 
-/* "fairseq/data/token_block_utils_fast.pyx":18
+/* "ncc/data/token_block_utils_fast.pyx":18
  * 
  * DTYPE = np.int64
  * ctypedef int64_t DTYPE_t             # <<<<<<<<<<<<<<
  * 
  * 
  */
-typedef int64_t __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t;
+typedef int64_t __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t;
 /* #### Code section: complex_type_declarations ### */
 /* Declarations.proto */
 #if CYTHON_CCOMPLEX && (1) && (!0 || __cplusplus)
@@ -1845,13 +1845,13 @@ static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(do
 /* #### Code section: type_declarations ### */
 
 /*--- Type declarations ---*/
-struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher;
+struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher;
 struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":767
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":767
  * ctypedef npy_longdouble longdouble_t
  * 
  * ctypedef npy_cfloat      cfloat_t             # <<<<<<<<<<<<<<
@@ -1860,7 +1860,7 @@ struct __pyx_memoryviewslice_obj;
  */
 typedef npy_cfloat __pyx_t_5numpy_cfloat_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":768
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":768
  * 
  * ctypedef npy_cfloat      cfloat_t
  * ctypedef npy_cdouble     cdouble_t             # <<<<<<<<<<<<<<
@@ -1869,7 +1869,7 @@ typedef npy_cfloat __pyx_t_5numpy_cfloat_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_cdouble_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":769
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":769
  * ctypedef npy_cfloat      cfloat_t
  * ctypedef npy_cdouble     cdouble_t
  * ctypedef npy_clongdouble clongdouble_t             # <<<<<<<<<<<<<<
@@ -1878,7 +1878,7 @@ typedef npy_cdouble __pyx_t_5numpy_cdouble_t;
  */
 typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":771
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":771
  * ctypedef npy_clongdouble clongdouble_t
  * 
  * ctypedef npy_cdouble     complex_t             # <<<<<<<<<<<<<<
@@ -1887,19 +1887,19 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 
-/* "fairseq/data/token_block_utils_fast.pyx":141
+/* "ncc/data/token_block_utils_fast.pyx":141
  * 
  * 
  * cdef class DatasetSearcher(object):             # <<<<<<<<<<<<<<
  *     """Helper for mapping "flat" indices to indices and offsets in an
  *     underlying dataset."""
  */
-struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher {
+struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher {
   PyObject_HEAD
-  struct __pyx_vtabstruct_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_vtab;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t current_i;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t current_offset;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t current_index;
+  struct __pyx_vtabstruct_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_vtab;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t current_i;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t current_offset;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t current_index;
   __Pyx_memviewslice sizes;
 };
 
@@ -1981,7 +1981,7 @@ struct __pyx_memoryviewslice_obj {
 
 
 
-/* "fairseq/data/token_block_utils_fast.pyx":141
+/* "ncc/data/token_block_utils_fast.pyx":141
  * 
  * 
  * cdef class DatasetSearcher(object):             # <<<<<<<<<<<<<<
@@ -1989,12 +1989,12 @@ struct __pyx_memoryviewslice_obj {
  *     underlying dataset."""
  */
 
-struct __pyx_vtabstruct_7fairseq_4data_22token_block_utils_fast_DatasetSearcher {
-  PyObject *(*reset)(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *);
-  int (*step)(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *, __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t);
-  PyObject *(*seek)(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *, __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t);
+struct __pyx_vtabstruct_3ncc_4data_22token_block_utils_fast_DatasetSearcher {
+  PyObject *(*reset)(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *);
+  int (*step)(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *, __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t);
+  PyObject *(*seek)(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *, __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t);
 };
-static struct __pyx_vtabstruct_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_vtabptr_7fairseq_4data_22token_block_utils_fast_DatasetSearcher;
+static struct __pyx_vtabstruct_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_vtabptr_3ncc_4data_22token_block_utils_fast_DatasetSearcher;
 
 
 /* "View.MemoryView":114
@@ -2949,8 +2949,8 @@ static int __pyx_slices_overlap(__Pyx_memviewslice *slice1,
                                 int ndim, size_t itemsize);
 
 /* MemviewDtypeToObject.proto */
-static CYTHON_INLINE PyObject *__pyx_memview_get_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(const char *itemp);
-static CYTHON_INLINE int __pyx_memview_set_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(const char *itemp, PyObject *obj);
+static CYTHON_INLINE PyObject *__pyx_memview_get_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(const char *itemp);
+static CYTHON_INLINE int __pyx_memview_set_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(const char *itemp, PyObject *obj);
 
 /* TypeInfoCompare.proto */
 static int __pyx_typeinfo_cmp(__Pyx_TypeInfo *a, __Pyx_TypeInfo *b);
@@ -2967,10 +2967,10 @@ static int __Pyx_ValidateAndInit_memviewslice(
                 PyObject *original_obj);
 
 /* ObjectToMemviewSlice.proto */
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(PyObject *, int writable_flag);
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(PyObject *, int writable_flag);
 
 /* ObjectToMemviewSlice.proto */
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(PyObject *, int writable_flag);
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(PyObject *, int writable_flag);
 
 /* RealImag.proto */
 #if CYTHON_CCOMPLEX
@@ -3165,9 +3165,9 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_5shape_shape(PyArrayObjec
 static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_7strides_strides(PyArrayObject *__pyx_v_self); /* proto*/
 static CYTHON_INLINE npy_intp __pyx_f_5numpy_7ndarray_4size_size(PyArrayObject *__pyx_v_self); /* proto*/
 static CYTHON_INLINE char *__pyx_f_5numpy_7ndarray_4data_data(PyArrayObject *__pyx_v_self); /* proto*/
-static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_reset(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self); /* proto*/
-static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_step(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i); /* proto*/
-static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_seek(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i); /* proto*/
+static PyObject *__pyx_f_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_reset(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self); /* proto*/
+static int __pyx_f_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_step(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i); /* proto*/
+static PyObject *__pyx_f_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_seek(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i); /* proto*/
 
 /* Module declarations from "libc.math" */
 
@@ -3197,7 +3197,7 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
 
 /* Module declarations from "libc.stdint" */
 
-/* Module declarations from "fairseq.data.token_block_utils_fast" */
+/* Module declarations from "ncc.data.token_block_utils_fast" */
 static PyObject *__pyx_collections_abc_Sequence = 0;
 static PyObject *generic = 0;
 static PyObject *strided = 0;
@@ -3206,11 +3206,11 @@ static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
 static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
-static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice_indices_none_mode(PyArrayObject *, int); /*proto*/
-static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_convert_to_np_array(PyObject *); /*proto*/
-static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice_indices_fast(PyArrayObject *, PyObject *, int, int, int __pyx_skip_dispatch); /*proto*/
-static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block_to_dataset_index_fast(PyArrayObject *, PyArrayObject *, int __pyx_skip_dispatch); /*proto*/
-static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast___pyx_unpickle_DatasetSearcher__set_state(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *, PyObject *); /*proto*/
+static PyArrayObject *__pyx_f_3ncc_4data_22token_block_utils_fast__get_slice_indices_none_mode(PyArrayObject *, int); /*proto*/
+static PyArrayObject *__pyx_f_3ncc_4data_22token_block_utils_fast__fast_convert_to_np_array(PyObject *); /*proto*/
+static PyArrayObject *__pyx_f_3ncc_4data_22token_block_utils_fast__get_slice_indices_fast(PyArrayObject *, PyObject *, int, int, int __pyx_skip_dispatch); /*proto*/
+static PyArrayObject *__pyx_f_3ncc_4data_22token_block_utils_fast__get_block_to_dataset_index_fast(PyArrayObject *, PyArrayObject *, int __pyx_skip_dispatch); /*proto*/
+static PyObject *__pyx_f_3ncc_4data_22token_block_utils_fast___pyx_unpickle_DatasetSearcher__set_state(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *, PyObject *); /*proto*/
 static int __pyx_array_allocate_buffer(struct __pyx_array_obj *); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static PyObject *__pyx_memoryview_new(PyObject *, int, int, __Pyx_TypeInfo *); /*proto*/
@@ -3246,13 +3246,13 @@ static void __pyx_memoryview_slice_assign_scalar(__Pyx_memviewslice *, int, size
 static void __pyx_memoryview__slice_assign_scalar(char *, Py_ssize_t *, Py_ssize_t *, int, size_t, void *); /*proto*/
 static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *, PyObject *); /*proto*/
 /* #### Code section: typeinfo ### */
-static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t = { "DTYPE_t", NULL, sizeof(__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t), { 0 }, 0, __PYX_IS_UNSIGNED(__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t) ? 'U' : 'I', __PYX_IS_UNSIGNED(__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t), 0 };
+static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t = { "DTYPE_t", NULL, sizeof(__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t), { 0 }, 0, __PYX_IS_UNSIGNED(__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t) ? 'U' : 'I', __PYX_IS_UNSIGNED(__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t), 0 };
 /* #### Code section: before_global_var ### */
-#define __Pyx_MODULE_NAME "fairseq.data.token_block_utils_fast"
-extern int __pyx_module_is_main_fairseq__data__token_block_utils_fast;
-int __pyx_module_is_main_fairseq__data__token_block_utils_fast = 0;
+#define __Pyx_MODULE_NAME "ncc.data.token_block_utils_fast"
+extern int __pyx_module_is_main_ncc__data__token_block_utils_fast;
+int __pyx_module_is_main_ncc__data__token_block_utils_fast = 0;
 
-/* Implementation of "fairseq.data.token_block_utils_fast" */
+/* Implementation of "ncc.data.token_block_utils_fast" */
 /* #### Code section: global_var ### */
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ValueError;
@@ -3401,6 +3401,7 @@ static const char __pyx_k_unable_to_allocate_array_data[] = "unable to allocate 
 static const char __pyx_k_strided_and_direct_or_indirect[] = "<strided and direct or indirect>";
 static const char __pyx_k_DatasetSearcher___reduce_cython[] = "DatasetSearcher.__reduce_cython__";
 static const char __pyx_k_get_block_to_dataset_index_fast[] = "_get_block_to_dataset_index_fast";
+static const char __pyx_k_ncc_data_token_block_utils_fast[] = "ncc/data/token_block_utils_fast.pyx";
 static const char __pyx_k_numpy_core_multiarray_failed_to[] = "numpy.core.multiarray failed to import";
 static const char __pyx_k_All_dimensions_preceding_dimensi[] = "All dimensions preceding dimension %d must be indexed and not sliced";
 static const char __pyx_k_Buffer_view_does_not_expose_stri[] = "Buffer view does not expose strides";
@@ -3415,13 +3416,12 @@ static const char __pyx_k_Indirect_dimensions_not_supporte[] = "Indirect dimensi
 static const char __pyx_k_Invalid_mode_expected_c_or_fortr[] = "Invalid mode, expected 'c' or 'fortran', got ";
 static const char __pyx_k_Out_of_bounds_on_buffer_access_a[] = "Out of bounds on buffer access (axis ";
 static const char __pyx_k_Unable_to_convert_item_to_object[] = "Unable to convert item to object";
-static const char __pyx_k_fairseq_data_token_block_utils_f[] = "fairseq/data/token_block_utils_fast.pyx";
 static const char __pyx_k_got_differing_extents_in_dimensi[] = "got differing extents in dimension ";
 static const char __pyx_k_no_default___reduce___due_to_non[] = "no default __reduce__ due to non-trivial __cinit__";
 static const char __pyx_k_numpy_core_umath_failed_to_impor[] = "numpy.core.umath failed to import";
 static const char __pyx_k_unable_to_allocate_shape_and_str[] = "unable to allocate shape and strides.";
+static const char __pyx_k_ncc_data_token_block_utils_fast_2[] = "ncc.data.token_block_utils_fast";
 static const char __pyx_k_Incompatible_checksums_0x_x_vs_0_2[] = "Incompatible checksums (0x%x vs (0x8c67b45, 0x2e2dd22, 0x6632805) = (current_i, current_index, current_offset, sizes))";
-static const char __pyx_k_fairseq_data_token_block_utils_f_2[] = "fairseq.data.token_block_utils_fast";
 /* #### Code section: decls ### */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
@@ -3464,13 +3464,13 @@ static void __pyx_memoryviewslice___pyx_pf_15View_dot_MemoryView_16_memoryviewsl
 static PyObject *__pyx_pf___pyx_memoryviewslice___reduce_cython__(CYTHON_UNUSED struct __pyx_memoryviewslice_obj *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf___pyx_memoryviewslice_2__setstate_cython__(CYTHON_UNUSED struct __pyx_memoryviewslice_obj *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_15View_dot_MemoryView___pyx_unpickle_Enum(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast__get_slice_indices_fast(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sizes, PyObject *__pyx_v_break_mode, int __pyx_v_block_size, int __pyx_v_document_sep_len); /* proto */
-static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_2_get_block_to_dataset_index_fast(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sizes, PyArrayObject *__pyx_v_slice_indices); /* proto */
-static int __pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher___init__(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __Pyx_memviewslice __pyx_v_sizes); /* proto */
-static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_2__reduce_cython__(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_4__setstate_cython__(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_4__pyx_unpickle_DatasetSearcher(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state); /* proto */
-static PyObject *__pyx_tp_new_7fairseq_4data_22token_block_utils_fast_DatasetSearcher(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static PyObject *__pyx_pf_3ncc_4data_22token_block_utils_fast__get_slice_indices_fast(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sizes, PyObject *__pyx_v_break_mode, int __pyx_v_block_size, int __pyx_v_document_sep_len); /* proto */
+static PyObject *__pyx_pf_3ncc_4data_22token_block_utils_fast_2_get_block_to_dataset_index_fast(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sizes, PyArrayObject *__pyx_v_slice_indices); /* proto */
+static int __pyx_pf_3ncc_4data_22token_block_utils_fast_15DatasetSearcher___init__(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __Pyx_memviewslice __pyx_v_sizes); /* proto */
+static PyObject *__pyx_pf_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_2__reduce_cython__(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_4__setstate_cython__(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, PyObject *__pyx_v___pyx_state); /* proto */
+static PyObject *__pyx_pf_3ncc_4data_22token_block_utils_fast_4__pyx_unpickle_DatasetSearcher(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state); /* proto */
+static PyObject *__pyx_tp_new_3ncc_4data_22token_block_utils_fast_DatasetSearcher(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_array(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_Enum(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_tp_new_memoryview(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
@@ -3547,13 +3547,13 @@ typedef struct {
   #if CYTHON_USE_MODULE_STATE
   #endif
   #if CYTHON_USE_MODULE_STATE
-  PyObject *__pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher;
+  PyObject *__pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher;
   PyObject *__pyx_type___pyx_array;
   PyObject *__pyx_type___pyx_MemviewEnum;
   PyObject *__pyx_type___pyx_memoryview;
   PyObject *__pyx_type___pyx_memoryviewslice;
   #endif
-  PyTypeObject *__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher;
+  PyTypeObject *__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher;
   PyTypeObject *__pyx_array_type;
   PyTypeObject *__pyx_MemviewEnum_type;
   PyTypeObject *__pyx_memoryview_type;
@@ -3634,8 +3634,6 @@ typedef struct {
   PyObject *__pyx_n_s_enumerate;
   PyObject *__pyx_n_u_eos;
   PyObject *__pyx_n_s_error;
-  PyObject *__pyx_kp_s_fairseq_data_token_block_utils_f;
-  PyObject *__pyx_n_s_fairseq_data_token_block_utils_f_2;
   PyObject *__pyx_n_s_flags;
   PyObject *__pyx_n_s_format;
   PyObject *__pyx_n_s_fortran;
@@ -3663,6 +3661,8 @@ typedef struct {
   PyObject *__pyx_n_s_mode;
   PyObject *__pyx_n_s_name;
   PyObject *__pyx_n_s_name_2;
+  PyObject *__pyx_kp_s_ncc_data_token_block_utils_fast;
+  PyObject *__pyx_n_s_ncc_data_token_block_utils_fast_2;
   PyObject *__pyx_n_s_ndim;
   PyObject *__pyx_n_s_new;
   PyObject *__pyx_kp_s_no_default___reduce___due_to_non;
@@ -3814,8 +3814,8 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_flexible);
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_character);
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_ufunc);
-  Py_CLEAR(clear_module_state->__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher);
-  Py_CLEAR(clear_module_state->__pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher);
+  Py_CLEAR(clear_module_state->__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher);
+  Py_CLEAR(clear_module_state->__pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher);
   Py_CLEAR(clear_module_state->__pyx_array_type);
   Py_CLEAR(clear_module_state->__pyx_type___pyx_array);
   Py_CLEAR(clear_module_state->__pyx_MemviewEnum_type);
@@ -3900,8 +3900,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_enumerate);
   Py_CLEAR(clear_module_state->__pyx_n_u_eos);
   Py_CLEAR(clear_module_state->__pyx_n_s_error);
-  Py_CLEAR(clear_module_state->__pyx_kp_s_fairseq_data_token_block_utils_f);
-  Py_CLEAR(clear_module_state->__pyx_n_s_fairseq_data_token_block_utils_f_2);
   Py_CLEAR(clear_module_state->__pyx_n_s_flags);
   Py_CLEAR(clear_module_state->__pyx_n_s_format);
   Py_CLEAR(clear_module_state->__pyx_n_s_fortran);
@@ -3929,6 +3927,8 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_mode);
   Py_CLEAR(clear_module_state->__pyx_n_s_name);
   Py_CLEAR(clear_module_state->__pyx_n_s_name_2);
+  Py_CLEAR(clear_module_state->__pyx_kp_s_ncc_data_token_block_utils_fast);
+  Py_CLEAR(clear_module_state->__pyx_n_s_ncc_data_token_block_utils_fast_2);
   Py_CLEAR(clear_module_state->__pyx_n_s_ndim);
   Py_CLEAR(clear_module_state->__pyx_n_s_new);
   Py_CLEAR(clear_module_state->__pyx_kp_s_no_default___reduce___due_to_non);
@@ -4058,8 +4058,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_flexible);
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_character);
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_ufunc);
-  Py_VISIT(traverse_module_state->__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher);
-  Py_VISIT(traverse_module_state->__pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher);
+  Py_VISIT(traverse_module_state->__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher);
+  Py_VISIT(traverse_module_state->__pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher);
   Py_VISIT(traverse_module_state->__pyx_array_type);
   Py_VISIT(traverse_module_state->__pyx_type___pyx_array);
   Py_VISIT(traverse_module_state->__pyx_MemviewEnum_type);
@@ -4144,8 +4144,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_enumerate);
   Py_VISIT(traverse_module_state->__pyx_n_u_eos);
   Py_VISIT(traverse_module_state->__pyx_n_s_error);
-  Py_VISIT(traverse_module_state->__pyx_kp_s_fairseq_data_token_block_utils_f);
-  Py_VISIT(traverse_module_state->__pyx_n_s_fairseq_data_token_block_utils_f_2);
   Py_VISIT(traverse_module_state->__pyx_n_s_flags);
   Py_VISIT(traverse_module_state->__pyx_n_s_format);
   Py_VISIT(traverse_module_state->__pyx_n_s_fortran);
@@ -4173,6 +4171,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_mode);
   Py_VISIT(traverse_module_state->__pyx_n_s_name);
   Py_VISIT(traverse_module_state->__pyx_n_s_name_2);
+  Py_VISIT(traverse_module_state->__pyx_kp_s_ncc_data_token_block_utils_fast);
+  Py_VISIT(traverse_module_state->__pyx_n_s_ncc_data_token_block_utils_fast_2);
   Py_VISIT(traverse_module_state->__pyx_n_s_ndim);
   Py_VISIT(traverse_module_state->__pyx_n_s_new);
   Py_VISIT(traverse_module_state->__pyx_kp_s_no_default___reduce___due_to_non);
@@ -4339,13 +4339,13 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #if CYTHON_USE_MODULE_STATE
 #endif
 #if CYTHON_USE_MODULE_STATE
-#define __pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher __pyx_mstate_global->__pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher
+#define __pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher __pyx_mstate_global->__pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher
 #define __pyx_type___pyx_array __pyx_mstate_global->__pyx_type___pyx_array
 #define __pyx_type___pyx_MemviewEnum __pyx_mstate_global->__pyx_type___pyx_MemviewEnum
 #define __pyx_type___pyx_memoryview __pyx_mstate_global->__pyx_type___pyx_memoryview
 #define __pyx_type___pyx_memoryviewslice __pyx_mstate_global->__pyx_type___pyx_memoryviewslice
 #endif
-#define __pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher __pyx_mstate_global->__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher
+#define __pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher __pyx_mstate_global->__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher
 #define __pyx_array_type __pyx_mstate_global->__pyx_array_type
 #define __pyx_MemviewEnum_type __pyx_mstate_global->__pyx_MemviewEnum_type
 #define __pyx_memoryview_type __pyx_mstate_global->__pyx_memoryview_type
@@ -4426,8 +4426,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_enumerate __pyx_mstate_global->__pyx_n_s_enumerate
 #define __pyx_n_u_eos __pyx_mstate_global->__pyx_n_u_eos
 #define __pyx_n_s_error __pyx_mstate_global->__pyx_n_s_error
-#define __pyx_kp_s_fairseq_data_token_block_utils_f __pyx_mstate_global->__pyx_kp_s_fairseq_data_token_block_utils_f
-#define __pyx_n_s_fairseq_data_token_block_utils_f_2 __pyx_mstate_global->__pyx_n_s_fairseq_data_token_block_utils_f_2
 #define __pyx_n_s_flags __pyx_mstate_global->__pyx_n_s_flags
 #define __pyx_n_s_format __pyx_mstate_global->__pyx_n_s_format
 #define __pyx_n_s_fortran __pyx_mstate_global->__pyx_n_s_fortran
@@ -4455,6 +4453,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_mode __pyx_mstate_global->__pyx_n_s_mode
 #define __pyx_n_s_name __pyx_mstate_global->__pyx_n_s_name
 #define __pyx_n_s_name_2 __pyx_mstate_global->__pyx_n_s_name_2
+#define __pyx_kp_s_ncc_data_token_block_utils_fast __pyx_mstate_global->__pyx_kp_s_ncc_data_token_block_utils_fast
+#define __pyx_n_s_ncc_data_token_block_utils_fast_2 __pyx_mstate_global->__pyx_n_s_ncc_data_token_block_utils_fast_2
 #define __pyx_n_s_ndim __pyx_mstate_global->__pyx_n_s_ndim
 #define __pyx_n_s_new __pyx_mstate_global->__pyx_n_s_new
 #define __pyx_kp_s_no_default___reduce___due_to_non __pyx_mstate_global->__pyx_kp_s_no_default___reduce___due_to_non
@@ -18272,7 +18272,7 @@ static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *__
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":245
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":245
  * 
  *         @property
  *         cdef inline PyObject* base(self) nogil:             # <<<<<<<<<<<<<<
@@ -18283,7 +18283,7 @@ static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *__
 static CYTHON_INLINE PyObject *__pyx_f_5numpy_7ndarray_4base_base(PyArrayObject *__pyx_v_self) {
   PyObject *__pyx_r;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":248
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":248
  *             """Returns a borrowed reference to the object owning the data/memory.
  *             """
  *             return PyArray_BASE(self)             # <<<<<<<<<<<<<<
@@ -18293,7 +18293,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_7ndarray_4base_base(PyArrayObject 
   __pyx_r = PyArray_BASE(__pyx_v_self);
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":245
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":245
  * 
  *         @property
  *         cdef inline PyObject* base(self) nogil:             # <<<<<<<<<<<<<<
@@ -18306,7 +18306,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_7ndarray_4base_base(PyArrayObject 
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":251
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":251
  * 
  *         @property
  *         cdef inline dtype descr(self):             # <<<<<<<<<<<<<<
@@ -18320,7 +18320,7 @@ static CYTHON_INLINE PyArray_Descr *__pyx_f_5numpy_7ndarray_5descr_descr(PyArray
   PyArray_Descr *__pyx_t_1;
   __Pyx_RefNannySetupContext("descr", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":254
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":254
  *             """Returns an owned reference to the dtype of the array.
  *             """
  *             return <dtype>PyArray_DESCR(self)             # <<<<<<<<<<<<<<
@@ -18333,7 +18333,7 @@ static CYTHON_INLINE PyArray_Descr *__pyx_f_5numpy_7ndarray_5descr_descr(PyArray
   __pyx_r = ((PyArray_Descr *)__pyx_t_1);
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":251
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":251
  * 
  *         @property
  *         cdef inline dtype descr(self):             # <<<<<<<<<<<<<<
@@ -18348,7 +18348,7 @@ static CYTHON_INLINE PyArray_Descr *__pyx_f_5numpy_7ndarray_5descr_descr(PyArray
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":257
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":257
  * 
  *         @property
  *         cdef inline int ndim(self) nogil:             # <<<<<<<<<<<<<<
@@ -18359,7 +18359,7 @@ static CYTHON_INLINE PyArray_Descr *__pyx_f_5numpy_7ndarray_5descr_descr(PyArray
 static CYTHON_INLINE int __pyx_f_5numpy_7ndarray_4ndim_ndim(PyArrayObject *__pyx_v_self) {
   int __pyx_r;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":260
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":260
  *             """Returns the number of dimensions in the array.
  *             """
  *             return PyArray_NDIM(self)             # <<<<<<<<<<<<<<
@@ -18369,7 +18369,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_7ndarray_4ndim_ndim(PyArrayObject *__pyx
   __pyx_r = PyArray_NDIM(__pyx_v_self);
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":257
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":257
  * 
  *         @property
  *         cdef inline int ndim(self) nogil:             # <<<<<<<<<<<<<<
@@ -18382,7 +18382,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_7ndarray_4ndim_ndim(PyArrayObject *__pyx
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":263
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":263
  * 
  *         @property
  *         cdef inline npy_intp *shape(self) nogil:             # <<<<<<<<<<<<<<
@@ -18393,7 +18393,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_7ndarray_4ndim_ndim(PyArrayObject *__pyx
 static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_5shape_shape(PyArrayObject *__pyx_v_self) {
   npy_intp *__pyx_r;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":268
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":268
  *             Can return NULL for 0-dimensional arrays.
  *             """
  *             return PyArray_DIMS(self)             # <<<<<<<<<<<<<<
@@ -18403,7 +18403,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_5shape_shape(PyArrayObjec
   __pyx_r = PyArray_DIMS(__pyx_v_self);
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":263
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":263
  * 
  *         @property
  *         cdef inline npy_intp *shape(self) nogil:             # <<<<<<<<<<<<<<
@@ -18416,7 +18416,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_5shape_shape(PyArrayObjec
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":271
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":271
  * 
  *         @property
  *         cdef inline npy_intp *strides(self) nogil:             # <<<<<<<<<<<<<<
@@ -18427,7 +18427,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_5shape_shape(PyArrayObjec
 static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_7strides_strides(PyArrayObject *__pyx_v_self) {
   npy_intp *__pyx_r;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":275
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":275
  *             The number of elements matches the number of dimensions of the array (ndim).
  *             """
  *             return PyArray_STRIDES(self)             # <<<<<<<<<<<<<<
@@ -18437,7 +18437,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_7strides_strides(PyArrayO
   __pyx_r = PyArray_STRIDES(__pyx_v_self);
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":271
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":271
  * 
  *         @property
  *         cdef inline npy_intp *strides(self) nogil:             # <<<<<<<<<<<<<<
@@ -18450,7 +18450,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_7strides_strides(PyArrayO
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":278
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":278
  * 
  *         @property
  *         cdef inline npy_intp size(self) nogil:             # <<<<<<<<<<<<<<
@@ -18461,7 +18461,7 @@ static CYTHON_INLINE npy_intp *__pyx_f_5numpy_7ndarray_7strides_strides(PyArrayO
 static CYTHON_INLINE npy_intp __pyx_f_5numpy_7ndarray_4size_size(PyArrayObject *__pyx_v_self) {
   npy_intp __pyx_r;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":281
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":281
  *             """Returns the total size (in number of elements) of the array.
  *             """
  *             return PyArray_SIZE(self)             # <<<<<<<<<<<<<<
@@ -18471,7 +18471,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_7ndarray_4size_size(PyArrayObject *
   __pyx_r = PyArray_SIZE(__pyx_v_self);
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":278
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":278
  * 
  *         @property
  *         cdef inline npy_intp size(self) nogil:             # <<<<<<<<<<<<<<
@@ -18484,7 +18484,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_7ndarray_4size_size(PyArrayObject *
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":284
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":284
  * 
  *         @property
  *         cdef inline char* data(self) nogil:             # <<<<<<<<<<<<<<
@@ -18495,7 +18495,7 @@ static CYTHON_INLINE npy_intp __pyx_f_5numpy_7ndarray_4size_size(PyArrayObject *
 static CYTHON_INLINE char *__pyx_f_5numpy_7ndarray_4data_data(PyArrayObject *__pyx_v_self) {
   char *__pyx_r;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":290
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":290
  *             of `PyArray_DATA()` instead, which returns a 'void*'.
  *             """
  *             return PyArray_BYTES(self)             # <<<<<<<<<<<<<<
@@ -18505,7 +18505,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy_7ndarray_4data_data(PyArrayObject *__p
   __pyx_r = PyArray_BYTES(__pyx_v_self);
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":284
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":284
  * 
  *         @property
  *         cdef inline char* data(self) nogil:             # <<<<<<<<<<<<<<
@@ -18518,7 +18518,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy_7ndarray_4data_data(PyArrayObject *__p
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":773
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":773
  * ctypedef npy_cdouble     complex_t
  * 
  * cdef inline object PyArray_MultiIterNew1(a):             # <<<<<<<<<<<<<<
@@ -18535,7 +18535,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew1(PyObject *__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew1", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":774
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":774
  * 
  * cdef inline object PyArray_MultiIterNew1(a):
  *     return PyArray_MultiIterNew(1, <void*>a)             # <<<<<<<<<<<<<<
@@ -18549,7 +18549,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew1(PyObject *__
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":773
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":773
  * ctypedef npy_cdouble     complex_t
  * 
  * cdef inline object PyArray_MultiIterNew1(a):             # <<<<<<<<<<<<<<
@@ -18568,7 +18568,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew1(PyObject *__
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":776
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":776
  *     return PyArray_MultiIterNew(1, <void*>a)
  * 
  * cdef inline object PyArray_MultiIterNew2(a, b):             # <<<<<<<<<<<<<<
@@ -18585,7 +18585,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew2(PyObject *__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew2", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":777
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":777
  * 
  * cdef inline object PyArray_MultiIterNew2(a, b):
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)             # <<<<<<<<<<<<<<
@@ -18599,7 +18599,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew2(PyObject *__
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":776
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":776
  *     return PyArray_MultiIterNew(1, <void*>a)
  * 
  * cdef inline object PyArray_MultiIterNew2(a, b):             # <<<<<<<<<<<<<<
@@ -18618,7 +18618,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew2(PyObject *__
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":779
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":779
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)
  * 
  * cdef inline object PyArray_MultiIterNew3(a, b, c):             # <<<<<<<<<<<<<<
@@ -18635,7 +18635,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew3(PyObject *__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew3", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":780
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":780
  * 
  * cdef inline object PyArray_MultiIterNew3(a, b, c):
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)             # <<<<<<<<<<<<<<
@@ -18649,7 +18649,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew3(PyObject *__
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":779
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":779
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)
  * 
  * cdef inline object PyArray_MultiIterNew3(a, b, c):             # <<<<<<<<<<<<<<
@@ -18668,7 +18668,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew3(PyObject *__
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":782
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":782
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)
  * 
  * cdef inline object PyArray_MultiIterNew4(a, b, c, d):             # <<<<<<<<<<<<<<
@@ -18685,7 +18685,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew4(PyObject *__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew4", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":783
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":783
  * 
  * cdef inline object PyArray_MultiIterNew4(a, b, c, d):
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)             # <<<<<<<<<<<<<<
@@ -18699,7 +18699,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew4(PyObject *__
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":782
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":782
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)
  * 
  * cdef inline object PyArray_MultiIterNew4(a, b, c, d):             # <<<<<<<<<<<<<<
@@ -18718,7 +18718,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew4(PyObject *__
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":785
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":785
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)
  * 
  * cdef inline object PyArray_MultiIterNew5(a, b, c, d, e):             # <<<<<<<<<<<<<<
@@ -18735,7 +18735,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew5(PyObject *__
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew5", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":786
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":786
  * 
  * cdef inline object PyArray_MultiIterNew5(a, b, c, d, e):
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)             # <<<<<<<<<<<<<<
@@ -18749,7 +18749,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew5(PyObject *__
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":785
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":785
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)
  * 
  * cdef inline object PyArray_MultiIterNew5(a, b, c, d, e):             # <<<<<<<<<<<<<<
@@ -18768,7 +18768,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew5(PyObject *__
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":788
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":788
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)
  * 
  * cdef inline tuple PyDataType_SHAPE(dtype d):             # <<<<<<<<<<<<<<
@@ -18782,7 +18782,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("PyDataType_SHAPE", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":789
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":789
  * 
  * cdef inline tuple PyDataType_SHAPE(dtype d):
  *     if PyDataType_HASSUBARRAY(d):             # <<<<<<<<<<<<<<
@@ -18792,7 +18792,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
   __pyx_t_1 = PyDataType_HASSUBARRAY(__pyx_v_d);
   if (__pyx_t_1) {
 
-    /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":790
+    /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":790
  * cdef inline tuple PyDataType_SHAPE(dtype d):
  *     if PyDataType_HASSUBARRAY(d):
  *         return <tuple>d.subarray.shape             # <<<<<<<<<<<<<<
@@ -18804,7 +18804,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
     __pyx_r = ((PyObject*)__pyx_v_d->subarray->shape);
     goto __pyx_L0;
 
-    /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":789
+    /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":789
  * 
  * cdef inline tuple PyDataType_SHAPE(dtype d):
  *     if PyDataType_HASSUBARRAY(d):             # <<<<<<<<<<<<<<
@@ -18813,7 +18813,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
  */
   }
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":792
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":792
  *         return <tuple>d.subarray.shape
  *     else:
  *         return ()             # <<<<<<<<<<<<<<
@@ -18827,7 +18827,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
     goto __pyx_L0;
   }
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":788
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":788
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)
  * 
  * cdef inline tuple PyDataType_SHAPE(dtype d):             # <<<<<<<<<<<<<<
@@ -18842,7 +18842,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":967
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":967
  *     int _import_umath() except -1
  * 
  * cdef inline void set_array_base(ndarray arr, object base):             # <<<<<<<<<<<<<<
@@ -18858,7 +18858,7 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("set_array_base", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":968
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":968
  * 
  * cdef inline void set_array_base(ndarray arr, object base):
  *     Py_INCREF(base) # important to do this before stealing the reference below!             # <<<<<<<<<<<<<<
@@ -18867,7 +18867,7 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
  */
   Py_INCREF(__pyx_v_base);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":969
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":969
  * cdef inline void set_array_base(ndarray arr, object base):
  *     Py_INCREF(base) # important to do this before stealing the reference below!
  *     PyArray_SetBaseObject(arr, base)             # <<<<<<<<<<<<<<
@@ -18876,7 +18876,7 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
  */
   __pyx_t_1 = PyArray_SetBaseObject(__pyx_v_arr, __pyx_v_base); if (unlikely(__pyx_t_1 == ((int)-1))) __PYX_ERR(2, 969, __pyx_L1_error)
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":967
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":967
  *     int _import_umath() except -1
  * 
  * cdef inline void set_array_base(ndarray arr, object base):             # <<<<<<<<<<<<<<
@@ -18892,7 +18892,7 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
   __Pyx_RefNannyFinishContext();
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":971
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":971
  *     PyArray_SetBaseObject(arr, base)
  * 
  * cdef inline object get_array_base(ndarray arr):             # <<<<<<<<<<<<<<
@@ -18907,7 +18907,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("get_array_base", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":972
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":972
  * 
  * cdef inline object get_array_base(ndarray arr):
  *     base = PyArray_BASE(arr)             # <<<<<<<<<<<<<<
@@ -18916,7 +18916,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
  */
   __pyx_v_base = PyArray_BASE(__pyx_v_arr);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":973
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":973
  * cdef inline object get_array_base(ndarray arr):
  *     base = PyArray_BASE(arr)
  *     if base is NULL:             # <<<<<<<<<<<<<<
@@ -18926,7 +18926,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
   __pyx_t_1 = (__pyx_v_base == NULL);
   if (__pyx_t_1) {
 
-    /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":974
+    /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":974
  *     base = PyArray_BASE(arr)
  *     if base is NULL:
  *         return None             # <<<<<<<<<<<<<<
@@ -18937,7 +18937,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":973
+    /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":973
  * cdef inline object get_array_base(ndarray arr):
  *     base = PyArray_BASE(arr)
  *     if base is NULL:             # <<<<<<<<<<<<<<
@@ -18946,7 +18946,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
  */
   }
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":975
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":975
  *     if base is NULL:
  *         return None
  *     return <object>base             # <<<<<<<<<<<<<<
@@ -18958,7 +18958,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
   __pyx_r = ((PyObject *)__pyx_v_base);
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":971
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":971
  *     PyArray_SetBaseObject(arr, base)
  * 
  * cdef inline object get_array_base(ndarray arr):             # <<<<<<<<<<<<<<
@@ -18973,7 +18973,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":979
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":979
  * # Versions of the import_* functions which are more suitable for
  * # Cython code.
  * cdef inline int import_array() except -1:             # <<<<<<<<<<<<<<
@@ -18997,7 +18997,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("import_array", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":980
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":980
  * # Cython code.
  * cdef inline int import_array() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -19013,7 +19013,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":981
+      /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":981
  * cdef inline int import_array() except -1:
  *     try:
  *         __pyx_import_array()             # <<<<<<<<<<<<<<
@@ -19022,7 +19022,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
  */
       __pyx_t_4 = _import_array(); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(2, 981, __pyx_L3_error)
 
-      /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":980
+      /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":980
  * # Cython code.
  * cdef inline int import_array() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -19036,7 +19036,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
     goto __pyx_L8_try_end;
     __pyx_L3_error:;
 
-    /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":982
+    /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":982
  *     try:
  *         __pyx_import_array()
  *     except Exception:             # <<<<<<<<<<<<<<
@@ -19051,7 +19051,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
       __Pyx_XGOTREF(__pyx_t_6);
       __Pyx_XGOTREF(__pyx_t_7);
 
-      /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":983
+      /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":983
  *         __pyx_import_array()
  *     except Exception:
  *         raise ImportError("numpy.core.multiarray failed to import")             # <<<<<<<<<<<<<<
@@ -19066,7 +19066,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
     }
     goto __pyx_L5_except_error;
 
-    /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":980
+    /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":980
  * # Cython code.
  * cdef inline int import_array() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -19082,7 +19082,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
     __pyx_L8_try_end:;
   }
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":979
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":979
  * # Versions of the import_* functions which are more suitable for
  * # Cython code.
  * cdef inline int import_array() except -1:             # <<<<<<<<<<<<<<
@@ -19105,7 +19105,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":985
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":985
  *         raise ImportError("numpy.core.multiarray failed to import")
  * 
  * cdef inline int import_umath() except -1:             # <<<<<<<<<<<<<<
@@ -19129,7 +19129,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("import_umath", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":986
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":986
  * 
  * cdef inline int import_umath() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -19145,7 +19145,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":987
+      /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":987
  * cdef inline int import_umath() except -1:
  *     try:
  *         _import_umath()             # <<<<<<<<<<<<<<
@@ -19154,7 +19154,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
  */
       __pyx_t_4 = _import_umath(); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(2, 987, __pyx_L3_error)
 
-      /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":986
+      /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":986
  * 
  * cdef inline int import_umath() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -19168,7 +19168,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
     goto __pyx_L8_try_end;
     __pyx_L3_error:;
 
-    /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":988
+    /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":988
  *     try:
  *         _import_umath()
  *     except Exception:             # <<<<<<<<<<<<<<
@@ -19183,7 +19183,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
       __Pyx_XGOTREF(__pyx_t_6);
       __Pyx_XGOTREF(__pyx_t_7);
 
-      /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":989
+      /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":989
  *         _import_umath()
  *     except Exception:
  *         raise ImportError("numpy.core.umath failed to import")             # <<<<<<<<<<<<<<
@@ -19198,7 +19198,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
     }
     goto __pyx_L5_except_error;
 
-    /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":986
+    /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":986
  * 
  * cdef inline int import_umath() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -19214,7 +19214,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
     __pyx_L8_try_end:;
   }
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":985
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":985
  *         raise ImportError("numpy.core.multiarray failed to import")
  * 
  * cdef inline int import_umath() except -1:             # <<<<<<<<<<<<<<
@@ -19237,7 +19237,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":991
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":991
  *         raise ImportError("numpy.core.umath failed to import")
  * 
  * cdef inline int import_ufunc() except -1:             # <<<<<<<<<<<<<<
@@ -19261,7 +19261,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("import_ufunc", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":992
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":992
  * 
  * cdef inline int import_ufunc() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -19277,7 +19277,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":993
+      /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":993
  * cdef inline int import_ufunc() except -1:
  *     try:
  *         _import_umath()             # <<<<<<<<<<<<<<
@@ -19286,7 +19286,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
  */
       __pyx_t_4 = _import_umath(); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(2, 993, __pyx_L3_error)
 
-      /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":992
+      /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":992
  * 
  * cdef inline int import_ufunc() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -19300,7 +19300,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
     goto __pyx_L8_try_end;
     __pyx_L3_error:;
 
-    /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":994
+    /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":994
  *     try:
  *         _import_umath()
  *     except Exception:             # <<<<<<<<<<<<<<
@@ -19315,7 +19315,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
       __Pyx_XGOTREF(__pyx_t_6);
       __Pyx_XGOTREF(__pyx_t_7);
 
-      /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":995
+      /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":995
  *         _import_umath()
  *     except Exception:
  *         raise ImportError("numpy.core.umath failed to import")             # <<<<<<<<<<<<<<
@@ -19330,7 +19330,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
     }
     goto __pyx_L5_except_error;
 
-    /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":992
+    /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":992
  * 
  * cdef inline int import_ufunc() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -19346,7 +19346,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
     __pyx_L8_try_end:;
   }
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":991
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":991
  *         raise ImportError("numpy.core.umath failed to import")
  * 
  * cdef inline int import_ufunc() except -1:             # <<<<<<<<<<<<<<
@@ -19369,7 +19369,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":998
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":998
  * 
  * 
  * cdef inline bint is_timedelta64_object(object obj):             # <<<<<<<<<<<<<<
@@ -19382,7 +19382,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_timedelta64_object(PyObject *__pyx_v_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("is_timedelta64_object", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1010
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1010
  *     bool
  *     """
  *     return PyObject_TypeCheck(obj, &PyTimedeltaArrType_Type)             # <<<<<<<<<<<<<<
@@ -19392,7 +19392,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_timedelta64_object(PyObject *__pyx_v_
   __pyx_r = PyObject_TypeCheck(__pyx_v_obj, (&PyTimedeltaArrType_Type));
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":998
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":998
  * 
  * 
  * cdef inline bint is_timedelta64_object(object obj):             # <<<<<<<<<<<<<<
@@ -19406,7 +19406,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_timedelta64_object(PyObject *__pyx_v_
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1013
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1013
  * 
  * 
  * cdef inline bint is_datetime64_object(object obj):             # <<<<<<<<<<<<<<
@@ -19419,7 +19419,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_datetime64_object(PyObject *__pyx_v_o
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("is_datetime64_object", 0);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1025
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1025
  *     bool
  *     """
  *     return PyObject_TypeCheck(obj, &PyDatetimeArrType_Type)             # <<<<<<<<<<<<<<
@@ -19429,7 +19429,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_datetime64_object(PyObject *__pyx_v_o
   __pyx_r = PyObject_TypeCheck(__pyx_v_obj, (&PyDatetimeArrType_Type));
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1013
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1013
  * 
  * 
  * cdef inline bint is_datetime64_object(object obj):             # <<<<<<<<<<<<<<
@@ -19443,7 +19443,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_datetime64_object(PyObject *__pyx_v_o
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1028
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1028
  * 
  * 
  * cdef inline npy_datetime get_datetime64_value(object obj) nogil:             # <<<<<<<<<<<<<<
@@ -19454,7 +19454,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_is_datetime64_object(PyObject *__pyx_v_o
 static CYTHON_INLINE npy_datetime __pyx_f_5numpy_get_datetime64_value(PyObject *__pyx_v_obj) {
   npy_datetime __pyx_r;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1035
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1035
  *     also needed.  That can be found using `get_datetime64_unit`.
  *     """
  *     return (<PyDatetimeScalarObject*>obj).obval             # <<<<<<<<<<<<<<
@@ -19464,7 +19464,7 @@ static CYTHON_INLINE npy_datetime __pyx_f_5numpy_get_datetime64_value(PyObject *
   __pyx_r = ((PyDatetimeScalarObject *)__pyx_v_obj)->obval;
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1028
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1028
  * 
  * 
  * cdef inline npy_datetime get_datetime64_value(object obj) nogil:             # <<<<<<<<<<<<<<
@@ -19477,7 +19477,7 @@ static CYTHON_INLINE npy_datetime __pyx_f_5numpy_get_datetime64_value(PyObject *
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1038
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1038
  * 
  * 
  * cdef inline npy_timedelta get_timedelta64_value(object obj) nogil:             # <<<<<<<<<<<<<<
@@ -19488,7 +19488,7 @@ static CYTHON_INLINE npy_datetime __pyx_f_5numpy_get_datetime64_value(PyObject *
 static CYTHON_INLINE npy_timedelta __pyx_f_5numpy_get_timedelta64_value(PyObject *__pyx_v_obj) {
   npy_timedelta __pyx_r;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1042
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1042
  *     returns the int64 value underlying scalar numpy timedelta64 object
  *     """
  *     return (<PyTimedeltaScalarObject*>obj).obval             # <<<<<<<<<<<<<<
@@ -19498,7 +19498,7 @@ static CYTHON_INLINE npy_timedelta __pyx_f_5numpy_get_timedelta64_value(PyObject
   __pyx_r = ((PyTimedeltaScalarObject *)__pyx_v_obj)->obval;
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1038
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1038
  * 
  * 
  * cdef inline npy_timedelta get_timedelta64_value(object obj) nogil:             # <<<<<<<<<<<<<<
@@ -19511,7 +19511,7 @@ static CYTHON_INLINE npy_timedelta __pyx_f_5numpy_get_timedelta64_value(PyObject
   return __pyx_r;
 }
 
-/* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1045
+/* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1045
  * 
  * 
  * cdef inline NPY_DATETIMEUNIT get_datetime64_unit(object obj) nogil:             # <<<<<<<<<<<<<<
@@ -19522,7 +19522,7 @@ static CYTHON_INLINE npy_timedelta __pyx_f_5numpy_get_timedelta64_value(PyObject
 static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObject *__pyx_v_obj) {
   NPY_DATETIMEUNIT __pyx_r;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1049
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1049
  *     returns the unit part of the dtype for a numpy datetime64 object.
  *     """
  *     return <NPY_DATETIMEUNIT>(<PyDatetimeScalarObject*>obj).obmeta.base             # <<<<<<<<<<<<<<
@@ -19530,7 +19530,7 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
   __pyx_r = ((NPY_DATETIMEUNIT)((PyDatetimeScalarObject *)__pyx_v_obj)->obmeta.base);
   goto __pyx_L0;
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1045
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":1045
  * 
  * 
  * cdef inline NPY_DATETIMEUNIT get_datetime64_unit(object obj) nogil:             # <<<<<<<<<<<<<<
@@ -19543,7 +19543,7 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
   return __pyx_r;
 }
 
-/* "fairseq/data/token_block_utils_fast.pyx":24
+/* "ncc/data/token_block_utils_fast.pyx":24
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
  * cdef np.ndarray[DTYPE_t, ndim=2] _get_slice_indices_none_mode(np.ndarray[DTYPE_t, ndim=1] sizes, int block_size):             # <<<<<<<<<<<<<<
@@ -19551,14 +19551,14 @@ static CYTHON_INLINE NPY_DATETIMEUNIT __pyx_f_5numpy_get_datetime64_unit(PyObjec
  *     cdef DTYPE_t length = <DTYPE_t> ceil(total_size / <double> block_size)
  */
 
-static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice_indices_none_mode(PyArrayObject *__pyx_v_sizes, int __pyx_v_block_size) {
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_total_size;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_length;
+static PyArrayObject *__pyx_f_3ncc_4data_22token_block_utils_fast__get_slice_indices_none_mode(PyArrayObject *__pyx_v_sizes, int __pyx_v_block_size) {
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_total_size;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_length;
   PyArrayObject *__pyx_v_slice_indices = 0;
   __Pyx_memviewslice __pyx_v_slice_indices_view = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_start;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_end;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_start;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_end;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_sizes;
   __Pyx_Buffer __pyx_pybuffer_sizes;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_slice_indices;
@@ -19569,15 +19569,15 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   int __pyx_t_4;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_t_5;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
   PyArrayObject *__pyx_t_7 = NULL;
   __Pyx_memviewslice __pyx_t_8 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_t_9;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_t_10;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_t_11;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_t_12;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_t_13;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_t_9;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_t_10;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_t_11;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_t_12;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_t_13;
   int __pyx_t_14;
   Py_ssize_t __pyx_t_15;
   Py_ssize_t __pyx_t_16;
@@ -19595,11 +19595,11 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_pybuffernd_sizes.rcbuffer = &__pyx_pybuffer_sizes;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer, (PyObject*)__pyx_v_sizes, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 24, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer, (PyObject*)__pyx_v_sizes, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 24, __pyx_L1_error)
   }
   __pyx_pybuffernd_sizes.diminfo[0].strides = __pyx_pybuffernd_sizes.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_sizes.diminfo[0].shape = __pyx_pybuffernd_sizes.rcbuffer->pybuffer.shape[0];
 
-  /* "fairseq/data/token_block_utils_fast.pyx":25
+  /* "ncc/data/token_block_utils_fast.pyx":25
  * @cython.nonecheck(False)
  * cdef np.ndarray[DTYPE_t, ndim=2] _get_slice_indices_none_mode(np.ndarray[DTYPE_t, ndim=1] sizes, int block_size):
  *     cdef DTYPE_t total_size = sizes.sum()             # <<<<<<<<<<<<<<
@@ -19634,7 +19634,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_total_size = __pyx_t_5;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":26
+  /* "ncc/data/token_block_utils_fast.pyx":26
  * cdef np.ndarray[DTYPE_t, ndim=2] _get_slice_indices_none_mode(np.ndarray[DTYPE_t, ndim=1] sizes, int block_size):
  *     cdef DTYPE_t total_size = sizes.sum()
  *     cdef DTYPE_t length = <DTYPE_t> ceil(total_size / <double> block_size)             # <<<<<<<<<<<<<<
@@ -19645,9 +19645,9 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
     __PYX_ERR(0, 26, __pyx_L1_error)
   }
-  __pyx_v_length = ((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t)ceil((((double)__pyx_v_total_size) / ((double)__pyx_v_block_size))));
+  __pyx_v_length = ((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t)ceil((((double)__pyx_v_total_size) / ((double)__pyx_v_block_size))));
 
-  /* "fairseq/data/token_block_utils_fast.pyx":27
+  /* "ncc/data/token_block_utils_fast.pyx":27
  *     cdef DTYPE_t total_size = sizes.sum()
  *     cdef DTYPE_t length = <DTYPE_t> ceil(total_size / <double> block_size)
  *     cdef np.ndarray[DTYPE_t, ndim=2] slice_indices = np.zeros([length, 2], dtype=DTYPE)             # <<<<<<<<<<<<<<
@@ -19689,7 +19689,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_t_7 = ((PyArrayObject *)__pyx_t_6);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_slice_indices = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.buf = NULL;
       __PYX_ERR(0, 27, __pyx_L1_error)
     } else {__pyx_pybuffernd_slice_indices.diminfo[0].strides = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_slice_indices.diminfo[0].shape = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_slice_indices.diminfo[1].strides = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_slice_indices.diminfo[1].shape = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.shape[1];
@@ -19699,19 +19699,19 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_v_slice_indices = ((PyArrayObject *)__pyx_t_6);
   __pyx_t_6 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":28
+  /* "ncc/data/token_block_utils_fast.pyx":28
  *     cdef DTYPE_t length = <DTYPE_t> ceil(total_size / <double> block_size)
  *     cdef np.ndarray[DTYPE_t, ndim=2] slice_indices = np.zeros([length, 2], dtype=DTYPE)
  *     cdef DTYPE_t[:, :] slice_indices_view = slice_indices             # <<<<<<<<<<<<<<
  *     cdef DTYPE_t i
  *     cdef DTYPE_t start
  */
-  __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(((PyObject *)__pyx_v_slice_indices), PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(((PyObject *)__pyx_v_slice_indices), PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 28, __pyx_L1_error)
   __pyx_v_slice_indices_view = __pyx_t_8;
   __pyx_t_8.memview = NULL;
   __pyx_t_8.data = NULL;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":32
+  /* "ncc/data/token_block_utils_fast.pyx":32
  *     cdef DTYPE_t start
  *     cdef DTYPE_t end
  *     for i in range(length):             # <<<<<<<<<<<<<<
@@ -19723,7 +19723,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
     __pyx_v_i = __pyx_t_10;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":33
+    /* "ncc/data/token_block_utils_fast.pyx":33
  *     cdef DTYPE_t end
  *     for i in range(length):
  *         start = i * block_size             # <<<<<<<<<<<<<<
@@ -19732,7 +19732,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
     __pyx_v_start = (__pyx_v_i * __pyx_v_block_size);
 
-    /* "fairseq/data/token_block_utils_fast.pyx":34
+    /* "ncc/data/token_block_utils_fast.pyx":34
  *     for i in range(length):
  *         start = i * block_size
  *         end = min(start + block_size, total_size)             # <<<<<<<<<<<<<<
@@ -19749,7 +19749,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     }
     __pyx_v_end = __pyx_t_13;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":35
+    /* "ncc/data/token_block_utils_fast.pyx":35
  *         start = i * block_size
  *         end = min(start + block_size, total_size)
  *         slice_indices_view[i][0] = start             # <<<<<<<<<<<<<<
@@ -19758,9 +19758,9 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
     __pyx_t_15 = __pyx_v_i;
     __pyx_t_16 = 0;
-    *((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_slice_indices_view.data + __pyx_t_15 * __pyx_v_slice_indices_view.strides[0]) ) + __pyx_t_16 * __pyx_v_slice_indices_view.strides[1]) )) = __pyx_v_start;
+    *((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_slice_indices_view.data + __pyx_t_15 * __pyx_v_slice_indices_view.strides[0]) ) + __pyx_t_16 * __pyx_v_slice_indices_view.strides[1]) )) = __pyx_v_start;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":36
+    /* "ncc/data/token_block_utils_fast.pyx":36
  *         end = min(start + block_size, total_size)
  *         slice_indices_view[i][0] = start
  *         slice_indices_view[i][1] = end             # <<<<<<<<<<<<<<
@@ -19769,10 +19769,10 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
     __pyx_t_16 = __pyx_v_i;
     __pyx_t_15 = 1;
-    *((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_slice_indices_view.data + __pyx_t_16 * __pyx_v_slice_indices_view.strides[0]) ) + __pyx_t_15 * __pyx_v_slice_indices_view.strides[1]) )) = __pyx_v_end;
+    *((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_slice_indices_view.data + __pyx_t_16 * __pyx_v_slice_indices_view.strides[0]) ) + __pyx_t_15 * __pyx_v_slice_indices_view.strides[1]) )) = __pyx_v_end;
   }
 
-  /* "fairseq/data/token_block_utils_fast.pyx":37
+  /* "ncc/data/token_block_utils_fast.pyx":37
  *         slice_indices_view[i][0] = start
  *         slice_indices_view[i][1] = end
  *     return slice_indices             # <<<<<<<<<<<<<<
@@ -19784,7 +19784,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_r = ((PyArrayObject *)__pyx_v_slice_indices);
   goto __pyx_L0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":24
+  /* "ncc/data/token_block_utils_fast.pyx":24
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
  * cdef np.ndarray[DTYPE_t, ndim=2] _get_slice_indices_none_mode(np.ndarray[DTYPE_t, ndim=1] sizes, int block_size):             # <<<<<<<<<<<<<<
@@ -19806,7 +19806,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast._get_slice_indices_none_mode", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast._get_slice_indices_none_mode", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   goto __pyx_L2;
   __pyx_L0:;
@@ -19820,7 +19820,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   return __pyx_r;
 }
 
-/* "fairseq/data/token_block_utils_fast.pyx":40
+/* "ncc/data/token_block_utils_fast.pyx":40
  * 
  * 
  * cdef np.ndarray[DTYPE_t, ndim=2] _fast_convert_to_np_array(list list_of_list):             # <<<<<<<<<<<<<<
@@ -19828,7 +19828,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  *     Faster function to convert DTYPE_t list of list.
  */
 
-static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_convert_to_np_array(PyObject *__pyx_v_list_of_list) {
+static PyArrayObject *__pyx_f_3ncc_4data_22token_block_utils_fast__fast_convert_to_np_array(PyObject *__pyx_v_list_of_list) {
   PyArrayObject *__pyx_v_flat = 0;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_flat;
   __Pyx_Buffer __pyx_pybuffer_flat;
@@ -19851,7 +19851,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_conv
   __pyx_pybuffernd_flat.data = NULL;
   __pyx_pybuffernd_flat.rcbuffer = &__pyx_pybuffer_flat;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":45
+  /* "ncc/data/token_block_utils_fast.pyx":45
  *     Only fast when there are huge number of rows and low number of columns.
  *     """
  *     cdef np.ndarray[DTYPE_t, ndim=1] flat = np.fromiter(chain.from_iterable(list_of_list), DTYPE, -1)             # <<<<<<<<<<<<<<
@@ -19920,7 +19920,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_conv
   __pyx_t_7 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_flat.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_flat.rcbuffer->pybuffer, (PyObject*)__pyx_t_7, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_flat = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_flat.rcbuffer->pybuffer.buf = NULL;
       __PYX_ERR(0, 45, __pyx_L1_error)
     } else {__pyx_pybuffernd_flat.diminfo[0].strides = __pyx_pybuffernd_flat.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_flat.diminfo[0].shape = __pyx_pybuffernd_flat.rcbuffer->pybuffer.shape[0];
@@ -19930,7 +19930,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_conv
   __pyx_v_flat = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":46
+  /* "ncc/data/token_block_utils_fast.pyx":46
  *     """
  *     cdef np.ndarray[DTYPE_t, ndim=1] flat = np.fromiter(chain.from_iterable(list_of_list), DTYPE, -1)
  *     return flat.reshape((len(list_of_list), -1))             # <<<<<<<<<<<<<<
@@ -19983,7 +19983,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_conv
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":40
+  /* "ncc/data/token_block_utils_fast.pyx":40
  * 
  * 
  * cdef np.ndarray[DTYPE_t, ndim=2] _fast_convert_to_np_array(list list_of_list):             # <<<<<<<<<<<<<<
@@ -20004,7 +20004,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_conv
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_flat.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast._fast_convert_to_np_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast._fast_convert_to_np_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   goto __pyx_L2;
   __pyx_L0:;
@@ -20016,7 +20016,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_conv
   return __pyx_r;
 }
 
-/* "fairseq/data/token_block_utils_fast.pyx":52
+/* "ncc/data/token_block_utils_fast.pyx":52
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
  * cpdef np.ndarray[DTYPE_t, ndim=2] _get_slice_indices_fast(np.ndarray[DTYPE_t, ndim=1] sizes, str break_mode, int block_size, int document_sep_len):             # <<<<<<<<<<<<<<
@@ -20024,18 +20024,18 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_conv
  *     cdef DTYPE_t sz_idx = 0
  */
 
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_1_get_slice_indices_fast(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_1_get_slice_indices_fast(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice_indices_fast(PyArrayObject *__pyx_v_sizes, PyObject *__pyx_v_break_mode, int __pyx_v_block_size, int __pyx_v_document_sep_len, CYTHON_UNUSED int __pyx_skip_dispatch) {
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_tok_idx;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_sz_idx;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_curr_size;
-  CYTHON_UNUSED __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i;
+static PyArrayObject *__pyx_f_3ncc_4data_22token_block_utils_fast__get_slice_indices_fast(PyArrayObject *__pyx_v_sizes, PyObject *__pyx_v_break_mode, int __pyx_v_block_size, int __pyx_v_document_sep_len, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_tok_idx;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_sz_idx;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_curr_size;
+  CYTHON_UNUSED __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i;
   __Pyx_memviewslice __pyx_v_sizes_view = { 0, 0, { 0 }, { 0 }, { 0 } };
   PyArrayObject *__pyx_v_slice_indices = 0;
   PyObject *__pyx_v_slice_indices_list = 0;
@@ -20075,11 +20075,11 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_pybuffernd_sizes.rcbuffer = &__pyx_pybuffer_sizes;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer, (PyObject*)__pyx_v_sizes, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer, (PyObject*)__pyx_v_sizes, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
   }
   __pyx_pybuffernd_sizes.diminfo[0].strides = __pyx_pybuffernd_sizes.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_sizes.diminfo[0].shape = __pyx_pybuffernd_sizes.rcbuffer->pybuffer.shape[0];
 
-  /* "fairseq/data/token_block_utils_fast.pyx":53
+  /* "ncc/data/token_block_utils_fast.pyx":53
  * @cython.nonecheck(False)
  * cpdef np.ndarray[DTYPE_t, ndim=2] _get_slice_indices_fast(np.ndarray[DTYPE_t, ndim=1] sizes, str break_mode, int block_size, int document_sep_len):
  *     cdef DTYPE_t tok_idx = 0             # <<<<<<<<<<<<<<
@@ -20088,7 +20088,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
   __pyx_v_tok_idx = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":54
+  /* "ncc/data/token_block_utils_fast.pyx":54
  * cpdef np.ndarray[DTYPE_t, ndim=2] _get_slice_indices_fast(np.ndarray[DTYPE_t, ndim=1] sizes, str break_mode, int block_size, int document_sep_len):
  *     cdef DTYPE_t tok_idx = 0
  *     cdef DTYPE_t sz_idx = 0             # <<<<<<<<<<<<<<
@@ -20097,7 +20097,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
   __pyx_v_sz_idx = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":55
+  /* "ncc/data/token_block_utils_fast.pyx":55
  *     cdef DTYPE_t tok_idx = 0
  *     cdef DTYPE_t sz_idx = 0
  *     cdef DTYPE_t curr_size = 0             # <<<<<<<<<<<<<<
@@ -20106,7 +20106,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
   __pyx_v_curr_size = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":56
+  /* "ncc/data/token_block_utils_fast.pyx":56
  *     cdef DTYPE_t sz_idx = 0
  *     cdef DTYPE_t curr_size = 0
  *     cdef DTYPE_t i = 0             # <<<<<<<<<<<<<<
@@ -20115,19 +20115,19 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
   __pyx_v_i = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":59
+  /* "ncc/data/token_block_utils_fast.pyx":59
  *     cdef DTYPE_t length
  *     cdef DTYPE_t total_size
  *     cdef DTYPE_t[:] sizes_view = sizes             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[DTYPE_t, ndim=2] slice_indices
  *     cdef list slice_indices_list = []
  */
-  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(((PyObject *)__pyx_v_sizes), PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 59, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(((PyObject *)__pyx_v_sizes), PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 59, __pyx_L1_error)
   __pyx_v_sizes_view = __pyx_t_1;
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":61
+  /* "ncc/data/token_block_utils_fast.pyx":61
  *     cdef DTYPE_t[:] sizes_view = sizes
  *     cdef np.ndarray[DTYPE_t, ndim=2] slice_indices
  *     cdef list slice_indices_list = []             # <<<<<<<<<<<<<<
@@ -20139,7 +20139,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_v_slice_indices_list = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":63
+  /* "ncc/data/token_block_utils_fast.pyx":63
  *     cdef list slice_indices_list = []
  * 
  *     if break_mode is None or break_mode == 'none':             # <<<<<<<<<<<<<<
@@ -20157,22 +20157,22 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_3) {
 
-    /* "fairseq/data/token_block_utils_fast.pyx":64
+    /* "ncc/data/token_block_utils_fast.pyx":64
  * 
  *     if break_mode is None or break_mode == 'none':
  *         slice_indices = _get_slice_indices_none_mode(sizes, block_size)             # <<<<<<<<<<<<<<
  *     elif break_mode == 'complete':
  *         while sz_idx < len(sizes_view):
  */
-    __pyx_t_2 = ((PyObject *)__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice_indices_none_mode(((PyArrayObject *)__pyx_v_sizes), __pyx_v_block_size)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
+    __pyx_t_2 = ((PyObject *)__pyx_f_3ncc_4data_22token_block_utils_fast__get_slice_indices_none_mode(((PyArrayObject *)__pyx_v_sizes), __pyx_v_block_size)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
       __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer);
-      __pyx_t_5 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_2), &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
+      __pyx_t_5 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_2), &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
       if (unlikely(__pyx_t_5 < 0)) {
         PyErr_Fetch(&__pyx_t_6, &__pyx_t_7, &__pyx_t_8);
-        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
           Py_XDECREF(__pyx_t_6); Py_XDECREF(__pyx_t_7); Py_XDECREF(__pyx_t_8);
           __Pyx_RaiseBufferFallbackError();
         } else {
@@ -20186,7 +20186,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     __pyx_v_slice_indices = ((PyArrayObject *)__pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":63
+    /* "ncc/data/token_block_utils_fast.pyx":63
  *     cdef list slice_indices_list = []
  * 
  *     if break_mode is None or break_mode == 'none':             # <<<<<<<<<<<<<<
@@ -20196,7 +20196,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     goto __pyx_L3;
   }
 
-  /* "fairseq/data/token_block_utils_fast.pyx":65
+  /* "ncc/data/token_block_utils_fast.pyx":65
  *     if break_mode is None or break_mode == 'none':
  *         slice_indices = _get_slice_indices_none_mode(sizes, block_size)
  *     elif break_mode == 'complete':             # <<<<<<<<<<<<<<
@@ -20206,7 +20206,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_t_3 = (__Pyx_PyUnicode_Equals(__pyx_v_break_mode, __pyx_n_u_complete, Py_EQ)); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 65, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "fairseq/data/token_block_utils_fast.pyx":66
+    /* "ncc/data/token_block_utils_fast.pyx":66
  *         slice_indices = _get_slice_indices_none_mode(sizes, block_size)
  *     elif break_mode == 'complete':
  *         while sz_idx < len(sizes_view):             # <<<<<<<<<<<<<<
@@ -20218,7 +20218,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
       __pyx_t_3 = (__pyx_v_sz_idx < __pyx_t_9);
       if (!__pyx_t_3) break;
 
-      /* "fairseq/data/token_block_utils_fast.pyx":67
+      /* "ncc/data/token_block_utils_fast.pyx":67
  *     elif break_mode == 'complete':
  *         while sz_idx < len(sizes_view):
  *             if curr_size + sizes_view[sz_idx] <= block_size or curr_size == 0:             # <<<<<<<<<<<<<<
@@ -20226,7 +20226,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  *                 sz_idx += 1
  */
       __pyx_t_10 = __pyx_v_sz_idx;
-      __pyx_t_4 = ((__pyx_v_curr_size + (*((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) )))) <= __pyx_v_block_size);
+      __pyx_t_4 = ((__pyx_v_curr_size + (*((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) )))) <= __pyx_v_block_size);
       if (!__pyx_t_4) {
       } else {
         __pyx_t_3 = __pyx_t_4;
@@ -20237,7 +20237,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
       __pyx_L9_bool_binop_done:;
       if (__pyx_t_3) {
 
-        /* "fairseq/data/token_block_utils_fast.pyx":68
+        /* "ncc/data/token_block_utils_fast.pyx":68
  *         while sz_idx < len(sizes_view):
  *             if curr_size + sizes_view[sz_idx] <= block_size or curr_size == 0:
  *                 curr_size += sizes_view[sz_idx]             # <<<<<<<<<<<<<<
@@ -20245,9 +20245,9 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  *             else:
  */
         __pyx_t_10 = __pyx_v_sz_idx;
-        __pyx_v_curr_size = (__pyx_v_curr_size + (*((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) ))));
+        __pyx_v_curr_size = (__pyx_v_curr_size + (*((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) ))));
 
-        /* "fairseq/data/token_block_utils_fast.pyx":69
+        /* "ncc/data/token_block_utils_fast.pyx":69
  *             if curr_size + sizes_view[sz_idx] <= block_size or curr_size == 0:
  *                 curr_size += sizes_view[sz_idx]
  *                 sz_idx += 1             # <<<<<<<<<<<<<<
@@ -20256,7 +20256,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
         __pyx_v_sz_idx = (__pyx_v_sz_idx + 1);
 
-        /* "fairseq/data/token_block_utils_fast.pyx":67
+        /* "ncc/data/token_block_utils_fast.pyx":67
  *     elif break_mode == 'complete':
  *         while sz_idx < len(sizes_view):
  *             if curr_size + sizes_view[sz_idx] <= block_size or curr_size == 0:             # <<<<<<<<<<<<<<
@@ -20266,7 +20266,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
         goto __pyx_L8;
       }
 
-      /* "fairseq/data/token_block_utils_fast.pyx":71
+      /* "ncc/data/token_block_utils_fast.pyx":71
  *                 sz_idx += 1
  *             else:
  *                 slice_indices_list.append((tok_idx, tok_idx + curr_size))             # <<<<<<<<<<<<<<
@@ -20289,7 +20289,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
         __pyx_t_13 = __Pyx_PyList_Append(__pyx_v_slice_indices_list, __pyx_t_12); if (unlikely(__pyx_t_13 == ((int)-1))) __PYX_ERR(0, 71, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-        /* "fairseq/data/token_block_utils_fast.pyx":72
+        /* "ncc/data/token_block_utils_fast.pyx":72
  *             else:
  *                 slice_indices_list.append((tok_idx, tok_idx + curr_size))
  *                 tok_idx += curr_size             # <<<<<<<<<<<<<<
@@ -20298,7 +20298,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
         __pyx_v_tok_idx = (__pyx_v_tok_idx + __pyx_v_curr_size);
 
-        /* "fairseq/data/token_block_utils_fast.pyx":73
+        /* "ncc/data/token_block_utils_fast.pyx":73
  *                 slice_indices_list.append((tok_idx, tok_idx + curr_size))
  *                 tok_idx += curr_size
  *                 curr_size = 0             # <<<<<<<<<<<<<<
@@ -20310,7 +20310,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
       __pyx_L8:;
     }
 
-    /* "fairseq/data/token_block_utils_fast.pyx":74
+    /* "ncc/data/token_block_utils_fast.pyx":74
  *                 tok_idx += curr_size
  *                 curr_size = 0
  *         if curr_size > 0:             # <<<<<<<<<<<<<<
@@ -20320,7 +20320,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     __pyx_t_3 = (__pyx_v_curr_size > 0);
     if (__pyx_t_3) {
 
-      /* "fairseq/data/token_block_utils_fast.pyx":75
+      /* "ncc/data/token_block_utils_fast.pyx":75
  *                 curr_size = 0
  *         if curr_size > 0:
  *             slice_indices_list.append((tok_idx, tok_idx + curr_size))             # <<<<<<<<<<<<<<
@@ -20342,7 +20342,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
       __pyx_t_13 = __Pyx_PyList_Append(__pyx_v_slice_indices_list, __pyx_t_2); if (unlikely(__pyx_t_13 == ((int)-1))) __PYX_ERR(0, 75, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "fairseq/data/token_block_utils_fast.pyx":74
+      /* "ncc/data/token_block_utils_fast.pyx":74
  *                 tok_idx += curr_size
  *                 curr_size = 0
  *         if curr_size > 0:             # <<<<<<<<<<<<<<
@@ -20351,22 +20351,22 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
     }
 
-    /* "fairseq/data/token_block_utils_fast.pyx":76
+    /* "ncc/data/token_block_utils_fast.pyx":76
  *         if curr_size > 0:
  *             slice_indices_list.append((tok_idx, tok_idx + curr_size))
  *         slice_indices = _fast_convert_to_np_array(slice_indices_list)             # <<<<<<<<<<<<<<
  *     elif break_mode == 'complete_doc':
  *         while sz_idx < len(sizes_view):
  */
-    __pyx_t_2 = ((PyObject *)__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_convert_to_np_array(__pyx_v_slice_indices_list)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 76, __pyx_L1_error)
+    __pyx_t_2 = ((PyObject *)__pyx_f_3ncc_4data_22token_block_utils_fast__fast_convert_to_np_array(__pyx_v_slice_indices_list)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 76, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
       __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer);
-      __pyx_t_5 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_2), &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
+      __pyx_t_5 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_2), &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
       if (unlikely(__pyx_t_5 < 0)) {
         PyErr_Fetch(&__pyx_t_8, &__pyx_t_7, &__pyx_t_6);
-        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
           Py_XDECREF(__pyx_t_8); Py_XDECREF(__pyx_t_7); Py_XDECREF(__pyx_t_6);
           __Pyx_RaiseBufferFallbackError();
         } else {
@@ -20380,7 +20380,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     __pyx_v_slice_indices = ((PyArrayObject *)__pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":65
+    /* "ncc/data/token_block_utils_fast.pyx":65
  *     if break_mode is None or break_mode == 'none':
  *         slice_indices = _get_slice_indices_none_mode(sizes, block_size)
  *     elif break_mode == 'complete':             # <<<<<<<<<<<<<<
@@ -20390,7 +20390,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     goto __pyx_L3;
   }
 
-  /* "fairseq/data/token_block_utils_fast.pyx":77
+  /* "ncc/data/token_block_utils_fast.pyx":77
  *             slice_indices_list.append((tok_idx, tok_idx + curr_size))
  *         slice_indices = _fast_convert_to_np_array(slice_indices_list)
  *     elif break_mode == 'complete_doc':             # <<<<<<<<<<<<<<
@@ -20400,7 +20400,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_t_3 = (__Pyx_PyUnicode_Equals(__pyx_v_break_mode, __pyx_n_u_complete_doc, Py_EQ)); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 77, __pyx_L1_error)
   if (__pyx_t_3) {
 
-    /* "fairseq/data/token_block_utils_fast.pyx":78
+    /* "ncc/data/token_block_utils_fast.pyx":78
  *         slice_indices = _fast_convert_to_np_array(slice_indices_list)
  *     elif break_mode == 'complete_doc':
  *         while sz_idx < len(sizes_view):             # <<<<<<<<<<<<<<
@@ -20412,7 +20412,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
       __pyx_t_3 = (__pyx_v_sz_idx < __pyx_t_9);
       if (!__pyx_t_3) break;
 
-      /* "fairseq/data/token_block_utils_fast.pyx":80
+      /* "ncc/data/token_block_utils_fast.pyx":80
  *         while sz_idx < len(sizes_view):
  *             if (
  *                 (curr_size + sizes_view[sz_idx] <= block_size or curr_size == 0)             # <<<<<<<<<<<<<<
@@ -20420,7 +20420,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  *                 and sizes_view[sz_idx] != document_sep_len
  */
       __pyx_t_10 = __pyx_v_sz_idx;
-      __pyx_t_4 = ((__pyx_v_curr_size + (*((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) )))) <= __pyx_v_block_size);
+      __pyx_t_4 = ((__pyx_v_curr_size + (*((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) )))) <= __pyx_v_block_size);
       if (!__pyx_t_4) {
       } else {
         goto __pyx_L16_next_and;
@@ -20433,7 +20433,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
       }
       __pyx_L16_next_and:;
 
-      /* "fairseq/data/token_block_utils_fast.pyx":82
+      /* "ncc/data/token_block_utils_fast.pyx":82
  *                 (curr_size + sizes_view[sz_idx] <= block_size or curr_size == 0)
  *                 # an empty sentence indicates end-of-document:
  *                 and sizes_view[sz_idx] != document_sep_len             # <<<<<<<<<<<<<<
@@ -20441,11 +20441,11 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  *                 curr_size += sizes_view[sz_idx]
  */
       __pyx_t_10 = __pyx_v_sz_idx;
-      __pyx_t_4 = ((*((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) ))) != __pyx_v_document_sep_len);
+      __pyx_t_4 = ((*((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) ))) != __pyx_v_document_sep_len);
       __pyx_t_3 = __pyx_t_4;
       __pyx_L15_bool_binop_done:;
 
-      /* "fairseq/data/token_block_utils_fast.pyx":79
+      /* "ncc/data/token_block_utils_fast.pyx":79
  *     elif break_mode == 'complete_doc':
  *         while sz_idx < len(sizes_view):
  *             if (             # <<<<<<<<<<<<<<
@@ -20454,7 +20454,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
       if (__pyx_t_3) {
 
-        /* "fairseq/data/token_block_utils_fast.pyx":84
+        /* "ncc/data/token_block_utils_fast.pyx":84
  *                 and sizes_view[sz_idx] != document_sep_len
  *             ):
  *                 curr_size += sizes_view[sz_idx]             # <<<<<<<<<<<<<<
@@ -20462,9 +20462,9 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  *             else:
  */
         __pyx_t_10 = __pyx_v_sz_idx;
-        __pyx_v_curr_size = (__pyx_v_curr_size + (*((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) ))));
+        __pyx_v_curr_size = (__pyx_v_curr_size + (*((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) ))));
 
-        /* "fairseq/data/token_block_utils_fast.pyx":85
+        /* "ncc/data/token_block_utils_fast.pyx":85
  *             ):
  *                 curr_size += sizes_view[sz_idx]
  *                 sz_idx += 1             # <<<<<<<<<<<<<<
@@ -20473,7 +20473,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
         __pyx_v_sz_idx = (__pyx_v_sz_idx + 1);
 
-        /* "fairseq/data/token_block_utils_fast.pyx":79
+        /* "ncc/data/token_block_utils_fast.pyx":79
  *     elif break_mode == 'complete_doc':
  *         while sz_idx < len(sizes_view):
  *             if (             # <<<<<<<<<<<<<<
@@ -20483,7 +20483,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
         goto __pyx_L14;
       }
 
-      /* "fairseq/data/token_block_utils_fast.pyx":88
+      /* "ncc/data/token_block_utils_fast.pyx":88
  *             else:
  *                 # Only keep non-empty documents.
  *                 if curr_size > 1:             # <<<<<<<<<<<<<<
@@ -20494,7 +20494,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
         __pyx_t_3 = (__pyx_v_curr_size > 1);
         if (__pyx_t_3) {
 
-          /* "fairseq/data/token_block_utils_fast.pyx":89
+          /* "ncc/data/token_block_utils_fast.pyx":89
  *                 # Only keep non-empty documents.
  *                 if curr_size > 1:
  *                     slice_indices_list.append((tok_idx, tok_idx + curr_size))             # <<<<<<<<<<<<<<
@@ -20516,7 +20516,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
           __pyx_t_13 = __Pyx_PyList_Append(__pyx_v_slice_indices_list, __pyx_t_12); if (unlikely(__pyx_t_13 == ((int)-1))) __PYX_ERR(0, 89, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-          /* "fairseq/data/token_block_utils_fast.pyx":88
+          /* "ncc/data/token_block_utils_fast.pyx":88
  *             else:
  *                 # Only keep non-empty documents.
  *                 if curr_size > 1:             # <<<<<<<<<<<<<<
@@ -20525,7 +20525,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
         }
 
-        /* "fairseq/data/token_block_utils_fast.pyx":90
+        /* "ncc/data/token_block_utils_fast.pyx":90
  *                 if curr_size > 1:
  *                     slice_indices_list.append((tok_idx, tok_idx + curr_size))
  *                 tok_idx += curr_size             # <<<<<<<<<<<<<<
@@ -20534,7 +20534,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
         __pyx_v_tok_idx = (__pyx_v_tok_idx + __pyx_v_curr_size);
 
-        /* "fairseq/data/token_block_utils_fast.pyx":91
+        /* "ncc/data/token_block_utils_fast.pyx":91
  *                     slice_indices_list.append((tok_idx, tok_idx + curr_size))
  *                 tok_idx += curr_size
  *                 curr_size = 0             # <<<<<<<<<<<<<<
@@ -20543,7 +20543,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
         __pyx_v_curr_size = 0;
 
-        /* "fairseq/data/token_block_utils_fast.pyx":92
+        /* "ncc/data/token_block_utils_fast.pyx":92
  *                 tok_idx += curr_size
  *                 curr_size = 0
  *                 if sizes_view[sz_idx] == document_sep_len:             # <<<<<<<<<<<<<<
@@ -20551,10 +20551,10 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  *                     sz_idx += 1
  */
         __pyx_t_10 = __pyx_v_sz_idx;
-        __pyx_t_3 = ((*((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) ))) == __pyx_v_document_sep_len);
+        __pyx_t_3 = ((*((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) ))) == __pyx_v_document_sep_len);
         if (__pyx_t_3) {
 
-          /* "fairseq/data/token_block_utils_fast.pyx":93
+          /* "ncc/data/token_block_utils_fast.pyx":93
  *                 curr_size = 0
  *                 if sizes_view[sz_idx] == document_sep_len:
  *                     tok_idx += sizes_view[sz_idx]             # <<<<<<<<<<<<<<
@@ -20562,9 +20562,9 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  *         if curr_size > 1:
  */
           __pyx_t_10 = __pyx_v_sz_idx;
-          __pyx_v_tok_idx = (__pyx_v_tok_idx + (*((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) ))));
+          __pyx_v_tok_idx = (__pyx_v_tok_idx + (*((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_sizes_view.data + __pyx_t_10 * __pyx_v_sizes_view.strides[0]) ))));
 
-          /* "fairseq/data/token_block_utils_fast.pyx":94
+          /* "ncc/data/token_block_utils_fast.pyx":94
  *                 if sizes_view[sz_idx] == document_sep_len:
  *                     tok_idx += sizes_view[sz_idx]
  *                     sz_idx += 1             # <<<<<<<<<<<<<<
@@ -20573,7 +20573,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
           __pyx_v_sz_idx = (__pyx_v_sz_idx + 1);
 
-          /* "fairseq/data/token_block_utils_fast.pyx":92
+          /* "ncc/data/token_block_utils_fast.pyx":92
  *                 tok_idx += curr_size
  *                 curr_size = 0
  *                 if sizes_view[sz_idx] == document_sep_len:             # <<<<<<<<<<<<<<
@@ -20585,7 +20585,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
       __pyx_L14:;
     }
 
-    /* "fairseq/data/token_block_utils_fast.pyx":95
+    /* "ncc/data/token_block_utils_fast.pyx":95
  *                     tok_idx += sizes_view[sz_idx]
  *                     sz_idx += 1
  *         if curr_size > 1:             # <<<<<<<<<<<<<<
@@ -20595,7 +20595,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     __pyx_t_3 = (__pyx_v_curr_size > 1);
     if (__pyx_t_3) {
 
-      /* "fairseq/data/token_block_utils_fast.pyx":96
+      /* "ncc/data/token_block_utils_fast.pyx":96
  *                     sz_idx += 1
  *         if curr_size > 1:
  *             slice_indices_list.append((tok_idx, tok_idx + curr_size))             # <<<<<<<<<<<<<<
@@ -20617,7 +20617,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
       __pyx_t_13 = __Pyx_PyList_Append(__pyx_v_slice_indices_list, __pyx_t_2); if (unlikely(__pyx_t_13 == ((int)-1))) __PYX_ERR(0, 96, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-      /* "fairseq/data/token_block_utils_fast.pyx":95
+      /* "ncc/data/token_block_utils_fast.pyx":95
  *                     tok_idx += sizes_view[sz_idx]
  *                     sz_idx += 1
  *         if curr_size > 1:             # <<<<<<<<<<<<<<
@@ -20626,22 +20626,22 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
     }
 
-    /* "fairseq/data/token_block_utils_fast.pyx":97
+    /* "ncc/data/token_block_utils_fast.pyx":97
  *         if curr_size > 1:
  *             slice_indices_list.append((tok_idx, tok_idx + curr_size))
  *         slice_indices = _fast_convert_to_np_array(slice_indices_list)             # <<<<<<<<<<<<<<
  *     elif break_mode == 'eos':
  *         slice_indices = np.zeros((len(sizes), 2), dtype=DTYPE)
  */
-    __pyx_t_2 = ((PyObject *)__pyx_f_7fairseq_4data_22token_block_utils_fast__fast_convert_to_np_array(__pyx_v_slice_indices_list)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 97, __pyx_L1_error)
+    __pyx_t_2 = ((PyObject *)__pyx_f_3ncc_4data_22token_block_utils_fast__fast_convert_to_np_array(__pyx_v_slice_indices_list)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 97, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
       __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer);
-      __pyx_t_5 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_2), &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
+      __pyx_t_5 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)((PyArrayObject *)__pyx_t_2), &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
       if (unlikely(__pyx_t_5 < 0)) {
         PyErr_Fetch(&__pyx_t_6, &__pyx_t_7, &__pyx_t_8);
-        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
           Py_XDECREF(__pyx_t_6); Py_XDECREF(__pyx_t_7); Py_XDECREF(__pyx_t_8);
           __Pyx_RaiseBufferFallbackError();
         } else {
@@ -20655,7 +20655,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     __pyx_v_slice_indices = ((PyArrayObject *)__pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":77
+    /* "ncc/data/token_block_utils_fast.pyx":77
  *             slice_indices_list.append((tok_idx, tok_idx + curr_size))
  *         slice_indices = _fast_convert_to_np_array(slice_indices_list)
  *     elif break_mode == 'complete_doc':             # <<<<<<<<<<<<<<
@@ -20665,7 +20665,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     goto __pyx_L3;
   }
 
-  /* "fairseq/data/token_block_utils_fast.pyx":98
+  /* "ncc/data/token_block_utils_fast.pyx":98
  *             slice_indices_list.append((tok_idx, tok_idx + curr_size))
  *         slice_indices = _fast_convert_to_np_array(slice_indices_list)
  *     elif break_mode == 'eos':             # <<<<<<<<<<<<<<
@@ -20675,7 +20675,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_t_3 = (__Pyx_PyUnicode_Equals(__pyx_v_break_mode, __pyx_n_u_eos, Py_EQ)); if (unlikely((__pyx_t_3 < 0))) __PYX_ERR(0, 98, __pyx_L1_error)
   if (likely(__pyx_t_3)) {
 
-    /* "fairseq/data/token_block_utils_fast.pyx":99
+    /* "ncc/data/token_block_utils_fast.pyx":99
  *         slice_indices = _fast_convert_to_np_array(slice_indices_list)
  *     elif break_mode == 'eos':
  *         slice_indices = np.zeros((len(sizes), 2), dtype=DTYPE)             # <<<<<<<<<<<<<<
@@ -20719,10 +20719,10 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
       __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer);
-      __pyx_t_5 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_t_15, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
+      __pyx_t_5 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_t_15, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
       if (unlikely(__pyx_t_5 < 0)) {
         PyErr_Fetch(&__pyx_t_8, &__pyx_t_7, &__pyx_t_6);
-        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
           Py_XDECREF(__pyx_t_8); Py_XDECREF(__pyx_t_7); Py_XDECREF(__pyx_t_6);
           __Pyx_RaiseBufferFallbackError();
         } else {
@@ -20737,7 +20737,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     __pyx_v_slice_indices = ((PyArrayObject *)__pyx_t_14);
     __pyx_t_14 = 0;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":100
+    /* "ncc/data/token_block_utils_fast.pyx":100
  *     elif break_mode == 'eos':
  *         slice_indices = np.zeros((len(sizes), 2), dtype=DTYPE)
  *         cumsum = sizes.cumsum(axis=0)             # <<<<<<<<<<<<<<
@@ -20756,7 +20756,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     __pyx_v_cumsum = __pyx_t_2;
     __pyx_t_2 = 0;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":101
+    /* "ncc/data/token_block_utils_fast.pyx":101
  *         slice_indices = np.zeros((len(sizes), 2), dtype=DTYPE)
  *         cumsum = sizes.cumsum(axis=0)
  *         slice_indices[1:, 0] = cumsum[:cumsum.shape[0] - 1]             # <<<<<<<<<<<<<<
@@ -20777,7 +20777,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     if (unlikely((PyObject_SetItem(((PyObject *)__pyx_v_slice_indices), __pyx_tuple__12, __pyx_t_12) < 0))) __PYX_ERR(0, 101, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":102
+    /* "ncc/data/token_block_utils_fast.pyx":102
  *         cumsum = sizes.cumsum(axis=0)
  *         slice_indices[1:, 0] = cumsum[:cumsum.shape[0] - 1]
  *         slice_indices[:, 1] = cumsum             # <<<<<<<<<<<<<<
@@ -20786,7 +20786,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
  */
     if (unlikely((PyObject_SetItem(((PyObject *)__pyx_v_slice_indices), __pyx_tuple__13, __pyx_v_cumsum) < 0))) __PYX_ERR(0, 102, __pyx_L1_error)
 
-    /* "fairseq/data/token_block_utils_fast.pyx":98
+    /* "ncc/data/token_block_utils_fast.pyx":98
  *             slice_indices_list.append((tok_idx, tok_idx + curr_size))
  *         slice_indices = _fast_convert_to_np_array(slice_indices_list)
  *     elif break_mode == 'eos':             # <<<<<<<<<<<<<<
@@ -20796,7 +20796,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     goto __pyx_L3;
   }
 
-  /* "fairseq/data/token_block_utils_fast.pyx":104
+  /* "ncc/data/token_block_utils_fast.pyx":104
  *         slice_indices[:, 1] = cumsum
  *     else:
  *         raise ValueError('Invalid break_mode: ' + break_mode)             # <<<<<<<<<<<<<<
@@ -20815,7 +20815,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   }
   __pyx_L3:;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":105
+  /* "ncc/data/token_block_utils_fast.pyx":105
  *     else:
  *         raise ValueError('Invalid break_mode: ' + break_mode)
  *     return slice_indices             # <<<<<<<<<<<<<<
@@ -20827,7 +20827,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
   __pyx_r = ((PyArrayObject *)__pyx_v_slice_indices);
   goto __pyx_L0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":52
+  /* "ncc/data/token_block_utils_fast.pyx":52
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
  * cpdef np.ndarray[DTYPE_t, ndim=2] _get_slice_indices_fast(np.ndarray[DTYPE_t, ndim=1] sizes, str break_mode, int block_size, int document_sep_len):             # <<<<<<<<<<<<<<
@@ -20849,7 +20849,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast._get_slice_indices_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast._get_slice_indices_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   goto __pyx_L2;
   __pyx_L0:;
@@ -20866,15 +20866,15 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_1_get_slice_indices_fast(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_1_get_slice_indices_fast(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_7fairseq_4data_22token_block_utils_fast_1_get_slice_indices_fast = {"_get_slice_indices_fast", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7fairseq_4data_22token_block_utils_fast_1_get_slice_indices_fast, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_1_get_slice_indices_fast(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_3ncc_4data_22token_block_utils_fast_1_get_slice_indices_fast = {"_get_slice_indices_fast", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_3ncc_4data_22token_block_utils_fast_1_get_slice_indices_fast, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_1_get_slice_indices_fast(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -20989,13 +20989,13 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast._get_slice_indices_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast._get_slice_indices_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_sizes), __pyx_ptype_5numpy_ndarray, 1, "sizes", 0))) __PYX_ERR(0, 52, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_break_mode), (&PyUnicode_Type), 1, "break_mode", 1))) __PYX_ERR(0, 52, __pyx_L1_error)
-  __pyx_r = __pyx_pf_7fairseq_4data_22token_block_utils_fast__get_slice_indices_fast(__pyx_self, __pyx_v_sizes, __pyx_v_break_mode, __pyx_v_block_size, __pyx_v_document_sep_len);
+  __pyx_r = __pyx_pf_3ncc_4data_22token_block_utils_fast__get_slice_indices_fast(__pyx_self, __pyx_v_sizes, __pyx_v_break_mode, __pyx_v_block_size, __pyx_v_document_sep_len);
 
   /* function exit code */
   goto __pyx_L0;
@@ -21012,7 +21012,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast__get_slice_indices_fast(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sizes, PyObject *__pyx_v_break_mode, int __pyx_v_block_size, int __pyx_v_document_sep_len) {
+static PyObject *__pyx_pf_3ncc_4data_22token_block_utils_fast__get_slice_indices_fast(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sizes, PyObject *__pyx_v_break_mode, int __pyx_v_block_size, int __pyx_v_document_sep_len) {
   __Pyx_LocalBuf_ND __pyx_pybuffernd_sizes;
   __Pyx_Buffer __pyx_pybuffer_sizes;
   PyObject *__pyx_r = NULL;
@@ -21028,11 +21028,11 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast__get_slice_ind
   __pyx_pybuffernd_sizes.rcbuffer = &__pyx_pybuffer_sizes;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer, (PyObject*)__pyx_v_sizes, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer, (PyObject*)__pyx_v_sizes, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 52, __pyx_L1_error)
   }
   __pyx_pybuffernd_sizes.diminfo[0].strides = __pyx_pybuffernd_sizes.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_sizes.diminfo[0].shape = __pyx_pybuffernd_sizes.rcbuffer->pybuffer.shape[0];
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_7fairseq_4data_22token_block_utils_fast__get_slice_indices_fast(__pyx_v_sizes, __pyx_v_break_mode, __pyx_v_block_size, __pyx_v_document_sep_len, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_3ncc_4data_22token_block_utils_fast__get_slice_indices_fast(__pyx_v_sizes, __pyx_v_break_mode, __pyx_v_block_size, __pyx_v_document_sep_len, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -21047,7 +21047,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast__get_slice_ind
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast._get_slice_indices_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast._get_slice_indices_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -21058,7 +21058,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast__get_slice_ind
   return __pyx_r;
 }
 
-/* "fairseq/data/token_block_utils_fast.pyx":111
+/* "ncc/data/token_block_utils_fast.pyx":111
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
  * cpdef np.ndarray[DTYPE_t, ndim=2] _get_block_to_dataset_index_fast(np.ndarray[DTYPE_t, ndim=1] sizes, np.ndarray[DTYPE_t, ndim=2] slice_indices):             # <<<<<<<<<<<<<<
@@ -21066,21 +21066,21 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast__get_slice_ind
  *     cdef DTYPE_t start_offset
  */
 
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block_to_dataset_index_fast(PyArrayObject *__pyx_v_sizes, PyArrayObject *__pyx_v_slice_indices, CYTHON_UNUSED int __pyx_skip_dispatch) {
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_start_ds_idx;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_start_offset;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_end_ds_idx;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_s;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_e;
-  struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_ds = 0;
+static PyArrayObject *__pyx_f_3ncc_4data_22token_block_utils_fast__get_block_to_dataset_index_fast(PyArrayObject *__pyx_v_sizes, PyArrayObject *__pyx_v_slice_indices, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_start_ds_idx;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_start_offset;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_end_ds_idx;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_s;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_e;
+  struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_ds = 0;
   PyArrayObject *__pyx_v_block_to_dataset_index = 0;
   __Pyx_memviewslice __pyx_v_block_to_dataset_index_view = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_slice_indices_view = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -21102,10 +21102,10 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
   __Pyx_memviewslice __pyx_t_7 = { 0, 0, { 0 }, { 0 }, { 0 } };
   npy_intp *__pyx_t_8;
   Py_ssize_t __pyx_t_9;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_t_10;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_t_10;
   Py_ssize_t __pyx_t_11;
   Py_ssize_t __pyx_t_12;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_t_13;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_t_13;
   int __pyx_t_14;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -21125,28 +21125,28 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
   __pyx_pybuffernd_slice_indices.rcbuffer = &__pyx_pybuffer_slice_indices;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer, (PyObject*)__pyx_v_sizes, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 111, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer, (PyObject*)__pyx_v_sizes, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 111, __pyx_L1_error)
   }
   __pyx_pybuffernd_sizes.diminfo[0].strides = __pyx_pybuffernd_sizes.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_sizes.diminfo[0].shape = __pyx_pybuffernd_sizes.rcbuffer->pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 111, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 111, __pyx_L1_error)
   }
   __pyx_pybuffernd_slice_indices.diminfo[0].strides = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_slice_indices.diminfo[0].shape = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_slice_indices.diminfo[1].strides = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_slice_indices.diminfo[1].shape = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.shape[1];
 
-  /* "fairseq/data/token_block_utils_fast.pyx":118
+  /* "ncc/data/token_block_utils_fast.pyx":118
  *     cdef DTYPE_t s
  *     cdef DTYPE_t e
  *     cdef DatasetSearcher ds = DatasetSearcher(sizes)             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[DTYPE_t, ndim=2] block_to_dataset_index = np.zeros([len(slice_indices), 3], dtype=DTYPE)
  *     cdef DTYPE_t[:, :] block_to_dataset_index_view = block_to_dataset_index
  */
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher), ((PyObject *)__pyx_v_sizes)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 118, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher), ((PyObject *)__pyx_v_sizes)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_ds = ((struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_t_1);
+  __pyx_v_ds = ((struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":119
+  /* "ncc/data/token_block_utils_fast.pyx":119
  *     cdef DTYPE_t e
  *     cdef DatasetSearcher ds = DatasetSearcher(sizes)
  *     cdef np.ndarray[DTYPE_t, ndim=2] block_to_dataset_index = np.zeros([len(slice_indices), 3], dtype=DTYPE)             # <<<<<<<<<<<<<<
@@ -21189,7 +21189,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
   __pyx_t_6 = ((PyArrayObject *)__pyx_t_5);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_block_to_dataset_index.rcbuffer->pybuffer, (PyObject*)__pyx_t_6, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_block_to_dataset_index.rcbuffer->pybuffer, (PyObject*)__pyx_t_6, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
       __pyx_v_block_to_dataset_index = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_block_to_dataset_index.rcbuffer->pybuffer.buf = NULL;
       __PYX_ERR(0, 119, __pyx_L1_error)
     } else {__pyx_pybuffernd_block_to_dataset_index.diminfo[0].strides = __pyx_pybuffernd_block_to_dataset_index.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_block_to_dataset_index.diminfo[0].shape = __pyx_pybuffernd_block_to_dataset_index.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_block_to_dataset_index.diminfo[1].strides = __pyx_pybuffernd_block_to_dataset_index.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_block_to_dataset_index.diminfo[1].shape = __pyx_pybuffernd_block_to_dataset_index.rcbuffer->pybuffer.shape[1];
@@ -21199,31 +21199,31 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
   __pyx_v_block_to_dataset_index = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":120
+  /* "ncc/data/token_block_utils_fast.pyx":120
  *     cdef DatasetSearcher ds = DatasetSearcher(sizes)
  *     cdef np.ndarray[DTYPE_t, ndim=2] block_to_dataset_index = np.zeros([len(slice_indices), 3], dtype=DTYPE)
  *     cdef DTYPE_t[:, :] block_to_dataset_index_view = block_to_dataset_index             # <<<<<<<<<<<<<<
  *     cdef DTYPE_t[:, :] slice_indices_view = slice_indices
  *     cdef Py_ssize_t x_max = slice_indices.shape[0]
  */
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(((PyObject *)__pyx_v_block_to_dataset_index), PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 120, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(((PyObject *)__pyx_v_block_to_dataset_index), PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 120, __pyx_L1_error)
   __pyx_v_block_to_dataset_index_view = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":121
+  /* "ncc/data/token_block_utils_fast.pyx":121
  *     cdef np.ndarray[DTYPE_t, ndim=2] block_to_dataset_index = np.zeros([len(slice_indices), 3], dtype=DTYPE)
  *     cdef DTYPE_t[:, :] block_to_dataset_index_view = block_to_dataset_index
  *     cdef DTYPE_t[:, :] slice_indices_view = slice_indices             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t x_max = slice_indices.shape[0]
  * 
  */
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(((PyObject *)__pyx_v_slice_indices), PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 121, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(((PyObject *)__pyx_v_slice_indices), PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 121, __pyx_L1_error)
   __pyx_v_slice_indices_view = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":122
+  /* "ncc/data/token_block_utils_fast.pyx":122
  *     cdef DTYPE_t[:, :] block_to_dataset_index_view = block_to_dataset_index
  *     cdef DTYPE_t[:, :] slice_indices_view = slice_indices
  *     cdef Py_ssize_t x_max = slice_indices.shape[0]             # <<<<<<<<<<<<<<
@@ -21233,7 +21233,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
   __pyx_t_8 = __pyx_f_5numpy_7ndarray_5shape_shape(((PyArrayObject *)__pyx_v_slice_indices)); if (unlikely(__pyx_t_8 == ((npy_intp *)NULL) && PyErr_Occurred())) __PYX_ERR(0, 122, __pyx_L1_error)
   __pyx_v_x_max = (__pyx_t_8[0]);
 
-  /* "fairseq/data/token_block_utils_fast.pyx":124
+  /* "ncc/data/token_block_utils_fast.pyx":124
  *     cdef Py_ssize_t x_max = slice_indices.shape[0]
  * 
  *     for i in range(x_max):             # <<<<<<<<<<<<<<
@@ -21245,7 +21245,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
   for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
     __pyx_v_i = __pyx_t_10;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":125
+    /* "ncc/data/token_block_utils_fast.pyx":125
  * 
  *     for i in range(x_max):
  *         s = slice_indices_view[i][0]             # <<<<<<<<<<<<<<
@@ -21254,9 +21254,9 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
  */
     __pyx_t_11 = __pyx_v_i;
     __pyx_t_12 = 0;
-    __pyx_v_s = (*((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_slice_indices_view.data + __pyx_t_11 * __pyx_v_slice_indices_view.strides[0]) ) + __pyx_t_12 * __pyx_v_slice_indices_view.strides[1]) )));
+    __pyx_v_s = (*((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_slice_indices_view.data + __pyx_t_11 * __pyx_v_slice_indices_view.strides[0]) ) + __pyx_t_12 * __pyx_v_slice_indices_view.strides[1]) )));
 
-    /* "fairseq/data/token_block_utils_fast.pyx":126
+    /* "ncc/data/token_block_utils_fast.pyx":126
  *     for i in range(x_max):
  *         s = slice_indices_view[i][0]
  *         e = slice_indices_view[i][1]             # <<<<<<<<<<<<<<
@@ -21265,20 +21265,20 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
  */
     __pyx_t_12 = __pyx_v_i;
     __pyx_t_11 = 1;
-    __pyx_v_e = (*((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_slice_indices_view.data + __pyx_t_12 * __pyx_v_slice_indices_view.strides[0]) ) + __pyx_t_11 * __pyx_v_slice_indices_view.strides[1]) )));
+    __pyx_v_e = (*((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_slice_indices_view.data + __pyx_t_12 * __pyx_v_slice_indices_view.strides[0]) ) + __pyx_t_11 * __pyx_v_slice_indices_view.strides[1]) )));
 
-    /* "fairseq/data/token_block_utils_fast.pyx":127
+    /* "ncc/data/token_block_utils_fast.pyx":127
  *         s = slice_indices_view[i][0]
  *         e = slice_indices_view[i][1]
  *         ds.seek(s)             # <<<<<<<<<<<<<<
  *         start_ds_idx = ds.current_index
  *         start_offset = ds.current_offset
  */
-    __pyx_t_5 = ((struct __pyx_vtabstruct_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_ds->__pyx_vtab)->seek(__pyx_v_ds, __pyx_v_s); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 127, __pyx_L1_error)
+    __pyx_t_5 = ((struct __pyx_vtabstruct_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_ds->__pyx_vtab)->seek(__pyx_v_ds, __pyx_v_s); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":128
+    /* "ncc/data/token_block_utils_fast.pyx":128
  *         e = slice_indices_view[i][1]
  *         ds.seek(s)
  *         start_ds_idx = ds.current_index             # <<<<<<<<<<<<<<
@@ -21288,7 +21288,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
     __pyx_t_13 = __pyx_v_ds->current_index;
     __pyx_v_start_ds_idx = __pyx_t_13;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":129
+    /* "ncc/data/token_block_utils_fast.pyx":129
  *         ds.seek(s)
  *         start_ds_idx = ds.current_index
  *         start_offset = ds.current_offset             # <<<<<<<<<<<<<<
@@ -21298,7 +21298,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
     __pyx_t_13 = __pyx_v_ds->current_offset;
     __pyx_v_start_offset = __pyx_t_13;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":130
+    /* "ncc/data/token_block_utils_fast.pyx":130
  *         start_ds_idx = ds.current_index
  *         start_offset = ds.current_offset
  *         if e <= s:             # <<<<<<<<<<<<<<
@@ -21308,7 +21308,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
     __pyx_t_14 = (__pyx_v_e <= __pyx_v_s);
     if (__pyx_t_14) {
 
-      /* "fairseq/data/token_block_utils_fast.pyx":131
+      /* "ncc/data/token_block_utils_fast.pyx":131
  *         start_offset = ds.current_offset
  *         if e <= s:
  *             end_ds_idx = start_ds_idx             # <<<<<<<<<<<<<<
@@ -21317,7 +21317,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
  */
       __pyx_v_end_ds_idx = __pyx_v_start_ds_idx;
 
-      /* "fairseq/data/token_block_utils_fast.pyx":130
+      /* "ncc/data/token_block_utils_fast.pyx":130
  *         start_ds_idx = ds.current_index
  *         start_offset = ds.current_offset
  *         if e <= s:             # <<<<<<<<<<<<<<
@@ -21327,7 +21327,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
       goto __pyx_L5;
     }
 
-    /* "fairseq/data/token_block_utils_fast.pyx":133
+    /* "ncc/data/token_block_utils_fast.pyx":133
  *             end_ds_idx = start_ds_idx
  *         else:
  *             ds.seek(e - 1)             # <<<<<<<<<<<<<<
@@ -21335,11 +21335,11 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
  *         block_to_dataset_index_view[i][0] = start_ds_idx  # starting index in dataset
  */
     /*else*/ {
-      __pyx_t_5 = ((struct __pyx_vtabstruct_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_ds->__pyx_vtab)->seek(__pyx_v_ds, (__pyx_v_e - 1)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 133, __pyx_L1_error)
+      __pyx_t_5 = ((struct __pyx_vtabstruct_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_ds->__pyx_vtab)->seek(__pyx_v_ds, (__pyx_v_e - 1)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 133, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-      /* "fairseq/data/token_block_utils_fast.pyx":134
+      /* "ncc/data/token_block_utils_fast.pyx":134
  *         else:
  *             ds.seek(e - 1)
  *             end_ds_idx = ds.current_index             # <<<<<<<<<<<<<<
@@ -21351,7 +21351,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
     }
     __pyx_L5:;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":135
+    /* "ncc/data/token_block_utils_fast.pyx":135
  *             ds.seek(e - 1)
  *             end_ds_idx = ds.current_index
  *         block_to_dataset_index_view[i][0] = start_ds_idx  # starting index in dataset             # <<<<<<<<<<<<<<
@@ -21360,9 +21360,9 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
  */
     __pyx_t_11 = __pyx_v_i;
     __pyx_t_12 = 0;
-    *((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_block_to_dataset_index_view.data + __pyx_t_11 * __pyx_v_block_to_dataset_index_view.strides[0]) ) + __pyx_t_12 * __pyx_v_block_to_dataset_index_view.strides[1]) )) = __pyx_v_start_ds_idx;
+    *((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_block_to_dataset_index_view.data + __pyx_t_11 * __pyx_v_block_to_dataset_index_view.strides[0]) ) + __pyx_t_12 * __pyx_v_block_to_dataset_index_view.strides[1]) )) = __pyx_v_start_ds_idx;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":136
+    /* "ncc/data/token_block_utils_fast.pyx":136
  *             end_ds_idx = ds.current_index
  *         block_to_dataset_index_view[i][0] = start_ds_idx  # starting index in dataset
  *         block_to_dataset_index_view[i][1] = start_offset  # starting offset within starting index             # <<<<<<<<<<<<<<
@@ -21371,9 +21371,9 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
  */
     __pyx_t_12 = __pyx_v_i;
     __pyx_t_11 = 1;
-    *((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_block_to_dataset_index_view.data + __pyx_t_12 * __pyx_v_block_to_dataset_index_view.strides[0]) ) + __pyx_t_11 * __pyx_v_block_to_dataset_index_view.strides[1]) )) = __pyx_v_start_offset;
+    *((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_block_to_dataset_index_view.data + __pyx_t_12 * __pyx_v_block_to_dataset_index_view.strides[0]) ) + __pyx_t_11 * __pyx_v_block_to_dataset_index_view.strides[1]) )) = __pyx_v_start_offset;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":137
+    /* "ncc/data/token_block_utils_fast.pyx":137
  *         block_to_dataset_index_view[i][0] = start_ds_idx  # starting index in dataset
  *         block_to_dataset_index_view[i][1] = start_offset  # starting offset within starting index
  *         block_to_dataset_index_view[i][2] = end_ds_idx    # ending index in dataset             # <<<<<<<<<<<<<<
@@ -21382,10 +21382,10 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
  */
     __pyx_t_11 = __pyx_v_i;
     __pyx_t_12 = 2;
-    *((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_block_to_dataset_index_view.data + __pyx_t_11 * __pyx_v_block_to_dataset_index_view.strides[0]) ) + __pyx_t_12 * __pyx_v_block_to_dataset_index_view.strides[1]) )) = __pyx_v_end_ds_idx;
+    *((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_block_to_dataset_index_view.data + __pyx_t_11 * __pyx_v_block_to_dataset_index_view.strides[0]) ) + __pyx_t_12 * __pyx_v_block_to_dataset_index_view.strides[1]) )) = __pyx_v_end_ds_idx;
   }
 
-  /* "fairseq/data/token_block_utils_fast.pyx":138
+  /* "ncc/data/token_block_utils_fast.pyx":138
  *         block_to_dataset_index_view[i][1] = start_offset  # starting offset within starting index
  *         block_to_dataset_index_view[i][2] = end_ds_idx    # ending index in dataset
  *     return block_to_dataset_index             # <<<<<<<<<<<<<<
@@ -21397,7 +21397,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
   __pyx_r = ((PyArrayObject *)__pyx_v_block_to_dataset_index);
   goto __pyx_L0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":111
+  /* "ncc/data/token_block_utils_fast.pyx":111
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
  * cpdef np.ndarray[DTYPE_t, ndim=2] _get_block_to_dataset_index_fast(np.ndarray[DTYPE_t, ndim=1] sizes, np.ndarray[DTYPE_t, ndim=2] slice_indices):             # <<<<<<<<<<<<<<
@@ -21420,7 +21420,7 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast._get_block_to_dataset_index_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast._get_block_to_dataset_index_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   goto __pyx_L2;
   __pyx_L0:;
@@ -21438,15 +21438,15 @@ static PyArrayObject *__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_7fairseq_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast = {"_get_block_to_dataset_index_fast", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7fairseq_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_3ncc_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast = {"_get_block_to_dataset_index_fast", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_3ncc_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -21531,13 +21531,13 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast._get_block_to_dataset_index_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast._get_block_to_dataset_index_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_sizes), __pyx_ptype_5numpy_ndarray, 1, "sizes", 0))) __PYX_ERR(0, 111, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_slice_indices), __pyx_ptype_5numpy_ndarray, 1, "slice_indices", 0))) __PYX_ERR(0, 111, __pyx_L1_error)
-  __pyx_r = __pyx_pf_7fairseq_4data_22token_block_utils_fast_2_get_block_to_dataset_index_fast(__pyx_self, __pyx_v_sizes, __pyx_v_slice_indices);
+  __pyx_r = __pyx_pf_3ncc_4data_22token_block_utils_fast_2_get_block_to_dataset_index_fast(__pyx_self, __pyx_v_sizes, __pyx_v_slice_indices);
 
   /* function exit code */
   goto __pyx_L0;
@@ -21554,7 +21554,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_2_get_block_to_dataset_index_fast(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sizes, PyArrayObject *__pyx_v_slice_indices) {
+static PyObject *__pyx_pf_3ncc_4data_22token_block_utils_fast_2_get_block_to_dataset_index_fast(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_sizes, PyArrayObject *__pyx_v_slice_indices) {
   __Pyx_LocalBuf_ND __pyx_pybuffernd_sizes;
   __Pyx_Buffer __pyx_pybuffer_sizes;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_slice_indices;
@@ -21576,16 +21576,16 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_2_get_block_to
   __pyx_pybuffernd_slice_indices.rcbuffer = &__pyx_pybuffer_slice_indices;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer, (PyObject*)__pyx_v_sizes, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 111, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer, (PyObject*)__pyx_v_sizes, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 111, __pyx_L1_error)
   }
   __pyx_pybuffernd_sizes.diminfo[0].strides = __pyx_pybuffernd_sizes.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_sizes.diminfo[0].shape = __pyx_pybuffernd_sizes.rcbuffer->pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 111, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer, (PyObject*)__pyx_v_slice_indices, &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) __PYX_ERR(0, 111, __pyx_L1_error)
   }
   __pyx_pybuffernd_slice_indices.diminfo[0].strides = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_slice_indices.diminfo[0].shape = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_slice_indices.diminfo[1].strides = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_slice_indices.diminfo[1].shape = __pyx_pybuffernd_slice_indices.rcbuffer->pybuffer.shape[1];
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_7fairseq_4data_22token_block_utils_fast__get_block_to_dataset_index_fast(__pyx_v_sizes, __pyx_v_slice_indices, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_3ncc_4data_22token_block_utils_fast__get_block_to_dataset_index_fast(__pyx_v_sizes, __pyx_v_slice_indices, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -21601,7 +21601,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_2_get_block_to
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sizes.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_slice_indices.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast._get_block_to_dataset_index_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast._get_block_to_dataset_index_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -21613,7 +21613,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_2_get_block_to
   return __pyx_r;
 }
 
-/* "fairseq/data/token_block_utils_fast.pyx":149
+/* "ncc/data/token_block_utils_fast.pyx":149
  *     cdef DTYPE_t[:] sizes
  * 
  *     def __init__(self, DTYPE_t[:] sizes):             # <<<<<<<<<<<<<<
@@ -21622,8 +21622,8 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_2_get_block_to
  */
 
 /* Python wrapper */
-static int __pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static int __pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static int __pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static int __pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_sizes = { 0, 0, { 0 }, { 0 }, { 0 } };
   CYTHON_UNUSED Py_ssize_t __pyx_nargs;
   CYTHON_UNUSED PyObject *const *__pyx_kwvalues;
@@ -21670,7 +21670,7 @@ static int __pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_1_
     } else {
       values[0] = __Pyx_Arg_VARARGS(__pyx_args, 0);
     }
-    __pyx_v_sizes = __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_sizes.memview)) __PYX_ERR(0, 149, __pyx_L3_error)
+    __pyx_v_sizes = __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_sizes.memview)) __PYX_ERR(0, 149, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
@@ -21684,11 +21684,11 @@ static int __pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_1_
     }
   }
   __PYX_XCLEAR_MEMVIEW(&__pyx_v_sizes, 1);
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.DatasetSearcher.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.DatasetSearcher.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher___init__(((struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self), __pyx_v_sizes);
+  __pyx_r = __pyx_pf_3ncc_4data_22token_block_utils_fast_15DatasetSearcher___init__(((struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self), __pyx_v_sizes);
 
   /* function exit code */
   __PYX_XCLEAR_MEMVIEW(&__pyx_v_sizes, 1);
@@ -21702,7 +21702,7 @@ static int __pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_1_
   return __pyx_r;
 }
 
-static int __pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher___init__(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __Pyx_memviewslice __pyx_v_sizes) {
+static int __pyx_pf_3ncc_4data_22token_block_utils_fast_15DatasetSearcher___init__(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __Pyx_memviewslice __pyx_v_sizes) {
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -21711,7 +21711,7 @@ static int __pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher___
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "fairseq/data/token_block_utils_fast.pyx":150
+  /* "ncc/data/token_block_utils_fast.pyx":150
  * 
  *     def __init__(self, DTYPE_t[:] sizes):
  *         self.sizes = sizes             # <<<<<<<<<<<<<<
@@ -21722,18 +21722,18 @@ static int __pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher___
   __PYX_INC_MEMVIEW(&__pyx_v_sizes, 1);
   __pyx_v_self->sizes = __pyx_v_sizes;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":151
+  /* "ncc/data/token_block_utils_fast.pyx":151
  *     def __init__(self, DTYPE_t[:] sizes):
  *         self.sizes = sizes
  *         self.reset()             # <<<<<<<<<<<<<<
  * 
  *     cdef reset(self):
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self->__pyx_vtab)->reset(__pyx_v_self); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 151, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self->__pyx_vtab)->reset(__pyx_v_self); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":149
+  /* "ncc/data/token_block_utils_fast.pyx":149
  *     cdef DTYPE_t[:] sizes
  * 
  *     def __init__(self, DTYPE_t[:] sizes):             # <<<<<<<<<<<<<<
@@ -21746,14 +21746,14 @@ static int __pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher___
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.DatasetSearcher.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.DatasetSearcher.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "fairseq/data/token_block_utils_fast.pyx":153
+/* "ncc/data/token_block_utils_fast.pyx":153
  *         self.reset()
  * 
  *     cdef reset(self):             # <<<<<<<<<<<<<<
@@ -21761,12 +21761,12 @@ static int __pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher___
  *         self.current_i = 0          # "flat" index
  */
 
-static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_reset(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self) {
+static PyObject *__pyx_f_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_reset(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("reset", 0);
 
-  /* "fairseq/data/token_block_utils_fast.pyx":154
+  /* "ncc/data/token_block_utils_fast.pyx":154
  * 
  *     cdef reset(self):
  *         self.current_offset = 0     # offset within current index in underlying dataset             # <<<<<<<<<<<<<<
@@ -21775,7 +21775,7 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
  */
   __pyx_v_self->current_offset = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":155
+  /* "ncc/data/token_block_utils_fast.pyx":155
  *     cdef reset(self):
  *         self.current_offset = 0     # offset within current index in underlying dataset
  *         self.current_i = 0          # "flat" index             # <<<<<<<<<<<<<<
@@ -21784,7 +21784,7 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
  */
   __pyx_v_self->current_i = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":156
+  /* "ncc/data/token_block_utils_fast.pyx":156
  *         self.current_offset = 0     # offset within current index in underlying dataset
  *         self.current_i = 0          # "flat" index
  *         self.current_index = 0      # index in underlying dataset             # <<<<<<<<<<<<<<
@@ -21793,7 +21793,7 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
  */
   __pyx_v_self->current_index = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":153
+  /* "ncc/data/token_block_utils_fast.pyx":153
  *         self.reset()
  * 
  *     cdef reset(self):             # <<<<<<<<<<<<<<
@@ -21808,7 +21808,7 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
   return __pyx_r;
 }
 
-/* "fairseq/data/token_block_utils_fast.pyx":161
+/* "ncc/data/token_block_utils_fast.pyx":161
  *     @cython.wraparound(False)
  *     @cython.nonecheck(False)
  *     cdef int step(self, DTYPE_t i):             # <<<<<<<<<<<<<<
@@ -21816,9 +21816,9 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
  *         cdef DTYPE_t remaining
  */
 
-static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_step(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i) {
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_to_consume;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_remaining;
+static int __pyx_f_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_step(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i) {
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_to_consume;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_remaining;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -21829,7 +21829,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("step", 0);
 
-  /* "fairseq/data/token_block_utils_fast.pyx":164
+  /* "ncc/data/token_block_utils_fast.pyx":164
  *         cdef DTYPE_t to_consume
  *         cdef DTYPE_t remaining
  *         if i < self.current_i:             # <<<<<<<<<<<<<<
@@ -21839,18 +21839,18 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
   __pyx_t_1 = (__pyx_v_i < __pyx_v_self->current_i);
   if (__pyx_t_1) {
 
-    /* "fairseq/data/token_block_utils_fast.pyx":165
+    /* "ncc/data/token_block_utils_fast.pyx":165
  *         cdef DTYPE_t remaining
  *         if i < self.current_i:
  *             self.reset()             # <<<<<<<<<<<<<<
  *         if i > self.current_i:
  *             to_consume = i - self.current_i
  */
-    __pyx_t_2 = ((struct __pyx_vtabstruct_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self->__pyx_vtab)->reset(__pyx_v_self); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 165, __pyx_L1_error)
+    __pyx_t_2 = ((struct __pyx_vtabstruct_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self->__pyx_vtab)->reset(__pyx_v_self); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 165, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":164
+    /* "ncc/data/token_block_utils_fast.pyx":164
  *         cdef DTYPE_t to_consume
  *         cdef DTYPE_t remaining
  *         if i < self.current_i:             # <<<<<<<<<<<<<<
@@ -21859,7 +21859,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
  */
   }
 
-  /* "fairseq/data/token_block_utils_fast.pyx":166
+  /* "ncc/data/token_block_utils_fast.pyx":166
  *         if i < self.current_i:
  *             self.reset()
  *         if i > self.current_i:             # <<<<<<<<<<<<<<
@@ -21869,7 +21869,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
   __pyx_t_1 = (__pyx_v_i > __pyx_v_self->current_i);
   if (__pyx_t_1) {
 
-    /* "fairseq/data/token_block_utils_fast.pyx":167
+    /* "ncc/data/token_block_utils_fast.pyx":167
  *             self.reset()
  *         if i > self.current_i:
  *             to_consume = i - self.current_i             # <<<<<<<<<<<<<<
@@ -21878,7 +21878,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
  */
     __pyx_v_to_consume = (__pyx_v_i - __pyx_v_self->current_i);
 
-    /* "fairseq/data/token_block_utils_fast.pyx":168
+    /* "ncc/data/token_block_utils_fast.pyx":168
  *         if i > self.current_i:
  *             to_consume = i - self.current_i
  *             remaining = self.sizes[self.current_index] - self.current_offset             # <<<<<<<<<<<<<<
@@ -21887,9 +21887,9 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
  */
     if (unlikely(!__pyx_v_self->sizes.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 168, __pyx_L1_error)}
     __pyx_t_3 = __pyx_v_self->current_index;
-    __pyx_v_remaining = ((*((__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_self->sizes.data + __pyx_t_3 * __pyx_v_self->sizes.strides[0]) ))) - __pyx_v_self->current_offset);
+    __pyx_v_remaining = ((*((__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) ( /* dim=0 */ (__pyx_v_self->sizes.data + __pyx_t_3 * __pyx_v_self->sizes.strides[0]) ))) - __pyx_v_self->current_offset);
 
-    /* "fairseq/data/token_block_utils_fast.pyx":169
+    /* "ncc/data/token_block_utils_fast.pyx":169
  *             to_consume = i - self.current_i
  *             remaining = self.sizes[self.current_index] - self.current_offset
  *             if remaining > to_consume:             # <<<<<<<<<<<<<<
@@ -21899,7 +21899,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
     __pyx_t_1 = (__pyx_v_remaining > __pyx_v_to_consume);
     if (__pyx_t_1) {
 
-      /* "fairseq/data/token_block_utils_fast.pyx":170
+      /* "ncc/data/token_block_utils_fast.pyx":170
  *             remaining = self.sizes[self.current_index] - self.current_offset
  *             if remaining > to_consume:
  *                 self.current_offset += to_consume             # <<<<<<<<<<<<<<
@@ -21908,7 +21908,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
  */
       __pyx_v_self->current_offset = (__pyx_v_self->current_offset + __pyx_v_to_consume);
 
-      /* "fairseq/data/token_block_utils_fast.pyx":171
+      /* "ncc/data/token_block_utils_fast.pyx":171
  *             if remaining > to_consume:
  *                 self.current_offset += to_consume
  *                 self.current_i += to_consume             # <<<<<<<<<<<<<<
@@ -21917,7 +21917,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
  */
       __pyx_v_self->current_i = (__pyx_v_self->current_i + __pyx_v_to_consume);
 
-      /* "fairseq/data/token_block_utils_fast.pyx":169
+      /* "ncc/data/token_block_utils_fast.pyx":169
  *             to_consume = i - self.current_i
  *             remaining = self.sizes[self.current_index] - self.current_offset
  *             if remaining > to_consume:             # <<<<<<<<<<<<<<
@@ -21927,7 +21927,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
       goto __pyx_L5;
     }
 
-    /* "fairseq/data/token_block_utils_fast.pyx":173
+    /* "ncc/data/token_block_utils_fast.pyx":173
  *                 self.current_i += to_consume
  *             else:
  *                 assert remaining >= 0             # <<<<<<<<<<<<<<
@@ -21947,7 +21947,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
       if ((1)); else __PYX_ERR(0, 173, __pyx_L1_error)
       #endif
 
-      /* "fairseq/data/token_block_utils_fast.pyx":174
+      /* "ncc/data/token_block_utils_fast.pyx":174
  *             else:
  *                 assert remaining >= 0
  *                 self.current_i += remaining             # <<<<<<<<<<<<<<
@@ -21956,7 +21956,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
  */
       __pyx_v_self->current_i = (__pyx_v_self->current_i + __pyx_v_remaining);
 
-      /* "fairseq/data/token_block_utils_fast.pyx":175
+      /* "ncc/data/token_block_utils_fast.pyx":175
  *                 assert remaining >= 0
  *                 self.current_i += remaining
  *                 self.current_index += 1             # <<<<<<<<<<<<<<
@@ -21965,7 +21965,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
  */
       __pyx_v_self->current_index = (__pyx_v_self->current_index + 1);
 
-      /* "fairseq/data/token_block_utils_fast.pyx":176
+      /* "ncc/data/token_block_utils_fast.pyx":176
  *                 self.current_i += remaining
  *                 self.current_index += 1
  *                 self.current_offset = 0             # <<<<<<<<<<<<<<
@@ -21974,7 +21974,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
  */
       __pyx_v_self->current_offset = 0;
 
-      /* "fairseq/data/token_block_utils_fast.pyx":177
+      /* "ncc/data/token_block_utils_fast.pyx":177
  *                 self.current_index += 1
  *                 self.current_offset = 0
  *                 return 1             # <<<<<<<<<<<<<<
@@ -21986,7 +21986,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
     }
     __pyx_L5:;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":166
+    /* "ncc/data/token_block_utils_fast.pyx":166
  *         if i < self.current_i:
  *             self.reset()
  *         if i > self.current_i:             # <<<<<<<<<<<<<<
@@ -21995,7 +21995,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
  */
   }
 
-  /* "fairseq/data/token_block_utils_fast.pyx":178
+  /* "ncc/data/token_block_utils_fast.pyx":178
  *                 self.current_offset = 0
  *                 return 1
  *         return 0             # <<<<<<<<<<<<<<
@@ -22005,7 +22005,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
   __pyx_r = 0;
   goto __pyx_L0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":161
+  /* "ncc/data/token_block_utils_fast.pyx":161
  *     @cython.wraparound(False)
  *     @cython.nonecheck(False)
  *     cdef int step(self, DTYPE_t i):             # <<<<<<<<<<<<<<
@@ -22016,14 +22016,14 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.DatasetSearcher.step", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.DatasetSearcher.step", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "fairseq/data/token_block_utils_fast.pyx":183
+/* "ncc/data/token_block_utils_fast.pyx":183
  *     @cython.wraparound(False)
  *     @cython.nonecheck(False)
  *     cdef seek(self, DTYPE_t i):             # <<<<<<<<<<<<<<
@@ -22031,7 +22031,7 @@ static int __pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_ste
  *         while not_done == 1:
  */
 
-static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_seek(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i) {
+static PyObject *__pyx_f_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_seek(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_v_i) {
   int __pyx_v_not_done;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -22042,7 +22042,7 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("seek", 0);
 
-  /* "fairseq/data/token_block_utils_fast.pyx":184
+  /* "ncc/data/token_block_utils_fast.pyx":184
  *     @cython.nonecheck(False)
  *     cdef seek(self, DTYPE_t i):
  *         cdef int not_done = 1             # <<<<<<<<<<<<<<
@@ -22051,7 +22051,7 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
  */
   __pyx_v_not_done = 1;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":185
+  /* "ncc/data/token_block_utils_fast.pyx":185
  *     cdef seek(self, DTYPE_t i):
  *         cdef int not_done = 1
  *         while not_done == 1:             # <<<<<<<<<<<<<<
@@ -22062,17 +22062,17 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
     __pyx_t_1 = (__pyx_v_not_done == 1);
     if (!__pyx_t_1) break;
 
-    /* "fairseq/data/token_block_utils_fast.pyx":186
+    /* "ncc/data/token_block_utils_fast.pyx":186
  *         cdef int not_done = 1
  *         while not_done == 1:
  *             not_done = self.step(i)             # <<<<<<<<<<<<<<
  *         assert self.current_i == i
  */
-    __pyx_t_2 = ((struct __pyx_vtabstruct_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self->__pyx_vtab)->step(__pyx_v_self, __pyx_v_i); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 186, __pyx_L1_error)
+    __pyx_t_2 = ((struct __pyx_vtabstruct_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self->__pyx_vtab)->step(__pyx_v_self, __pyx_v_i); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 186, __pyx_L1_error)
     __pyx_v_not_done = __pyx_t_2;
   }
 
-  /* "fairseq/data/token_block_utils_fast.pyx":187
+  /* "ncc/data/token_block_utils_fast.pyx":187
  *         while not_done == 1:
  *             not_done = self.step(i)
  *         assert self.current_i == i             # <<<<<<<<<<<<<<
@@ -22089,7 +22089,7 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
   if ((1)); else __PYX_ERR(0, 187, __pyx_L1_error)
   #endif
 
-  /* "fairseq/data/token_block_utils_fast.pyx":183
+  /* "ncc/data/token_block_utils_fast.pyx":183
  *     @cython.wraparound(False)
  *     @cython.nonecheck(False)
  *     cdef seek(self, DTYPE_t i):             # <<<<<<<<<<<<<<
@@ -22101,7 +22101,7 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.DatasetSearcher.seek", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.DatasetSearcher.seek", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -22116,15 +22116,15 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearch
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__ = {"__reduce_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -22156,18 +22156,18 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   goto __pyx_L4_argument_unpacking_done;
   goto __pyx_L3_error;
   __pyx_L3_error:;
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.DatasetSearcher.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.DatasetSearcher.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_2__reduce_cython__(((struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self));
+  __pyx_r = __pyx_pf_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_2__reduce_cython__(((struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_2__reduce_cython__(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self) {
+static PyObject *__pyx_pf_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_2__reduce_cython__(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self) {
   PyObject *__pyx_v_state = 0;
   PyObject *__pyx_v__dict = 0;
   int __pyx_v_use_setstate;
@@ -22198,7 +22198,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearc
   __pyx_t_3 = __Pyx_PyInt_From_int64_t(__pyx_v_self->current_offset); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if (unlikely(!__pyx_v_self->sizes.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(1, 5, __pyx_L1_error)}
-  __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_self->sizes, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 5, __pyx_L1_error)
+  __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_self->sizes, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, (int (*)(char *, PyObject *)) __pyx_memview_set_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_5 = PyTuple_New(4); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
@@ -22390,7 +22390,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearc
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.DatasetSearcher.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.DatasetSearcher.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_state);
@@ -22408,15 +22408,15 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearc
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__(PyObject *__pyx_v_self, 
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__(PyObject *__pyx_v_self, 
+static PyMethodDef __pyx_mdef_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__ = {"__setstate_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__(PyObject *__pyx_v_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -22486,11 +22486,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.DatasetSearcher.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.DatasetSearcher.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_4__setstate_cython__(((struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self), __pyx_v___pyx_state);
+  __pyx_r = __pyx_pf_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_4__setstate_cython__(((struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v_self), __pyx_v___pyx_state);
 
   /* function exit code */
   {
@@ -22503,7 +22503,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_4__setstate_cython__(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pf_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_4__setstate_cython__(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v_self, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -22518,7 +22518,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearc
  *     __pyx_unpickle_DatasetSearcher__set_state(self, __pyx_state)             # <<<<<<<<<<<<<<
  */
   if (!(likely(PyTuple_CheckExact(__pyx_v___pyx_state))||((__pyx_v___pyx_state) == Py_None) || __Pyx_RaiseUnexpectedTypeError("tuple", __pyx_v___pyx_state))) __PYX_ERR(1, 17, __pyx_L1_error)
-  __pyx_t_1 = __pyx_f_7fairseq_4data_22token_block_utils_fast___pyx_unpickle_DatasetSearcher__set_state(__pyx_v_self, ((PyObject*)__pyx_v___pyx_state)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 17, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_3ncc_4data_22token_block_utils_fast___pyx_unpickle_DatasetSearcher__set_state(__pyx_v_self, ((PyObject*)__pyx_v___pyx_state)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -22534,7 +22534,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearc
   goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.DatasetSearcher.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.DatasetSearcher.__setstate_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -22549,15 +22549,15 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_15DatasetSearc
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_5__pyx_unpickle_DatasetSearcher(PyObject *__pyx_self, 
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_5__pyx_unpickle_DatasetSearcher(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ); /*proto*/
-static PyMethodDef __pyx_mdef_7fairseq_4data_22token_block_utils_fast_5__pyx_unpickle_DatasetSearcher = {"__pyx_unpickle_DatasetSearcher", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7fairseq_4data_22token_block_utils_fast_5__pyx_unpickle_DatasetSearcher, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_7fairseq_4data_22token_block_utils_fast_5__pyx_unpickle_DatasetSearcher(PyObject *__pyx_self, 
+static PyMethodDef __pyx_mdef_3ncc_4data_22token_block_utils_fast_5__pyx_unpickle_DatasetSearcher = {"__pyx_unpickle_DatasetSearcher", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_3ncc_4data_22token_block_utils_fast_5__pyx_unpickle_DatasetSearcher, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_3ncc_4data_22token_block_utils_fast_5__pyx_unpickle_DatasetSearcher(PyObject *__pyx_self, 
 #if CYTHON_METH_FASTCALL
 PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 #else
@@ -22657,11 +22657,11 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       __Pyx_Arg_XDECREF_FASTCALL(values[__pyx_temp]);
     }
   }
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.__pyx_unpickle_DatasetSearcher", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.__pyx_unpickle_DatasetSearcher", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7fairseq_4data_22token_block_utils_fast_4__pyx_unpickle_DatasetSearcher(__pyx_self, __pyx_v___pyx_type, __pyx_v___pyx_checksum, __pyx_v___pyx_state);
+  __pyx_r = __pyx_pf_3ncc_4data_22token_block_utils_fast_4__pyx_unpickle_DatasetSearcher(__pyx_self, __pyx_v___pyx_type, __pyx_v___pyx_checksum, __pyx_v___pyx_state);
 
   /* function exit code */
   {
@@ -22674,7 +22674,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_4__pyx_unpickle_DatasetSearcher(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_pf_3ncc_4data_22token_block_utils_fast_4__pyx_unpickle_DatasetSearcher(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v___pyx_type, long __pyx_v___pyx_checksum, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_v___pyx_PickleError = 0;
   PyObject *__pyx_v___pyx_result = 0;
   PyObject *__pyx_r = NULL;
@@ -22756,7 +22756,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_4__pyx_unpickl
  *     if __pyx_state is not None:
  *         __pyx_unpickle_DatasetSearcher__set_state(<DatasetSearcher> __pyx_result, __pyx_state)
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher), __pyx_n_s_new); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 7, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher), __pyx_n_s_new); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_4 = NULL;
   __pyx_t_5 = 0;
@@ -22801,7 +22801,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_4__pyx_unpickl
  * cdef __pyx_unpickle_DatasetSearcher__set_state(DatasetSearcher __pyx_result, tuple __pyx_state):
  */
     if (!(likely(PyTuple_CheckExact(__pyx_v___pyx_state))||((__pyx_v___pyx_state) == Py_None) || __Pyx_RaiseUnexpectedTypeError("tuple", __pyx_v___pyx_state))) __PYX_ERR(1, 9, __pyx_L1_error)
-    __pyx_t_1 = __pyx_f_7fairseq_4data_22token_block_utils_fast___pyx_unpickle_DatasetSearcher__set_state(((struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v___pyx_result), ((PyObject*)__pyx_v___pyx_state)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 9, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_3ncc_4data_22token_block_utils_fast___pyx_unpickle_DatasetSearcher__set_state(((struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)__pyx_v___pyx_result), ((PyObject*)__pyx_v___pyx_state)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 9, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
@@ -22837,7 +22837,7 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_4__pyx_unpickl
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.__pyx_unpickle_DatasetSearcher", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.__pyx_unpickle_DatasetSearcher", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v___pyx_PickleError);
@@ -22855,11 +22855,11 @@ static PyObject *__pyx_pf_7fairseq_4data_22token_block_utils_fast_4__pyx_unpickl
  *     if len(__pyx_state) > 4 and hasattr(__pyx_result, '__dict__'):
  */
 
-static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast___pyx_unpickle_DatasetSearcher__set_state(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v___pyx_result, PyObject *__pyx_v___pyx_state) {
+static PyObject *__pyx_f_3ncc_4data_22token_block_utils_fast___pyx_unpickle_DatasetSearcher__set_state(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *__pyx_v___pyx_result, PyObject *__pyx_v___pyx_state) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
-  __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t __pyx_t_2;
+  __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t __pyx_t_2;
   __Pyx_memviewslice __pyx_t_3 = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_t_4;
   Py_ssize_t __pyx_t_5;
@@ -22913,7 +22913,7 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast___pyx_unpickle_
   }
   __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 12, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(1, 12, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(1, 12, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __PYX_XCLEAR_MEMVIEW(&__pyx_v___pyx_result->sizes, 0);
   __pyx_v___pyx_result->sizes = __pyx_t_3;
@@ -23008,17 +23008,17 @@ static PyObject *__pyx_f_7fairseq_4data_22token_block_utils_fast___pyx_unpickle_
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_AddTraceback("fairseq.data.token_block_utils_fast.__pyx_unpickle_DatasetSearcher__set_state", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("ncc.data.token_block_utils_fast.__pyx_unpickle_DatasetSearcher__set_state", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
-static struct __pyx_vtabstruct_7fairseq_4data_22token_block_utils_fast_DatasetSearcher __pyx_vtable_7fairseq_4data_22token_block_utils_fast_DatasetSearcher;
+static struct __pyx_vtabstruct_3ncc_4data_22token_block_utils_fast_DatasetSearcher __pyx_vtable_3ncc_4data_22token_block_utils_fast_DatasetSearcher;
 
-static PyObject *__pyx_tp_new_7fairseq_4data_22token_block_utils_fast_DatasetSearcher(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
-  struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *p;
+static PyObject *__pyx_tp_new_3ncc_4data_22token_block_utils_fast_DatasetSearcher(PyTypeObject *t, CYTHON_UNUSED PyObject *a, CYTHON_UNUSED PyObject *k) {
+  struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *p;
   PyObject *o;
   #if CYTHON_COMPILING_IN_LIMITED_API
   allocfunc alloc_func = (allocfunc)PyType_GetSlot(t, Py_tp_alloc);
@@ -23031,18 +23031,18 @@ static PyObject *__pyx_tp_new_7fairseq_4data_22token_block_utils_fast_DatasetSea
   }
   if (unlikely(!o)) return 0;
   #endif
-  p = ((struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)o);
-  p->__pyx_vtab = __pyx_vtabptr_7fairseq_4data_22token_block_utils_fast_DatasetSearcher;
+  p = ((struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)o);
+  p->__pyx_vtab = __pyx_vtabptr_3ncc_4data_22token_block_utils_fast_DatasetSearcher;
   p->sizes.data = NULL;
   p->sizes.memview = NULL;
   return o;
 }
 
-static void __pyx_tp_dealloc_7fairseq_4data_22token_block_utils_fast_DatasetSearcher(PyObject *o) {
-  struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *p = (struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *)o;
+static void __pyx_tp_dealloc_3ncc_4data_22token_block_utils_fast_DatasetSearcher(PyObject *o) {
+  struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *p = (struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *)o;
   #if CYTHON_USE_TP_FINALIZE
   if (unlikely((PY_VERSION_HEX >= 0x03080000 || __Pyx_PyType_HasFeature(Py_TYPE(o), Py_TPFLAGS_HAVE_FINALIZE)) && __Pyx_PyObject_GetSlot(o, tp_finalize, destructor)) && (!PyType_IS_GC(Py_TYPE(o)) || !__Pyx_PyObject_GC_IsFinalized(o))) {
-    if (__Pyx_PyObject_GetSlot(o, tp_dealloc, destructor) == __pyx_tp_dealloc_7fairseq_4data_22token_block_utils_fast_DatasetSearcher) {
+    if (__Pyx_PyObject_GetSlot(o, tp_dealloc, destructor) == __pyx_tp_dealloc_3ncc_4data_22token_block_utils_fast_DatasetSearcher) {
       if (PyObject_CallFinalizerFromDealloc(o)) return;
     }
   }
@@ -23059,35 +23059,35 @@ static void __pyx_tp_dealloc_7fairseq_4data_22token_block_utils_fast_DatasetSear
   #endif
 }
 
-static PyMethodDef __pyx_methods_7fairseq_4data_22token_block_utils_fast_DatasetSearcher[] = {
-  {"__reduce_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
-  {"__setstate_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+static PyMethodDef __pyx_methods_3ncc_4data_22token_block_utils_fast_DatasetSearcher[] = {
+  {"__reduce_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
+  {"__setstate_cython__", (PyCFunction)(void*)(__Pyx_PyCFunction_FastCallWithKeywords)__pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__, __Pyx_METH_FASTCALL|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 #if CYTHON_USE_TYPE_SPECS
-static PyType_Slot __pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher_slots[] = {
-  {Py_tp_dealloc, (void *)__pyx_tp_dealloc_7fairseq_4data_22token_block_utils_fast_DatasetSearcher},
+static PyType_Slot __pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher_slots[] = {
+  {Py_tp_dealloc, (void *)__pyx_tp_dealloc_3ncc_4data_22token_block_utils_fast_DatasetSearcher},
   {Py_tp_doc, (void *)PyDoc_STR("Helper for mapping \"flat\" indices to indices and offsets in an\n    underlying dataset.")},
-  {Py_tp_methods, (void *)__pyx_methods_7fairseq_4data_22token_block_utils_fast_DatasetSearcher},
-  {Py_tp_init, (void *)__pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_1__init__},
-  {Py_tp_new, (void *)__pyx_tp_new_7fairseq_4data_22token_block_utils_fast_DatasetSearcher},
+  {Py_tp_methods, (void *)__pyx_methods_3ncc_4data_22token_block_utils_fast_DatasetSearcher},
+  {Py_tp_init, (void *)__pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_1__init__},
+  {Py_tp_new, (void *)__pyx_tp_new_3ncc_4data_22token_block_utils_fast_DatasetSearcher},
   {0, 0},
 };
-static PyType_Spec __pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher_spec = {
-  "fairseq.data.token_block_utils_fast.DatasetSearcher",
-  sizeof(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher),
+static PyType_Spec __pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher_spec = {
+  "ncc.data.token_block_utils_fast.DatasetSearcher",
+  sizeof(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE,
-  __pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher_slots,
+  __pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher_slots,
 };
 #else
 
-static PyTypeObject __pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher = {
+static PyTypeObject __pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher = {
   PyVarObject_HEAD_INIT(0, 0)
-  "fairseq.data.token_block_utils_fast.""DatasetSearcher", /*tp_name*/
-  sizeof(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher), /*tp_basicsize*/
+  "ncc.data.token_block_utils_fast.""DatasetSearcher", /*tp_name*/
+  sizeof(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_7fairseq_4data_22token_block_utils_fast_DatasetSearcher, /*tp_dealloc*/
+  __pyx_tp_dealloc_3ncc_4data_22token_block_utils_fast_DatasetSearcher, /*tp_dealloc*/
   #if PY_VERSION_HEX < 0x030800b4
   0, /*tp_print*/
   #endif
@@ -23120,7 +23120,7 @@ static PyTypeObject __pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSe
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
   0, /*tp_iternext*/
-  __pyx_methods_7fairseq_4data_22token_block_utils_fast_DatasetSearcher, /*tp_methods*/
+  __pyx_methods_3ncc_4data_22token_block_utils_fast_DatasetSearcher, /*tp_methods*/
   0, /*tp_members*/
   0, /*tp_getset*/
   0, /*tp_base*/
@@ -23130,9 +23130,9 @@ static PyTypeObject __pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSe
   #if !CYTHON_USE_TYPE_SPECS
   0, /*tp_dictoffset*/
   #endif
-  __pyx_pw_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_1__init__, /*tp_init*/
+  __pyx_pw_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_1__init__, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_7fairseq_4data_22token_block_utils_fast_DatasetSearcher, /*tp_new*/
+  __pyx_tp_new_3ncc_4data_22token_block_utils_fast_DatasetSearcher, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -23301,7 +23301,7 @@ static PyType_Slot __pyx_type___pyx_array_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_array_spec = {
-  "fairseq.data.token_block_utils_fast.array",
+  "ncc.data.token_block_utils_fast.array",
   sizeof(struct __pyx_array_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_SEQUENCE,
@@ -23347,7 +23347,7 @@ static PyBufferProcs __pyx_tp_as_buffer_array = {
 
 static PyTypeObject __pyx_type___pyx_array = {
   PyVarObject_HEAD_INIT(0, 0)
-  "fairseq.data.token_block_utils_fast.""array", /*tp_name*/
+  "ncc.data.token_block_utils_fast.""array", /*tp_name*/
   sizeof(struct __pyx_array_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_array, /*tp_dealloc*/
@@ -23507,7 +23507,7 @@ static PyType_Slot __pyx_type___pyx_MemviewEnum_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_MemviewEnum_spec = {
-  "fairseq.data.token_block_utils_fast.Enum",
+  "ncc.data.token_block_utils_fast.Enum",
   sizeof(struct __pyx_MemviewEnum_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
@@ -23517,7 +23517,7 @@ static PyType_Spec __pyx_type___pyx_MemviewEnum_spec = {
 
 static PyTypeObject __pyx_type___pyx_MemviewEnum = {
   PyVarObject_HEAD_INIT(0, 0)
-  "fairseq.data.token_block_utils_fast.""Enum", /*tp_name*/
+  "ncc.data.token_block_utils_fast.""Enum", /*tp_name*/
   sizeof(struct __pyx_MemviewEnum_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_Enum, /*tp_dealloc*/
@@ -23814,7 +23814,7 @@ static PyType_Slot __pyx_type___pyx_memoryview_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_memoryview_spec = {
-  "fairseq.data.token_block_utils_fast.memoryview",
+  "ncc.data.token_block_utils_fast.memoryview",
   sizeof(struct __pyx_memoryview_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC,
@@ -23860,7 +23860,7 @@ static PyBufferProcs __pyx_tp_as_buffer_memoryview = {
 
 static PyTypeObject __pyx_type___pyx_memoryview = {
   PyVarObject_HEAD_INIT(0, 0)
-  "fairseq.data.token_block_utils_fast.""memoryview", /*tp_name*/
+  "ncc.data.token_block_utils_fast.""memoryview", /*tp_name*/
   sizeof(struct __pyx_memoryview_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_memoryview, /*tp_dealloc*/
@@ -24014,7 +24014,7 @@ static PyType_Slot __pyx_type___pyx_memoryviewslice_slots[] = {
   {0, 0},
 };
 static PyType_Spec __pyx_type___pyx_memoryviewslice_spec = {
-  "fairseq.data.token_block_utils_fast._memoryviewslice",
+  "ncc.data.token_block_utils_fast._memoryviewslice",
   sizeof(struct __pyx_memoryviewslice_obj),
   0,
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_GC|Py_TPFLAGS_SEQUENCE,
@@ -24024,7 +24024,7 @@ static PyType_Spec __pyx_type___pyx_memoryviewslice_spec = {
 
 static PyTypeObject __pyx_type___pyx_memoryviewslice = {
   PyVarObject_HEAD_INIT(0, 0)
-  "fairseq.data.token_block_utils_fast.""_memoryviewslice", /*tp_name*/
+  "ncc.data.token_block_utils_fast.""_memoryviewslice", /*tp_name*/
   sizeof(struct __pyx_memoryviewslice_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc__memoryviewslice, /*tp_dealloc*/
@@ -24204,8 +24204,6 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
     {&__pyx_n_u_eos, __pyx_k_eos, sizeof(__pyx_k_eos), 0, 1, 0, 1},
     {&__pyx_n_s_error, __pyx_k_error, sizeof(__pyx_k_error), 0, 0, 1, 1},
-    {&__pyx_kp_s_fairseq_data_token_block_utils_f, __pyx_k_fairseq_data_token_block_utils_f, sizeof(__pyx_k_fairseq_data_token_block_utils_f), 0, 0, 1, 0},
-    {&__pyx_n_s_fairseq_data_token_block_utils_f_2, __pyx_k_fairseq_data_token_block_utils_f_2, sizeof(__pyx_k_fairseq_data_token_block_utils_f_2), 0, 0, 1, 1},
     {&__pyx_n_s_flags, __pyx_k_flags, sizeof(__pyx_k_flags), 0, 0, 1, 1},
     {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
     {&__pyx_n_s_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 0, 1, 1},
@@ -24233,6 +24231,8 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_mode, __pyx_k_mode, sizeof(__pyx_k_mode), 0, 0, 1, 1},
     {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
     {&__pyx_n_s_name_2, __pyx_k_name_2, sizeof(__pyx_k_name_2), 0, 0, 1, 1},
+    {&__pyx_kp_s_ncc_data_token_block_utils_fast, __pyx_k_ncc_data_token_block_utils_fast, sizeof(__pyx_k_ncc_data_token_block_utils_fast), 0, 0, 1, 0},
+    {&__pyx_n_s_ncc_data_token_block_utils_fast_2, __pyx_k_ncc_data_token_block_utils_fast_2, sizeof(__pyx_k_ncc_data_token_block_utils_fast_2), 0, 0, 1, 1},
     {&__pyx_n_s_ndim, __pyx_k_ndim, sizeof(__pyx_k_ndim), 0, 0, 1, 1},
     {&__pyx_n_s_new, __pyx_k_new, sizeof(__pyx_k_new), 0, 0, 1, 1},
     {&__pyx_kp_s_no_default___reduce___due_to_non, __pyx_k_no_default___reduce___due_to_non, sizeof(__pyx_k_no_default___reduce___due_to_non), 0, 0, 1, 0},
@@ -24349,7 +24349,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":983
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":983
  *         __pyx_import_array()
  *     except Exception:
  *         raise ImportError("numpy.core.multiarray failed to import")             # <<<<<<<<<<<<<<
@@ -24360,7 +24360,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__9);
   __Pyx_GIVEREF(__pyx_tuple__9);
 
-  /* "../../../../home/wanyao/anaconda3/envs/fairseq/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":989
+  /* "../../../../home/wanyao/anaconda3/envs/ncc/lib/python3.10/site-packages/numpy/__init__.cython-30.pxd":989
  *         _import_umath()
  *     except Exception:
  *         raise ImportError("numpy.core.umath failed to import")             # <<<<<<<<<<<<<<
@@ -24371,7 +24371,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
 
-  /* "fairseq/data/token_block_utils_fast.pyx":101
+  /* "ncc/data/token_block_utils_fast.pyx":101
  *         slice_indices = np.zeros((len(sizes), 2), dtype=DTYPE)
  *         cumsum = sizes.cumsum(axis=0)
  *         slice_indices[1:, 0] = cumsum[:cumsum.shape[0] - 1]             # <<<<<<<<<<<<<<
@@ -24385,7 +24385,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
 
-  /* "fairseq/data/token_block_utils_fast.pyx":102
+  /* "ncc/data/token_block_utils_fast.pyx":102
  *         cumsum = sizes.cumsum(axis=0)
  *         slice_indices[1:, 0] = cumsum[:cumsum.shape[0] - 1]
  *         slice_indices[:, 1] = cumsum             # <<<<<<<<<<<<<<
@@ -24508,7 +24508,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__24);
   __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(1, 1, __pyx_L1_error)
 
-  /* "fairseq/data/token_block_utils_fast.pyx":52
+  /* "ncc/data/token_block_utils_fast.pyx":52
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
  * cpdef np.ndarray[DTYPE_t, ndim=2] _get_slice_indices_fast(np.ndarray[DTYPE_t, ndim=1] sizes, str break_mode, int block_size, int document_sep_len):             # <<<<<<<<<<<<<<
@@ -24518,9 +24518,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__26 = PyTuple_Pack(4, __pyx_n_s_sizes, __pyx_n_s_break_mode, __pyx_n_s_block_size, __pyx_n_s_document_sep_len); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__26);
   __Pyx_GIVEREF(__pyx_tuple__26);
-  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_fairseq_data_token_block_utils_f, __pyx_n_s_get_slice_indices_fast, 52, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_ncc_data_token_block_utils_fast, __pyx_n_s_get_slice_indices_fast, 52, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 52, __pyx_L1_error)
 
-  /* "fairseq/data/token_block_utils_fast.pyx":111
+  /* "ncc/data/token_block_utils_fast.pyx":111
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
  * cpdef np.ndarray[DTYPE_t, ndim=2] _get_block_to_dataset_index_fast(np.ndarray[DTYPE_t, ndim=1] sizes, np.ndarray[DTYPE_t, ndim=2] slice_indices):             # <<<<<<<<<<<<<<
@@ -24530,7 +24530,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__28 = PyTuple_Pack(2, __pyx_n_s_sizes, __pyx_n_s_slice_indices); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__28);
   __Pyx_GIVEREF(__pyx_tuple__28);
-  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_fairseq_data_token_block_utils_f, __pyx_n_s_get_block_to_dataset_index_fast, 111, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(2, 0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_ncc_data_token_block_utils_fast, __pyx_n_s_get_block_to_dataset_index_fast, 111, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 111, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -24663,36 +24663,36 @@ static int __Pyx_modinit_type_init_code(void) {
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
-  __pyx_vtabptr_7fairseq_4data_22token_block_utils_fast_DatasetSearcher = &__pyx_vtable_7fairseq_4data_22token_block_utils_fast_DatasetSearcher;
-  __pyx_vtable_7fairseq_4data_22token_block_utils_fast_DatasetSearcher.reset = (PyObject *(*)(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *))__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_reset;
-  __pyx_vtable_7fairseq_4data_22token_block_utils_fast_DatasetSearcher.step = (int (*)(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *, __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t))__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_step;
-  __pyx_vtable_7fairseq_4data_22token_block_utils_fast_DatasetSearcher.seek = (PyObject *(*)(struct __pyx_obj_7fairseq_4data_22token_block_utils_fast_DatasetSearcher *, __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t))__pyx_f_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_seek;
+  __pyx_vtabptr_3ncc_4data_22token_block_utils_fast_DatasetSearcher = &__pyx_vtable_3ncc_4data_22token_block_utils_fast_DatasetSearcher;
+  __pyx_vtable_3ncc_4data_22token_block_utils_fast_DatasetSearcher.reset = (PyObject *(*)(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *))__pyx_f_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_reset;
+  __pyx_vtable_3ncc_4data_22token_block_utils_fast_DatasetSearcher.step = (int (*)(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *, __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t))__pyx_f_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_step;
+  __pyx_vtable_3ncc_4data_22token_block_utils_fast_DatasetSearcher.seek = (PyObject *(*)(struct __pyx_obj_3ncc_4data_22token_block_utils_fast_DatasetSearcher *, __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t))__pyx_f_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_seek;
   #if CYTHON_USE_TYPE_SPECS
-  __pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher_spec, NULL); if (unlikely(!__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher)) __PYX_ERR(0, 141, __pyx_L1_error)
-  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher_spec, __pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
+  __pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher = (PyTypeObject *) __Pyx_PyType_FromModuleAndSpec(__pyx_m, &__pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher_spec, NULL); if (unlikely(!__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher)) __PYX_ERR(0, 141, __pyx_L1_error)
+  if (__Pyx_fix_up_extension_type_from_spec(&__pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher_spec, __pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
   #else
-  __pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher = &__pyx_type_7fairseq_4data_22token_block_utils_fast_DatasetSearcher;
+  __pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher = &__pyx_type_3ncc_4data_22token_block_utils_fast_DatasetSearcher;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   #endif
   #if !CYTHON_USE_TYPE_SPECS
-  if (__Pyx_PyType_Ready(__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
+  if (__Pyx_PyType_Ready(__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
   #endif
   #if PY_MAJOR_VERSION < 3
-  __pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher->tp_print = 0;
+  __pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher->tp_print = 0;
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
-  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher->tp_dictoffset && __pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher->tp_getattro == PyObject_GenericGetAttr)) {
-    __pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher->tp_getattro = __Pyx_PyObject_GenericGetAttr;
+  if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher->tp_dictoffset && __pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher->tp_getattro == PyObject_GenericGetAttr)) {
+    __pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher->tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
   #endif
-  if (__Pyx_SetVtable(__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher, __pyx_vtabptr_7fairseq_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher, __pyx_vtabptr_3ncc_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
   #if !CYTHON_COMPILING_IN_LIMITED_API
-  if (__Pyx_MergeVtables(__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
+  if (__Pyx_MergeVtables(__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
   #endif
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_DatasetSearcher, (PyObject *) __pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_DatasetSearcher, (PyObject *) __pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
   #if !CYTHON_COMPILING_IN_LIMITED_API
-  if (__Pyx_setup_reduce((PyObject *) __pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject *) __pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher) < 0) __PYX_ERR(0, 141, __pyx_L1_error)
   #endif
   __pyx_vtabptr_array = &__pyx_vtable_array;
   __pyx_vtable_array.get_memview = (PyObject *(*)(struct __pyx_array_obj *))__pyx_array_get_memview;
@@ -25162,14 +25162,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_fairseq__data__token_block_utils_fast) {
+  if (__pyx_module_is_main_ncc__data__token_block_utils_fast) {
     if (PyObject_SetAttr(__pyx_m, __pyx_n_s_name_2, __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "fairseq.data.token_block_utils_fast")) {
-      if (unlikely((PyDict_SetItemString(modules, "fairseq.data.token_block_utils_fast", __pyx_m) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "ncc.data.token_block_utils_fast")) {
+      if (unlikely((PyDict_SetItemString(modules, "ncc.data.token_block_utils_fast", __pyx_m) < 0))) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -25703,7 +25703,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_Enum, __pyx_t_7) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":7
+  /* "ncc/data/token_block_utils_fast.pyx":7
  * # LICENSE file in the root directory of this source tree.
  * 
  * import numpy as np             # <<<<<<<<<<<<<<
@@ -25715,7 +25715,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_7) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":8
+  /* "ncc/data/token_block_utils_fast.pyx":8
  * 
  * import numpy as np
  * import torch             # <<<<<<<<<<<<<<
@@ -25727,7 +25727,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_torch, __pyx_t_7) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":9
+  /* "ncc/data/token_block_utils_fast.pyx":9
  * import numpy as np
  * import torch
  * from itertools import chain             # <<<<<<<<<<<<<<
@@ -25748,7 +25748,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":17
+  /* "ncc/data/token_block_utils_fast.pyx":17
  * from libc.stdint cimport int32_t, int64_t
  * 
  * DTYPE = np.int64             # <<<<<<<<<<<<<<
@@ -25763,26 +25763,26 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_DTYPE, __pyx_t_7) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":52
+  /* "ncc/data/token_block_utils_fast.pyx":52
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
  * cpdef np.ndarray[DTYPE_t, ndim=2] _get_slice_indices_fast(np.ndarray[DTYPE_t, ndim=1] sizes, str break_mode, int block_size, int document_sep_len):             # <<<<<<<<<<<<<<
  *     cdef DTYPE_t tok_idx = 0
  *     cdef DTYPE_t sz_idx = 0
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7fairseq_4data_22token_block_utils_fast_1_get_slice_indices_fast, 0, __pyx_n_s_get_slice_indices_fast, NULL, __pyx_n_s_fairseq_data_token_block_utils_f_2, __pyx_d, ((PyObject *)__pyx_codeobj__27)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_3ncc_4data_22token_block_utils_fast_1_get_slice_indices_fast, 0, __pyx_n_s_get_slice_indices_fast, NULL, __pyx_n_s_ncc_data_token_block_utils_fast_2, __pyx_d, ((PyObject *)__pyx_codeobj__27)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_slice_indices_fast, __pyx_t_7) < 0) __PYX_ERR(0, 52, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":111
+  /* "ncc/data/token_block_utils_fast.pyx":111
  * @cython.wraparound(False)
  * @cython.nonecheck(False)
  * cpdef np.ndarray[DTYPE_t, ndim=2] _get_block_to_dataset_index_fast(np.ndarray[DTYPE_t, ndim=1] sizes, np.ndarray[DTYPE_t, ndim=2] slice_indices):             # <<<<<<<<<<<<<<
  *     cdef DTYPE_t start_ds_idx
  *     cdef DTYPE_t start_offset
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7fairseq_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast, 0, __pyx_n_s_get_block_to_dataset_index_fast, NULL, __pyx_n_s_fairseq_data_token_block_utils_f_2, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 111, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_3ncc_4data_22token_block_utils_fast_3_get_block_to_dataset_index_fast, 0, __pyx_n_s_get_block_to_dataset_index_fast, NULL, __pyx_n_s_ncc_data_token_block_utils_fast_2, __pyx_d, ((PyObject *)__pyx_codeobj__29)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_block_to_dataset_index_fast, __pyx_t_7) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -25792,11 +25792,11 @@ if (!__Pyx_RefNanny) {
  *     cdef tuple state
  *     cdef object _dict
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_DatasetSearcher___reduce_cython, NULL, __pyx_n_s_fairseq_data_token_block_utils_f_2, __pyx_d, ((PyObject *)__pyx_codeobj__31)); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_3__reduce_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_DatasetSearcher___reduce_cython, NULL, __pyx_n_s_ncc_data_token_block_utils_fast_2, __pyx_d, ((PyObject *)__pyx_codeobj__31)); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher, __pyx_n_s_reduce_cython, __pyx_t_7) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher, __pyx_n_s_reduce_cython, __pyx_t_7) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  PyType_Modified(__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher);
+  PyType_Modified(__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher);
 
   /* "(tree fragment)":16
  *     else:
@@ -25804,23 +25804,23 @@ if (!__Pyx_RefNanny) {
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_DatasetSearcher__set_state(self, __pyx_state)
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7fairseq_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_DatasetSearcher___setstate_cytho, NULL, __pyx_n_s_fairseq_data_token_block_utils_f_2, __pyx_d, ((PyObject *)__pyx_codeobj__33)); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 16, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_3ncc_4data_22token_block_utils_fast_15DatasetSearcher_5__setstate_cython__, __Pyx_CYFUNCTION_CCLASS, __pyx_n_s_DatasetSearcher___setstate_cytho, NULL, __pyx_n_s_ncc_data_token_block_utils_fast_2, __pyx_d, ((PyObject *)__pyx_codeobj__33)); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 16, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher, __pyx_n_s_setstate_cython, __pyx_t_7) < 0) __PYX_ERR(1, 16, __pyx_L1_error)
+  if (__Pyx_SetItemOnTypeDict((PyObject *)__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher, __pyx_n_s_setstate_cython, __pyx_t_7) < 0) __PYX_ERR(1, 16, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  PyType_Modified(__pyx_ptype_7fairseq_4data_22token_block_utils_fast_DatasetSearcher);
+  PyType_Modified(__pyx_ptype_3ncc_4data_22token_block_utils_fast_DatasetSearcher);
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_DatasetSearcher(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
  *     cdef object __pyx_PickleError
  *     cdef object __pyx_result
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_7fairseq_4data_22token_block_utils_fast_5__pyx_unpickle_DatasetSearcher, 0, __pyx_n_s_pyx_unpickle_DatasetSearcher, NULL, __pyx_n_s_fairseq_data_token_block_utils_f_2, __pyx_d, ((PyObject *)__pyx_codeobj__34)); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_3ncc_4data_22token_block_utils_fast_5__pyx_unpickle_DatasetSearcher, 0, __pyx_n_s_pyx_unpickle_DatasetSearcher, NULL, __pyx_n_s_ncc_data_token_block_utils_fast_2, __pyx_d, ((PyObject *)__pyx_codeobj__34)); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pyx_unpickle_DatasetSearcher, __pyx_t_7) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "fairseq/data/token_block_utils_fast.pyx":1
+  /* "ncc/data/token_block_utils_fast.pyx":1
  * # cython: language_level=3             # <<<<<<<<<<<<<<
  * # Copyright (c) Facebook, Inc. and its affiliates.
  * #
@@ -25839,7 +25839,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_7);
   if (__pyx_m) {
     if (__pyx_d && stringtab_initialized) {
-      __Pyx_AddTraceback("init fairseq.data.token_block_utils_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init ncc.data.token_block_utils_fast", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     #if !CYTHON_USE_MODULE_STATE
     Py_CLEAR(__pyx_m);
@@ -25853,7 +25853,7 @@ if (!__Pyx_RefNanny) {
     }
     #endif
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init fairseq.data.token_block_utils_fast");
+    PyErr_SetString(PyExc_ImportError, "init ncc.data.token_block_utils_fast");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
@@ -31377,14 +31377,14 @@ __pyx_slices_overlap(__Pyx_memviewslice *slice1,
     }
 
 /* MemviewDtypeToObject */
-  static CYTHON_INLINE PyObject *__pyx_memview_get_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(const char *itemp) {
-    return (PyObject *) __Pyx_PyInt_From_int64_t(*(__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) itemp);
+  static CYTHON_INLINE PyObject *__pyx_memview_get_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(const char *itemp) {
+    return (PyObject *) __Pyx_PyInt_From_int64_t(*(__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) itemp);
 }
-static CYTHON_INLINE int __pyx_memview_set_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(const char *itemp, PyObject *obj) {
-    __pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t value = __Pyx_PyInt_As_int64_t(obj);
+static CYTHON_INLINE int __pyx_memview_set_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(const char *itemp, PyObject *obj) {
+    __pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t value = __Pyx_PyInt_As_int64_t(obj);
     if (unlikely((value == ((int64_t)-1)) && PyErr_Occurred()))
         return 0;
-    *(__pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t *) itemp = value;
+    *(__pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t *) itemp = value;
     return 1;
 }
 
@@ -31612,7 +31612,7 @@ no_fail:
 }
 
 /* ObjectToMemviewSlice */
-  static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(PyObject *obj, int writable_flag) {
+  static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(PyObject *obj, int writable_flag) {
     __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
     __Pyx_BufFmt_StackElem stack[1];
     int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
@@ -31623,7 +31623,7 @@ no_fail:
     }
     retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
                                                  PyBUF_RECORDS_RO | writable_flag, 1,
-                                                 &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, stack,
+                                                 &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, stack,
                                                  &result, obj);
     if (unlikely(retcode == -1))
         goto __pyx_fail;
@@ -31635,7 +31635,7 @@ __pyx_fail:
 }
 
 /* ObjectToMemviewSlice */
-  static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t(PyObject *obj, int writable_flag) {
+  static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dsds_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t(PyObject *obj, int writable_flag) {
     __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
     __Pyx_BufFmt_StackElem stack[1];
     int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED), (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
@@ -31646,7 +31646,7 @@ __pyx_fail:
     }
     retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
                                                  PyBUF_RECORDS_RO | writable_flag, 2,
-                                                 &__Pyx_TypeInfo_nn___pyx_t_7fairseq_4data_22token_block_utils_fast_DTYPE_t, stack,
+                                                 &__Pyx_TypeInfo_nn___pyx_t_3ncc_4data_22token_block_utils_fast_DTYPE_t, stack,
                                                  &result, obj);
     if (unlikely(retcode == -1))
         goto __pyx_fail;
