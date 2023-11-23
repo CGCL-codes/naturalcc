@@ -106,7 +106,6 @@ def _13b_code() -> LLaMAConfig:
         dropout_p=0.1,
     )
 
-
 @llama_arch("7b")
 def _7b() -> LLaMAConfig:
     return LLaMAConfig(

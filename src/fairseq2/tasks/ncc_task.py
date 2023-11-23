@@ -6,7 +6,7 @@ import os
 
 class NccTask():
     @classmethod
-    def __init__(self,archs:ArchitectureRegistry,model_name:str,builder,device=None):
+    def __init__(self,archs:ArchitectureRegistry,model_name:str,builder,convertor:dict={},device=None):
         if not model_name in archs.names():
             raise ValueError("Arch {} don't includes model {}".format(archs.model_type,model_name))
         if not device:
@@ -17,6 +17,7 @@ class NccTask():
                 device = torch.device("cpu")
                 print("CUDA is not available. Using CPU.")
         self.device = device
+        self.convertor = convertor
         self.load_model(archs,model_name,builder,device)
         
     @classmethod  
@@ -25,9 +26,9 @@ class NccTask():
         self.config = archs.get_config(model_name)
         self.builder = builder(self.config,device=device)
         self.model = self.builder.build_model()
-        
+
     @classmethod    
-    def load_state(self,ckpt_folder,key_map={}):
+    def load_state(self,ckpt_folder):
         ckpt_files = [f for f in os.listdir(ckpt_folder) if f.endswith('.pth')]
         ckpt = {}
         if not ckpt_files:
@@ -38,8 +39,8 @@ class NccTask():
             for key in checkpoint:
                 ckpt[key] = checkpoint[key]
         ckpt2 = {}
-        for key in key_map:
-            ckpt2[key_map[key]] = ckpt[key]
+        for key in self.convertor:
+            ckpt2[self.convertor[key]] = ckpt[key]
         del ckpt
         self.model.load_state_dict(ckpt2)
 
