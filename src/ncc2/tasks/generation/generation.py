@@ -3,7 +3,8 @@ from ncc2.models.sequence import SequenceBatch
 from ncc2.nn.padding import PaddingMask
 import torch.nn.functional as F
 import torch
-from torch.utils.data import Dataset,DataLoader
+from ncc2.data.dataset import NccDataset
+from torch.utils.data import DataLoader
 import json
 import os
 from tqdm import tqdm
@@ -16,20 +17,7 @@ from ncc2.models.llama import LLaMABuilder,LLaMAConfig,LLaMATokenizer,LLaMAConfi
 from ncc2.data.text import TextTokenizer
 
 
-class NccDataset(Dataset):
-    def __init__(self,input):
-        self.input = input
-        
-    def __len__(self):
-        return len(self.input)
-        
-    def __getitem__(self,index):
-        if index >= len(self.input):
-            raise IndexError('Index out of range')
-        sample = {
-            'input': self.input[index]
-        }
-        return sample
+
 
 @dataclass
 class GenerationTaskConfig:
@@ -39,7 +27,7 @@ class GenerationTaskConfig:
     builder: object
     tokenizer_cls: TextTokenizer     
     
-generation_tasks = TaskRegistry('generation')
+generation_tasks = TaskRegistry[GenerationTaskConfig]('generation')
 generation_task = generation_tasks.marker
 
 @generation_task('codellama_7b_code')
@@ -85,7 +73,7 @@ class GenerationTask(NccTask):
             else:
                 raise Exception('No tokenizer loaded')
         if seed:
-            torch.manual_seed(2618)
+            torch.manual_seed(seed)
         encoder = tokenizer.create_encoder()
         decoder = tokenizer.create_decoder()
         
