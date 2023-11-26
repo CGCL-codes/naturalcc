@@ -58,7 +58,9 @@ pip install -r requirements.txt
 
 After installation, verify the environment setup:
 
-```python -m env_test```
+```shell
+python -m env_test
+```
 
 #### 2. Configure the Environment
 
@@ -118,12 +120,12 @@ g++ -v
 
 ## 📚 Dataset
 
-Currently, we have processed the following datasets:
+NaturalCC supports a diverse range of datasets, catering to various aspects of code analysis and processing. These datasets include:
 
 - [Python (Wan et al.)](ncc_dataset/python_wan/README.md)
 - [CodeSearchNet (Husain et al.)](ncc_dataset/codesearchnet/README.md)
 - [CodeXGlue (Feng et al.)](ncc_dataset/codexglue/code_to_text/README.md)
-- Py150 [(official processed)](ncc_dataset/py150/README.md) [(raw)](ncc_dataset/raw_py150/README.md)
+- [Py150 (official processed)](ncc_dataset/py150/README.md) [(raw)](ncc_dataset/raw_py150/README.md)
 - [OpenCL (Grewe et al.)](ncc_dataset/opencl/README.md)
 - [Java (Hu et, al.)](ncc_dataset/java_hu/README.md)
 - [Stack Overflow](ncc_dataset/stackoverflow/README.md)
@@ -133,34 +135,36 @@ Currently, we have processed the following datasets:
 
 ## 🤖 Implementations
 
+NaturalCC includes a wide range of implementations for different tasks in code analysis. These are categorized as follows:
+
 #### Code retrieval (search)
-- [NBOW](ncc/models/retrieval/nbow.py)
-- [BiRNN](ncc/models/retrieval/birnn.py)
-- [1D-CNN](ncc/models/retrieval/birnn.py)
-- [SelfAttn](ncc/models/retrieval/self_attn.py)
-- [Deepcs](ncc/models/retrieval/deepcs.py)
+- [NBOW](ncc/models/retrieval/nbow.py): Neural Bag-of-Words model for code retrieval.
+- [BiRNN](ncc/models/retrieval/birnn.py): Bidirectional Recurrent Neural Network implementation.
+- [1D-CNN](ncc/models/retrieval/birnn.py): One-dimensional Convolutional Neural Network.
+- [SelfAttn](ncc/models/retrieval/self_attn.py): Self-Attention model for code retrieval.
+- [Deepcs](ncc/models/retrieval/deepcs.py): Deep Code Search model.
 
 #### Code completion
-- [SeqRNN](ncc/models/completion/seqrnn.py)
-- [GPT2](ncc/models/completion/gpt2.py)
+- [SeqRNN](ncc/models/completion/seqrnn.py): Sequential RNN for code completion.
+- [GPT2](ncc/models/completion/gpt2.py): GPT-2 model adapted for code completion.
 
 #### Heterogeneous mapping
-- [static mapping](run/mapping/static_mapping)
-- [decision tree](run/mapping/decision_tree)
-- [deeptune](run/mapping/deeptune)
-- [inst2vec](run/mapping/inst2vec)
+- [static mapping](run/mapping/static_mapping): A static approach to code-feature mapping.
+- [decision tree](run/mapping/decision_tree): Decision tree-based mapping method.
+- [deeptune](run/mapping/deeptune): Deep learning-based code-feature mapping.
+- [inst2vec](run/mapping/inst2vec): Instruction-to-Vector mapping model.
 
 #### Code summarization
-- [Naive Copy](run/translation/naive_copy)
-- [CodeNN](ncc/models/summarization/codenn.py)
-- [DeepCom](ncc/models/summarization/deepcom.py)
-- [Seq2Seeq + Attention](ncc/models/summarization/seq2seq.py)
-- [Nary-](ncc/models/summarization/nary_tree2seq.py)/[ChildSum-](ncc/models/summarization/child_sum_tree2seq.py)Tree2Seq
-- [Code2Seq](ncc/models/summarization/code2seq.py)
-- [Transformer + (Sinusoidal/Relative/Learned Position Encoding)](ncc/models/transfomer)
-- [CodeBERT](run/translation/codebert/model.py)
-- [GraphCodeBERT](run/translation/graphcodebert/model.py)
-- [PLBART](ncc/models/transfomer)
+- [Naive Copy](run/translation/naive_copy): A simple copy-based summarization approach.
+- [CodeNN](ncc/models/summarization/codenn.py): Neural Network model for code summarization.
+- [DeepCom](ncc/models/summarization/deepcom.py): Deep Comment Generation model.
+- [Seq2Seeq + Attention](ncc/models/summarization/seq2seq.py): Sequence-to-Sequence model with attention mechanism.
+- [Nary-](ncc/models/summarization/nary_tree2seq.py)/[ChildSum-](ncc/models/summarization/child_sum_tree2seq.py)Tree2Seq: Nary-Tree2Seq and ChildSum-Tree2Seq models.
+- [Code2Seq](ncc/models/summarization/code2seq.py): Code-to-Sequence model.
+- [Transformer + (Sinusoidal/Relative/Learned Position Encoding)](ncc/models/transfomer): Transformers with various position encoding techniques.
+- [CodeBERT](run/translation/codebert/model.py): CodeBERT model for summarization.
+- [GraphCodeBERT](run/translation/graphcodebert/model.py): GraphCodeBERT model implementation.
+- [PLBART](ncc/models/transfomer): Pre-trained Language model for BART architecture.
 
 #### Structural Analysis of Pre-Trained Language Models for Source Code
 - [ICSE 2022](examples/structural_analysis/)
