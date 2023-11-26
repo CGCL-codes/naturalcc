@@ -25,20 +25,19 @@ NaturalCC is a sequence modeling toolkit that allows researchers and developers 
 
 ## ⭐ Features
 
-- A collection of code corpus with data preprocessing: We provide clean, preprocessed datasets (CodeSearchNet, Python-Doc, and Py150) along with scripts for extracting various code features using compiler tools like LLVM.
-- An extensible framework: Based on the registry mechanism implemented in Fairseq, our framework is well-modularized and can be easily extended to various tasks.
-- Performance benchmark: We have benchmarked three downstream tasks (code summarization, code retrieval, and code completion) over three datasets using NaturalCC, achieving state-of-the-art or competitive performance.
-- Efficient training: NaturalCC harnesses the power of the `NCCL` library and `torch.distributed` to support model training on multiple GPUs. Furthermore, it also supports both full precision (FP32) and half-precision floating point (FP16) for fast training and inference.
-- Better logging output: We have implemented advanced logging features to provide clear, detailed feedback during model training and operation, aiding in debugging and performance optimization.
-- Various Implementations:
-    - tensorflow gradient clipping
-    - optimizers or learning schedulers
-    - baseline models
-    - binary data formats
+- **A collection of code corpus with data preprocessing:** Access clean, preprocessed datasets (CodeSearchNet, Python-Doc, and Py150) along with scripts for extracting various code features using compiler tools like LLVM.
+- **An extensible framework:** Built on Fairseq's registry mechanism, NaturalCC is well-modularized and can be easily extended to a variety of software engineering tasks.
+- **Performance benchmark:** Benchmarked three downstream tasks (code summarization, code retrieval, and code completion) over three datasets using NaturalCC, achieving state-of-the-art or competitive performance.
+- **Efficient training:** Harnesses the power of the `NCCL` library and `torch.distributed` to support model training on multiple GPUs. Furthermore, it also supports both full precision (FP32) and half-precision floating point (FP16) for fast training and inference.
+- **Better logging output:** Advanced logging features to provide clear, detailed feedback during model training and operation, aiding in debugging and performance optimization.
 
 ## 🚀 Installation
 
-### Requirements
+Follow these steps to set up the environment and get started.
+
+### Prerequisites
+
+Ensure you have the following requirements:
 
 - PyTorch version >= 1.6.0
 - Python version >= 3.6
@@ -48,31 +47,35 @@ NaturalCC is a sequence modeling toolkit that allows researchers and developers 
 
 [comment]: <> "  with the --cuda_ext and --deprecated_fused_adam options"
 
-#### 1. Install prerequisite libraries
+### Step-by-Step Installation Guide
+
+#### 1. Clone the Repository and Install Dependencies
 
 ```shell
 git clone https://github.com/CGCL-codes/naturalcc && cd naturalcc
 pip install -r requirements.txt
 ```
 
-Once you installed prerequisite libraries, you can check them via
+After installation, verify the environment setup:
+
 ```python -m env_test```
 
-#### 2. Build or install NaturalCC
+#### 2. Configure the Environment
 
-Export your NaturalCC cache directory (data and models will be saved in this directory) to user
-variables(```~/.bashrc``` or  ```~/.zshrc``` in Linux, ```~/.zsh_profile``` or ```~/.bash_profile``` in macOS).
+Set the NaturalCC cache directory where data and models will be stored. Add this to your shell configuration file:
 
 ```shell
-# Linux
+# For Linux users
 echo "export NCC=<path_to_store ncc_data>" >> ~/.bashrc
-# macOS
+# For macOS users
 echo "export NCC=<path_to_store ncc_data>" >> ~/.bash_profile
 ```
 
-> Note: PyCharm cannot get environment variables and, therefore, we recommend you to register your NCC variable at ```ncc/__init__.py```.
+> Note: If you're using PyCharm, it does not automatically detect environment variables. Register your NCC variable in ```ncc/__init__.py``` as a workaround.
 
-Compile Cython files to accelerate programs and register NaturalCC into your pip list
+#### 3. Install NaturalCC
+
+Compile Cython files to accelerate programs and register NaturalCC into your pip list:
 
 ```shell
 # compile for debug
@@ -81,17 +84,17 @@ Compile Cython files to accelerate programs and register NaturalCC into your pip
 pip install --editable ./
 ```
 
-#### 3. Half precision computation (optional)
+#### 3. Enable Half Precision Computation (Optional)
 
-NaturalCC supports half precision training.
+NaturalCC supports half-precision training.
 
 - If your ``Pytorch.__version__ < 1.6.0`` and ```nvcc -V``` is runnable, please install [apex](https://github.com/NVIDIA/apex).
 - Otherwise, use Automatic Mixed Precision (AMP). Available Now (set ```amp: 1``` in yaml file, [An example](run/summarization/seq2seq/config/python_wan/python.yml)).
 
 
-#### 4. Install GCC/G++ with conda (if you do not have permission)
+#### 4. Install GCC/G++ without Root Access (Optional)
 
-Since NCC is build via Cython, your GCC/G++ version should be greater than 4.9. If you have the root permission, update
+Since NCC is built via Cython, your GCC/G++ version should be greater than 4.9. If you have the root permission, update
 GCC/G++; otherwise, install GCC/G++ with conda.
 
 ```shell
@@ -101,10 +104,16 @@ conda install -c conda-forge gcc_linux-64
 cd ~/anaconda/envs/XXX/bin
 ln -s x86_64-conda_cos6-linux-gnu-gcc gcc
 ln -s x86_64-conda_cos6-linux-gnu-g++ g++
+```
+
+To verify the installation:
+
+```shell
 # check
 conda deactivate
 conda activate XXX
->> type "gcc/g++ -v" in terminals
+gcc -v
+g++ -v
 ```
 
 ## 📚 Dataset
