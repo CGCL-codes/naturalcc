@@ -266,23 +266,28 @@ CUDA_VISIBLE_DEVICES=0 python -m run.summarization.transformer.eval -f config/py
 ```
 
 # ❓ FAQ
-Please fell free to contact me if you have any troubles.
+
+If you have any questions or encounter issues, please feel free to reach out. For quick queries, you can also check our `Issues` page for common questions and solutions.
 
 ## 😘 License and Acknowledgement
 
-NaturalCC is [MIT-licensed](https://github.com/CGCL-codes/naturalcc/blob/master/LICENSE.txt). The license applies to the
-pre-trained models as well. This project is also highly inspired by [Fairseq](https://github.com/pytorch/fairseq)
-and [AllenNLP](https://allennlp.org).
+**License:** NaturalCC is open-sourced under the [MIT-licensed](https://github.com/CGCL-codes/naturalcc/blob/master/LICENSE.txt). The license applies to the
+pre-trained models as well. 
+
+**Acknowledgements:** We gratefully acknowledge the inspiration and influence from projects such as [Fairseq](https://github.com/pytorch/fairseq) for their advanced sequence-to-sequence models and [AllenNLP](https://allennlp.org) for their robust NLP components.
 
 ## 🔗 Related Links
-[Paper](https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf) <br>
-[NaturalCC-demo](http://121.43.116.104:3000/) <br>
-About us: [XCodeMind](https://xcodemind.github.io/team) <br>
+
+[Paper](https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf): Detailed paper about NaturalCC.
+
+[NaturalCC-demo](http://121.43.116.104:3000/): Try our model in action with an interactive demo.
+
+[About us - XCodeMind](https://xcodemind.github.io/team): Learn more about the team behind NaturalCC.
 
 
 ## ❤️ Citation
 
-Please cite as:
+If you use NaturalCC in your research, please consider citing our work:
 
 ```
 @inproceedings{wan2022naturalcc,
