@@ -280,6 +280,13 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.summarization.transformer.train
 CUDA_VISIBLE_DEVICES=0 python -m run.summarization.transformer.eval -f config/python_wan/python -o run/summarization/transformer/config/python_wan/python.txt
 ```
 
+# Contributing
+We warmly welcome contributions to NaturalCC! Your involvement is essential for keeping NaturalCC innovative and accessible. We're grateful to all our amazing contributors who have made this project what it is today!
+
+<a href="https://github.com/CGCL-codes/naturalcc/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=CGCL-codes/naturalcc&r="  width="800px"/>
+</a>
+
 # ❓ FAQ
 
 If you have any questions or encounter issues, please feel free to reach out. For quick queries, you can also check our `Issues` page for common questions and solutions.
