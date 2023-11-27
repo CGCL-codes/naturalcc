@@ -1,0 +1,32 @@
+preprocess:
+  task: opencl_heterogeneous_mapping # task', metavar='TASK', default="translation", choices=TASK_REGISTRY.keys(), help='task'
+  source_lang: src_tokens # sbt, sbtao, path, bin_ast
+  target_lang: oracle
+  auxiliary_langs:
+    - atomic
+    - dataset
+    - rational
+    - benchmark
+    - localmem
+    - runtime_cpu
+    - transfer
+    - coalesced
+    - mem
+    - runtime_gpu
+    - wgsize
+    - comp
+  # ~ path for dataset default. e.g.  for CodeSearchNet, ~/flatten = ~/CodeSearchNet/flatten
+  trainpref: ~/opencl/attributes/amd/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~ #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~ #", metavar="FP", default=None, help="comma separated, test file prefixes"
+
+  align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
+  destdir: ~/opencl/mapping/amd/data-mmap #", metavar="DIR", default="data-bin", help="destination dir"
+  thresholdtgt: 0 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
+  srcdict: ~
+  tgtdict: ~
+#  srcdict: /data/opencl/mapping/amd/data-mmap/src_tokens.dict.json
+#  tgtdict: /data/opencl/mapping/amd/data-mmap/oracle.dict.json
+  dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+  padding_factor: 1 #", metavar="N", default=8, type=int, help="Pad dictionary size to be multiple of N"
+  workers: 40 # ", metavar="N", default=1, type=int, help="number of parallel workers"

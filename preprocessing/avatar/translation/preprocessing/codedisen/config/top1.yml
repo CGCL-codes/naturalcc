@@ -1,0 +1,18 @@
+preprocess:
+  task: cross_translation # task', metavar='TASK', default="translation", choices=TASK_REGISTRY.keys(), help='task'
+  src_lang: java
+  tgt_lang: csharp
+  only_source: 0
+  trainpref: ~/avatar/attributes/top1/*/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/avatar/attributes/top1/*/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/avatar/attributes/top1/*/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+
+  # bin dataset
+  dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+  destdir: ~/avatar/translation/top1/codedisen/data-mmap #", metavar="DIR", default="data-bin", help="destination dir"
+
+  only_train: 0 # if set false, generate dictionaries with additional validation datasets. e.g. neural-transformer
+
+#  align_suffix: ~ # ", metavar="FP", default=None, help="alignment file suffix"
+  threshold: 1 #", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown"
+  workers: 1 # ", metavar="N", default=1, type=int, help="number of parallel workers"
