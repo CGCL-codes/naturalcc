@@ -31,13 +31,12 @@ NaturalCC is a sequence modeling toolkit designed to bridge the gap between prog
 
 Key features of NaturalCC include:
 
-- **Advanced Support for Large Code Models:** Facilitates code generation with state-of-the-art large code models.
-- **Comprehensive Code Corpus and Preprocessing Tools:** Offers access to a variety of clean, preprocessed datasets including CodeSearchNet, Python-Doc, and Py150. Comes equipped with scripts for feature extraction using compiler tools like LLVM.
 - **Modular and Extensible Framework:** Built on the robust Fairseq's registry mechanism, allowing for easy adaptation and extension to diverse software engineering tasks.
-- **Benchmarked Performance**: Benchmarks three downstream tasks (code summarization, code retrieval, and code completion) over three datasets, achieving state-of-the-art or competitive performance.
+- **Datasets and Preprocessing Tools+:** Offers access to a variety of clean, preprocessed benchmarks such as Human-Eval, CodeSearchNet, Python-Doc, and Py150. Comes equipped with scripts for feature extraction using compiler tools like LLVM.
+- **Support for Large Code Models:** Incorporates state-of-the-art large code models like Code Llama, CodeT5, CodeGen, and StarCoder.
+- **Benchmarking and Evaluation**: Benchmarks multiple downstream tasks (including code generation and code completion), with evaluation capabilities on well-known benchmarks using popular metrics like pass@k.
 - **Optimized for Efficiency:** Employs the `NCCL` library and `torch.distributed` for high-efficiency model training across multiple GPUs. Supports both full-precision (`FP32`) and half-precision (`FP16`) computations to accelerate training and inference processes.
 - **Enhanced Logging for Improved Debugging:** Advanced logging features to provide clear, detailed feedback during model training and operation, aiding in debugging and performance optimization.
-
 
 ## ✨ Latest News
 
@@ -46,92 +45,40 @@ Key features of NaturalCC include:
 - **[Jan 25, 2022]** Our paper introducing the NaturalCC toolkit was accepted at the ICSE 2022 Demo Track.
 - **[May 10, 2022]** Merged the source code of "What Do They Capture? - A Structural Analysis of Pre-Trained Language Models for Source Code" into NaturalCC.
 
-## 🚀 Installation
+## 🛠️ Installation Guide
 
-Follow these steps to set up the environment and get started.
+To get started with NaturalCC, ensure your system meets the following requirements:
 
-### Prerequisites
+- GCC/G++ version 5.0 or higher
+- NVIDIA GPU, NCCL, and the Cuda Toolkit for training new models (optional but recommended)
+- NVIDIA's apex library for faster training (optional)
 
-Ensure you have the following requirements:
+Follow these steps to set up the environment.
 
-- PyTorch version >= 1.6.0
-- Python version >= 3.6
-- GCC/G++ > 5.0
-- For training new models, you'll also need an NVIDIA GPU, NCCL and Cuda Toolkit installed.
-- (optional) For faster training, you need to install NVIDIA's ```apex``` library.
+1. (Optional) Creating conda environment
+    ```shell
+    conda create -n naturalcc python=3.6
+    conda activate naturalcc
+    ```
 
-[comment]: <> "  with the --cuda_ext and --deprecated_fused_adam options"
+2. Building NaturalCC from source
+    ```shell
+    git clone https://github.com/CGCL-codes/naturalcc && cd naturalcc
+    pip install -r requirements.txt
+    pip install --editable ./
+    ```
+3. Installing Additional Dependencies
+    ```shell
+    pip install -q -U git+https://github.com/huggingface/transformers.git
+    pip install -q -U git+https://github.com/huggingface/accelerate.git
+    ```
 
-### Step-by-Step Installation Guide
+4. HuggingFace Token for Certain Models
 
-#### 1. Clone the Repository and Install Dependencies
-
-```shell
-git clone https://github.com/CGCL-codes/naturalcc && cd naturalcc
-pip install -r requirements.txt
-```
-
-After installation, verify the environment setup:
-
-```shell
-python -m env_test
-```
-
-#### 2. Configure the Environment
-
-Set the NaturalCC cache directory where data and models will be stored. Add this to your shell configuration file:
-
-```shell
-# For Linux users
-echo "export NCC=<path_to_store ncc_data>" >> ~/.bashrc
-# For macOS users
-echo "export NCC=<path_to_store ncc_data>" >> ~/.bash_profile
-```
-
-> Note: If you're using PyCharm, it does not automatically detect environment variables. Register your NCC variable in ```ncc/__init__.py``` as a workaround.
-
-#### 3. Install NaturalCC
-
-Compile Cython files to accelerate programs and register NaturalCC into your pip list:
-
-```shell
-# compile for debug
-# python setup.py build_ext --inplace
-# install 
-pip install --editable ./
-```
-
-#### 3. Enable Half Precision Computation (Optional)
-
-NaturalCC supports half-precision training.
-
-- If your ``Pytorch.__version__ < 1.6.0`` and ```nvcc -V``` is runnable, please install [apex](https://github.com/NVIDIA/apex).
-- Otherwise, use Automatic Mixed Precision (AMP). Available Now (set ```amp: 1``` in yaml file, [An example](run/summarization/seq2seq/config/python_wan/python.yml)).
-
-
-#### 4. Install GCC/G++ without Root Access (Optional)
-
-Since NCC is built via Cython, your GCC/G++ version should be greater than 4.9. If you have the root permission, update
-GCC/G++; otherwise, install GCC/G++ with conda.
-
-```shell
-# install GCC/G++ with conda
-conda install -c anaconda gxx_linux-64
-conda install -c conda-forge gcc_linux-64
-cd ~/anaconda/envs/XXX/bin
-ln -s x86_64-conda_cos6-linux-gnu-gcc gcc
-ln -s x86_64-conda_cos6-linux-gnu-g++ g++
-```
-
-To verify the installation:
-
-```shell
-# check
-conda deactivate
-conda activate XXX
-gcc -v
-g++ -v
-```
+    For models like [StarCoder](https://github.com/bigcode-project/starcoder), a HuggingFace token is required. Log in to HuggingFace using:
+    ```
+    huggingface-cli login
+    ```
 
 ## 📚 Dataset
 
