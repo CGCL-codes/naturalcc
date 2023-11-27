@@ -1,6 +1,6 @@
 <p align="center">
   <br>
-  <img src="docs/naturalcc_logo.png" width="400">
+  <img src="docs/naturalcc_logo.png" width="450">
   <br>
 </p>
 <div align="center">
