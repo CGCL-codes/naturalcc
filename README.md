@@ -1,5 +1,5 @@
 <p align=center>
-  <img src="docs/naturalcc_logo.png" width="250">
+  <img src="docs/naturalcc_logo.png" width="300">
   <br />
   <br />
   <a href="https://xcodemind.github.io/">
