@@ -27,19 +27,24 @@
 
 ## 📖 Introduction
 
-NaturalCC is a sequence modeling toolkit that allows researchers and developers to train custom models for many software engineering tasks, e.g., code generation, code completion, code summarization, code retrieval, code clone detection, and type inference. Our vision is to bridge the gap between programming language and natural language through machine learning techniques.
+NaturalCC is a sequence modeling toolkit designed to bridge the gap between programming and natural languages through advanced machine learning techniques. It allows researchers and developers to train custom models for a variety of software engineering tasks, e.g., code generation, code completion, code summarization, code retrieval, code clone detection, and type inference.
 
-The current version of the library offers:
+Key features of NaturalCC include:
 
-- **A collection of code corpus with data preprocessing:** Access clean, preprocessed datasets (CodeSearchNet, Python-Doc, and Py150) along with scripts for extracting various code features using compiler tools like LLVM.
-- **An extensible framework:** Built on Fairseq's registry mechanism, NaturalCC is well-modularized and can be easily extended to a variety of software engineering tasks.
-- **Performance benchmark:** Benchmarked three downstream tasks (code summarization, code retrieval, and code completion) over three datasets using NaturalCC, achieving state-of-the-art or competitive performance.
-- **Efficient training:** Harnesses the power of the `NCCL` library and `torch.distributed` to support model training on multiple GPUs. Furthermore, it also supports both full precision (FP32) and half-precision floating point (FP16) for fast training and inference.
-- **Better logging output:** Advanced logging features to provide clear, detailed feedback during model training and operation, aiding in debugging and performance optimization.
+- **Advanced Support for Large Code Models:** Facilitates code generation with state-of-the-art large code models.
+- **Comprehensive Code Corpus and Preprocessing Tools:** Offers access to a variety of clean, preprocessed datasets including CodeSearchNet, Python-Doc, and Py150. Comes equipped with scripts for feature extraction using compiler tools like LLVM.
+- **Modular and Extensible Framework:** Built on the robust Fairseq's registry mechanism, allowing for easy adaptation and extension to diverse software engineering tasks.
+- **Benchmarked Performance**: Benchmarks three downstream tasks (code summarization, code retrieval, and code completion) over three datasets, achieving state-of-the-art or competitive performance.
+- **Optimized for Efficiency:** Employs the `NCCL` library and `torch.distributed` for high-efficiency model training across multiple GPUs. Supports both full-precision (`FP32`) and half-precision (`FP16`) computations to accelerate training and inference processes.
+- **Enhanced Logging for Improved Debugging:** Advanced logging features to provide clear, detailed feedback during model training and operation, aiding in debugging and performance optimization.
 
-## ✨ News 
-- [April 19, 2023] We have merged the source code of "You See What I Want You to See: Poisoning Vulnerabilities in Neural Code Search" into NaturalCC.
-- [May 10, 2022] We have merged the source code of "What Do They Capture? - A Structural Analysis of Pre-Trained Language Models for Source Code" into NaturalCC.
+
+## ✨ Latest News
+
+- **[Nov 25, 2023]** **NaturalCC 2.0 Released!** Now compatible with [Transformers](https://github.com/huggingface/transformers) and supporting popular large code models like Code Llama, CodeT5, CodeGen, and StarCoder from [Hugging Face](https://huggingface.co). Access the previous version in the [ncc1]() branch.
+- **[Apr 19, 2023]** Integrated the source code of "You See What I Want You to See: Poisoning Vulnerabilities in Neural Code Search" into NaturalCC.
+- **[Jan 25, 2022]** Our paper introducing the NaturalCC toolkit was accepted at the ICSE 2022 Demo Track.
+- **[May 10, 2022]** Merged the source code of "What Do They Capture? - A Structural Analysis of Pre-Trained Language Models for Source Code" into NaturalCC.
 
 ## 🚀 Installation
 
