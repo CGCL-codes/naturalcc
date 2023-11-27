@@ -17,9 +17,9 @@
     <img src="https://img.shields.io/github/license/EdisonLeeeee/GraphGallery" alt="license">
   </a>
 
-<a href="https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf">Paper</a>
-<a href="http://121.43.116.104:3000">Demo</a>
-<a href="https://xcodemind.github.io/team">About us - XCodeMind</a>
+<a href="https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf">Paper</a>,
+<a href="http://121.43.116.104:3000">Demo</a>,
+<a href="https://xcodemind.github.io/team">About us-XCodeMind</a>
 
 # NaturalCC - Bridging Programming and Natural Languages
    
