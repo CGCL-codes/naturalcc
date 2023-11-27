@@ -21,12 +21,11 @@
 <a href="http://121.43.116.104:3000">Demo</a>,
 <a href="https://xcodemind.github.io/team">About us-XCodeMind</a>
 
-# NaturalCC - Bridging Programming and Natural Languages
+# NaturalCC - Natural Code Comprehension
    
 </div>
 
-
-
+## 📖 Introduction
 
 NaturalCC is a sequence modeling toolkit that allows researchers and developers to train custom models for many software engineering tasks, e.g., code summarization, code retrieval, code completion, code clone detection, and type inference. Our vision is to bridge the gap between programming language and natural language through machine learning techniques.
 
