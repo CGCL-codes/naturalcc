@@ -2,7 +2,7 @@
   <br>
   <img src="docs/naturalcc_logo.png" width="400">
   <br>
-<p>
+</p>
 <div align="center">
   <a href="https://xcodemind.github.io/">
     <img src="https://img.shields.io/badge/NaturalCC-0.6.0-green" alt="Version">
@@ -15,10 +15,17 @@
   </a>
   <a href="https://github.com/EdisonLeeeee/GraphGallery/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/EdisonLeeeee/GraphGallery" alt="license">
-  </a>       
-</div>
+  </a>
+
+<a href="https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf">Paper</a>
+<a href="http://121.43.116.104:3000">Demo</a>
+<a href="https://xcodemind.github.io/team">About us - XCodeMind</a>
 
 # NaturalCC - Bridging Programming and Natural Languages
+   
+</div>
+
+
 
 
 NaturalCC is a sequence modeling toolkit that allows researchers and developers to train custom models for many software engineering tasks, e.g., code summarization, code retrieval, code completion, code clone detection, and type inference. Our vision is to bridge the gap between programming language and natural language through machine learning techniques.
@@ -280,13 +287,13 @@ pre-trained models as well.
 
 **Acknowledgements:** We gratefully acknowledge the inspiration and influence from projects such as [Fairseq](https://github.com/pytorch/fairseq) for their advanced sequence-to-sequence models and [AllenNLP](https://allennlp.org) for their robust NLP components.
 
-## 🔗 Related Links
+<!-- ## 🔗 Related Links
 
 [Paper](https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf): Detailed paper about NaturalCC.
 
 [NaturalCC-demo](http://121.43.116.104:3000/): Try our model in action with an interactive demo.
 
-[About us - XCodeMind](https://xcodemind.github.io/team): Learn more about the team behind NaturalCC.
+[About us - XCodeMind](https://xcodemind.github.io/team): Learn more about the team behind NaturalCC. -->
 
 
 ## ❤️ Citation
