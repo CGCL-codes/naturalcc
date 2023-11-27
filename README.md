@@ -1,7 +1,9 @@
-<p align=center>
+<p align="center">
+  <br>
   <img src="docs/naturalcc_logo.png" width="400">
-  <br />
-  <br />
+  <br>
+<p>
+<div align="center">
   <a href="https://xcodemind.github.io/">
     <img src="https://img.shields.io/badge/NaturalCC-0.6.0-green" alt="Version">
   </a>
@@ -14,8 +16,10 @@
   <a href="https://github.com/EdisonLeeeee/GraphGallery/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/EdisonLeeeee/GraphGallery" alt="license">
   </a>       
-</p>
-<hr>
+</div>
+
+# NaturalCC - Bridging Programming and Natural Languages
+
 
 NaturalCC is a sequence modeling toolkit that allows researchers and developers to train custom models for many software engineering tasks, e.g., code summarization, code retrieval, code completion, code clone detection, and type inference. Our vision is to bridge the gap between programming language and natural language through machine learning techniques.
 
