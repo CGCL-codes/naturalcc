@@ -1,6 +1,6 @@
 <p align="center">
   <br>
-  <img src="docs/naturalcc_logo.png" width="450">
+  <img src="docs/naturalcc_logo.png" width="400">
   <br>
 </p>
 <div align="center">
@@ -21,25 +21,25 @@
 <a href="http://121.43.116.104:3000">Demo</a>,
 <a href="https://xcodemind.github.io/team">About us-XCodeMind</a>
 
-</div>
-
 # NaturalCC - Natural Code Comprehension
+
+</div>
 
 ## 📖 Introduction
 
-NaturalCC is a sequence modeling toolkit that allows researchers and developers to train custom models for many software engineering tasks, e.g., code summarization, code retrieval, code completion, code clone detection, and type inference. Our vision is to bridge the gap between programming language and natural language through machine learning techniques.
+NaturalCC is a sequence modeling toolkit that allows researchers and developers to train custom models for many software engineering tasks, e.g., code generation, code completion, code summarization, code retrieval, code clone detection, and type inference. Our vision is to bridge the gap between programming language and natural language through machine learning techniques.
 
-## 🔖 News 
-- [April 19, 2023] We have merged the source code of "You See What I Want You to See: Poisoning Vulnerabilities in Neural Code Search" into NaturalCC.
-- [May 10, 2022] We have merged the source code of "What Do They Capture? - A Structural Analysis of Pre-Trained Language Models for Source Code" into NaturalCC.
-
-## ⭐ Features
+The current version of the library offers:
 
 - **A collection of code corpus with data preprocessing:** Access clean, preprocessed datasets (CodeSearchNet, Python-Doc, and Py150) along with scripts for extracting various code features using compiler tools like LLVM.
 - **An extensible framework:** Built on Fairseq's registry mechanism, NaturalCC is well-modularized and can be easily extended to a variety of software engineering tasks.
 - **Performance benchmark:** Benchmarked three downstream tasks (code summarization, code retrieval, and code completion) over three datasets using NaturalCC, achieving state-of-the-art or competitive performance.
 - **Efficient training:** Harnesses the power of the `NCCL` library and `torch.distributed` to support model training on multiple GPUs. Furthermore, it also supports both full precision (FP32) and half-precision floating point (FP16) for fast training and inference.
 - **Better logging output:** Advanced logging features to provide clear, detailed feedback during model training and operation, aiding in debugging and performance optimization.
+
+## ✨ News 
+- [April 19, 2023] We have merged the source code of "You See What I Want You to See: Poisoning Vulnerabilities in Neural Code Search" into NaturalCC.
+- [May 10, 2022] We have merged the source code of "What Do They Capture? - A Structural Analysis of Pre-Trained Language Models for Source Code" into NaturalCC.
 
 ## 🚀 Installation
 
