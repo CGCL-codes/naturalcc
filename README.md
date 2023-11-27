@@ -295,40 +295,22 @@ If you have any questions or encounter issues, please feel free to reach out. Fo
 
 ## 😘 License and Acknowledgement
 
-**License:** NaturalCC is open-sourced under the [MIT-licensed](https://github.com/CGCL-codes/naturalcc/blob/master/LICENSE.txt). The license applies to the
-pre-trained models as well. 
+**License:** NaturalCC is open-sourced under the [MIT-licensed](https://github.com/CGCL-codes/naturalcc/blob/master/LICENSE.txt). This permissive license applies not only to the toolkit itself but also to the pre-trained models provided within.
 
-**Acknowledgements:** We gratefully acknowledge the inspiration and influence from projects such as [Fairseq](https://github.com/pytorch/fairseq) for their advanced sequence-to-sequence models and [AllenNLP](https://allennlp.org) for their robust NLP components.
-
-<!-- ## 🔗 Related Links
-
-[Paper](https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf): Detailed paper about NaturalCC.
-
-[NaturalCC-demo](http://121.43.116.104:3000/): Try our model in action with an interactive demo.
-
-[About us - XCodeMind](https://xcodemind.github.io/team): Learn more about the team behind NaturalCC. -->
-
+**Acknowledgements:** We extend our heartfelt gratitude to the broader open-source community, particularly drawing inspiration from projects like [Fairseq](https://github.com/pytorch/fairseq) for their advanced sequence-to-sequence models, and [AllenNLP](https://allennlp.org) for their robust NLP components. Their groundbreaking work has been instrumental in shaping the development of NaturalCC.
 
 ## 📄 Citation
 
-If you use NaturalCC in your research, please consider citing our work:
+We're thrilled that you're interested in using NaturalCC for your research or applications! Citing our work helps us to grow and continue improving this toolkit. You can find more in-depth details about NaturalCC in our [paper](https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf).
+
+If you use NaturalCC in your research, please consider citing our paper. Below is the BibTex format for citation:
 
 ```
 @inproceedings{wan2022naturalcc,
-              author    = {Yao Wan and
-                           Yang He and
-                           Zhangqian Bi and
-                           Jianguo Zhang and
-                           Yulei Sui and
-                           Hongyu Zhang and
-                           Kazuma Hashimoto and
-                           Hai Jin and
-                           Guandong Xu and
-                           Caiming Xiong and
-                           Philip S. Yu},
-              title     = {NaturalCC: An Open-Source Toolkit for Code Intelligence},
-              booktitle   = {Proceedings of 44th International Conference on Software Engineering, Companion Volume},
-              publisher = ACM,
-              year      = {2022}
-            }
+  title={NaturalCC: An Open-Source Toolkit for Code Intelligence},
+  author={Yao Wan and Yang He and Zhangqian Bi and Jianguo Zhang and Yulei Sui and Hongyu Zhang and Kazuma Hashimoto and Hai Jin and Guandong Xu and Caiming Xiong and Philip S. Yu},
+  booktitle={Proceedings of 44th International Conference on Software Engineering, Companion Volume},
+  publisher=ACM,
+  year={2022}
+}
 ```
