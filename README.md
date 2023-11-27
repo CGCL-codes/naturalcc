@@ -21,9 +21,9 @@
 <a href="http://121.43.116.104:3000">Demo</a>,
 <a href="https://xcodemind.github.io/team">About us-XCodeMind</a>
 
-# NaturalCC - Natural Code Comprehension
-   
 </div>
+
+# NaturalCC - Natural Code Comprehension
 
 ## 📖 Introduction
 
