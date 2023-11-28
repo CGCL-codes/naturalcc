@@ -5,22 +5,29 @@ import { NccCompletionProvider } from './completion';
 import { onConfigChange } from './config';
 
 export const pluginName = 'nccc'
-
+export var isActive: boolean
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "naturalcode" is now active!');
-	vscode.window.showInformationMessage('Hello World from naturalCode!');
-
+	vscode.window.showInformationMessage('Nccc is now active!');
+	isActive = true
 	const completor = new NccCompletionProvider();
 	context.subscriptions.push(
 		vscode.languages.registerInlineCompletionItemProvider(
 			{pattern: '**'},
 			completor
-		)
+		),
+		vscode.commands.registerCommand('nccc.enable', () => {
+			vscode.window.showInformationMessage('Nccc is now active!');
+			isActive = true
+		  }),
+		vscode.commands.registerCommand('nccc.disable', () => {
+			vscode.window.showInformationMessage('Nccc is now inactive!');
+			isActive = false
+		  }),
 	)
 }
 

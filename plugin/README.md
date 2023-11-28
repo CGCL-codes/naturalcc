@@ -1,71 +1,30 @@
-# naturalcode README
+# Ncc Completor
 
-This is the README for your extension "naturalcode". After writing up a brief description, we recommend including the following sections.
+## Enable / Disable
 
-## Features
+To enable the plugin: 
+1. Press `ctrl + shift + p` or `cmd + shift + p`.
+2. Type in `Enable nccc`.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+To disable the plugin: 
+1. Press `ctrl + shift + p` or `cmd + shift + p`.
+2. Type in `Disable nccc`.
 
-For example if there is an image subfolder under your extension project workspace:
+## Configurations
 
-\!\[feature X\]\(images/feature-x.png\)
+To set the arguments:
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+1. Press `ctrl + shift + p` or `cmd + shift + p`.
+2. Type in `Preferences: Open Settings (UI)` or `Preferences: Open User Settings (JSON)`.
+3. Search for `nccc`.
+4. Modify settings you are interested in.
 
-## Requirements
+All the arguments are listed below:
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+* `nccc.server`: The server running the model. default: "http://127.0.0.1:5000"
+* `nccc.debounce`: The inter-trigger time(in ms) to wait between completion requests. default: 1500
+* `nccc.maxLength`: The maximium length of generation. default: 200
+* `nccc.topK`: The top_k used in generation. default: 10
+* `nccc.topP`: The top_p used in generation. default: 0.95
+* `nccc.temperature`: The temperature used in generation. default: 0.1
+* `nccc.contextLineCount`: The lines to consider(i.e. pass to the model) when requesting completion. default: 5

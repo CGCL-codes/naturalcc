@@ -11,6 +11,7 @@ import {
   } from 'vscode'
 import { getCompletion } from './network';
 import { getConfig } from './config';
+import { isActive } from './extension';
 export class NccCompletionProvider implements InlineCompletionItemProvider {
 
     private debounceTimer: NodeJS.Timeout | undefined;
@@ -21,25 +22,19 @@ export class NccCompletionProvider implements InlineCompletionItemProvider {
         token: CancellationToken
       ): Promise<InlineCompletionItem[] | InlineCompletionList | null | undefined> {
         const line = document.lineAt(position.line).text
-
-        if(line.length < 5) {
+        if(line.length < 5 || !isActive) {
           return []
         }
 
         if(this.debounceTimer) {
-          console.log('clear')
           clearTimeout(this.debounceTimer);
         }
         return new Promise((resolve) => {
           this.debounceTimer = setTimeout(async () => {
-            console.log('trigger')
             const ctx = getContext(document, position)
             const ret = await getCompletion(ctx)
             const completionRange = document.lineAt(position.line).range
             const compl = removeFirstNLines(ret, ctx.split('\n').length - 1)
-            console.log(ctx)
-            console.log(ctx.split('\n').length)
-            console.log(compl)
             resolve([new InlineCompletionItem(compl, completionRange)])
           }, Number(getConfig().debounce));
         });
