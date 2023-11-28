@@ -41,6 +41,10 @@
         "nccc.temperature": {
           "type": "number",
           "default": 0.1
+        },
+        "nccc.contextLineCount": {
+          "type": "number",
+          "default": 5
         }
       }
     }
