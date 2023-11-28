@@ -3,6 +3,16 @@
   "displayName": "nccc",
   "description": "",
   "version": "0.0.1",
+  "repository": {
+    "url": "https://github.com/CGCL-codes/naturalcc"
+  },
+  "license": "MIT",
+  "keywords": [
+    "code-completion",
+    "code-inference",
+    "code-suggestion",
+    "naturalcc"
+  ],
   "engines": {
     "vscode": "^1.84.0"
   },
@@ -14,7 +24,18 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [],
+    "commands": [
+      {
+        "command": "nccc.enable",
+        "shortTitle": "Enable nccc",
+        "title": "Enable nccc"
+      },
+      {
+        "command": "nccc.disable",
+        "title": "Disable nccc",
+        "shortTitle": "Disable nccc"
+      }
+    ],
     "configuration": {
       "title": "nccc",
       "properties": {
