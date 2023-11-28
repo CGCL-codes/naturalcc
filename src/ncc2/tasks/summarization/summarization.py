@@ -104,5 +104,5 @@ class SummarizationTask(NccTask):
         
     @classmethod
     def from_pretrained(self, ckpt_folder):
-        self.model = self.model.from_pretrained(ckpt_folder,device_map={"":self.device})
+        self.model = self.model.from_pretrained(ckpt_folder,device_map={"":self.device},trust_remote_code=True)
         self.tokenizer = self.tokenizer_cls(ckpt_folder)
