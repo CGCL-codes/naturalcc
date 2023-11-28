@@ -34,11 +34,7 @@ export class NccCompletionProvider implements InlineCompletionItemProvider {
           this.debounceTimer = setTimeout(async () => {
             console.log('trigger')
             const ret = await getCompletion(line)
-            console.log(ret);
-            console.log(line.substring(0, position.character))
-            const overlap = getOverlap(line.substring(0, position.character), ret)
-            const completionRange = new Range(position.translate(0, -overlap), document.lineAt(position.line).range.end)
-            console.log(completionRange)
+            const completionRange = document.lineAt(position.line).range
             resolve([new InlineCompletionItem(ret, completionRange)])
           }, Number(getConfig().debounce));
         });
