@@ -34,8 +34,8 @@ def auto() -> SummarizationTaskConfig:
         tokenizer_cls=HFTokenizer
     )
 
-@register_task('summarization')
-class SummarizationTask(NccTask):
+@register_task('llm_summarization')
+class LLM_SummarizationTask(NccTask):
     @classmethod
     def __init__(self,config: SummarizationTaskConfig=None,task_name: str=None,*args,**kwargs):
         if not config:
