@@ -25,11 +25,12 @@
 
 </div>
 
-## 📖 Introduction
+## 📖 Vision
 
 NaturalCC is a sequence modeling toolkit designed to bridge the gap between programming and natural languages through advanced machine learning techniques. It allows researchers and developers to train custom models for a variety of software engineering tasks, e.g., code generation, code completion, code summarization, code retrieval, code clone detection, and type inference.
 
-Key features of NaturalCC include:
+
+## ✨ Key Features:
 
 - **Modular and Extensible Framework:** Built on the robust Fairseq's registry mechanism, allowing for easy adaptation and extension to diverse software engineering tasks.
 - **Datasets and Preprocessing Tools+:** Offers access to a variety of clean, preprocessed benchmarks such as Human-Eval, CodeSearchNet, Python-Doc, and Py150. Comes equipped with scripts for feature extraction using compiler tools like LLVM.
