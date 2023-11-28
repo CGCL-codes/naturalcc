@@ -2,6 +2,7 @@ from typing import Optional
 from ncc2.nn.position_encoder import RotaryEncoder
 from ncc2.typing import DataType, Device
 from transformers import AutoModelForCausalLM
+from transformers import T5ForConditionalGeneration
 from ncc2.models.utils.arch_registry import ArchitectureRegistry
 from dataclasses import dataclass
 from ncc2.data import VocabularyInfo
@@ -10,7 +11,7 @@ from ncc2.data import VocabularyInfo
 class HFConfig:
     model_name: str
 
-hf_archs = ArchitectureRegistry("hf")
+hf_archs = ArchitectureRegistry("hf_seq2seq")
 
 hf_arch = hf_archs.marker
 
@@ -37,4 +38,7 @@ class HFBuilder:
         self.device, self.dtype = device,dtype
         
     def build_model(self):
-        return AutoModelForCausalLM
+        return T5ForConditionalGeneration
+
+
+
