@@ -1,9 +1,34 @@
 import axios from 'axios';
+import { NccConfig, getConfig } from './config';
 
-async function sendGetRequestWithBody(url: string, body: any): Promise<any> {
-    const response = await axios.get(url, {
-        data: body // Axios 允许在GET请求中使用 'data' 属性来发送body
-    });
+class NccResult {
+    public generated_text: string;
+    constructor(text: string) {
+        this.generated_text = text
+    }
+}
 
-    return response.data;
+class NccPrompt {
+    public config: NccConfig
+    public prompt: string
+    constructor(prompt: string) {
+        this.config = getConfig()
+        this.prompt = prompt
+    }
+
+    async fire(): Promise<NccResult> {
+        try {
+            const response = await axios.post(encodeURI(this.config.server + '/complete'), this)
+            return response.data as NccResult
+        } catch(err) {
+            console.log(err)
+        }
+        return new NccResult("")
+    }
+}
+
+export async function getCompletion(prompt: string): Promise<string> {
+    const nccPrompt = new NccPrompt(prompt)
+    const result = await nccPrompt.fire()
+    return result.generated_text
 }

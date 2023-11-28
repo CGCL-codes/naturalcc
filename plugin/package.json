@@ -1,6 +1,6 @@
 {
-  "name": "naturalcode",
-  "displayName": "naturalCode",
+  "name": "nccc",
+  "displayName": "nccc",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -14,7 +14,36 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": []
+    "commands": [],
+    "configuration": {
+      "title": "nccc",
+      "properties": {
+        "nccc.server": {
+          "type": "string",
+          "default": "http://127.0.0.1:5000"
+        },
+        "nccc.debounce": {
+          "type": "number",
+          "default": 1500
+        },
+        "nccc.maxLength": {
+          "type": "number",
+          "default": 200
+        },
+        "nccc.topK": {
+          "type": "number",
+          "default": 10
+        },
+        "nccc.topP": {
+          "type": "number",
+          "default": 0.95
+        },
+        "nccc.temperature": {
+          "type": "number",
+          "default": 0.1
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

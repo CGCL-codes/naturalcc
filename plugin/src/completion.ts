@@ -7,11 +7,10 @@ import {
     CancellationToken,
     Position,
     Range,
-    TextDocument,
-    workspace,
-    window
+    TextDocument
   } from 'vscode'
-
+import { getCompletion } from './network';
+import { getConfig } from './config';
 export class NccCompletionProvider implements InlineCompletionItemProvider {
 
     private debounceTimer: NodeJS.Timeout | undefined;
@@ -27,25 +26,21 @@ export class NccCompletionProvider implements InlineCompletionItemProvider {
           return []
         }
 
-        if (this.debounceTimer) {
+        if(this.debounceTimer) {
           console.log('clear')
           clearTimeout(this.debounceTimer);
         }
         return new Promise((resolve) => {
           this.debounceTimer = setTimeout(async () => {
             console.log('trigger')
-            const response = await fetch(encodeURI('http://127.0.0.1:5000/complete?prompt=' + line));
-            const data = await response.json();
-            const ret = data.generated_text;
+            const ret = await getCompletion(line)
             console.log(ret);
-            const overlap = getOverlap(line, ret);
-            resolve([new InlineCompletionItem(ret, new Range(position.translate(0, -overlap), position))]);
-          }, 2000);
+            console.log(line.substring(0, position.character))
+            const overlap = getOverlap(line.substring(0, position.character), ret)
+            const completionRange = new Range(position.translate(0, -overlap), document.lineAt(position.line).range.end)
+            console.log(completionRange)
+            resolve([new InlineCompletionItem(ret, completionRange)])
+          }, Number(getConfig().debounce));
         });
     }
-
-    public async getCompletion(prompt:string) {
-      
-    }
-
 }

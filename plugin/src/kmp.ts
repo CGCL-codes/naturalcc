@@ -1,6 +1,6 @@
 
 // use KMP to find the overlap between the suffix of user input and prefix of completion result
-export function getOverlap(text: string, pattern: string): Number {
+export function getOverlap(text: string, pattern: string): number {
 
     text = ' ' + text
     pattern = ' ' + pattern
