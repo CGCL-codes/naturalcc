@@ -9,7 +9,8 @@ if __name__ == '__main__':
     
     # init task by task_name
     print('Initializing SummarizationTask')
-    task = SummarizationTask(task_name="auto",device="cuda:2")
+    task = SummarizationTask(task_name="llm",device="cuda:2")
+    # task = SummarizationTask(task_name="t5_code",device="cuda:2")
 
     # set tokenizer and load model weights
     print('Loading model weights [{}]'.format(ckpt_path))

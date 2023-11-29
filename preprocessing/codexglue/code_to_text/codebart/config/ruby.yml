@@ -1,0 +1,18 @@
+preprocess:
+  task: multilingual_denoising # task', metavar='TASK', default="translation", choices=TASK_REGISTRY.keys(), help='task'
+  source_lang: code.spm
+  target_lang: docstring.spm
+  only_source: 0
+  trainpref: ~/ncc_data/codexglue/code_to_text/attributes/ruby/train #", metavar="FP", default=None, help="train file prefix"
+  validpref: ~/ncc_data/codexglue/code_to_text/attributes/ruby/valid #", metavar="FP", default=None, help="comma separated, valid file prefixes"
+  testpref:  ~/ncc_data/codexglue/code_to_text/attributes/ruby/test  #", metavar="FP", default=None, help="comma separated, test file prefixes"
+
+  # bin dataset
+  dataset_impl: mmap #', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(), help='output dataset implementation'
+  destdir: ~/ncc_data/codexglue/code_to_text/multilingual_denoising/data-mmap/ruby #", metavar="DIR", default="data-bin", help="destination dir"
+
+  only_train: 1 # if set false, generate dictionaries with additional validation datasets. e.g. neural-transformer
+
+  alignfile: ~ #", metavar="ALIGN", default=None, help="an alignment file (optional)"
+  padding_factor: 1 #", metavar="N", default=8, type=int, help="Pad dictionary size to be multiple of N"
+  workers: 40 # ", metavar="N", default=1, type=int, help="number of parallel workers"

@@ -1,5 +1,6 @@
 from ncc2.tasks import NccTask
 from ncc2.models.hf import HFTokenizer,HFBuilder,hf_archs
+from ncc2.models.hf_seq2seq import HFSeq2seqBuilder,hf_seq2seq_archs
 from ncc2.tasks import register_task
 from ncc2.tasks.utils.task_registry import TaskRegistry
 from dataclasses import dataclass
@@ -25,12 +26,21 @@ class SummarizationTaskConfig:
 summarization_tasks = TaskRegistry[SummarizationTaskConfig]('summarization')
 summarization_task = summarization_tasks.marker
     
-@summarization_task('auto')
-def auto() -> SummarizationTaskConfig:
+@summarization_task('llm')
+def llm() -> SummarizationTaskConfig:
     return SummarizationTaskConfig(
         archs=hf_archs,
         model_name='auto',
         builder=HFBuilder,
+        tokenizer_cls=HFTokenizer
+    )
+    
+@summarization_task('t5_code')
+def t5_code() -> SummarizationTaskConfig:
+    return SummarizationTaskConfig(
+        archs=hf_seq2seq_archs,
+        model_name='auto',
+        builder=HFSeq2seqBuilder,
         tokenizer_cls=HFTokenizer
     )
 

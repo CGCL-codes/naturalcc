@@ -1,0 +1,53 @@
+{
+    "devign": {
+        "learning_rate" : 1e-4,
+        "weight_decay" : 1.3e-6,
+        "loss_lambda" : 1.3e-6,
+        "model": {
+            "gated_graph_conv_args": {"out_channels" : 200, "num_layers" : 6, "aggr" : "add", "bias": true},
+            "conv_args": {
+                "conv1d_1" : {"in_channels": 205, "out_channels": 50, "kernel_size": 3, "padding" : 1},
+                "conv1d_2" : {"in_channels": 50, "out_channels": 20, "kernel_size": 1, "padding" : 1},
+                "maxpool1d_1" : {"kernel_size" : 3, "stride" : 2},
+                "maxpool1d_2" : {"kernel_size" : 2, "stride" : 2}
+            },
+            "emb_size" : 101
+        }
+    },
+    "create" : {
+        "filter_column_value": {"project" : "qemu"},
+        "slice_size": 100,
+        "joern_cli_dir": "joern/joern-cli/"
+    },
+    "paths" : {
+        "cpg" : "data/cpg/",
+        "joern" : "data/joern/",
+        "raw" : "data/raw/",
+        "input" : "data/input/",
+        "model" : "data/model/",
+        "tokens" : "data/tokens/",
+        "w2v" : "data/w2v/"
+    },
+    "files" : {
+        "raw" : "dataset.json",
+        "cpg" : "cpg",
+        "tokens" : "tokens.pkl",
+        "w2v" : "w2v.model",
+        "input" : "input.pkl",
+        "model" : "checkpoint.pt"
+    },
+    "embed" : {
+        "nodes_dim" : 205,
+        "word2vec_args": {"size" : 100, "alpha" : 0.01, "window" : 5, "min_count" : 3, "sample" : 1e-5,
+                "workers" : 4, "sg" : 1, "hs" : 0, "negative" : 5
+            },
+        "edge_type": "Ast"
+    },
+    "process" : {
+        "epochs" : 100,
+        "patience" : 10,
+        "batch_size" : 8,
+        "dataset_ratio" : 0.2,
+        "shuffle" : false
+    }
+}
