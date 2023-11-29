@@ -1,4 +1,4 @@
-from ncc2.tasks.generation import GenerationTask
+from ncc2.tasks.completion import CompletionTask
 
 if __name__ == '__main__':
     
@@ -8,8 +8,8 @@ if __name__ == '__main__':
     test_input = ['this is a test']
     
     # init task by task_name
-    print('Initializing GenerationTask')
-    task = GenerationTask(task_name="codellama_7b_code",device="cuda:6")
+    print('Initializing CompletionTask')
+    task = CompletionTask(task_name="llm",device="cuda:6")
 
     # set tokenizer and load model weights
     print('Loading model weights [{}]'.format(ckpt_path))

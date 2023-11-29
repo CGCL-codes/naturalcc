@@ -1,4 +1,4 @@
-# GenerationTask
+# CompletionTask
 ## Step1: Download the checkpoint
 Recommend Model: [Codellama-7B](https://huggingface.co/camenduru/CodeLlama-7b)
 
@@ -30,21 +30,21 @@ For example:
 ## Step3: Running scripts
 - Instantiate the task class and set device
 ```python
-print('Initializing GenerationTask')
-task = GenerationTask(task_name="codellama_7b_code",device="cuda:6")
+print('Initializing CompletionTask')
+    task = SummarizationTask(task_name="llm",device="cuda:2")
 ```
 - Load the checkpoint
 ```python
 print('Loading model weights [{}]'.format(ckpt_path))
-task.from_pretrained(ckpt_path)
+    task.from_pretrained(ckpt_path)
 ```
 - Load the dataset from given path
 ```python
 print('Processing dataset [{}]'.format(dataset_path))
-task.load_dataset(dataset_path)
+    task.load_dataset(dataset_path)
 ```
 - Run the model and output to the specified path
 ```python
 task.run(output_path=output_path,batch_size=1,max_length=50)
-print('Output file: {}'.format(output_path))
+    print('Output file: {}'.format(output_path))
 ```

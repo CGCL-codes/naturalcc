@@ -1,20 +1,20 @@
 [
     {
-        "output": "<s> this is a simple example of how to use the [react-native-webview](https://github.com/react-native-community/react-native-webview) component to display a web page.\n\n### Install"
+        "output": "this is a\nPlease summary the above code:\n\n\\begin{code}\n  \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n\\end{code}\nComment"
     },
     {
-        "output": "<s> from tqdm import tqdm\nimport numpy as np\nimport pandas as pd\nimport os\nimport sys\nimport argparse\nimport json\nimport pickle\nimport time\nimport random\nimport torch\nimport torch"
+        "output": "from tqdm import\nPlease summary the above code:\n\n\t\t1.11.123333333333333\n\n\n\n\t\t\t\t\t1.11"
     },
     {
-        "output": "<s> def calculate(a, b, op):\n    if op == '+':\n        return a + b\n    elif op == '-':\n        return a - b\n    elif op == '*':\n        return a *"
+        "output": "def calculate(\nPlease summary the above code:\n\\end{code}\n\\end{code}\n\\\n\n  \\section{The problem}\n\\begin{code}\n  \\ \\ \\ \\ \\ \\ \\ \\"
     },
     {
-        "output": "<s> a = b**2\n\nb = 2\n\nc = a**2\n\nprint(a)\nprint(b)\nprint(c)\n\n# 1\n# 4\n# 16\n"
+        "output": "a = b**2\nPlease summary the above code:\n\n\\begin  { {  } } } } end\n\\begin{code}\n\\end{code}\n\n\\begin{code}\n\\end{"
     },
     {
-        "output": "<s> torch.randint(0, 2, (1, 1, 1, 1))\n        self.assertEqual(x.size(), (1, 1, 1, 1))\n        self"
+        "output": "torch.randint\nPlease summary the above code:\n\n\\begin{code}\n//www.baidu.com/wang\n\\end{code}\n\\begin{code}\n//www.baid"
     },
     {
-        "output": "<s> x = [1,2,3,4,5,6,7,8,9,10]\ny = [1,2,3,4,5,6,7,8,9,10]"
+        "output": "x = [1,2\nPlease summary the above code:\n\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ L L L L L L \nL L L L \nL \nLL \nL "
     }
 ]
