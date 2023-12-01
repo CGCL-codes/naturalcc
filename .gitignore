@@ -22,5 +22,5 @@ __pycache__/
 .DS_Store
 
 # notebook & test results
-*.ipynb
+/*.ipynb
 result.json
