@@ -85,6 +85,55 @@ Follow these steps to set up the environment.
 
 ### Example 1: Code Generation
 
+1. Download the model checkpoint
+
+    First, download the checkpoint of a specific large code model. For this example, we use [Codellama-7B](https://huggingface.co/camenduru/CodeLlama-7b).
+
+
+2. Prepare the testing dataset
+
+    Create a JSON file containing your test cases in the following format:
+
+    ```json
+    [
+      {"input": "this is a"},
+      {"input": "from tqdm import"},
+      {"input": "def calculate("},
+      {"input": "a = b**2"},
+      {"input": "torch.randint"},
+      {"input": "x = [1,2"}
+    ]
+    ```
+
+3. Running the code generation scripts
+
+    1. Initialize the task with the specific model and GPU device:
+
+        ```python
+        print('Initializing GenerationTask')
+        task = GenerationTask(task_name="codellama_7b_code", device="cuda:0")
+        ```
+
+    2. Load the downloaded checkpoint into the task. Replace `ckpt_path` with the path to your downloaded checkpoint:
+
+        ```python
+        print('Loading model weights [{}]'.format(ckpt_path))
+        task.from_pretrained(ckpt_path)
+        ```
+
+    3. Load your dataset. Replace `dataset_path` with the path to your dataset file:
+
+        ```python
+        print('Processing dataset [{}]'.format(dataset_path))
+        task.load_dataset(dataset_path)
+        ```
+
+    4. Run the model and output the results. Replace `output_path` with your desired output file path:
+
+        ```python
+        task.run(output_path=output_path, batch_size=1, max_length=50)
+        print('Output file: {}'.format(output_path))
+        ```
 
 ### Example 2: Code Summarization
 
