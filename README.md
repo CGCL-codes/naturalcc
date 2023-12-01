@@ -96,12 +96,12 @@ Follow these steps to set up the environment.
 
     ```json
     [
-      {"input": "this is a"},
-      {"input": "from tqdm import"},
-      {"input": "def calculate("},
-      {"input": "a = b**2"},
-      {"input": "torch.randint"},
-      {"input": "x = [1,2"}
+      {"input": "this is a"},
+      {"input": "from tqdm import"},
+      {"input": "def calculate("},
+      {"input": "a = b**2"},
+      {"input": "torch.randint"},
+      {"input": "x = [1,2"}
     ]
     ```
 
