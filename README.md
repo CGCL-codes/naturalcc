@@ -188,7 +188,15 @@ NaturalCC supports a diverse range of datasets, catering to various aspects of c
 - [StackOverflow (Iyer et al.)](preprocessing/stackoverflow)
 
 
+## 🤝 Contributor
 
+We warmly welcome contributions to NaturalCC! Your involvement is essential for keeping NaturalCC innovative and accessible. 
+
+We're grateful to all our amazing contributors who have made this project what it is today!
+
+<a href="https://github.com/CGCL-codes/naturalcc/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=CGCL-codes/naturalcc&r="  width="800px"/>
+</a>
 
 ## 💡 FAQ
 
