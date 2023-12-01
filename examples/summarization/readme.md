@@ -7,7 +7,7 @@ For example:
 ```json
 [
     {
-        "input": "current_directory = os.path.dirname(os.path.abspath(__file__))"
+        "input": "current_directory = os.path.dirname(os.path.abspath(__file__))"v
     },
     {
         "input": "import os\nos.environ['http_proxy'] = 'http://127.0.0.1:7890'\nos.environ['https_proxy'] = 'http://127.0.0.1:7890'"

@@ -2,7 +2,7 @@ from ncc2.tasks.summarization import SummarizationTask
 
 if __name__ == '__main__':
     
-    ckpt_path = './CodeLlama-7b-Instruct'
+    ckpt_path = '~/checkpoints/CodeLlama-7b-Instruct'
     dataset_path = './dataset.json'
     output_path = './result.json'
     test_input = ['this is a test']

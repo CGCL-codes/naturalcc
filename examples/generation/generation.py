@@ -7,16 +7,19 @@ if __name__ == '__main__':
     output_path = './result.json'
     test_input = ['this is a test']
     
-    # init task by task_name
-    print('Initializing GenerationTask')
-    task = GenerationTask(task_name="codellama_7b_code",device="cuda:6")
+task_name = "codellama_7b_code",
+device = "cuda:6" 
+    
+# init task by task_name
+task = GenerationTask(task_name,device)
 
-    # set tokenizer and load model weights
-    print('Loading model weights [{}]'.format(ckpt_path))
-    task.from_pretrained(ckpt_path)
+# set tokenizer and load model weights
+task.from_pretrained(ckpt_path)
 
-    # load dataset and run task
-    print('Processing dataset [{}]'.format(dataset_path))
-    task.load_dataset(dataset_path)
-    task.run(output_path=output_path,batch_size=1,max_length=50)
-    print('Output file: {}'.format(output_path))
+# load dataset
+task.load_dataset(dataset_path)
+
+# set config and run
+task.run(output_path=output_path,max_length=50)
+
+
