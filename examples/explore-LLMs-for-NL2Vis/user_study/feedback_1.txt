@@ -1,0 +1,1 @@
+The ability of large language models (LLMs) in the NL2Vis  task is much stronger than I had imagined. They can perform well on most common tasks and can handle complex tasks reasonably well, although there may be some limitations. However, as long as the instructions are detailed enough, any shortcomings in this area can be overcome to a certain extent.
