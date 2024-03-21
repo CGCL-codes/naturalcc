@@ -66,6 +66,7 @@ Follow these steps to set up the environment.
     ```shell
     git clone https://github.com/CGCL-codes/naturalcc && cd naturalcc
     pip install -r requirements.txt
+    cd src
     pip install --editable ./
     ```
 3. Installing Additional Dependencies
