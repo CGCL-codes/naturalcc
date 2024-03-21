@@ -48,7 +48,7 @@ def t5_code() -> SummarizationTaskConfig:
         tokenizer_cls=HFTokenizer
     )
     
-@summarization_task('llm')
+@summarization_task('codellama_7b_summarization')
 def codellama() -> SummarizationTaskConfig:
     key_map = {}
     key_map['tok_embeddings.weight'] = 'decoder_frontend.embed.weight'

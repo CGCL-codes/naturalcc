@@ -71,6 +71,7 @@ Follow these steps to set up the environment.
     ```
 3. Installing Additional Dependencies
     ```shell
+    conda install conda-forge::libsndfile
     pip install -q -U git+https://github.com/huggingface/transformers.git
     pip install -q -U git+https://github.com/huggingface/accelerate.git
     ```

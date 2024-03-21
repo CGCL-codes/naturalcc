@@ -7,12 +7,11 @@ if __name__ == '__main__':
     output_path = './result.json'
     test_input = ['this is a test']
     
-task_name = "codellama_7b_generation"
-device = "cuda:0"
+task_name = "codellama_7b_code",
+device = "cuda:6" 
     
 # init task by task_name
-task = GenerationTask(task_name=task_name,
-                      device=device)
+task = GenerationTask(task_name,device)
 
 # set tokenizer and load model weights
 task.from_pretrained(ckpt_path)
