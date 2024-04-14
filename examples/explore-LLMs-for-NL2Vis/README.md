@@ -43,7 +43,7 @@ We incorporate multiple methods for representing tabular data, located in distin
 Several optimization strategies are implemented to enhance model performance, including:
 <p align="center">
     <br>
-<img src="./img/prompts_optimization.png" width="700">
+<img src="./img/prompts_optimization.png" width="550">
     <br>
 <p>
 
