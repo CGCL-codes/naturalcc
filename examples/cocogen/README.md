@@ -29,7 +29,7 @@ The directory structure of this repository is shown as below:
 ├── running_scripts          # Example scripts to evaluate CoCoGen 
 └── src
     ├── data                 # Datasets
-    ├── main.py              # The main script of CoCoGen
+    ├── cocogen.py              # The main script of CoCoGen
     ├── RepoCoder.py         # Impelmentation of RepoCoder baseline
     └── vector_database      # pre-computed vector embeddings using the text-embedding-ada-002 model
 ```
