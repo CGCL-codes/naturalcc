@@ -1,0 +1,15 @@
+huggingface_hub==0.17.3
+numpy==1.26.4
+openai==1.12.0
+pandas==2.2.0
+psycopg2_binary==2.9.9
+pylint==3.0.3
+python_Levenshtein==0.23.0
+python_Levenshtein==0.25.0
+regex==2023.10.3
+scipy==1.12.0
+tiktoken==0.5.2
+torch==2.1.0
+tqdm==4.66.1
+transformers==4.35.1
+tree_sitter==0.20.4
