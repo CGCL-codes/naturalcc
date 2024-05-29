@@ -1,11 +1,11 @@
 # CoCoGen
 
 ## Introduction
-The code repository for anonymous ACL sumbission "Iterative Refinement of Project-Level Code Context for Precise Code Generation with Compiler Feedback"
+The code repository for the paper "Iterative Refinement of Project-Level Code Context for Precise Code Generation with Compiler Feedback"
 
 CoCoGen is a framework to allow an LLM to leverage the code repository of a software project to enhance the quality of the generated code through compiler feedback.
 
-![System overview](./assets/fig_overview.png)
+![System Overview](./assets/fig_overview.png)
 ## How CoCoGen Works
 
 CoCoGen operates by iteratively refining LLM-generated code that leverages compiler feedback to identify and correct context-related errors:
