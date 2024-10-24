@@ -5,6 +5,6 @@ This is the code for *CODEIP: A Grammar-Guided Multi-Bit Watermark for Large Lan
 To run the code, please follow the instruction below.
 
 ```
-cd CodeIP
+cd src
 python run_wm.py
 ```
