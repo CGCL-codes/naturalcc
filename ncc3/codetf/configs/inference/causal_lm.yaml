@@ -1,0 +1,71 @@
+causallm-codegen-350M-mono-pretrained:
+    huggingface_url: "Salesforce/codegen-350M-mono"
+    tokenizer_url: "Salesforce/codegen-350M-mono"
+    max_prediction_length: 512
+causallm-codegen-350M-multi-pretrained:
+    huggingface_url: "Salesforce/codegen-350M-multi"
+    tokenizer_url: "Salesforce/codegen-350M-multi"
+    max_prediction_length: 512
+causallm-codegen-350M-nl-pretrained:
+    huggingface_url: "Salesforce/codegen-350M-nl"
+    tokenizer_url: "Salesforce/codegen-350M-nl"
+    max_prediction_length: 512
+causallm-codegen-2B-mono-pretrained:
+    huggingface_url: "Salesforce/codegen-2B-mono"
+    tokenizer_url: "Salesforce/codegen-2B-mono"
+    max_prediction_length: 512
+causallm-codegen-2B-multi-pretrained:
+    huggingface_url: "Salesforce/codegen-2B-multi"
+    tokenizer_url: "Salesforce/codegen-2B-multi"
+    max_prediction_length: 512
+causallm-codegen-2B-nl-pretrained:
+    huggingface_url: "Salesforce/codegen-2B-nl"
+    tokenizer_url: "Salesforce/codegen-2B-nl"
+    max_prediction_length: 512
+causallm-codegen-6B-mono-pretrained:
+    huggingface_url: "Salesforce/codegen-6B-mono"
+    tokenizer_url: "Salesforce/codegen-6B-mono"
+    max_prediction_length: 512
+causallm-codegen-6B-nl-pretrained:
+    huggingface_url: "Salesforce/codegen-6B-nl"
+    tokenizer_url: "Salesforce/codegen-6B-nl"
+    max_prediction_length: 512
+causallm-codegen-6B-multi-pretrained:
+    huggingface_url: "Salesforce/codegen-6B-multi"
+    tokenizer_url: "Salesforce/codegen-6B-mullti"
+    max_prediction_legnth: 512
+causallm-starcoder-15.5B-pretrained:
+    huggingface_url: "bigcode/starcoder"
+    tokenizer_url: "bigcode/starcoder"
+    max_prediction_length: 512
+causallm-gpt-neox-20B-pretrained:
+    huggingface_url: "EleutherAI/gpt-neox-20b"
+    tokenizer_url: "EleutherAI/gpt-neox-20b"
+    max_prediction_length: 512
+causallm-gpt-neo-1.3B-pretrained:
+    huggingface_url: "EleutherAI/gpt-neo-1.3B"
+    tokenizer_url:  "EleutherAI/gpt-neo-1.3B"
+    max_prediction_length: 512
+causallm-gpt-j-6B-pretrained:
+    huggingface_url: "EleutherAI/gpt-j-6b"
+    tokenizer_url:  "EleutherAI/gpt-j-6b"
+    max_prediction_length: 512
+causallm-incoder-6B-pretrained:
+    huggingface_url: "facebook/incoder-6B"
+    tokenizer_url:  "facebook/incoder-6B"
+    max_prediction_length: 512
+causallm-codegen2-1B-pretrained:
+    huggingface_url: "Salesforce/codegen2-1B"
+    tokenizer_url: "Salesforce/codegen2-1B"
+    max_prediction_length: 512
+causallm-codegen2-3.7B-pretrained:
+    huggingface_url: "Salesforce/codegen2-3_7B"
+    tokenizer_url: "Salesforce/codegen2-3_7B"
+causallm-codegen2-7B-pretrained:
+    huggingface_url: "Salesforce/codegen2-7B"
+    tokenizer_url: "Salesforce/codegen2-7B"
+    max_prediction_length: 512
+causallm-codegen2-16B-pretrained:
+    huggingface_url: "Salesforce/codegen2-16B"
+    tokenizer_url: "Salesforce/codegen2-16B"
+    max_prediction_length: 512
