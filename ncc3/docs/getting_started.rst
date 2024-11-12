@@ -52,9 +52,9 @@ Want to train a custom LLM for code? We've got you covered. Below is an example 
 .. code-block:: python
 
     from codetf.trainer.causal_lm_trainer import CausalLMTrainer
-    from codetf.data_utility.codexglue_dataset import CodeXGLUEDataset
+    from ncc3.utils.data_util.codexglue_dataset import CodeXGLUEDataset
     from codetf.models import load_model_pipeline
-    from codetf.performance.evaluate import EvaluationMetric
+    from codetf.evaluate.evaluate import EvaluationMetric
 
     model_class = load_model_pipeline(model_name="causal-lm", task="pretrained",
                     model_type="starcoder-15.5B", is_eval=False,
@@ -85,8 +85,8 @@ Planning to reproduce the results of well-known benchmarks like ``Human-Eval``, 
 .. code-block:: python
 
     from codetf.models import load_model_pipeline
-    from codetf.data_utility.human_eval_dataset import HumanEvalDataset
-    from codetf.performance.model_evaluator import ModelEvaluator
+    from ncc3.utils.data_util.human_eval_dataset import HumanEvalDataset
+    from codetf.evaluate.model_evaluator import ModelEvaluator
 
     os.environ["HF_ALLOW_CODE_EVAL"] = "1"
     os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -113,7 +113,7 @@ CodeTF provides the Dataset utility for several well-known datasets, such as Cod
 
 .. code-block:: python
 
-    from codetf.data_utility.codexglue_dataset import CodeXGLUEDataset
+    from ncc3.utils.data_util.codexglue_dataset import CodeXGLUEDataset
     from transformers import RobertaTokenizer
 
     tokenizer = RobertaTokenizer.from_pretrained("Salesforce/codet5-base", use_fast=True)
@@ -134,9 +134,9 @@ CodeTF includes AST parsers compatible with numerous programming languages. Here
 
 .. code-block:: python
 
-    from codetf.code_utility.apex.apex_code_utility import ApexCodeUtility
+    from codetf.code_util.apex.apex_code_util import ApexCodeUtility
 
-    apex_code_utility = ApexCodeUtility()
+    apex_code_util = ApexCodeUtility()
 
     sample_code = """
         public class SampleClass {    
@@ -152,7 +152,7 @@ CodeTF includes AST parsers compatible with numerous programming languages. Here
             }
         }
     """
-    ast = apex_code_utility.parse(sample_code)
+    ast = apex_code_util.parse(sample_code)
 
     # This will print the tree-sitter AST object
     print(ast)
@@ -173,7 +173,7 @@ CodeTF provides an interface to easily extract code attributes. The following is
 
 .. code-block:: python
 
-    code_attributes = apex_code_utility.get_code_attributes(sample_code)
+    code_attributes = apex_code_util.get_code_attributes(sample_code)
     print(code_attributes)
 
 This will print:
@@ -187,7 +187,7 @@ There are other existing utilities, such as removing comments from code:
 
 .. code-block:: python
 
-    new_code_snippet = apex_code_utility.remove_comments(sample_code)
+    new_code_snippet = apex_code_util.remove_comments(sample_code)
     print(new_code_snippet)
 
 This will print:

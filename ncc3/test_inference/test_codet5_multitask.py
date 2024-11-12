@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 sys.path.append(str(Path(".").absolute().parent))
-from codetf.models import load_model_pipeline
+from ncc3.models import load_model_pipeline
 
 translation_model = load_model_pipeline(model_name="codet5", task="translate_cs_java",
             model_type="base", is_eval=True, 

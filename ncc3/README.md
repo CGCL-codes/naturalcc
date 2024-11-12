@@ -116,7 +116,7 @@ huggingface-cli login
 Getting started with CodeTF is simple and quick with our model loading pipeline function ``load_model_pipeline()``. Here's an example showing how to load codet5+ model and perform inference on code generation task:
     
 ```python
-from codetf.models import load_model_pipeline
+from ncc3.models import load_model_pipeline
 
 code_generation_model = load_model_pipeline(model_name="codet5", task="pretrained",
             model_type="plus-770M-python", is_eval=True,
@@ -187,10 +187,10 @@ Want to train a custom LLM for code? We've got you covered. Below is an example 
     
 ```python
 from codetf.trainer.codet5_trainer import CodeT5Seq2SeqTrainer
-from codetf.data_utility.codexglue_dataset import CodeXGLUEDataset
+from ncc3.utils.data_util.codexglue_dataset import CodeXGLUEDataset
 from codetf.models import load_model_pipeline
-from codetf.performance.evaluation_metric import EvaluationMetric
-from codetf.data_utility.base_dataset import CustomDataset
+from codetf.evaluate.evaluation_metric import EvaluationMetric
+from ncc3.utils.data_util.base_dataset import CustomDataset
 
 model_class = load_model_pipeline(model_name="codet5", task="pretrained",
             model_type="plus-220M", is_eval=True)
@@ -220,8 +220,8 @@ Comparing to [this script from StarCoder](https://github.com/bigcode-project/sta
 Planning to reproduce the results of well-known benchmarks like ``Human-Eval``, but struggling with not achieving the same numbers as reported in the original papers? Worried about the complicated evaluation process? Don't worry, we've got you covered with an intuitive, easy-to-use interface. Here's a sample snippet demonstrating how to evaluate Human Eval using pass@k (k=[1,10,100]) as the metric:
 ```python
 from codetf.models import load_model_pipeline
-from codetf.data_utility.human_eval_dataset import HumanEvalDataset
-from codetf.performance.model_evaluator import ModelEvaluator
+from ncc3.utils.data_util.human_eval_dataset import HumanEvalDataset
+from codetf.evaluate.model_evaluator import ModelEvaluator
 
 os.environ["HF_ALLOW_CODE_EVAL"] = "1"
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -246,7 +246,7 @@ Comparing to [this script from HuggingFace](https://github.com/huggingface/trans
 CodeTF provides the Dataset utility for several well-known datasets, such as CodeXGLUE, Human Eval, MBPP, and APPS. The following is an example of how to load the CodeXGLUE dataset:  
 
 ```python
-from codetf.data_utility.codexglue_dataset import CodeXGLUEDataset
+from ncc3.utils.data_util.codexglue_dataset import CodeXGLUEDataset
 from transformers import RobertaTokenizer
 
 tokenizer = RobertaTokenizer.from_pretrained("Salesforce/codet5-base", use_fast=True)
@@ -264,9 +264,9 @@ In addition to providing utilities for LLMs, CodeTF also equips users with tools
 
 CodeTF includes AST parsers compatible with numerous programming languages. Here's an example showcasing the parsing of Apex code into an AST:
 ```python
-from codetf.code_utility.apex.apex_code_utility import ApexCodeUtility
+from codetf.code_util.apex.apex_code_util import ApexCodeUtility
 
-apex_code_utility = ApexCodeUtility()
+apex_code_util = ApexCodeUtility()
 
 sample_code = """
     public class SampleClass {    
@@ -282,7 +282,7 @@ sample_code = """
         }
     }
 """
-ast = apex_code_utility.parse(sample_code)
+ast = apex_code_util.parse(sample_code)
 
 # This will print the tree-sitter AST object
 print(ast)
@@ -303,7 +303,7 @@ There are also other utilities for Java, Python, etc, that can perform the same 
 CodeTF provides an interface to easily extract code attributes. The following is a sample for extracting the function name of a Python function:
 
 ```python
-code_attributes = apex_code_utility.get_code_attributes(sample_code)
+code_attributes = apex_code_util.get_code_attributes(sample_code)
 print(code_attributes)
 ```
 
@@ -315,7 +315,7 @@ This will print:
 ### Remove Comments
 There are other existing utilities, such as removing comments from code:
 ```python
-new_code_snippet = apex_code_utility.remove_comments(sample_code)
+new_code_snippet = apex_code_util.remove_comments(sample_code)
 print(new_code_snippet)
 ```
 

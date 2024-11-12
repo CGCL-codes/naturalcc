@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 sys.path.append(str(Path(".").absolute().parent))
-from codetf.models import load_model_pipeline
+from ncc3.models import load_model_pipeline
 
 code_generation_model = load_model_pipeline(model_name="causallm", task="pretrained",
             model_type="codegen-2B-mono", is_eval=True,

@@ -2,9 +2,9 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(".").absolute().parent))
 # sys.path.append(str(Path(__file__).resolve().parents[2]))
-from codetf.code_utility.apex.apex_code_utility import ApexCodeUtility
+from codetf.code_util.apex.apex_code_util import ApexCodeUtility
 
-apex_code_utility = ApexCodeUtility()
+apex_code_util = ApexCodeUtility()
 
 sample_code = """
     /**
@@ -44,7 +44,7 @@ sample_code = """
 
 
 # for sample_code in sample_codes:
-new_code_snippet = apex_code_utility.remove_comments(sample_code)
+new_code_snippet = apex_code_util.remove_comments(sample_code)
 print(new_code_snippet)
 
 

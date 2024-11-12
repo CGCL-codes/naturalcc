@@ -2,10 +2,10 @@
 # from pathlib import Path
 # sys.path.append(str(Path(".").absolute().parent))
 # sys.path.append(str(Path(__file__).resolve().parents[2]))
-from codetf.code_utility.apex.apex_code_utility import ApexCodeUtility
+from ncc3.utils.code_util.apex.apex_code_util import ApexCodeUtility
 
 
-apex_code_utility = ApexCodeUtility()
+apex_code_util = ApexCodeUtility()
 
 sample_code = """
     public class AccountWithContacts {
@@ -27,7 +27,7 @@ sample_code = """
     """
 
 
-code_attributes = apex_code_utility.get_code_attributes(sample_code)
+code_attributes = apex_code_util.get_code_attributes(sample_code)
 print(code_attributes)
 
 

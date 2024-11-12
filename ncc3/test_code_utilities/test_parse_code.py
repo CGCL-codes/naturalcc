@@ -1,9 +1,9 @@
 import sys
 from pathlib import Path
 sys.path.append(str(Path(".").absolute().parent))
-from codetf.code_utility.apex.apex_code_utility import ApexCodeUtility
+from ncc3.utils.code_util.apex.apex_code_util import ApexCodeUtility
 
-apex_code_utility = ApexCodeUtility()
+apex_code_util = ApexCodeUtility()
 
 sample_code = """
     public class SampleClass {    
@@ -15,7 +15,7 @@ sample_code = """
     }
 """
 
-ast = apex_code_utility.parse(sample_code)
+ast = apex_code_util.parse(sample_code)
 
 # This will print the tree-sitter AST object
 print(ast)

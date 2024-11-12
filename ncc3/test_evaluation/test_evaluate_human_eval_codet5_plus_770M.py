@@ -1,9 +1,9 @@
 import sys
 from pathlib import Path
 sys.path.append(str(Path(".").absolute().parent))
-from codetf.models import load_model_pipeline
-from codetf.data_utility.human_eval_dataset import HumanEvalDataset
-from codetf.performance.model_evaluator import ModelEvaluator
+from ncc3.models import load_model_pipeline
+from ncc3.utils.data_util.human_eval_dataset import HumanEvalDataset
+from codetf.evaluate.model_evaluator import ModelEvaluator
 from torch.utils.data import TensorDataset
 import os
 
