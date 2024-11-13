@@ -6,4 +6,5 @@ dataset:
   APPS: "codeparrot/apps"
   openai_humaneval: "openai_humaneval"
   mbpp: "mbpp"
- 
+  repobench_python: "tianyang/repobench_python_v1.1"
+  repobench_java: "tianyang/repobench_java_v1.1"
