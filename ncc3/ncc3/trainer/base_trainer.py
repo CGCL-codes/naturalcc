@@ -16,14 +16,14 @@ import os
 
 class BaseTrainer():
     
-    DEFAULT_CODET5_HYPERPARAMETERS = "configs/training/codet5.yaml"
-    DEFAULT_CAUSAL_LM_HYPERPARAMETERS = "configs/training/causal_lm.yaml"
+    DEFAULT_CODET5_HYPERPARAMETERS_PATH = "configs/training/codet5.yaml"
+    DEFAULT_CAUSAL_LM_HYPERPARAMETERS_PATH = "configs/training/causal_lm.yaml"
 
     def __init__(self, model, tokenizer, train_dataset, validation_dataset=None,
                 checkpoints_path="./checkpoints", pretrained_model_or_path=None,
                 evaluator=None, evaluation_fn=None):
         
-        self.checkpoints_path = checkpoints_path
+        self.saved_checkpoints_path = checkpoints_path
         self.create_checkpoints_path(checkpoints_path)
         self.model = model
         self.tokenizer = tokenizer
@@ -52,66 +52,66 @@ class BaseTrainer():
 
     def train(self):
         self.trainer.train()
-        # self.trainer.save_model(self.checkpoints_path)
+        # self.trainer.save_model(self.saved_checkpoints_path)
     
     def evaluate(self, dataset=None):
         self.trainer.evaluate(dataset)
 
     def get_default_codet5_hyperparameters(self):
-        hyperparameters_config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS)).hyperparameters
+        codet5_hyperparameters_config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).hyperparameters
 
         training_args = TrainingArguments(
-            per_device_train_batch_size=hyperparameters_config["per_device_train_batch_size"],
-            gradient_accumulation_steps=hyperparameters_config["gradient_accumulation_steps"],
-            num_train_epochs=hyperparameters_config["num_train_epochs"],
-            warmup_steps=hyperparameters_config["warmup_steps"],
-            learning_rate=hyperparameters_config["learning_rate"],
-            fp16=hyperparameters_config["fp16"],
-            fsdp=hyperparameters_config["fsdp"],
-            sharded_ddp=hyperparameters_config["sharded_ddp"],
-            logging_steps=hyperparameters_config["logging_steps"],
-            evaluation_strategy=hyperparameters_config["evaluation_strategy"],
-            save_strategy=hyperparameters_config["save_strategy"],
-            gradient_checkpointing=hyperparameters_config["gradient_checkpointing"],
-            auto_find_batch_size=hyperparameters_config["auto_find_batch_size"],
-            load_best_model_at_end=hyperparameters_config["load_best_model_at_end"],
-            output_dir=self.checkpoints_path
+            per_device_train_batch_size=codet5_hyperparameters_config["per_device_train_batch_size"],
+            gradient_accumulation_steps=codet5_hyperparameters_config["gradient_accumulation_steps"],
+            num_train_epochs=codet5_hyperparameters_config["num_train_epochs"],
+            warmup_steps=codet5_hyperparameters_config["warmup_steps"],
+            learning_rate=codet5_hyperparameters_config["learning_rate"],
+            fp16=codet5_hyperparameters_config["fp16"],
+            fsdp=codet5_hyperparameters_config["fsdp"],
+            sharded_ddp=codet5_hyperparameters_config["sharded_ddp"],
+            logging_steps=codet5_hyperparameters_config["logging_steps"],
+            evaluation_strategy=codet5_hyperparameters_config["evaluation_strategy"],
+            save_strategy=codet5_hyperparameters_config["save_strategy"],
+            gradient_checkpointing=codet5_hyperparameters_config["gradient_checkpointing"],
+            auto_find_batch_size=codet5_hyperparameters_config["auto_find_batch_size"],
+            load_best_model_at_end=codet5_hyperparameters_config["load_best_model_at_end"],
+            output_dir=self.saved_checkpoints_path
         )
         # return hyperparameters_config
         return training_args
     
     def get_default_causal_lm_hyperparameters(self):
-        hyperparameters_config = OmegaConf.load(get_abs_path(self.DEFAULT_CAUSAL_LM_HYPERPARAMETERS)).hyperparameters
+        causal_lm_hyperparameters_config = OmegaConf.load(get_abs_path(self.DEFAULT_CAUSAL_LM_HYPERPARAMETERS_PATH)).hyperparameters
 
         training_args = TrainingArguments(
-            per_device_train_batch_size=hyperparameters_config["per_device_train_batch_size"],
-            gradient_accumulation_steps=hyperparameters_config["gradient_accumulation_steps"],
-            num_train_epochs=hyperparameters_config["num_train_epochs"],
-            warmup_steps=hyperparameters_config["num_train_epochs"],
-            learning_rate=hyperparameters_config["learning_rate"],
-            fp16=hyperparameters_config["fp16"],
-            fsdp=hyperparameters_config["fsdp"],
-            sharded_ddp=hyperparameters_config["sharded_ddp"],
-            logging_steps=hyperparameters_config["logging_steps"],
-            evaluation_strategy=hyperparameters_config["evaluation_strategy"],
-            save_strategy=hyperparameters_config["save_strategy"],
-            gradient_checkpointing=hyperparameters_config["gradient_checkpointing"],
-            auto_find_batch_size=hyperparameters_config["auto_find_batch_size"],
-            load_best_model_at_end=hyperparameters_config["load_best_model_at_end"],
-            output_dir=self.checkpoints_path
+            per_device_train_batch_size=causal_lm_hyperparameters_config["per_device_train_batch_size"],
+            gradient_accumulation_steps=causal_lm_hyperparameters_config["gradient_accumulation_steps"],
+            num_train_epochs=causal_lm_hyperparameters_config["num_train_epochs"],
+            warmup_steps=causal_lm_hyperparameters_config["num_train_epochs"],
+            learning_rate=causal_lm_hyperparameters_config["learning_rate"],
+            fp16=causal_lm_hyperparameters_config["fp16"],
+            fsdp=causal_lm_hyperparameters_config["fsdp"],
+            sharded_ddp=causal_lm_hyperparameters_config["sharded_ddp"],
+            logging_steps=causal_lm_hyperparameters_config["logging_steps"],
+            evaluation_strategy=causal_lm_hyperparameters_config["evaluation_strategy"],
+            save_strategy=causal_lm_hyperparameters_config["save_strategy"],
+            gradient_checkpointing=causal_lm_hyperparameters_config["gradient_checkpointing"],
+            auto_find_batch_size=causal_lm_hyperparameters_config["auto_find_batch_size"],
+            load_best_model_at_end=causal_lm_hyperparameters_config["load_best_model_at_end"],
+            output_dir=self.saved_checkpoints_path
         )
         # return hyperparameters_config
         return training_args
     
     def get_default_lora_config_for_codet5(self):
         
-        config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS)).lora
+        codet5_config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).lora
 
         lora_config = LoraConfig(
             task_type=TaskType.SEQ_2_SEQ_LM, 
-            inference_mode=False, r=config["r"], 
-            lora_alpha=config["lora_alpha"], 
-            lora_dropout=config["lora_dropout"]
+            inference_mode=False, r=codet5_config["r"], 
+            lora_alpha=codet5_config["lora_alpha"], 
+            lora_dropout=codet5_config["lora_dropout"]
         )
         return lora_config
 
@@ -141,10 +141,10 @@ class BaseTrainer():
        
     def get_default_prefixtuning_config_for_codet5(self):
         
-        config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS)).prefixtuning
+        codet5_prefixtuning_config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).prefixtuning
 
         prefixtuning_config = PrefixTuningConfig(
-            num_virtual_tokens=config["num_virtual_tokens"],
+            num_virtual_tokens=codet5_prefixtuning_config["num_virtual_tokens"],
             task_type=TaskType.SEQ_2_SEQ_LM
         )
 
