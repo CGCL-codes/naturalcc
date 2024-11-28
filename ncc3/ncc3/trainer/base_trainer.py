@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import OneCycleLR
 from transformers import RobertaTokenizer, T5ForConditionalGeneration, Trainer, TrainingArguments,logging,set_seed
 from omegaconf import OmegaConf
 from accelerate import Accelerator
-from peft import get_peft_config, get_peft_model, LoraConfig, TaskType, AdaLoraConfig, PrefixTuningConfig, PromptTuningInit, PromptTuningConfig
+from peft import get_peft_config, get_peft_model, LoraConfig, TaskType, AdaLoraConfig, PromptEncoderConfig, PrefixTuningConfig, PromptTuningInit, PromptTuningConfig
 from ncc3.utils.common.utils import get_abs_path
 import sacrebleu
 from transformers.trainer_pt_utils import get_parameter_names
@@ -103,52 +103,63 @@ class BaseTrainer():
         # return hyperparameters_config
         return training_args
     
-    def get_default_lora_config_for_codet5(self):
-        
-        codet5_config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).lora
-
-        lora_config = LoraConfig(
-            task_type=TaskType.SEQ_2_SEQ_LM, 
-            inference_mode=False, r=codet5_config["r"], 
-            lora_alpha=codet5_config["lora_alpha"], 
-            lora_dropout=codet5_config["lora_dropout"]
-        )
-        return lora_config
-
-    # def get_default_adalora_config_for_codet5(self):
-        
-    #     config = OmegaConf.load(get_abs_path(self.PEFT_CODET5_CONFIGS)).adalora
-
-    #     adalora_config = AdaLoraConfig(
-    #         init_r=config["init_r"],
-    #         target_r=config["target_r"],
-    #         beta1=config["beta1"],
-    #         beta2=config["beta2"],
-    #         tinit=config["tinit"],
-    #         tfinal=config["tfinal"],
-    #         deltaT=config["deltaT"],
-    #         lora_alpha=config["lora_alpha"],
-    #         lora_dropout=config["lora_dropout"],
-    #         task_type=TaskType.SEQ_2_SEQ_LM,
-    #         inference_mode=False,
-    #     )
-
-    #     return adalora_config
+    def get_default_peft_config(self, peft_type):
+        peft_config = None
+        if peft_type == 'lora':
+            config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).lora
+            peft_config =  LoraConfig(
+            r=config.r,
+            lora_alpha=config.lora_alpha,
+            target_modules=config.lora_target_modules,
+            lora_dropout=config.lora_dropout,
+            bias="none",
+            task_type="CAUSAL_LM",
+            )
+        elif peft_type == 'adalora':
+            config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).adalora
+            peft_config =  AdaLoraConfig(
+            init_r=config.init_r,
+            r=config.target_r,
+            beta1=config.beta1,
+            beta2=config.beta2,
+            tinit=config.tinit,
+            tfinal=config.tfinal,
+            deltaT=config.deltaT,
+            lora_alpha=config.lora_alpha,
+            lora_dropout=config.lora_dropout,
+            target_modules=config.lora_target_modules,
+            task_type="CAUSAL_LM",
+            inference_mode=config. inference_mode,
+            )
+        elif peft_type == 'prompt':
+            config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).prompt
+            peft_config =  PromptTuningConfig(
+            task_type="CAUSAL_LM",
+            num_virtual_tokens=config.num_virtual_tokens,
+            )
+        elif peft_type == 'p_tuning':
+            config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).p_tuning
+            peft_config =  PromptEncoderConfig(
+            task_type="CAUSAL_LM",
+            num_virtual_tokens=config.num_virtual_tokens,
+            encoder_hidden_size=config.prompt_encoder_hidden_size
+            )
+        elif peft_type == 'prefix':
+            config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).prefix
+            peft_config =  PrefixTuningConfig(
+            task_type="CAUSAL_LM",
+            num_virtual_tokens=config.num_virtual_tokens,
+            encoder_hidden_size=config.prompt_encoder_hidden_size,
+            prefix_projection=True,
+            )
+            self.model.gradient_checkpointing_disable()
+        else:
+            assert peft_type, "Error: Wrong type of peft."    
+        return peft_config
 
     def create_checkpoints_path(self, checkpoints_path):
         if not os.path.exists(checkpoints_path):
             os.makedirs(checkpoints_path)
-       
-    def get_default_prefixtuning_config_for_codet5(self):
-        
-        codet5_prefixtuning_config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).prefixtuning
-
-        prefixtuning_config = PrefixTuningConfig(
-            num_virtual_tokens=codet5_prefixtuning_config["num_virtual_tokens"],
-            task_type=TaskType.SEQ_2_SEQ_LM
-        )
-
-        return prefixtuning_config
     
     
 
