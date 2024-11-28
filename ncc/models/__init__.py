@@ -3,12 +3,12 @@ from pathlib import Path
 sys.path.append(str(Path(".").absolute().parent))
 import logging
 from omegaconf import OmegaConf
-from ncc3.utils.common.registry import registry
-from ncc3.models.base_model import BaseModel
-from ncc3.models.seq2seq_models import Seq2SeqModel
-from ncc3.models.causal_lm_models import CausalLMModel
-from ncc3.models.bert_models import BertModel
-from ncc3.utils.common.utils import get_abs_path
+from ncc.utils.common.registry import registry
+from ncc.models.base_model import BaseModel
+from ncc.models.seq2seq_models import Seq2SeqModel
+from ncc.models.causal_lm_models import CausalLMModel
+from ncc.models.bert_models import BertModel
+from ncc.utils.common.utils import get_abs_path
 
 __all__ = [
     "Seq2SeqModel",

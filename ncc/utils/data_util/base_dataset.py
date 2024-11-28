@@ -3,7 +3,7 @@ from torch.utils.data import TensorDataset
 import torch
 import concurrent.futures
 from omegaconf import OmegaConf
-from ncc3.utils.common.utils import get_abs_path
+from ncc.utils.common.utils import get_abs_path
 from torch.utils.data import IterableDataset, Dataset
 
 class BaseDataset():

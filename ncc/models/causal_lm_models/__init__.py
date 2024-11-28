@@ -2,8 +2,8 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(".").absolute().parent))
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
-from ncc3.models.base_model import BaseModel
-from ncc3.utils.common.registry import registry
+from ncc.models.base_model import BaseModel
+from ncc.utils.common.registry import registry
 from collections import defaultdict
 from tqdm import tqdm
 import torch

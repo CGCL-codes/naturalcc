@@ -1,4 +1,4 @@
-from ncc3.data_util.base_dataset import BaseDataset
+from ncc.data_util.base_dataset import BaseDataset
 
 from datasets import load_dataset
 

@@ -9,9 +9,9 @@ from torch.optim.lr_scheduler import OneCycleLR
 from transformers import RobertaTokenizer, T5ForConditionalGeneration, Trainer, TrainingArguments,logging,set_seed, get_linear_schedule_with_warmup, AdamW
 from omegaconf import OmegaConf
 # from accelerate import Accelerator
-from ncc3.trainer.base_trainer import BaseTrainer
+from ncc.trainer.base_trainer import BaseTrainer
 from peft import get_peft_config, get_peft_model, LoraConfig, TaskType, AdaLoraConfig, prepare_model_for_int8_training
-from ncc3.utils.common.utils import get_abs_path
+from ncc.utils.common.utils import get_abs_path
 from transformers.trainer_pt_utils import get_parameter_names
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm

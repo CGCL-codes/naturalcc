@@ -2,9 +2,9 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(".").absolute().parent))
 from transformers import AutoTokenizer
-from ncc3.models.base_model import BaseModel
+from ncc.models.base_model import BaseModel
 from transformers import AutoModelForSeq2SeqLM, AutoConfig
-from ncc3.utils.common.registry import registry
+from ncc.utils.common.registry import registry
 from accelerate import Accelerator
 import torch
 from accelerate import init_empty_weights, load_checkpoint_and_dispatch

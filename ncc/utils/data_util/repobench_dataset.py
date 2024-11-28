@@ -1,6 +1,6 @@
 import re
 from datasets import load_dataset
-from ncc3.data_util.base_dataset import BaseDataset
+from ncc.utils.data_util.base_dataset import BaseDataset
 
 class RepoBenchDataset(BaseDataset):
     def __init__(self, tokenizer, max_length=512):

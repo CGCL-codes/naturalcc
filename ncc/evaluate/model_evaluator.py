@@ -1,8 +1,8 @@
 import sys
 from pathlib import Path
 sys.path.append(str(Path(".").absolute().parent))
-from ncc3.models import load_model_pipeline
-from ncc3.data_util.util import EOF_STRINGS, EndOfFunctionCriteria, remove_last_block
+from ncc.models import load_model_pipeline
+from ncc.utils.data_util.util import EOF_STRINGS, EndOfFunctionCriteria, remove_last_block
 from torch.utils.data.dataloader import DataLoader
 from transformers import StoppingCriteriaList
 import torch

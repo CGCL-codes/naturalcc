@@ -4,7 +4,7 @@ from pathlib import Path
 # sys.path.append(str(Path(".").absolute().parent))
 # sys.path.append("../")
 from omegaconf import OmegaConf
-from ncc3.utils.common.registry import registry
+from ncc.utils.common.registry import registry
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
 default_config = OmegaConf.load(os.path.join(root_dir, "configs/default.yaml"))

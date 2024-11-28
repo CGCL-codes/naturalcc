@@ -2,8 +2,8 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(".").absolute().parent))
 from transformers import RobertaTokenizer, RobertaModel, RobertaConfig
-from ncc3.models.base_model import BaseModel
-from ncc3.utils.common.registry import registry
+from ncc.models.base_model import BaseModel
+from ncc.utils.common.registry import registry
 from accelerate import Accelerator
 from collections import defaultdict
 from tqdm import tqdm

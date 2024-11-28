@@ -1,5 +1,5 @@
 from transformers import AutoModelForCausalLM
-from ncc3.trainer.base_trainer import BaseTrainer
+from ncc.trainer.base_trainer import BaseTrainer
 from peft import get_peft_model, prepare_model_for_int8_training
 
 

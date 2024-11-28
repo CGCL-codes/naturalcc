@@ -9,7 +9,7 @@ from transformers import RobertaTokenizer, T5ForConditionalGeneration, Trainer, 
 from omegaconf import OmegaConf
 from accelerate import Accelerator
 from peft import get_peft_config, get_peft_model, LoraConfig, TaskType, AdaLoraConfig, PromptEncoderConfig, PrefixTuningConfig, PromptTuningInit, PromptTuningConfig
-from ncc3.utils.common.utils import get_abs_path
+from ncc.utils.common.utils import get_abs_path
 import sacrebleu
 from transformers.trainer_pt_utils import get_parameter_names
 import os 

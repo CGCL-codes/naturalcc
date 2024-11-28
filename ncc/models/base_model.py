@@ -7,7 +7,7 @@ import torch.nn as nn
 import requests
 from tqdm import tqdm
 from urllib.parse import urlsplit
-from ncc3.utils.common.utils import get_abs_path
+from ncc.utils.common.utils import get_abs_path
 import urllib.request
 from accelerate import Accelerator
 

@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from datasets import load_dataset
-from ncc3.data_util.base_dataset import BaseDataset
+from ncc.utils.data_util.base_dataset import BaseDataset
 import re
 
 class HumanEvalDataset(BaseDataset):

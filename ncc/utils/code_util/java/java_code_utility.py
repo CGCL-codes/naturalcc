@@ -1,4 +1,4 @@
-from ncc3.utils.code_util.language_specific_utility import LanguageSpecificUtility
+from ncc.utils.code_util.language_specific_utility import LanguageSpecificUtility
 import lizard
 import re
 

@@ -3,7 +3,7 @@ import os
 from urllib.parse import urlparse
 
 from iopath.common.file_io import g_pathmgr
-from ncc3.utils.common.registry import registry
+from ncc.utils.common.registry import registry
 
 
 def now():
