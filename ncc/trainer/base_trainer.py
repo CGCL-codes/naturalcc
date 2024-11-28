@@ -18,6 +18,7 @@ class BaseTrainer():
     
     DEFAULT_CODET5_HYPERPARAMETERS_PATH = "configs/training/codet5.yaml"
     DEFAULT_CAUSAL_LM_HYPERPARAMETERS_PATH = "configs/training/causal_lm.yaml"
+    DEFAULT_PEFT_CONFIG_PATH = "configs/training/peft.yaml"
 
     def __init__(self, model, tokenizer, train_dataset, validation_dataset=None,
                 checkpoints_path="./checkpoints", pretrained_model_or_path=None,
@@ -106,7 +107,7 @@ class BaseTrainer():
     def get_default_peft_config(self, peft_type):
         peft_config = None
         if peft_type == 'lora':
-            config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).lora
+            config = OmegaConf.load(get_abs_path(self.DEFAULT_PEFT_CONFIG_PATH)).lora
             peft_config =  LoraConfig(
             r=config.r,
             lora_alpha=config.lora_alpha,
@@ -116,7 +117,7 @@ class BaseTrainer():
             task_type="CAUSAL_LM",
             )
         elif peft_type == 'adalora':
-            config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).adalora
+            config = OmegaConf.load(get_abs_path(self.DEFAULT_PEFT_CONFIG_PATH)).adalora
             peft_config =  AdaLoraConfig(
             init_r=config.init_r,
             r=config.target_r,
@@ -132,20 +133,20 @@ class BaseTrainer():
             inference_mode=config. inference_mode,
             )
         elif peft_type == 'prompt':
-            config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).prompt
+            config = OmegaConf.load(get_abs_path(self.DEFAULT_PEFT_CONFIG_PATH)).prompt
             peft_config =  PromptTuningConfig(
             task_type="CAUSAL_LM",
             num_virtual_tokens=config.num_virtual_tokens,
             )
         elif peft_type == 'p_tuning':
-            config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).p_tuning
+            config = OmegaConf.load(get_abs_path(self.DEFAULT_PEFT_CONFIG_PATH)).p_tuning
             peft_config =  PromptEncoderConfig(
             task_type="CAUSAL_LM",
             num_virtual_tokens=config.num_virtual_tokens,
             encoder_hidden_size=config.prompt_encoder_hidden_size
             )
         elif peft_type == 'prefix':
-            config = OmegaConf.load(get_abs_path(self.DEFAULT_CODET5_HYPERPARAMETERS_PATH)).prefix
+            config = OmegaConf.load(get_abs_path(self.DEFAULT_PEFT_CONFIG_PATH)).prefix
             peft_config =  PrefixTuningConfig(
             task_type="CAUSAL_LM",
             num_virtual_tokens=config.num_virtual_tokens,
