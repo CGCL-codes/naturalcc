@@ -3,7 +3,7 @@
 import torch
 import torch.nn.functional as F
 from datasets import load_dataset
-from ncc3.data_util.base_dataset import BaseDataset
+from ncc3.utils.data_util.base_dataset import BaseDataset
 # from torch.utils.data import TensorDataset
 
 class APPSDataset(BaseDataset):

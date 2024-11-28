@@ -69,3 +69,19 @@ causallm-codegen2-16B-pretrained:
     huggingface_url: "Salesforce/codegen2-16B"
     tokenizer_url: "Salesforce/codegen2-16B"
     max_prediction_length: 512
+causallm-opencoder-1.5B-base-pretrained:
+    huggingface_url: "infly/OpenCoder-1.5B-Base"
+    tokenizer_url: "infly/OpenCoder-1.5B-Base"
+    max_prediction_length: 4096
+causallm-opencoder-1.5B-insstruct-pretrained:
+    huggingface_url: "infly/OpenCoder-1.5B-Instruct"
+    tokenizer_url: "infly/OpenCoder-1.5B-Instruct"
+    max_prediction_length: 4096
+causallm-opencoder-8B-base-pretrained:
+    huggingface_url: "infly/OpenCoder-8B-Base"
+    tokenizer_url: "infly/OpenCoder-8B-Base"
+    max_prediction_length: 8192
+causallm-opencoder-8B-insstruct-pretrained:
+    huggingface_url: "infly/OpenCoder-8B-Instruct"
+    tokenizer_url: "infly/OpenCoder-8B-Instruct"
+    max_prediction_length: 8192
