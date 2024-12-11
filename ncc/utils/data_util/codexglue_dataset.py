@@ -1,11 +1,10 @@
-from ncc.data_util.base_dataset import BaseDataset
+from ncc.utils.data_util.base_dataset import BaseDataset
 
 from datasets import load_dataset
 
 class CodeXGLUEDataset(BaseDataset):
 
     def __init__(self, tokenizer, max_length=512):
-        
         super().__init__(tokenizer, max_length)
         self.load_funcs = {
             'text-to-code': self.load_codexglue_text_to_code_dataset,

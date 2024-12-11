@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
-sys.path.append(str(Path("").absolute().parent))
+# sys.path.append(str(Path("").absolute().parent))
+sys.path.append(str(Path(__file__).resolve().parents[2]))
 import torch
 from ncc.trainer.causal_lm_trainer import CausalLMTrainer
 from ncc.utils.data_util.codexglue_dataset import CodeXGLUEDataset
@@ -8,8 +9,10 @@ from ncc.models import load_model_pipeline
 from ncc.evaluate.evaluation_metric import EvaluationMetric
 from ncc.utils.data_util.base_dataset import CustomDataset
 
+
+
 model_class = load_model_pipeline(model_name="causallm", task="pretrained",
-            model_type="codegen-350M-mono", is_eval=False, load_in_8bit=True)
+            model_type="codegen-350M-mono", is_eval=False, load_in_8bit=False)
 
 dataset = CodeXGLUEDataset(tokenizer=model_class.get_tokenizer())
 train, test, validation = dataset.load(subset="text-to-code")
