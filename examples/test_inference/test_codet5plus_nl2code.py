@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 sys.path.append(str(Path("").absolute().parent))
-from ncc3.models import load_model_pipeline
+from ncc.models import load_model_pipeline
 
 code_generation_model = load_model_pipeline(model_name="codet5", task="pretrained",
             model_type="plus-2B", is_eval=True,

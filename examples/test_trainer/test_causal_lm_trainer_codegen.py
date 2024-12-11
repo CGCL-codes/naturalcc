@@ -2,11 +2,11 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path("").absolute().parent))
 import torch
-from ncc3.trainer.causal_lm_trainer import CausalLMTrainer
-from ncc3.data_utility.codexglue_dataset import CodeXGLUEDataset
-from ncc3.models import load_model_pipeline
-from ncc3.evaluate.evaluation_metric import EvaluationMetric
-from ncc3.data_utility.base_dataset import CustomDataset
+from ncc.trainer.causal_lm_trainer import CausalLMTrainer
+from ncc.utils.data_util.codexglue_dataset import CodeXGLUEDataset
+from ncc.models import load_model_pipeline
+from ncc.evaluate.evaluation_metric import EvaluationMetric
+from ncc.utils.data_util.base_dataset import CustomDataset
 
 model_class = load_model_pipeline(model_name="causallm", task="pretrained",
             model_type="codegen-350M-mono", is_eval=False, load_in_8bit=True)

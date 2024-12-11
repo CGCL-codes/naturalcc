@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 sys.path.append(str(Path("").absolute().parent))
-from ncc3.utils.code_util.apex.apex_code_util import ApexCodeUtility
+from ncc.utils.code_util.apex.apex_code_utility import ApexCodeUtility
 
 apex_code_util = ApexCodeUtility()
 

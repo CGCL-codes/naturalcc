@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path("").absolute().parent))
 import torch
-from ncc3.data_utility.codexglue_dataset import CodeXGLUEDataset
+from ncc.utils.data_util.codexglue_dataset import CodeXGLUEDataset
 from transformers import RobertaTokenizer
 
 tokenizer = RobertaTokenizer.from_pretrained("Salesforce/codet5-base", use_fast=True)
