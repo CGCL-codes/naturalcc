@@ -5,7 +5,7 @@ hyperparameters:
   logging_strategy: "epoch"
   num_train_epochs: 1
   auto_find_batch_size: True
-  batch_size: 4
+  batch_size: 2
   logging_steps: 100
   per_device_train_batch_size: 8
   per_device_eval_batch_size: 8
@@ -22,7 +22,7 @@ hyperparameters:
   fp16: False
   bf16: False
   auto_find_batch: True
-  num_workers: 4
+  num_workers: 1
   max_prediction_length: 256
   beam_size: 5
   max_grad_norm: 5.0

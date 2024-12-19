@@ -3,7 +3,7 @@ from pathlib import Path
 sys.path.append(str(Path("").absolute().parent))
 # sys.path.append("../")
 import torch
-from ncc3.models import load_model_pipeline
+from ncc.models import load_model_pipeline
 
 model = load_model_pipeline(model_name="bert", task="pretrained",
             model_type="codebert-base", is_eval=True,

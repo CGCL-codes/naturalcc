@@ -13,7 +13,7 @@ class Registry:
     @classmethod
     def register_model(cls, name):
         def wrap(model_cls):
-            from ncc3.models import BaseModel
+            from ncc.models import BaseModel
             
             assert issubclass(
                 model_cls, BaseModel
