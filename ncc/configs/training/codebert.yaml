@@ -1,0 +1,41 @@
+compute_environment: LOCAL_MACHINE
+debug: false
+deepspeed_config:
+  gradient_accumulation_steps: 1
+  gradient_clipping: 1.0
+  offload_optimizer_device: none
+  offload_param_device: none
+  zero3_init_flag: true
+  zero_stage: 2
+distributed_type: DEEPSPEED
+downcast_bf16: 'no'
+enable_cpu_affinity: false
+machine_rank: 0
+main_training_function: main
+mixed_precision: bf16
+num_machines: 1
+num_processes: 8
+rdzv_backend: static
+same_network: true
+tpu_env: []
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false
+hyperparameters:
+  output_dir: "./codebert_output"
+  evaluation_strategy: "steps"
+  eval_steps: 1000
+  save_steps: 1000
+  save_total_limit: 2
+  logging_steps: 500
+  learning_rate: 1e-4
+  per_device_train_batch_size: 64
+  per_device_eval_batch_size: 64
+  num_train_epochs: 3
+  weight_decay: 0.01
+  warmup_steps: 2000
+  logging_dir: "./logs"
+  save_strategy: "steps"
+  bf16: true
+  report_to: "tensorboard"
+  seed: 42
