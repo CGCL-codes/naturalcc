@@ -1,5 +1,0 @@
-sklearn
-numpy
-torch
-torchvision
-tqdm
