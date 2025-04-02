@@ -1,0 +1,751 @@
+visualize bar select episode , rating from tv_series order by rating desc limit 3
+visualize pie select par , count(par) from tv_channel where language != 'english' group by par
+visualize pie select par, count(country) from tv_channel where language != 'english' group by par;
+visualize bar select country, pixel_aspect_ratio_par from tv_channel where language != 'english'
+visualize bar select package_option , count(package_option) from tv_channel as t1 where t1.id not in (select t2.channel from cartoon as t2 where t2.directed_by = 'ben jones') group by package_option
+visualize pie select package_option , count(package_option) from tv_channel as t1 left join cartoon as t2 on t1.id = t2.channel where t2.directed_by != 'ben jones' and t2.id is null group by package_option
+visualize bar select package_option , count(package_option) from tv_channel as t1 left join cartoon as t2 on t1.id = t2.channel where t2.directed_by != 'ben jones' group by package_option
+visualize bar select country, pixel_aspect_ratio_par from tv_channel where language != 'english' order by country asc
+visualize bar select country , pixel_aspect_ratio_par from tv_channel where language != 'english' order by pixel_aspect_ratio_par desc
+visualize bar select country , pixel_aspect_ratio_par from tv_channel where language != 'english' order by count(country) asc
+visualize bar select country , pixel_aspect_ratio_par from tv_channel where language <> 'english' order by pixel_aspect_ratio_par desc
+visualize bar select package_option, count(package_option) from tv_channel where id not in (select channel from cartoon where directed_by = 'ben jones') group by package_option order by count(package_option) desc
+visualize bar select package_option, count(package_option) from tv_channel as t1 join cartoon as t2 on t1.id = t2.channel where t2.directed_by != 'ben jones' group by package_option order by package_option desc
+visualize bar select package_option , count(package_option) from tv_channel as t1 left join cartoon as t2 on t1.id = t2.channel where t2.directed_by != 'ben jones' group by package_option order by count(package_option) desc
+visualize pie select name, partitionid from user_profiles where uid in (select uid from tweets group by uid having count(uid) < 2)
+visualize bar select name, partitionid from user_profiles u inner join tweets t on u.uid = t.uid group by u.uid having count(t.id) < 2
+visualize bar select name, partitionid from user_profiles where uid in (select uid from tweets group by uid having count(*) < 2) order by name asc
+visualize bar select name, partitionid from user_profiles u join tweets t on u.uid = t.uid group by name, partitionid having count(t.id) < 2 order by name desc
+visualize bar select name, partitionid, count(*) from user_profiles inner join tweets on user_profiles.uid = tweets.uid group by name, partitionid having count(*) < 2 order by count(*) asc
+visualize bar select name, partitionid from user_profiles join tweets on user_profiles.uid = tweets.uid group by name, partitionid having count(*) < 2 order by count(*) desc
+visualize bar select affiliation , sum(enrollment) from university group by affiliation
+visualize scatter select school_id, acc_percent from basketball_match group by acc_road, school_id order by acc_percent asc
+visualize scatter select school_id , all_games_percent from basketball_match group by all_acc_road
+visualize scatter select school_id , all_games_percent from basketball_match group by all_acc_road
+visualize scatter select school_id, all_games_percent from basketball_match group by school_id, all_games_percent order by acc_road
+visualize scatter select school_id , acc_percent from basketball_match group by school_id, acc_percent
+visualize scatter select school_id , all_games_percent from basketball_match group by all_home, school_id
+visualize bar select all_home, team_id from basketball_match group by acc_road
+visualize bar select team_id, all_home from basketball_match group by acc_road;
+visualize bar select all_home , count(team_id) from basketball_match group by acc_road ,  all_home
+visualize bar select all_home, school_id from basketball_match group by acc_road;
+visualize bar select all_home, school_id from basketball_match group by acc_road
+visualize bar select all_home, count(school_id) from basketball_match group by school_id, acc_road bin all_home by week
+visualize bar select acc_road , team_id from basketball_match group by all_home;
+visualize bar select all_home, team_id, acc_road from basketball_match group by all_home, team_id;
+visualize bar select acc_road, team_id from basketball_match group by all_home
+visualize bar select acc_road , count(team_id) from basketball_match group by all_home ,  acc_road
+visualize bar select all_home, acc_road, school_id from basketball_match group by all_home, school_id;
+visualize bar select acc_road, count(school_id) from basketball_match group by all_home, school_id bin acc_road by weekday
+visualize bar select acc_road, team_id from basketball_match group by acc_home
+visualize bar select team_id, acc_road from basketball_match group by acc_home;
+visualize bar select acc_road , team_id from basketball_match group by acc_home
+visualize bar select acc_road , sum(team_id) from basketball_match group by acc_home bin acc_road by all_games
+visualize bar select acc_road , school_id from basketball_match group by acc_home;
+visualize bar select acc_road, school_id from basketball_match group by acc_home;
+visualize bar select acc_road, school_id from basketball_match group by acc_home;
+visualize bar select acc_road , school_id from basketball_match group by acc_home bin acc_road by all_road
+visualize bar select team_id , all_home from basketball_match group by acc_home
+visualize bar select t1.acc_home , t1.team_id from basketball_match as t1 join university as t2 on t1.school_id = t2.school_id group by t1.acc_home , t1.team_id
+visualize bar select team_id, all_home from basketball_match group by acc_home;
+visualize bar select all_home , count(team_id) from basketball_match group by all_home ,  acc_home
+visualize bar select all_home , school_id from basketball_match group by acc_home
+visualize bar select t1.acc_home, t1.school_id from basketball_match as t1 group by t1.acc_home, t1.school_id
+visualize bar select all_home , school_id from basketball_match group by acc_home
+visualize bar select all_home , count(school_id) from basketball_match group by school_id ,  acc_home bin all_home by weekday
+visualize bar select acc_road, count(team_id) from basketball_match group by acc_road
+visualize bar select acc_road , t1.team_id from basketball_match as t1 group by acc_road
+visualize bar select acc_road, team_id from basketball_match group by acc_road;
+visualize bar select acc_road , team_id from basketball_match group by acc_road
+visualize bar select acc_road, team_id from basketball_match group by acc_road
+visualize bar select team_name , sum(school_id) from basketball_match group by acc_road
+visualize bar select acc_road , count(distinct school_id) from basketball_match group by acc_road
+visualize bar select team_id, avg(team_id) from basketball_match group by all_home
+visualize bar select t1.all_home , t1.school_id from basketball_match as t1 group by t1.all_home order by t1.school_id asc
+visualize bar select all_home, count(distinct school_id) from basketball_match group by all_home
+visualize bar select all_home, school_id from basketball_match group by all_home
+visualize bar select school_id , avg(all_home) from basketball_match group by school_id
+visualize bar select team_id, count(team_id) from basketball_match group by team_name
+visualize bar select team_id, acc_regular_season from basketball_match bin acc_regular_season
+visualize bar select school_id, acc_regular_season from basketball_match bin school_id by acc_regular_season
+visualize bar select all_games, count(team_id) from basketball_match group by all_games
+visualize bar select school_id, count(all_games) from basketball_match group by school_id
+visualize pie select team_id , sum(team_id) from basketball_match group by team_id
+visualize pie select team_id, count(team_id) from basketball_match group by team_id
+visualize pie select team_name , count(team_id) from basketball_match group by team_name
+visualize pie select team_name , count(team_id) from basketball_match group by team_name
+visualize pie select team_name , count(team_id) from basketball_match group by team_name
+visualize pie select team_name , count(team_id) from basketball_match group by team_name
+visualize pie select team_id , count(team_id) from basketball_match group by team_id
+visualize pie select team_id, count(team_id) from basketball_match group by team_id
+visualize pie select all_road , count(team_id) from basketball_match group by all_road
+visualize pie select team_id , count(team_id) from basketball_match group by team_id
+visualize pie select all_road , count(team_id) from basketball_match group by all_road
+visualize pie select team_id , count(team_id) from basketball_match group by team_id
+visualize pie select all_neutral , count(team_id) from basketball_match group by all_neutral
+visualize pie select all_neutral , count(team_id) from basketball_match group by all_neutral
+visualize pie select all_games_percent, count(all_games_percent) from basketball_match group by all_games_percent
+visualize pie select all_games_percent , count(all_games_percent) from basketball_match group by all_games_percent
+visualize pie select all_games_percent , count(all_games_percent) from basketball_match group by all_games_percent
+visualize pie select all_games_percent , count(all_games_percent) from basketball_match group by all_games_percent
+visualize pie select all_road , count(all_games_percent) from basketball_match group by all_road
+visualize bar select all_neutral, avg(acc_percent) from basketball_match group by all_neutral
+visualize pie select all_neutral , count(all_games_percent) from basketball_match group by all_neutral
+visualize pie select team_name, count(*) from basketball_match group by school_id, team_name
+visualize pie select team_name , count(school_id) from basketball_match group by team_name
+visualize pie select acc_percent, count(acc_percent) from basketball_match group by acc_percent
+visualize pie select acc_regular_season , count(school_id) from basketball_match group by acc_regular_season
+visualize pie select school_id, count(acc_regular_season) from basketball_match group by school_id bin acc_regular_season by season
+visualize pie select acc_regular_season , sum(acc_percent) from basketball_match group by acc_regular_season
+visualize pie select all_games , count(school_id) from basketball_match group by all_games
+visualize pie select school_id , count(*) from basketball_match group by school_id where all_games = 'all_games'
+visualize pie select acc_percent, count(acc_percent) from basketball_match group by acc_percent
+visualize pie select all_games , sum(acc_percent) from basketball_match group by all_games
+visualize pie select school_id, count(all_road) from basketball_match group by school_id
+visualize pie select all_road , count(school_id) from basketball_match group by all_road
+visualize pie select all_road , count(school_id) from basketball_match group by all_road
+visualize pie select all_road , sum(acc_percent) from basketball_match group by all_road
+visualize pie select all_road , count(acc_percent) from basketball_match group by all_road order by acc_percent desc
+visualize pie select all_road , sum(acc_percent) from basketball_match group by all_road
+visualize pie select all_neutral , count(school_id) from basketball_match group by all_neutral order by school_id desc
+visualize pie select all_neutral , sum(acc_percent) from basketball_match group by all_neutral
+visualize pie select all_neutral , avg(acc_percent) from basketball_match group by all_neutral
+visualize scatter select team_name , school_id , acc_percent from basketball_match group by team_name
+visualize scatter select team_name , all_games_percent from basketball_match group by school_id
+visualize bar select affiliation , sum(enrollment) from university where founded > 1850 group by affiliation
+visualize bar select affiliation, sum(enrollment) from university where founded > 1850 group by affiliation
+visualize bar select affiliation, count(enrollment) from university where founded > 1850 group by affiliation
+visualize bar select team_id, all_home from basketball_match group by acc_road order by team_name asc
+visualize bar select team_name, team_id from basketball_match group by acc_road, team_name order by team_name asc
+visualize bar select acc_road , team_id from basketball_match group by acc_road order by team_id asc
+visualize bar select team_id , count(*) from basketball_match group by all_home , acc_road , team_id order by team_id asc
+visualize bar select all_home , team_id from basketball_match group by acc_road order by all_home asc
+visualize bar select all_home , team_id from basketball_match group by acc_road order by team_id asc
+visualize bar select team_id, all_home from basketball_match group by acc_road order by team_id desc
+visualize bar select team_id, all_home from basketball_match group by acc_road order by all_home desc
+visualize bar select acc_road , team_id from basketball_match group by acc_road order by acc_road desc
+visualize bar select all_home, team_id from basketball_match group by acc_road order by all_home desc
+visualize bar select team_id , count(*) from basketball_match group by acc_road , all_home order by team_id desc
+visualize bar select all_home , team_id from basketball_match group by acc_road order by all_home desc
+visualize bar select all_home , team_id from basketball_match group by acc_road order by team_id asc
+visualize bar select all_home , team_id from basketball_match group by acc_road order by team_id asc
+visualize bar select all_home , team_id from basketball_match group by acc_road order by team_id asc
+visualize bar select t1.all_home , t1.team_id from basketball_match as t1 group by acc_road order by t1.team_id asc
+visualize bar select all_home , count(team_id) from basketball_match group by acc_road order by count(team_id) asc
+visualize bar select team_id , count(*) from basketball_match group by all_home ,  acc_road order by count(*) asc
+visualize bar select acc_road , team_id from basketball_match group by acc_road order by team_id desc
+visualize bar select all_home, team_id from basketball_match group by acc_road order by team_id desc
+visualize bar select all_home , team_id from basketball_match group by acc_road order by team_id desc
+visualize bar select team_id , count(*) from basketball_match group by acc_road ,  all_home order by count(*) desc
+visualize bar select all_home , team_id from basketball_match group by acc_road order by team_id desc
+visualize bar select all_home, team_id from basketball_match group by acc_road order by team_id desc
+visualize bar select all_home , school_id from basketball_match group by acc_road order by acc_road asc
+visualize bar select acc_road , all_home from basketball_match group by acc_road order by all_home asc
+visualize bar select acc_road , school_id from basketball_match group by acc_road order by acc_road asc
+visualize bar select all_home , sum(school_id) from basketball_match group by acc_road order by all_home asc bin all_home by weekday
+visualize bar select team_name , school_id from basketball_match group by acc_road , team_name order by all_home asc
+visualize bar select all_home , school_id from basketball_match group by acc_road order by all_home asc
+visualize bar select team_name, school_id from basketball_match group by acc_road , team_name order by school_id desc
+visualize bar select all_home , sum(school_id) from basketball_match group by acc_road order by all_home desc bin all_home by weekday
+visualize bar select all_home , school_id from basketball_match group by acc_road order by all_home desc
+visualize bar select acc_road , sum(school_id) from basketball_match group by acc_road order by acc_road desc
+visualize bar select t1.school_id, t1.all_home from basketball_match as t1 group by acc_road, t1.school_id order by t1.school_id desc
+visualize bar select all_home , school_id from basketball_match group by acc_road order by all_home desc
+visualize bar select acc_road, school_id from basketball_match group by acc_road order by school_id asc
+visualize bar select all_home , school_id from basketball_match group by acc_road order by school_id asc
+visualize bar select team_name , school_id from basketball_match group by acc_road , team_name order by school_id asc
+visualize bar select acc_road, school_id from basketball_match group by acc_road order by school_id asc
+visualize bar select school_id , all_home from basketball_match group by acc_road order by all_home asc
+visualize bar select school_id, count(acc_road) from basketball_match group by all_home, school_id order by count(acc_road) asc
+visualize bar select all_home , school_id from basketball_match group by acc_road order by school_id desc
+visualize bar select all_home, school_id from basketball_match group by acc_road order by school_id desc
+visualize bar select acc_road , school_id from basketball_match group by acc_road order by school_id desc
+visualize bar select school_id , count(acc_road) from basketball_match group by all_home , school_id , acc_road order by count(acc_road) desc
+visualize bar select t1.acc_road , t1.school_id from basketball_match as t1 group by t1.acc_road order by t1.all_home desc
+visualize bar select all_home , school_id from basketball_match group by acc_road order by all_home desc
+visualize bar select acc_road, team_id from basketball_match group by all_home order by acc_road asc
+visualize bar select acc_road , team_id from basketball_match group by all_home order by acc_road asc
+visualize bar select all_home , team_id from basketball_match group by all_home order by acc_road asc
+visualize bar select acc_road , sum(team_id) from basketball_match group by all_home order by acc_road asc bin acc_road by month
+visualize bar select acc_road , team_id from basketball_match group by all_home order by acc_road asc
+visualize bar select all_home , acc_road from basketball_match group by all_home order by acc_road asc
+visualize bar select acc_road , count(team_id) from basketball_match group by all_home order by acc_road desc
+visualize bar select all_home, team_id from basketball_match group by all_home order by team_id desc
+visualize bar select all_home , team_id from basketball_match group by all_home order by all_home desc
+visualize bar select all_home , team_id from basketball_match group by all_home order by team_id desc
+visualize bar select team_id, acc_road from basketball_match group by all_home order by acc_road desc
+visualize bar select acc_road , team_id from basketball_match group by all_home order by acc_road desc
+visualize bar select all_home, team_id from basketball_match group by all_home order by team_id asc
+visualize bar select team_id , acc_road from basketball_match group by all_home order by team_id asc
+visualize bar select team_id , acc_road from basketball_match group by all_home order by team_id asc
+visualize bar select acc_road , sum(team_id) from basketball_match group by all_home order by sum(team_id) asc
+visualize bar select all_home , team_id from basketball_match group by all_home order by team_id asc
+visualize bar select acc_road , team_id from basketball_match group by all_home order by team_id desc
+visualize bar select acc_road, team_id from basketball_match group by all_home order by team_id desc
+visualize bar select acc_road, count(team_id) from basketball_match group by all_home order by count(team_id) desc bin acc_road by weekday
+visualize bar select team_id, acc_road from basketball_match group by all_home order by team_id desc
+visualize bar select all_home , team_id from basketball_match group by all_home order by team_id desc
+visualize bar select all_home, team_id, acc_road from basketball_match group by all_home order by team_id desc;
+visualize bar select acc_road , school_id from basketball_match group by all_home order by acc_road asc
+visualize bar select school_id , count(all_home) from basketball_match group by acc_road , school_id order by count(all_home) asc
+visualize bar select acc_road , school_id from basketball_match group by all_home order by acc_road asc
+visualize bar select acc_road , school_id from basketball_match group by all_home order by acc_road asc
+visualize bar select all_home , acc_road , school_id from basketball_match group by all_home order by acc_road asc
+visualize bar select all_home , school_id from basketball_match group by all_home order by school_id asc
+visualize bar select all_home , school_id from basketball_match group by all_home , acc_road order by all_home desc
+visualize bar select all_home , sum(school_id) from basketball_match group by all_home order by all_home desc
+visualize bar select acc_road, count(school_id) from basketball_match group by all_home order by acc_road desc
+visualize bar select all_home, acc_road, school_id from basketball_match group by all_home order by acc_road desc
+visualize bar select acc_road , school_id from basketball_match group by all_home order by acc_road desc
+visualize bar select team_name , school_id from basketball_match group by all_home , team_name order by team_name desc
+visualize bar select acc_road , school_id from basketball_match group by all_home order by acc_road asc
+visualize bar select t1.acc_road, t1.school_id from basketball_match as t1 group by t1.all_home order by t1.school_id asc
+visualize bar select acc_road , school_id from basketball_match group by all_home order by acc_road asc
+visualize bar select school_id , all_home from basketball_match group by acc_road , school_id order by all_home asc
+visualize bar select all_home , school_id from basketball_match group by all_home order by school_id asc bin acc_road
+visualize bar select acc_road , school_id from basketball_match group by all_home order by acc_road asc
+visualize bar select t1.acc_road , t1.school_id from basketball_match as t1 group by all_home , t1.acc_road order by t1.acc_road desc
+visualize bar select all_home , school_id from basketball_match group by all_home order by school_id desc
+visualize bar select school_id , all_home from basketball_match group by acc_road , school_id order by all_home desc
+visualize bar select t1.acc_road , t1.school_id from basketball_match as t1 group by all_home order by t1.school_id desc
+visualize bar select all_home , acc_road from basketball_match group by all_home order by acc_road desc
+visualize bar select acc_road , school_id from basketball_match group by all_home order by acc_road desc
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by team_id asc
+visualize bar select acc_road , team_id from basketball_match group by acc_home order by acc_road asc
+visualize bar select acc_road, team_id from basketball_match group by acc_home order by acc_road asc
+visualize bar select acc_road , sum(team_id) from basketball_match group by acc_home order by acc_road asc
+visualize bar select acc_road , team_id from basketball_match group by acc_home order by acc_road asc
+visualize bar select acc_road , team_id from basketball_match group by acc_home order by acc_road asc
+visualize bar select acc_road , team_id from basketball_match group by acc_home order by acc_road desc;
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by team_id desc
+visualize bar select acc_road , count(*) from basketball_match group by acc_home ,  acc_road order by acc_road desc
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by team_id desc
+visualize bar select acc_road , team_id from basketball_match group by acc_home order by acc_road desc
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by team_id desc
+visualize bar select acc_road, team_id from basketball_match group by acc_home order by team_id asc
+visualize bar select team_id, acc_road from basketball_match group by acc_home order by team_id asc;
+visualize bar select acc_road , sum(team_id) from basketball_match group by acc_home order by sum(team_id) asc
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by team_id asc
+visualize bar select acc_road , sum(team_id) from basketball_match group by acc_home order by sum(team_id) asc
+visualize bar select acc_road , team_id from basketball_match group by acc_home order by team_id asc
+visualize bar select team_id , acc_road from basketball_match group by acc_home order by team_id desc
+visualize bar select acc_road, team_id from basketball_match group by acc_home order by team_id desc
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by team_id desc
+visualize bar select acc_road , sum(team_id) from basketball_match group by acc_home order by sum(team_id) desc
+visualize bar select acc_road , team_id from basketball_match group by acc_home order by team_id desc
+visualize bar select team_id , acc_road from basketball_match group by acc_home order by team_id desc
+visualize bar select acc_road, school_id from basketball_match group by acc_home order by acc_road asc
+visualize bar select acc_road , school_id from basketball_match group by acc_home order by acc_road asc
+visualize bar select acc_road , sum(school_id) from basketball_match group by acc_home order by acc_road asc
+visualize bar select acc_road, school_id from basketball_match group by acc_home order by acc_road asc
+visualize bar select acc_home , school_id from basketball_match group by acc_home order by acc_home asc
+visualize bar select acc_road , school_id from basketball_match group by acc_home order by acc_road asc
+visualize bar select acc_home, school_id from basketball_match group by acc_home order by acc_road desc
+visualize bar select acc_road , school_id from basketball_match group by acc_home order by acc_road desc
+visualize bar select acc_road, school_id from basketball_match group by acc_home order by acc_road desc
+visualize bar select acc_road , school_id from basketball_match group by acc_home order by acc_road desc
+visualize bar select acc_road , count(school_id) from basketball_match group by acc_home order by acc_road desc
+visualize bar select acc_home , school_id from basketball_match group by acc_home order by acc_road desc
+visualize bar select acc_road , sum(school_id) from basketball_match group by acc_home order by sum(school_id) asc bin acc_road by weekday
+visualize bar select acc_road , school_id from basketball_match group by acc_home order by school_id asc
+visualize bar select acc_home , school_id from basketball_match order by school_id asc group by acc_home
+visualize bar select acc_road , school_id from basketball_match group by acc_home order by school_id asc
+visualize bar select acc_home , school_id from basketball_match group by acc_home order by school_id asc
+visualize bar select acc_road , school_id from basketball_match group by acc_home order by school_id asc
+visualize bar select acc_road , school_id from basketball_match group by acc_home order by school_id desc
+visualize bar select acc_home , school_id from basketball_match group by acc_home order by school_id desc
+visualize bar select acc_road , school_id from basketball_match group by acc_home order by school_id desc
+visualize bar select acc_road , school_id from basketball_match group by acc_home order by school_id desc
+visualize bar select acc_home , school_id from basketball_match group by acc_home order by school_id desc
+visualize bar select acc_road, count(school_id) from basketball_match group by acc_home, acc_road order by count(school_id) desc
+visualize bar select all_home , team_id from basketball_match group by acc_home order by all_home asc
+visualize bar select all_home , team_id from basketball_match group by acc_home order by all_home asc
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by acc_home asc
+visualize bar select all_home , count(team_id) from basketball_match group by acc_home , all_home order by all_home asc
+visualize bar select team_id , all_home from basketball_match group by acc_home order by all_home asc
+visualize bar select acc_home , sum(team_id) from basketball_match group by acc_home order by acc_home desc
+visualize bar select all_home , count(team_id) from basketball_match group by acc_home bin all_home by weekday order by all_home desc
+visualize bar select team_id, all_home from basketball_match group by acc_home order by team_id desc
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by team_id desc
+visualize bar select all_home , team_id from basketball_match group by acc_home order by all_home desc
+visualize bar select all_home, team_id from basketball_match group by acc_home order by all_home desc
+visualize bar select all_home, team_id from basketball_match group by acc_home order by all_home asc
+visualize bar select t1.team_id , t1.all_home from basketball_match as t1 group by t1.acc_home order by t1.team_id asc
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by team_id asc
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by team_id asc
+visualize bar select all_home , count(team_id) from basketball_match group by acc_home ,  all_home order by count(team_id) asc
+visualize bar select team_id, all_home from basketball_match group by acc_home order by team_id asc
+visualize bar select all_home , team_id from basketball_match group by acc_home order by team_id desc
+visualize bar select team_id, all_home from basketball_match group by acc_home order by team_id desc
+visualize bar select acc_home , team_id from basketball_match group by acc_home order by team_id desc
+visualize bar select all_home , count(team_id) from basketball_match group by acc_home ,  all_home order by count(team_id) desc
+visualize bar select team_id , all_home from basketball_match group by acc_home order by team_id desc
+visualize bar select all_home , team_id from basketball_match group by acc_home order by team_id desc
+visualize bar select acc_home , school_id from basketball_match group by acc_home order by acc_home asc
+visualize bar select acc_home , school_id from basketball_match group by acc_home order by acc_home asc
+visualize bar select all_home , school_id from basketball_match group by acc_home order by all_home asc
+visualize bar select all_home , count(school_id) from basketball_match group by acc_home ,  all_home order by all_home asc
+visualize bar select all_home , school_id from basketball_match group by acc_home order by all_home asc
+visualize bar select acc_home, school_id from basketball_match group by acc_home order by acc_home asc
+visualize bar select acc_home , sum(school_id) from basketball_match group by acc_home order by acc_home desc
+visualize bar select acc_home , school_id from basketball_match group by acc_home order by acc_home desc
+visualize bar select acc_home, school_id from basketball_match group by acc_home order by acc_home desc
+visualize bar select acc_home , school_id from basketball_match group by acc_home order by acc_home desc
+visualize bar select all_home , count(school_id) from basketball_match group by acc_home ,  all_home order by all_home desc
+visualize bar select all_home, school_id from basketball_match group by acc_home order by all_home desc
+visualize bar select all_home , school_id from basketball_match group by acc_home order by school_id asc
+visualize bar select acc_home , school_id from basketball_match group by acc_home order by school_id asc
+visualize bar select all_home , school_id from basketball_match group by acc_home order by school_id asc
+visualize bar select acc_home, school_id from basketball_match group by acc_home order by school_id asc
+visualize bar select acc_home, school_id from basketball_match group by acc_home order by school_id asc
+visualize bar select all_home , count(school_id) from basketball_match group by acc_home ,  all_home order by count(school_id) asc bin all_home by total number.
+visualize bar select acc_home, school_id from basketball_match group by acc_home order by school_id desc
+visualize bar select all_home, school_id from basketball_match group by acc_home order by all_home desc
+visualize bar select t1.all_home , t1.school_id from basketball_match as t1 group by acc_home order by t1.all_home desc
+visualize bar select all_home, school_id from basketball_match group by acc_home order by all_home desc
+visualize bar select school_id , count(acc_home) from basketball_match group by all_home ,  school_id order by count(acc_home) desc
+visualize bar select all_home , school_id from basketball_match group by acc_home order by school_id desc
+visualize bar select acc_road , sum(team_id) from basketball_match group by acc_road order by sum(team_id) asc
+visualize bar select acc_road, count(team_id) from basketball_match group by acc_road order by acc_road asc
+visualize bar select acc_road, count(team_id) from basketball_match group by acc_road order by acc_road desc
+visualize bar select acc_road , count(team_id) from basketball_match group by acc_road order by count(team_id) asc
+visualize bar select acc_road , avg(team_id) from basketball_match group by acc_road order by avg(team_id) desc
+visualize bar select acc_road , avg(team_id) from basketball_match group by acc_road order by avg(team_id) desc
+visualize bar select acc_road, avg(team_id) from basketball_match group by acc_road order by avg(team_id) desc
+visualize bar select acc_road, avg(team_id) from basketball_match group by acc_road order by avg(team_id) desc
+visualize bar select team_id , avg(acc_road) from basketball_match group by team_id order by avg(acc_road) asc
+visualize bar select acc_road , avg(team_id) from basketball_match group by acc_road order by count(*) desc
+visualize bar select t1.acc_road , t1.team_id from basketball_match as t1 group by t1.acc_road order by t1.team_id desc
+visualize bar select acc_road , count(distinct school_id) from basketball_match order by acc_road asc
+visualize bar select acc_road , count(distinct school_id) from basketball_match group by acc_road order by acc_road desc
+visualize bar select acc_road , count(school_id) from basketball_match group by acc_road order by count(school_id) asc
+visualize bar select school_id, count(distinct team_id) from basketball_match where acc_road="y" group by school_id order by count(distinct team_id) desc
+visualize bar select acc_road , count(school_id) from basketball_match group by acc_road order by count(school_id) desc
+visualize bar select acc_road , avg(school_id) from basketball_match group by acc_road order by avg(school_id) asc
+visualize bar select acc_road , school_id from basketball_match group by acc_road order by acc_road asc
+visualize bar select acc_road , avg(school_id) from basketball_match group by acc_road order by avg(school_id) desc
+visualize bar select acc_road , avg(school_id) from basketball_match order by acc_road desc
+visualize bar select acc_road , avg(school_id) from basketball_match order by avg(school_id) asc bin acc_road by weekend
+visualize bar select all_home, sum(team_id) from basketball_match group by all_home order by sum(team_id) asc
+visualize bar select all_home , avg(team_id) from basketball_match group by all_home order by avg(team_id) asc
+visualize bar select team_id , avg(all_home) from basketball_match group by team_id order by avg(all_home) asc
+visualize bar select all_home , avg(team_id) from basketball_match group by all_home order by count(*) desc
+visualize bar select mean(team_id) , all_home from basketball_match group by all_home order by mean(team_id) desc
+visualize bar select all_home , count(distinct school_id) from basketball_match group by all_home order by count(distinct school_id) asc
+visualize bar select school_id , count(distinct team_id) from basketball_match group by school_id order by count(distinct team_id) desc
+visualize bar select all_home , sum(school_id) from basketball_match group by all_home order by sum(school_id) desc
+visualize bar select school_id, count(*) from basketball_match group by school_id order by count(*) desc
+visualize bar select all_home , avg(school_id) from basketball_match group by all_home order by avg(school_id) desc
+visualize bar select all_home, school_id from basketball_match group by all_home order by school_id asc
+visualize bar select team_name , team_id from basketball_match order by team_id asc
+visualize bar select team_name , team_id from basketball_match order by team_id asc
+visualize bar select team_name , team_id from basketball_match order by team_id desc
+visualize bar select team_name , count(team_id) from basketball_match group by team_name order by count(team_id) asc
+visualize bar select team_id , count(team_id) from basketball_match group by team_name order by count(team_id) desc
+visualize bar select team_name , school_id from basketball_match order by school_id asc
+visualize bar select team_name, school_id from basketball_match order by school_id desc
+visualize bar select team_name , school_id from basketball_match order by school_id desc
+visualize bar select team_id, acc_regular_season from basketball_match order by acc_regular_season asc bin team_id by team_id.
+visualize bar select acc_regular_season , team_id from basketball_match order by team_id desc
+visualize bar select acc_regular_season , team_id from basketball_match order by team_id desc
+visualize bar select team_id , acc_regular_season from basketball_match order by acc_regular_season desc bin acc_regular_season by year
+visualize bar select acc_regular_season , count(team_id) from basketball_match group by acc_regular_season order by count(team_id) asc
+visualize histogram select team_id , acc_regular_season from basketball_match order by acc_regular_season asc
+visualize bar select team_id , acc_regular_season from basketball_match order by acc_regular_season desc bin team_id by acc_regular_season
+visualize bar select school_id , acc_regular_season from basketball_match group by school_id order by acc_regular_season asc bin acc_regular_season by range.
+visualize bar select acc_regular_season , school_id from basketball_match order by school_id desc
+visualize bar select acc_regular_season , school_id from basketball_match order by school_id desc
+visualize bar select school_id , count(acc_regular_season) from basketball_match order by acc_regular_season desc bin school_id by season
+visualize bar select team_name , school_id from basketball_match order by team_name desc
+visualize bar select school_id , acc_regular_season from basketball_match order by acc_regular_season asc bin acc_regular_season by count.
+visualize bar select school_id , acc_regular_season from basketball_match order by acc_regular_season desc
+visualize bar select all_games , count(team_id) from basketball_match group by all_games order by all_games asc
+visualize bar select team_id, all_games from basketball_match order by team_id asc
+visualize bar select all_games , team_id from basketball_match order by team_id desc
+visualize bar select all_games , team_id from basketball_match order by team_id desc
+visualize bar select team_name , all_games from basketball_match order by team_name desc
+visualize bar select team_id , all_games from basketball_match order by all_games desc
+visualize bar select all_games , school_id from basketball_match order by school_id asc
+visualize bar select school_id , count(all_games) from basketball_match group by school_id order by school_id asc
+visualize bar select school_id , count(all_games) from basketball_match group by school_id order by school_id desc
+visualize bar select team_name, all_games from basketball_match order by school_id desc
+visualize bar select school_id, all_games from basketball_match group by school_id order by all_games asc
+visualize bar select all_games , school_id from basketball_match order by all_games asc
+visualize bar select school_id , all_games from basketball_match group by school_id order by all_games asc
+visualize bar select school_id , count(all_games) from basketball_match group by school_id order by count(all_games) asc
+visualize bar select all_games, school_id from basketball_match group by all_games order by count(*) asc
+visualize bar select all_games , school_id from basketball_match order by all_games desc
+visualize bar select school_id , count(all_games) from basketball_match group by school_id order by count(all_games) desc
+visualize bar select all_road , team_id from basketball_match order by team_id asc
+visualize bar select team_id , all_road from basketball_match order by team_id asc
+visualize bar select team_id, all_road from basketball_match order by team_id asc
+visualize bar select team_id , all_road from basketball_match order by team_id asc
+visualize bar select team_id , all_road from basketball_match order by team_id desc
+visualize bar select all_road , team_id from basketball_match order by team_id desc
+visualize bar select team_id , all_road from basketball_match order by all_road asc
+visualize bar select team_id, all_road from basketball_match order by all_road asc
+visualize bar select team_id , all_road from basketball_match order by all_road asc
+visualize bar select all_road , school_id from basketball_match order by school_id asc
+visualize bar select all_road , school_id from basketball_match order by school_id asc
+visualize bar select all_road , school_id from basketball_match order by school_id desc
+visualize bar select school_id , all_road from basketball_match order by school_id desc
+visualize bar select school_id , all_road from basketball_match order by school_id desc
+visualize bar select school_id , all_road from basketball_match order by all_road desc
+visualize bar select school_id , all_road from basketball_match order by all_road desc
+visualize bar select school_id , all_road from basketball_match order by all_road desc
+visualize bar select school_id , all_road from basketball_match order by all_road desc
+visualize bar select all_neutral , team_id from basketball_match order by team_id asc
+visualize bar select team_id , all_neutral from basketball_match order by team_id asc
+visualize bar select all_neutral , team_id from basketball_match group by all_neutral order by team_id asc
+visualize bar select team_id , all_neutral from basketball_match order by team_id asc
+visualize bar select team_id , all_neutral from basketball_match order by team_id desc
+visualize bar select team_id , all_neutral from basketball_match order by team_name desc
+visualize bar select all_neutral , count(team_id) from basketball_match group by all_neutral order by all_neutral desc
+visualize bar select team_id , all_neutral from basketball_match order by all_neutral asc
+visualize bar select all_neutral , count(team_id) from basketball_match group by all_neutral order by count(team_id) asc
+visualize bar select all_neutral , school_id from basketball_match order by school_id asc
+visualize bar select all_neutral , school_id from basketball_match order by school_id asc
+visualize bar select all_neutral , school_id from basketball_match order by school_id desc
+visualize bar select team_name, all_neutral from basketball_match order by all_neutral desc
+visualize bar select team_name , school_id from basketball_match order by all_neutral asc
+visualize bar select all_home, count(all_home) from basketball_match group by all_home order by count(all_home) desc
+visualize bar select team_name , acc_percent from basketball_match order by acc_percent asc
+visualize bar select team_name, acc_percent from basketball_match order by acc_percent desc
+visualize bar select team_name , all_games_percent from basketball_match group by team_name order by all_games_percent asc
+visualize bar select team_name , all_games_percent from basketball_match order by all_games_percent desc
+visualize bar select acc_regular_season , acc_percent from basketball_match order by acc_percent asc
+visualize bar select acc_regular_season , acc_percent from basketball_match order by acc_percent asc
+visualize bar select acc_regular_season, acc_percent from basketball_match order by acc_percent desc
+visualize bar select acc_regular_season , count(acc_percent) from basketball_match group by acc_regular_season order by acc_regular_season desc
+visualize bar select acc_regular_season , all_games_percent from basketball_match order by all_games_percent asc
+visualize bar select acc_regular_season , all_games_percent from basketball_match order by all_games_percent desc
+visualize bar select all_games , acc_percent from basketball_match order by count(*) desc
+visualize bar select all_road , acc_percent from basketball_match order by acc_percent asc
+visualize bar select all_road , acc_percent from basketball_match order by acc_percent asc
+visualize bar select all_road , acc_percent from basketball_match order by acc_percent asc
+visualize bar select all_road , acc_percent from basketball_match order by acc_percent desc
+visualize bar select all_road , acc_percent from basketball_match order by acc_percent desc
+visualize bar select all_road , acc_percent from basketball_match order by count(*) asc
+visualize bar select all_road , acc_percent from basketball_match order by count(*) asc
+visualize bar select all_road , all_games_percent from basketball_match order by all_games_percent asc
+visualize bar select all_road, all_games_percent from basketball_match order by all_games_percent asc
+visualize bar select all_neutral , acc_percent , count(*) from basketball_match group by all_neutral , acc_percent order by count(*) desc
+visualize bar select affiliation , count(*) from university where founded > 1850 group by affiliation order by count(*) asc
+visualize bar select affiliation, count(*) from university where founded > 1850 group by affiliation order by count(*) desc
+visualize bar select affiliation , count(enrollment) from university where founded> 1850 group by affiliation order by count(enrollment) desc
+visualize bar select state, count(vote_id) from votes group by state
+visualize bar select state, count(*), avg(vote_id) from votes group by state
+visualize bar select state, count(state) from votes group by state bin state by alphabetical order.
+visualize bar select state, sum(vote_id) from votes group by state order by sum(vote_id) asc
+visualize bar select state , count(vote_id) from votes group by state order by state asc
+visualize bar select state, count(vote_id) from votes group by state order by state desc
+visualize bar select state, count(vote_id) from votes group by state order by count(vote_id) asc
+visualize histogram select state , count(vote_id) from votes group by state order by count(vote_id) desc
+visualize bar select state , avg(vote_id) from votes group by state order by avg(vote_id) asc
+visualize bar select state , avg(vote_id) from votes group by state order by avg(vote_id) desc
+visualize bar select state, count(*), avg(vote_id) from votes group by state order by avg(vote_id) desc
+visualize bar select state , count(*), avg(vote_id) from votes group by state order by avg(vote_id) asc
+visualize bar select state , count(*), avg(vote_id) from votes group by state order by count(*) desc
+visualize bar select state, count(distinct state) from votes order by state asc
+visualize bar select state , count(distinct state) from votes order by state desc
+visualize bar select state , count(distinct state) from votes order by count(distinct state) desc
+visualize bar select advisor , count(*) from student group by advisor
+visualize bar select registration_date, count(registration_date) from voting_record group by registration_date
+visualize bar select registration_date , count(registration_date) from voting_record  order by count(registration_date) desc bin registration_date by year
+visualize bar select open_date , count(open_date) from church group by open_date
+visualize line select open_date , count(open_date) from church bin open_date by year
+visualize line select open_date , count(open_date) from church bin open_date by year
+visualize line select open_date , count(open_date) from church bin open_date by year
+visualize bar select open_date , count(open_date) from church order by open_date desc limit 3
+visualize bar select country , count(*) from people group by country
+visualize bar select open_date , count(open_date) from church group by open_date
+visualize bar select open_date , count(open_date) from church group by open_date order by count(open_date) asc
+visualize bar select open_date , count(open_date) from church bin open_date by weekday order by count(open_date) desc
+visualize bar select open_date , count(open_date) from church  order by count(open_date) desc bin open_date by year
+visualize line select open_date , count(open_date) from church order by open_date asc bin open_date by year
+visualize line select open_date , count(open_date) from church order by open_date asc bin open_date by year
+visualize line select open_date, count(open_date) from church order by open_date asc bin open_date by year
+visualize line select open_date , count(open_date) from church order by open_date desc bin open_date by year
+visualize line select open_date , count(open_date) from church order by open_date desc
+visualize line select open_date, count(open_date) from church order by open_date desc bin open_date by year
+visualize bar select open_date , count(open_date) from church group by open_date order by count(open_date) asc
+visualize bar select open_date , count(open_date) from church group by open_date order by count(open_date) asc bin open_date by weekday
+visualize bar select open_date, count(open_date) from church group by open_date order by count(open_date) desc
+visualize scatter select appelation, avg(price), avg(score) from wine group by appelation
+visualize scatter select appelation , avg(price), avg(score) from wine group by appelation
+visualize scatter select avg(price), score from wine group by appelation;
+visualize scatter select avg(price) , avg(score) from wine group by state
+visualize bar select grape , count(grape) from wine where score > 93 group by grape order by grape asc
+visualize stacked select appellation , count(appellation), name from wine where score > 93 group by appellation order by name asc
+visualize bar select count(*) from appellations group by county
+visualize bar select count(*) from appellations group by county
+visualize bar select count(*) , appelation from appellations group by appelation;
+visualize bar select count(*) from wine where price < 50 and appelation in (select appelation from appellations where county = 'monterey') group by appelation
+visualize bar select name, count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t2.county = 'monterey' and t1.price < 50 group by t1.name
+visualize bar select count(*) from wine where price < 50 and appelation in(select appelation from appellations where county = 'monterey') group by appelation
+visualize bar select appelation , count(*) from wine where price < 50 and appelation in (select appelation from appellations where county = 'monterey') group by appelation
+visualize bar select year, count(year) from wine where price > 100 group by year order by year bin year by year
+visualize bar select grape, count(no) from wine where price > 100 group by grape, year order by year asc
+visualize bar select grape , count(*) from wine where price > 100 group by grape, year order by year asc bin grape by count(*) desc
+visualize bar select year , count(grape) from wine where price > 100 group by year order by year asc
+visualize pie select grape , count(grape) from wine where price > 100 group by grape order by year
+visualize bar select winery, grape, count(winery) from wine where price > 100 group by winery, grape order by count(winery) asc
+visualize bar select county, count(county) from appellations a inner join wine w on a.appelation = w.appelation  group by county having count(county)<= 3
+visualize bar select a.state, count(w.no) from appellations as a join wine as w on a.appelation = w.appelation group by a.state having count(w.no)<=3
+visualize bar select county, count(appelation) from appellations a join wine w on a.appelation = w.appelation group by county having count(appelation) <= 3 order by count(appelation) desc
+visualize bar select year, count(year) from wine bin year by year
+visualize bar select year, count(year) from wine bin year by year
+visualize line select avg(price), grape from wine group by grape
+visualize line select avg(price) , grape from wine group by grape
+visualize line select avg(price) , grape from wine group by grape
+visualize bar select year , avg(price) from wine bin year by weekday
+visualize bar select year , avg(price) from wine bin year by year
+visualize bar select year , max(price), max(score) from wine bin year by weekday
+visualize bar select year , max(price), max(score) from wine bin year by weekday
+visualize bar select year , count(year) from wine bin year by year
+visualize bar select year , max(score) from wine group by year
+visualize line select year , max(score) from wine group by year bin year by year
+visualize line select year , max(score) from wine bin year by year
+visualize bar select year , avg(max(price)) from wine bin year by weekday
+visualize bar select year , avg(price) from wine group by year order by avg(price) desc bin year by weekday
+visualize bar select year , avg(max(price)) from wine group by year bin year by weekday
+visualize bar select year , avg(max(price)) from wine group by year
+visualize bar select year , avg(max(score)) from wine group by year bin year by weekday
+visualize bar select year , avg(max(score)) from wine group by year bin year by weekday
+visualize bar select year , avg(max(score)) from wine group by year bin year by weekday
+visualize bar select year , avg(max(score)) from wine group by year
+visualize bar select year , max(price) from wine group by year
+visualize line select year, max(price) from wine group by year bin year by year
+visualize scatter select year, max(price), score from wine group by year
+visualize scatter select max(price), score, year from wine group by year
+visualize scatter select max(price) , score , year from wine group by year
+visualize scatter select max(price) , max(score) from wine
+visualize bar select grape, count(grape) from wine group by grape order by count(grape) desc
+visualize bar select grape, count(*) from wine group by grape order by count(*) desc
+visualize bar select appelation , count(county) from appellations group by appelation order by appelation asc
+visualize bar select county, count(*) from appellations group by county order by count(*) asc
+visualize bar select appellation , count(*) from appellations group by appellation order by appellation asc
+visualize bar select county , count(*) from appellations group by county order by count(*) desc
+visualize bar select appellation , count(county) from appellations group by appellation order by count(county) desc
+visualize bar select count(*) , appelation from appellations group by appelation order by count(*) asc
+visualize bar select count(distinct county) as count_of_counties, appelation from appellations group by appelation order by count_of_counties asc
+visualize bar select count(distinct county) , appelation from appellations group by appelation order by count(distinct county) asc
+visualize bar select count(county), appellation from appellations group by appellation order by count(county) desc
+visualize bar select count(*) from appellations group by county order by count(*) desc
+visualize bar select count(*) as 'number of counties', area from appellations group by area order by count(*) desc
+visualize bar select name , count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t2.county = 'monterey' and t1.price < 50 group by t1.name order by t1.name asc
+visualize bar select name , count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where price < 50 and county = 'monterey' group by name order by name asc
+visualize bar select name , count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t1.price < 50 and t2.county = 'monterey' group by t1.name order by name asc
+visualize bar select a.appelation , count(*) from appellations as a join wine as w on a.appelation = w.appelation where a.county = 'monterey' and w.price < 50 group by a.appelation order by a.appelation asc
+visualize bar select appelation , count(*) from wine, appellations where wine.price < 50 and appellations.county = 'monterey' and wine.appelation = appellations.appelation group by appelation order by appelation desc
+visualize bar select name, count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t2.county = 'monterey' and t1.price < 50 group by t1.name order by count(*) desc
+visualize bar select appelation, count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t1.price < 50 and t2.county = 'monterey' group by t1.appelation order by appelation desc
+visualize bar select appelation , count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t1.price < 50 and t2.county = 'monterey' group by t1.appelation order by appelation desc
+visualize bar select name, count(name) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t1.price < 50 and t2.county = 'monterey' group by name order by name asc
+visualize bar select count(*), appelation from wine where price<50 and appelation in (select appelation from appellations where county='monterey') group by appelation order by count(*) asc
+visualize bar select appelation, count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t1.price < 50 and t2.county = 'monterey' group by t1.appelation order by count(*) asc
+visualize bar select name, count(*) from appellations as t1 join wine as t2 on t1.appelation = t2.appelation where t1.county = 'monterey' and t2.price < 50 group by t2.name order by count(*) asc
+visualize bar select name, count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t2.county="monterey" and t1.price<50 group by name order by count(*) desc
+visualize bar select appelation, count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t2.county='monterey' and t1.price<50 group by appelation order by count(*) desc
+visualize bar select a.appelation, count(*) from appellations as a join wine as w on a.appelation = w.appelation where a.county = 'monterey' and w.price < 50 group by a.appelation order by count(*) desc
+visualize bar select name , count(*) from wine as t1 join appellations as t2 on t1.appelation = t2.appelation where t2.county = 'monterey' and t1.price < 50 group by t1.name order by count(*) desc
+visualize bar select winery , grape , count(winery) from wine where price > 100 group by grape , winery order by winery desc
+visualize bar select winery, grape, count(winery) from wine where price > 100 group by winery, grape order by winery desc
+visualize bar select winery , count(winery) from wine where price > 100 group by winery order by count(winery) desc
+visualize bar select country , count(country) from appellations a join wine w on a.appelation = w.appelation group by country having count(*) <= 3 order by country asc
+visualize bar select county, count(*) from appellations where appelation in (select appelation from wine group by appelation having count(*) <= 3) group by county order by county asc
+visualize bar select county, count(*) from appellations as t1 join wine as t2 on t1.appelation = t2.appelation group by county having count(*) <= 3 order by county asc
+visualize bar select a.state , count(w.no) from appellations as a join wine as w on a.appelation = w.appelation group by a.state having count(w.no) <= 3 order by count(w.no) desc
+visualize bar select state , count(*) from appellations as t1 join wine as t2 on t1.appelation = t2.appelation group by state having count(*) <= 3 order by state desc
+visualize bar select county , count(*) from appellations as t1 join wine as t2 on t1.appelation = t2.appelation group by county having count(*) <= 3 order by county desc
+visualize bar select state , count(*) from appellations as t1 join wine as t2 on t1.appelation = t2.appelation group by state having count(*) <= 3 order by count(*) asc
+visualize bar select a.area , count(*) from appellations a join wine w on a.appelation=w.appelation group by a.area having count(*) <= 3 order by count(*) asc;
+visualize bar select county , count(county) from appellations as t1 join wine as t2 on t1.appelation = t2.appelation group by county having count(t2.no) <= 3 order by count(county) asc
+visualize bar select county , count(county) from appellations where appelation in (select appelation from wine group by appelation having count(*) <= 3) group by county order by count(county) desc
+visualize bar select t1.state , count(t2.no) from appellations as t1 join wine as t2 on t1.appelation = t2.appelation group by t1.state having count(t2.no) <= 3 order by count(t2.no) desc
+visualize bar select state, count(state) from appellations as t1 join wine as t2 on t1.appelation = t2.appelation group by state having count(state) <= 3 order by count(state) desc
+visualize bar select grape, count(*) from wine group by grape order by count(*) desc
+visualize bar select grape, count(*) from wine group by grape order by count(*) desc
+visualize bar select grape, count(*) from wine group by grape order by count(*) desc
+visualize bar select year , count(year) from wine order by count(year) asc bin year by year
+visualize bar select year , count(year) from wine  order by count(year) asc bin year by year
+visualize bar select year, count(year) from wine group by year order by count(year) desc bin year by year
+visualize bar select year , count(year) from wine order by count(year) desc bin year by year
+visualize line select winery, avg(price) from wine group by winery order by winery asc
+visualize line select appelation, avg(price) from wine group by appelation order by appelation asc
+visualize line select appelation , avg(price) from wine group by appelation order by appelation asc
+visualize line select appelation, avg(price) from wine group by appelation order by avg(price) desc
+visualize line select winery, avg(price) from wine group by winery order by avg(price) desc
+visualize bar select year , avg(price) from wine order by avg(price) asc bin year by weekday
+visualize bar select year , avg(price) from wine order by avg(price) asc bin year by year
+visualize bar select year , avg(price) from wine order by avg(price) desc bin year by weekday
+visualize bar select year , avg(price) from wine order by avg(price) desc bin year by year
+visualize bar select year , max(price, score) from wine order by max(price, score) asc bin year by weekday
+visualize bar select year , count(year) from wine order by count(year) asc bin year by year
+visualize bar select year , count(year) from wine where price = (select max(price) from wine) and score = (select max(score) from wine) order by count(year) asc bin year by weekday
+visualize bar select year, max(price), max(score) from wine order by max(price) desc, max(score) desc bin year by weekday
+visualize bar select year , max(price,score) from wine order by max(price,score) desc bin year by weekday
+visualize bar select year , count(year) from wine order by count(year) desc bin year by year
+visualize bar select year , max(score) from wine group by year order by year asc
+visualize line select year , max(score) from wine order by year asc bin year by year
+visualize line select year, max(score) from wine order by year desc bin year by year
+visualize bar select year , max(score) from wine  order by year desc bin year by year
+visualize bar select year , avg(max(price)) from wine group by year order by avg(max(price)) asc bin year by weekday
+visualize bar select year , avg(max(price)) from wine bin year by weekday order by avg(max(price)) asc
+visualize bar select year , avg(price) from wine order by avg(price) asc bin year by year
+visualize bar select year , avg(max(price)) from wine order by avg(max(price)) asc bin year by year
+visualize bar select year, avg(max(price)) from wine group by year order by avg(max(price)) desc bin year by weekday
+visualize bar select year, avg(max(price)) from wine group by year order by avg(max(price)) desc
+visualize bar select year , avg(price) from wine group by year order by count(year) desc bin year by weekday
+visualize bar select year , avg(max(price)) from wine group by year order by avg(max(price)) desc bin year by weekday
+visualize bar select year , avg(score) from wine group by year order by count(year) asc bin year by weekday
+visualize bar select year , avg(max(score)) from wine group by year order by avg(max(score)) asc bin year by weekday
+visualize bar select year, avg(max(score)) from wine group by year order by avg(max(score)) asc
+visualize bar select year , avg(score) from wine order by count(year) asc bin year by weekday
+visualize bar select year , avg(max(score)) from wine group by year order by avg(max(score)) desc bin year by weekday
+visualize bar select year , avg(score) from wine group by year order by count(year) desc bin year by weekday
+visualize bar select year , avg(max(score)) from wine order by avg(max(score)) desc bin year by weekday
+visualize bar select year , avg(max(score)) from wine group by year order by avg(max(score)) desc
+visualize bar select year, max(price) from wine group by year order by year asc
+visualize bar select year, max(price) from wine group by year order by year desc
+visualize line select year , max(price) from wine group by year order by year desc bin year by year
+visualize bar select count (author) from submission group by author
+visualize bar select result, count(*) from acceptance group by result
+visualize pie select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by t1.author
+visualize pie select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by t1.author
+visualize pie select author , count(distinct workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author
+visualize pie select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author
+visualize pie select author , count(workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author
+visualize pie select author , count(workshop_id) from acceptance as t1 join submission as t2 on t1.submission_id = t2.submission_id group by author
+visualize bar select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by t1.author
+visualize bar select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by t1.author
+visualize bar select author , count(workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author
+visualize bar select author, count(workshop_id) from acceptance group by author
+visualize bar select author, count(distinct workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author
+visualize bar select author , count(distinct workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author
+visualize bar select venue , count(name) from workshop group by venue order by name asc
+visualize bar select venue , count(venue) from workshop group by venue order by count(venue) desc
+visualize bar select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by t1.author order by author asc
+visualize bar select author , count(workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by author asc
+visualize bar select author , count(workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by author asc
+visualize bar select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by t1.author order by author asc
+visualize bar select author, count(workshop_id) from submission join acceptance on submission.submission_id = acceptance.submission_id group by author order by author asc
+visualize bar select author , count(distinct workshop_id) from acceptance as t1 join submission as t2 on t1.submission_id = t2.submission_id group by t2.author order by author asc
+visualize bar select author , count(workshop_id) from acceptance as t1 join submission as t2 on t1.submission_id = t2.submission_id group by author order by author desc
+visualize bar select author , count(workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by author desc
+visualize bar select author , count(distinct workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by author desc
+visualize bar select author, count(workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by author desc
+visualize bar select author , count(workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by author desc
+visualize bar select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by t1.author order by author desc
+visualize bar select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by t1.author order by count(*) asc
+visualize bar select author , count(workshop_id) from acceptance as t1 join submission as t2 on t1.submission_id = t2.submission_id group by author order by count(workshop_id) asc
+visualize bar select author, count(workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by count(workshop_id) asc
+visualize bar select author , count(distinct workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by workshop_id asc
+visualize bar select author , count(*) from acceptance as t1 join submission as t2 on t1.submission_id = t2.submission_id group by t2.author order by count(*) asc
+visualize bar select author , count(workshop_id) from submission inner join acceptance on submission.submission_id = acceptance.submission_id group by author order by count(workshop_id) asc
+visualize bar select author , count(*) from acceptance as t1 join submission as t2 on t1.submission_id = t2.submission_id group by t2.author order by t1.workshop_id desc
+visualize bar select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by t1.author order by count(*) desc
+visualize bar select author , count(workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by count(workshop_id) desc
+visualize bar select author , count(*) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by count(*) desc
+visualize bar select author , count(workshop_id) from submission inner join acceptance on submission.submission_id = acceptance.submission_id group by author order by count(workshop_id) desc
+visualize bar select author , count(distinct workshop_id) from submission as t1 join acceptance as t2 on t1.submission_id = t2.submission_id group by author order by count(distinct workshop_id) desc
+visualize bar select continent , sum(population) from country where lifeexpectancy < 72 group by continent
+visualize bar select continent, sum(population) from country where lifeexpectancy < 72 group by continent
+visualize bar select continent, sum(population) from country group by continent
+visualize pie select continent, avg(lifeexpectancy) from country where lifeexpectancy < 72 group by continent
+visualize pie select continent, avg(lifeexpectancy) from country group by continent
+visualize bar select continent, avg(lifeexpectancy) from country where lifeexpectancy < 72 group by continent
+visualize bar select continent , avg(lifeexpectancy) from country where lifeexpectancy < 72 group by continent
+visualize scatter select continent, avg(lifeexpectancy), sum(population) from country where avg(lifeexpectancy) < 72 group by continent
+visualize scatter select continent, avg(lifeexpectancy), sum(population) from country where lifeexpectancy < 72 group by continent
+visualize scatter select sum(population) , avg(lifeexpectancy) from country group by continent
+visualize pie select continent , sum(population) from country where lifeexpectancy < 72 group by continent;
+visualize pie select continent , sum(population) from country where lifeexpectancy < 72 group by continent
+visualize pie select continent , sum(population) from country group by continent
+visualize scatter select continent, avg(lifeexpectancy), sum(population) from country where lifeexpectancy < 72 group by continent;
+visualize pie select language , count(language) from countrylanguage as t1 join country as t2 on t1.countrycode = t2.code where t2.headofstate='beatrix' and t1.isofficial='t' group by language
+visualize pie select language , count(*) from countrylanguage inner join country on countrylanguage.countrycode = country.code where headofstate = 'beatrix' and isofficial = 't' group by language
+visualize bar select language , count(language) from countrylanguage as t1 join country as t2 on t1.countrycode = t2.code where t2.headofstate = 'beatrix' and t1.isofficial = 't' group by language
+visualize bar select language , count(*) from countrylanguage as t1 join country as t2 on t1.countrycode = t2.code where t2.headofstate = 'beatrix' and t1.isofficial = 't' group by language
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform
+visualize bar select governmentform, sum(population) from country where lifeexpectancy > 72 group by governmentform
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform
+visualize bar select name, surfacearea from country order by surfacearea desc limit 5;
+visualize bar select region , sum(population) from country where lifeexpectancy < 72 group by region order by region asc
+visualize bar select continent, sum(population) from country where lifeexpectancy < 72 group by continent order by continent asc
+visualize bar select continent , sum(population) from country group by continent order by continent asc
+visualize bar select t1.continent , sum(t2.population) from country as t2 join continents as t1 on t2.continent = t1.continent where t2.lifeexpectancy < 72 group by t1.continent order by t1.continent desc
+visualize bar select continent , sum(population) from country where lifeexpectancy < 72 group by continent order by sum(population) desc
+visualize bar select continent, sum(population) from country group by continent order by continent desc
+visualize bar select continent , sum(population) from country where lifeexpectancy < 72 group by continent order by sum(population) asc
+visualize bar select continent , sum(population) from country group by continent order by sum(population) asc
+visualize bar select continent , sum(population) from country where lifeexpectancy < 72 group by continent order by sum(population) asc
+visualize bar select continent , sum(population) from country group by continent order by sum(population) desc
+visualize bar select continent, sum(population) from country where lifeexpectancy < 72 group by continent order by sum(population) desc
+visualize bar select continent , sum(population) from country where lifeexpectancy < 72 group by continent order by sum(population) desc
+visualize bar select t1.continent , avg(t1.lifeexpectancy) from country as t1 where t1.lifeexpectancy<72 group by t1.continent order by avg(t1.lifeexpectancy) asc
+visualize bar select continent , avg(lifeexpectancy) from country where lifeexpectancy < 72 group by continent order by continent asc
+visualize bar select continent , avg(lifeexpectancy) from country group by continent having avg(lifeexpectancy) < 72 order by avg(lifeexpectancy) desc
+visualize bar select continent , avg(lifeexpectancy) from country where lifeexpectancy < 72 group by continent order by continent desc
+visualize bar select t1.continent , avg(t2.lifeexpectancy) from country as t2 join continent as t1 on t2.continent = t1.continent where t2.lifeexpectancy < 72 group by t1.continent order by avg(t2.lifeexpectancy) asc
+visualize bar select continent, avg(lifeexpectancy) from country where lifeexpectancy < 72 group by continent order by avg(lifeexpectancy) asc
+visualize bar select continent, avg(lifeexpectancy) from country where lifeexpectancy < 72 group by continent order by avg(lifeexpectancy) desc
+visualize bar select continent , avg(lifeexpectancy) from country where lifeexpectancy < 72 group by continent order by avg(lifeexpectancy) desc
+visualize bar select language , count(*) from countrylanguage as t1 join country as t2 on t1.countrycode = t2.code where t2.headofstate = 'beatrix' and t1.isofficial = 't' group by language order by language asc
+visualize bar select language , count(language) from countrylanguage as t1 join country as t2 on t1.countrycode = t2.code where t2.headofstate='beatrix' and t1.isofficial='t' group by language order by language asc
+visualize bar select language , count(*) from countrylanguage as t1 join country as t2 on t1.countrycode = t2.code where t2.headofstate = 'beatrix' and t1.isofficial = 't' group by language order by language desc
+visualize bar select language , count(language) from countrylanguage as t1 join country as t2 on t1.countrycode = t2.code where t2.headofstate = 'beatrix' and t1.isofficial = 't' group by language order by language desc
+visualize bar select t2.language , count(*) from country as t1 join countrylanguage as t2 on t1.code = t2.countrycode where t1.headofstate = 'beatrix' and t2.isofficial = 't' group by t2.language order by count(*) asc
+visualize bar select language , count(*) from countrylanguage as t1 join country as t2 on t1.countrycode = t2.code where t2.headofstate = 'beatrix' and t1.isofficial = 't' group by language order by count(*) asc
+visualize bar select language , count(*) from countrylanguage as t1 join country as t2 on t1.countrycode = t2.code where t2.headofstate = 'beatrix' and t1.isofficial = 't' group by language order by count(*) desc
+visualize bar select language , count(*) from countrylanguage as t1 join country as t2 on t1.countrycode = t2.code where t2.headofstate = 'beatrix' and t1.isofficial = 't' group by language order by count(*) desc
+visualize bar select governmentform, sum(population) from country where avg(lifeexpectancy) > 72 group by governmentform order by governmentform asc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by governmentform asc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by governmentform asc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by governmentform asc
+visualize bar select governmentform,sum(population) from country where lifeexpectancy > 72 group by governmentform order by governmentform desc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by governmentform desc
+visualize bar select governmentform, count(population) from country group by governmentform order by governmentform desc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by sum(population) desc
+visualize bar select governmentform, sum(population) from country where avg(lifeexpectancy) > 72 group by governmentform order by governmentform desc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by sum(population) asc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by sum(population) asc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by sum(population) asc
+visualize bar select governmentform, sum(population) from country where lifeexpectancy > 72 group by governmentform order by sum(population) asc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by sum(population) desc
+visualize bar select governmentform, sum(population) from country where lifeexpectancy > 72 group by governmentform order by sum(population) desc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by sum(population) desc
+visualize bar select governmentform , sum(population) from country where lifeexpectancy > 72 group by governmentform order by sum(population) desc
+visualize bar select governmentform , count(population) from country group by governmentform order by count(population) desc
+visualize bar select count(distinct location) from wrestler
+visualize bar select team , count(*) from elimination group by team order by count(*) asc
+visualize bar select team , count(*) from elimination group by team order by count(*) desc
+visualize bar select location, count(*) from wrestler order by location desc
+visualize bar select location , count(*) from wrestler order by location desc
+visualize bar select location, count(wrestler_id) from wrestler order by location desc
+visualize bar select location, count(*) from wrestler order by count(*) asc
+visualize bar select team, count(team) from elimination group by team order by count(team) asc
+visualize bar select ranking_date, sum(tours) from rankings group by ranking_date
+visualize bar select ranking_date,sum(tours) from rankings group by ranking_date
+visualize bar select ranking_date, sum(tours) from rankings group by ranking_date
+visualize bar select year , count(*) from matches group by year
+visualize bar select year, count(*) from matches group by year
+visualize bar select year , sum(match_num) from matches group by year
+visualize bar select year , avg(match_num) from matches group by year
+visualize bar select year, avg(match_num) from matches group by year
+visualize bar select year , avg(match_num) from matches bin year by year
+visualize bar select year , count(*) from matches group by year order by count(*) asc
+visualize bar select year , count(*) from matches group by year order by count(*) asc
+visualize bar select year , sum(match_num) from matches group by year order by sum(match_num) asc
+visualize bar select year, count(*) from matches group by year order by count(*) desc
+visualize bar select year, count(*) from matches group by year order by count(*) desc
+visualize bar select year , count(*) from matches group by year order by count(*) desc
+visualize bar select year, sum(match_num) from matches group by year order by sum(match_num) desc
+visualize bar select year, avg(match_num) from matches group by year order by avg(match_num) asc
+visualize bar select year, avg(match_num) from matches group by year order by avg(match_num) asc
+visualize bar select year , avg(match_num) from matches group by year order by avg(match_num) asc
+visualize bar select year , count(year) from matches bin year by year order by count(year) asc
+visualize bar select year , avg(match_num) from matches group by year order by avg(match_num) desc
+visualize bar select year , avg(match_num) from matches group by year order by avg(match_num) desc
+visualize bar select year, avg(match_num) from matches group by year order by avg(match_num) desc

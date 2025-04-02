@@ -1,0 +1,20 @@
+[
+    {
+        "input": "this is a"
+    },
+    {
+        "input": "from tqdm import"
+    },
+    {
+        "input": "def calculate("
+    },
+    {
+        "input": "a = b**2"
+    },
+    {
+        "input": "torch.randint"
+    },
+    {
+        "input": "x = [1,2"
+    }
+]

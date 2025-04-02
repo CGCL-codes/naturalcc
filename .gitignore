@@ -1,22 +1,26 @@
-.idea
-*/.idea/*
-.DS_Store
-.cache
-*.pyc
-*.pod
-*.pm
-*.exc
-*.db
-src/test.py
-/.vs
-*.xml
-*.o
-build/*
+# Build Artifacts
+build/
+
+# Core Dumps
+core
+
+# Byte-Compiled Modules
+__pycache__/
+
+# Extension Modules
 *.so
-*.log
-ncc/data/tools/data_utils_fast.cpp
-ncc/data/tools/token_block_utils_fast.cpp
-ncc/data/tools/token_block_utils_fast.cpython-37m-x86_64-linux-gnu.so
-ncc/data/tools/data_utils_fast.cpython-37m-x86_64-linux-gnu.so
-ncc/libbleu.cpython-37m-x86_64-linux-gnu.so
-ncc/libnat.cpython-37m-x86_64-linux-gnu.so
+
+# Packaging Artifacts
+*.egg-info
+*.whl
+
+# IDEs and Tools
+.idea/
+.gdb_history
+
+# Other
+.DS_Store
+
+# notebook & test results
+/*.ipynb
+result.json

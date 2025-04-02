@@ -1,296 +1,227 @@
-# <center> NaturalCC
-
-
-NaturalCC is a sequence modeling toolkit that allows researchers and developers to train custom models for many software
-engineering tasks, e.g., code summarization, code retrieval, code completion, code clone detection and type inference.
-Our vision is to bridge the gap between programming language and natural language through machine learning techniques.
-
-<p align=center>
+<p align="center">
+  <br>
+  <img src="docs/naturalcc_logo.png" width="400">
+  <br>
+</p>
+<div align="center">
   <a href="https://xcodemind.github.io/">
     <img src="https://img.shields.io/badge/NaturalCC-0.6.0-green" alt="Version">
   </a>
-
   <a href="https://www.python.org/downloads/release/python-360/">
     <img src="https://img.shields.io/badge/Python->=3.6-3776AB?logo=python" alt="Python">
   </a>
-
   <a href="https://github.com/pytorch/pytorch">
     <img src="https://img.shields.io/badge/PyTorch->=1.4-FF6F00?logo=pytorch" alt="pytorch">
   </a>
-
   <a href="https://github.com/EdisonLeeeee/GraphGallery/blob/master/LICENSE">
     <img src="https://img.shields.io/github/license/EdisonLeeeee/GraphGallery" alt="license">
-  </a>       
-</p>
-<hr>
+  </a>
 
-## 🔖 News 
-- [May 10] We have merged the source code of "What Do They Capture? - A Structural Analysis of Pre-Trained Language Models for Source Code" into NaturalCC.
+<a href="https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf">Paper</a>,
+<a href="http://121.43.116.104:3000">Demo</a>,
+<a href="https://xcodemind.github.io/team">About us-XCodeMind</a>
 
-## ⭐ Features
+# NaturalCC - Natural Code Comprehension
 
-- A collection of code corpus with data preprocessing
-- Performance benchmark
-- Mixed precision training
-    - Nvidia APEX
-    - Automatic Mixed Precision
-- Multi-GPU training
-- Better logging output
-- Various Implementations:
-    - tensorflow gradient clipping
-    - optimizers or learning schedulers
-    - baseline models
-    - binary data formats
+</div>
+
+## 📖 Vision
+
+NaturalCC is a sequence modeling toolkit designed to bridge the gap between programming and natural languages through advanced machine learning techniques. It allows researchers and developers to train custom models for a variety of software engineering tasks, e.g., code generation, code completion, code summarization, code retrieval, code clone detection, and type inference.
 
 
-## 🚀 Installation
+## 🌟 Key Features:
 
-### Requirements
+- **Modular and Extensible Framework:** Built on the robust Fairseq's registry mechanism, allowing for easy adaptation and extension to diverse software engineering tasks.
+- **Datasets and Preprocessing Tools+:** Offers access to a variety of clean, preprocessed benchmarks such as Human-Eval, CodeSearchNet, Python-Doc, and Py150. Comes equipped with scripts for feature extraction using compiler tools like LLVM.
+- **Support for Large Code Models:** Incorporates state-of-the-art large code models like Code Llama, CodeT5, CodeGen, and StarCoder.
+- **Benchmarking and Evaluation**: Benchmarks multiple downstream tasks (including code generation and code completion), with evaluation capabilities on well-known benchmarks using popular metrics like pass@k.
+- **Optimized for Efficiency:** Employs the `NCCL` library and `torch.distributed` for high-efficiency model training across multiple GPUs. Supports both full-precision (`FP32`) and half-precision (`FP16`) computations to accelerate training and inference processes.
+- **Enhanced Logging for Improved Debugging:** Advanced logging features to provide clear, detailed feedback during model training and operation, aiding in debugging and performance optimization.
 
-- PyTorch version >= 1.6.0
-- Python version >= 3.6
-- GCC/G++ > 5.0
-- For training new models, you'll also need an NVIDIA GPU, NCCL and Cuda Toolkit installed.
-- (optional) For faster training, you need to install NVIDIA's ```apex``` library.
+## ✨ Latest News
 
-[comment]: <> "  with the --cuda_ext and --deprecated_fused_adam options"
+- **[Nov 25, 2023]** **NaturalCC 2.0 Released!** Now compatible with [Transformers](https://github.com/huggingface/transformers) and supporting popular large code models like Code Llama, CodeT5, CodeGen, and StarCoder from [Hugging Face](https://huggingface.co). Access the previous version in the [ncc1]() branch.
+- **[Apr 19, 2023]** Integrated the source code of "You See What I Want You to See: Poisoning Vulnerabilities in Neural Code Search" into NaturalCC.
+- **[Jan 25, 2022]** Our paper introducing the NaturalCC toolkit was accepted at the ICSE 2022 Demo Track.
+- **[May 10, 2022]** Merged the source code of "What Do They Capture? - A Structural Analysis of Pre-Trained Language Models for Source Code" into NaturalCC.
 
-#### 1. Install prerequisite libraries
+## 🛠️ Installation Guide
 
-```shell
-git clone https://github.com/CGCL-codes/naturalcc && cd naturalcc
-pip install -r requirements.txt
-```
+To get started with NaturalCC, ensure your system meets the following requirements:
 
-Once you installed prerequisite libraries, you can check them via
-```python -m env_test```
+- GCC/G++ version 5.0 or higher
+- NVIDIA GPU, NCCL, and the Cuda Toolkit for training new models (optional but recommended)
+- NVIDIA's apex library for faster training (optional)
 
-#### 2. Build or install NaturalCC
+Follow these steps to set up the environment.
 
-Export your NaturalCC cache directory (data and models will be saved in this directory) to user
-variables(```~/.bashrc``` or  ```~/.zshrc``` in Linux, ```~/.zsh_profile``` or ```~/.bash_profile``` in macOS).
+1. (Optional) Creating conda environment
+    ```shell
+    conda create -n naturalcc python=3.6
+    conda activate naturalcc
+    ```
 
-```shell
-# Linux
-echo "export NCC=<path_to_store ncc_data>" >> ~/.bashrc
-# macOS
-echo "export NCC=<path_to_store ncc_data>" >> ~/.bash_profile
-```
+2. Building NaturalCC from source
+    ```shell
+    git clone https://github.com/CGCL-codes/naturalcc && cd naturalcc
+    pip install -r requirements.txt
+    cd src
+    pip install --editable ./
+    ```
+3. Installing Additional Dependencies
+    ```shell
+    conda install conda-forge::libsndfile
+    pip install -q -U git+https://github.com/huggingface/transformers.git
+    pip install -q -U git+https://github.com/huggingface/accelerate.git
+    ```
 
-> Note: PyCharm cannot get environment variables and, therefore, we recommend you to register your NCC variable at ```ncc/__init__.py```.
+4. HuggingFace Token for Certain Models
 
-Compile Cython files to accelerate programs and register NaturalCC into your pip list
+    For models like [StarCoder](https://github.com/bigcode-project/starcoder), a HuggingFace token is required. Log in to HuggingFace using:
+    ```
+    huggingface-cli login
+    ```
 
-```shell
-# compile for debug
-# python setup.py build_ext --inplace
-# install 
-pip install --editable ./
-```
+## 🚀 Quick Start
 
-#### 3. Half precision computation (optional)
+### Example 1: Code Generation
 
-NaturalCC supports half precision training.
+1. Download the model checkpoint
 
-- If your ``Pytorch.__version__ < 1.6.0`` and ```nvcc -V``` is runnable, please install [apex](https://github.com/NVIDIA/apex).
-- Otherwise, use Automatic Mixed Precision (AMP). Available Now (set ```amp: 1``` in yaml file, [An example](run/summarization/seq2seq/config/python_wan/python.yml)).
+    First, download the checkpoint of a specific large code model. For this example, we use [Codellama-7B](https://huggingface.co/camenduru/CodeLlama-7b).
 
 
-#### 4. Install GCC/G++ with conda (if you do not have permission)
+2. Prepare the testing dataset
 
-Since NCC is build via Cython, your GCC/G++ version should be greater than 4.9. If you have the root permission, update
-GCC/G++; otherwise, install GCC/G++ with conda.
+    Create a JSON file containing your test cases in the following format:
 
-```shell
-# install GCC/G++ with conda
-conda install -c anaconda gxx_linux-64
-conda install -c conda-forge gcc_linux-64
-cd ~/anaconda/envs/XXX/bin
-ln -s x86_64-conda_cos6-linux-gnu-gcc gcc
-ln -s x86_64-conda_cos6-linux-gnu-g++ g++
-# check
-conda deactivate
-conda activate XXX
->> type "gcc/g++ -v" in terminals
-```
+    ```json
+    [
+      {"input": "this is a"},
+      {"input": "from tqdm import"},
+      {"input": "def calculate("},
+      {"input": "a = b**2"},
+      {"input": "torch.randint"},
+      {"input": "x = [1,2"}
+    ]
+    ```
+
+3. Running the code generation scripts
+
+    1. Initialize the task with the specific model and GPU device:
+
+        ```python
+        print('Initializing GenerationTask')
+        task = GenerationTask(task_name="codellama_7b_code", device="cuda:0")
+        ```
+
+    2. Load the downloaded checkpoint into the task. Replace `ckpt_path` with the path to your downloaded checkpoint:
+
+        ```python
+        print('Loading model weights [{}]'.format(ckpt_path))
+        task.from_pretrained(ckpt_path)
+        ```
+
+    3. Load your dataset. Replace `dataset_path` with the path to your dataset file:
+
+        ```python
+        print('Processing dataset [{}]'.format(dataset_path))
+        task.load_dataset(dataset_path)
+        ```
+
+    4. Run the model and output the results. Replace `output_path` with your desired output file path:
+
+        ```python
+        task.run(output_path=output_path, batch_size=1, max_length=50)
+        print('Output file: {}'.format(output_path))
+        ```
+
+### Example 2: Code Summarization
+
+1. Download and process a dataset from ```datasets```, and follow the instructions from the README.md file.
+    ```shell
+    # ref: dataset/python_wan/README.md
+    # download dataset
+    bash dataset/python_wan/download.sh
+    # clean data
+    python -m dataset.python_wan.clean
+    # cast data attributes into different files
+    python -m dataset.python_wan.attributes_cast
+
+    # ref: dataset/python_wan/summarization/README.md
+    # save code tokens and docstirng tokens into MMAP format
+    python -m dataset.python_wan.summarization.preprocess
+    ```
+
+2. Register your self-defined models
+    - If you want to create a new model, please add your model at ```ncc/models``` and ```ncc/modules```.
+
+    - If your training policy are more complex than we thought, you should update your criterions and training procedure at ```ncc/criterions``` and ```ncc/trainers```, respectively.
+      <br>
+
+      Do not forget to update your self defined module at ```ncc/XX/__init__.py```.
+
+3. Training and inference.
+    - Select a task and a model from [task list](run/) and follow the instructions in its README.md to start your learning.
+    ```shell
+    # ref: run/summarization/transformer/README.md
+    # train
+    CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.summarization.transformer.train -f config/python_wan/python > run/summarization/transformer/config/python_wan/python.log 2>&1 &
+    # inference
+    CUDA_VISIBLE_DEVICES=0 python -m run.summarization.transformer.eval -f config/python_wan/python -o run/summarization/transformer/config/python_wan/python.txt
+    ```
+
+> We also have more detailed [READMEs](examples) to start your tutorial of NaturalCC.
 
 ## 📚 Dataset
 
-Currently, we have processed the following datasets:
+NaturalCC supports a diverse range of datasets, catering to various aspects of code analysis and processing. These datasets include:
 
-- [Python (Wan et al.)](ncc_dataset/python_wan/README.md)
-- [CodeSearchNet (Husain et al.)](ncc_dataset/codesearchnet/README.md)
-- [CodeXGlue (Feng et al.)](ncc_dataset/codexglue/code_to_text/README.md)
-- Py150 [(official processed)](ncc_dataset/py150/README.md) [(raw)](ncc_dataset/raw_py150/README.md)
-- [OpenCL (Grewe et al.)](ncc_dataset/opencl/README.md)
-- [Java (Hu et, al.)](ncc_dataset/java_hu/README.md)
-- [Stack Overflow](ncc_dataset/stackoverflow/README.md)
-- [DeepCS (Gu et al.)](ncc_dataset/deepcs)
-- [AVATAR (Ahmad et al.)](ncc_dataset/avatar)
-- [StackOverflow (Iyer et al.)](ncc_dataset/stackoverflow)
-
-## 🤖 Implementations
-
-#### Code retrieval (search)
-- [NBOW](ncc/models/retrieval/nbow.py)
-- [BiRNN](ncc/models/retrieval/birnn.py)
-- [1D-CNN](ncc/models/retrieval/birnn.py)
-- [SelfAttn](ncc/models/retrieval/self_attn.py)
-- [Deepcs](ncc/models/retrieval/deepcs.py)
-
-#### Code completion
-- [SeqRNN](ncc/models/completion/seqrnn.py)
-- [GPT2](ncc/models/completion/gpt2.py)
-
-#### Heterogeneous mapping
-- [static mapping](run/mapping/static_mapping)
-- [decision tree](run/mapping/decision_tree)
-- [deeptune](run/mapping/deeptune)
-- [inst2vec](run/mapping/inst2vec)
-
-#### Code summarization
-- [Naive Copy](run/translation/naive_copy)
-- [CodeNN](ncc/models/summarization/codenn.py)
-- [DeepCom](ncc/models/summarization/deepcom.py)
-- [Seq2Seeq + Attention](ncc/models/summarization/seq2seq.py)
-- [Nary-](ncc/models/summarization/nary_tree2seq.py)/[ChildSum-](ncc/models/summarization/child_sum_tree2seq.py)Tree2Seq
-- [Code2Seq](ncc/models/summarization/code2seq.py)
-- [Transformer + (Sinusoidal/Relative/Learned Position Encoding)](ncc/models/transfomer)
-- [CodeBERT](run/translation/codebert/model.py)
-- [GraphCodeBERT](run/translation/graphcodebert/model.py)
-- [PLBART](ncc/models/transfomer)
-
-#### Structural Analysis of Pre-Trained Language Models for Source Code
-- [ICSE 2022](examples/structural_analysis/)
-  
-## 📋 Experiments
-
-### [Code Summarization](run/summarization)
-Dataset: [Python (Wan et al.)](ncc_dataset/python_wan/README.md)
-
-|                 | BLEU-4 | METEOR | ROUGE-L | Cost    | Logs    |
-|-----------------|--------|--------|---------|---------|---------|
-| Seq2Seq+Attn    | 25.57  | 14.40  | 39.41   | 0.09s/b | [click here](run/summarization/seq2seq/config/python_wan/python.log) |
-| Tree2Seq+Attn   | 23.35  | 12.59  | 36.49   | 0.48s/b | [click here](run/summarization/tree2seq/config/python_wan/python.log) |
-| Transformer     | 30.64  | 17.65  | 44.59   | 0.26s/b | [click here](run/summarization/transformer/config/python_wan/python.log) |
-| Transformer+RPE | 31.57  | 17.74  | 45.18   | 0.27s/b | [click here](run/summarization/neural_transformer/relative/python_wan/python.log) |
-| PLBART          | 32.71  | 18.13  | 46.05   | 0.80s/b | [TBC]() |
+- [Python (Wan et al.)](preprocessing/python_wan/README.md)
+- [CodeSearchNet (Husain et al.)](preprocessing/codesearchnet/README.md)
+- [CodeXGlue (Feng et al.)](preprocessing/codexglue/code_to_text/README.md)
+- [Py150 (official processed)](preprocessing/py150/README.md) [(raw)](preprocessing/raw_py150/README.md)
+- [OpenCL (Grewe et al.)](preprocessing/opencl/README.md)
+- [Java (Hu et, al.)](preprocessing/java_hu/README.md)
+- [Stack Overflow](preprocessing/stackoverflow/README.md)
+- [DeepCS (Gu et al.)](preprocessing/deepcs)
+- [AVATAR (Ahmad et al.)](preprocessing/avatar)
+- [StackOverflow (Iyer et al.)](preprocessing/stackoverflow)
 
 
-### [Code Retrieval](run/retrieval)
-Dataset: [CodeSearchNet (Husain et al.)](ncc_dataset/codesearchnet/README.md)
+## 🤝 Contributor
 
-| MRR      | Go    | Java  | JS    | PHP   | Python | Ruby  | Cost    | Logs    |
-|----------|-------|-------|-------|-------|--------|-------|---------|---------|
-| NBOW     | 66.59 | 59.92 | 47.15 | 54.75 | 63.33  | 42.86 | 0.16s/b | [click here](run/retrieval/nbow/config/csn/all.log) |
-| ConV1d   | 70.87 | 60.49 | 38.81 | 61.92 | 67.29  | 36.53 | 0.30s/b | [click here](run/retrieval/conv1d/config/csn/all.log) |
-| BiRNN    | 65.80 | 48.60 | 23.23 | 51.36 | 48.28  | 19.35 | 0.74s/b | [click here](run/retrieval/birnn/config/csn/all.log) |
-| SelfAttn | 78.45 | 66.55 | 50.38 | 65.78 | 79.09  | 47.96 | 0.25s/b | [click here](run/retrieval/selfattn/config/csn/all.log) |
+We warmly welcome contributions to NaturalCC! Your involvement is essential for keeping NaturalCC innovative and accessible. 
 
+We're grateful to all our amazing contributors who have made this project what it is today!
 
-### [Code Completion](run/completion)
-Dataset: Py150 [(official processed)](ncc_dataset/py150/README.md) [(raw)](ncc_dataset/raw_py150/README.md)
+<a href="https://github.com/CGCL-codes/naturalcc/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=CGCL-codes/naturalcc&r="  width="800px"/>
+</a>
 
-| MRR       | Attr  | Num   | Name   | Param | Tokens | Cost    | Logs    |
-|-----------|-------|-------|--------|-------|--------|---------|---------|
-| LSTM      | 51.67 | 47.45 | 46.52  | 66.06 | 73.73  | 0.31s/b | [click here](run/completion/seqrnn/config/raw_py150/python.log) |
-| GPT-2     | 70.37 | 62.20 | 63.84  | 73.54 | 82.17  | 0.43s/b | [click here](run/completion/gpt2/config/raw_py150/python.log) |
-| TravTrans | 72.08 | 68.55 | 76.33  | 71.08 | 83.17  | 0.43s/b | [click here](run/completion/trav_trans/config/py150/python.log) |
+## 💡 FAQ
 
-### [Type Inference](run/type_prediction)
-Dataset: [CodeSearchNet-Java (Husain et al.)](ncc_dataset/codesearchnet/README.md)
-
-|             | Acc@1 (All types) | Acc@5 (All types) | Acc@1 (Any types) | Acc@5 (Any types) | Cost    | Logs    |
-|-------------|-------------------|-------------------|-------------------|-------------------|---------|---------|
-| DeepTyper   | 0.52              | 0.67              | 0.43              | 0.67              | 0.42s/b | [TBC]() |
-| Transformer | 0.32              | 0.64              | 0.37              | 0.75              | 0.85s/b | [TBC]() |
-
-### [Heterogeneous Mapping](run/mapping)
-Dataset: [OpenCL (Grewe et al.)](ncc_dataset/opencl/README.md)
-
-| Accuracy        | AMD      | NVIDIA  |
-|-----------------|----------|---------|
-| Static mapping | 58.82    | 56.91    |
-| Decision tree | 70.29    | 74.56    |
-| Inst2vec | 82.79    | 81.76    |
-| DeepTune | 83.24    | 80.15    |
-
-
-
-## 🏫 Examples & Tutorials
-
-> All the running commands here should be executed in the root of project folder (the path of your `naturalcc`). For example, in my environment I will stay at `/data/wanyao/Dropbox/ghproj-v100/naturalcc`.
-> 
-> We also have more detailed [READMEs](examples) to start your tutorial of NaturalCC.
-
-### Step 1: Download and process a dataset from ```datasets```, and follow the instructions from the README.md file.
-```shell
-# ref: dataset/python_wan/README.md
-# download dataset
-bash dataset/python_wan/download.sh
-# clean data
-python -m dataset.python_wan.clean
-# cast data attributes into different files
-python -m dataset.python_wan.attributes_cast
-
-# ref: dataset/python_wan/summarization/README.md
-# save code tokens and docstirng tokens into MMAP format
-python -m dataset.python_wan.summarization.preprocess
-```
-
-### Step 2 (optional): Register your self-defined models
-- If you want to create a new model, please add your model at ```ncc/models``` and ```ncc/modules```.
-
-- If your training policy are more complex than we thought, you should update your criterions and training procedure at ```ncc/criterions``` and ```ncc/trainers```, respectively.
-  <br>
-
-  Do not forget to update your self defined module at ```ncc/XX/__init__.py```.
-
-### Step 3: Training and inference.
-- Select a task and a model from [task list](run/) and follow the instructions in its README.md to start your learning.
-```shell
-# ref: run/summarization/transformer/README.md
-# train
-CUDA_VISIBLE_DEVICES=0,1,2,3 nohup python -m run.summarization.transformer.train -f config/python_wan/python > run/summarization/transformer/config/python_wan/python.log 2>&1 &
-# inference
-CUDA_VISIBLE_DEVICES=0 python -m run.summarization.transformer.eval -f config/python_wan/python -o run/summarization/transformer/config/python_wan/python.txt
-```
-
-# ❓ FAQ
-Please fell free to contact me if you have any troubles.
+If you have any questions or encounter issues, please feel free to reach out. For quick queries, you can also check our `Issues` page for common questions and solutions.
 
 ## 😘 License and Acknowledgement
 
-NaturalCC is [MIT-licensed](https://github.com/CGCL-codes/naturalcc/blob/master/LICENSE.txt). The license applies to the
-pre-trained models as well. This project is also highly inspired by [Fairseq](https://github.com/pytorch/fairseq)
-and [AllenNLP](https://allennlp.org).
+**License:** NaturalCC is open-sourced under the [MIT-licensed](https://github.com/CGCL-codes/naturalcc/blob/master/LICENSE.txt). This permissive license applies not only to the toolkit itself but also to the pre-trained models provided within.
 
-## 🔗 Related Links
-[Paper](https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf) <br>
-[NaturalCC-demo](http://121.43.116.104:3000/) <br>
-About us: [XCodeMind](https://xcodemind.github.io/team) <br>
+**Acknowledgements:** We extend our heartfelt gratitude to the broader open-source community, particularly drawing inspiration from projects like [Fairseq](https://github.com/pytorch/fairseq) for their advanced sequence-to-sequence models, and [AllenNLP](https://allennlp.org) for their robust NLP components. Their groundbreaking work has been instrumental in shaping the development of NaturalCC.
 
+## 📄 Citation
 
-## ❤️ Citation
+We're thrilled that you're interested in using NaturalCC for your research or applications! Citing our work helps us to grow and continue improving this toolkit. You can find more in-depth details about NaturalCC in our [paper](https://xcodemind.github.io/papers/icse22_naturalcc_camera_submitted.pdf).
 
-Please cite as:
+If you use NaturalCC in your research, please consider citing our paper. Below is the BibTex format for citation:
 
 ```
 @inproceedings{wan2022naturalcc,
-              author    = {Yao Wan and
-                           Yang He and
-                           Zhangqian Bi and
-                           Jianguo Zhang and
-                           Yulei Sui and
-                           Hongyu Zhang and
-                           Kazuma Hashimoto and
-                           Hai Jin and
-                           Guandong Xu and
-                           Caiming Xiong and
-                           Philip S. Yu},
-              title     = {NaturalCC: An Open-Source Toolkit for Code Intelligence},
-              booktitle   = {Proceedings of 44th International Conference on Software Engineering, Companion Volume},
-              publisher = ACM,
-              year      = {2022}
-            }
+  title={NaturalCC: An Open-Source Toolkit for Code Intelligence},
+  author={Yao Wan and Yang He and Zhangqian Bi and Jianguo Zhang and Yulei Sui and Hongyu Zhang and Kazuma Hashimoto and Hai Jin and Guandong Xu and Caiming Xiong and Philip S. Yu},
+  booktitle={Proceedings of 44th International Conference on Software Engineering, Companion Volume},
+  publisher=ACM,
+  year={2022}
+}
 ```
