@@ -1,6 +1,6 @@
 # Nester
 
-This is the guide released for the paper "Neuro-Symbolic Language Models for Type Inference."
+This is the guide released for the paper "Dataflow-Guided Neuro-Symbolic Language Models for Type Inference."
 
 ## Requirements
 
