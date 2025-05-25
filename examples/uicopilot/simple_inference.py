@@ -9,7 +9,7 @@ from agents import *
 device = 'cuda'
 
 processor = AutoProcessor.from_pretrained("anonymouscodee/webcoder")
-model_bbox = Pix2StructForConditionalGeneration.from_pretrained("anonymouscodee/webcoder", is_encoder_decoder=True, device_map=device, torch_dtype=torch.float16)
+model_bbox = Pix2StructForConditionalGeneration.from_pretrained("xcodemind/uicopilot_structure ", is_encoder_decoder=True, device_map=device, torch_dtype=torch.float16)
 add_special_tokens(model_bbox,processor.tokenizer)
 
 agent_i2c = AgentI2C()
