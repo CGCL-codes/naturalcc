@@ -14,16 +14,7 @@ import re
 
 
 def validate_and_clean_programs(programs):
-    """
-    清理 programs，确保 If_Analysis 后面必须跟着 Return_Analysis 或 Assignment_Analysis。
-    如果 If_Analysis 无效（无后续或后续无效），则删除它，但保留其他语句。
 
-    Args:
-        programs (dict): 格式如 {"file.py@loc--name--scope": "If_Analysis(...):\nAssignment_Analysis(...)"}
-
-    Returns:
-        dict: 清理后的 programs，无效的 If_Analysis 被移除
-    """
     cleaned_programs = {}
     removal_count = 0
 
@@ -36,32 +27,32 @@ def validate_and_clean_programs(programs):
         while i < n:
             line = lines[i]
 
-            # 检查 If_Analysis
+
             if line.startswith("If_Analysis("):
-                # 如果已经是最后一行，跳过（无效）
+
                 if i + 1 >= n:
                     removal_count += 1
                     i += 1
                     continue
 
                 next_line = lines[i + 1]
-                # 检查下一行是否是 Return_Analysis 或 Assignment_Analysis
+
                 if (next_line.startswith("Return_Analysis(") or
                         next_line.startswith("Assignment_Analysis(")):
-                    # 有效，保留这两行
+
                     cleaned_lines.append(line)
                     cleaned_lines.append(next_line)
                     i += 2
                 else:
-                    # 无效，跳过这个 If_Analysis
+
                     removal_count += 1
                     i += 1
             else:
-                # 其他语句直接保留
+
                 cleaned_lines.append(line)
                 i += 1
 
-        # 重新组合成字符串
+
         cleaned_analysis = '\n'.join(cleaned_lines)
         cleaned_programs[key] = cleaned_analysis
 
@@ -74,7 +65,7 @@ validated_programs = validate_and_clean_programs(programs)
 
 import re
 
-# ===== 编译器主逻辑 =====
+
 import re
 
 
@@ -170,15 +161,7 @@ def compile_program(p,program):
 
     return compiled
 
-# ===== 测试用例 =====
-p = """
-If_Analysis(ttl_millisec >= 0):
-    expired = Assignment_Analysis(False)
-If_Analysis(ttl_millisec == -1):
-    expired = Assignment_Analysis(False)
-If_Analysis(ttl_millisec == -2):
-    expired = Assignment_Analysis(True)
-"""
+
 
 results = {}
 for p in validated_programs:
