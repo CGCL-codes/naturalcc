@@ -14,23 +14,19 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 import sacrebleu
 import os 
-
+import inspect
 class CodeBertTrainer(BaseTrainer):
     def __init__(self, train_dataset, validation_dataset=None, tokenizer=None, 
                 checkpoints_path="./checkpoints", pretrained_model_or_path="microsoft/codebert-base", 
-                training_args=None, evaluator=None, evaluation_fn=None, peft=None):
+                evaluation_fn=None, training_args=None, evaluator=None, peft=None, data_collator=None):
         
         super().__init__(pretrained_model_or_path, tokenizer, train_dataset, validation_dataset,
                         checkpoints_path, pretrained_model_or_path,
-                        evaluator, evaluation_fn)
+                        evaluator, evaluation_fn, data_collator)
         
-        if training_args is None:
-            self.training_args = self.get_default_codet5_hyperparameters()
-        else:
-            self.training_args = training_args
-
+        self.training_args = training_args
         self.trainer = self.init_trainer()
-
+        # print('trainer.compute_loss_func:',inspect.getsource(self.trainer.compute_loss_func))
         if peft:
             self.peft = peft
             self.model = prepare_model_for_int8_training(self.model)
@@ -39,26 +35,3 @@ class CodeBertTrainer(BaseTrainer):
             self.model = get_peft_model(self.model, peft_config)
             self.model.print_trainable_parameters()
     
-    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
-        labels = inputs.pop("labels")
-        rtd_labels = inputs.pop("rtd_labels")
-
-        outputs = model(**inputs)
-        logits = outputs.logits
-
-        mlm_loss = F.cross_entropy(
-            logits.view(-1, logits.size(-1)),
-            labels.view(-1),
-            ignore_index=-100
-        )
-
-        hidden_states = outputs.hidden_states[-1]  # 确保输出最后的 hidden_states
-        rtd_logits = hidden_states[:, :, 0]  # 这里适配 RTD 逻辑，具体实现请根据模型输出调整
-
-        rtd_loss = F.binary_cross_entropy_with_logits(
-            rtd_logits.view(-1),
-            rtd_labels.float().view(-1)
-        )
-
-        total_loss = mlm_loss + rtd_loss
-        return (total_loss, outputs) if return_outputs else total_loss

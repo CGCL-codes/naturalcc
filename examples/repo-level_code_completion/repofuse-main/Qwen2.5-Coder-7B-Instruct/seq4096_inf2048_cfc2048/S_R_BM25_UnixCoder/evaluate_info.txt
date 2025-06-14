@@ -1,0 +1,7 @@
+########################################Evaluate INFO#######################模型加载路径: /mnt/silver/tanlei/hf-models/Qwen2.5-Coder-7B-Instruct
+跨文件上下文长度 2048
+跨文件类型 S_R
+排序策略 BM25
+输出目录 /home/wanyao/talentan/naturalcc/examples/repo-level_code_completion/repofuse-main/Qwen2.5-Coder-7B-Instruct/seq4096_inf2048_cfc2048/S_R_BM25_UnixCoder
+Batch_size 1
+#############################################################################

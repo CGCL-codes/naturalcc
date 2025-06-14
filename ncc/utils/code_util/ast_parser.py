@@ -157,11 +157,11 @@ class ASTParser():
         self.PARSER.set_language(language_build)
 
     def get_language(self, language=None):
-        root = Path(__file__)
+        current_file_path = Path(__file__)
+        root = current_file_path.parent.parent.parent / "tools"
         cd = os.getcwd()
         plat = platform.system()     
         p = os.path.join(root, "tree-sitter-prebuilts", plat)
-        print(p)
         file = f'{language}.so'
         
         return Language(os.path.join(p, file), language)

@@ -1,5 +1,5 @@
 bert-codebert-base-pretrained:
-    huggingface_url: "microsoft/codebert-base"
+    model_path: "microsoft/codebert-base"
     tokenizer_url: "microsoft/codebert-base"
     max_prediction_length: 512
 bert-unixcoder-base-pretrained:

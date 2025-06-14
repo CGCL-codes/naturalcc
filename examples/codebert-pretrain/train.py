@@ -4,42 +4,70 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 import torch
 from ncc.trainer.codebert_trainer import CodeBertTrainer
-from ncc.utils.data_util.codesearch_dataset import CodeSearchDataset, CustomDataCollatorForMLMAndRTD, preprocess_function
+from ncc.utils.data_util.codesearch_dataset import CodeSearchDataset, load_tokenized_dataset
 from ncc.models import load_model_pipeline
 from ncc.utils.data_util.base_dataset import CustomDataset
 import yaml
-from ncc.configs.training
-
+from pathlib import Path
+from transformers import AutoTokenizer, TrainingArguments, DataCollatorForLanguageModeling
+import inspect
+from torch.utils.data import DataLoader
+def load_config(config_path):
+    with open(config_path, 'r') as f:
+        return yaml.safe_load(f)
 def main():
-    config_path = "../ncc/configs/training/codebert.yaml"
+    config_path = Path(__file__).resolve().parents[2] / "ncc/configs/training/codebert.yaml"
     config = load_config(config_path)
-    training_args = config['hyperparameters']
+    hyperparameters = config['hyperparameters']
 
-    model_class = load_model_pipeline(model_name="causallm", task="pretrained",
-                model_type="codegen-350M-mono", is_eval=False, load_in_8bit=False)
+    # 创建 TrainingArguments 实例
+    training_args = TrainingArguments(
+        output_dir=hyperparameters['output_dir'],
+        evaluation_strategy=hyperparameters['eval_strategy'],
+        eval_steps=hyperparameters['eval_steps'],
+        save_steps=hyperparameters['save_steps'],
+        save_total_limit=hyperparameters['save_total_limit'],
+        logging_steps=hyperparameters['logging_steps'],
+        learning_rate=float(hyperparameters['learning_rate']),
+        per_device_train_batch_size=hyperparameters['per_device_train_batch_size'],
+        per_device_eval_batch_size=hyperparameters['per_device_eval_batch_size'],
+        num_train_epochs=hyperparameters['num_train_epochs'],
+        weight_decay=hyperparameters['weight_decay'],
+        warmup_steps=hyperparameters['warmup_steps'],
+        logging_dir=hyperparameters['logging_dir'],
+        save_strategy=hyperparameters['save_strategy'],
+        bf16=hyperparameters['bf16'],
+        report_to=hyperparameters['report_to'],
+        seed=hyperparameters['seed']
+    )
 
-    data_class = CodeSearchDataset(tokenizer=model_class.get_tokenizer())
-    train, validation, test = data_class.load(subset="all")
+    model = load_model_pipeline(
+        model_name="bert-pretrain",
+        task="pretrained",
+        model_type="codebert-base",
+        is_eval=False,
+        load_in_8bit=False
+    )
 
-    train_dataset = data_class.get_tokenized_dataset(train)
-    valid_dataset = data_class.get_tokenized_dataset(validation)
-    test_dataset = data_class.get_tokenized_dataset(test)
+    tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
 
-    data_collator = CustomDataCollatorForMLMAndRTD(tokenizer=model_class.get_tokenizer(), mlm=True, mlm_probability=0.15)
+    # 从本地加载预处理后的数据集
+    save_path = Path("/mnt/silver/tanlei/datasets/codebert")
+    train_dataset = load_tokenized_dataset(save_path / "train")
+    valid_dataset = load_tokenized_dataset(save_path / "validation")
 
     trainer = CodeBertTrainer(
-        pretrained_model_or_path=model_class,
-        tokenizer=model_class.get_tokenizer(),
+        pretrained_model_or_path=model,
+        tokenizer=tokenizer,
         train_dataset=train_dataset,
-        eval_dataset=valid_dataset,
-        data_collator=data_collator,
+        validation_dataset=valid_dataset,
+        data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=True, mlm_probability=0.15),
         training_args=training_args,
         checkpoints_path="./checkpoints",
         peft=None,
     )
 
     trainer.train()
-
 
 if __name__ == "__main__":
     main()

@@ -22,7 +22,7 @@ class BaseTrainer():
 
     def __init__(self, model, tokenizer, train_dataset, validation_dataset=None,
                 checkpoints_path="./checkpoints", pretrained_model_or_path=None,
-                evaluator=None, evaluation_fn=None):
+                evaluator=None, evaluation_fn=None, data_collator=None):
         
         self.saved_checkpoints_path = checkpoints_path
         self.create_checkpoints_path(checkpoints_path)
@@ -30,6 +30,7 @@ class BaseTrainer():
         self.tokenizer = tokenizer
         self.train_dataset = train_dataset
         self.validation_dataset = validation_dataset
+        self.data_collator = data_collator
 
         # check for evaluator and evaluation_fn, cannot co-exist
         if evaluator is not None and evaluation_fn is not None:
@@ -48,7 +49,8 @@ class BaseTrainer():
             args=self.training_args,
             train_dataset=self.train_dataset,
             eval_dataset=self.validation_dataset,
-            compute_metrics=self.compute_metrics_fn
+            compute_metrics=self.compute_metrics_fn,
+            data_collator=self.data_collator,
         )
 
     def train(self):

@@ -42,9 +42,11 @@ def get_model_class_name(model_name, task):
 def load_model_pipeline(model_name, model_type="base", task="sum",
             dataset=None, language=None, is_eval=True, 
             load_in_8bit=False, load_in_4bit=False, weight_sharding=False):
-    
     model_cls = registry.get_model_class(model_name)
     model_card = construct_model_card(model_name, model_type, task, dataset, language)
+    # print(f'model_cls : {model_cls}')
+    # print(f'model_card : {model_card}')
+    # print(f'model_cls.from_pretrained:{model_cls.from_pretrained}')
     model = model_cls.from_pretrained(model_card=model_card, load_in_8bit=load_in_8bit, load_in_4bit=load_in_4bit, weight_sharding=weight_sharding)
     if is_eval:
         model.eval()

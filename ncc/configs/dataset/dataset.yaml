@@ -14,3 +14,4 @@ dataset:
   opencoder_fineweb_math: "OpenCoder-LLM/opc-fineweb-math-corpus"
   opencoder_sft_stage1: "OpenCoder-LLM/opc-sft-stage1"
   opencoder_sft_stage2: "OpenCoder-LLM/opc-sft-stage2"
+  code_search_net: "code-search-net/code_search_net"

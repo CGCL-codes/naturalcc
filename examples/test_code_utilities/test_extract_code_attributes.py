@@ -1,11 +1,10 @@
-# import sys
-# from pathlib import Path
-# sys.path.append(str(Path(".").absolute().parent))
-# sys.path.append(str(Path(__file__).resolve().parents[2]))
-from ncc.utils.code_util.apex.apex_code_utility import ApexCodeUtility
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parents[2]))
+from ncc.utils.code_util.apex.apex_code_utility import ApexCodeUtil
+from tree_sitter import Node
 
-
-apex_code_util = ApexCodeUtility()
+apex_code_util = ApexCodeUtil()
 
 sample_code = """
     public class AccountWithContacts {

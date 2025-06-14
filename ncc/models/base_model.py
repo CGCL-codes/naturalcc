@@ -1,16 +1,16 @@
 from omegaconf import OmegaConf
-
 import numpy as np
 import os
 import torch
 import torch.nn as nn
 import requests
+from pathlib import Path
 from tqdm import tqdm
 from urllib.parse import urlsplit
 from ncc.utils.common.utils import get_abs_path
 import urllib.request
 from accelerate import Accelerator
-
+from transformers import AutoModel, AutoModelForMaskedLM
 def download_model(model_cache_path, model_url):
     if not os.path.exists(model_cache_path):
         with urllib.request.urlopen(model_url) as response, open(model_cache_path, 'wb') as out_file:
@@ -44,9 +44,11 @@ class BaseModel(nn.Module):
         """
         Build a pretrained model from default configuration file, specified by model_type.
         """
+        # print(f'get_abs_path(model_class.MODEL_DICT):{get_abs_path(model_class.MODEL_DICT)}')
         model_config = OmegaConf.load(get_abs_path(model_class.MODEL_DICT))[model_card]
+        # print(f'model_config:{model_config}')
         model_cls = model_class.load_huggingface_model_from_config(model_config=model_config, load_in_8bit=load_in_8bit, load_in_4bit=load_in_4bit, weight_sharding=weight_sharding)
-
+        # print(f'model_cls:{model_cls}')
         return model_cls
     
 
