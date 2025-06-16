@@ -1,0 +1,12 @@
+hyperparameters:
+    model_path: "/mnt/silver/weiwucai/Qwen/Qwen2___5-Coder-1___5B"
+    # train_data: none
+    max_length: 1024
+    per_device_train_batch_size: 1
+    gradient_accumulation_steps: 8
+    learning_rate: 5e-5
+    output_dir: "./checkpoints"
+    train_epochs: 3
+    checkpoint: "./checkpoints"
+    lora_r: 64
+    warm_up: 2400

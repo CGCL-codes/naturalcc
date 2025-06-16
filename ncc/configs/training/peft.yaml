@@ -2,6 +2,7 @@ lora:
   r: 8
   lora_alpha: 32
   lora_dropout: 0.1
+  lora_target_modules: ["q_proj", "v_proj"]
 adalora:
   init_r: 12
   target_r: 8
@@ -13,6 +14,8 @@ adalora:
   lora_alpha: 32
   lora_dropout: 0.1
   inference_mode: False
+  total_step: 10000
+  lora_target_modules: ["q_proj", "v_proj"]
 prefix:
   num_virtual_tokens: 20
   prompt_encoder_hidden_size: 512

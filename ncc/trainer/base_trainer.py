@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import OneCycleLR
 from transformers import RobertaTokenizer, T5ForConditionalGeneration, Trainer, TrainingArguments,logging,set_seed
 from omegaconf import OmegaConf
 from accelerate import Accelerator
-from peft import get_peft_config, get_peft_model, LoraConfig, TaskType, AdaLoraConfig, PromptEncoderConfig, PrefixTuningConfig, PromptTuningInit, PromptTuningConfig
+from peft import get_peft_model, LoraConfig, TaskType, AdaLoraConfig, PromptEncoderConfig, PrefixTuningConfig, PromptTuningInit, PromptTuningConfig
 from ncc.utils.common.utils import get_abs_path
 import sacrebleu
 from transformers.trainer_pt_utils import get_parameter_names
@@ -132,6 +132,7 @@ class BaseTrainer():
             lora_dropout=config.lora_dropout,
             target_modules=config.lora_target_modules,
             task_type="CAUSAL_LM",
+            total_step=config.total_step,
             inference_mode=config. inference_mode,
             )
         elif peft_type == 'prompt':
