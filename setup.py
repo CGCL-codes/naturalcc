@@ -2,7 +2,7 @@ from setuptools import setup, find_packages, find_namespace_packages
 import platform
 
 install_requires = [
-  # "accelerate==0.20.3",
+  "accelerate==0.20.3",
   "datasets==2.13.1",
   "huggingface-hub==0.15.1",
   "iopath==0.1.10",
@@ -16,13 +16,13 @@ install_requires = [
   "requests==2.31.0",
   "rouge-score==0.1.2",
   "sacrebleu==2.3.1",
-  # "scikit-learn==1.2.2",
-  # "torch==2.0.1",
-  # "torchvision==0.15.2",
+  "scikit-learn==1.2.2",
+  "torch==2.0.1",
+  "torchvision==0.15.2",
   "tqdm==4.63.0",
   "transformers==4.30.2",
   "tree-sitter==0.20.1",
-  # "bitsandbytes==0.39.1",
+  "bitsandbytes==0.39.1",
   "evaluate==0.4.0"
 ]
 

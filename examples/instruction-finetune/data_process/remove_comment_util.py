@@ -49,13 +49,15 @@ def remove_comments(code):
 # print(remove_comments(code))
 
 
-# 打开JSON文件，这里使用相对路径，你可以根据实际情况调整路径
+# 打开JSON文件，你可以根据实际情况调整路径,这里路径仅供参考
 json_objects = []
-with jsonlines.open('/home/wanyao/wucai/work/data/code_instructions_filtered_CoT.jsonl') as reader:
+origin_data_path='/home/wanyao/wucai/work/data/code_instructions_filtered_CoT.jsonl'
+remove_comment_path='/home/wanyao/wucai/work/data/code_instructions_filtered_CoT_comment_remove.jsonl'
+with jsonlines.open(origin_data_path) as reader:
     for data in reader:
         data['output'] = remove_comments(data['output'])
         del data['CoT']
         json_objects.append(data)
-with jsonlines.open('/home/wanyao/wucai/work/data/code_instructions_filtered_CoT_comment_remove.jsonl', 'a') as writer:
+with jsonlines.open(remove_comment_path, 'a') as writer:
     for item in json_objects:
         writer.write(item)
