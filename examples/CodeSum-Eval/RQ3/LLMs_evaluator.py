@@ -8,39 +8,70 @@ sys.path.append("../..")
 import os
 import prettytable as pt
 from scipy import stats
-
-openai.api_key = 'your openai key'
+import nltk
+from nltk.translate.bleu_score import sentence_bleu, corpus_bleu, SmoothingFunction
+# openai.api_key = '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'
+# openai.api_key = 'sk-QsUMOEHG9tuCYo2PQBjFXOgKXTKEa9eVcOV0JEZR'
+openai.api_key = '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'
 
 
 def evaluate(refs, preds, num, model, reference, turn, approach):
+    # 构建角色和评估标准
 
     criteria = {
-        "Coherence": "The summary should exhibit clear structural organization, progressing logically from sentence "
-                     "to sentence to form a coherent body of information about the topic.",
-        "Consistency": "Evaluating the alignment of facts between the summary and the code snippet. A consistent "
-                       "summary should contain only statements supported by the source code, while penalizing any "
-                       "inclusion of hallucinated facts.",
-        "Fluency": "Assessing the quality of each sentence. Sentences should be free from repetition, formatting "
-                   "issues, capitalization errors, or clear grammatical problems (e.g., fragments) that affect "
-                   "readability.",
-        "Relevance": "Evaluating the selection of vital content from the source code. The summary should include only "
-                     "essential information from the source document, with penalties for redundancies and excessive "
-                     "details.",
-        # "Coherence": "the summary should be well-structured and well-organized. The summary should not just be a heap "
-        #              "of related information, but should build from sentence to sentence to a coherent body of "
-        #              "information about a topic.",
-        #
-        # "Consistency": "the factual alignment between the summary and the summarized code. A factually consistent "
-        #                "summary contains only statements that are entailed by the source code. Annotators were "
-        #                "also asked to penalize summaries that contained hallucinated facts. ",
-        #
-        # "Fluency": "the quality of individual sentences. The sentence should have no repetitive word, formatting "
-        #            "problems, capitalization errors or obviously ungrammatical sentences ( "
-        #            "e.g., fragments, missing components) that make the text difficult to understand.",
-        #
-        # "Relevance": "selection of important content from the source. The summary should include only important "
-        #              "information from the source document. Annotators were instructed to penalize summaries that "
-        #              "contained redundancies and excess information.",
+        "Coherence": "the summary should be well-structured and well-organized. The summary should not just be a heap "
+                     "of related information, but should build from sentence to sentence to a coherent body of "
+                     "information about a topic.",
+        # Rate the coherence of the summary on a scale of 0-4:\n "
+        # "0 - Completely incoherent, lacks logical flow.\n"
+        # "1 - Some coherent elements, but significant disconnection in logic.\n"
+        # "2 - Generally coherent with occasional breaks in logical flow.\n"
+        # "3 - Highly coherent with minor inconsistencies.\n"
+        # "4 - Exceptionally structured with clear and seamless logic flow.",
+
+        "Consistency": "the factual alignment between the summary and the summarized code. A factually consistent "
+                       "summary contains only statements that are entailed by the source code. Annotators were "
+                       "also asked to penalize summaries that contained hallucinated facts. ",
+        # "Rate the consistency of the summary on a scale of 0-4:\n"
+        # "0 - Numerous inconsistencies and deviations.\n"
+        # "1 - Some alignment but with clear discrepancies.\n"
+        # "2 - Mostly consistent with minor omissions or deviations.\n"
+        # "3 - Highly consistent with very few errors.\n"
+        # "4 - Perfectly consistent, accurately reflecting code's intentions and operations.",
+
+        "Fluency": "the quality of individual sentences. The sentence should have no repetitive word, formatting "
+                   "problems, capitalization errors or obviously ungrammatical sentences ( "
+                   "e.g., fragments, missing components) that make the text difficult to understand.",
+        # "Rate the fluency of the summary on a scale of 0,2,4:\n"
+        # "0 - with errors and meaningless.\n"
+        # "2 - with errors that don't hinder overall understanding.\n"
+        # "4 - fluency, ensuring utmost clarity and understanding.",
+
+        "Relevance": "selection of important content from the source. The summary should include only important "
+                     "information from the source document. Annotators were instructed to penalize summaries that "
+                     "contained redundancies and excess information.",
+        # "Rate the relevance of the summary on a scale of 0-4:\n"
+        # "0 - Irrelevant details dominate, missing core functionalities.\n"
+        # "1 - Some relevant details, but diluted with extraneous information.\n"
+        # "2 - Mostly relevant with occasional unnecessary details.\n"
+        # "3 - Highly relevant, capturing most pivotal functionalities.\n"
+        # "4 - Perfectly relevant, focusing solely on crucial behaviors and actions.",
+
+        # "Comprehensive": "Analyze the summary considering all dimensions - coherence, fluency, consistency, "
+        #                  "and relevance. Does it strike a balance in all these areas, representing the code "
+        #                  "comprehensively and logically? "
+        # "Rate the summary on a scale of 0-4:\n"
+        # "0 - Fails in multiple criteria, significant improvements needed.\n"
+        # "1 - Meets some criteria, falls short in others.\n"
+        # "2 - Adequate in all dimensions but room for improvement.\n"
+        # "3 - Strong representation in almost all areas with minor lapses.\n"
+        # "4 - A masterful summary, balancing all criteria excellently."
+        # "Semantic": 'the semantic similarity between the generated and reference summaries. '
+        #             '0 - No similarity between the generation and reference.'
+        #             '1 - Have few shared tokens, not semantically similar.'
+        #             '2 - Have some shared tokens, probable semantically similar.'
+        #             '3 - Much similar in semantic but a few tokens are different.'
+        #             '4 - Identical in semantic.'
     }
 
     if reference:
@@ -221,21 +252,17 @@ def evaluate(refs, preds, num, model, reference, turn, approach):
     else:
         roles = {
             # coherence
-            "Systems Analyst1": "As a Systems Analyst, you ensure the coherence of the "
-                                "code summary, ensuring that it clearly conveys the main logic of the code.",
+            "Original Code Author 0": "As the Original Code Author, having written the code, you ensure the coherence of the code summary, ensuring that it clearly conveys the main logic "
+                                      "of the code and is easy to follow.",
             # Consistency
-            "Code Reviewer1": "As a Code Reviewer, serving as an experienced developer, you guarantee that the summary "
-                              "remains consistent with the original code. You ensure that the summary captures the "
-                              "primary functionality and logic of the code without introducing any additional or "
-                              "unrelated content.",
+            "Original Code Author 1": "As the Original Code Author, having written the code, you guarantee that the summary remains consistent with the original code, without hallucinated or unsupported content, similar to fact-checking to prevent any fabricated functionality.",
+
             # Fluency
-            "Systems Analyst2": "As a Systems Analyst, you focus on ensuring that the summary is written smoothly, with clear "
-                                "sentences and appropriate wording. You challenge other judgments and provide alternative "
-                                "solutions when necessary.",
+            "Original Code Author 2": "As the Original Code Author, having written the code, you focus on ensuring that the summary is written smoothly, with clear sentences and appropriate "
+                                      "wording, ensuring it reads naturally, like it was written by a fluent native speaker.",
+
             # Relevance
-            "Code Reviewer2": "As a Code Reviewer, serving as an experienced developer, concentrating on the business or functional relevance of the code, "
-                              "you ensure that the summary captures the key significance of the code in the larger "
-                              "system or project.",
+            "Code Reviewer": "As a Code Reviewer, serving as an experienced developer, you identify and preserve the most important parts of the code, avoiding unnecessary or off-topic content—like aiming at the core message without distraction.",
         }
         evaluation_step = {
             'Coh': '',
@@ -255,13 +282,13 @@ def evaluate(refs, preds, num, model, reference, turn, approach):
             # 'source code. If any are found, they should be penalized in your evaluation.'
             # '3. Assign a score for consistency on a scale of 0 to 4, where 0 is the lowest and 4 is the highest, '
             # 'based on the Evaluation Criteria. ',
-            'Flu': ''
-                   'Evaluation Steps:'
-                   '1. Read the code comments carefully and examine each sentence to ensure it is grammatically correct.'
-                   '2. Identify any glaring grammatical errors, such as sentence fragments, missing components like verbs or subjects, or any other issue that makes the text difficult to understand '
-                   '3. Check for any instances of repetitive words that can hamper clarity and ensure proper capitalization throughout the comments.'
-                   '4. Assign a score for fluency on a scale of 0 to 4, where 0 is the lowest and 4 is the highest, '
-                   'based on the Evaluation Criteria. ',
+            'Flu': '',
+                   # 'Evaluation Steps:'
+                   # '1. Read the code comments carefully and examine each sentence to ensure it is grammatically correct.'
+                   # '2. Identify any glaring grammatical errors, such as sentence fragments, missing components like verbs or subjects, or any other issue that makes the text difficult to understand '
+                   # '3. Check for any instances of repetitive words that can hamper clarity and ensure proper capitalization throughout the comments.'
+                   # '4. Assign a score for fluency on a scale of 0 to 4, where 0 is the lowest and 4 is the highest, '
+                   # 'based on the Evaluation Criteria. ',
             'Ref': '',
             # 'Evaluation Steps:'
             # '1. Read the source code carefully and understand its key information and primary actions of the code.'
@@ -420,10 +447,9 @@ def evaluate(refs, preds, num, model, reference, turn, approach):
             # 'Ref': 'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)',
             'Con': 'Evaluation Form (scores ONLY):',
             'Flu': 'Evaluation Form (scores ONLY):',
-            'Ref': 'Evaluation Form (scores ONLY):',
-
+            'Ref': 'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)',
         }
-
+    # 结合数据
     df = pd.DataFrame(preds, columns=['Generated'])
     df = pd.concat([refs, df], axis=1)
     df = df.head(num)
@@ -483,11 +509,18 @@ def evaluate(refs, preds, num, model, reference, turn, approach):
                     else:
                         match = 0
             else:
-                match = re.search(r'\d+', score)
-                if match:
-                    match = match.group()
+                if rating_name in ['Ref']:
+                    match = re.search(r'Rating:\s*(\d+\.?\d*)', score)
+                    if match:
+                        match = float(match.group(1))
+                    else:
+                        match = 0
                 else:
-                    match = 0
+                    match = re.search(r'\d+', score)
+                    if match:
+                        match = match.group()
+                    else:
+                        match = 0
             scores_dict[column_name] = match
             # Printing out the desired information:
             # print(f"Role: {role_name}")
@@ -496,8 +529,62 @@ def evaluate(refs, preds, num, model, reference, turn, approach):
         # print("------" * 10)
         # Append the result to the DataFrame
         results_df = results_df.append(scores_dict, ignore_index=True)
-    results_df.to_excel(f"evaluated_{approach}_{num}_by_{model}_reference{reference}_turn{turn}.xlsx", index=False)
+    # 选择最后四列
+    last_four_columns = results_df.iloc[:, -1:]
+    name = results_df.columns[-1:]
+    print(name)
+    # 计算这四列每行的平均值
+    row_averages = last_four_columns.mean(axis=1)/0.04
+    # 将平均值保存到新列 "Average"
+    # results_df['Average'] = row_averages
+    # Save the results to an Excel file
+    results_df.to_excel(f"evaluated_0shot_{approach}_{num}_by_{model}_reference{reference}_turn{turn}.xlsx", index=False)
+    # score = results_df[['Average']].mean() / 4
+    # print(f'Final evaluated score:{score}')
+    return row_averages
 
+def get_bleu_cn(refs,preds):
+    r_str_list = []
+    p_str_list = []
+    for r, p in zip(refs, preds):
+        if len(r[0]) == 0 or len(p) == 0:
+            continue
+        r_str_list.append([" ".join([str(token_id) for token_id in r[0]])])
+        p_str_list.append(" ".join([str(token_id) for token_id in p]))
+    try:
+        bleu_list = codenn_smooth_bleu(r_str_list, p_str_list)
+    except:
+        bleu_list = [0, 0, 0, 0]
+    codenn_bleu = bleu_list[0]
+    codenn_bleu = round(codenn_bleu,4)
+    return codenn_bleu
+def get_bleu_dc(refs,preds):
+    all_score = 0.0
+    count = 0
+    for r, p in zip(refs, preds):
+        # nltk bug: https://github.com/nltk/nltk/issues/2204
+        if len(p) == 1:
+            continue
+        score = nltk.translate.bleu(r, p, smoothing_function=SmoothingFunction().method4)
+        all_score += score
+        count += 1
+    emse_bleu = round(all_score / count * 100, 4)
+    return emse_bleu
+def get_codenn_score(refs, preds):
+    r_str_list = []
+    p_str_list = []
+    for r, p in zip(refs, preds):
+        if len(r[0]) == 0 or len(p) == 0:
+            continue
+        r_str_list.append([" ".join([str(token_id) for token_id in r[0]])])
+        p_str_list.append(" ".join([str(token_id) for token_id in p]))
+    try:
+        bleu_list = codenn_smooth_bleu(r_str_list, p_str_list)
+    except:
+        bleu_list = [0, 0, 0, 0]
+    codenn_bleu = bleu_list[0]
+    codenn_bleu = round(codenn_bleu,4)
+    return codenn_bleu
 def get_score(r0, r1):
 #     pvalue = wilcoxon_signed_rank_test(y1, y2)
     _, p_val_t_test = stats.ttest_ind(r0, r1, equal_var=False)
@@ -516,6 +603,30 @@ def model_api(model, prompt):
                 messages=message,
             )
             generated_answer = ' '.join(response.choices[0]['message']['content'].strip().split())
+        except Exception as e:
+            time.sleep(25)
+            return model_api(model, prompt)
+    elif model == 'gpt-4.1-nano' or model == 'gpt-4o-mini' or model == 'gpt-4o':
+        try:
+            message = [
+                      {"role": "user", "content": prompt}
+               ]
+            response = openai.chat.completions.create(
+              model=model,
+              messages=message,
+              response_format={
+                "type": "text"
+              },
+              temperature=1,
+              max_completion_tokens=1000,
+              top_p=1,
+              frequency_penalty=0,
+              presence_penalty=0,
+              store=False
+            )
+            generated_answer = ' '.join(response.choices[0].message.content.strip().split())
+            matches = re.findall(r'\d+', generated_answer)
+            match = matches[-1]  # 获取最后一个匹配的数字
         except Exception as e:
             time.sleep(25)
             return model_api(model, prompt)
@@ -548,6 +659,7 @@ def read_to_df(filename):
     f = open(filename, 'r',encoding="utf-8")
     res = []
     for row in f:
+        # (rid, text) = row.split('\t')
         res.append(row.rstrip('\n'))
     return res
 
@@ -558,28 +670,62 @@ def show_dict(all_bleu):
     print(tb)
 
 def get_all_datset_result(approaches, diff_datasets, evaluate, num, model, reference, turn):
+    #     scores = {}
+    scores_p_test = {}
     for approach in approaches:
+        scores_diff_dataset = {}
+        latex_diff_dataset = {}
         for diff_dataset in diff_datasets:
+            average_score = []
             for random_seed in range(1):
                 refs_filename = os.path.join('../../dataset/RQ3/final/' + diff_dataset, "code%s.xlsx" % random_seed)
+                # refs_filename = os.path.join('../../dataset/RQ3/final/' + diff_dataset, approach, "random%s" % random_seed, "test.pred")
+                # if diff_dataset in ["FCM", "FCM_project_large"]:
+                #     refs_filename = os.path.join(diff_dataset, approach, "code.xlsx")
                 preds_filename = os.path.join('../../dataset/RQ3/final/' + diff_dataset, approach, "random%s" % random_seed, "results.xlsx")
                 preds = pd.read_excel(preds_filename)
                 refs = pd.read_excel(refs_filename)
-                evaluate(refs, preds, num, model, reference, turn, approach)
+                bleu_s = evaluate(refs, preds, num, model, reference, turn, approach)
+                # bleu_s = get_codenn_score(refs, preds)
+                average_score.append(bleu_s)
+                if diff_dataset in list(scores_p_test):
+                    scores_p_test[diff_dataset].append(bleu_s)
+                else:
+                    scores_p_test[diff_dataset] = [bleu_s]
+            mean, std_var = get_mean_std(average_score)
+            scores_diff_dataset[diff_dataset] = "%.2f+-%.2f" % (mean, std_var)
+            latex_diff_dataset[diff_dataset] = "&%.2f$\pm$%.2f" % (mean, std_var)
+        #         scores[diff_dataset] = scores_diff_dataset
+        print(15 * "*" + approach + 15 * "*")
+        print(approach)
+        print(average_score)
+
+        show_dict(scores_diff_dataset)
+    print("-------------Significant Testing---------------")
+    #     print(scores_p_test)
+    if len(scores_p_test) > 1:
+        get_pvalue_and_effect_size(dict(list(scores_p_test.items())[:1]))
+        get_pvalue_and_effect_size(dict(list(scores_p_test.items())[1:]))
+    else:
+        get_pvalue_and_effect_size(scores_p_test)
 
 if __name__ == '__main__':
     num = 100
-    model = "text-davinci-003"
+    # model = "text-davinci-003"
     # model = 'gpt-3.5-turbo-0613'
     # model = 'gpt-4'
+    model = 'gpt-4o-mini'
     # cot = 1  # 0-false, 1-ture
     # rating_form = 0  # 0-raw, 1-explain, 2-analyse
     reference = 0  # 0-false, 1-ture
 
+    # sys.stdout = open(f'log_evaluated_{num}_by_{model}.txt', 'w')
+
     # Performance in Different Dtaset: TCL FCM CSN
     diff_datasets = ["TLC"]
-    # approaches = ["codenn", "deepcom", "astattgru", "rencos", "ncs", "chatgpt"]
-    approaches = ["chatgpt"]
+    # approaches = ["codenn", "deepcom", "astattgru", "rencos", "ncs"]
+    # approaches = ["chatgpt", "codex"]
+    approaches = ["codeT5"]
     turn = 1
 
     get_all_datset_result(approaches, diff_datasets, evaluate, num, model, reference, turn)

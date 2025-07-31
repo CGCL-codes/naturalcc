@@ -13,7 +13,7 @@ pip install random numpy scipy pandas nltk openai tqdm
 ```
 ## Data
 The experimental data and manual evaluation results required are available for download from the following link:
-[Download Data](https://drive.google.com/file/d/1_EUSX5sWehxS5_2LwrA8hhMsfVdWZ_QL/view?usp=sharing)
+[Download Data](https://drive.google.com/file/d/1KZwvuTS82bPiU2sJt08y6RwkuQeLci3z/view?usp=sharing)
 
 ## Usage
 To evaluate the code summarization, you can run our scripts provided in the repository. These scripts design diverse roles and strategies to automatically assess the quality of code summaries using Large Language Models (LLMs).

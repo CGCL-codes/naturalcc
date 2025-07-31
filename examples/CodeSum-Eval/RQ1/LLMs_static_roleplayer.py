@@ -1,13 +1,33 @@
 import openai
+from openai import OpenAI
 import pandas as pd
 import time
 import re
+import sys
 
-openai.api_key = "your api key"
+# openai.api_key = ''
 
+def evaluate(model, reference,role):
+    
+    roles_specific = {
+        # coherence
+        "Code Reviewer": "As a Code Reviewer, serving as an experienced developer, you ensure the coherence of the "
+                         "code summary, ensuring that it clearly conveys the main logic of the code.",
+        # Consistency
+        "Original Code Author": "As the Original Code Author, having written the code, you guarantee that the summary "
+                                "remains consistent with the original code. You ensure that the summary captures the "
+                                "primary functionality and logic of the code without introducing any additional or "
+                                "unrelated content.",
+        # Fluency
+        "Code Editor": "As a Code Editor, you focus on ensuring that the summary is written smoothly, with clear "
+                       "sentences and appropriate wording. You challenge other judgments and provide alternative "
+                       "solutions when necessary.",
+        # Relevance
+        "Systems Analyst": "As a Systems Analyst, concentrating on the business or functional relevance of the code, "
+                           "you ensure that the summary captures the key significance of the code in the larger "
+                           "system or project.",
+    }
 
-def evaluate(model, reference):
-    # Construct roles and evaluation criteria
     roles = {
         "Code Reviewer": "As a Code Reviewer, serving as an experienced developer, ",
         "Original Code Author": "As the Original Code Author, having written the code, ",
@@ -15,26 +35,12 @@ def evaluate(model, reference):
         "Systems Analyst": "As a Systems Analyst, ",
     }
     dimension_roles = {
-        "Coherence": "The summary should exhibit clear structural organization, progressing logically from sentence "
-                     "to sentence to form a coherent body of information about the topic.",
-        "Consistency": "Evaluating the alignment of facts between the summary and the code snippet. A consistent "
-                       "summary should contain only statements supported by the source code, while penalizing any "
-                       "inclusion of hallucinated facts.",
-        "Fluency": "Assessing the quality of each sentence. Sentences should be free from repetition, formatting "
-                   "issues, capitalization errors, or clear grammatical problems (e.g., fragments) that affect "
-                   "readability.",
-        "Relevance": "Evaluating the selection of vital content from the source code. The summary should include only "
-                     "essential information from the source document, with penalties for redundancies and excessive "
-                     "details.",
-        # "Coherence": "you ensure the coherence of the code summary, ensuring that it clearly conveys the main logic "
-        #              "of the code.",
-        # "Consistency": "you guarantee that the summary remains consistent with the original code. You ensure "
-        #                "that the summary captures the primary functionality and logic of the code without "
-        #                "introducing any additional or unrelated content.",
-        # "Fluency": "you focus on ensuring that the summary is written smoothly, with clear sentences and appropriate "
-        #            "wording. You challenge other judgments and provide alternative solutions when necessary.",
-        # "Relevance": "concentrating on the business or functional relevance of the code, you ensure that the "
-        #              "summary captures the key significance of the code in the larger system or project.",
+        "Coherence": "you ensure the coherence of the code summary, ensuring that it clearly conveys the main logic "
+                     "of the code and is easy to follow.",
+        "Consistency": "you guarantee that the summary remains consistent with the original code, without hallucinated or unsupported content, similar to fact-checking to prevent any fabricated functionality.",
+        "Fluency": "you focus on ensuring that the summary is written smoothly, with clear sentences and appropriate "
+                   "wording, ensuring it reads naturally, like it was written by a fluent native speaker.",
+        "Relevance": "You identify and preserve the most important parts of the code, avoiding unnecessary or off-topic content—like aiming at the core message without distraction.",
     }
 
     criteria = {
@@ -264,7 +270,7 @@ def evaluate(model, reference):
                'Evaluation Form (scores ONLY): '
                '- Relevance: 3',
     }
-    # Combining data
+
     df = pd.read_excel('../dataset/RQ1-2/final/recode.xlsx')
 
     # Define the columns for the results DataFrame
@@ -273,27 +279,83 @@ def evaluate(model, reference):
     # Initialize an empty DataFrame to store results
     results_df = pd.DataFrame(columns=columns)
 
+    count = 0
     for idx, row in df.iterrows():
         code_to_display = row['Code']
         target = row['Target']
         generated = row['Generated']
         print(idx)
-        print(f"Code: {code_to_display}")
-        print(f"Reference: {target}")
-        print(f"Summary (To Be Evaluated): {generated}")
+        # print(f"Code: {code_to_display}")
+        # print(f"Reference: {target}")
+        # print(f"Summary (To Be Evaluated): {generated}")
         scores_dict = {
             'Code': code_to_display,
             'Target': target,
             'Generated': generated
         }
+        if role:
+            for role_name,role_description in roles.items():
+                for (dimension_name,role_dimension), (criterion_name, criterion_task), (eval_name, eval_step), \
+                    (example_name, example_data) in zip(dimension_roles.items(), criteria.items(), evaluation_step.items(), example.items()):
 
-        for role_name,role_description in roles.items():
-            for (dimension_name,role_dimension), (criterion_name, criterion_task), (eval_name, eval_step), \
-                (example_name, example_data) in zip(dimension_roles.items(), criteria.items(), evaluation_step.items(), example.items()):
+                    if reference:
+                        prompt = f"""
+                        {role_description}{role_dimension}
+                        You will be given one summary written for a source code. 
+                        Your task is to rate the summary on one metric.
+                        Please make sure you read and understand these instructions carefully. 
+                        Please keep this document open while reviewing, and refer to it as needed.
+                        Evaluation Criteria:
+                        {criterion_name}(0-4) - {criterion_task}
+                        Example:
+                        {example_data}
+                        Evaluate item:
+                        Source Code: {code_to_display}
+                        Reference Summary: {target}
+                        Summary: {generated}
+                        Evaluation Form (scores ONLY): 
+                        - {criterion_name}: 
+                        """
+                    else:
+                        prompt = f"""
+                        {role_description}{role_dimension}
+                        You will be given one summary written for a source code. 
+                        Your task is to rate the summary on one metric.
+                        Please make sure you read and understand these instructions carefully. 
+                        Please keep this document open while reviewing, and refer to it as needed.
+                        Evaluation Criteria:
+                        {criterion_name}(0-4) - {criterion_task}
+                        Example:
+                        {example_data}
+                        Evaluate item:
+                        Source Code: {code_to_display}
+                        Summary: {generated}
+                        Evaluation Form (scores ONLY): 
+                        - {criterion_name}: 
+                        """
 
+                    score = model_api(model, prompt)
+                    # print(score)
+                    column_name = f"{role_name} ({criterion_name} Score)"
+                    # match = re.search(r'\d+', score)
+                    matches = re.findall(r'\d+', score)
+                    match = matches[-1]  
+                    # if match:
+                    #     match = match.group()
+                    # else:
+                    #     match = 0
+                    scores_dict[column_name] = match
+                    # Printing out the desired information:
+                    # print(prompt)
+                    print(f"Role: {role_name}")
+                    print(f"Criterion: {criterion_name}")
+                    print(f"Score: {match}")
+        else:
+            for (dimension_name, role_dimension), (criterion_name, criterion_task), (eval_name, eval_step), \
+                (example_name, example_data) in zip(dimension_roles.items(), criteria.items(),
+                                                    evaluation_step.items(), example.items()):
                 if reference:
                     prompt = f"""
-                    {role_description}{role_dimension}
                     You will be given one summary written for a source code. 
                     Your task is to rate the summary on one metric.
                     Please make sure you read and understand these instructions carefully. 
@@ -311,7 +373,6 @@ def evaluate(model, reference):
                     """
                 else:
                     prompt = f"""
-                    {role_description}{role_dimension}
                     You will be given one summary written for a source code. 
                     Your task is to rate the summary on one metric.
                     Please make sure you read and understand these instructions carefully. 
@@ -328,39 +389,125 @@ def evaluate(model, reference):
                     """
 
                 score = model_api(model, prompt)
-
-                column_name = f"{role_name} ({criterion_name} Score)"
-                match = re.search(r'\d+', score)
-                if match:
-                    match = match.group()
-                else:
-                    match = 0
+                # print(score)
+                column_name = f"{criterion_name} Score"
+                # match = re.search(r'\d+', score)
+                matches = re.findall(r'\d+', score)
+                match = matches[-1]  
+                # if match:
+                #     match = match.group()
+                # else:
+                #     match = 0
                 scores_dict[column_name] = match
                 # Printing out the desired information:
                 # print(prompt)
-                print(f"Role: {role_name}")
                 print(f"Criterion: {criterion_name}")
                 print(f"Score: {score}")
         print("------" * 10)
         # Append the result to the DataFrame
-        results_df = results_df.append(scores_dict, ignore_index=True)
-
+        # results_df = results_df.append(scores_dict, ignore_index=True)
+        results_df = pd.concat([results_df, pd.DataFrame([scores_dict])], ignore_index=True)
+        count += 1  # increment counter
     # Save the results to an Excel file
     results_df.to_excel(f"evaluated_by_{model}_reference{reference}_final.xlsx", index=False)
 
-
 def model_api(model, prompt):
     # print(f"new prompt:\n {prompt}")
+    message = [
+        {"role": "user", "content": prompt}
+    ]
     if model == 'gpt-4' or model == 'gpt-3.5-turbo':
-        message = [
-            {"role": "user", "content": prompt}
-        ]
         try:
             response = openai.ChatCompletion.create(
                 model=model,
                 messages=message,
             )
-            generated_answer = ' '.join(response.choices[0]['message']['content'].strip().split())
+            generated_answer = ' '.join(response.choices[0].message.content.strip().split())
+        except Exception as e:
+            time.sleep(25)
+            return model_api(model, prompt)
+    elif model == 'deepseek':
+        try:
+            client = OpenAI(
+                api_key='',
+                base_url="https://api.deepseek.com/beta",
+            )
+            response = client.completions.create(
+                model="deepseek-chat",
+                prompt=prompt,
+                suffix="",
+                max_tokens=1000)
+            generated_answer = response.choices[0].text
+            matches = re.findall(r'\d+', generated_answer)
+            match = matches[-1]  
+            print(match)
+        except Exception as e:
+            time.sleep(25)
+            return model_api(model, prompt)
+    elif model == 'Qwen3-32B':
+        print('Qwen')
+        message = [
+            {"role": "user", "content": prompt}
+        ]
+        #
+        client = OpenAI(
+            base_url="https://router.huggingface.co/hf-inference/models/Qwen/Qwen3-32B/v1",
+            api_key="")
+        try:
+            completion = client.chat.completions.create(
+                model="Qwen/Qwen3-32B",
+                messages=message,
+                max_tokens=1000,
+            )
+            generated_answer = completion.choices[0].message.content
+            print(generated_answer)
+            matches = re.findall(r'\d+', generated_answer)
+            match = matches[-1]  
+            print(match)
+        except Exception as e:
+            time.sleep(25)
+            return model_api(model, prompt)
+    elif model == 'Qwen3-235B':
+        print('Qwen-new')
+        message = [
+            {"role": "user", "content": prompt}
+        ]
+        #
+        client = OpenAI(
+            base_url="https://router.huggingface.co/fireworks-ai/inference/v1",
+            api_key="",)
+        # try:
+        completion = client.chat.completions.create(
+            model="accounts/fireworks/models/qwen3-235b-a22b",
+            messages=message,
+            max_tokens=1000,
+        )
+        generated_answer = completion.choices[0].message.content
+        print(generated_answer)
+        matches = re.findall(r'\d+', generated_answer)
+        match = matches[-1] 
+        print(match)
+        # except Exception as e:
+        #     time.sleep(25)
+        #     return model_api(model, prompt)
+    elif model == 'gpt-4.1-nano' or model == 'gpt-4o-mini' or model == 'gpt-4o':
+        try:
+            response = openai.chat.completions.create(
+              model=model,
+              messages=message,
+              response_format={
+                "type": "text"
+              },
+              temperature=1,
+              max_completion_tokens=1000,
+              top_p=1,
+              frequency_penalty=0,
+              presence_penalty=0,
+              store=False
+            )
+            generated_answer = ' '.join(response.choices[0].message.content.strip().split())
+            matches = re.findall(r'\d+', generated_answer)
+            match = matches[-1]  
         except Exception as e:
             time.sleep(25)
             return model_api(model, prompt)
@@ -372,6 +519,7 @@ def model_api(model, prompt):
                 max_tokens=100,
             )
             generated_answer = ' '.join(response.choices[0].text.strip().split())
+
         except Exception as e:
             time.sleep(25)
             return model_api(model, prompt)
@@ -379,8 +527,15 @@ def model_api(model, prompt):
 
 
 if __name__ == '__main__':
-    # model = "text-davinci-003"
+    # model = "gpt-4.1-nano"
+    model = 'gpt-4o-mini'
     # model = 'gpt-3.5-turbo'
-    model = 'gpt-4'
+    # model = 'gpt-4o'
+    # model = 'gpt-4.1'
+    # model = 'deepseek'
+    # model = 'Qwen3-32B'
+    role = 1
     reference = 0 # 0-free, 1-reference
-    evaluate(model, reference)
+    print(model, reference, role)
+    evaluate(model, reference, role)
+

@@ -4,38 +4,27 @@ import time
 import re
 import sys
 
-openai.api_key = 'your key'
+# openai.api_key = ''
 
 
 def evaluate(model, cot, rating_form, reference):
 
     criteria = {
-           "Coherence": "The summary should exhibit clear structural organization, progressing logically from sentence "
-                        "to sentence to form a coherent body of information about the topic.",
-           "Consistency": "Evaluating the alignment of facts between the summary and the code snippet. A consistent "
-                          "summary should contain only statements supported by the source code, while penalizing any "
-                          "inclusion of hallucinated facts.",
-           "Fluency": "Assessing the quality of each sentence. Sentences should be free from repetition, formatting "
-                      "issues, capitalization errors, or clear grammatical problems (e.g., fragments) that affect "
-                      "readability.",
-           "Relevance": "Evaluating the selection of vital content from the source code. The summary should include only "
-                        "essential information from the source document, with penalties for redundancies and excessive "
-                        "details.",
-           # "Coherence": "the summary should be well-structured and well-organized. The summary should not just be a heap "
-        #              "of related information, but should build from sentence to sentence to a coherent body of "
-        #              "information about a topic.",
-        #
-        # "Consistency": "the factual alignment between the summary and the summarized code. A factually consistent "
-        #                "summary contains only statements that are entailed by the source code. Annotators were "
-        #                "also asked to penalize summaries that contained hallucinated facts. ",
-        #
-        # "Fluency": "the quality of individual sentences. The sentence should have no repetitive word, formatting "
-        #            "problems, capitalization errors or obviously ungrammatical sentences ( "
-        #            "e.g., fragments, missing components) that make the text difficult to understand.",
-        #
-        # "Relevance": "selection of important content from the source. The summary should include only important "
-        #              "information from the source document. Annotators were instructed to penalize summaries that "
-        #              "contained redundancies and excess information.",
+        "Coherence": "the summary should be well-structured and well-organized. The summary should not just be a heap "
+                     "of related information, but should build from sentence to sentence to a coherent body of "
+                     "information about a topic.",
+
+        "Consistency": "the factual alignment between the summary and the summarized code. A factually consistent "
+                       "summary contains only statements that are entailed by the source code. Annotators were "
+                       "also asked to penalize summaries that contained hallucinated facts. ",
+
+        "Fluency": "the quality of individual sentences. The sentence should have no repetitive word, formatting "
+                   "problems, capitalization errors or obviously ungrammatical sentences ( "
+                   "e.g., fragments, missing components) that make the text difficult to understand.",
+
+        "Relevance": "selection of important content from the source. The summary should include only important "
+                     "information from the source document. Annotators were instructed to penalize summaries that "
+                     "contained redundancies and excess information.",
     }
 
     evaluation_step = {
@@ -76,22 +65,18 @@ def evaluate(model, cot, rating_form, reference):
 
     if reference:
         roles = {
-            # coherence
-            "Original Code Author": "As the Original Code Author, having written the code, you ensure the coherence of the "
-                             "code summary, ensuring that it clearly conveys the main logic of the code.",
-            # Consistency
-            "Code Reviewer1": "As a Code Reviewer, serving as an experienced developer, you guarantee that the summary "
-                                    "remains consistent with the original code. You ensure that the summary captures the "
-                                    "primary functionality and logic of the code without introducing any additional or "
-                                    "unrelated content.",
-            # Fluency
-            "Code Reviewer2": "As a Code Reviewer, serving as an experienced developer, you focus on ensuring that the summary is written smoothly, with clear "
-                           "sentences and appropriate wording. You challenge other judgments and provide alternative "
-                           "solutions when necessary.",
-            # Relevance
-            "Code Editor": "As a Code Editor, concentrating on the business or functional relevance of the code, "
-                               "you ensure that the summary captures the key significance of the code in the larger "
-                               "system or project.",
+               # coherence
+               "Original Code Author 0": "you ensure the coherence of the code summary, ensuring that it clearly conveys the main logic "
+                     "of the code and is easy to follow.",
+               # Consistency
+               "Original Code Author 1": "you guarantee that the summary remains consistent with the original code, without hallucinated or unsupported content, similar to fact-checking to prevent any fabricated functionality.",
+
+               # Fluency
+               "Original Code Author 2": "you focus on ensuring that the summary is written smoothly, with clear sentences and appropriate "
+                   "wording, ensuring it reads naturally, like it was written by a fluent native speaker.",
+
+               # Relevance
+               "Code Reviewer": "You identify and preserve the most important parts of the code, avoiding unnecessary or off-topic content—like aiming at the core message without distraction.",
         }
         if rating_form == 1:
             example = {
@@ -142,6 +127,24 @@ def evaluate(model, cot, rating_form, reference):
                        'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
                        'Analysis: The summary "creates a new dexportprivatekeypvk dialog" is inconsistent with the source code, which specifically mentions dexportprivatekeyopenssl. This indicates a factual misalignment between the summary and the code.'
                        'Rating: 0'
+                       'Source Code: override public void on success ( dlsn value ) { if ( value get log segment sequence no ( ) != current log segment seq no ) { log error ( <string> , value get log segment sequence no ( ) , current log segment seq no ) ; errors found set ( true ) ; } if ( verify entry id && value get entry id ( ) != current entry id ) { log error ( <string> , value get entry id ( ) , current entry id ) ; errors found set ( true ) ; } sync latch count down ( ) ; }'
+                       'Reference Summary:  invoked if the computation completes successfully'
+                       'Summary: invoked completes a computation successfully successfully'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: The summary is mostly accurate but redundant, reflecting the source code\'s successful computation completion.'
+                       'Rating: 4'
+                       'Source Code: public static void modify file ( file file , function < string , string > modifier ) throws ioexception { string content = new string ( files to byte array ( file ) , standard charsets utf 8 ) ; string result = modifier apply ( content ) ; files write ( result get bytes ( standard charsets utf 8 ) , file ) ; }'
+                       'Reference Summary: modifies the given file in place .'
+                       'Summary: modifies the the file given . for prefixes . the file'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: The summary "modifies the the file given . for prefixes . the file" starts correctly by indicating the modification of a file but becomes unclear and irrelevant with the addition of "for prefixes."'
+                       'Rating: 2'
+                       'Source Code: public process execute async ( final command line command , map < string , string > environment ) throws ioexception { if ( working directory != null && ! working directory exists ( ) ) { throw new ioexception ( working directory + <string> ) ; } return execute internal ( command , environment , working directory , stream handler , null ) ; }'
+                       'Reference Summary: methods for starting asynchronous execution .'
+                       'Summary: methods for starting asynchronous execution . process process process process parent parent'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: The initial part of the summary, "methods for starting asynchronous execution," accurately reflects the source code\'s purpose. However, the repetition of "process process process process parent parent" is irrelevant and reduces the overall clarity.'
+                       'Rating: 3'
                        'Source Code: public omscalingraster ( double ullat , double ullon , double lrlat , double lrlon , image icon ii ) { this ( ullat , ullon , lrlat , lrlon , ii get image ( ) ) ; }'
                        'Reference Summary: create an omraster , lat / lon placement with an imageicon .'
                        'Summary: define a omraster lat lat , lon lon lon imageicon , scale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale , 4000000 4000000 , 4000000 4000000 . 4000000 4000000 . 4000000 . 4000000 4000000 . 4000000 4000000 . 4000000 4000000 . 4000000'
@@ -168,13 +171,45 @@ def evaluate(model, cot, rating_form, reference):
                        'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
                        'Analysis: The summary "creates a new dexportprivatekeypvk dialog" is fluent in terms of its structure and grammar. Despite the mismatch with the specific class name in the source code, the sentence itself is well-formed, without repetitive words or grammatical errors.'
                        'Rating: 4'
+                       'Source Code: override public void on success ( dlsn value ) { if ( value get log segment sequence no ( ) != current log segment seq no ) { log error ( <string> , value get log segment sequence no ( ) , current log segment seq no ) ; errors found set ( true ) ; } if ( verify entry id && value get entry id ( ) != current entry id ) { log error ( <string> , value get entry id ( ) , current entry id ) ; errors found set ( true ) ; } sync latch count down ( ) ; }'
+                       'Reference Summary:  invoked if the computation completes successfully'
+                       'Summary: invoked completes a computation successfully successfully'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: The summary "invoked completes a computation successfully successfully" has a grammatical error due to the repetition of the word "successfully." This redundancy makes the sentence awkward and less fluent, impacting its overall readability.'
+                       'Rating: 0'
                        'Source Code: public static void modify file ( file file , function < string , string > modifier ) throws ioexception { string content = new string ( files to byte array ( file ) , standard charsets utf 8 ) ; string result = modifier apply ( content ) ; files write ( result get bytes ( standard charsets utf 8 ) , file ) ; }'
                        'Reference Summary: modifies the given file in place .'
                        'Summary: modifies the the file given . for prefixes . the file'
                        'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
                        'Analysis: The summary "modifies the the file given . for prefixes . the file" suffers from fluency issues. The repetition of "the" and fragmented phrases like "for prefixes . the file" result in a grammatically incorrect and hard-to-understand sentence.'
                        'Rating: 0',
-                'Ref': 'Source Code: public dexportprivatekeyopenssl ( jframe parent , string entry alias , password quality config password quality config ) { super ( parent , dialog modality type document modal ) ; this entry alias = entry alias ; this password quality config = password quality config ; init components ( ) ; }'
+                'Ref': 'Source Code: Code public zip entry ( string name ) { objects require non null ( name , <string> ) ; '
+                       'if ( name length ( ) > 0xffff ) { throw new illegal argument exception ( <string> ) ; } this name = '
+                       'name ; }'
+                       'Reference Summary: creates a new zip entry with the specified name.'
+                       'Summary: creates a new zip entry with the name'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: the summary "creates a new zip entry with the name" effectively captures the most important action of the source code without including any redundancies or excess information. It concisely states the primary functionality of the code, aligning closely with the key content of the source.'
+                       'Rating: 4'
+                       'Source Code: public void remove scanning callback ( one sheeld scanning callback scanning callback ) { if ( scanning callback != null && scanning callbacks contains ( scanning callback ) ) scanning callbacks remove ( scanning callback ) ; }'
+                       'Reference Summary:  remove a scanning callback .'
+                       'Summary: if a scanning and .'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: the summary "if a scanning and ." fails to capture the essential action of the source code, which is the removal of a scanning callback. The summary is incomplete and does not convey the key information present in the code, leading to a lack of relevance.'
+                       'Rating: 1'
+                       'Source Code: private void check server response code ( httpurlconnection url connection ) throws request failure exception { try { if ( url connection get response code ( ) != <num> ) { throw new request failure exception ( <string> + url connection get response code ( ) + <string> ) ; } } catch ( ioexception e ) { throw new request failure exception ( <string> , e ) ; } }'
+                       'Reference Summary: confirms that the omaha server sent back an " ok " code .'
+                       'Summary: code that code in the code response .'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: the summary "code that code in the code response." is vague and fails to capture the essential action of the source code, which is checking and validating the server response code. The summary does not effectively convey the specific function of confirming an "ok" response from the server, as indicated in the reference summary.'
+                       'Rating: 0'
+                       'Source Code: private void offset start time if necessary ( time start time , time end time , string rrule , calendar event model model ) { if ( rrule == null || rrule is empty ( ) ) { return ; } m event recurrence parse ( rrule ) ; if ( m event recurrence freq != event recurrence weekly ) { return ; } if ( m event recurrence byday length > m event recurrence byday count ) { return ; } int closest weekday = integer max value ; int weekstart = event recurrence day2time day ( m event recurrence wkst ) ; int start day = start time week day ; for ( int i = <num> ; i < m event recurrence byday count ; i ++ ) { int day = event recurrence day2time day ( m event recurrence byday [ i ] ) ; if ( day == start day ) { return ; } if ( day < weekstart ) { day += <num> ; } if ( day > start day && ( day < closest weekday || closest weekday < start day ) ) { closest weekday = day ; } if ( closest weekday == integer max value || closest weekday < start day ) { if ( day < closest weekday ) { closest weekday = day ; } } } if ( closest weekday < start day ) { closest weekday += <num> ; } int days offset = closest weekday - start day ; start time month day += days offset ; end time month day += days offset ; long new start time = start time normalize ( true ) ; long new end time = end time normalize ( true ) ; model m start = new start time ; model m end = new end time ; }'
+                       'Reference Summary:  if the recurrence rule is such that the event start date doesn \' t actually fall in one of the recurrences , then push the start date up to the first actual instance of the event .'
+                       'Summary:  parses the elements and , the store . the .'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: '
+                       'Rating: 0'
+                       'Source Code: public dexportprivatekeyopenssl ( jframe parent , string entry alias , password quality config password quality config ) { super ( parent , dialog modality type document modal ) ; this entry alias = entry alias ; this password quality config = password quality config ; init components ( ) ; }'
                        'Reference Summary: creates a new dexportprivatekeyopenssl dialog .'
                        'Summary:  creates a new dexportprivatekeypvk dialog .'
                        'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
@@ -228,7 +263,20 @@ def evaluate(model, cot, rating_form, reference):
                        'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
                        'Rating: 1'
                        'Rationale: The summary starts with a coherent phrase "define a omraster lat lat, lon lon lon imageicon,". However, the subsequent repetitive and irrelevant phrases like "scale minscale minscale..." and the series of "4000000" significantly disrupt the coherence.',
-                'Con': 'Rationale: The summary "if a scanning and ." lacks factual consistency with the source code. While it hints at a conditional operation involving scanning, it fails to accurately or fully convey the main action of the source code, which is the removal of a scanning callback.'
+                'Con': 'Source Code: Code public zip entry ( string name ) { objects require non null ( name , <string> ) ; '
+                       'if ( name length ( ) > 0xffff ) { throw new illegal argument exception ( <string> ) ; } this name = '
+                       'name ; }'
+                       'Reference Summary: creates a new zip entry with the specified name.'
+                       'Summary: creates a new zip entry with the name'
+                       'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
+                       'Rating: 4'
+                       'Rationale: The summary "creates a new zip entry with the name" is factually consistent with the source code, which details the creation of a new zip entry given a string name. '
+                       'Source Code: public void remove scanning callback ( one sheeld scanning callback scanning callback ) { if ( scanning callback != null && scanning callbacks contains ( scanning callback ) ) scanning callbacks remove ( scanning callback ) ; }'
+                       'Reference Summary: remove a scanning callback .'
+                       'Summary: if a scanning and .'
+                       'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
+                       'Rating: 1'
+                       'Rationale: The summary "if a scanning and ." lacks factual consistency with the source code. While it hints at a conditional operation involving scanning, it fails to accurately or fully convey the main action of the source code, which is the removal of a scanning callback.'
                        'Source Code: public dexportprivatekeyopenssl ( jframe parent , string entry alias , password quality config password quality config ) { super ( parent , dialog modality type document modal ) ; this entry alias = entry alias ; this password quality config = password quality config ; init components ( ) ; }'
                        'Reference Summary: creates a new dexportprivatekeyopenssl dialog .'
                        'Summary: creates a new dexportprivatekeypvk dialog .'
@@ -246,6 +294,12 @@ def evaluate(model, cot, rating_form, reference):
                        'Summary: modifies the the file given . for prefixes . the file'
                        'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
                        'Rating: 2'
+                       'Rationale: The summary "modifies the the file given. for prefixes. the file" partially aligns with the source code\'s functionality of modifying a file. However, the phrase "for prefixes. the file" and the repetition of "the" introduce elements that are not present or implied in the source code, leading to a reduction in factual consistency.'
+                       'Source Code: public process execute async ( final command line command , map < string , string > environment ) throws ioexception { if ( working directory != null && ! working directory exists ( ) ) { throw new ioexception ( working directory + <string> ) ; } return execute internal ( command , environment , working directory , stream handler , null ) ; }\n'
+                       'Reference Summary: methods for starting asynchronous execution .'
+                       'Summary: methods for starting asynchronous execution . process process process process parent parent'
+                       'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
+                       'Rating: 3'
                        'Rationale: The summary "methods for starting asynchronous execution. process process process process parent parent" begins correctly and is consistent with the source code\'s description of starting asynchronous execution. However, the latter part with the repetition of "process" and the addition of "parent parent" introduces unrelated elements that are not entailed by the source code. This decreases the overall factual consistency, as these additional phrases do not align with the specific actions or content of the code.'
                        'Source Code: public omscalingraster ( double ullat , double ullon , double lrlat , double lrlon , image icon ii ) { this ( ullat , ullon , lrlat , lrlon , ii get image ( ) ) ; }\n'
                        'Reference Summary: create an omraster , lat / lon placement with an imageicon .'
@@ -278,8 +332,39 @@ def evaluate(model, cot, rating_form, reference):
                        'Summary: invoked completes a computation successfully successfully'
                        'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
                        'Rating: 0'
+                       'Rationale: The summary lacks fluency. It contains repetitive words ("completes" and "successfully") and lacks clarity. The summary does not effectively convey the meaning of the source code. Additionally, there is a grammatical issue in the summary, making it difficult to understand.'
+                       'Source Code: public static void modify file ( file file , function < string , string > modifier ) throws ioexception { string content = new string ( files to byte array ( file ) , standard charsets utf 8 ) ; string result = modifier apply ( content ) ; files write ( result get bytes ( standard charsets utf 8 ) , file ) ; }'
+                       'Reference Summary: modifies the given file in place .'
+                       'Summary: modifies the the file given . for prefixes . the file'
+                       'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
+                       'Rating: 0'
                        'Rationale: The summary lacks fluency. It contains repetitive words ("modifies," "the," "given," "file," "the," "file") and lacks clarity. The summary does not effectively convey the meaning of the source code. Additionally, there are grammatical issues in the summary, making it difficult to understand.',
-                'Ref': 'Rationale: The summary does not effectively convey the important information from the source code. It lacks relevance and coherence, making it difficult to understand the purpose and functionality of the code. The summary is not in line with the source code\'s content, resulting in a low rating for relevance.'
+                'Ref': 'Source Code: Code public zip entry ( string name ) { objects require non null ( name , <string> ) ; '
+                       'if ( name length ( ) > 0xffff ) { throw new illegal argument exception ( <string> ) ; } this name = '
+                       'name ; }'
+                       'Reference Summary: creates a new zip entry with the specified name.'
+                       'Summary: creates a new zip entry with the name'
+                       'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
+                       'Rating: 4'
+                       'Rationale: The summary is highly relevant to the source code. It effectively conveys the essential information from the source code, which is the creation of a new zip entry with a specified name. There are no redundancies or excess information in the summary, and it captures the key details accurately.'
+                       'Source Code: public void remove scanning callback ( one sheeld scanning callback scanning callback ) { if ( scanning callback != null && scanning callbacks contains ( scanning callback ) ) scanning callbacks remove ( scanning callback ) ; }'
+                       'Reference Summary:  remove a scanning callback .'
+                       'Summary: if a scanning and .'
+                       'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
+                       'Rating: 1'
+                       'Rationale: While the summary mentions the removal of a scanning callback, it lacks clarity and important details about the functionality of the code. It does not effectively convey the important information from the source code, and there is room for improvement in terms of relevance.'
+                       'Source Code: private void check server response code ( httpurlconnection url connection ) throws request failure exception { try { if ( url connection get response code ( ) != <num> ) { throw new request failure exception ( <string> + url connection get response code ( ) + <string> ) ; } } catch ( ioexception e ) { throw new request failure exception ( <string> , e ) ; } }'
+                       'Reference Summary: confirms that the omaha server sent back an " ok " code .'
+                       'Summary: code that code in the code response .'
+                       'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
+                       'Rating: 0'
+                       'Rationale: The summary lacks relevance as it does not effectively convey the important information from the source code, which is about checking the server response code for an "ok" code. It contains unclear and irrelevant language, resulting in a low rating for relevance.'
+                       'Source Code: private void offset start time if necessary ( time start time , time end time , string rrule , calendar event model model ) { if ( rrule == null || rrule is empty ( ) ) { return ; } m event recurrence parse ( rrule ) ; if ( m event recurrence freq != event recurrence weekly ) { return ; } if ( m event recurrence byday length > m event recurrence byday count ) { return ; } int closest weekday = integer max value ; int weekstart = event recurrence day2time day ( m event recurrence wkst ) ; int start day = start time week day ; for ( int i = <num> ; i < m event recurrence byday count ; i ++ ) { int day = event recurrence day2time day ( m event recurrence byday [ i ] ) ; if ( day == start day ) { return ; } if ( day < weekstart ) { day += <num> ; } if ( day > start day && ( day < closest weekday || closest weekday < start day ) ) { closest weekday = day ; } if ( closest weekday == integer max value || closest weekday < start day ) { if ( day < closest weekday ) { closest weekday = day ; } } } if ( closest weekday < start day ) { closest weekday += <num> ; } int days offset = closest weekday - start day ; start time month day += days offset ; end time month day += days offset ; long new start time = start time normalize ( true ) ; long new end time = end time normalize ( true ) ; model m start = new start time ; model m end = new end time ; }'
+                       'Reference Summary:  if the recurrence rule is such that the event start date doesn \' t actually fall in one of the recurrences , then push the start date up to the first actual instance of the event .'
+                       'Summary:  parses the elements and , the store . the .'
+                       'Evaluation Form (Answer by starting with ``Rating:'' and then give the explanation of the rating on the next line by ``Rationale:'')'
+                       'Rating: 0'
+                       'Rationale: The summary does not effectively convey the important information from the source code. It lacks relevance and coherence, making it difficult to understand the purpose and functionality of the code. The summary is not in line with the source code\'s content, resulting in a low rating for relevance.'
                        'Source Code: public dexportprivatekeyopenssl ( jframe parent , string entry alias , password quality config password quality config ) { super ( parent , dialog modality type document modal ) ; this entry alias = entry alias ; this password quality config = password quality config ; init components ( ) ; }'
                        'Reference Summary: creates a new dexportprivatekeyopenssl dialog .'
                        'Summary:  creates a new dexportprivatekeypvk dialog .'
@@ -450,21 +535,17 @@ def evaluate(model, cot, rating_form, reference):
     else:
         roles = {
             # coherence
-            "Systems Analyst1": "As a Systems Analyst, you ensure the coherence of the "
-                             "code summary, ensuring that it clearly conveys the main logic of the code.",
+            "Original Code Author 0": "As the Original Code Author, having written the code, you ensure the coherence of the code summary, ensuring that it clearly conveys the main logic "
+                     "of the code and is easy to follow.",
             # Consistency
-            "Code Reviewer1": "As a Code Reviewer, serving as an experienced developer, you guarantee that the summary "
-                                    "remains consistent with the original code. You ensure that the summary captures the "
-                                    "primary functionality and logic of the code without introducing any additional or "
-                                    "unrelated content.",
+            "Original Code Author 1": "As the Original Code Author, having written the code, you guarantee that the summary remains consistent with the original code, without hallucinated or unsupported content, similar to fact-checking to prevent any fabricated functionality.",
+
             # Fluency
-            "Systems Analyst2": "As a Systems Analyst, you focus on ensuring that the summary is written smoothly, with clear "
-                           "sentences and appropriate wording. You challenge other judgments and provide alternative "
-                           "solutions when necessary.",
+            "Original Code Author 2": "As the Original Code Author, having written the code, you focus on ensuring that the summary is written smoothly, with clear sentences and appropriate "
+                   "wording, ensuring it reads naturally, like it was written by a fluent native speaker.",
+
             # Relevance
-            "Code Reviewer2": "As a Code Reviewer, serving as an experienced developer, concentrating on the business or functional relevance of the code, "
-                                    "you ensure that the summary captures the key significance of the code in the larger "
-                                    "system or project.",
+            "Code Reviewer": "As a Code Reviewer, serving as an experienced developer, you identify and preserve the most important parts of the code, avoiding unnecessary or off-topic content—like aiming at the core message without distraction.",
         }
         if rating_form == 1:
             example = {
@@ -503,18 +584,18 @@ def evaluate(model, cot, rating_form, reference):
                        'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
                        'Analysis: The summary "creates a new zip entry with the name" is factually consistent with the source code, which describes a method for creating a zip entry with a given name. There are no hallucinated facts or inconsistencies in the summary.'
                        'Rating: 4'
-                       # 'Source Code: public void remove scanning callback ( one sheeld scanning callback scanning callback ) { if ( scanning callback != null && scanning callbacks contains ( scanning callback ) ) scanning callbacks remove ( scanning callback ) ; }'
-                       # # 'Reference Summary: remove a scanning callback .'
-                       # 'Summary: if a scanning and .'
-                       # 'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
-                       # 'Analysis: The summary "if a scanning and ." is incomplete and does not accurately convey the primary action of the source code, which is to remove a scanning callback. It lacks clarity and does not align well with the reference summary or the code\'s functionality.'
-                       # 'Rating: 1'
-                       # 'Source Code: public dexportprivatekeyopenssl ( jframe parent , string entry alias , password quality config password quality config ) { super ( parent , dialog modality type document modal ) ; this entry alias = entry alias ; this password quality config = password quality config ; init components ( ) ; }'
-                       # # 'Reference Summary: creates a new dexportprivatekeyopenssl dialog .'
-                       # 'Summary: creates a new dexportprivatekeypvk dialog .'
-                       # 'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
-                       # 'Analysis: The summary "creates a new dexportprivatekeypvk dialog" is inconsistent with the source code, which specifically mentions dexportprivatekeyopenssl. This indicates a factual misalignment between the summary and the code.'
-                       # 'Rating: 0'
+                       'Source Code: public void remove scanning callback ( one sheeld scanning callback scanning callback ) { if ( scanning callback != null && scanning callbacks contains ( scanning callback ) ) scanning callbacks remove ( scanning callback ) ; }'
+                       # 'Reference Summary: remove a scanning callback .'
+                       'Summary: if a scanning and .'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: The summary "if a scanning and ." is incomplete and does not accurately convey the primary action of the source code, which is to remove a scanning callback. It lacks clarity and does not align well with the reference summary or the code\'s functionality.'
+                       'Rating: 1'
+                       'Source Code: public dexportprivatekeyopenssl ( jframe parent , string entry alias , password quality config password quality config ) { super ( parent , dialog modality type document modal ) ; this entry alias = entry alias ; this password quality config = password quality config ; init components ( ) ; }'
+                       # 'Reference Summary: creates a new dexportprivatekeyopenssl dialog .'
+                       'Summary: creates a new dexportprivatekeypvk dialog .'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: The summary "creates a new dexportprivatekeypvk dialog" is inconsistent with the source code, which specifically mentions dexportprivatekeyopenssl. This indicates a factual misalignment between the summary and the code.'
+                       'Rating: 0'
                        'Source Code: override public void on success ( dlsn value ) { if ( value get log segment sequence no ( ) != current log segment seq no ) { log error ( <string> , value get log segment sequence no ( ) , current log segment seq no ) ; errors found set ( true ) ; } if ( verify entry id && value get entry id ( ) != current entry id ) { log error ( <string> , value get entry id ( ) , current entry id ) ; errors found set ( true ) ; } sync latch count down ( ) ; }'
                        # 'Reference Summary:  invoked if the computation completes successfully'
                        'Summary: invoked completes a computation successfully successfully'
@@ -527,12 +608,12 @@ def evaluate(model, cot, rating_form, reference):
                        'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
                        'Analysis: The summary "modifies the the file given . for prefixes . the file" starts correctly by indicating the modification of a file but becomes unclear and irrelevant with the addition of "for prefixes."'
                        'Rating: 2'
-                       # 'Source Code: public process execute async ( final command line command , map < string , string > environment ) throws ioexception { if ( working directory != null && ! working directory exists ( ) ) { throw new ioexception ( working directory + <string> ) ; } return execute internal ( command , environment , working directory , stream handler , null ) ; }'
-                       # # 'Reference Summary: methods for starting asynchronous execution .'
-                       # 'Summary: methods for starting asynchronous execution . process process process process parent parent'
-                       # 'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
-                       # 'Analysis: The initial part of the summary, "methods for starting asynchronous execution," accurately reflects the source code\'s purpose. However, the repetition of "process process process process parent parent" is irrelevant and reduces the overall clarity.'
-                       # 'Rating: 3'
+                       'Source Code: public process execute async ( final command line command , map < string , string > environment ) throws ioexception { if ( working directory != null && ! working directory exists ( ) ) { throw new ioexception ( working directory + <string> ) ; } return execute internal ( command , environment , working directory , stream handler , null ) ; }'
+                       # 'Reference Summary: methods for starting asynchronous execution .'
+                       'Summary: methods for starting asynchronous execution . process process process process parent parent'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: The initial part of the summary, "methods for starting asynchronous execution," accurately reflects the source code\'s purpose. However, the repetition of "process process process process parent parent" is irrelevant and reduces the overall clarity.'
+                       'Rating: 3'
                        'Source Code: public omscalingraster ( double ullat , double ullon , double lrlat , double lrlon , image icon ii ) { this ( ullat , ullon , lrlat , lrlon , ii get image ( ) ) ; }'
                        # 'Reference Summary: create an omraster , lat / lon placement with an imageicon .'
                        'Summary: define a omraster lat lat , lon lon lon imageicon , scale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale minscale , 4000000 4000000 , 4000000 4000000 . 4000000 4000000 . 4000000 . 4000000 4000000 . 4000000 4000000 . 4000000 4000000 . 4000000'
@@ -559,12 +640,12 @@ def evaluate(model, cot, rating_form, reference):
                        'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
                        'Analysis: The summary "creates a new dexportprivatekeypvk dialog" is fluent in terms of its structure and grammar. Despite the mismatch with the specific class name in the source code, the sentence itself is well-formed, without repetitive words or grammatical errors.'
                        'Rating: 4'
-                       # 'Source Code: override public void on success ( dlsn value ) { if ( value get log segment sequence no ( ) != current log segment seq no ) { log error ( <string> , value get log segment sequence no ( ) , current log segment seq no ) ; errors found set ( true ) ; } if ( verify entry id && value get entry id ( ) != current entry id ) { log error ( <string> , value get entry id ( ) , current entry id ) ; errors found set ( true ) ; } sync latch count down ( ) ; }'
-                       # # 'Reference Summary:  invoked if the computation completes successfully'
-                       # 'Summary: invoked completes a computation successfully successfully'
-                       # 'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
-                       # 'Analysis: The summary "invoked completes a computation successfully successfully" has a grammatical error due to the repetition of the word "successfully." This redundancy makes the sentence awkward and less fluent, impacting its overall readability.'
-                       # 'Rating: 0'
+                       'Source Code: override public void on success ( dlsn value ) { if ( value get log segment sequence no ( ) != current log segment seq no ) { log error ( <string> , value get log segment sequence no ( ) , current log segment seq no ) ; errors found set ( true ) ; } if ( verify entry id && value get entry id ( ) != current entry id ) { log error ( <string> , value get entry id ( ) , current entry id ) ; errors found set ( true ) ; } sync latch count down ( ) ; }'
+                       # 'Reference Summary:  invoked if the computation completes successfully'
+                       'Summary: invoked completes a computation successfully successfully'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: The summary "invoked completes a computation successfully successfully" has a grammatical error due to the repetition of the word "successfully." This redundancy makes the sentence awkward and less fluent, impacting its overall readability.'
+                       'Rating: 0'
                        'Source Code: public static void modify file ( file file , function < string , string > modifier ) throws ioexception { string content = new string ( files to byte array ( file ) , standard charsets utf 8 ) ; string result = modifier apply ( content ) ; files write ( result get bytes ( standard charsets utf 8 ) , file ) ; }'
                        # 'Reference Summary: modifies the given file in place .'
                        'Summary: modifies the the file given . for prefixes . the file'
@@ -585,30 +666,30 @@ def evaluate(model, cot, rating_form, reference):
                        'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
                        'Analysis: the summary "if a scanning and ." fails to capture the essential action of the source code, which is the removal of a scanning callback. The summary is incomplete and does not convey the key information present in the code, leading to a lack of relevance.'
                        'Rating: 1'
-                       # 'Source Code: private void check server response code ( httpurlconnection url connection ) throws request failure exception { try { if ( url connection get response code ( ) != <num> ) { throw new request failure exception ( <string> + url connection get response code ( ) + <string> ) ; } } catch ( ioexception e ) { throw new request failure exception ( <string> , e ) ; } }'
-                       # # 'Reference Summary: confirms that the omaha server sent back an " ok " code .'
-                       # 'Summary: code that code in the code response .'
-                       # 'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
-                       # 'Analysis: the summary "code that code in the code response." is vague and fails to capture the essential action of the source code, which is checking and validating the server response code. The summary does not effectively convey the specific function of confirming an "ok" response from the server, as indicated in the reference summary.'
-                       # 'Rating: 0'
-                       # 'Source Code: private void offset start time if necessary ( time start time , time end time , string rrule , calendar event model model ) { if ( rrule == null || rrule is empty ( ) ) { return ; } m event recurrence parse ( rrule ) ; if ( m event recurrence freq != event recurrence weekly ) { return ; } if ( m event recurrence byday length > m event recurrence byday count ) { return ; } int closest weekday = integer max value ; int weekstart = event recurrence day2time day ( m event recurrence wkst ) ; int start day = start time week day ; for ( int i = <num> ; i < m event recurrence byday count ; i ++ ) { int day = event recurrence day2time day ( m event recurrence byday [ i ] ) ; if ( day == start day ) { return ; } if ( day < weekstart ) { day += <num> ; } if ( day > start day && ( day < closest weekday || closest weekday < start day ) ) { closest weekday = day ; } if ( closest weekday == integer max value || closest weekday < start day ) { if ( day < closest weekday ) { closest weekday = day ; } } } if ( closest weekday < start day ) { closest weekday += <num> ; } int days offset = closest weekday - start day ; start time month day += days offset ; end time month day += days offset ; long new start time = start time normalize ( true ) ; long new end time = end time normalize ( true ) ; model m start = new start time ; model m end = new end time ; }'
-                       # # 'Reference Summary:  if the recurrence rule is such that the event start date doesn \' t actually fall in one of the recurrences , then push the start date up to the first actual instance of the event .'
-                       # 'Summary:  parses the elements and , the store . the .'
-                       # 'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
-                       # 'Analysis: '
-                       # 'Rating: 0'
-                       # 'Source Code: public dexportprivatekeyopenssl ( jframe parent , string entry alias , password quality config password quality config ) { super ( parent , dialog modality type document modal ) ; this entry alias = entry alias ; this password quality config = password quality config ; init components ( ) ; }'
-                       # # 'Reference Summary: creates a new dexportprivatekeyopenssl dialog .'
-                       # 'Summary:  creates a new dexportprivatekeypvk dialog .'
-                       # 'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
-                       # 'Analysis: the summary "parses the elements and, the store. the." is disjointed and lacks coherence, failing to capture the essential function of the source code. The summary does not convey the specific operation of adjusting the event start date based on the recurrence rule, as detailed in the reference summary.'
-                       # 'Rating: 0'
-                       # 'Source Code: override public void on success ( dlsn value ) { if ( value get log segment sequence no ( ) != current log segment seq no ) { log error ( <string> , value get log segment sequence no ( ) , current log segment seq no ) ; errors found set ( true ) ; } if ( verify entry id && value get entry id ( ) != current entry id ) { log error ( <string> , value get entry id ( ) , current entry id ) ; errors found set ( true ) ; } sync latch count down ( ) ; }'
-                       # # 'Reference Summary:  invoked if the computation completes successfully'
-                       # 'Summary: invoked completes a computation successfully successfully'
-                       # 'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
-                       # 'Analysis: the summary "invoked completes a computation successfully successfully" captures the essence of the source code, which is about a method being invoked upon successful completion of a computation. However, the redundancy in the use of "successfully" could be seen as a minor issue, as it introduces a slight irrelevance through repetition.'
-                       # 'Rating: 4'
+                       'Source Code: private void check server response code ( httpurlconnection url connection ) throws request failure exception { try { if ( url connection get response code ( ) != <num> ) { throw new request failure exception ( <string> + url connection get response code ( ) + <string> ) ; } } catch ( ioexception e ) { throw new request failure exception ( <string> , e ) ; } }'
+                       # 'Reference Summary: confirms that the omaha server sent back an " ok " code .'
+                       'Summary: code that code in the code response .'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: the summary "code that code in the code response." is vague and fails to capture the essential action of the source code, which is checking and validating the server response code. The summary does not effectively convey the specific function of confirming an "ok" response from the server, as indicated in the reference summary.'
+                       'Rating: 0'
+                       'Source Code: private void offset start time if necessary ( time start time , time end time , string rrule , calendar event model model ) { if ( rrule == null || rrule is empty ( ) ) { return ; } m event recurrence parse ( rrule ) ; if ( m event recurrence freq != event recurrence weekly ) { return ; } if ( m event recurrence byday length > m event recurrence byday count ) { return ; } int closest weekday = integer max value ; int weekstart = event recurrence day2time day ( m event recurrence wkst ) ; int start day = start time week day ; for ( int i = <num> ; i < m event recurrence byday count ; i ++ ) { int day = event recurrence day2time day ( m event recurrence byday [ i ] ) ; if ( day == start day ) { return ; } if ( day < weekstart ) { day += <num> ; } if ( day > start day && ( day < closest weekday || closest weekday < start day ) ) { closest weekday = day ; } if ( closest weekday == integer max value || closest weekday < start day ) { if ( day < closest weekday ) { closest weekday = day ; } } } if ( closest weekday < start day ) { closest weekday += <num> ; } int days offset = closest weekday - start day ; start time month day += days offset ; end time month day += days offset ; long new start time = start time normalize ( true ) ; long new end time = end time normalize ( true ) ; model m start = new start time ; model m end = new end time ; }'
+                       # 'Reference Summary:  if the recurrence rule is such that the event start date doesn \' t actually fall in one of the recurrences , then push the start date up to the first actual instance of the event .'
+                       'Summary:  parses the elements and , the store . the .'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: '
+                       'Rating: 0'
+                       'Source Code: public dexportprivatekeyopenssl ( jframe parent , string entry alias , password quality config password quality config ) { super ( parent , dialog modality type document modal ) ; this entry alias = entry alias ; this password quality config = password quality config ; init components ( ) ; }'
+                       # 'Reference Summary: creates a new dexportprivatekeyopenssl dialog .'
+                       'Summary:  creates a new dexportprivatekeypvk dialog .'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: the summary "parses the elements and, the store. the." is disjointed and lacks coherence, failing to capture the essential function of the source code. The summary does not convey the specific operation of adjusting the event start date based on the recurrence rule, as detailed in the reference summary.'
+                       'Rating: 0'
+                       'Source Code: override public void on success ( dlsn value ) { if ( value get log segment sequence no ( ) != current log segment seq no ) { log error ( <string> , value get log segment sequence no ( ) , current log segment seq no ) ; errors found set ( true ) ; } if ( verify entry id && value get entry id ( ) != current entry id ) { log error ( <string> , value get entry id ( ) , current entry id ) ; errors found set ( true ) ; } sync latch count down ( ) ; }'
+                       # 'Reference Summary:  invoked if the computation completes successfully'
+                       'Summary: invoked completes a computation successfully successfully'
+                       'Evaluation Form (Answer by starting with ``Analysis:'' to analyze the given example regarding the evaluation criteria as concisely as possible, and then give the numeric rating on the next line by ``Rating'':)'
+                       'Analysis: the summary "invoked completes a computation successfully successfully" captures the essence of the source code, which is about a method being invoked upon successful completion of a computation. However, the redundancy in the use of "successfully" could be seen as a minor issue, as it introduces a slight irrelevance through repetition.'
+                       'Rating: 4'
                        'Source Code: public static void modify file ( file file , function < string , string > modifier ) throws ioexception { string content = new string ( files to byte array ( file ) , standard charsets utf 8 ) ; string result = modifier apply ( content ) ; files write ( result get bytes ( standard charsets utf 8 ) , file ) ; }'
                        # 'Reference Summary: modifies the given file in place .'
                        'Summary: modifies the the file given . for prefixes . the file'
@@ -943,7 +1024,6 @@ def evaluate(model, cot, rating_form, reference):
             'Generated': generated
         }
 
-
         for (role_name, role_description), (criterion_name, criterion_task), (eval_name, eval_step), \
             (example_name, example_data) in zip(roles.items(), criteria.items(), evaluation_step.items(),
                                                 example.items()):
@@ -988,15 +1068,19 @@ def evaluate(model, cot, rating_form, reference):
             column_name = f"{role_name} ({criterion_name} Score)"
 
             if rating_form:
-                match = re.search(r'Rating:\s*(\d+\.?\d*)', score)
-                if match:
-                     match = float(match.group(1))
+                # match = re.search(r'Rating:\s*(\d+\.?\d*)', score)
+                matches = re.findall(r'\d+', score)
+
+                if matches:
+                     match = matches[-1] 
                 else:
                      match = 0
             else:
-                match = re.search(r'\d+', score)
-                if match:
-                     match = match.group()
+                # match = re.search(r'\d+', score)
+                matches = re.findall(r'\d+', score)
+
+                if matches:
+                     match = matches[-1] 
                 else:
                      match = 0
 
@@ -1028,6 +1112,30 @@ def model_api(model, prompt):
         except Exception as e:
             time.sleep(25)
             return model_api(model, prompt)
+    elif model == 'gpt-4.1-nano' or model == 'gpt-4o-mini' or model == 'gpt-4o':
+        try:
+            message = [
+                      {"role": "user", "content": prompt}
+               ]
+            response = openai.chat.completions.create(
+              model=model,
+              messages=message,
+              response_format={
+                "type": "text"
+              },
+              temperature=1,
+              max_completion_tokens=1000,
+              top_p=1,
+              frequency_penalty=0,
+              presence_penalty=0,
+              store=False
+            )
+            generated_answer = ' '.join(response.choices[0].message.content.strip().split())
+            matches = re.findall(r'\d+', generated_answer)
+            match = matches[-1] 
+        except Exception as e:
+            time.sleep(25)
+            return model_api(model, prompt)
     else:
         try:
             response = openai.Completion.create(
@@ -1043,12 +1151,10 @@ def model_api(model, prompt):
 
 
 if __name__ == '__main__':
-    model = "text-davinci-003"
-    # model = 'gpt-3.5-turbo-0613'
-    # model = 'gpt-4'
+    model = 'gpt-4o-mini'
     cot = 0  # 0-false, 1-ture
     rating_form = 2  # 0-raw, 1-analyse, 2-explain
-    reference = 1  # 0-false, 1-ture
-    print(rating_form)
-    evaluate( model, cot, rating_form, reference)
+    reference = 0  # 0-false, 1-ture
+    print(cot,reference,rating_form)
+    evaluate(model, cot, rating_form, reference)
 
