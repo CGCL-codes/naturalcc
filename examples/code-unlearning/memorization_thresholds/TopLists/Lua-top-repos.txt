@@ -1,0 +1,16 @@
+2508	https://github.com/stevearc/conform.nvim
+2204	https://github.com/nvimtools/none-ls.nvim
+2199	https://github.com/folke/flash.nvim
+1582	https://github.com/face-hh/griddycode
+1212	https://github.com/CopilotC-Nvim/CopilotChat.nvim
+1072	https://github.com/tbhrbxx/robloxscripts
+963	https://github.com/David-Kunz/gen.nvim
+786	https://github.com/3rd/image.nvim
+649	https://github.com/kawre/leetcode.nvim
+641	https://github.com/nvim-java/nvim-java
+579	https://github.com/craftzdog/solarized-osaka.nvim
+575	https://github.com/tris203/precognition.nvim
+554	https://github.com/ejoy/vaststars
+544	https://github.com/nvim-neorocks/rocks.nvim
+531	https://github.com/Robitx/gp.nvim
+519	https://github.com/wojciech-kulik/xcodebuild.nvim

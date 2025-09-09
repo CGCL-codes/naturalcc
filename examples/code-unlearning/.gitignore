@@ -1,0 +1,11 @@
+__pycache__/
+
+memorization_thresholds/Code/
+memorization_thresholds/Repos/
+
+sensitive_memorization/codeparrot-clean-train-secrets-*
+sensitive_memorization/.codeparrot-clean-train-cache
+
+unlearning_preparation/benchmark.feather
+
+unlearning/ckpts/

@@ -1,0 +1,7 @@
+28270	https://github.com/maybe-finance/maybe
+5489	https://github.com/docusealco/docuseal
+707	https://github.com/rage-rb/rage
+694	https://github.com/Multiwoven/multiwoven
+616	https://github.com/darwin-containers/homebrew-formula
+584	https://github.com/wouterken/crystalruby
+516	https://github.com/Freika/dawarich
