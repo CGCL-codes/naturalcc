@@ -1,0 +1,7 @@
+output
+*__pycache__
+test.ipynb
+.vscode
+tmp_*
+tmp/*
+output_*
