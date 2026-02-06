@@ -1,6 +1,7 @@
 # MetaTab
 
-This is the official guide for the paper *“Detecting Logic Errors in LM-Generated Programs for Tabular Data via Metamorphic Testing.”*  
+This is the official guide for the paper  
+**“Detecting Logic Errors in LM-Generated Programs for Tabular Data Reasoning via Metamorphic Testing.”**
 
 ![MetaTab Illustration](METATAB1.png)
 
@@ -33,6 +34,8 @@ Extract the dataset:
 unzip assets/data.zip -d path/to/data
 ```
 
+---
+
 ### 2. Model Setup
 
 Set up the tabular language models locally:
@@ -56,48 +59,21 @@ python run_tablegpt_agent.py \
     --log_dir output/wtq_agent --cache_dir cache/tablegpt
 ```
 
-#### Intermediate Program Generation (Perturbed)
-
 ---
 
-### Permutation Metamorphic Relations (PMR)
+## Permutation Metamorphic Relations (PMR)
 
-- **PMR1: Shuffle**
+Previous PMR3 (Transpose) and PMR4 (Reconstruction) have been removed.  
+Current PMRs are based on inserting redundant rows or columns.
+
+### PMR1: Dummy Row Insertion
+
 ```bash
-python run_tablegpt_agent.py \
-    --model tablegpt \
-    --dataset wtq --sub_sample False \
-    --perturbation shuffle --use_full_table True \
-    --disable_resort True --norm_cache True \
-    --resume 0 --stop_at 1e6 --self_consistency 5 --temperature 0.8 \
-    --log_dir output/wtq_agent --cache_dir cache/tablegpt
+python insert_dummy_row_mul.py
 ```
 
-- **PMR2: Column Shuffle**
 ```bash
 python run_tablegpt_agent.py \
-    --model tablegpt \
-    --dataset wtq --sub_sample False \
-    --perturbation column_shuffle --use_full_table True \
-    --disable_resort True --norm_cache True \
-    --resume 0 --stop_at 1e6 --self_consistency 5 --temperature 0.8 \
-    --log_dir output/wtq_agent --cache_dir cache/tablegpt
-```
-
-- **PMR3: Transpose**
-```bash
-python run_tablegpt_agent.py \
-    --model tablegpt \
-    --dataset wtq --sub_sample False \
-    --perturbation transpose --use_full_table True \
-    --disable_resort True --norm_cache True \
-    --resume 0 --stop_at 1e6 --self_consistency 5 --temperature 0.8 \
-    --log_dir output/wtq_agent --cache_dir cache/tablegpt
-```
-
-- **PMR4: Reconstruction**
-```bash
-python run_reconstruction_tablegpt_agent.py \
     --model tablegpt \
     --dataset wtq --sub_sample False \
     --perturbation none --use_full_table True \
@@ -108,9 +84,52 @@ python run_reconstruction_tablegpt_agent.py \
 
 ---
 
-### Decomposition Metamorphic Relations (DMR)
+### PMR2: Dummy Column Insertion
 
-- **DMR1**
+```bash
+python insert_dummy_column_mul.py
+```
+
+```bash
+python run_tablegpt_agent.py \
+    --model tablegpt \
+    --dataset wtq --sub_sample False \
+    --perturbation none --use_full_table True \
+    --disable_resort True --norm_cache True \
+    --resume 0 --stop_at 1e6 --self_consistency 5 --temperature 0.8 \
+    --log_dir output/wtq_agent --cache_dir cache/tablegpt
+```
+
+---
+
+- **PMR3: Shuffle**
+```bash
+python run_tablegpt_agent.py \
+    --model tablegpt \
+    --dataset wtq --sub_sample False \
+    --perturbation shuffle --use_full_table True \
+    --disable_resort True --norm_cache True \
+    --resume 0 --stop_at 1e6 --self_consistency 5 --temperature 0.8 \
+    --log_dir output/wtq_agent --cache_dir cache/tablegpt
+```
+---
+
+- **PMR4: Column Shuffle**
+```bash
+python run_tablegpt_agent.py \
+    --model tablegpt \
+    --dataset wtq --sub_sample False \
+    --perturbation column_shuffle --use_full_table True \
+    --disable_resort True --norm_cache True \
+    --resume 0 --stop_at 1e6 --self_consistency 5 --temperature 0.8 \
+    --log_dir output/wtq_agent --cache_dir cache/tablegpt
+```
+---
+
+## Decomposition Metamorphic Relations (DMR)
+
+### DMR1
+
 ```bash
 python run_tablegpt_agent_cut.py \
     --model tablegpt \
@@ -121,7 +140,10 @@ python run_tablegpt_agent_cut.py \
     --log_dir output/wtq_agent --cache_dir cache/tablegpt
 ```
 
-- **DMR2**
+---
+
+### DMR2
+
 ```bash
 python run_tablegpt_agent_c_cut.py \
     --model tablegpt \
@@ -134,24 +156,45 @@ python run_tablegpt_agent_c_cut.py \
 
 ---
 
-### Semantic Metamorphic Relations (SMR)
+## Semantic Metamorphic Relations (SMR)
 
-- **SMR1**
+### SMR1
+
 ```bash
 python Symbolization_pure_numbers_to_words.py
 ```
 
-- **SMR2**
 ```bash
-python Category_Anonymization.py
+python run_tablegpt_agent.py \
+    --model tablegpt \
+    --dataset wtq --sub_sample False \
+    --perturbation none --use_full_table True \
+    --disable_resort True --norm_cache True \
+    --resume 0 --stop_at 1e6 --self_consistency 5 --temperature 0.8 \
+    --log_dir output/wtq_agent --cache_dir cache/tablegpt
 ```
 
-- **SMR3**
+---
+
+### SMR2
+
+```bash
+python run_tablegpt_agent_wo_kongge.py \
+    --model tablegpt \
+    --dataset wtq --sub_sample False \
+    --perturbation none --use_full_table True \
+    --disable_resort True --norm_cache True \
+    --resume 0 --stop_at 1e6 --self_consistency 5 --temperature 0.8 \
+    --log_dir output/wtq_agent --cache_dir cache/tablegpt
+```
+
+---
+
+### SMR3
+
 ```bash
 python filter_time_series_table.py
 ```
-
-After preprocessing, run:
 
 ```bash
 python run_tablegpt_agent.py \
@@ -167,18 +210,17 @@ python run_tablegpt_agent.py \
 
 ## Evaluation
 
-- **Error Rate**
+### Error Rate
+
 ```bash
 python evaluate_agent_all_type.py
 ```
 
-- **Recall, Precision, F1 Score**
-```bash
-python hhh_wtq.py
-```
-
 ---
 
-## Environment
+### Detection Rate and False Alarm Rate
 
-- PyTorch  
+```bash
+python hhh_logic_eq_cons.py
+```
+
