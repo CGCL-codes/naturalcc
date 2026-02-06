@@ -63,8 +63,6 @@ python run_tablegpt_agent.py \
 
 ## Permutation Metamorphic Relations (PMR)
 
-Previous PMR3 (Transpose) and PMR4 (Reconstruction) have been removed.  
-Current PMRs are based on inserting redundant rows or columns.
 
 ### PMR1: Dummy Row Insertion
 
