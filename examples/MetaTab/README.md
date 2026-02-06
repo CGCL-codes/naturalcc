@@ -100,7 +100,7 @@ python run_tablegpt_agent.py \
 
 ---
 
-### PMR3: Shuffle
+### PMR3: Row Permutation
 ```bash
 python run_tablegpt_agent.py \
     --model tablegpt \
@@ -112,7 +112,7 @@ python run_tablegpt_agent.py \
 ```
 ---
 
-### PMR4: Column Shuffle
+### PMR4: Column Permutation
 ```bash
 python run_tablegpt_agent.py \
     --model tablegpt \
