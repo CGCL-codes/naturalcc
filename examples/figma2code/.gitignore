@@ -1,0 +1,14 @@
+data
+output
+tmp
+.env
+.vscode
+*__pycache__
+test.ipynb
+vendors/apikeys.py
+tmp.py
+.gradio
+.clipsim.py.swp
+gradio_temp
+doc/tmp.md
+tmp_test.py
