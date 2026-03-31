@@ -133,13 +133,13 @@ def build_aider_context_and_command(
     if not user_instruction or not user_instruction.strip():
         raise ValueError("user_instruction 不能为空。")
 
-    DEFAULT_API_KEY = "Add by yourself"
+    API_KEY_TMP = "Add by yourself"
 
     if not api_key:
         api_key = (
             os.environ.get("OPENROUTER_API_KEY")
             or os.environ.get("OPENAI_API_KEY")
-            or DEFAULT_API_KEY
+            or API_KEY_TMP
         )
         if not api_key:
             init_log += "⚠️ [警告]: 未提供 API Key，且环境变量中未找到 OPENROUTER_API_KEY / OPENAI_API_KEY，调用可能会失败。\n"

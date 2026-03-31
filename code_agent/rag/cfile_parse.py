@@ -1,9 +1,90 @@
 import os
 import sys
+from pathlib import Path
+from ctypes.util import find_library
+
 from clang import cindex
-#cindex.Config.set_library_file('/opt/homebrew/Cellar/llvm/20.1.2/lib/libclang.dylib')
-#cindex.Config.set_library_file('/usr/lib/llvm-12/lib/libclang.so.1')
-cindex.Config.set_library_file(f"{os.environ['CONDA_PREFIX']}/lib/libclang.so")
+
+
+def _iter_libclang_candidates():
+    override = os.environ.get("LIBCLANG_PATH")
+    if override:
+        override_path = Path(override)
+        if override_path.is_file():
+            yield override_path
+        elif override_path.is_dir():
+            if sys.platform == "win32":
+                yield override_path / "libclang.dll"
+                for dll in sorted(override_path.glob("libclang-*.dll"), reverse=True):
+                    yield dll
+                yield override_path / "clang.dll"
+            elif sys.platform == "darwin":
+                yield override_path / "libclang.dylib"
+            else:
+                yield override_path / "libclang.so"
+                yield override_path / "libclang.so.1"
+
+    prefixes = [Path(sys.prefix)]
+    for env_name in ("CONDA_PREFIX", "VIRTUAL_ENV"):
+        prefix = os.environ.get(env_name)
+        if prefix:
+            prefixes.append(Path(prefix))
+
+    seen = set()
+    for prefix in prefixes:
+        prefix_str = str(prefix.resolve()) if prefix.exists() else str(prefix)
+        if prefix_str in seen:
+            continue
+        seen.add(prefix_str)
+
+        if sys.platform == "win32":
+            win_dirs = [
+                prefix / "Library" / "bin",
+                prefix / "Library" / "lib",
+                prefix / "bin",
+            ]
+            for win_dir in win_dirs:
+                yield win_dir / "libclang.dll"
+                for dll in sorted(win_dir.glob("libclang-*.dll"), reverse=True):
+                    yield dll
+                yield win_dir / "clang.dll"
+        elif sys.platform == "darwin":
+            yield prefix / "lib" / "libclang.dylib"
+        else:
+            yield prefix / "lib" / "libclang.so"
+            yield prefix / "lib" / "libclang.so.1"
+            yield prefix / "lib64" / "libclang.so"
+            yield prefix / "lib64" / "libclang.so.1"
+
+    for lib_name in ("clang", "libclang"):
+        found = find_library(lib_name)
+        if found:
+            yield Path(found)
+
+
+def _configure_libclang():
+    if cindex.Config.loaded:
+        return
+
+    for candidate in _iter_libclang_candidates():
+        try:
+            if candidate.exists() or not candidate.parent:
+                cindex.Config.set_library_file(str(candidate))
+                return
+        except OSError:
+            continue
+
+    env_prefix = sys.prefix
+    raise RuntimeError(
+        "libclang not found. "
+        f"Checked under environment: {env_prefix}. "
+        "Install libclang into the active environment, for example:\n"
+        "  conda install -n naturalcc -c conda-forge libclang\n"
+        "or set LIBCLANG_PATH to the full library path."
+    )
+
+
+_configure_libclang()
 from clang.cindex import Index, CursorKind, TranslationUnit
 # 利用 libclang 解析 C 文件，提取文件中的函数、变量、结构体、typedef、include 等语法元素，
 # 并保存为结构化字典，方便后续做静态分析、代码索引、文档生成或知识图谱构建。
