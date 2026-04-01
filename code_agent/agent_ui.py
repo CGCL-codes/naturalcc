@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+from typing import List, Sequence, Tuple
 
 import gradio as gr
 
@@ -8,9 +9,19 @@ if __package__ in (None, ""):
     package_root = Path(__file__).resolve().parent.parent
     if str(package_root) not in sys.path:
         sys.path.insert(0, str(package_root))
-    from code_agent.aider_runner import run_aider_stream, preview_prompt
+    from code_agent.aider_runner import (
+        DEFAULT_PROJECT_DIR,
+        normalize_project_dir,
+        preview_prompt,
+        run_aider_stream,
+    )
 else:
-    from .aider_runner import run_aider_stream, preview_prompt
+    from .aider_runner import (
+        DEFAULT_PROJECT_DIR,
+        normalize_project_dir,
+        preview_prompt,
+        run_aider_stream,
+    )
 
 
 MODELS = [
@@ -37,37 +48,155 @@ MODELS = [
 ]
 
 
-def get_local_files(root_dir="."):
-    """遍历当前目录，提供给用户选择已有文件的列表"""
-    file_list = []
-    ignore_dirs = {
-        ".git",
-        "__pycache__",
-        "venv",
-        ".venv",
-        ".aider.tags.cache.v3",
-        "datasets",
-        "node_modules",
-        ".idea",
-        ".vscode",
-    }
+IGNORE_DIRS = {
+    ".git",
+    "__pycache__",
+    "venv",
+    ".venv",
+    ".aider.tags.cache.v3",
+    ".aider.tags.cache.v4",
+    "datasets",
+    "node_modules",
+    ".idea",
+    ".vscode",
+}
+IGNORE_FILE_EXTENSIONS = {".log", ".ps"}
 
-    if not os.path.isdir(root_dir):
+
+def should_ignore_file(filename: str) -> bool:
+    return filename.startswith(".") or Path(filename).suffix.lower() in IGNORE_FILE_EXTENSIONS
+
+
+def get_local_files(root_dir: str = DEFAULT_PROJECT_DIR) -> List[str]:
+    """遍历项目目录，提供给用户选择已有文件的列表。"""
+    normalized_root = normalize_project_dir(root_dir)
+    if not os.path.isdir(normalized_root):
         return []
 
-    for dirpath, dirnames, filenames in os.walk(root_dir):
-        dirnames[:] = [d for d in dirnames if d not in ignore_dirs]
-        for f in filenames:
-            if not f.startswith("."):
-                full_path = os.path.relpath(os.path.join(dirpath, f), root_dir)
-                file_list.append(full_path.replace("\\", "/"))
-    return sorted(file_list)
+    file_list = []
+    for dirpath, dirnames, filenames in os.walk(normalized_root):
+        dirnames[:] = [dirname for dirname in dirnames if dirname not in IGNORE_DIRS]
+        for filename in filenames:
+            if should_ignore_file(filename):
+                continue
+            full_path = os.path.relpath(os.path.join(dirpath, filename), normalized_root)
+            file_list.append(full_path.replace("\\", "/"))
+    return sorted(file_list, key=str.casefold)
 
 
-def refresh_file_choices(project_dir: str):
-    if not project_dir or not os.path.isdir(project_dir):
-        return gr.update(choices=[], value=[])
-    return gr.update(choices=get_local_files(project_dir), value=[])
+def sanitize_target_files(target_files) -> List[str]:
+    if target_files is None:
+        return []
+
+    if isinstance(target_files, str):
+        target_files = [target_files]
+
+    result: List[str] = []
+    seen = set()
+    for item in target_files:
+        normalized_item = str(item).strip().replace("\\", "/")
+        if not normalized_item:
+            continue
+        if Path(normalized_item).suffix.lower() in IGNORE_FILE_EXTENSIONS:
+            continue
+        if normalized_item in seen:
+            continue
+        result.append(normalized_item)
+        seen.add(normalized_item)
+    return result
+
+
+def merge_file_choices(file_choices: Sequence[str], target_files) -> Tuple[List[str], List[str]]:
+    selected_files = sanitize_target_files(target_files)
+    merged_choices = list(file_choices)
+    seen = set(merged_choices)
+    for item in selected_files:
+        if item in seen:
+            continue
+        merged_choices.append(item)
+        seen.add(item)
+    return merged_choices, selected_files
+
+
+def refresh_file_choices(project_dir: str, target_files=None):
+    normalized_root = normalize_project_dir(project_dir)
+    if not os.path.isdir(normalized_root):
+        return gr.update(value=normalized_root), gr.update(choices=[], value=[])
+
+    file_choices = get_local_files(normalized_root)
+    merged_choices, selected_files = merge_file_choices(file_choices, target_files)
+    return (
+        gr.update(value=normalized_root),
+        gr.update(choices=merged_choices, value=selected_files),
+    )
+
+
+def choose_project_dir(current_dir: str):
+    fallback_dir = normalize_project_dir(current_dir)
+    root = None
+    selected_dir = ""
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        selected_dir = filedialog.askdirectory(initialdir=fallback_dir)
+    except Exception:
+        selected_dir = fallback_dir
+    finally:
+        if root is not None:
+            try:
+                root.destroy()
+            except Exception:
+                pass
+
+    return refresh_file_choices(selected_dir or fallback_dir)
+
+
+def preview_prompt_from_ui(
+    target_files,
+    user_instruction: str,
+    model: str,
+    api_key: str,
+    project_dir: str,
+    symbol: str,
+    completion_type: str,
+    prefix: str,
+):
+    return preview_prompt(
+        target_files=sanitize_target_files(target_files),
+        user_instruction=user_instruction,
+        model=model,
+        api_key=api_key,
+        project_dir=normalize_project_dir(project_dir),
+        symbol=symbol,
+        completion_type=completion_type,
+        prefix=prefix,
+    )
+
+
+def run_aider_stream_from_ui(
+    target_files,
+    user_instruction: str,
+    model: str,
+    api_key: str,
+    project_dir: str,
+    symbol: str,
+    completion_type: str,
+    prefix: str,
+):
+    yield from run_aider_stream(
+        target_files=sanitize_target_files(target_files),
+        user_instruction=user_instruction,
+        model=model,
+        api_key=api_key,
+        project_dir=normalize_project_dir(project_dir),
+        symbol=symbol,
+        completion_type=completion_type,
+        prefix=prefix,
+    )
 
 
 custom_theme = gr.themes.Soft(
@@ -93,19 +222,22 @@ with gr.Blocks(theme=custom_theme, title="NaturalCC Agent") as demo:
 
             with gr.Group():
                 project_dir_input = gr.Textbox(
+                    value=DEFAULT_PROJECT_DIR,
                     label="📁 项目根目录",
-                    placeholder="例如: /path/to/your/c_project",
-                    info="必须填写，用于加载 CProjectParser 解析结果"
+                    placeholder="例如: D:/workspace/your_project",
+                    info="默认使用当前运行 agent_ui.py 时的目录。也可以点击右侧文件夹按钮重新选择。"
                 )
 
-                refresh_btn = gr.Button("🔄 刷新项目文件列表")
+                with gr.Row():
+                    choose_dir_btn = gr.Button("📂 选择目录", variant="secondary")
+                    refresh_btn = gr.Button("🔄 刷新项目文件列表", variant="secondary")
 
                 target_files_input = gr.Dropdown(
-                    choices=[],
+                    choices=get_local_files(DEFAULT_PROJECT_DIR),
                     multiselect=True,
                     allow_custom_value=True,
                     label="📄 Aider 目标文件 (支持多选及新建)",
-                    info="这些文件会交给 Aider 实际修改，同时第一个目标文件会作为解析目标文件。点击刷新后可从项目目录中选择。"
+                    info="会自动忽略 .log、.ps 等垃圾文件。这些文件会交给 Aider 实际修改，同时第一个目标文件会作为解析目标文件。"
                 )
 
             with gr.Group():
@@ -124,25 +256,26 @@ with gr.Blocks(theme=custom_theme, title="NaturalCC Agent") as demo:
                     info="可直接从下拉框中选择模型，也可以手动输入"
                 )
 
-            with gr.Group():
-                symbol_input = gr.Textbox(
-                    label="🔤 目标符号 symbol（可选）",
-                    placeholder="例如: factory / winsize / node",
-                    info="可留空。程序会尝试从开发指令中自动识别，例如“补全 parse_flags 函数”会自动识别 parse_flags。"
-                )
+            with gr.Accordion("🧩 进阶功能", open=False):
+                with gr.Group():
+                    symbol_input = gr.Textbox(
+                        label="🔤 目标符号 symbol",
+                        placeholder="例如: factory / winsize / node",
+                        info="可留空。程序会尝试从开发指令中自动识别，例如“补全 parse_flags 函数”会自动识别 parse_flags。"
+                    )
 
-                completion_type_input = gr.Dropdown(
-                    choices=["", "member", "variable", "function", "function_body", "type"],
-                    value="",
-                    label="🧩 补全类型（可选）",
-                    info="可留空。程序会自动推断，补全函数默认按函数体实现处理。"
-                )
+                    completion_type_input = gr.Dropdown(
+                        choices=["", "member", "variable", "function", "function_body", "type"],
+                        value="",
+                        label="🧩 补全类型",
+                        info="可留空。程序会自动推断，补全函数默认按函数体实现处理。"
+                    )
 
-                prefix_input = gr.Textbox(
-                    label="🔎 前缀过滤 prefix（可选）",
-                    placeholder="例如: get_terminal_ / win / co",
-                    info="一般可留空。只有在你想按前缀匹配多个候选时才需要填写。"
-                )
+                    prefix_input = gr.Textbox(
+                        label="🔎 前缀过滤 prefix",
+                        placeholder="例如: get_terminal_ / win / co",
+                        info="一般可留空。只有在你想按前缀匹配多个候选时才需要填写。"
+                    )
 
         with gr.Column(scale=7):
             gr.Markdown("### 📝 开发指令")
@@ -165,14 +298,26 @@ with gr.Blocks(theme=custom_theme, title="NaturalCC Agent") as demo:
                 interactive=False
             )
 
+    choose_dir_btn.click(
+        fn=choose_project_dir,
+        inputs=[project_dir_input],
+        outputs=[project_dir_input, target_files_input]
+    )
+
     refresh_btn.click(
         fn=refresh_file_choices,
-        inputs=[project_dir_input],
-        outputs=[target_files_input]
+        inputs=[project_dir_input, target_files_input],
+        outputs=[project_dir_input, target_files_input]
+    )
+
+    project_dir_input.change(
+        fn=refresh_file_choices,
+        inputs=[project_dir_input, target_files_input],
+        outputs=[project_dir_input, target_files_input]
     )
 
     preview_btn.click(
-        fn=preview_prompt,
+        fn=preview_prompt_from_ui,
         inputs=[
             target_files_input,
             instruction_input,
@@ -187,7 +332,7 @@ with gr.Blocks(theme=custom_theme, title="NaturalCC Agent") as demo:
     )
 
     run_btn.click(
-        fn=run_aider_stream,
+        fn=run_aider_stream_from_ui,
         inputs=[
             target_files_input,
             instruction_input,

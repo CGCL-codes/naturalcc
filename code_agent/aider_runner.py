@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import argparse
 import sys
+import locale
 from pathlib import Path
 from typing import Generator, List, Optional, Tuple
 
@@ -18,9 +19,24 @@ else:
 
 
 ANSI_ESCAPE_PATTERN = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+OUTPUT_ENCODING_CANDIDATES = [
+    "utf-8",
+    "utf-8-sig",
+    "gb18030",
+    "cp936",
+    locale.getpreferredencoding(False) or "",
+]
+DEFAULT_PROJECT_DIR = str(Path.cwd().resolve())
 
 # 全局缓存一个 agent，避免同一进程中重复解析同一个项目
 PROMPT_AGENT = CompletionPromptAgent()
+
+
+def normalize_project_dir(project_dir: Optional[str]) -> str:
+    raw_value = (project_dir or "").strip()
+    if not raw_value:
+        return DEFAULT_PROJECT_DIR
+    return str(Path(raw_value).expanduser().resolve())
 
 
 def normalize_file_path_for_parser(file_path: Optional[str], project_dir: Optional[str]) -> Optional[str]:
@@ -30,7 +46,7 @@ def normalize_file_path_for_parser(file_path: Optional[str], project_dir: Option
         return file_path
 
     file_path = os.path.abspath(file_path) if os.path.isabs(file_path) else file_path
-    project_dir_abs = os.path.abspath(project_dir)
+    project_dir_abs = normalize_project_dir(project_dir)
 
     if os.path.isabs(file_path):
         try:
@@ -80,7 +96,7 @@ def normalize_target_files(target_files, project_dir=None):
         if os.path.isabs(item):
             result.append(item)
         else:
-            base_dir = project_dir or os.getcwd()
+            base_dir = normalize_project_dir(project_dir)
             result.append(os.path.abspath(os.path.join(base_dir, item)))
 
     return result
@@ -94,6 +110,7 @@ def generate_completion_prompt(
     completion_type: Optional[str] = None,
     prefix: str = "",
 ) -> str:
+    project_dir = normalize_project_dir(project_dir)
     normalized_targets = normalize_target_files(target_files, project_dir=project_dir)
     effective_file_path = normalized_targets[0] if normalized_targets else None
     normalized_file_path = normalize_file_path_for_parser(effective_file_path, project_dir)
@@ -126,6 +143,8 @@ def build_aider_context_and_command(
     """
     ensure_aider_installed()
 
+    project_dir = normalize_project_dir(project_dir)
+
     target_files = normalize_target_files(target_files, project_dir=project_dir)
 
     init_log = ""
@@ -146,8 +165,8 @@ def build_aider_context_and_command(
 
     init_log += "🚀 [NaturalCC] 正在扫描并分析项目图谱...\n"
 
-    if not project_dir:
-        raise ValueError("必须提供 project_dir，用于加载项目解析信息。")
+    if not os.path.isdir(project_dir):
+        raise ValueError(f"项目根目录不存在或不可访问: {project_dir}")
 
     effective_file_path = target_files[0] if target_files else None
     normalized_effective_file_path = normalize_file_path_for_parser(effective_file_path, project_dir)
@@ -197,6 +216,7 @@ def build_aider_context_and_command(
         "--map-tokens",
         "0",
         "--yes-always",
+        "--no-fancy-input",
         "--no-auto-commits",
     ]
 
@@ -220,6 +240,26 @@ def mask_command_for_log(aider_command: List[str], model: str) -> str:
         else:
             safe_cmd.append(cmd)
     return " ".join(safe_cmd)
+
+
+def build_subprocess_env() -> dict:
+    env = os.environ.copy()
+    # 在 Windows pipe 场景下强制 Python 子进程优先走 UTF-8，降低中文输出乱码概率。
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUTF8"] = "1"
+    env.setdefault("NO_COLOR", "1")
+    return env
+
+
+def decode_process_line(raw_line: bytes) -> str:
+    for encoding in OUTPUT_ENCODING_CANDIDATES:
+        if not encoding:
+            continue
+        try:
+            return raw_line.decode(encoding).replace("\r\n", "\n").replace("\r", "\n")
+        except UnicodeDecodeError:
+            continue
+    return raw_line.decode("utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
 
 
 def run_aider_cli(
@@ -248,7 +288,7 @@ def run_aider_cli(
     print(f"🔧 [执行命令]: {mask_command_for_log(aider_command, model)}\n" + "-" * 60)
 
     try:
-        subprocess.run(aider_command, check=True)
+        subprocess.run(aider_command, check=True, env=build_subprocess_env())
         print("\n✅ [NaturalCC Agent] 任务圆满完成！")
     except subprocess.CalledProcessError as e:
         print(f"\n❌ [Aider] 执行异常退出，退出码：{e.returncode}")
@@ -270,10 +310,11 @@ def run_aider_stream(
     output_log = ""
 
     try:
+        project_dir = normalize_project_dir(project_dir)
         target_files = normalize_target_files(target_files, project_dir=project_dir)
 
-        if not project_dir:
-            yield "⚠️ [错误]: 请输入项目根目录 project_dir。\n"
+        if not os.path.isdir(project_dir):
+            yield f"⚠️ [错误]: 项目根目录不存在或不可访问: {project_dir}\n"
             return
 
         if not user_instruction or not user_instruction.strip():
@@ -302,16 +343,15 @@ def run_aider_stream(
             aider_command,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,
-            universal_newlines=True,
-            encoding="utf-8",
-            errors="replace",
+            text=False,
+            bufsize=0,
+            env=build_subprocess_env(),
         )
 
         assert process.stdout is not None
         for line in process.stdout:
-            clean_line = ANSI_ESCAPE_PATTERN.sub("", line)
+            decoded_line = decode_process_line(line)
+            clean_line = ANSI_ESCAPE_PATTERN.sub("", decoded_line)
             output_log += clean_line
             yield output_log
 
@@ -348,6 +388,7 @@ def preview_prompt(
     仅生成并预览最终给 Aider 的 prompt，不执行 Aider。
     """
     try:
+        project_dir = normalize_project_dir(project_dir)
         target_files = normalize_target_files(target_files, project_dir=project_dir)
         _aider_command, prompt_file_path, init_log, final_instruction = build_aider_context_and_command(
             target_files=target_files,
@@ -380,7 +421,12 @@ if __name__ == "__main__":
     parser.add_argument("--instruction", type=str, required=True, help="你的修改需求")
     parser.add_argument("--model", type=str, default="openrouter/deepseek/deepseek-chat", help="使用的模型")
     parser.add_argument("--api-key", type=str, default=None, help="API Key (默认读环境变量)")
-    parser.add_argument("--project-dir", type=str, required=True, help="项目根目录")
+    parser.add_argument(
+        "--project-dir",
+        type=str,
+        default=DEFAULT_PROJECT_DIR,
+        help="项目根目录，默认使用当前运行程序的目录",
+    )
     parser.add_argument("--symbol", type=str, default=None, help="目标符号（可选）")
     parser.add_argument(
         "--completion-type",
