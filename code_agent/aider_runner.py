@@ -417,19 +417,19 @@ def preview_prompt(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NaturalCC Agent 命令行工具")
-    parser.add_argument("--files", nargs="*", default=[], help="目标文件列表，如 src/main.c src/utils.c")
-    parser.add_argument("--instruction", type=str, required=True, help="你的修改需求")
-    parser.add_argument("--model", type=str, default="openrouter/deepseek/deepseek-chat", help="使用的模型")
-    parser.add_argument("--api-key", type=str, default=None, help="API Key (默认读环境变量)")
+    parser.add_argument("-f", "--files", nargs="*", default=[], help="目标文件列表，如 src/main.c src/utils.c")
+    parser.add_argument("-i", "--instruction", type=str, required=True, help="你的修改需求")
+    parser.add_argument("-m", "--model", type=str, default="openrouter/deepseek/deepseek-chat", help="使用的模型")
+    parser.add_argument("-key", "--api-key", type=str, default=None, help="API Key (默认读环境变量)")
     parser.add_argument(
-        "--project-dir",
+        "-dir", "--project-dir",
         type=str,
         default=DEFAULT_PROJECT_DIR,
         help="项目根目录，默认使用当前运行程序的目录",
     )
-    parser.add_argument("--symbol", type=str, default=None, help="目标符号（可选）")
+    parser.add_argument("-s", "--symbol", type=str, default=None, help="目标符号（可选）")
     parser.add_argument(
-        "--completion-type",
+        "-t", "--completion-type",
         type=str,
         default=None,
         choices=[None, "member", "variable", "function", "function_body", "type"],
