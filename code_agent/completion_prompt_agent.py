@@ -188,7 +188,8 @@ class CompletionPromptAgent:
     def _get_file_info(self, file_path: str) -> Optional[Dict]:
         if not file_path or not self.parse_res:
             return None
-        return self.parse_res.get(file_path)
+        normalized_file_path = str(file_path).replace("\\", "/")
+        return self.parse_res.get(normalized_file_path)
 
     def _iter_symbols_in_file(self, file_info: Dict):
         for name, info in file_info.items():

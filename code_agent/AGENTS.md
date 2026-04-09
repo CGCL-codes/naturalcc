@@ -190,6 +190,11 @@ parse_res = {
 
 ## 8. 最小运行方式
 
+### 运行前先激活环境
+```bash
+conda activate naturalcc
+```
+
 ### 启动 UI
 
 ```bash
@@ -245,4 +250,4 @@ python test_api.py --generation-check
   3. 明确 C 和 C++ 的编译参数
   4. 把在线链路与离线实验脚本再拆干净
 
-- 代码，运行方式，软件的改动有信息价值的最终同步到本AGENT.md中，同时修改README.md中的对应内容。
+- 代码，运行方式，软件的改动和有信息价值（小细节不需要记录）最终同步到本AGENTS.md中，同时修改README.md中的对应内容。

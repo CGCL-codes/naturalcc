@@ -15,20 +15,21 @@ class CProjectSearcher(object):
         }
     
     def set_proj(self, proj_dir, proj_info):
-        if not proj_dir.endswith(os.sep):
-            self.proj_dir = proj_dir + os.sep
-        else:
-            self.proj_dir = proj_dir
+        self.proj_dir = os.path.abspath(proj_dir)
             
         normalized_info = {}
         for module, file_info in proj_info.items():
-            if "" in file_info and module not in file_info:
+            normalized_module = self._normalize_path(module)
+            if "" in file_info and normalized_module not in file_info:
                 module_info = file_info.pop("")
-                file_info[module] = module_info
+                file_info[normalized_module] = module_info
                 
-            normalized_info[module] = file_info
+            normalized_info[normalized_module] = file_info
         
         self.proj_info = normalized_info
+
+    def _normalize_path(self, path):
+        return str(path).replace("\\", "/")
     
     def name_in_file(self, name, avail_list, src_name=None, struct_name=None):
         if name.count('.') > 0 and struct_name:
@@ -56,13 +57,19 @@ class CProjectSearcher(object):
         if header_base in self.standard_libraries:
             return None
         
+        normalized_header_name = self._normalize_path(header_name)
+        normalized_include_suffix = self._normalize_path(os.path.join("include", header_name))
+
         candidates = []
         for path in self.proj_info:
-            if path.endswith(header_name) or path.endswith(os.path.join('include', header_name)):
+            if path.endswith(normalized_header_name) or path.endswith(normalized_include_suffix):
                 candidates.append(path)
         
         if not candidates:
-            candidates = [x for x in self.proj_info if os.path.basename(x) == header_name]
+            candidates = [
+                x for x in self.proj_info
+                if os.path.basename(x.replace("/", os.sep)) == os.path.basename(header_name)
+            ]
         
         if candidates:
             if len(candidates) > 1:
@@ -73,8 +80,8 @@ class CProjectSearcher(object):
         return None
     
     def get_distance_paths(self, src_path, target_path):
-        src_parts = src_path.replace(self.proj_dir, '').split(os.sep)
-        target_parts = target_path.replace(self.proj_dir, '').split(os.sep)
+        src_parts = [part for part in self._normalize_path(src_path).split("/") if part]
+        target_parts = [part for part in self._normalize_path(target_path).split("/") if part]
         
         common_len = 0
         for i in range(min(len(src_parts), len(target_parts))):

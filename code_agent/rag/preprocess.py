@@ -20,12 +20,12 @@ class CProjectParser(object):
         self.parse_res = None
     
     def set_proj_dir(self, dir_path):
-        if not dir_path.endswith(os.sep):
-            self.proj_dir = dir_path + os.sep
-        else:
-            self.proj_dir = dir_path
+        self.proj_dir = os.path.abspath(dir_path)
 
         print(f"\n📁 设置项目目录: {self.proj_dir}")
+
+    def _normalize_module_path(self, path: str) -> str:
+        return path.replace("\\", "/")
 
     def retain_project_rels(self):
         print("🔧 清洗项目内引用关系中 ...")
@@ -89,8 +89,8 @@ class CProjectParser(object):
         return c_dict
     
     def _get_module_name(self, fpath):
-        rel_path = fpath[len(self.proj_dir):]
-        return rel_path
+        rel_path = os.path.relpath(os.path.abspath(fpath), self.proj_dir)
+        return self._normalize_module_path(rel_path)
     
     def parse_dir(self, c_proj_dir):
         self.set_proj_dir(c_proj_dir)
