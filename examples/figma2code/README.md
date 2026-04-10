@@ -198,3 +198,19 @@ These modules assume that generation results and evaluation logs are already pro
   - Verifying that your current working directory is the project root
 
 ---
+
+## 8. Citation
+
+```text
+@inproceedings{Gui2026Figma2Code,
+  author    = {Yi Gui and Jiawan Zhang and Yina Wang and Tianran Ma and
+               Yao Wan and Shilin He and Dongping Chen and Zhou Zhao and
+               Wenbin Jiang and Xuanhua Shi and Hai Jin and Philip S. Yu},
+  title     = {Figma2Code: Automating Multimodal Design to Code in the Wild},
+  booktitle = {The Fourteenth International Conference on Learning Representations (ICLR 2026)},
+  year      = {2026},
+  url       = {https://openreview.net/forum?id=CaXZB6bI31}
+}
+```
+
+---
