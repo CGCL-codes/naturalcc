@@ -1,6 +1,5 @@
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-
-from .rag.preprocess import CProjectParser
 
 
 class CompletionPromptAgent:
@@ -13,21 +12,50 @@ class CompletionPromptAgent:
     """
 
     def __init__(self):
-        self.project_parser = CProjectParser()
+        self.project_parser = None
+        self.language: str = "c"
         self.proj_dir: Optional[str] = None
         self.parse_res: Optional[Dict] = None
         self.searcher = None
 
+    @staticmethod
+    def _infer_language(file_path: Optional[str], explicit_language: Optional[str] = None) -> str:
+        if explicit_language:
+            lang = explicit_language.strip().lower()
+            if lang in {"c", "java"}:
+                return lang
+
+        suffix = Path(file_path or "").suffix.lower()
+        if suffix == ".java":
+            return "java"
+        return "c"
+
     # ---------------------------
     # 项目加载
     # ---------------------------
-    def load_project(self, proj_dir: str):
+    def load_project(self, proj_dir: str, language: str = "c"):
         if not proj_dir:
             raise ValueError("proj_dir 不能为空")
 
+        if language not in {"c", "java"}:
+            raise ValueError(f"不支持的语言: {language}")
+
+        if language == "java":
+            from .rag.java.java_project_parser_ts import JavaProjectParserTS
+
+            self.project_parser = JavaProjectParserTS()
+            self.searcher = getattr(self.project_parser, "searcher", None)
+        else:
+            from .rag.c.preprocess import CProjectParser
+
+            self.project_parser = CProjectParser()
+            self.searcher = None
+
         self.proj_dir = proj_dir
+        self.language = language
         self.parse_res = self.project_parser.parse_dir(proj_dir)
-        self.searcher = self.project_parser.proj_searcher
+        if self.language == "c":
+            self.searcher = getattr(self.project_parser, "proj_searcher", None)
 
     # ---------------------------
     # 用户请求入口
@@ -45,17 +73,31 @@ class CompletionPromptAgent:
         }
         """
         proj_dir = request.get("project_dir")
-        if proj_dir and (self.proj_dir != proj_dir or self.parse_res is None):
-            self.load_project(proj_dir)
+        file_path = request.get("file_path")
+        language = self._infer_language(file_path, request.get("language"))
+        if proj_dir and (
+            self.proj_dir != proj_dir
+            or self.parse_res is None
+            or self.language != language
+        ):
+            self.load_project(proj_dir, language=language)
 
         if self.parse_res is None:
             raise ValueError("项目尚未加载，请提供有效的 project_dir")
 
         user_instruction = request.get("user_instruction", "").strip()
-        file_path = request.get("file_path")
         symbol = request.get("symbol")
         prefix = request.get("prefix", "") or ""
         completion_type = request.get("completion_type")
+
+        if self.language == "java":
+            return self._build_java_completion_prompt(
+                user_instruction=user_instruction,
+                file_path=file_path,
+                symbol=symbol,
+                completion_type=completion_type,
+                prefix=prefix,
+            )
 
         # 如果用户没有显式提供 symbol，则从自然语言中自动提取
         if not symbol:
@@ -109,6 +151,92 @@ class CompletionPromptAgent:
             symbol=symbol,
             prefix=prefix,
         )
+
+    def _build_java_completion_prompt(
+        self,
+        user_instruction: str,
+        file_path: Optional[str],
+        symbol: Optional[str],
+        completion_type: Optional[str],
+        prefix: str = "",
+    ) -> str:
+        file_info = self._get_file_info(file_path) if file_path else None
+
+        symbol_candidates: List[str] = []
+        if file_info:
+            for name, info in file_info.items():
+                if not name or name == "":
+                    continue
+                ntype = info.get("type")
+                if ntype in {
+                    "Class",
+                    "Interface",
+                    "Enum",
+                    "Annotation",
+                    "Record",
+                    "Method",
+                    "Constructor",
+                    "Field",
+                }:
+                    symbol_candidates.append(name)
+
+        if symbol:
+            symbol_candidates = [x for x in symbol_candidates if symbol in x]
+        if prefix:
+            symbol_candidates = [x for x in symbol_candidates if x.split(".")[-1].startswith(prefix)]
+
+        symbol_candidates = sorted(symbol_candidates)[:40]
+
+        related_defs: List[str] = []
+        for fpath, finfo in (self.parse_res or {}).items():
+            for name, info in finfo.items():
+                if not name or info.get("type") not in {"Class", "Interface", "Enum", "Record", "Method"}:
+                    continue
+                if symbol and symbol not in name:
+                    continue
+                if prefix and not name.split(".")[-1].startswith(prefix):
+                    continue
+                snippet = info.get("def") or ""
+                if not snippet:
+                    continue
+                related_defs.append(f"/* {fpath} */\n{snippet}")
+                if len(related_defs) >= 20:
+                    break
+            if len(related_defs) >= 20:
+                break
+
+        completion_hint = completion_type or "auto"
+        return f"""你是一个 Java 代码补全助手。
+任务：基于项目内真实符号与定义，在目标文件中直接完成补全或修正。
+
+【用户指令】
+{user_instruction}
+
+【目标文件】
+{file_path}
+
+【补全类型】
+{completion_hint}
+
+【目标符号】
+{symbol}
+
+【前缀】
+{prefix}
+
+【当前文件候选符号】
+{chr(10).join(f'- {x}' for x in symbol_candidates) if symbol_candidates else '- 无'}
+
+【项目内相关定义】
+{chr(10).join(related_defs) if related_defs else '无匹配定义'}
+
+【执行要求】
+1. 不要只输出解释或候选列表；请直接修改目标文件中的代码。
+2. 优先复用项目中已有类、方法、字段与导入，不要臆造不存在的 API。
+3. 保持现有代码风格，做最小必要修改。
+4. 如需补充 import、类型声明或异常处理，可一并最小修改。
+5. 如果代码存在未完成表达式、占位符或 TODO，请直接补全为可工作的实现。
+"""
 
     def _infer_symbol_from_instruction(self, instruction: str) -> Optional[str]:
         """

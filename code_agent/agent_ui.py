@@ -70,7 +70,7 @@ IGNORE_DIRS = {
     ".vscode",
 }
 IGNORE_FILE_EXTENSIONS = {".log", ".ps"}
-PARSABLE_SOURCE_EXTENSIONS = {".c", ".cpp", ".h", ".hpp"}
+PARSABLE_SOURCE_EXTENSIONS = {".c", ".cpp", ".h", ".hpp", ".java"}
 
 
 def should_ignore_file(filename: str) -> bool:

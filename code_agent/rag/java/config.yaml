@@ -1,0 +1,69 @@
+# openai tiktoken
+tiktoken_cache_dir: 'Your cache directory for OpenAI tiktoken'
+
+max_to_generate: 48
+
+# codegen
+codegen350m_repo: "Salesforce/codegen-350M-mono"
+codegen2b_repo: "Salesforce/codegen-2B-mono"
+codegen6b_repo: "Salesforce/codegen-6B-mono"
+codegen16b_repo: "Salesforce/codegen-16B-mono"
+codegen_max_token: 2048
+
+# codegen25
+codegen25_repo: "Salesforce/codegen25-7b-mono_P"
+codegen25_max_token: 2048
+
+# santacoder
+santacoder_repo: "bigcode/santacoder"
+santacoder_max_token: 2048
+
+# starcoder
+starcoder_repo: "bigcode/starcoder"
+starcoder_max_token: 8192
+
+# codellama-7b
+#codellama7b_repo: "meta-llama/CodeLlama-7b-Python-hf"
+# codellama7b_repo: "/Users/austinxu/Desktop/api/model/CodeLlama-7b-hf"
+codellama7b_repo: "/home/sub4-wy/wangchen/models/codellama/CodeLlama-7b-Instruct-hf"
+codellama_max_token: 8192
+
+
+# llama3
+llama3_repo: "/home/sub4-wy/wangchen/models/llama/Llama-3.1-8B"
+llama3_max_token: 8192
+
+
+# deepseek-coder
+# deepseek_repo: "deepseek-ai/deepseek-coder-6.7b-base"
+deepseekcoder_repo: "/home/sub4-wy/wangchen/models/deepseek-ai/deepseek-coder-6.7b-instruct"
+deepseek_max_token: 8192
+
+# qwencoder
+# qwencoder_repo: "Qwen/Qwen2.5-Coder-7B-Instruct"
+# qwencoder_repo: "/home/sub4-wy/wangchen/models/Qwen/Qwen2.5-Coder-7B-Instruct"
+qwencoder_repo: "/home/sub4-wy/wangchen/models/Qwen/Qwen2.5-Coder-7B"
+qwencoder_max_token: 8192
+
+
+
+# qwen3
+qwen3_repo: "/home/sub4-wy/wangchen/models/Qwen/Qwen3-8B"
+qwen3_max_token: 8192
+
+# starcoder2
+starcoder2_repo: "/home/sub4-wy/wangchen/models/bigcode/starcoder2-7b"
+starcoder2_max_token: 8192
+
+
+# GPT-3.5
+gpt35_api: "gpt-3.5-turbo-0613"
+gpt35_max_token: 4096
+
+# GPT4
+gpt4_api: "gpt-4-0613"
+gpt4_max_token: 8192
+
+# GPT-5.1
+gpt51_api: "gpt-5.1"
+gpt51_max_token: 32768
