@@ -915,7 +915,7 @@ with gr.Blocks(title="NaturalCC Agent", fill_width=True, fill_height=True) as de
                 """
             )
             with gr.Column(elem_classes=["panel-body"]):
-                with gr.Column(visible=True, elem_classes=["panel-view"]) as instruction_view:
+                with gr.Column(visible=True, elem_classes=["panel-view", "instruction-view"]) as instruction_view:
                     instruction_feedback = gr.HTML(build_instruction_feedback("", initial_bundle["selected_files"]))
                     instruction_input = gr.Textbox(
                         label="开发指令",
@@ -929,31 +929,35 @@ with gr.Blocks(title="NaturalCC Agent", fill_width=True, fill_height=True) as de
                         clear_btn = gr.Button("清空任务", variant="secondary")
                     gr.Markdown("预览只看 prompt；执行会调用 `aider`。")
 
-                with gr.Column(visible=False, elem_classes=["panel-view"]) as console_view:
+                with gr.Column(visible=False, elem_classes=["panel-view", "console-view"]) as console_view:
                     command_summary = gr.HTML(INITIAL_COMMAND_SUMMARY)
                     with gr.Row(elem_classes=["console-content-row"]):
                         with gr.Column(scale=7, min_width=360):
-                            generated_content_output = gr.Textbox(
+                            generated_content_output = gr.Code(
                                 label="命令行生成内容",
-                                lines=13,
-                                max_lines=16,
+                                language="shell",
+                                lines=11,
+                                max_lines=11,
                                 interactive=False,
-                                autoscroll=True,
+                                wrap_lines=True,
+                                show_line_numbers=False,
                                 buttons=["copy"],
-                                placeholder="这里会显示 prompt 预览文本或 Aider 的执行日志。",
+                                elem_classes=["console-output-code"],
                             )
                         with gr.Column(scale=5, min_width=320):
-                            command_preview_output = gr.Textbox(
+                            command_preview_output = gr.Code(
                                 label="等效命令行",
-                                lines=13,
-                                max_lines=16,
+                                language="shell",
+                                lines=11,
+                                max_lines=11,
                                 interactive=False,
-                                autoscroll=False,
+                                wrap_lines=True,
+                                show_line_numbers=False,
                                 buttons=["copy"],
-                                placeholder="触发预览或生成后，这里会展示可复用的命令行草案。",
+                                elem_classes=["console-output-code"],
                             )
 
-                with gr.Column(visible=False, elem_classes=["panel-view"]) as status_view:
+                with gr.Column(visible=False, elem_classes=["panel-view", "status-view"]) as status_view:
                     gr.Markdown(USAGE_GUIDE, elem_classes=["status-markdown"])
                     status_detail = gr.Markdown(INITIAL_STATUS_DETAIL, elem_classes=["status-markdown"])
 

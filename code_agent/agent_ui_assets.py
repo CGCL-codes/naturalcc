@@ -119,12 +119,14 @@ CUSTOM_CSS = """
 }
 
 .panel-shell {
+    display: flex !important;
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: 24px;
     box-shadow: var(--shadow);
     flex-direction: column !important;
     flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
     align-items: stretch !important;
     padding: 6px !important;
     min-width: 0 !important;
@@ -138,10 +140,16 @@ CUSTOM_CSS = """
     min-width: 0;
 }
 
+.panel-shell > .block {
+    flex: 0 0 auto !important;
+}
+
 .panel-body {
     display: flex;
-    flex: 1 1 auto;
+    flex: 1 1 0;
     flex-direction: column;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
     min-height: 0;
     overflow: auto;
     overscroll-behavior: contain;
@@ -197,6 +205,7 @@ CUSTOM_CSS = """
 }
 
 .panel-view {
+    flex: 0 0 auto !important;
     min-height: 0;
     overflow: visible;
     border: 1px solid rgba(21, 52, 73, 0.08);
@@ -222,7 +231,12 @@ CUSTOM_CSS = """
 }
 
 .panel-view > * {
+    flex: 0 0 auto !important;
     min-width: 0;
+}
+
+.panel-body > * {
+    flex: 0 0 auto !important;
 }
 
 .panel-view .gr-column,
@@ -232,6 +246,26 @@ CUSTOM_CSS = """
     box-shadow: none !important;
     margin: 0 !important;
     padding: 0 !important;
+}
+
+#execution-panel .panel-body {
+    overflow: auto;
+}
+
+#execution-panel .panel-view {
+    display: flex;
+    flex: 0 0 auto !important;
+    flex-direction: column;
+    min-height: 0;
+    overflow: auto;
+}
+
+#execution-panel .console-view {
+    flex: 1 1 auto !important;
+    border: 0 !important;
+    background: transparent;
+    padding: 0 0 14px !important;
+    overflow: hidden;
 }
 
 .section-copy h3 {
@@ -374,6 +408,7 @@ CUSTOM_CSS = """
 
 .panel-footer {
     display: flex;
+    flex: 0 0 auto;
     flex-wrap: wrap !important;
     gap: 4px;
     border-top: 1px solid rgba(21, 52, 73, 0.10);
@@ -457,12 +492,134 @@ CUSTOM_CSS = """
 }
 
 .console-content-row {
+    flex: 1 1 auto;
     gap: 6px;
     align-items: stretch;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#execution-panel .console-view > .console-content-row {
+    flex: 1 1 0 !important;
+    margin-top: 6px;
+    padding: 6px;
+    border: 1px solid rgba(15, 118, 110, 0.16);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.76);
 }
 
 .console-content-row > * {
+    display: flex;
+    flex-direction: column;
+    min-height: 0 !important;
     min-width: 0 !important;
+}
+
+#execution-panel .console-output-box {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column;
+    min-height: 0 !important;
+    overflow: hidden;
+}
+
+#execution-panel .console-output-box > * {
+    min-height: 0 !important;
+    min-width: 0 !important;
+}
+
+#execution-panel .console-output-box [data-testid="textbox"] {
+    flex: 1 1 0 !important;
+    border: 1px solid rgba(21, 52, 73, 0.10);
+    border-radius: 12px;
+    background: rgba(241, 245, 249, 0.82);
+    overflow: auto !important;
+    scrollbar-width: thin;
+}
+
+#execution-panel .console-output-box textarea {
+    flex: 1 1 auto;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: auto !important;
+    overflow-x: hidden !important;
+    line-height: 1.45 !important;
+    padding-bottom: 72px !important;
+    resize: none;
+    scrollbar-width: thin;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+#execution-panel .console-output-box [data-testid="textbox"]::-webkit-scrollbar,
+#execution-panel .console-output-box textarea::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+#execution-panel .console-output-box [data-testid="textbox"]::-webkit-scrollbar-thumb,
+#execution-panel .console-output-box textarea::-webkit-scrollbar-thumb {
+    background: rgba(21, 52, 73, 0.24);
+    border-radius: 999px;
+}
+
+#execution-panel .console-output-code {
+    display: flex !important;
+    flex: 1 1 0 !important;
+    flex-direction: column;
+    min-height: 0 !important;
+    overflow: hidden;
+}
+
+#execution-panel .console-output-code > * {
+    min-height: 0 !important;
+    min-width: 0 !important;
+}
+
+#execution-panel .console-output-code .cm-editor {
+    flex: 1 1 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    border: 1px solid rgba(21, 52, 73, 0.10);
+    border-radius: 12px;
+    background: rgba(241, 245, 249, 0.82);
+    overflow: hidden;
+}
+
+#execution-panel .console-output-code .cm-scroller {
+    height: 100% !important;
+    overflow: auto !important;
+    padding: 10px 12px 68px !important;
+    font-family: "IBM Plex Mono", ui-monospace, monospace !important;
+    line-height: 1.45 !important;
+    scrollbar-width: thin;
+}
+
+#execution-panel .console-output-code .cm-gutters {
+    display: none !important;
+}
+
+#execution-panel .console-output-code .cm-content {
+    padding: 0 0 68px !important;
+    white-space: pre-wrap !important;
+    word-break: break-word;
+}
+
+#execution-panel .console-output-code .cm-line {
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere;
+}
+
+#execution-panel .console-output-code .cm-scroller::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+#execution-panel .console-output-code .cm-scroller::-webkit-scrollbar-thumb {
+    background: rgba(21, 52, 73, 0.24);
+    border-radius: 999px;
 }
 
 @media (max-width: 1440px), (max-height: 860px) {
@@ -504,8 +661,20 @@ CUSTOM_CSS = """
         max-height: none;
     }
 
+    #execution-panel .panel-body {
+        overflow: visible;
+    }
+
+    #execution-panel .panel-view,
+    #execution-panel .console-view {
+        flex: 0 0 auto;
+        overflow: visible;
+    }
+
     .console-content-row {
+        flex: 0 0 auto;
         gap: 6px;
+        overflow: visible;
     }
 
     .metric-grid {
@@ -521,6 +690,11 @@ CUSTOM_CSS = """
 @media (max-width: 1380px) {
     .console-content-row {
         flex-direction: column;
+    }
+
+    #execution-panel .console-output-box textarea {
+        height: auto !important;
+        min-height: 180px !important;
     }
 }
 """
