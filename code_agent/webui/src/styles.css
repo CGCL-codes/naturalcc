@@ -322,6 +322,7 @@ button:disabled {
 .file-row:hover,
 .ghost-button:hover,
 .icon-button:hover,
+.search-clear-button:hover,
 .secondary-button:hover {
   background: #22262b;
 }
@@ -345,9 +346,22 @@ button:disabled {
   background: transparent;
 }
 
+.search-clear-button {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  color: var(--faint);
+  background: transparent;
+  cursor: pointer;
+}
+
 .file-list {
-  min-height: 180px;
-  flex: 1;
+  flex: 0 0 auto;
+  max-height: calc(31px * 9);
   overflow: auto;
   margin: 10px 0;
   border: 1px solid var(--line);

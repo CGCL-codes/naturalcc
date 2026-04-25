@@ -15,9 +15,10 @@ import {
   Settings2,
   Sparkles,
   Terminal,
-  Trash2
+  Trash2,
+  X
 } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
 const defaultCompletionTypes = ["", "member", "variable", "function", "function_body", "type"];
@@ -83,6 +84,7 @@ function App() {
   const [workspace, setWorkspace] = useState(emptyWorkspace);
   const [browseState, setBrowseState] = useState({ path: "", parent: "", directories: [], files: [] });
   const [fileFilter, setFileFilter] = useState("");
+  const fileFilterRef = useRef(null);
   const [customTarget, setCustomTarget] = useState("");
   const [terminalLog, setTerminalLog] = useState("");
   const [runCommand, setRunCommand] = useState("");
@@ -397,10 +399,25 @@ function App() {
           <div className="search-row">
             <Search size={15} />
             <input
+              ref={fileFilterRef}
               value={fileFilter}
               onChange={(event) => setFileFilter(event.target.value)}
               placeholder="Filter files"
             />
+            {fileFilter ? (
+              <button
+                type="button"
+                className="search-clear-button"
+                title="Clear filter"
+                aria-label="Clear filter"
+                onClick={() => {
+                  setFileFilter("");
+                  fileFilterRef.current?.focus();
+                }}
+              >
+                <X size={14} />
+              </button>
+            ) : null}
           </div>
           <div className="file-list">
             {filteredFiles.map((file) => (
