@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, AsyncIterable, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -32,6 +32,17 @@ else:
         preview_prompt,
         run_aider_stream,
     )
+
+if __package__ in (None, ""):
+    import code_agent.plugins
+    from code_agent.plugins.base import ExecutionContext
+    from code_agent.plugins.dispatcher import dispatcher, ndjson_event
+    from code_agent.plugins.registry import registry
+else:
+    from . import plugins
+    from .plugins.base import ExecutionContext
+    from .plugins.dispatcher import dispatcher, ndjson_event
+    from .plugins.registry import registry
 
 
 MODELS = [
@@ -84,6 +95,8 @@ class AgentRequest(BaseModel):
     symbol: Optional[str] = None
     completion_type: Optional[str] = None
     prefix: str = ""
+    feature: str = Field(default="code_completion")
+    feature_config: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ScanRequest(BaseModel):
@@ -156,9 +169,11 @@ def build_cli_command_preview(request: AgentRequest, preview_only: bool) -> str:
     instruction = (request.instruction or "").strip()
     model = (request.model or "").strip()
     api_key = (request.api_key or "").strip()
-    symbol = (request.symbol or "").strip()
-    completion_type = (request.completion_type or "").strip()
-    prefix = (request.prefix or "").strip()
+    # Prefer feature_config for backward/forward compatibility
+    feature_config = dict(request.feature_config or {})
+    symbol = (request.symbol or feature_config.get("symbol") or "").strip()
+    completion_type = (request.completion_type or feature_config.get("completion_type") or "").strip()
+    prefix = (request.prefix or feature_config.get("prefix") or "").strip()
     project_dir = normalize_project_dir(request.project_dir or DEFAULT_PROJECT_DIR)
 
     command = ["python", "aider_runner.py", "-dir", project_dir]
@@ -296,6 +311,17 @@ async def bootstrap() -> Dict[str, Any]:
         "models": MODELS,
         "default_model": DEFAULT_MODEL,
         "completion_types": COMPLETION_TYPES,
+        "features": [
+            {
+                "name": m.name,
+                "label": m.label,
+                "description": m.description,
+                "execution_mode": m.execution_mode.value,
+            }
+            for m in registry.list_plugins()
+        ],
+        "schemas": registry.get_schemas(),
+        "default_feature": "code_completion",
     }
 
 
@@ -335,16 +361,43 @@ async def command_preview(request: AgentRequest) -> Dict[str, str]:
 @app.post("/api/prompt/preview")
 async def prompt_preview(request: AgentRequest) -> Dict[str, Any]:
     selected_files = sanitize_target_files(request.target_files)
-    preview_text = preview_prompt(
-        target_files=selected_files,
-        user_instruction=request.instruction or "",
-        model=request.model or DEFAULT_MODEL,
-        api_key=request.api_key or None,
-        project_dir=normalize_project_dir(request.project_dir or DEFAULT_PROJECT_DIR),
-        symbol=(request.symbol or None),
-        completion_type=(request.completion_type or None),
-        prefix=request.prefix or "",
-    )
+    project_dir = normalize_project_dir(request.project_dir or DEFAULT_PROJECT_DIR)
+
+    feature = request.feature or "code_completion"
+    feature_config = dict(request.feature_config or {})
+    if request.symbol is not None:
+        feature_config.setdefault("symbol", request.symbol)
+    if request.completion_type is not None:
+        feature_config.setdefault("completion_type", request.completion_type)
+    if request.prefix:
+        feature_config.setdefault("prefix", request.prefix)
+
+    plugin = registry.get(feature)
+    if plugin is not None:
+        context = ExecutionContext(
+            project_dir=project_dir,
+            target_files=selected_files,
+            instruction=request.instruction or "",
+            model=request.model or DEFAULT_MODEL,
+            api_key=request.api_key,
+            feature_config={"feature": feature, **feature_config},
+            uploaded_files={},
+            symbol=request.symbol,
+            completion_type=request.completion_type,
+            prefix=request.prefix,
+        )
+        preview_text = plugin.preview(context)
+    else:
+        preview_text = preview_prompt(
+            target_files=selected_files,
+            user_instruction=request.instruction or "",
+            model=request.model or DEFAULT_MODEL,
+            api_key=request.api_key or None,
+            project_dir=project_dir,
+            symbol=(request.symbol or None),
+            completion_type=(request.completion_type or None),
+            prefix=request.prefix or "",
+        )
     status = "error" if preview_text.startswith("❌") else "success"
     return {
         "status": status,
@@ -354,42 +407,74 @@ async def prompt_preview(request: AgentRequest) -> Dict[str, Any]:
     }
 
 
+async def _stream_with_context(context: ExecutionContext) -> AsyncIterable[str]:
+    for event in dispatcher.dispatch(context):
+        yield event
+
+
 @app.post("/api/run")
-async def run_agent(request: AgentRequest) -> StreamingResponse:
-    selected_files = sanitize_target_files(request.target_files)
+async def run_agent(request: Request) -> StreamingResponse:
+    content_type = request.headers.get("content-type", "")
 
-    async def stream() -> AsyncIterable[str]:
-        yield ndjson_event(
-            {
-                "type": "start",
-                "status": "running",
-                "log": "Preparing execution...\n",
-                "command": build_cli_command_preview(request, preview_only=False),
-                "primary_target": selected_files[0] if selected_files else "",
-            }
+    if "multipart/form-data" in content_type or "application/x-www-form-urlencoded" in content_type:
+        form = await request.form()
+        project_dir = str(form.get("project_dir", DEFAULT_PROJECT_DIR))
+        target_files_raw = str(form.get("target_files", "[]"))
+        instruction = str(form.get("instruction", ""))
+        model = str(form.get("model", DEFAULT_MODEL))
+        api_key = form.get("api_key")
+        feature = str(form.get("feature", "code_completion"))
+        feature_config_raw = str(form.get("feature_config", "{}"))
+
+        target_files_list = json.loads(target_files_raw) if target_files_raw else []
+        feature_config_dict = json.loads(feature_config_raw) if feature_config_raw else {}
+
+        uploaded_files = {}
+        for key in form:
+            value = form[key]
+            if isinstance(value, UploadFile):
+                uploaded_files[key] = value
+
+        context = ExecutionContext(
+            project_dir=normalize_project_dir(project_dir),
+            target_files=sanitize_target_files(target_files_list),
+            instruction=instruction,
+            model=model,
+            api_key=api_key,
+            feature_config={"feature": feature, **feature_config_dict},
+            uploaded_files=uploaded_files,
         )
-        last_log = ""
-        for output_log in run_aider_stream(
-            target_files=selected_files,
-            user_instruction=request.instruction or "",
-            model=request.model or DEFAULT_MODEL,
-            api_key=request.api_key or None,
-            project_dir=normalize_project_dir(request.project_dir or DEFAULT_PROJECT_DIR),
-            symbol=(request.symbol or None),
-            completion_type=(request.completion_type or None),
-            prefix=request.prefix or "",
-        ):
-            last_log = output_log
-            yield ndjson_event(
-                {
-                    "type": "log",
-                    "status": infer_status(output_log),
-                    "log": output_log,
-                }
-            )
-        yield ndjson_event({"type": "done", "status": infer_status(last_log), "log": last_log})
 
-    return StreamingResponse(stream(), media_type="application/x-ndjson")
+        return StreamingResponse(_stream_with_context(context), media_type="application/x-ndjson")
+
+    # JSON fallback (backward compatible)
+    body = await request.json()
+    agent_request = AgentRequest(**body)
+    selected_files = sanitize_target_files(agent_request.target_files)
+
+    feature = agent_request.feature or "code_completion"
+    feature_config = dict(agent_request.feature_config or {})
+    if agent_request.symbol is not None:
+        feature_config.setdefault("symbol", agent_request.symbol)
+    if agent_request.completion_type is not None:
+        feature_config.setdefault("completion_type", agent_request.completion_type)
+    if agent_request.prefix:
+        feature_config.setdefault("prefix", agent_request.prefix)
+
+    context = ExecutionContext(
+        project_dir=normalize_project_dir(agent_request.project_dir or DEFAULT_PROJECT_DIR),
+        target_files=selected_files,
+        instruction=agent_request.instruction or "",
+        model=agent_request.model or DEFAULT_MODEL,
+        api_key=agent_request.api_key,
+        feature_config={"feature": feature, **feature_config},
+        uploaded_files={},
+        symbol=agent_request.symbol,
+        completion_type=agent_request.completion_type,
+        prefix=agent_request.prefix,
+    )
+
+    return StreamingResponse(_stream_with_context(context), media_type="application/x-ndjson")
 
 
 DIST_DIR = Path(__file__).resolve().parent / "webui" / "dist"

@@ -80,6 +80,20 @@ npm install
 
 The UI has a FastAPI backend and a React frontend.
 
+### Quick Start (One-Click)
+
+If you have a graphical terminal emulator installed (gnome-terminal, konsole, alacritty, etc.), or `tmux` as a fallback:
+
+```bash
+./start.sh
+```
+
+This script automatically activates the `naturalcc` environment and opens two terminal windows (or tmux panes):
+- One for the FastAPI backend
+- One for the Vite frontend dev server
+
+When using tmux, the session is named `ncc-agent`. Press `Ctrl+B` then `D` to detach; re-attach with `tmux attach -t ncc-agent`.
+
 ### Development Mode
 
 Use this while editing frontend code. It gives Vite hot reload.
@@ -196,6 +210,113 @@ type
 - `POST /api/run`
 
 `/api/run` streams newline-delimited JSON events so the frontend can display live Aider logs.
+
+## Feature Plugin System
+
+The **Advanced** panel is now powered by a plugin architecture. Each feature is a `FeaturePlugin` under `plugins/`. The frontend renders forms dynamically from each plugin's `config_schema`, so adding a new capability does **not** require any frontend code changes.
+
+### Architecture
+
+- `plugins/base.py` — `FeaturePlugin` abstract base class, `ExecutionMode` (`aider`/`direct`/`hybrid`), `ConfigField` schema definition, `ExecutionContext`.
+- `plugins/registry.py` — `@register_plugin` class decorator; plugins auto-register on import.
+- `plugins/dispatcher.py` — routes execution to AIDER, DIRECT, or HYBRID mode.
+- `plugins/code_completion.py` — the existing `symbol`/`completion_type`/`prefix` logic, migrated to a plugin.
+
+### Execution Modes
+
+| Mode | Behavior | Example |
+|------|----------|---------|
+| `aider` | Generate prompt → call Aider → modify code files | Code completion |
+| `direct` | Call external API directly → return report / write files | Image-to-HTML |
+| `hybrid` | Analysis via API → generate fix prompt → Aider repair | Vulnerability detection |
+
+### How to Add a New Feature Plugin
+
+1. Create a new file under `plugins/`, e.g. `plugins/my_feature.py`.
+2. Inherit `FeaturePlugin`, implement `metadata`, `config_schema`, and `execute`.
+3. Decorate the class with `@register_plugin`.
+4. Restart the backend. The frontend will automatically show the new feature and render its form.
+
+Example:
+
+```python
+# plugins/my_feature.py
+from typing import Any, Dict, Generator, List, Optional
+from code_agent.plugins.base import (
+    FeaturePlugin, FeatureMetadata, ExecutionMode,
+    ConfigField, ConfigFieldType, ExecutionContext, PluginResult,
+)
+from code_agent.plugins.registry import register_plugin
+
+
+@register_plugin
+class MyFeaturePlugin(FeaturePlugin):
+
+    @property
+    def metadata(self) -> FeatureMetadata:
+        return FeatureMetadata(
+            name="my_feature",           # unique ID
+            label="My Feature",          # display name
+            description="What it does",
+            execution_mode=ExecutionMode.DIRECT,  # or AIDER / HYBRID
+        )
+
+    @property
+    def config_schema(self) -> List[ConfigField]:
+        return [
+            ConfigField(
+                name="my_param",
+                label="My Parameter",
+                type=ConfigFieldType.TEXT,   # text / textarea / select / switch / file
+                required=True,
+                default="",
+                placeholder="Enter value",
+                help_text="This is shown under the field",
+            ),
+        ]
+
+    def execute(self, context: ExecutionContext) -> Generator[str, None, None]:
+        # yield strings for log output
+        yield "Starting...\n"
+        # ... your logic ...
+        # yield PluginResult when done (for DIRECT / HYBRID)
+        yield PluginResult(success=True, message="Done!")
+```
+
+### Config Field Types
+
+| Type | Renders as | Extra properties |
+|------|-----------|-----------------|
+| `text` | `<input type="text">` | `placeholder`, `default` |
+| `textarea` | `<textarea>` | `placeholder`, `default` |
+| `select` | `<select>` | `options: [{value, label}]`, `default` |
+| `switch` | `<input type="checkbox">` | `default` (bool) |
+| `file` | `<input type="file">` | `accept`, `multiple` |
+
+### File Upload
+
+If your plugin config contains a `file` type field, the frontend will automatically send the request as `multipart/form-data`. Uploaded files are available in `context.uploaded_files` as `{field_name: UploadFile}`.
+
+### API Changes for Plugins
+
+`/api/bootstrap` now returns:
+
+```json
+{
+  "features": [{"name": "...", "label": "...", "execution_mode": "..."}],
+  "schemas": {"feature_name": [{"name": "...", "type": "...", ...}]},
+  "default_feature": "code_completion"
+}
+```
+
+`/api/run` accepts both JSON (backward compatible) and `multipart/form-data` (for file uploads). The payload should include:
+
+```json
+{
+  "feature": "my_feature",
+  "feature_config": {"my_param": "value"}
+}
+```
 
 ## Notes And Limitations
 

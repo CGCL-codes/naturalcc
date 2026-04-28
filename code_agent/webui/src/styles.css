@@ -593,6 +593,91 @@ button:disabled {
   background: var(--danger);
 }
 
+/* Dynamic form components */
+.dynamic-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.required {
+  color: var(--danger);
+  margin-left: 4px;
+}
+
+.field-help {
+  margin: 4px 0 0;
+  color: var(--faint);
+  font-size: 0.72rem;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #111316;
+  cursor: pointer;
+}
+
+.switch-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.file-upload-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.file-upload-row input[type="file"] {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #111316;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.file-name {
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+}
+
+.report-panel {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 0 0 8px 8px;
+  background: var(--panel);
+}
+
+.report-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: white;
+}
+
+.report-markdown {
+  padding: 14px;
+  margin: 0;
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
 @media (max-width: 1120px) {
   .app-shell {
     grid-template-columns: minmax(260px, 310px) minmax(420px, 1fr);

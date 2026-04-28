@@ -70,6 +70,98 @@ function metricLabel(value) {
   return String(value);
 }
 
+const FIELD_TYPE_COMPONENTS = {
+  text: ({ field, value, onChange }) => (
+    <input
+      id={`field-${field.name}`}
+      className="text-input"
+      type="text"
+      value={value || ""}
+      onChange={(e) => onChange(field.name, e.target.value)}
+      placeholder={field.placeholder || ""}
+    />
+  ),
+
+  textarea: ({ field, value, onChange }) => (
+    <textarea
+      id={`field-${field.name}`}
+      className="text-input"
+      value={value || ""}
+      onChange={(e) => onChange(field.name, e.target.value)}
+      placeholder={field.placeholder || ""}
+      rows={4}
+    />
+  ),
+
+  select: ({ field, value, onChange }) => (
+    <select
+      id={`field-${field.name}`}
+      className="text-input"
+      value={value || field.default || ""}
+      onChange={(e) => onChange(field.name, e.target.value)}
+    >
+      {(field.options || []).map((opt) => (
+        <option value={opt.value} key={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  ),
+
+  switch: ({ field, value, onChange }) => (
+    <label className="switch-row">
+      <input
+        type="checkbox"
+        checked={!!value}
+        onChange={(e) => onChange(field.name, e.target.checked)}
+      />
+      <span>{field.help_text || field.label}</span>
+    </label>
+  ),
+
+  file: ({ field, value, onChange }) => (
+    <div className="file-upload-row">
+      <input
+        id={`field-${field.name}`}
+        type="file"
+        accept={field.accept || "*"}
+        multiple={field.multiple}
+        onChange={(e) => onChange(field.name, e.target.files)}
+      />
+      {value && value[0] && (
+        <span className="file-name">{value[0].name}</span>
+      )}
+    </div>
+  ),
+};
+
+function DynamicForm({ schema, values, onChange }) {
+  return (
+    <div className="dynamic-form">
+      {schema.map((field) => {
+        const Component = FIELD_TYPE_COMPONENTS[field.type];
+        if (!Component) return null;
+        return (
+          <div key={field.name} className="form-field">
+            <label className="field-label" htmlFor={`field-${field.name}`}>
+              {field.label}
+              {field.required && <span className="required">*</span>}
+            </label>
+            <Component
+              field={field}
+              value={values[field.name]}
+              onChange={onChange}
+            />
+            {field.help_text && (
+              <p className="field-help">{field.help_text}</p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function App() {
   const [models, setModels] = useState([]);
   const [completionTypes, setCompletionTypes] = useState(defaultCompletionTypes);
@@ -77,10 +169,16 @@ function App() {
   const [targets, setTargets] = useState([]);
   const [model, setModel] = useState("");
   const [apiKey, setApiKey] = useState("");
+  const [instruction, setInstruction] = useState("");
+  // Feature plugin states
+  const [features, setFeatures] = useState([]);
+  const [featureSchemas, setFeatureSchemas] = useState({});
+  const [currentFeature, setCurrentFeature] = useState("code_completion");
+  const [featureConfig, setFeatureConfig] = useState({});
+  // Legacy advanced states (kept for backward compat during transition)
   const [symbol, setSymbol] = useState("");
   const [completionType, setCompletionType] = useState("");
   const [prefix, setPrefix] = useState("");
-  const [instruction, setInstruction] = useState("");
   const [workspace, setWorkspace] = useState(emptyWorkspace);
   const [browseState, setBrowseState] = useState({ path: "", parent: "", directories: [], files: [] });
   const [fileFilter, setFileFilter] = useState("");
@@ -97,17 +195,25 @@ function App() {
   const [lastUpdated, setLastUpdated] = useState("");
 
   const payload = useMemo(
-    () => ({
-      project_dir: projectDir,
-      target_files: targets,
-      instruction,
-      model,
-      api_key: apiKey || null,
-      symbol: symbol || null,
-      completion_type: completionType || null,
-      prefix
-    }),
-    [apiKey, completionType, instruction, model, prefix, projectDir, symbol, targets]
+    () => {
+      const base = {
+        project_dir: projectDir,
+        target_files: targets,
+        instruction,
+        model,
+        api_key: apiKey || null,
+        feature: currentFeature,
+        feature_config: { ...featureConfig },
+      };
+      // Backward compat: include legacy fields when using code_completion
+      if (currentFeature === "code_completion") {
+        base.symbol = featureConfig.symbol || symbol || null;
+        base.completion_type = featureConfig.completion_type || completionType || null;
+        base.prefix = featureConfig.prefix || prefix || "";
+      }
+      return base;
+    },
+    [apiKey, completionType, currentFeature, featureConfig, instruction, model, prefix, projectDir, symbol, targets]
   );
 
   const filteredFiles = useMemo(() => {
@@ -143,6 +249,9 @@ function App() {
         setCompletionTypes(data.completion_types || defaultCompletionTypes);
         setModel(data.default_model || "");
         setProjectDir(data.default_project_dir || "");
+        setFeatures(data.features || []);
+        setFeatureSchemas(data.schemas || {});
+        setCurrentFeature(data.default_feature || "code_completion");
         Promise.all([
           refreshWorkspace(data.default_project_dir || "", []),
           loadBrowse(data.default_project_dir || "")
@@ -247,17 +356,50 @@ function App() {
     }
   }
 
+  function buildFormData() {
+    const formData = new FormData();
+    formData.append("project_dir", projectDir);
+    formData.append("target_files", JSON.stringify(targets));
+    formData.append("instruction", instruction);
+    formData.append("model", model);
+    formData.append("api_key", apiKey || "");
+    formData.append("feature", currentFeature);
+
+    const cleanConfig = {};
+    for (const [key, value] of Object.entries(featureConfig)) {
+      if (value instanceof FileList) {
+        for (let i = 0; i < value.length; i++) {
+          formData.append(`files`, value[i]);
+        }
+      } else {
+        cleanConfig[key] = value;
+      }
+    }
+    formData.append("feature_config", JSON.stringify(cleanConfig));
+    return formData;
+  }
+
   async function handleRun() {
     setBusy(true);
     setMode("running");
     setLastError("");
     setTerminalLog("Preparing execution...\n");
     try {
-      const response = await fetch(`${API_BASE}/api/run`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+      const hasFiles = Object.values(featureConfig).some(
+        (v) => v instanceof FileList && v.length > 0
+      );
+      const options = hasFiles
+        ? {
+            method: "POST",
+            body: buildFormData()
+          }
+        : {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          };
+
+      const response = await fetch(`${API_BASE}/api/run`, options);
       if (!response.ok || !response.body) {
         throw new Error(response.statusText || "Execution stream failed");
       }
@@ -297,6 +439,15 @@ function App() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function handleFeatureChange(featureName) {
+    setCurrentFeature(featureName);
+    setFeatureConfig({});
+  }
+
+  function handleFeatureConfigChange(name, value) {
+    setFeatureConfig((prev) => ({ ...prev, [name]: value }));
   }
 
   function handleClear() {
@@ -528,35 +679,28 @@ function App() {
         <section className="panel-section">
           <div className="section-heading">
             <Braces size={16} />
-            <span>Advanced</span>
+            <span>Feature</span>
           </div>
-          <label className="field-label" htmlFor="symbol">Symbol</label>
-          <input
-            id="symbol"
-            className="text-input"
-            value={symbol}
-            onChange={(event) => setSymbol(event.target.value)}
-            placeholder="Auto inferred"
-          />
-          <label className="field-label" htmlFor="completionType">Completion type</label>
+          <label className="field-label" htmlFor="feature">Mode</label>
           <select
-            id="completionType"
+            id="feature"
             className="text-input"
-            value={completionType}
-            onChange={(event) => setCompletionType(event.target.value)}
+            value={currentFeature}
+            onChange={(event) => handleFeatureChange(event.target.value)}
           >
-            {completionTypes.map((item) => (
-              <option value={item} key={item || "auto"}>{item || "auto"}</option>
+            {features.map((f) => (
+              <option value={f.name} key={f.name}>
+                {f.label}
+              </option>
             ))}
           </select>
-          <label className="field-label" htmlFor="prefix">Prefix</label>
-          <input
-            id="prefix"
-            className="text-input"
-            value={prefix}
-            onChange={(event) => setPrefix(event.target.value)}
-            placeholder="Optional filter"
-          />
+          {featureSchemas[currentFeature] && (
+            <DynamicForm
+              schema={featureSchemas[currentFeature]}
+              values={featureConfig}
+              onChange={handleFeatureConfigChange}
+            />
+          )}
         </section>
 
         <section className="panel-section selected-section">
