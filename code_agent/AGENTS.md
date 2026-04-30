@@ -11,6 +11,7 @@ Primary use cases:
 - complete function signatures
 - complete variables, members, and types
 - make small project-style-aware code edits or refactors
+- detect potential vulnerabilities and optionally auto-remediate with Aider
 
 ## Main Entry Points
 
@@ -40,10 +41,26 @@ There is no legacy UI path. Keep the graphical interface centered on `agent_web_
 - UI screens, controls, layout, styling: `webui/src/App.jsx`, `webui/src/styles.css`
 - CLI flags, provider detection, Aider command construction: `aider_runner.py`
 - Prompt templates, symbol extraction, completion type inference: `completion_prompt_agent.py`
+- Feature plugins (advanced capabilities): `plugins/`
 - C/C++ parsing: `rag/c/cfile_parse.py`
 - Project traversal/relation cleanup: `rag/c/preprocess.py`
 - Cross-file context retrieval: `rag/c/node_prompt.py`
 - Java support: `rag/java/`
+
+## Feature Plugin System
+
+- `plugins/base.py`: plugin contract and execution modes.
+- `plugins/registry.py`: plugin registration/discovery.
+- `plugins/dispatcher.py`: mode-based execution router.
+- `plugins/code_completion.py`: code completion plugin.
+- `plugins/vulnerability_detection.py`: hybrid vulnerability scan + optional Aider remediation.
+
+`vulnerability_detection` key config:
+- `scan_scope`: `targets` or `project`
+- `severity_threshold`: `low` / `medium` / `high` / `critical`
+- `rule_profile`: `default` / `c_cpp` / `web`
+- `auto_fix`: run Aider remediation after analysis
+- `max_findings`, `extra_instruction`
 
 ## Run Commands
 

@@ -11,6 +11,7 @@ Primary use cases:
 - complete function signatures
 - complete variables, members, and types
 - make small project-style-aware code edits or refactors
+- detect potential vulnerabilities and optionally auto-remediate with Aider
 <>
 ## Main Entry Points
 
@@ -54,12 +55,20 @@ The Advanced panel is now powered by a plugin architecture under `plugins/`.
 - **`plugins/registry.py`** — `@register_plugin` decorator; auto-discovery on import.
 - **`plugins/dispatcher.py`** — Routes to AIDER (prompt → Aider), DIRECT (external API), or HYBRID mode.
 - **`plugins/code_completion.py`** — The original `symbol`/`completion_type`/`prefix` logic, migrated to a plugin.
+- **`plugins/vulnerability_detection.py`** — HYBRID plugin: static pattern-based vulnerability analysis with optional Aider remediation.
 
 Adding a new advanced feature:
 1. Create `plugins/my_feature.py`.
 2. Inherit `FeaturePlugin`, implement `metadata`, `config_schema`, `execute`.
 3. Decorate the class with `@register_plugin`.
 4. Restart the backend. The frontend will automatically show the new feature and render its form.
+
+`vulnerability_detection` key config:
+- `scan_scope`: `targets` / `project`
+- `severity_threshold`: `low` / `medium` / `high` / `critical`
+- `rule_profile`: `default` / `c_cpp` / `web`
+- `auto_fix`: if true, run remediation via Aider after analysis
+- `max_findings`, `extra_instruction`
 
 ## Run Commands
 

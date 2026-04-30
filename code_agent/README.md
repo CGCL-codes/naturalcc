@@ -23,6 +23,7 @@ Typical tasks:
 - complete a function signature
 - complete a variable, member, or type
 - make small code changes that should follow existing project style
+- detect potential vulnerabilities and optionally auto-fix them
 - preview the exact semantic prompt before running Aider
 
 Main files:
@@ -221,6 +222,7 @@ The **Advanced** panel is now powered by a plugin architecture. Each feature is 
 - `plugins/registry.py` — `@register_plugin` class decorator; plugins auto-register on import.
 - `plugins/dispatcher.py` — routes execution to AIDER, DIRECT, or HYBRID mode.
 - `plugins/code_completion.py` — the existing `symbol`/`completion_type`/`prefix` logic, migrated to a plugin.
+- `plugins/vulnerability_detection.py` — vulnerability analysis with optional Aider remediation.
 
 ### Execution Modes
 
@@ -229,6 +231,26 @@ The **Advanced** panel is now powered by a plugin architecture. Each feature is 
 | `aider` | Generate prompt → call Aider → modify code files | Code completion |
 | `direct` | Call external API directly → return report / write files | Image-to-HTML |
 | `hybrid` | Analysis via API → generate fix prompt → Aider repair | Vulnerability detection |
+
+### Built-in Vulnerability Detection Feature
+
+Feature name: `vulnerability_detection` (HYBRID mode)
+
+Behavior:
+- Phase 1: run static pattern-based vulnerability scan and generate a report.
+- Phase 2 (optional): if `auto_fix=true`, generate remediation instruction and run Aider on selected target files.
+
+Main config fields:
+- `scan_scope`: `targets` or `project`
+- `severity_threshold`: `low` / `medium` / `high` / `critical`
+- `rule_profile`: `default` / `c_cpp` / `web`
+- `auto_fix`: enable/disable repair stage
+- `max_findings`: cap report size
+- `extra_instruction`: extra remediation constraints
+
+Usage tips:
+- Select target files first if you plan to enable `auto_fix`.
+- Start with `auto_fix=false` and review findings before enabling automatic remediation.
 
 ### How to Add a New Feature Plugin
 

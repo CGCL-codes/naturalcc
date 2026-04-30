@@ -23,6 +23,7 @@
 - 补全函数签名
 - 补全变量、成员或类型
 - 按项目现有风格做小范围代码修改
+- 检测潜在漏洞并按需自动修复
 - 在执行 Aider 前预览最终语义 prompt
 
 主要文件：
@@ -221,6 +222,7 @@ type
 - `plugins/registry.py` — `@register_plugin` 类装饰器；插件在导入时自动注册。
 - `plugins/dispatcher.py` — 将执行路由到 AIDER、DIRECT 或 HYBRID 模式。
 - `plugins/code_completion.py` — 原有的 `symbol`/`completion_type`/`prefix` 逻辑，已迁移为插件。
+- `plugins/vulnerability_detection.py` — 漏洞分析插件，支持可选的 Aider 自动修复。
 
 ### 执行模式
 
@@ -229,6 +231,26 @@ type
 | `aider` | 生成 prompt → 调用 Aider → 修改代码文件 | 代码补全 |
 | `direct` | 直接调用外部 API → 返回报告 / 写入文件 | 图片生成 HTML |
 | `hybrid` | 通过 API 分析 → 生成修复 prompt → Aider 修复 | 漏洞检测 |
+
+### 内置漏洞检测功能
+
+功能名：`vulnerability_detection`（HYBRID 模式）
+
+执行方式：
+- 阶段 1：进行基于规则的静态漏洞扫描并生成报告。
+- 阶段 2（可选）：当 `auto_fix=true` 时，生成修复指令并调用 Aider 对目标文件进行修复。
+
+主要配置项：
+- `scan_scope`：`targets`（仅目标文件）或 `project`（全项目）
+- `severity_threshold`：`low` / `medium` / `high` / `critical`
+- `rule_profile`：`default` / `c_cpp` / `web`
+- `auto_fix`：是否执行自动修复阶段
+- `max_findings`：报告中最大告警条数
+- `extra_instruction`：额外修复约束
+
+使用建议：
+- 如果要开启 `auto_fix`，先选择好目标文件。
+- 建议先用 `auto_fix=false` 查看扫描结果，再决定是否自动修复。
 
 ### 如何添加新功能插件
 
