@@ -38,27 +38,40 @@ Main files:
 
 ## Environment Setup
 
-### 1. Activate the Python Environment
+### Prerequisites
+
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) (Python package manager)
+- Node.js & npm (for the frontend)
+
+### 1. Install System Dependencies
+
+C/C++ parsing requires the system `libclang` library. Install it via your OS package manager before running `uv sync`:
+
+- **Ubuntu/Debian**: `sudo apt install libclang1`
+- **macOS**: `brew install libclang`
+- **Other**: consult your distribution's package repository for `libclang`
+
+### 2. Create the Python Environment
+
+From `code_agent/`:
 
 ```bash
-conda activate naturalcc
+uv sync
 ```
 
-### 2. Install Python Requirements
+This creates a `.venv` virtual environment and installs all locked Python dependencies. No manual conda or pip steps are needed.
 
-The project expects these runtime capabilities:
+The project expects these runtime capabilities (all handled by `uv sync`):
 
 - `fastapi`
 - `uvicorn`
 - `clang` Python bindings
-- `libclang`
 - `aider` on `PATH`
 
-If the active environment is missing pieces, install them according to your local environment policy. A common setup is:
+If you need GPU support (e.g. for vLLM-based offline evaluation), install it manually:
 
 ```bash
-pip install fastapi uvicorn clang aider-chat
-conda install -c conda-forge libclang
+uv pip install vllm
 ```
 
 For OpenRouter/OpenAI calls, either pass an API key in the UI/CLI or set environment variables:
@@ -89,7 +102,7 @@ If you have a graphical terminal emulator installed (gnome-terminal, konsole, al
 ./start.sh
 ```
 
-This script automatically activates the `naturalcc` environment and opens two terminal windows (or tmux panes):
+This script automatically uses the `.venv` Python and opens two terminal windows (or tmux panes):
 - One for the FastAPI backend
 - One for the Vite frontend dev server
 
@@ -102,7 +115,7 @@ Use this while editing frontend code. It gives Vite hot reload.
 Terminal 1:
 
 ```bash
-python agent_web_api.py --host 127.0.0.1 --port 7860
+uv run python agent_web_api.py --host 127.0.0.1 --port 7860
 ```
 
 Terminal 2:
@@ -128,7 +141,7 @@ Use this when you want one server to serve both the UI and API.
 cd webui
 npm run build
 cd ..
-python agent_web_api.py --host 127.0.0.1 --port 7860
+uv run python agent_web_api.py --host 127.0.0.1 --port 7860
 ```
 
 Open:
@@ -156,7 +169,7 @@ Run commands from `code_agent/`.
 ### Preview Prompt Only
 
 ```bash
-python aider_runner.py \
+uv run python aider_runner.py \
   -dir /path/to/project \
   -f src/foo.c include/foo.h \
   -i "补全 foo 函数实现" \
@@ -166,7 +179,7 @@ python aider_runner.py \
 ### Execute Aider
 
 ```bash
-python aider_runner.py \
+uv run python aider_runner.py \
   -dir /path/to/project \
   -f src/foo.c include/foo.h \
   -i "根据现有风格完善 foo 函数实现" \

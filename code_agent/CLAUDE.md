@@ -74,14 +74,18 @@ Adding a new advanced feature:
 
 From `code_agent/`:
 
+Install dependencies and create the virtual environment:
+
 ```bash
-conda activate naturalcc
+uv sync
 ```
+
+> `libclang` is a system library required for C/C++ parsing. Install it via your OS package manager (e.g. `sudo apt install libclang1` or `brew install libclang`) before running `uv sync` if C/C++ features are needed.
 
 Development UI:
 
 ```bash
-python agent_web_api.py --host 127.0.0.1 --port 7860
+uv run python agent_web_api.py --host 127.0.0.1 --port 7860
 cd webui && npm install && npm run dev
 ```
 
@@ -90,19 +94,19 @@ Bundled UI:
 ```bash
 cd webui && npm install && npm run build
 cd ..
-python agent_web_api.py --host 127.0.0.1 --port 7860
+uv run python agent_web_api.py --host 127.0.0.1 --port 7860
 ```
 
 CLI preview:
 
 ```bash
-python aider_runner.py -dir /path/to/project -f src/foo.c -i "补全 foo 函数实现" --preview
+uv run python aider_runner.py -dir /path/to/project -f src/foo.c -i "补全 foo 函数实现" --preview
 ```
 
 CLI execute:
 
 ```bash
-python aider_runner.py -dir /path/to/project -f src/foo.c -i "补全 foo 函数实现" -m openrouter/deepseek/deepseek-chat
+uv run python aider_runner.py -dir /path/to/project -f src/foo.c -i "补全 foo 函数实现" -m openrouter/deepseek/deepseek-chat
 ```
 
 ## Known Constraints

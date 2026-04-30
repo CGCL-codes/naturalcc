@@ -1,0 +1,83 @@
+[project]
+name = "code-agent"
+version = "0.1.0"
+description = "Context-enhanced code editing agent with Aider integration"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "python-multipart",
+    "python-dotenv",
+    "pydantic",
+    "httpx",
+    "requests",
+    "aiofiles",
+    "orjson",
+    "pillow",
+    "pydub",
+    "clang",
+    "aider-chat",
+    "numpy",
+    "py2neo",
+    "tqdm",
+    "pyyaml",
+    "python-levenshtein",
+    "tiktoken",
+    "attridict",
+    "jsonlines",
+    "regex",
+    "psutil",
+    "openai",
+    "networkx",
+    "pandas",
+    "gitpython",
+    "filelock",
+    "fsspec",
+    "huggingface-hub",
+    "protobuf",
+    "playwright",
+    "torch",
+    "torchvision",
+    "transformers",
+    "accelerate",
+    "bitsandbytes",
+    "datasets",
+    "scipy",
+    "scikit-learn",
+    "peft",
+    "trl",
+    "wandb",
+    "tensorboard",
+    "sentencepiece",
+    "tokenizers",
+    "tree-sitter",
+    "tree-sitter-c",
+    "tree-sitter-cpp",
+    "tree-sitter-java",
+    "tree-sitter-c-sharp",
+    "tree-sitter-elixir",
+    "tree-sitter-go",
+    "tree-sitter-javascript",
+    "tree-sitter-julia",
+    "tree-sitter-kotlin",
+    "tree-sitter-lua",
+    "tree-sitter-objc",
+    "tree-sitter-php",
+    "tree-sitter-powershell",
+    "tree-sitter-python",
+    "tree-sitter-ruby",
+    "tree-sitter-rust",
+    "tree-sitter-scala",
+    "tree-sitter-swift",
+    "tree-sitter-typescript",
+    "tree-sitter-verilog",
+    "tree-sitter-zig",
+]
+[tool.uv]
+package = false
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

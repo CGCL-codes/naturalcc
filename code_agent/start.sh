@@ -9,9 +9,13 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# 激活 conda 环境
-source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate naturalcc
+# 检测 uv 虚拟环境
+VENV_PYTHON="$SCRIPT_DIR/.venv/bin/python"
+if [ ! -f "$VENV_PYTHON" ]; then
+    echo "错误: 未找到 .venv 虚拟环境。"
+    echo "请先在项目根目录执行: uv sync"
+    exit 1
+fi
 
 # 检测可用的终端模拟器
 find_terminal() {
@@ -40,11 +44,11 @@ if [ -z "$TERMINAL" ]; then
 
     # 创建新 session，默认运行 API
     tmux new-session -d -s "$SESSION_NAME" -n "agent"
-    tmux send-keys -t "$SESSION_NAME" "cd '$SCRIPT_DIR' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && echo '启动 API 服务...' && python agent_web_api.py --host 127.0.0.1 --port 7860" C-m
+    tmux send-keys -t "$SESSION_NAME" "cd '$SCRIPT_DIR' && echo '启动 API 服务...' && '$VENV_PYTHON' agent_web_api.py --host 127.0.0.1 --port 7860" C-m
 
     # 水平分割，下方运行前端
     tmux split-window -v -t "$SESSION_NAME"
-    tmux send-keys -t "$SESSION_NAME" "cd '$SCRIPT_DIR/webui' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && echo '启动前端开发服务器...' && npm run dev" C-m
+    tmux send-keys -t "$SESSION_NAME" "cd '$SCRIPT_DIR/webui' && echo '启动前端开发服务器...' && npm run dev" C-m
 
     # 调整上下比例（上面大一点）
     tmux resize-pane -t "$SESSION_NAME" -U 5
@@ -59,32 +63,32 @@ echo "使用终端: $TERMINAL"
 # 根据终端类型执行不同的命令
 case "$TERMINAL" in
     gnome-terminal|mate-terminal)
-        gnome-terminal -- bash -c "cd '$SCRIPT_DIR' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && echo '启动 API 服务...' && python agent_web_api.py --host 127.0.0.1 --port 7860; exec bash"
-        gnome-terminal -- bash -c "cd '$SCRIPT_DIR/webui' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && echo '启动前端开发服务器...' && npm run dev; exec bash"
+        gnome-terminal -- bash -c "cd '$SCRIPT_DIR' && echo '启动 API 服务...' && '$VENV_PYTHON' agent_web_api.py --host 127.0.0.1 --port 7860; exec bash"
+        gnome-terminal -- bash -c "cd '$SCRIPT_DIR/webui' && echo '启动前端开发服务器...' && npm run dev; exec bash"
         ;;
     konsole)
-        konsole --new-tab -e bash -c "cd '$SCRIPT_DIR' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && python agent_web_api.py --host 127.0.0.1 --port 7860; exec bash" &
-        konsole --new-tab -e bash -c "cd '$SCRIPT_DIR/webui' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && npm run dev; exec bash" &
+        konsole --new-tab -e bash -c "cd '$SCRIPT_DIR' && '$VENV_PYTHON' agent_web_api.py --host 127.0.0.1 --port 7860; exec bash" &
+        konsole --new-tab -e bash -c "cd '$SCRIPT_DIR/webui' && npm run dev; exec bash" &
         ;;
     xfce4-terminal)
-        xfce4-terminal --command="bash -c 'cd \"$SCRIPT_DIR\" && source \"$(conda info --base)/etc/profile.d/conda.sh\" && conda activate naturalcc && python agent_web_api.py --host 127.0.0.1 --port 7860; exec bash'"
-        xfce4-terminal --command="bash -c 'cd \"$SCRIPT_DIR/webui\" && source \"$(conda info --base)/etc/profile.d/conda.sh\" && conda activate naturalcc && npm run dev; exec bash'"
+        xfce4-terminal --command="bash -c 'cd \"$SCRIPT_DIR\" && \"$VENV_PYTHON\" agent_web_api.py --host 127.0.0.1 --port 7860; exec bash'"
+        xfce4-terminal --command="bash -c 'cd \"$SCRIPT_DIR/webui\" && npm run dev; exec bash'"
         ;;
     terminator)
-        terminator -e "bash -c 'cd \"$SCRIPT_DIR\" && source \"$(conda info --base)/etc/profile.d/conda.sh\" && conda activate naturalcc && python agent_web_api.py --host 127.0.0.1 --port 7860; exec bash'" &
-        terminator -e "bash -c 'cd \"$SCRIPT_DIR/webui\" && source \"$(conda info --base)/etc/profile.d/conda.sh\" && conda activate naturalcc && npm run dev; exec bash'" &
+        terminator -e "bash -c 'cd \"$SCRIPT_DIR\" && \"$VENV_PYTHON\" agent_web_api.py --host 127.0.0.1 --port 7860; exec bash'" &
+        terminator -e "bash -c 'cd \"$SCRIPT_DIR/webui\" && npm run dev; exec bash'" &
         ;;
     alacritty)
-        alacritty -e bash -c "cd '$SCRIPT_DIR' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && python agent_web_api.py --host 127.0.0.1 --port 7860; exec bash" &
-        alacritty -e bash -c "cd '$SCRIPT_DIR/webui' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && npm run dev; exec bash" &
+        alacritty -e bash -c "cd '$SCRIPT_DIR' && '$VENV_PYTHON' agent_web_api.py --host 127.0.0.1 --port 7860; exec bash" &
+        alacritty -e bash -c "cd '$SCRIPT_DIR/webui' && npm run dev; exec bash" &
         ;;
     wezterm)
-        wezterm start -- bash -c "cd '$SCRIPT_DIR' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && python agent_web_api.py --host 127.0.0.1 --port 7860; exec bash"
-        wezterm start -- bash -c "cd '$SCRIPT_DIR/webui' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && npm run dev; exec bash"
+        wezterm start -- bash -c "cd '$SCRIPT_DIR' && '$VENV_PYTHON' agent_web_api.py --host 127.0.0.1 --port 7860; exec bash"
+        wezterm start -- bash -c "cd '$SCRIPT_DIR/webui' && npm run dev; exec bash"
         ;;
     kitty)
-        kitty bash -c "cd '$SCRIPT_DIR' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && python agent_web_api.py --host 127.0.0.1 --port 7860; exec bash" &
-        kitty bash -c "cd '$SCRIPT_DIR/webui' && source '$(conda info --base)/etc/profile.d/conda.sh' && conda activate naturalcc && npm run dev; exec bash" &
+        kitty bash -c "cd '$SCRIPT_DIR' && '$VENV_PYTHON' agent_web_api.py --host 127.0.0.1 --port 7860; exec bash" &
+        kitty bash -c "cd '$SCRIPT_DIR/webui' && npm run dev; exec bash" &
         ;;
 esac
 

@@ -38,27 +38,40 @@
 
 ## 环境搭建
 
-### 1. 激活 Python 环境
+### 前置条件
+
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)（Python 包管理器）
+- Node.js & npm（前端构建）
+
+### 1. 安装系统依赖
+
+C/C++ 解析需要系统级 `libclang` 库。在运行 `uv sync` 之前，通过系统包管理器安装：
+
+- **Ubuntu/Debian**: `sudo apt install libclang1`
+- **macOS**: `brew install libclang`
+- **其他发行版**: 在系统包仓库中搜索 `libclang` 并安装
+
+### 2. 创建 Python 环境
+
+在 `code_agent/` 目录下执行：
 
 ```bash
-conda activate naturalcc
+uv sync
 ```
 
-### 2. 安装 Python 依赖
+此命令会自动创建 `.venv` 虚拟环境并安装所有锁定的 Python 依赖，无需手动配置 conda 或执行 pip。
 
-项目运行至少需要：
+项目运行至少需要以下能力（均由 `uv sync` 自动处理）：
 
 - `fastapi`
 - `uvicorn`
 - `clang` Python bindings
-- `libclang`
 - `aider` 可执行命令在 `PATH` 中
 
-如果当前环境缺少依赖，可按你的本地环境策略安装。常见方式：
+如需 GPU 支持（例如运行基于 vLLM 的离线评估），可手动安装：
 
 ```bash
-pip install fastapi uvicorn clang aider-chat
-conda install -c conda-forge libclang
+uv pip install vllm
 ```
 
 调用 OpenRouter / OpenAI 时，可以在界面或 CLI 中传入 API Key，也可以设置环境变量：
@@ -89,7 +102,7 @@ npm install
 ./start.sh
 ```
 
-该脚本会自动激活 `naturalcc` 环境，并打开两个终端窗口（或 tmux 分屏）：
+该脚本会自动使用 `.venv` 中的 Python，并打开两个终端窗口（或 tmux 分屏）：
 - 一个运行 FastAPI 后端
 - 一个运行 Vite 前端开发服务器
 
@@ -102,7 +115,7 @@ npm install
 终端 1：
 
 ```bash
-python agent_web_api.py --host 127.0.0.1 --port 7860
+uv run python agent_web_api.py --host 127.0.0.1 --port 7860
 ```
 
 终端 2：
@@ -128,7 +141,7 @@ http://127.0.0.1:5173/
 cd webui
 npm run build
 cd ..
-python agent_web_api.py --host 127.0.0.1 --port 7860
+uv run python agent_web_api.py --host 127.0.0.1 --port 7860
 ```
 
 打开：
@@ -156,7 +169,7 @@ http://127.0.0.1:7860/
 ### 仅预览 Prompt
 
 ```bash
-python aider_runner.py \
+uv run python aider_runner.py \
   -dir /path/to/project \
   -f src/foo.c include/foo.h \
   -i "补全 foo 函数实现" \
@@ -166,7 +179,7 @@ python aider_runner.py \
 ### 执行 Aider 修改文件
 
 ```bash
-python aider_runner.py \
+uv run python aider_runner.py \
   -dir /path/to/project \
   -f src/foo.c include/foo.h \
   -i "根据现有风格完善 foo 函数实现" \
