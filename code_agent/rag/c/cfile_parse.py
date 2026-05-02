@@ -61,6 +61,11 @@ def _iter_libclang_candidates():
         if found:
             yield Path(found)
 
+    if sys.platform != "win32" and sys.platform != "darwin":
+        for llvm_lib in sorted(Path("/usr/lib").glob("llvm-*/lib"), reverse=True):
+            yield llvm_lib / "libclang.so"
+            yield llvm_lib / "libclang.so.1"
+
 
 def _configure_libclang():
     if cindex.Config.loaded:
@@ -78,9 +83,8 @@ def _configure_libclang():
     raise RuntimeError(
         "libclang not found. "
         f"Checked under environment: {env_prefix}. "
-        "Install libclang into the active environment, for example:\n"
-        "  conda install -n naturalcc -c conda-forge libclang\n"
-        "or set LIBCLANG_PATH to the full library path."
+        "Install the system libclang package (e.g. 'sudo apt install libclang1' or "
+        "'brew install libclang'), or set LIBCLANG_PATH to the full library path."
     )
 
 

@@ -1,5 +1,6 @@
 import {
   Activity,
+  Bot,
   Braces,
   Check,
   ChevronUp,
@@ -9,13 +10,17 @@ import {
   FileCode,
   Folder,
   FolderOpen,
+  Menu,
+  PanelRightClose,
   Play,
   RefreshCcw,
   Search,
+  Send,
   Settings2,
   Sparkles,
   Terminal,
   Trash2,
+  User,
   X
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -68,6 +73,11 @@ function metricLabel(value) {
     return "not set";
   }
   return String(value);
+}
+
+function formatTime(date) {
+  if (!date) return "";
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 const FIELD_TYPE_COMPONENTS = {
@@ -183,6 +193,7 @@ function App() {
   const [browseState, setBrowseState] = useState({ path: "", parent: "", directories: [], files: [] });
   const [fileFilter, setFileFilter] = useState("");
   const fileFilterRef = useRef(null);
+  const chatInputRef = useRef(null);
   const [customTarget, setCustomTarget] = useState("");
   const [terminalLog, setTerminalLog] = useState("");
   const [runCommand, setRunCommand] = useState("");
@@ -193,6 +204,16 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [lastError, setLastError] = useState("");
   const [lastUpdated, setLastUpdated] = useState("");
+
+  // Ref to prevent duplicate user messages when Send triggers Run
+  const userMessageAddedRef = useRef(false);
+
+  // New UI states
+  const [messages, setMessages] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeMessageId, setActiveMessageId] = useState(null);
+  const messagesEndRef = useRef(null);
 
   const payload = useMemo(
     () => {
@@ -283,6 +304,21 @@ function App() {
     return () => window.clearTimeout(timer);
   }, [payload, projectDir]);
 
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, mode]);
+
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [drawerOpen]);
+
   async function refreshWorkspace(dir = projectDir, nextTargets = targets) {
     setLastError("");
     const data = await requestJson("/api/workspace/scan", {
@@ -333,11 +369,31 @@ function App() {
     setTargets((current) => current.filter((item) => item !== file));
   }
 
+  function addMessage(type, content, status = "complete", extra = {}) {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const msg = { id, type, content, timestamp: new Date(), status, ...extra };
+    setMessages((prev) => [...prev, msg]);
+    return id;
+  }
+
+  function updateMessage(id, updates) {
+    setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, ...updates } : m)));
+  }
+
   async function handlePreview() {
+    if (!instruction.trim() && !canRunWithoutInstruction()) {
+      setLastError("Please enter an instruction first.");
+      return;
+    }
     setBusy(true);
     setMode("running");
     setLastError("");
     setTerminalLog("Generating prompt preview...\n");
+
+    addMessage("user", instruction || "Vulnerability scan");
+    const assistantId = addMessage("assistant", "Generating prompt preview...", "running");
+    setActiveMessageId(assistantId);
+
     try {
       const data = await requestJson("/api/prompt/preview", {
         method: "POST",
@@ -347,12 +403,22 @@ function App() {
       setPreviewCommand(data.command || previewCommand);
       setMode(data.status === "error" ? "error" : "preview");
       setLastUpdated(new Date().toLocaleTimeString());
+      updateMessage(assistantId, {
+        content: data.log || "Preview generated.",
+        status: data.status === "error" ? "error" : "complete",
+        command: data.command || previewCommand
+      });
     } catch (error) {
       setMode("error");
       setLastError(error.message);
       setTerminalLog(`Preview failed: ${error.message}\n`);
+      updateMessage(assistantId, {
+        content: `Preview failed: ${error.message}`,
+        status: "error"
+      });
     } finally {
       setBusy(false);
+      setActiveMessageId(null);
     }
   }
 
@@ -380,10 +446,23 @@ function App() {
   }
 
   async function handleRun() {
+    if (!instruction.trim() && !canRunWithoutInstruction()) {
+      setLastError("Please enter an instruction first.");
+      return;
+    }
     setBusy(true);
     setMode("running");
     setLastError("");
     setTerminalLog("Preparing execution...\n");
+
+    if (!userMessageAddedRef.current) {
+      addMessage("user", instruction || "Vulnerability scan");
+    }
+    userMessageAddedRef.current = false;
+
+    const assistantId = addMessage("assistant", "Preparing execution...", "running");
+    setActiveMessageId(assistantId);
+
     try {
       const hasFiles = Object.values(featureConfig).some(
         (v) => v instanceof FileList && v.length > 0
@@ -407,6 +486,9 @@ function App() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let latestLog = "Preparing execution...\n";
+      let latestCommand = "";
+
       while (true) {
         const { value, done } = await reader.read();
         if (done) {
@@ -421,14 +503,22 @@ function App() {
           }
           const event = JSON.parse(line);
           if (event.command) {
+            latestCommand = event.command;
             setRunCommand(event.command);
           }
           if (event.log !== undefined) {
+            latestLog = event.log;
             setTerminalLog(event.log);
           }
           if (event.status) {
             setMode(event.status === "running" ? "running" : event.status);
           }
+          // Update the active assistant message in real-time
+          updateMessage(assistantId, {
+            content: latestLog,
+            command: latestCommand || runCommand,
+            status: event.status === "running" ? "running" : event.status
+          });
         }
       }
       setLastUpdated(new Date().toLocaleTimeString());
@@ -436,9 +526,18 @@ function App() {
       setMode("error");
       setLastError(error.message);
       setTerminalLog((current) => `${current}\nExecution failed: ${error.message}\n`);
+      updateMessage(assistantId, {
+        content: `Execution failed: ${error.message}`,
+        status: "error"
+      });
     } finally {
       setBusy(false);
+      setActiveMessageId(null);
     }
+  }
+
+  function canRunWithoutInstruction() {
+    return currentFeature === "vulnerability_detection" && !featureConfig.auto_fix;
   }
 
   function handleFeatureChange(featureName) {
@@ -455,28 +554,69 @@ function App() {
     setTerminalLog("");
     setMode("idle");
     setLastError("");
+    setMessages([]);
+    setActiveMessageId(null);
   }
 
-  async function copyCommand() {
-    const text = mode === "preview" ? previewCommand : runCommand;
-    if (!text) {
+  async function copyCommand(command) {
+    if (!command) {
       return;
     }
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(command);
   }
 
+  function handleSend() {
+    if (busy) return;
+    if (!instruction.trim() && !canRunWithoutInstruction()) {
+      setLastError("Please enter an instruction first.");
+      return;
+    }
+    userMessageAddedRef.current = true;
+    addMessage("user", instruction || "Vulnerability scan");
+    handleRun();
+    setInstruction("");
+    requestAnimationFrame(() => {
+      if (chatInputRef.current) {
+        chatInputRef.current.style.height = "auto";
+      }
+    });
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  }
+
+  function autoResizeTextarea() {
+    const el = chatInputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 200) + "px";
+  }
+
+  // ── Render ──
+
   return (
-    <main className="app-shell">
-      <aside className="workspace-rail">
-        <header className="app-title">
+    <div className="app-root">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="drawer-overlay"
+          style={{ zIndex: 25 }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Left Sidebar */}
+      <aside className={classNames("sidebar-left", sidebarOpen && "open")}>
+        <header className="sidebar-header">
           <div className="mark"><Code2 size={18} /></div>
-          <div>
-            <h1>NaturalCC Agent</h1>
-            <p>Workbench</p>
-          </div>
+          <h1>NaturalCC Agent</h1>
         </header>
 
-        <section className="panel-section">
+        <section className="sidebar-section">
           <div className="section-heading">
             <FolderOpen size={16} />
             <span>Workspace</span>
@@ -541,7 +681,7 @@ function App() {
           </div>
         </section>
 
-        <section className="panel-section file-section">
+        <section className="sidebar-section flex-1">
           <div className="section-heading">
             <FileCode size={16} />
             <span>Target files</span>
@@ -599,14 +739,53 @@ function App() {
             </button>
           </div>
         </section>
+
+        {/* Targets list in sidebar */}
+        {targets.length > 0 && (
+          <section className="sidebar-section">
+            <div className="section-heading">
+              <Circle size={16} />
+              <span>Primary parse order</span>
+            </div>
+            <div className="selected-list">
+              {targets.map((file, index) => (
+                <div className="selected-row" key={file} title={file}>
+                  <span className="rank">{index + 1}</span>
+                  <span className="selected-path">{file}</span>
+                  {index > 0 ? (
+                    <button type="button" className="mini-button" onClick={() => makePrimary(file)}>Primary</button>
+                  ) : (
+                    <span className="primary-pill">Primary</span>
+                  )}
+                  <button type="button" className="mini-icon" title="Remove target" onClick={() => removeTarget(file)}>
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </aside>
 
-      <section className="center-stage">
-        <div className="stage-header">
-          <div>
-            <span className={classNames("status-dot", mode)} />
-            <span className="eyebrow">{statusTitle}</span>
-            <h2>{primaryTarget || "No primary target selected"}</h2>
+      {/* Main Chat Stage */}
+      <main className="chat-stage">
+        {/* Header */}
+        <header className="stage-header">
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button
+              type="button"
+              className="mobile-menu-btn"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu size={18} />
+            </button>
+            <div>
+              <span className="eyebrow">
+                <span className={classNames("status-dot", mode)} />
+                {statusTitle}
+              </span>
+              <h2>{primaryTarget || "No primary target selected"}</h2>
+            </div>
           </div>
           <div className="stage-actions">
             <button type="button" className="secondary-button" disabled={busy} onClick={handlePreview}>
@@ -620,145 +799,205 @@ function App() {
             <button type="button" className="icon-button" title="Clear task" disabled={busy} onClick={handleClear}>
               <Trash2 size={16} />
             </button>
-          </div>
-        </div>
-
-        <section className="composer">
-          <label className="field-label" htmlFor="instruction">Development instruction</label>
-          <textarea
-            id="instruction"
-            value={instruction}
-            onChange={(event) => setInstruction(event.target.value)}
-            placeholder="Complete parse_flags and follow the existing error handling style."
-          />
-        </section>
-
-        <section className="timeline">
-          <div className="terminal-header">
-            <div>
-              <Terminal size={16} />
-              <span>Execution timeline</span>
-            </div>
-            <button type="button" className="ghost-button" title="Copy command" onClick={copyCommand}>
-              <Clipboard size={15} />
-              Copy CLI
+            <button
+              type="button"
+              className={classNames("icon-button", drawerOpen && "active")}
+              title="Open settings"
+              onClick={() => setDrawerOpen(true)}
+            >
+              <PanelRightClose size={16} />
             </button>
           </div>
-          <pre className="terminal-output">{terminalLog || "No output yet."}</pre>
-        </section>
-      </section>
+        </header>
 
-      <aside className="inspector">
-        <section className="panel-section">
-          <div className="section-heading">
-            <Settings2 size={16} />
-            <span>Model</span>
-          </div>
-          <label className="field-label" htmlFor="model">Model</label>
-          <input
-            id="model"
-            className="text-input"
-            value={model}
-            onChange={(event) => setModel(event.target.value)}
-            list="model-options"
-          />
-          <datalist id="model-options">
-            {models.map((item) => <option value={item} key={item} />)}
-          </datalist>
-          <label className="field-label" htmlFor="apiKey">API key</label>
-          <input
-            id="apiKey"
-            className="text-input"
-            value={apiKey}
-            type="password"
-            onChange={(event) => setApiKey(event.target.value)}
-            placeholder="Falls back to environment"
-          />
-        </section>
-
-        <section className="panel-section">
-          <div className="section-heading">
-            <Braces size={16} />
-            <span>Feature</span>
-          </div>
-          <label className="field-label" htmlFor="feature">Mode</label>
-          <select
-            id="feature"
-            className="text-input"
-            value={currentFeature}
-            onChange={(event) => handleFeatureChange(event.target.value)}
-          >
-            {features.map((f) => (
-              <option value={f.name} key={f.name}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-          {featureSchemas[currentFeature] && (
-            <DynamicForm
-              schema={featureSchemas[currentFeature]}
-              values={featureConfig}
-              onChange={handleFeatureConfigChange}
-            />
-          )}
-        </section>
-
-        <section className="panel-section selected-section">
-          <div className="section-heading">
-            <Activity size={16} />
-            <span>Status</span>
-          </div>
-          <div className="metrics-grid">
-            <Metric label="Visible" value={workspace.counts.visible_files} />
-            <Metric label="Parsable" value={workspace.counts.parsable_files} />
-            <Metric label="Targets" value={targets.length} />
-            <Metric label="Custom" value={customTargetCount} />
-          </div>
-          <dl className="info-list">
-            <Info label="Provider" value={provider} />
-            <Info label="API key" value={apiKeyLabel} />
-            <Info label="Updated" value={lastUpdated || "not yet"} />
-            <Info label="Root" value={workspace.normalized_root || projectDir} />
-          </dl>
-          {lastError ? <div className="error-box">{lastError}</div> : null}
-        </section>
-
-        <section className="panel-section selected-section">
-          <div className="section-heading">
-            <Circle size={16} />
-            <span>Primary parse order</span>
-          </div>
-          <div className="selected-list">
-            {targets.length === 0 ? (
-              <p className="muted">Select at least one target file.</p>
-            ) : (
-              targets.map((file, index) => (
-                <div className="selected-row" key={file} title={file}>
-                  <span className="rank">{index + 1}</span>
-                  <span className="selected-path">{file}</span>
-                  {index > 0 ? (
-                    <button type="button" className="mini-button" onClick={() => makePrimary(file)}>Primary</button>
-                  ) : (
-                    <span className="primary-pill">Primary</span>
-                  )}
-                  <button type="button" className="mini-icon" title="Remove target" onClick={() => removeTarget(file)}>
-                    <Trash2 size={13} />
-                  </button>
+        {/* Messages Area */}
+        <div className="messages-area">
+          {messages.length === 0 ? (
+            <div className="messages-empty">
+              <Sparkles size={32} />
+              <p>Enter an instruction below to get started.</p>
+              <p className="messages-empty-hint">
+                Select target files from the sidebar, then describe what you want to do.
+              </p>
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <div key={msg.id} className={classNames("message-card", `message-${msg.type}`)}>
+                <div className="message-avatar-column">
+                  <div className="message-avatar">
+                    {msg.type === "user" ? <User size={14} /> : <Bot size={14} />}
+                  </div>
+                  <span className="message-meta">{formatTime(msg.timestamp)}</span>
                 </div>
-              ))
-            )}
-          </div>
-        </section>
+                <div className="message-bubble">
+                  {msg.type === "assistant" && msg.status === "running" ? (
+                    <>
+                      <div className="message-status-row">
+                        <span className="status-dot running" />
+                        <span style={{ color: "var(--amber)" }}>Running...</span>
+                      </div>
+                      <pre className="terminal-body">{msg.content}</pre>
+                    </>
+                  ) : msg.type === "assistant" ? (
+                    <>
+                      {msg.status === "error" && (
+                        <div className="message-status-row">
+                          <span className="status-dot error" />
+                          <span style={{ color: "var(--danger)" }}>Error</span>
+                        </div>
+                      )}
+                      <pre className="terminal-body">{msg.content}</pre>
+                      {msg.command && (
+                        <button
+                          type="button"
+                          className="message-action-btn"
+                          onClick={() => copyCommand(msg.command)}
+                        >
+                          <Clipboard size={11} />
+                          Copy CLI
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    msg.content
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
-        <section className="panel-section command-section">
-          <div className="section-heading">
-            <Terminal size={16} />
-            <span>Equivalent CLI</span>
+        {/* Chat Input */}
+        <div className="chat-input-area">
+          <div className="chat-input-wrapper">
+            <textarea
+              ref={chatInputRef}
+              className="chat-input"
+              value={instruction}
+              onChange={(event) => {
+                setInstruction(event.target.value);
+                requestAnimationFrame(autoResizeTextarea);
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder="Describe what you want to do..."
+              rows={1}
+            />
+            <button
+              type="button"
+              className="chat-send-btn"
+              disabled={busy || (!instruction.trim() && !canRunWithoutInstruction())}
+              onClick={handleSend}
+              title="Send"
+            >
+              <Send size={18} />
+            </button>
           </div>
-          <pre className="command-preview">{mode === "preview" ? previewCommand : runCommand}</pre>
-        </section>
-      </aside>
-    </main>
+        </div>
+      </main>
+
+      {/* Right Drawer */}
+      {drawerOpen && (
+        <>
+          <div className="drawer-overlay" onClick={() => setDrawerOpen(false)} />
+          <aside className="drawer">
+            <div className="drawer-header">
+              <h3>Settings</h3>
+              <button
+                type="button"
+                className="drawer-close"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="drawer-body">
+              <section style={{ marginBottom: 16 }}>
+                <div className="section-heading">
+                  <Settings2 size={16} />
+                  <span>Model</span>
+                </div>
+                <label className="field-label" htmlFor="model">Model</label>
+                <input
+                  id="model"
+                  className="text-input"
+                  value={model}
+                  onChange={(event) => setModel(event.target.value)}
+                  list="model-options"
+                />
+                <datalist id="model-options">
+                  {models.map((item) => <option value={item} key={item} />)}
+                </datalist>
+                <label className="field-label" htmlFor="apiKey">API key</label>
+                <input
+                  id="apiKey"
+                  className="text-input"
+                  value={apiKey}
+                  type="password"
+                  onChange={(event) => setApiKey(event.target.value)}
+                  placeholder="Falls back to environment"
+                />
+              </section>
+
+              <section style={{ marginBottom: 16 }}>
+                <div className="section-heading">
+                  <Braces size={16} />
+                  <span>Feature</span>
+                </div>
+                <label className="field-label" htmlFor="feature">Mode</label>
+                <select
+                  id="feature"
+                  className="text-input"
+                  value={currentFeature}
+                  onChange={(event) => handleFeatureChange(event.target.value)}
+                >
+                  {features.map((f) => (
+                    <option value={f.name} key={f.name}>
+                      {f.label}
+                    </option>
+                  ))}
+                </select>
+                {featureSchemas[currentFeature] && (
+                  <DynamicForm
+                    schema={featureSchemas[currentFeature]}
+                    values={featureConfig}
+                    onChange={handleFeatureConfigChange}
+                  />
+                )}
+              </section>
+
+              <section style={{ marginBottom: 16 }}>
+                <div className="section-heading">
+                  <Activity size={16} />
+                  <span>Status</span>
+                </div>
+                <div className="metrics-grid">
+                  <Metric label="Visible" value={workspace.counts.visible_files} />
+                  <Metric label="Parsable" value={workspace.counts.parsable_files} />
+                  <Metric label="Targets" value={targets.length} />
+                  <Metric label="Custom" value={customTargetCount} />
+                </div>
+                <dl className="info-list">
+                  <Info label="Provider" value={provider} />
+                  <Info label="API key" value={apiKeyLabel} />
+                  <Info label="Updated" value={lastUpdated || "not yet"} />
+                  <Info label="Root" value={workspace.normalized_root || projectDir} />
+                </dl>
+                {lastError ? <div className="error-box">{lastError}</div> : null}
+              </section>
+
+              <section>
+                <div className="section-heading">
+                  <Terminal size={16} />
+                  <span>Equivalent CLI</span>
+                </div>
+                <pre className="command-preview">{mode === "preview" ? previewCommand : runCommand}</pre>
+              </section>
+            </div>
+          </aside>
+        </>
+      )}
+    </div>
   );
 }
 
