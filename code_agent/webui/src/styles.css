@@ -33,8 +33,14 @@
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--bg);
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+  min-height: 0;
 }
 
 button,
@@ -51,10 +57,12 @@ button {
 
 /* ── Root Layout ── */
 .app-root {
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
   display: grid;
   grid-template-columns: 260px 1fr;
   background: var(--bg);
+  overflow: hidden;
 }
 
 /* ── Left Sidebar ── */
@@ -401,13 +409,17 @@ button:disabled {
 .chat-stage {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
   overflow: hidden;
   background: var(--bg);
 }
 
 /* ── Stage Header ── */
 .stage-header {
+  position: sticky;
+  top: 0;
+  z-index: 12;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -460,7 +472,9 @@ button:disabled {
 
 /* ── Messages Area ── */
 .messages-area {
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -600,8 +614,8 @@ button:disabled {
 /* ── Terminal Block inside Message ── */
 .terminal-body {
   padding: 6px 8px;
-  overflow: auto;
-  max-height: 400px;
+  overflow: visible;
+  max-height: none;
   white-space: pre-wrap;
   word-break: break-word;
   color: #d4d4d4;

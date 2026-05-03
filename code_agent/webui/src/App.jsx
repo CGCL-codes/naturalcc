@@ -80,6 +80,10 @@ function formatTime(date) {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+function nextFrame() {
+  return new Promise((resolve) => requestAnimationFrame(resolve));
+}
+
 const FIELD_TYPE_COMPONENTS = {
   text: ({ field, value, onChange }) => (
     <input
@@ -122,7 +126,7 @@ const FIELD_TYPE_COMPONENTS = {
     <label className="switch-row">
       <input
         type="checkbox"
-        checked={!!value}
+        checked={value === undefined ? !!field.default : !!value}
         onChange={(e) => onChange(field.name, e.target.checked)}
       />
       <span>{field.help_text || field.label}</span>
@@ -213,6 +217,7 @@ function App() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeMessageId, setActiveMessageId] = useState(null);
+  const messagesAreaRef = useRef(null);
   const messagesEndRef = useRef(null);
 
   const payload = useMemo(
@@ -305,7 +310,12 @@ function App() {
   }, [payload, projectDir]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const area = messagesAreaRef.current;
+    if (area) {
+      area.scrollTop = area.scrollHeight;
+      return;
+    }
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
   }, [messages, mode]);
 
   useEffect(() => {
@@ -390,7 +400,7 @@ function App() {
     setLastError("");
     setTerminalLog("Generating prompt preview...\n");
 
-    addMessage("user", instruction || "Vulnerability scan");
+    addMessage("user", instruction || defaultTaskLabel());
     const assistantId = addMessage("assistant", "Generating prompt preview...", "running");
     setActiveMessageId(assistantId);
 
@@ -456,7 +466,7 @@ function App() {
     setTerminalLog("Preparing execution...\n");
 
     if (!userMessageAddedRef.current) {
-      addMessage("user", instruction || "Vulnerability scan");
+      addMessage("user", instruction || defaultTaskLabel());
     }
     userMessageAddedRef.current = false;
 
@@ -488,6 +498,24 @@ function App() {
       let buffer = "";
       let latestLog = "Preparing execution...\n";
       let latestCommand = "";
+      const applyStreamEvent = (event) => {
+        if (event.command) {
+          latestCommand = event.command;
+          setRunCommand(event.command);
+        }
+        if (event.log !== undefined) {
+          latestLog = event.log;
+          setTerminalLog(event.log);
+        }
+        if (event.status) {
+          setMode(event.status === "running" ? "running" : event.status);
+        }
+        updateMessage(assistantId, {
+          content: latestLog,
+          command: latestCommand || runCommand,
+          status: event.status === "running" ? "running" : event.status
+        });
+      };
 
       while (true) {
         const { value, done } = await reader.read();
@@ -502,24 +530,13 @@ function App() {
             continue;
           }
           const event = JSON.parse(line);
-          if (event.command) {
-            latestCommand = event.command;
-            setRunCommand(event.command);
-          }
-          if (event.log !== undefined) {
-            latestLog = event.log;
-            setTerminalLog(event.log);
-          }
-          if (event.status) {
-            setMode(event.status === "running" ? "running" : event.status);
-          }
-          // Update the active assistant message in real-time
-          updateMessage(assistantId, {
-            content: latestLog,
-            command: latestCommand || runCommand,
-            status: event.status === "running" ? "running" : event.status
-          });
+          applyStreamEvent(event);
+          await nextFrame();
         }
+      }
+      if (buffer.trim()) {
+        applyStreamEvent(JSON.parse(buffer));
+        await nextFrame();
       }
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (error) {
@@ -537,7 +554,27 @@ function App() {
   }
 
   function canRunWithoutInstruction() {
-    return currentFeature === "vulnerability_detection" && !featureConfig.auto_fix;
+    if (currentFeature === "code_repair") {
+      return Boolean(
+        (featureConfig.failure_log || "").trim()
+        || (featureConfig.extra_context || "").trim()
+      );
+    }
+    return currentFeature === "code_summary"
+      || (currentFeature === "vulnerability_detection" && !featureConfig.auto_fix);
+  }
+
+  function defaultTaskLabel() {
+    if (currentFeature === "code_summary") {
+      return "Code summary";
+    }
+    if (currentFeature === "vulnerability_detection") {
+      return "Vulnerability scan";
+    }
+    if (currentFeature === "code_repair") {
+      return "Code repair";
+    }
+    return "Code task";
   }
 
   function handleFeatureChange(featureName) {
@@ -572,7 +609,7 @@ function App() {
       return;
     }
     userMessageAddedRef.current = true;
-    addMessage("user", instruction || "Vulnerability scan");
+    addMessage("user", instruction || defaultTaskLabel());
     handleRun();
     setInstruction("");
     requestAnimationFrame(() => {
@@ -811,7 +848,7 @@ function App() {
         </header>
 
         {/* Messages Area */}
-        <div className="messages-area">
+        <div className="messages-area" ref={messagesAreaRef}>
           {messages.length === 0 ? (
             <div className="messages-empty">
               <Sparkles size={32} />

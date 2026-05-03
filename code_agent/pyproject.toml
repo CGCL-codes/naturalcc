@@ -17,7 +17,7 @@ dependencies = [
     "orjson",
     "pillow",
     "pydub",
-    "clang",
+    "clang==18.1.8",
     "aider-chat",
     "numpy",
     "py2neo",

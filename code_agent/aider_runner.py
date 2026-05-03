@@ -102,6 +102,68 @@ def normalize_target_files(target_files, project_dir=None):
     return result
 
 
+def resolve_api_key(api_key: Optional[str]) -> Tuple[Optional[str], str]:
+    api_key = api_key or (
+        os.environ.get("OPENROUTER_API_KEY")
+        or os.environ.get("OPENAI_API_KEY")
+        or "Add by yourself"
+    )
+    if api_key:
+        return api_key, ""
+    return (
+        api_key,
+        "⚠️ [警告]: 未提供 API Key，且环境变量中未找到 OPENROUTER_API_KEY / OPENAI_API_KEY，调用可能会失败。\n",
+    )
+
+
+def write_prompt_file(final_instruction: str) -> str:
+    tmp_file = tempfile.NamedTemporaryFile(
+        mode="w",
+        delete=False,
+        suffix=".txt",
+        encoding="utf-8",
+    )
+    tmp_file.write(final_instruction)
+    tmp_file.close()
+    return tmp_file.name
+
+
+def append_api_key_arg(aider_command: List[str], model: str, api_key: Optional[str]) -> None:
+    if api_key:
+        provider = detect_provider(model)
+        aider_command.extend(["--api-key", f"{provider}={api_key}"])
+
+
+def build_aider_command(
+    edit_files: List[str],
+    model: str,
+    api_key: Optional[str],
+    prompt_file_path: str,
+    no_pretty: bool = False,
+    dry_run: bool = False,
+) -> List[str]:
+    aider_command = [
+        "aider",
+        *edit_files,
+        "--model",
+        model,
+        "--message-file",
+        prompt_file_path,
+        "--no-gitignore",
+        "--map-tokens",
+        "0",
+        "--yes-always",
+        "--no-fancy-input",
+        "--no-auto-commits",
+    ]
+    if dry_run:
+        aider_command.append("--dry-run")
+    if no_pretty:
+        aider_command.append("--no-pretty")
+    append_api_key_arg(aider_command, model, api_key)
+    return aider_command
+
+
 def generate_completion_prompt(
     project_dir: str,
     user_instruction: str,
@@ -136,6 +198,7 @@ def build_aider_context_and_command(
     completion_type: Optional[str] = None,
     prefix: str = "",
     no_pretty: bool = False,
+    dry_run: bool = False,
 ) -> Tuple[List[str], str, str, str]:
     """
     返回:
@@ -152,16 +215,8 @@ def build_aider_context_and_command(
     if not user_instruction or not user_instruction.strip():
         raise ValueError("user_instruction 不能为空。")
 
-    API_KEY_TMP = "Add by yourself"
-
-    if not api_key:
-        api_key = (
-            os.environ.get("OPENROUTER_API_KEY")
-            or os.environ.get("OPENAI_API_KEY")
-            or API_KEY_TMP
-        )
-        if not api_key:
-            init_log += "⚠️ [警告]: 未提供 API Key，且环境变量中未找到 OPENROUTER_API_KEY / OPENAI_API_KEY，调用可能会失败。\n"
+    api_key, api_key_log = resolve_api_key(api_key)
+    init_log += api_key_log
 
     init_log += "🚀 [NaturalCC] 正在扫描并分析项目图谱...\n"
 
@@ -192,41 +247,19 @@ def build_aider_context_and_command(
 
 {prompt_from_agent}
 """
-
-    tmp_file = tempfile.NamedTemporaryFile(
-        mode="w",
-        delete=False,
-        suffix=".txt",
-        encoding="utf-8",
-    )
-    tmp_file.write(final_instruction)
-    tmp_file.close()
-    prompt_file_path = tmp_file.name
-
     init_log += f"🧠 [NaturalCC] Prompt 已生成，移交控制权给 Aider (模型: {model})...\n"
+    if dry_run:
+        init_log += "ℹ️ [Aider] dry-run enabled; files will not be modified.\n"
 
-    aider_command = [
-        "aider",
-        *target_files,
-        "--model",
-        model,
-        "--message-file",
-        prompt_file_path,
-        "--no-gitignore",
-        "--map-tokens",
-        "0",
-        "--yes-always",
-        "--no-fancy-input",
-        "--no-auto-commits",
-    ]
-
-    if no_pretty:
-        aider_command.append("--no-pretty")
-
-    if api_key:
-        provider = detect_provider(model)
-        key_arg = f"{provider}={api_key}"
-        aider_command.extend(["--api-key", key_arg])
+    prompt_file_path = write_prompt_file(final_instruction)
+    aider_command = build_aider_command(
+        edit_files=target_files,
+        model=model,
+        api_key=api_key,
+        prompt_file_path=prompt_file_path,
+        no_pretty=no_pretty,
+        dry_run=dry_run,
+    )
 
     return aider_command, prompt_file_path, init_log, final_instruction
 
@@ -306,9 +339,8 @@ def run_aider_stream(
     symbol: Optional[str] = None,
     completion_type: Optional[str] = None,
     prefix: str = "",
+    dry_run: bool = False,
 ) -> Generator[str, None, None]:
-    output_log = ""
-
     try:
         project_dir = normalize_project_dir(project_dir)
         target_files = normalize_target_files(target_files, project_dir=project_dir)
@@ -331,8 +363,24 @@ def run_aider_stream(
             completion_type=completion_type,
             prefix=prefix,
             no_pretty=True,
+            dry_run=dry_run,
         )
 
+    except Exception as e:
+        yield f"\n❌ [系统错误] 发生异常: {str(e)}\n"
+        return
+
+    yield from stream_aider_command(aider_command, prompt_file_path, init_log, model)
+
+
+def stream_aider_command(
+    aider_command: List[str],
+    prompt_file_path: str,
+    init_log: str,
+    model: str,
+) -> Generator[str, None, None]:
+    output_log = ""
+    try:
         output_log += init_log
         output_log += f"🔧 [执行命令]: {mask_command_for_log(aider_command, model)}\n"
         output_log += "-" * 60 + "\n"
@@ -366,7 +414,7 @@ def run_aider_stream(
         output_log += f"\n❌ [系统错误] 发生异常: {str(e)}\n"
     finally:
         try:
-            if "prompt_file_path" in locals() and os.path.exists(prompt_file_path):
+            if os.path.exists(prompt_file_path):
                 os.remove(prompt_file_path)
         except Exception:
             pass
@@ -383,6 +431,7 @@ def preview_prompt(
     symbol: Optional[str] = None,
     completion_type: Optional[str] = None,
     prefix: str = "",
+    dry_run: bool = False,
 ) -> str:
     """
     仅生成并预览最终给 Aider 的 prompt，不执行 Aider。
@@ -400,6 +449,7 @@ def preview_prompt(
             completion_type=completion_type,
             prefix=prefix,
             no_pretty=True,
+            dry_run=dry_run,
         )
 
         preview_text = init_log + "\n" + "=" * 80 + "\n"

@@ -51,6 +51,7 @@ class ExecutionDispatcher:
             "mode": "aider",
         })
 
+        log = ""
         for log in plugin.execute(context):
             yield ndjson_event({
                 "type": "log",
@@ -59,10 +60,14 @@ class ExecutionDispatcher:
                 "mode": "aider",
             })
 
+        final_status = self._infer_status(log)
+        if final_status in {"idle", "running"}:
+            final_status = "success"
+
         yield ndjson_event({
             "type": "done",
-            "status": "success",
-            "log": log,
+            "status": final_status,
+            "log": log or "Execution completed.",
             "mode": "aider",
         })
 

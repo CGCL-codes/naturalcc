@@ -235,15 +235,51 @@ The **Advanced** panel is now powered by a plugin architecture. Each feature is 
 - `plugins/registry.py` — `@register_plugin` class decorator; plugins auto-register on import.
 - `plugins/dispatcher.py` — routes execution to AIDER, DIRECT, or HYBRID mode.
 - `plugins/code_completion.py` — the existing `symbol`/`completion_type`/`prefix` logic, migrated to a plugin.
+- `plugins/code_summary.py` — NaturalCC + Aider dry-run code summaries.
+- `plugins/code_repair.py` — AIDER-mode repair prompts for bug, compile, and test failures.
 - `plugins/vulnerability_detection.py` — vulnerability analysis with optional Aider remediation.
 
 ### Execution Modes
 
 | Mode | Behavior | Example |
 |------|----------|---------|
-| `aider` | Generate prompt → call Aider → modify code files | Code completion |
-| `direct` | Call external API directly → return report / write files | Image-to-HTML |
+| `aider` | Generate prompt → call Aider → modify code files or dry-run reports | Code completion, code repair, code summary |
+| `direct` | Analyze directly → return report / write files | Static reports |
 | `hybrid` | Analysis via API → generate fix prompt → Aider repair | Vulnerability detection |
+
+### Built-in Code Summary Feature
+
+Feature name: `code_summary` (AIDER mode)
+
+Behavior:
+- Builds the normal NaturalCC semantic prompt for selected target files, or source files under the whole project.
+- Runs Aider with `--dry-run`, so summary generation does not modify files.
+- Uses the selected model to produce a deeper code-aware report.
+
+Main config fields:
+- `summary_scope`: `targets` or `project`
+- `detail_level`: `brief` / `standard` / `detailed`
+- `include_symbols`: ask Aider to include key symbols and data flow
+- `max_files`: cap files sent through NaturalCC and Aider
+
+### NaturalCC / libclang Version Alignment
+
+NaturalCC requires the Python `clang` bindings to match the installed system `libclang`. This project pins `clang==18.1.8`, which matches the Ubuntu LLVM 18 / `libclang1-18` family. If your system uses a different major LLVM version, update the `clang` dependency and lock file to the same major version as `libclang.so`.
+
+### Built-in Code Repair Feature
+
+Feature name: `code_repair` (AIDER mode)
+
+Behavior:
+- Builds a focused repair prompt from the user instruction, repair type, optional failure log, and optional extra context.
+- Uses the existing NaturalCC semantic prompt path, then delegates edits to Aider.
+- Biases toward minimal fixes and preserving existing interfaces.
+
+Main config fields:
+- `repair_type`: `bug_fix` / `compile_error` / `test_failure` / `safe_refactor`
+- `failure_log`: compiler, test, stack trace, or runtime output
+- `extra_context`: constraints, expected behavior, or reproduction notes
+- `allow_refactor`: allow small supporting refactors when needed
 
 ### Built-in Vulnerability Detection Feature
 

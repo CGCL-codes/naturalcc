@@ -235,15 +235,51 @@ type
 - `plugins/registry.py` — `@register_plugin` 类装饰器；插件在导入时自动注册。
 - `plugins/dispatcher.py` — 将执行路由到 AIDER、DIRECT 或 HYBRID 模式。
 - `plugins/code_completion.py` — 原有的 `symbol`/`completion_type`/`prefix` 逻辑，已迁移为插件。
+- `plugins/code_summary.py` — NaturalCC + Aider dry-run 代码总结。
+- `plugins/code_repair.py` — AIDER 模式的代码修复提示词，用于 bug、编译错误和测试失败。
 - `plugins/vulnerability_detection.py` — 漏洞分析插件，支持可选的 Aider 自动修复。
 
 ### 执行模式
 
 | 模式 | 行为 | 示例 |
 |------|------|------|
-| `aider` | 生成 prompt → 调用 Aider → 修改代码文件 | 代码补全 |
-| `direct` | 直接调用外部 API → 返回报告 / 写入文件 | 图片生成 HTML |
+| `aider` | 生成 prompt → 调用 Aider → 修改代码文件或输出 dry-run 报告 | 代码补全、代码修复、代码总结 |
+| `direct` | 直接分析 → 返回报告 / 写入文件 | 静态报告 |
 | `hybrid` | 通过 API 分析 → 生成修复 prompt → Aider 修复 | 漏洞检测 |
+
+### 内置代码总结功能
+
+功能名：`code_summary`（AIDER 模式）
+
+执行方式：
+- 对选中的目标文件，或项目下的源码文件，构造正常的 NaturalCC 语义 prompt。
+- 使用 `--dry-run` 调用 Aider，因此总结过程不会修改文件。
+- 使用所选模型生成更深入的代码理解报告。
+
+主要配置项：
+- `summary_scope`：`targets`（仅目标文件）或 `project`（全项目源码）
+- `detail_level`：`brief` / `standard` / `detailed`
+- `include_symbols`：要求 Aider 包含关键符号和数据流
+- `max_files`：发送给 NaturalCC 和 Aider 的文件数量上限
+
+### NaturalCC / libclang 版本对齐
+
+NaturalCC 要求 Python `clang` bindings 与系统安装的 `libclang` 版本匹配。本项目固定 `clang==18.1.8`，对应 Ubuntu LLVM 18 / `libclang1-18` 系列。如果系统使用其他 LLVM 主版本，需要把 `clang` 依赖和锁文件调整为与 `libclang.so` 相同的主版本。
+
+### 内置代码修复功能
+
+功能名：`code_repair`（AIDER 模式）
+
+执行方式：
+- 根据用户指令、修复类型、可选错误日志和可选额外上下文生成聚焦修复提示词。
+- 复用现有 NaturalCC 语义 prompt 路径，然后交给 Aider 修改目标文件。
+- 默认偏向最小修复，并尽量保持现有接口不变。
+
+主要配置项：
+- `repair_type`：`bug_fix` / `compile_error` / `test_failure` / `safe_refactor`
+- `failure_log`：编译错误、测试失败、堆栈或运行时报错
+- `extra_context`：约束、期望行为或复现说明
+- `allow_refactor`：必要时允许小范围辅助重构
 
 ### 内置漏洞检测功能
 

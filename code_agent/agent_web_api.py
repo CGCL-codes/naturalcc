@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import json
 import os
 import shlex
@@ -68,6 +69,11 @@ MODELS = [
     "openrouter/qwen/qwen3-coder",
 ]
 DEFAULT_MODEL = "openrouter/deepseek/deepseek-chat"
+STREAM_HEADERS = {
+    "Cache-Control": "no-cache, no-transform",
+    "X-Accel-Buffering": "no",
+    "Connection": "keep-alive",
+}
 
 IGNORE_DIRS = {
     ".git",
@@ -410,6 +416,7 @@ async def prompt_preview(request: AgentRequest) -> Dict[str, Any]:
 async def _stream_with_context(context: ExecutionContext) -> AsyncIterable[str]:
     for event in dispatcher.dispatch(context):
         yield event
+        await asyncio.sleep(0)
 
 
 @app.post("/api/run")
@@ -445,7 +452,11 @@ async def run_agent(request: Request) -> StreamingResponse:
             uploaded_files=uploaded_files,
         )
 
-        return StreamingResponse(_stream_with_context(context), media_type="application/x-ndjson")
+        return StreamingResponse(
+            _stream_with_context(context),
+            media_type="application/x-ndjson",
+            headers=STREAM_HEADERS,
+        )
 
     # JSON fallback (backward compatible)
     body = await request.json()
@@ -474,7 +485,11 @@ async def run_agent(request: Request) -> StreamingResponse:
         prefix=agent_request.prefix,
     )
 
-    return StreamingResponse(_stream_with_context(context), media_type="application/x-ndjson")
+    return StreamingResponse(
+        _stream_with_context(context),
+        media_type="application/x-ndjson",
+        headers=STREAM_HEADERS,
+    )
 
 
 DIST_DIR = Path(__file__).resolve().parent / "webui" / "dist"
