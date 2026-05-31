@@ -208,6 +208,7 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [lastError, setLastError] = useState("");
   const [lastUpdated, setLastUpdated] = useState("");
+  const [modelInputFocused, setModelInputFocused] = useState(false);
 
   // Ref to prevent duplicate user messages when Send triggers Run
   const userMessageAddedRef = useRef(false);
@@ -445,7 +446,7 @@ function App() {
     for (const [key, value] of Object.entries(featureConfig)) {
       if (value instanceof FileList) {
         for (let i = 0; i < value.length; i++) {
-          formData.append(`files`, value[i]);
+          formData.append(key, value[i]);
         }
       } else {
         cleanConfig[key] = value;
@@ -560,19 +561,27 @@ function App() {
         || (featureConfig.extra_context || "").trim()
       );
     }
+    if (currentFeature === "design_to_code") {
+      return Boolean(
+        featureConfig.screenshot instanceof FileList && featureConfig.screenshot.length > 0
+      );
+    }
     return currentFeature === "code_summary"
       || (currentFeature === "vulnerability_detection" && !featureConfig.auto_fix);
   }
 
   function defaultTaskLabel() {
     if (currentFeature === "code_summary") {
-      return "Code summary";
+      return "Code summarization";
     }
     if (currentFeature === "vulnerability_detection") {
       return "Vulnerability scan";
     }
     if (currentFeature === "code_repair") {
       return "Code repair";
+    }
+    if (currentFeature === "design_to_code") {
+      return "Design to code";
     }
     return "Code task";
   }
@@ -958,8 +967,10 @@ function App() {
                 <input
                   id="model"
                   className="text-input"
-                  value={model}
+                  value={modelInputFocused ? "" : model}
+                  onFocus={() => setModelInputFocused(true)}
                   onChange={(event) => setModel(event.target.value)}
+                  onBlur={() => setModelInputFocused(false)}
                   list="model-options"
                 />
                 <datalist id="model-options">

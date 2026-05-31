@@ -6,7 +6,7 @@ Working map for coding agents. Keep this file short; update it with `README.md` 
 
 `code_agent` is a NaturalCC-enhanced code editing agent. It parses a target project, builds a semantic prompt, then delegates edits or dry-run reports to Aider.
 
-Common tasks: code completion, small project-aware edits/refactors, code summary, code repair, vulnerability detection, and optional vulnerability remediation.
+Common tasks: code completion, small project-aware edits/refactors, code summarization, code repair, vulnerability detection, and optional vulnerability remediation.
 
 ## Active Entry Points
 

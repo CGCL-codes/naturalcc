@@ -19,6 +19,7 @@ dependencies = [
     "pydub",
     "clang==18.1.8",
     "aider-chat",
+    "beautifulsoup4",
     "numpy",
     "py2neo",
     "tqdm",

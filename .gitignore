@@ -5,6 +5,9 @@
 # vscode
 .vscode*
 
+# tmp
+code_agent/.design2code_tmp/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

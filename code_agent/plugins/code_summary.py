@@ -52,8 +52,8 @@ class CodeSummaryPlugin(FeaturePlugin):
     def metadata(self) -> FeatureMetadata:
         return FeatureMetadata(
             name="code_summary",
-            label="Code Summary",
-            description="Use NaturalCC semantic context and Aider dry-run mode to produce a deeper code summary",
+            label="Code Summarization",
+            description="Use NaturalCC semantic context and Aider dry-run mode to produce a deeper code summarization",
             execution_mode=ExecutionMode.AIDER,
         )
 
@@ -62,7 +62,7 @@ class CodeSummaryPlugin(FeaturePlugin):
         return [
             ConfigField(
                 name="summary_scope",
-                label="Summary Scope / 总结范围",
+                label="Summarization Scope / 总结范围",
                 type=ConfigFieldType.SELECT,
                 required=False,
                 default="targets",
@@ -70,7 +70,7 @@ class CodeSummaryPlugin(FeaturePlugin):
                     {"value": "targets", "label": "Selected target files / 仅选中文件"},
                     {"value": "project", "label": "Whole project (source files) / 全项目源码"},
                 ],
-                help_text="Selected files are more focused; project mode sends source files through the NaturalCC+Aider summary path. / 选中文件更聚焦；全项目会通过 NaturalCC+Aider 总结路径处理源码文件。",
+                help_text="Selected files are more focused; project mode sends source files through the NaturalCC+Aider summarization path. / 选中文件更聚焦；全项目会通过 NaturalCC+Aider 总结路径处理源码文件。",
             ),
             ConfigField(
                 name="detail_level",
@@ -117,7 +117,7 @@ class CodeSummaryPlugin(FeaturePlugin):
     def preview(self, context: ExecutionContext) -> str:
         files = self._collect_files(context)
         if not files:
-            return "❌ Code Summary requires at least one readable source file."
+            return "❌ Code Summarization requires at least one readable source file."
         return preview_prompt(
             target_files=files,
             user_instruction=self._build_summary_instruction(context, files),
@@ -130,7 +130,7 @@ class CodeSummaryPlugin(FeaturePlugin):
     def execute(self, context: ExecutionContext) -> Generator[str, None, None]:
         files = self._collect_files(context)
         if not files:
-            yield "⚠️ [错误]: Code Summary requires at least one readable source file.\n"
+            yield "⚠️ [错误]: Code Summarization requires at least one readable source file.\n"
             return
 
         for log in run_aider_stream(

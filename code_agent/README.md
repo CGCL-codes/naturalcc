@@ -243,18 +243,18 @@ The **Advanced** panel is now powered by a plugin architecture. Each feature is 
 
 | Mode | Behavior | Example |
 |------|----------|---------|
-| `aider` | Generate prompt → call Aider → modify code files or dry-run reports | Code completion, code repair, code summary |
+| `aider` | Generate prompt → call Aider → modify code files or dry-run reports | Code completion, code repair, code summarization |
 | `direct` | Analyze directly → return report / write files | Static reports |
 | `hybrid` | Analysis via API → generate fix prompt → Aider repair | Vulnerability detection |
 
-### Built-in Code Summary Feature
+### Built-in Code Summarization Feature
 
 Feature name: `code_summary` (AIDER mode)
 
 Behavior:
 - Builds the normal NaturalCC semantic prompt for selected target files, or source files under the whole project.
 - Runs Aider with `--dry-run`, so summary generation does not modify files.
-- Uses the selected model to produce a deeper code-aware report.
+- Uses the selected model to produce a deeper code-aware summarization.
 
 Main config fields:
 - `summary_scope`: `targets` or `project`

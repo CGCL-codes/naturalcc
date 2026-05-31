@@ -439,7 +439,7 @@ async def run_agent(request: Request) -> StreamingResponse:
         uploaded_files = {}
         for key in form:
             value = form[key]
-            if isinstance(value, UploadFile):
+            if hasattr(value, "filename") and hasattr(value, "file"):
                 uploaded_files[key] = value
 
         context = ExecutionContext(
