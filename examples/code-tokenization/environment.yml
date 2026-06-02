@@ -1,0 +1,10 @@
+name: code-tokenization
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - transformers>=4.37
+      - tokenizers>=0.15
