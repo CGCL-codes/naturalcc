@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { spawnSync, spawn, type ChildProcess } from 'node:child_process'
+import { resolve } from 'node:path'
 import type { Ctx } from '../../types/ctx.js'
+import { codeAgentDir, pythonPrelude } from '../../pythonPath.js'
 
 interface ExecutorDeps {
   files: string[]
@@ -11,7 +13,25 @@ interface ExecutorDeps {
   completionType: string | null
   prefix: string
   preview: boolean
+  feature: string
+  featureConfig: Record<string, unknown>
   addMsg: Ctx['addMsg']
+}
+
+interface FeatureEvent {
+  type?: string
+  status?: string
+  log?: string
+  report?: string
+  mode?: string
+}
+
+function eventText(event: FeatureEvent): string {
+  return event.log || event.report || ''
+}
+
+function isErrorPreview(text: string): boolean {
+  return text.startsWith('❌') || text.startsWith('Unknown feature') || text.startsWith('Feature preview failed')
 }
 
 export function useExecutor(deps: ExecutorDeps) {
@@ -26,10 +46,10 @@ export function useExecutor(deps: ExecutorDeps) {
   const interrupted = useRef(false)
 
   function execute(input: string) {
-    const { files, model, apiKey, projectDir, symbol, completionType, prefix, preview } = deps
+    const { files, model, apiKey, projectDir, symbol, completionType, prefix, preview, feature, featureConfig } = deps
     const addMsg = deps.addMsg
 
-    if (files.length === 0) {
+    if (feature === 'code_completion' && files.length === 0) {
       addMsg('error', 'No file is selected')
       return
     }
@@ -43,17 +63,18 @@ export function useExecutor(deps: ExecutorDeps) {
     lastInstructionRef.current = input
 
     let fullContent = ''
-    let errorContent = ''
 
     const payload = JSON.stringify({
       target_files: files,
       user_instruction: input,
       model,
       api_key: apiKey ?? null,
-      project_dir: projectDir,
+      project_dir: resolve(projectDir),
       symbol: symbol ?? null,
       completion_type: completionType ?? null,
       prefix: prefix ?? '',
+      feature,
+      feature_config: featureConfig,
     })
 
     if (preview) {
@@ -64,16 +85,16 @@ export function useExecutor(deps: ExecutorDeps) {
 
     function runPreview(payload: string) {
       const script = [
-        'import sys, json',
-        'sys.path.insert(0, "..")',
-        'from aider_runner import preview_prompt',
-        'print(preview_prompt(**json.loads(sys.stdin.read())))',
+        pythonPrelude,
+        'from feature_runner import preview_feature',
+        'print(preview_feature(**json.loads(sys.stdin.read())))',
       ].join('\n')
 
       try {
         const result = spawnSync('python3', ['-c', script], {
           input: payload,
           encoding: 'utf-8',
+          cwd: codeAgentDir,
         })
 
         isStreaming.current = true
@@ -85,11 +106,28 @@ export function useExecutor(deps: ExecutorDeps) {
           return
         }
 
-        fullContent = result.stdout.trimEnd()
-        if (result.stderr) errorContent = result.stderr.trimEnd()
+        const stdout = result.stdout.trimEnd()
+        const stderr = result.stderr.trimEnd()
+
+        if (stdout) {
+          fullContent = stdout
+        }
+        if (stderr) {
+          addMsg('error', `[错误] ${stderr}`)
+        }
+        if (result.signal) {
+          addMsg('error', `[错误] Python process terminated by signal: ${result.signal}`)
+          setLoading(false)
+          return
+        }
+        if (result.status !== 0) {
+          addMsg('error', `[错误] Python process exited with code ${result.status ?? 1}`)
+          setLoading(false)
+          return
+        }
+
         fullContent += '\nworked for ' + ((Date.now() - startTimeRef.current) / 1000).toFixed(1) + ' s'
-        addMsg('assistant', fullContent)
-        if (errorContent) addMsg('error', `[错误] ${errorContent}`)
+        addMsg(isErrorPreview(fullContent) ? 'error' : 'assistant', fullContent)
         setLoading(false)
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err)
@@ -100,37 +138,73 @@ export function useExecutor(deps: ExecutorDeps) {
 
     function runStream(payload: string) {
       const script = [
-        'import sys, json',
-        'sys.path.insert(0, "..")',
-        'from aider_runner import run_aider_stream',
-        'for chunk in run_aider_stream(**json.loads(sys.stdin.read())):',
-        '  print("<<NCC>>" + chunk, flush=True)',
+        pythonPrelude,
+        'from feature_runner import run_feature_stream',
+        'for event in run_feature_stream(**json.loads(sys.stdin.read())):',
+        '  print("<<NCC>>" + event, end="" if event.endswith("\\n") else "\\n", flush=True)',
       ].join('\n')
 
       try {
-        const child = spawn('python3', ['-c', script])
+        const child = spawn('python3', ['-c', script], { cwd: codeAgentDir })
         childRef.current = child
         child.stdin.write(payload)
         child.stdin.end()
+        let stdoutBuf = ''
+        let errBuf = ''
+        let hasErrorEvent = false
+        let lastEvent: FeatureEvent | null = null
 
         child.stdout.on('data', (chunk: Buffer) => {
           if (fullContent === '' && !isStreaming.current) {
             isStreaming.current = true
           }
-          const parts = chunk.toString().split('<<NCC>>')
-          fullContent = parts[parts.length - 1] ?? ''
-          setStreamingContent(fullContent)
+          stdoutBuf += chunk.toString()
+          let newlineIndex = stdoutBuf.indexOf('\n')
+          while (newlineIndex !== -1) {
+            const rawLine = stdoutBuf.slice(0, newlineIndex)
+            stdoutBuf = stdoutBuf.slice(newlineIndex + 1)
+            newlineIndex = stdoutBuf.indexOf('\n')
+
+            if (!rawLine.trim()) continue
+            const line = rawLine.startsWith('<<NCC>>') ? rawLine.slice('<<NCC>>'.length) : rawLine
+            try {
+              const event = JSON.parse(line) as FeatureEvent
+              lastEvent = event
+              if (event.status === 'error' || event.type === 'error') hasErrorEvent = true
+              const text = eventText(event)
+              if (text) {
+                fullContent = text
+                setStreamingContent(fullContent)
+              }
+            } catch {
+              fullContent = line
+              setStreamingContent(fullContent)
+            }
+          }
         })
 
-        child.on('close', () => {
+        child.on('close', (code, signal) => {
+          const stderr = errBuf.trimEnd()
           if (interrupted.current) {
             if (fullContent) addMsg('assistant', fullContent)
             addMsg('error', 'user interrupted')
             interrupted.current = false
+          } else if (signal) {
+            if (fullContent) addMsg('assistant', fullContent)
+            if (stderr) addMsg('error', `[错误] ${stderr}`)
+            addMsg('error', `[错误] Python process terminated by signal: ${signal}`)
+          } else if (code !== 0) {
+            if (fullContent) addMsg('assistant', fullContent)
+            if (stderr) addMsg('error', `[错误] ${stderr}`)
+            addMsg('error', `[错误] Python process exited with code ${code ?? 1}`)
+          } else if (hasErrorEvent || lastEvent?.status === 'error') {
+            if (fullContent) addMsg('error', fullContent)
+            if (stderr) addMsg('error', `[错误] ${stderr}`)
           } else {
             thinkTimeRef.current = (Date.now() - startTimeRef.current) / 1000
             fullContent += '\nworked for ' + thinkTimeRef.current.toFixed(1) + ' s'
             addMsg('assistant', fullContent)
+            if (stderr) addMsg('error', `[错误] ${stderr}`)
           }
           childRef.current = null
           setStreamingContent('')
@@ -144,15 +218,8 @@ export function useExecutor(deps: ExecutorDeps) {
           setLoading(false)
         })
 
-        let errBuf = ''
         child.stderr.on('data', (chunk) => {
           errBuf += chunk.toString()
-        })
-        child.stderr.on('end', () => {
-          if (errBuf && !interrupted.current) {
-            addMsg('error', `[错误] ${errBuf}`)
-            isStreaming.current = true
-          }
         })
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err)

@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/node": "^26.1.0",
     "@types/react": "^19.2.14"
   },
   "peerDependencies": {

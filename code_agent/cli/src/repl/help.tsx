@@ -13,7 +13,9 @@ export function help_info() : string{
             "-s, --symbol <symbol>, 设置目标符号(可选)\n"+
             "-t, --completionType <type>, 设置补全类型(可选)\n"+
             "\t member, variable, function, function_body, type\n"+
-            "--prefix <prefix>, 设置补全前缀\n"+
-            "--preview 切换预览模式开关,预览模式仅预览最终 Prompt ,不执行 Aider, 默认不开启\n"+
+	            "--prefix <prefix>, 设置补全前缀\n"+
+	            "--feature <name>, 设置功能插件: code_completion, code_summary, code_repair, vulnerability_detection, design_to_code\n"+
+	            "--feature-config <json>, 设置功能插件配置(JSON对象, REPL中请使用无空格紧凑JSON)\n"+
+	            "--preview 切换预览模式开关,预览模式仅预览最终 Prompt ,不执行 Aider, 默认不开启\n"+
             "--run ,以当前设置重新执行上一次的instruction"
 }

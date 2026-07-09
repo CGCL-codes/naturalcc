@@ -15,6 +15,8 @@ export interface Ctx{
     completionType: string | null                                                                                                                                                                                       
     prefix: string                                                                                                                                                                                                      
     preview: boolean
+    feature: string
+    featureConfig: Record<string, unknown>
 
     // 设置 — 写入
     setFiles(files: string[]): void 
@@ -24,6 +26,8 @@ export interface Ctx{
     setSymbol(symbol: string | null): void
     setCompletionType(type: string | null): void
     setPrefix(prefix: string): void
+    setFeature(feature: string): void
+    setFeatureConfig(config: Record<string, unknown>): void
     togglePreview(): void
     toggleSettings(): void
     resetSettings(): void

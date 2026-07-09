@@ -37,7 +37,7 @@ export function ThinkingBar({ loading, isStreaming, streamingContent, thinkTimeR
         </Box>
       )}
       <Box flexDirection="column">
-        <Text>{'─'.repeat(width - 2)}</Text>
+        <Text>{'─'.repeat(Math.max(0, width - 2))}</Text>
         <Text color='gray'>Esc to interrupted</Text>
       </Box>
     </>

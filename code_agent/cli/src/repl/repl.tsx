@@ -10,7 +10,7 @@ import { Header } from './components/Header.js'
 import { MessageList } from './components/MessageList.js'
 import { ThinkingBar } from './components/ThinkingBar.js'
 import { SettingsPanel } from './components/SettingsPanel.js'
-import { InputLine } from './components/InputLine.js'
+import { InputLine } from './components/Input.js'
 import type { Ctx } from '../types/ctx.js'
 
 function useTerminalWidth() {
@@ -42,6 +42,7 @@ export function Repl() {
 
   const [input, setInput] = useState('')
   const [exitWarning, setExitWarning] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
 
   const settings = useSettings()
   const msgs = useMessages()
@@ -52,10 +53,12 @@ export function Repl() {
     projectDir: settings.projectDir,
     symbol: settings.symbol,
     completionType: settings.completionType,
-    prefix: settings.prefix,
-    preview: settings.preview,
-    addMsg: msgs.addMsg,
-  })
+	    prefix: settings.prefix,
+	    preview: settings.preview,
+	    feature: settings.feature,
+	    featureConfig: settings.featureConfig,
+	    addMsg: msgs.addMsg,
+	  })
   const { elapsed, dots } = useTimer(executor.loading)
 
   const ctx: Ctx = {
@@ -68,9 +71,11 @@ export function Repl() {
     projectDir: settings.projectDir, setProjectDir: settings.setProjectDir,
     symbol: settings.symbol, setSymbol: settings.setSymbol,
     completionType: settings.completionType, setCompletionType: settings.setCompletionType,
-    prefix: settings.prefix, setPrefix: settings.setPrefix,
-    preview: settings.preview, togglePreview: settings.togglePreview,
-    toggleSettings: settings.toggleSettings,
+	    prefix: settings.prefix, setPrefix: settings.setPrefix,
+	    preview: settings.preview, togglePreview: settings.togglePreview,
+	    feature: settings.feature, setFeature: settings.setFeature,
+	    featureConfig: settings.featureConfig, setFeatureConfig: settings.setFeatureConfig,
+	    toggleSettings: settings.toggleSettings,
     resetSettings: settings.resetSettings,
     execute: executor.execute,
     rerun: executor.rerun,
@@ -89,6 +94,7 @@ export function Repl() {
       return
     }
     if (key.escape) {
+      if (dropdownOpen) return // 下拉打开时 AutocompleteInput 自己处理
       executor.interrupt()
     }
   })
@@ -122,18 +128,25 @@ export function Repl() {
             apiKey={settings.apiKey}
             projectDir={settings.projectDir}
             symbol={settings.symbol}
-            completionType={settings.completionType}
-            prefix={settings.prefix}
-            preview={settings.preview}
-          />
+	            completionType={settings.completionType}
+	            prefix={settings.prefix}
+	            preview={settings.preview}
+	            feature={settings.feature}
+	            featureConfig={settings.featureConfig}
+	          />
           <Text color="gray">enter{' '}
             <Text color="red">/help</Text> for help{'  '}
             <Text color="red">/settings</Text> to open or close settings window{'  '}
             <Text color="red">--run</Text> to run last instruction{'  '}
           </Text>
-          <Text>{'─'.repeat(width - 2)}</Text>
-          <InputLine input={input} onChange={setInput} onSubmit={handleSubmit} />
-          <Text>{'─'.repeat(width - 2)}</Text>
+          <InputLine 
+            value={input} 
+            onChange={setInput} 
+            onSubmit={handleSubmit} 
+            placeholder="Enter command..." 
+            projectDir={settings.projectDir} 
+            onDropdownChange={setDropdownOpen}
+            width={width} />
           {exitWarning && <Text color='gray'>press ctrl+c again to exit</Text>}
         </Box>
       )}

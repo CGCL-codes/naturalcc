@@ -10,13 +10,15 @@ export function useSettings(){
     const [completionType,setCompletionType] = useState<string | null>(null)
     const [prefix,setPrefix] = useState<string>('')
     const [preview,setPreview] = useState<boolean>(false)
+    const [feature,setFeature] = useState<string>('code_completion')
+    const [featureConfig,setFeatureConfig] = useState<Record<string, unknown>>({})
 
     //Setting windows切换
     const [settingsWindow,setSettingsWindow] = useState<boolean>(true)
 
     return{
-        files, model, apiKey, projectDir, symbol, completionType, prefix, preview, settingsWindow,
-        setFiles, setModel, setApiKey, setProjectDir, setSymbol, setCompletionType, setPrefix,
+        files, model, apiKey, projectDir, symbol, completionType, prefix, preview, feature, featureConfig, settingsWindow,
+        setFiles, setModel, setApiKey, setProjectDir, setSymbol, setCompletionType, setPrefix, setFeature, setFeatureConfig,
         togglePreview:() => setPreview(prev => !prev),
         toggleSettings:() => setSettingsWindow(prev => !prev),
         resetSettings:() => {
@@ -28,6 +30,8 @@ export function useSettings(){
             setCompletionType(null)
             setPrefix('')
             setPreview(false)
+            setFeature('code_completion')
+            setFeatureConfig({})
         }
     }
 }
