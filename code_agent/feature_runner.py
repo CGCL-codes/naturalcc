@@ -44,7 +44,12 @@ def _merge_feature_config(
         config.setdefault("completion_type", completion_type)
     if prefix:
         config.setdefault("prefix", prefix)
-    config["feature"] = feature or config.get("feature") or "code_completion"
+    configured_feature = config.get("feature")
+    config["feature"] = (
+        feature
+        or (configured_feature if isinstance(configured_feature, str) else None)
+        or "code_completion"
+    )
     return config
 
 
@@ -95,7 +100,7 @@ def _to_path_uploads(value: Any, project_dir: str) -> Any:
 
 
 def _build_uploaded_files(
-    feature: Optional[str],
+    feature: str,
     feature_config: Dict[str, Any],
     project_dir: str,
     uploaded_files: Optional[Dict[str, Any]],
@@ -152,7 +157,7 @@ def _build_context(
         completion_type=completion_type,
         prefix=prefix,
     )
-    feature_name = merged_config.get("feature", "code_completion")
+    feature_name = str(merged_config.get("feature") or "code_completion")
     files = _build_uploaded_files(feature_name, merged_config, normalized_project_dir, uploaded_files)
 
     return ExecutionContext(
