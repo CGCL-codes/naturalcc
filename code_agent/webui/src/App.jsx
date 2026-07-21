@@ -555,6 +555,9 @@ function App() {
   }
 
   function canRunWithoutInstruction() {
+    if (currentFeature === "knowledge_graph") {
+      return true;
+    }
     if (currentFeature === "code_repair") {
       return Boolean(
         (featureConfig.failure_log || "").trim()
@@ -571,6 +574,9 @@ function App() {
   }
 
   function defaultTaskLabel() {
+    if (currentFeature === "knowledge_graph") {
+      return "Knowledge graph generation";
+    }
     if (currentFeature === "code_summary") {
       return "Code summarization";
     }
@@ -902,6 +908,38 @@ function App() {
                           <Clipboard size={11} />
                           Copy CLI
                         </button>
+                      )}
+                      {msg.artifacts?.html && (
+                        <div className="artifact-viewer">
+                          <div className="artifact-header">
+                            <span>
+                              HTML artifact: {msg.artifacts.nodes || 0} nodes, {msg.artifacts.edges || 0} edges
+                            </span>
+                            <button
+                              type="button"
+                              className="message-action-btn"
+                              onClick={() => {
+                                const blob = new Blob([msg.artifacts.html], { type: "text/html" });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = "knowledge_graph.html";
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                              }}
+                            >
+                              Download
+                            </button>
+                          </div>
+                          <iframe
+                            className="artifact-iframe"
+                            srcDoc={msg.artifacts.html}
+                            title="Knowledge Graph"
+                            sandbox="allow-scripts allow-same-origin"
+                          />
+                        </div>
                       )}
                     </>
                   ) : (
