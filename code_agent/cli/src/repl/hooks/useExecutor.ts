@@ -3,6 +3,7 @@ import { spawnSync, spawn, type ChildProcess } from 'node:child_process'
 import { resolve } from 'node:path'
 import type { Ctx } from '../../types/ctx.js'
 import { codeAgentDir, pythonPrelude } from '../../pythonPath.js'
+import { displayInstruction } from '../../featurePolicy.js'
 
 interface ExecutorDeps {
   files: string[]
@@ -24,10 +25,28 @@ interface FeatureEvent {
   log?: string
   report?: string
   mode?: string
+    artifacts?: {
+    html?: string
+    html_path?: string
+    nodes?: number
+    edges?: number
+    modules?: number
+  }
+  files_modified?: string[]
 }
 
 function eventText(event: FeatureEvent): string {
-  return event.log || event.report || ''
+  const base = event.log || event.report || ''
+  const artifacts = event.artifacts
+  if (!artifacts || event.type !== 'done') return base
+
+  const lines = [base.trimEnd()]
+  if (typeof artifacts.html_path === 'string') lines.push(`HTML: ${artifacts.html_path}`)
+  if (typeof artifacts.modules === 'number') lines.push(`Modules: ${artifacts.modules}`)
+  if (typeof artifacts.nodes === 'number') lines.push(`Nodes: ${artifacts.nodes}`)
+  if (typeof artifacts.edges === 'number') lines.push(`Edges: ${artifacts.edges}`)
+
+  return lines.filter(Boolean).join('\n') + '\n'
 }
 
 function isErrorPreview(text: string): boolean {
@@ -44,6 +63,7 @@ export function useExecutor(deps: ExecutorDeps) {
   const lastInstructionRef = useRef('')
   const childRef = useRef<ChildProcess | null>(null)
   const interrupted = useRef(false)
+  const hasLastInstructionRef = useRef(false)
 
   function execute(input: string) {
     const { files, model, apiKey, projectDir, symbol, completionType, prefix, preview, feature, featureConfig } = deps
@@ -54,13 +74,14 @@ export function useExecutor(deps: ExecutorDeps) {
       return
     }
 
-    addMsg('user', input)
+    addMsg('user', displayInstruction(feature, input))
     startTimeRef.current = Date.now()
     thinkTimeRef.current = null
     isStreaming.current = false
     setLoading(true)
     setStreamingContent('')
     lastInstructionRef.current = input
+    hasLastInstructionRef.current = true
 
     let fullContent = ''
 
@@ -231,7 +252,7 @@ export function useExecutor(deps: ExecutorDeps) {
   }
 
   function rerun() {
-    if (!lastInstructionRef.current) {
+    if (!hasLastInstructionRef.current) {
       deps.addMsg('error', 'no previous instruction')
       return
     }

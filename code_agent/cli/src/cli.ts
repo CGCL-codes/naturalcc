@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 import { Command, Option } from 'commander'
 import { codeAgentDir, pythonPrelude } from './pythonPath.js'
+import { VERSION } from './version.js'
 
 async function resolvePrompt(parts: string[]): Promise<string> {
     const direct = parts.join(' ').trim()
@@ -24,7 +25,7 @@ export async function runCli(args: string[]): Promise<void> {
   CLIAgent
     .name('naturalcc')
     .description('naturalcc CLI测试')
-    .version('0.0.0', '-v, --version', '显示版本号')
+    .version(VERSION, '-v, --version', '显示版本号')
 
   // 默认命令：直接传问题
   CLIAgent

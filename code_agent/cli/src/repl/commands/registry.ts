@@ -1,13 +1,33 @@
 import type {Ctx} from '../../types/ctx.js'
 import {help_info} from '../help.js'
+import { featureSchemaText, listFeaturesText } from './features.js'
 
-const slashCommands: Record<string, (ctx: Ctx) => void> = {
-  '/help':     (ctx) => ctx.addMsg('assistant', help_info()),
-  '/exit':     (ctx) => { process.stdout.write('\n'); ctx.exit() },
-  '/clear':    (ctx) => { ctx.clearMessages() },
-  '/settings': (ctx) => { ctx.toggleSettings() },
-  '/reset':    (ctx) => { ctx.resetSettings() },
+export interface SlashCommandDef {
+  name: string
+  description: string
 }
+
+interface SlashCommand extends SlashCommandDef {
+  run: (ctx: Ctx, rawArguments: string) => void
+}
+
+const slashCommandEntries: SlashCommand[] = [
+  { name: '/help', description: '显示帮助信息', run: (ctx) => ctx.addMsg('assistant', help_info()) },
+  { name: '/features', description: '列出可用功能插件', run: (ctx) => ctx.addMsg('assistant', listFeaturesText()) },
+  { name: '/feature-schema', description: '查看功能插件配置字段', run: (ctx, rawArguments) => ctx.addMsg('assistant', featureSchemaText(rawArguments)) },
+  { name: '/exit', description: '退出 REPL', run: (ctx) => { process.stdout.write('\n'); ctx.exit() } },
+  { name: '/clear', description: '清除对话历史', run: (ctx) => { ctx.clearMessages() } },
+  { name: '/settings', description: '显示/隐藏当前设置面板', run: (ctx) => { ctx.toggleSettings() } },
+  { name: '/reset', description: '重置设置', run: (ctx) => { ctx.resetSettings() } },
+]
+
+export const slashCommandDefs: SlashCommandDef[] = slashCommandEntries.map(
+  ({ name, description }) => ({ name, description }),
+)
+
+const slashCommands: Record<string, SlashCommand['run']> = Object.fromEntries(
+  slashCommandEntries.map((command) => [command.name, command.run]),
+)
 
 interface FlagDef {
   aliases: string[]                        // ['-t', '--completionType']
@@ -80,7 +100,7 @@ export function dispatch(input: string, ctx: Ctx): void {
   if (first.startsWith('/')) {
     const handler = slashCommands[first]
     if (!handler) return ctx.error('unknown command')
-    handler(ctx)
+    handler(ctx, rawArguments)
     return  
   }
 

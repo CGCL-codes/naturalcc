@@ -1,4 +1,4 @@
-const VERSION = '0.0.0'
+import { VERSION } from './version.js'
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)

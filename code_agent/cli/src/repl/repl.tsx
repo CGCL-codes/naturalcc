@@ -12,6 +12,7 @@ import { ThinkingBar } from './components/ThinkingBar.js'
 import { SettingsPanel } from './components/SettingsPanel.js'
 import { InputLine } from './components/Input.js'
 import type { Ctx } from '../types/ctx.js'
+import { canRunWithoutInstruction } from '../featurePolicy.js'
 
 function useTerminalWidth() {
   const { stdout } = useStdout()
@@ -101,7 +102,8 @@ export function Repl() {
 
   const handleSubmit = (value: string) => {
     const trimmed = value.trim()
-    if (!trimmed || executor.loading) return
+    const allowEmptyInstruction = canRunWithoutInstruction(settings.feature)
+    if ((!trimmed && !allowEmptyInstruction) || executor.loading) return
     dispatch(trimmed, ctx)
     setInput('')
   }
@@ -144,6 +146,7 @@ export function Repl() {
             onChange={setInput} 
             onSubmit={handleSubmit} 
             placeholder="Enter command..." 
+            allowEmptySubmit={canRunWithoutInstruction(settings.feature)}
             projectDir={settings.projectDir} 
             onDropdownChange={setDropdownOpen}
             width={width} />

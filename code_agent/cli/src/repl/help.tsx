@@ -4,6 +4,8 @@ export function help_info() : string{
             "/exit 退出 REPL\n"+
             "/clear 清除对话历史\n"+
             "/settings 显示/隐藏当前设置面板\n"+
+            "/features 列出可用功能插件\n"+
+            "/feature-schema <feature>, 查看功能插件配置字段\n"+
             "\n"+
             "instruction:\n"+
             "-f --file [files...], 设置目标文件列表，如 src/main.c src/utils.c\n"+
@@ -14,8 +16,8 @@ export function help_info() : string{
             "-t, --completionType <type>, 设置补全类型(可选)\n"+
             "\t member, variable, function, function_body, type\n"+
 	            "--prefix <prefix>, 设置补全前缀\n"+
-	            "--feature <name>, 设置功能插件: code_completion, code_summary, code_repair, vulnerability_detection, design_to_code\n"+
-	            "--feature-config <json>, 设置功能插件配置(JSON对象, REPL中请使用无空格紧凑JSON)\n"+
+	            "--feature <name>, 设置功能插件，可用 /features 查看\n"+
+	            "--feature-config <json>, 设置功能插件配置(JSON对象)\n"+
 	            "--preview 切换预览模式开关,预览模式仅预览最终 Prompt ,不执行 Aider, 默认不开启\n"+
             "--run ,以当前设置重新执行上一次的instruction"
 }

@@ -2,6 +2,7 @@
 
 import sys
 from collections.abc import Iterable
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -16,6 +17,78 @@ from code_agent.aider_runner import normalize_project_dir, normalize_target_file
 from code_agent.plugins.base import ConfigFieldType, ExecutionContext
 from code_agent.plugins.dispatcher import dispatcher, ndjson_event
 from code_agent.plugins.registry import registry
+
+
+def _serialize_field(field) -> Dict[str, Any]:
+    return {
+        "name": field.name,
+        "label": field.label,
+        "type": field.type.value,
+        "required": field.required,
+        "default": field.default,
+        "placeholder": field.placeholder,
+        "help_text": field.help_text,
+        "options": field.options,
+        "accept": field.accept,
+        "multiple": field.multiple,
+    }
+
+
+def _serialize_metadata(metadata) -> Dict[str, Any]:
+    return {
+        "name": metadata.name,
+        "label": metadata.label,
+        "description": metadata.description,
+        "icon": metadata.icon,
+        "execution_mode": metadata.execution_mode.value,
+    }
+
+
+def _serialize_plugin(plugin, include_schema: bool = False) -> Dict[str, Any]:
+    payload = _serialize_metadata(plugin.metadata)
+    if include_schema:
+        payload["config_schema"] = [
+            _serialize_field(field)
+            for field in plugin.config_schema
+        ]
+    return payload
+
+
+def list_features():
+    """Return metadata for all registered feature plugins."""
+
+    return sorted(
+        [
+            _serialize_metadata(metadata)
+            for metadata in registry.list_plugins()
+        ],
+        key=lambda item: item["name"],
+    )
+
+
+def describe_feature(name: Optional[str]) -> Dict[str, Any]:
+    """Return full metadata and config schema for one registered feature plugin."""
+
+    feature_name = (name or "").strip()
+    if not feature_name:
+        return {"error": "feature name is required"}
+
+    plugin = registry.get(feature_name)
+    if plugin is None:
+        return {"error": f"Unknown feature: {feature_name}"}
+
+    return _serialize_plugin(plugin, include_schema=True)
+
+
+def _apply_config_defaults(feature: str, config: Dict[str, Any]) -> None:
+    plugin = registry.get(feature)
+    if plugin is None:
+        return
+
+    for field in plugin.config_schema:
+        if field.name in config or field.default is None:
+            continue
+        config[field.name] = deepcopy(field.default)
 
 
 class _PathUpload:
@@ -50,6 +123,7 @@ def _merge_feature_config(
         or (configured_feature if isinstance(configured_feature, str) else None)
         or "code_completion"
     )
+    _apply_config_defaults(config["feature"], config)
     return config
 
 
