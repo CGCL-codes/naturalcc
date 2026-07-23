@@ -26,12 +26,20 @@ import sys
 from pathlib import Path
 
 
-def _load_module_from_path(module_name: str, file_path: Path):
-    """通过文件路径直接加载 Python 模块（绕过包导入限制）。"""
+def _load_module_from_path(module_name: str, file_path: Path, package: str | None = None):
+    """通过文件路径直接加载 Python 模块（绕过包导入限制）。
+
+    Args:
+        module_name: 注册到 sys.modules 的模块名。
+        file_path: 模块文件路径。
+        package: 若提供，则设置为 module.__package__，用于支持相对导入。
+    """
     spec = importlib.util.spec_from_file_location(module_name, file_path)
     if spec is None or spec.loader is None:
         raise ImportError(f"无法加载模块: {file_path}")
     module = importlib.util.module_from_spec(spec)
+    if package is not None:
+        module.__package__ = package
     sys.modules[module_name] = module
     spec.loader.exec_module(module)
     return module
@@ -41,17 +49,29 @@ def parse_c_project(proj_dir: str) -> dict:
     """解析 C/C++ 项目，返回知识图谱 dict。"""
     rag_c_dir = Path(__file__).resolve().parent.parent / "c"
 
-    # 先把 cfile_parse 和 node_prompt 加载进 sys.modules，
-    # 这样 preprocess 中的 from .cfile_parse import ... 才能找到
-    cfile_parse = _load_module_from_path("rag_cfile_parse", rag_c_dir / "cfile_parse.py")
-    node_prompt = _load_module_from_path("rag_node_prompt", rag_c_dir / "node_prompt.py")
-
-    # 注入到 sys.modules 中，使用相对导入的名称
-    sys.modules["__main__.cfile_parse"] = cfile_parse
-    sys.modules["__main__.node_prompt"] = node_prompt
+    # 先把依赖模块加载到 __main__ 包下，供 preprocess 的相对导入使用
+    _load_module_from_path(
+        "__main__.utils",
+        rag_c_dir / "utils.py",
+        package="__main__",
+    )
+    _load_module_from_path(
+        "__main__.cfile_parse",
+        rag_c_dir / "cfile_parse.py",
+        package="__main__",
+    )
+    _load_module_from_path(
+        "__main__.node_prompt",
+        rag_c_dir / "node_prompt.py",
+        package="__main__",
+    )
 
     # 现在加载 preprocess
-    preprocess = _load_module_from_path("rag_c_preprocess", rag_c_dir / "preprocess.py")
+    preprocess = _load_module_from_path(
+        "__main__.preprocess",
+        rag_c_dir / "preprocess.py",
+        package="__main__",
+    )
     parser = preprocess.CProjectParser()
     result = parser.parse_dir(proj_dir)
     return result
@@ -61,15 +81,24 @@ def parse_java_project(proj_dir: str) -> dict:
     """解析 Java 项目，返回知识图谱 dict。"""
     rag_java_dir = Path(__file__).resolve().parent.parent / "java"
 
-    # 先加载依赖模块
-    javafile_parse = _load_module_from_path("rag_javafile_parse_ts", rag_java_dir / "javafile_parse_ts.py")
-    node_prompt_java = _load_module_from_path("rag_node_prompt_java_ts", rag_java_dir / "node_prompt_java_ts.py")
-
-    sys.modules["__main__.javafile_parse_ts"] = javafile_parse
-    sys.modules["__main__.node_prompt_java_ts"] = node_prompt_java
+    # 先把依赖模块加载到 __main__ 包下，供主解析器的相对导入使用
+    _load_module_from_path(
+        "__main__.javafile_parse_ts",
+        rag_java_dir / "javafile_parse_ts.py",
+        package="__main__",
+    )
+    _load_module_from_path(
+        "__main__.node_prompt_java_ts",
+        rag_java_dir / "node_prompt_java_ts.py",
+        package="__main__",
+    )
 
     # 加载主解析器
-    java_parser = _load_module_from_path("rag_java_project_parser_ts", rag_java_dir / "java_project_parser_ts.py")
+    java_parser = _load_module_from_path(
+        "__main__.java_project_parser_ts",
+        rag_java_dir / "java_project_parser_ts.py",
+        package="__main__",
+    )
     parser = java_parser.JavaProjectParserTS()
     result = parser.parse_dir(proj_dir)
     return result
