@@ -416,3 +416,25 @@ npm run package
 如果插件未能自动发现运行环境，请将 `naturalccCodeAgent.pythonPath` 配置为 `uv
 sync` 创建的 Python 解释器，例如 `/path/to/code_agent/.venv/bin/python`。服务只监听
 `127.0.0.1`，并会在插件停用时结束。
+
+### 用户环境与 API Key
+
+插件包含应用源码，但不包含 Python 运行依赖。用户应先克隆仓库并创建运行环境：
+
+```bash
+git clone --branch ncc3 --single-branch https://github.com/CGCL-codes/naturalcc.git
+cd naturalcc/code_agent
+uv sync
+```
+
+随后在 VS Code 设置中，将 `naturalccCodeAgent.pythonPath` 指向该环境的 Python
+绝对路径，例如：
+
+```json
+"naturalccCodeAgent.pythonPath": "/absolute/path/naturalcc/code_agent/.venv/bin/python"
+```
+
+运行 **NaturalCC: Open Code Agent** 后，选择模型，并在界面的 **API Key** 字段填入
+自己的 OpenRouter 或 OpenAI Key。该 Key 仅会发送给本次本地 Agent 请求，不会写入
+VS Code 设置。也可以在启动 VS Code 的环境中设置 `OPENROUTER_API_KEY` 或
+`OPENAI_API_KEY`，然后重启扩展主机。

@@ -418,3 +418,27 @@ Agent**. Configure `naturalccCodeAgent.pythonPath` to the Python interpreter
 created by `uv sync` (for example, `/path/to/code_agent/.venv/bin/python`) if
 the extension cannot find it automatically. The service binds only to
 `127.0.0.1` and stops when the extension deactivates.
+
+### User Environment And API Key
+
+The extension bundles the application source but not its Python dependencies.
+Users should clone this repository and prepare the runtime once:
+
+```bash
+git clone --branch ncc3 --single-branch https://github.com/CGCL-codes/naturalcc.git
+cd naturalcc/code_agent
+uv sync
+```
+
+Then set the VS Code setting `naturalccCodeAgent.pythonPath` to the absolute
+path of that environment's Python executable, for example:
+
+```json
+"naturalccCodeAgent.pythonPath": "/absolute/path/naturalcc/code_agent/.venv/bin/python"
+```
+
+Open **NaturalCC: Open Code Agent**, choose a model, and enter your own
+OpenRouter or OpenAI API key in the UI's **API Key** field. The key is sent only
+to the local agent process for that request and is not saved in VS Code
+settings. Alternatively, launch VS Code with `OPENROUTER_API_KEY` or
+`OPENAI_API_KEY` set in its environment, then restart the extension host.

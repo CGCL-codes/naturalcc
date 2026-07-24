@@ -2,7 +2,7 @@
   "name": "naturalcc-code-agent",
   "displayName": "NaturalCC Code Agent",
   "description": "Run the NaturalCC context-aware code editing agent inside VS Code.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "naturalcc",
   "license": "MIT",
   "repository": {
@@ -22,6 +22,7 @@
     "code completion"
   ],
   "main": "./vscode-extension.js",
+  "icon": "media/bot.png",
   "extensionKind": [
     "workspace"
   ],

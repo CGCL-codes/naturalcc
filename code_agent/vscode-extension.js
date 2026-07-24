@@ -28,6 +28,15 @@ function getPythonExecutable(context) {
   return candidates.find((candidate) => candidate === "python3" || require("fs").existsSync(candidate));
 }
 
+function getServerEnvironment(python) {
+  const environment = { ...process.env, PYTHONUNBUFFERED: "1" };
+  if (path.isAbsolute(python)) {
+    const pythonBinDir = path.dirname(python);
+    environment.PATH = `${pythonBinDir}${path.delimiter}${environment.PATH || ""}`;
+  }
+  return environment;
+}
+
 function reservePort() {
   return new Promise((resolve, reject) => {
     const socket = net.createServer();
@@ -84,7 +93,7 @@ async function startServer(context) {
   output.appendLine(`Starting NaturalCC service with ${python} on port ${port}.`);
   serverProcess = spawn(python, [launcher, "--host", "127.0.0.1", "--port", String(port)], {
     cwd: context.extensionPath,
-    env: { ...process.env, PYTHONUNBUFFERED: "1" },
+    env: getServerEnvironment(python),
     stdio: ["ignore", "pipe", "pipe"],
   });
   serverProcess.stdout.on("data", (data) => output.append(data.toString()));
