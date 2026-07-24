@@ -396,3 +396,25 @@ If your plugin config contains a `file` type field, the frontend will automatica
 - `rag/` includes offline research/evaluation scripts with local-path assumptions.
 - The project currently has smoke checks rather than a formal automated test suite.
 - `test_api.py` checks API connectivity; it is not a parser or UI test.
+
+## VS Code Extension
+
+The local VS Code extension runs the same FastAPI service and opens its bundled
+web interface in an editor tab. It includes application source and the built
+frontend, but deliberately does not include Python packages, Aider, `libclang`,
+or local models.
+
+Build a local installable package from `code_agent/`:
+
+```bash
+cd webui && npm run build
+cd ..
+npm run package
+```
+
+Install the resulting `naturalcc-code-agent-0.1.0.vsix` from VS Code's
+**Extensions: Install from VSIX...** command, then run **NaturalCC: Open Code
+Agent**. Configure `naturalccCodeAgent.pythonPath` to the Python interpreter
+created by `uv sync` (for example, `/path/to/code_agent/.venv/bin/python`) if
+the extension cannot find it automatically. The service binds only to
+`127.0.0.1` and stops when the extension deactivates.

@@ -396,3 +396,23 @@ class MyFeaturePlugin(FeaturePlugin):
 - `rag/` 中包含离线研究和评测脚本，其中部分脚本带有本地路径假设。
 - 当前项目主要依赖 smoke check，还没有正式自动化测试体系。
 - `test_api.py` 只用于 API 连通性检查，不是 parser 或 UI 测试。
+
+## VS Code 插件
+
+本地 VS Code 插件会启动同一个 FastAPI 服务，并在编辑器标签页中打开已构建的 Web
+界面。插件只包含应用源码与前端构建产物；不会打包 Python 依赖、Aider、`libclang`
+或本地模型。
+
+在 `code_agent/` 中构建本地可安装包：
+
+```bash
+cd webui && npm run build
+cd ..
+npm run package
+```
+
+随后在 VS Code 中执行 **Extensions: Install from VSIX...**，选择生成的
+`naturalcc-code-agent-0.1.0.vsix`，再运行 **NaturalCC: Open Code Agent**。
+如果插件未能自动发现运行环境，请将 `naturalccCodeAgent.pythonPath` 配置为 `uv
+sync` 创建的 Python 解释器，例如 `/path/to/code_agent/.venv/bin/python`。服务只监听
+`127.0.0.1`，并会在插件停用时结束。

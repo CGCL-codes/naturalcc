@@ -1,0 +1,75 @@
+{
+  "name": "naturalcc-code-agent",
+  "displayName": "NaturalCC Code Agent",
+  "description": "Run the NaturalCC context-aware code editing agent inside VS Code.",
+  "version": "0.1.0",
+  "publisher": "naturalcc",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CGCL-codes/naturalcc.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "naturalcc",
+    "aider",
+    "code agent",
+    "code completion"
+  ],
+  "main": "./vscode-extension.js",
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onCommand:naturalccCodeAgent.open",
+    "onCommand:naturalccCodeAgent.restart",
+    "onCommand:naturalccCodeAgent.stop"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "naturalccCodeAgent.open",
+        "title": "NaturalCC: Open Code Agent",
+        "category": "NaturalCC"
+      },
+      {
+        "command": "naturalccCodeAgent.restart",
+        "title": "NaturalCC: Restart Code Agent Service",
+        "category": "NaturalCC"
+      },
+      {
+        "command": "naturalccCodeAgent.stop",
+        "title": "NaturalCC: Stop Code Agent Service",
+        "category": "NaturalCC"
+      }
+    ],
+    "configuration": {
+      "title": "NaturalCC Code Agent",
+      "properties": {
+        "naturalccCodeAgent.pythonPath": {
+          "type": "string",
+          "default": "",
+          "description": "Python executable with the Code Agent dependencies installed. Leave empty to use the extension's .venv, the workspace .venv, or python3."
+        },
+        "naturalccCodeAgent.startupTimeoutMs": {
+          "type": "number",
+          "default": 30000,
+          "minimum": 1000,
+          "description": "Maximum time to wait for the local NaturalCC service to start."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "package": "vsce package",
+    "publish:local": "vsce package"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.9.2"
+  }
+}

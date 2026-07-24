@@ -12,6 +12,7 @@ Common tasks: code completion, small project-aware edits/refactors, code summari
 
 - `agent_web_api.py`: FastAPI backend, bundled UI server, workspace scan/browse, prompt preview, NDJSON Aider streaming.
 - `webui/src/App.jsx`, `webui/src/styles.css`: React UI, feature forms, target file order, terminal/chat output, layout.
+- `vscode-extension.js`, `vscode_server.py`: VS Code webview host and local-service bootstrap. Package with `npm run package` after building `webui/dist`.
 - `aider_runner.py`: CLI, NaturalCC prompt generation, Aider command construction/streaming. Keep CLI behavior stable unless requested.
 - `completion_prompt_agent.py`: prompt construction, symbol and completion-type inference.
 - `plugins/`: Feature Plugin System.
@@ -49,6 +50,7 @@ uv sync
 uv run python agent_web_api.py --host 127.0.0.1 --port 7860
 cd webui && npm install && npm run dev
 cd webui && npm run build
+npm run package
 uv run python aider_runner.py -dir /path/to/project -f src/foo.c -i "补全 foo 函数实现" --preview
 ```
 
