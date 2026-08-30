@@ -170,7 +170,8 @@ def parse_css_rules(css_text: str):
     def extract_declarations(content):
         if not content:
             return []
-        return [x for x in content if isinstance(x, Declaration) and x.name]
+        declarations = parse_declaration_list(content, skip_whitespace=True, skip_comments=True)
+        return [x for x in declarations if isinstance(x, Declaration) and x.name]
     
     def walk_rules(nodes, media_cond=None, at_rule_name=None):
         for node in nodes:
