@@ -1,5 +1,6 @@
 # openai tiktoken
-tiktoken_cache_dir: 'Your cache directory for OpenAI tiktoken'
+# tiktoken 缓存目录：留空则使用默认位置，也可通过环境变量 TIKTOKEN_CACHE_DIR 覆盖
+tiktoken_cache_dir: ''
 
 max_to_generate: 48
 
@@ -22,35 +23,35 @@ santacoder_max_token: 2048
 starcoder_repo: "bigcode/starcoder"
 starcoder_max_token: 8192
 
+# 以下 *_repo 均为 HuggingFace 模型 ID。
+# 若已把权重下载到本地，可改成本地绝对路径，例如：
+#   codellama7b_repo: "/data/models/CodeLlama-7b-Instruct-hf"
+
 # codellama-7b
-#codellama7b_repo: "meta-llama/CodeLlama-7b-Python-hf"
-# codellama7b_repo: "/Users/austinxu/Desktop/api/model/CodeLlama-7b-hf"
-codellama7b_repo: "/home/sub4-wy/wangchen/models/codellama/CodeLlama-7b-Instruct-hf"
+codellama7b_repo: "codellama/CodeLlama-7b-Instruct-hf"
 codellama_max_token: 8192
 
 
 # llama3
-llama3_repo: "/home/sub4-wy/wangchen/models/llama/Llama-3.1-8B"
+llama3_repo: "meta-llama/Llama-3.1-8B"
 llama3_max_token: 8192
 
 # deepseek-coder
-# deepseek_repo: "deepseek-ai/deepseek-coder-6.7b-base"
-deepseekcoder_repo: "/home/sub4-wy/wangchen/models/deepseek-ai/deepseek-coder-6.7b-instruct"
+deepseekcoder_repo: "deepseek-ai/deepseek-coder-6.7b-instruct"
 deepseek_max_token: 8192
 
 # qwencoder
-# qwencoder_repo: "Qwen/Qwen2.5-Coder-7B-Instruct"
-qwencoder_repo: "/home/sub4-wy/wangchen/models/Qwen/Qwen2.5-Coder-7B-Instruct"
+qwencoder_repo: "Qwen/Qwen2.5-Coder-7B-Instruct"
 qwencoder_max_token: 8192
 
 
 # qwen3
-qwen3_repo: "/home/sub4-wy/wangchen/models/Qwen/Qwen3-8B"
+qwen3_repo: "Qwen/Qwen3-8B"
 qwen3_max_token: 8192
 
 
 # starcoder2
-starcoder2_repo: "/home/sub4-wy/wangchen/models/bigcode/starcoder2-7b"
+starcoder2_repo: "bigcode/starcoder2-7b"
 starcoder2_max_token: 8192
 
 # GPT-3.5

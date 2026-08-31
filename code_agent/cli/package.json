@@ -4,9 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "naturalcc": "bun run src/index.ts",
-    "typecheck": "bunx tsc --noEmit",
-    "test": "bun test"
+    "naturalcc": "bun run src/index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -20,11 +18,6 @@
     "commander": "^14.0.3",
     "ink": "^7.0.3",
     "ink-text-input": "^6.0.0",
-    "marked": "^9.1.6",
-    "openai": "^6.49.0",
-    "react": "^19.2.6",
-    "string-width": "^8.2.1",
-    "strip-ansi": "^7.2.0",
-    "wrap-ansi": "^10.0.0"
+    "react": "^19.2.6"
   }
 }

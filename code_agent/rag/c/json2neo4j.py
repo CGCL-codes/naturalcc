@@ -1,10 +1,31 @@
+"""把 RAG 解析出的 C 项目符号图导入 Neo4j。
+
+配置（环境变量）：
+    NEO4J_URI       默认 bolt://localhost:7687
+    NEO4J_USER      默认 neo4j
+    NEO4J_PASSWORD  必填，无默认值
+    CGRAPH_JSON     待导入的符号图 JSON 路径
+"""
 import json
+import os
+import sys
+
 from py2neo import Graph, Node, Relationship
 
-# 连接 Neo4j
-graph = Graph("bolt://localhost:7687", auth=("neo4j", "password"))
+NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD")
+GRAPH_JSON = os.environ.get("CGRAPH_JSON")
 
-with open("ccoder/CEval/c_graph/t113-system-prj.json", "r") as f:
+if not NEO4J_PASSWORD:
+    sys.exit("请设置环境变量 NEO4J_PASSWORD。")
+if not GRAPH_JSON:
+    sys.exit("请设置环境变量 CGRAPH_JSON，指向待导入的符号图 JSON 文件。")
+
+# 连接 Neo4j
+graph = Graph(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+
+with open(GRAPH_JSON, "r") as f:
     data = json.load(f)
 
 for file_path, symbols in data.items():

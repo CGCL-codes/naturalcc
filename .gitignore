@@ -161,6 +161,33 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
+# ---- 本轮增量补充规则（2026-08-31）----
+# ChatGPT 聊天记录 / 工作记录（不进入仓库）
+**/chatgpt聊天记录/
+**/chatgpt聊天记录/**
+**/tokenizer copy.py
+**/tokenizer copy.*
+**/*tokenizer*copy*
+**/Your cache directory for OpenAI tiktoken/
+**/Your cache directory for OpenAI tiktoken/**
+
+# codex workbench / .superpowers / .codegraph（运行期 / 调试产物）
+.superpowers/
+.superpowers/**
+.codegraph/
+.codegraph/**
+
+# NEUAgent 与 zidong 实验项目（暂不推送到本仓库）
+NEUAgent/
+test/zidong/
+
+# 数据库、备份与运行时快照
+*.db
+*.db-shm
+*.db-wal
+*.bak
+outputs/
+
 # Cython debug symbols
 cython_debug/
 
@@ -169,8 +196,40 @@ cython_debug/
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+.idea/
+
+# Sphinx documentation
+docs/
+
+# Chinese dev documentation
+测试实操指南.md
+项目功能分析报告.md
+
+# Community / non-essential docs
+CODE_OF_CONDUCT.md
+SECURITY.md
+CODEOWNERS
+OVERVIEW.md
+license_info.md
+
+# Large data files in examples
+examples/**/*.jsonl
+examples/**/logs/
 .DS_Store
 .env
 *.secret
 credentials*
+
+# ---- agent 中间产物 / 运行时数据 ----
+.superpowers/
+.code-agent/
+code_agent/outputs/
+*.db
+*.db-shm
+*.db-wal
+*.bak
+
+# ---- 本地配置与密钥（切勿提交）----
+.env
+.env.local
+!.env.example

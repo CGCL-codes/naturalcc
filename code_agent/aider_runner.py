@@ -58,17 +58,23 @@ def normalize_file_path_for_parser(file_path: Optional[str], project_dir: Option
 
 def detect_provider(model: str) -> str:
     """
-    根据模型名前缀粗略判断 provider。
-    Aider 的 --api-key 参数通常形如:
-      --api-key openrouter=sk-xxx
+    根据模型名前缀判断 LiteLLM provider。
+    --api-key 参数形如:
+      --api-key deepseek=sk-xxx
       --api-key openai=sk-xxx
+      --api-key openrouter=sk-xxx
     """
     model = model or ""
+    if model.startswith("deepseek/") or "deepseek" in model:
+        return "deepseek"
     if model.startswith("openrouter/") or "openrouter" in model:
         return "openrouter"
     if model.startswith("openai/") or "/openai/" in model:
         return "openai"
-    return "openai"
+    # 默认按 deepseek 处理（本项目默认使用 deepseek）
+    if model.startswith("deepseek"):
+        return "deepseek"
+    return "deepseek"
 
 
 def ensure_aider_installed() -> None:
@@ -103,16 +109,18 @@ def normalize_target_files(target_files, project_dir=None):
 
 
 def resolve_api_key(api_key: Optional[str]) -> Tuple[Optional[str], str]:
+    """解析 API Key：优先参数传入 → 环境变量 DEEPSEEK_API_KEY → OPENROUTER_API_KEY → OPENAI_API_KEY"""
     api_key = api_key or (
-        os.environ.get("OPENROUTER_API_KEY")
+        os.environ.get("DEEPSEEK_API_KEY")
+        or os.environ.get("OPENROUTER_API_KEY")
         or os.environ.get("OPENAI_API_KEY")
-        or "Add by yourself"
+        or ""
     )
-    if api_key:
+    if api_key and api_key != "Add by yourself":
         return api_key, ""
     return (
-        api_key,
-        "⚠️ [警告]: 未提供 API Key，且环境变量中未找到 OPENROUTER_API_KEY / OPENAI_API_KEY，调用可能会失败。\n",
+        "",
+        "⚠️ [警告]: 未提供 API Key，且环境变量中未找到 DEEPSEEK_API_KEY / OPENROUTER_API_KEY / OPENAI_API_KEY，调用可能会失败。\n",
     )
 
 
@@ -469,7 +477,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="NaturalCC Agent 命令行工具")
     parser.add_argument("-f", "--files", nargs="*", default=[], help="目标文件列表，如 src/main.c src/utils.c")
     parser.add_argument("-i", "--instruction", type=str, required=True, help="你的修改需求")
-    parser.add_argument("-m", "--model", type=str, default="openrouter/deepseek/deepseek-chat", help="使用的模型")
+    parser.add_argument("-m", "--model", type=str, default="deepseek/deepseek-chat", help="使用的模型")
     parser.add_argument("-key", "--api-key", type=str, default=None, help="API Key (默认读环境变量)")
     parser.add_argument(
         "-dir", "--project-dir",

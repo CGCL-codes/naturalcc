@@ -47,28 +47,10 @@ else:
 
 
 MODELS = [
-    "openrouter/anthropic/claude-3-haiku",
-    "openrouter/anthropic/claude-3.5-sonnet",
-    "openrouter/anthropic/claude-3.7-sonnet",
-    "openrouter/anthropic/claude-opus-4",
-    "openrouter/anthropic/claude-sonnet-4",
-    "openrouter/deepseek/deepseek-chat",
-    "openrouter/deepseek/deepseek-chat-v3-0324",
-    "openrouter/deepseek/deepseek-r1",
-    "openrouter/google/gemini-2.5-flash",
-    "openrouter/google/gemini-2.5-pro",
-    "openrouter/openai/gpt-4.1",
-    "openrouter/openai/gpt-4o",
-    "openrouter/openai/gpt-4o-mini",
-    "openrouter/openai/gpt-5",
-    "openrouter/openai/gpt-5-chat",
-    "openrouter/openai/gpt-5-codex",
-    "openrouter/openai/gpt-5-mini",
-    "openrouter/openrouter/auto",
-    "openrouter/qwen/qwen-2.5-coder-32b-instruct",
-    "openrouter/qwen/qwen3-coder",
+    "deepseek/deepseek-chat",
+    "deepseek/deepseek-coder",
 ]
-DEFAULT_MODEL = "openrouter/deepseek/deepseek-chat"
+DEFAULT_MODEL = "deepseek/deepseek-chat"
 STREAM_HEADERS = {
     "Cache-Control": "no-cache, no-transform",
     "X-Accel-Buffering": "no",
@@ -303,6 +285,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# The durable Agent Runtime is mounted separately from the legacy Pipeline API.
+# Construction is lazy with respect to model clients; no API key is persisted.
+if __package__ in (None, ""):
+    from code_agent.api.agent_routes import build_default_agent_router
+else:
+    from .api.agent_routes import build_default_agent_router
+
+app.include_router(build_default_agent_router())
 
 
 @app.get("/api/health")

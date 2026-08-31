@@ -1,173 +1,132 @@
-import { Command } from 'commander'
-
-import { AgentError, createAbortError, errorMessage, isAbortError } from './agent/errors.js'
-import {
-  createCodingAgent,
-  type CodingAgentApplication,
-  type CreateCodingAgentOptions,
-} from './app/createCodingAgent.js'
-import { OneShotEventRenderer, type EventWriter } from './ui/oneShotEventRenderer.js'
+import { spawnSync } from 'node:child_process'
+import { resolve } from 'node:path'
+import { Command, Option } from 'commander'
+import { codeAgentDir, pythonPrelude } from './pythonPath.js'
 import { VERSION } from './version.js'
-import type { ApprovalMode } from './tools/approval.js'
-import { InteractiveApprovalProvider } from './tools/approval.js'
 
-export interface CliOptions {
-  model?: string
-  apiKey?: string
-  baseUrl?: string
-  projectDir?: string
-  maxTurns?: number
-  toolResults?: boolean
-  approval?: ApprovalMode
-  yes?: boolean
+async function resolvePrompt(parts: string[]): Promise<string> {
+    const direct = parts.join(' ').trim()
+    if (direct) return direct
+    return ''
 }
 
-interface CliIO {
-  stdout: EventWriter
-  stderr: EventWriter
-}
-
-export type CodingAgentFactory = (
-  options: CreateCodingAgentOptions,
-) => Promise<CodingAgentApplication>
-
-export async function runOneShot(
-  prompt: string,
-  options: CreateCodingAgentOptions = {},
-  io: CliIO = { stdout: process.stdout, stderr: process.stderr },
-  factory: CodingAgentFactory = createCodingAgent,
-): Promise<number> {
-  const controller = new AbortController()
-  const onInterrupt = () => controller.abort()
-  process.once('SIGINT', onInterrupt)
-
-  let application: CodingAgentApplication | undefined
-  try {
-    application = await factory({ ...options, signal: controller.signal })
-    if (controller.signal.aborted) throw createAbortError()
-    const session = application.sessionManager.current()
-    if (!session) throw new Error('The coding agent did not create a session')
-
-    const approvalPresentationOwner = options.approvalProvider?.presentationOwner
-      ?? (application.config.codingAgent.approvalMode === 'prompt' ? 'provider' : 'renderer')
-    const renderer = new OneShotEventRenderer(io.stdout, io.stderr, {
-      approvalPresentationOwner,
-    })
-    for await (const event of session.runTurn({
-      prompt,
-      signal: controller.signal,
-    })) {
-      renderer.handle(event)
+function parseFeatureConfig(raw: string | undefined): Record<string, unknown> {
+    if (!raw) return {}
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error('feature config must be a JSON object')
     }
-    return renderer.exitCode
-  } catch (error) {
-    if (isAbortError(error, controller.signal)) {
-      io.stderr.write('Agent turn interrupted.\n')
-      return 130
-    }
-    const code = error instanceof AgentError && error.code === 'config_error' ? 2 : 1
-    io.stderr.write(`${errorMessage(error)}\n`)
-    return code
-  } finally {
-    process.removeListener('SIGINT', onInterrupt)
-    await application?.dispose()
-  }
+    return parsed as Record<string, unknown>
 }
 
 export async function runCli(args: string[]): Promise<void> {
-  const cli = new Command()
+  const CLIAgent = new Command()
 
-  cli
+  CLIAgent
     .name('naturalcc')
-    .description('NaturalCC coding agent')
+    .description('naturalcc CLI测试')
     .version(VERSION, '-v, --version', '显示版本号')
-    .option('--model <name>', '模型名称')
-    .option('--api-key <key>', 'OpenAI API Key')
-    .option('--base-url <url>', 'OpenAI-compatible endpoint')
-    .option('--project-dir <dir>', '项目目录')
-    .option('--max-turns <number>', '单回合最大循环次数', (value) => Number(value))
-    .option('--no-tool-results', '隐藏正常工具输出')
-    .option('--approval <mode>', '审批模式：prompt、deny 或 allow', parseApprovalMode)
-    .option('--yes', '允许需要审批的工具调用')
-    .argument('[prompt...]')
-    .action(async (promptParts: string[], options: CliOptions) => {
-      const prompt = promptParts.join(' ').trim()
-      const config = toAgentOptions(options)
 
-      if (!prompt) {
-        if (process.stdin.isTTY !== true) {
-          cli.outputHelp()
-          process.exitCode = 2
-          return
+  // 默认命令：直接传问题
+  CLIAgent
+    .argument('[prompt...]')
+    .option('-f, --file [file...]', '目标文件列表，如 src/main.c src/utils.c', [])
+    .option('-i, --instruction <instruction>', '你的修改需求')
+    .option('-m, --model <model>', '使用的模型', 'deepseek/deepseek-chat')
+    .option('-k, --apiKey <apiKey>', 'API Key(默认读环境变量)')
+    .option('-d, --projectDir <dir>', '项目根目录，默认使用当前运行程序的目录', process.cwd())
+    .option('-s, --symbol <symbol>', '目标符号(可选)')
+    .addOption(new Option('-t, --completionType <type>', '补全类型(可选)')
+      .choices(['member', 'variable', 'function', 'function_body', 'type']))
+    .option('--prefix <prefix>', '补全前缀')
+    .option('--feature <feature>', '功能插件', 'code_completion')
+    .option('--feature-config <json>', '功能插件配置(JSON对象)')
+    .option('--preview' ,'仅预览最终 Prompt ，不执行 Aider', false)
+    .action(async (promptParts: string[], opts) => {
+      const prompt = await resolvePrompt(promptParts)
+      const optionInstruction = opts.instruction?.trim()
+      const instruction = optionInstruction || prompt
+      if (!instruction) {
+        if (process.stdin.isTTY) {
+          const { startRepl } = await import('./repl/app.js')
+          await startRepl()
+        } else {
+          CLIAgent.help()
         }
-        await runInteractive(config)
         return
       }
 
-      process.exitCode = await runOneShot(prompt, config)
+      const files: string[] = Array.isArray(opts.file) ? opts.file
+        : typeof opts.file === 'string' ? [opts.file]
+        : []
+      let featureConfig: Record<string, unknown>
+      try {
+        featureConfig = parseFeatureConfig(opts.featureConfig)
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        console.error(`Invalid --feature-config: ${message}`)
+        process.exitCode = 1
+        return
+      }
+
+      const payload = JSON.stringify({
+        target_files: files,
+        user_instruction: instruction,
+        model: opts.model,
+        api_key: opts.apiKey ?? null,
+        project_dir: resolve(opts.projectDir),
+        symbol: opts.symbol ?? null,
+        completion_type: opts.completionType ?? null,
+        prefix: opts.prefix ?? "",
+        feature: opts.feature,
+        feature_config: featureConfig,
+      })
+
+      const fn = opts.preview ? 'preview_feature' : 'run_feature_stream'
+      const script = [
+        pythonPrelude,
+        `from feature_runner import ${fn}`,
+        opts.preview
+          ? `print(${fn}(**json.loads(sys.stdin.read())))`
+          : [
+              'last_log = ""',
+              'last_status = "success"',
+              `for event_line in ${fn}(**json.loads(sys.stdin.read())):`,
+              '  event = json.loads(event_line)',
+              '  last_status = event.get("status", last_status)',
+              '  last_log = event.get("log") or event.get("report") or last_log',
+              'print(last_log, end="" if last_log.endswith("\\n") else "\\n")',
+              'sys.exit(1 if last_status == "error" else 0)',
+            ].join('\n'),
+      ].join('\n')
+
+      const result = spawnSync('python3', ['-c', script], {
+        input: payload,
+        encoding: 'utf-8',
+        cwd: codeAgentDir,
+      })
+
+      if (result.error) {
+        console.error('Failed to spawn Python:', result.error.message)
+        process.exitCode = 1
+        return
+      }
+
+      if (result.stdout) {
+        console.log(result.stdout.trimEnd())
+      }
+      if (result.stderr) {
+        console.error(result.stderr.trimEnd())
+      }
+      if (result.signal) {
+        console.error(`Python process terminated by signal: ${result.signal}`)
+        process.exitCode = 1
+        return
+      }
+      if (result.status !== 0) {
+        process.exitCode = result.status ?? 1
+      }
     })
 
-  await cli.parseAsync(['node', 'naturalcc', ...args])
-}
-
-export async function runInteractive(
-  options: CreateCodingAgentOptions,
-  factory: CodingAgentFactory = createCodingAgent,
-): Promise<void> {
-  let application: CodingAgentApplication | undefined
-  const controller = new AbortController()
-  const onInterrupt = () => controller.abort()
-  process.once('SIGINT', onInterrupt)
-  const approvalProvider = options.approvalMode === 'allow' || options.approvalMode === 'deny'
-    ? undefined
-    : new InteractiveApprovalProvider()
-  try {
-    application = await factory({
-      ...options,
-      approvalProvider,
-      signal: controller.signal,
-    })
-    if (controller.signal.aborted) throw createAbortError()
-    // After initialization, Ink owns interactive SIGINT behavior.
-    process.removeListener('SIGINT', onInterrupt)
-    const [{ render }, { createElement }, { Repl }] = await Promise.all([
-      import('ink'),
-      import('react'),
-      import('./ui/repl.js'),
-    ])
-    const instance = render(createElement(Repl, {
-      sessionManager: application.sessionManager,
-      approvalProvider,
-    }), { incrementalRendering: true })
-    await instance.waitUntilExit()
-  } catch (error) {
-    if (isAbortError(error, controller.signal)) {
-      process.stderr.write('Agent turn interrupted.\n')
-      process.exitCode = 130
-    } else {
-      process.stderr.write(`${errorMessage(error)}\n`)
-      process.exitCode = error instanceof AgentError && error.code === 'config_error' ? 2 : 1
-    }
-  } finally {
-    process.removeListener('SIGINT', onInterrupt)
-    await application?.dispose()
-  }
-}
-
-export function toAgentOptions(options: CliOptions): CreateCodingAgentOptions {
-  const approvalMode = options.yes ? 'allow' : options.approval
-  return {
-    model: options.model,
-    apiKey: options.apiKey,
-    baseURL: options.baseUrl,
-    projectDir: options.projectDir,
-    maxTurns: options.maxTurns,
-    showToolResults: options.toolResults !== false,
-    approvalMode,
-  }
-}
-
-export function parseApprovalMode(value: string): ApprovalMode {
-  if (value === 'prompt' || value === 'deny' || value === 'allow') return value
-  throw new Error('approval mode must be prompt, deny, or allow')
+  await CLIAgent.parseAsync(['node', 'myagent', ...args])
 }
