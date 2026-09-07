@@ -1,0 +1,34 @@
+#
+# 项目: project_10_java_spring
+# 测试主题: Java Spring Boot 企业级应用
+# 功能: 应用配置
+#
+
+spring:
+  application:
+    name: demo
+
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.example.demo: DEBUG

@@ -1,0 +1,85 @@
+/*
+  项目: project_02_js_calculator
+  测试主题: JavaScript 前端交互 - 计算器应用
+  功能: 计算器样式
+*/
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.calculator {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.calculator h1 {
+  text-align: center;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+#display {
+  width: 100%;
+  padding: 16px;
+  font-size: 24px;
+  text-align: right;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.btn {
+  padding: 16px;
+  font-size: 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #f0f0f0;
+  transition: background 0.2s;
+}
+
+.btn:hover {
+  background: #e0e0e0;
+}
+
+.btn.operator {
+  background: #ff9500;
+  color: #fff;
+}
+
+.btn.equals {
+  background: #28a745;
+  color: #fff;
+}
+
+.btn.clear {
+  background: #dc3545;
+  color: #fff;
+}
+
+.col-2 {
+  grid-column: span 2;
+}
+
+.row-2 {
+  grid-row: span 2;
+}

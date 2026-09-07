@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<!--
+  项目: project_05_landing_page
+  测试主题: HTML/CSS 响应式落地页设计
+  功能: SaaS 产品落地页，包含 Hero、功能介绍、定价、CTA 等区块
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TestSaaS - 简单高效的项目管理工具</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav container">
+      <a href="#" class="logo">TestSaaS</a>
+      <ul class="nav-links">
+        <li><a href="#features">功能</a></li>
+        <li><a href="#pricing">定价</a></li>
+        <li><a href="#contact">联系</a></li>
+      </ul>
+      <button class="btn-primary">免费试用</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero 区 -->
+    <section class="hero">
+      <div class="container hero-content">
+        <h1>更简单的方式管理你的项目</h1>
+        <p>TestSaaS 帮助团队高效协作，让项目管理变得轻松愉快。</p>
+        <div class="hero-actions">
+          <button class="btn-primary btn-large">立即开始</button>
+          <button class="btn-secondary btn-large">观看演示</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 功能区 -->
+    <section id="features" class="features">
+      <div class="container">
+        <h2 class="section-title">核心功能</h2>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-icon">📋</div>
+            <h3>任务管理</h3>
+            <p>看板视图清晰展示任务进度，拖拽即可更新状态。</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3>团队协作</h3>
+            <p>实时同步、评论、@提醒，让沟通更顺畅。</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>数据分析</h3>
+            <p>可视化报表帮助你洞察项目健康度。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 定价区 -->
+    <section id="pricing" class="pricing">
+      <div class="container">
+        <h2 class="section-title">简单透明的定价</h2>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <h3>免费版</h3>
+            <p class="price">¥0<span>/月</span></p>
+            <ul>
+              <li>最多 5 个项目</li>
+              <li>3 人协作</li>
+              <li>基础功能</li>
+            </ul>
+            <button class="btn-secondary">开始使用</button>
+          </div>
+          <div class="pricing-card featured">
+            <h3>专业版</h3>
+            <p class="price">¥99<span>/月</span></p>
+            <ul>
+              <li>无限项目</li>
+              <li>20 人协作</li>
+              <li>高级分析</li>
+            </ul>
+            <button class="btn-primary">立即升级</button>
+          </div>
+          <div class="pricing-card">
+            <h3>企业版</h3>
+            <p class="price">定制</p>
+            <ul>
+              <li>无限用户</li>
+              <li>专属客服</li>
+              <li>定制集成</li>
+            </ul>
+            <button class="btn-secondary">联系我们</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="contact" class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 TestSaaS. 用于测试 coding agent 的演示项目。</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -68,47 +68,54 @@ def _js_safe(obj: Any) -> str:
 # ---------------------------------------------------------------------------
 
 def _html_styles() -> str:
+    """Light-theme CSS injected around the Pyvis container."""
     return """<style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #f3f4f6; color: #111827; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; height: 100vh; overflow: hidden; }
-  #graph { flex: 1; background: #ffffff; }
-  #sidebar { width: 320px; background: #ffffff; border-left: 1px solid #d1d5db; display: flex; flex-direction: column; overflow: hidden; box-shadow: -2px 0 8px rgba(0,0,0,0.04); }
-  #search-wrap { padding: 12px; border-bottom: 1px solid #e5e7eb; }
-  #search { width: 100%; background: #ffffff; border: 1px solid #d1d5db; color: #111827; padding: 7px 10px; border-radius: 6px; font-size: 13px; outline: none; }
-  #search:focus { border-color: #2563EB; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
-  #search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid #e5e7eb; display: none; background: #ffffff; }
-  .search-item { padding: 4px 6px; cursor: pointer; border-radius: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .search-item:hover { background: #eff6ff; }
-  #info-panel { padding: 14px; border-bottom: 1px solid #e5e7eb; min-height: 140px; }
-  #info-panel h3 { font-size: 13px; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-  #info-content { font-size: 13px; color: #374151; line-height: 1.6; }
-  #info-content .field { margin-bottom: 5px; }
-  #info-content .field b { color: #111827; }
-  #info-content .empty { color: #9ca3af; font-style: italic; }
-  .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #d1d5db; }
-  .neighbor-link:hover { background: #eff6ff; }
-  #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
-  #legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
-  #legend-wrap h3 { font-size: 13px; color: #6b7280; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 12px; }
-  .legend-item:hover { background: #f3f4f6; padding-left: 4px; }
-  .legend-item.dimmed { opacity: 0.35; }
-  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); }
-  .legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #111827; }
-  .legend-count { color: #9ca3af; font-size: 11px; }
-  #stats { padding: 10px 14px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; }
-  #legend-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 4px 0; }
-  #legend-controls label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #4b5563; user-select: none; }
-  #legend-controls label:hover { color: #111827; }
-  .legend-cb, #select-all-cb { appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border: 1.5px solid #d1d5db; border-radius: 3px; background: #ffffff; cursor: pointer; position: relative; flex-shrink: 0; }
-  .legend-cb:checked, #select-all-cb:checked { background: #2563EB; border-color: #2563EB; }
-  .legend-cb:checked::after, #select-all-cb:checked::after { content: ''; position: absolute; left: 3.5px; top: 1px; width: 4px; height: 7px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
-  #select-all-cb:indeterminate { background: #2563EB; border-color: #2563EB; }
-  #select-all-cb:indeterminate::after { content: ''; position: absolute; left: 2px; top: 5px; width: 8px; height: 2px; background: #fff; border: none; transform: none; }
+  body { background: #f3f4f6; color: #111827; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  .kg-header { height: 52px; flex-shrink: 0; display: flex; align-items: center; gap: 18px; padding: 0 18px; border-bottom: 1px solid #d1d5db; background: #ffffff; }
+  .kg-header strong { font-size: 14px; color: #111827; }
+  .kg-header span { color: #6b7280; font-size: 12px; }
+  .kg-header .hint { margin-left: auto; color: #9ca3af; font-size: 11px; }
+  .kg-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 320px; min-height: 0; }
+  #kg-graph { background: #ffffff; border-right: 1px solid #e5e7eb; min-height: 0; }
+  #kg-sidebar { background: #ffffff; display: flex; flex-direction: column; overflow: hidden; }
+  #kg-search-wrap { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+  #kg-search { width: 100%; background: #ffffff; border: 1px solid #d1d5db; color: #111827; padding: 7px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+  #kg-search:focus { border-color: #2563EB; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+  #kg-search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid #e5e7eb; display: none; background: #ffffff; }
+  .kg-search-item { padding: 4px 6px; cursor: pointer; border-radius: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .kg-search-item:hover { background: #eff6ff; }
+  #kg-info-panel { padding: 14px; border-bottom: 1px solid #e5e7eb; min-height: 140px; }
+  #kg-info-panel h3 { font-size: 13px; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #kg-info-content { font-size: 13px; color: #374151; line-height: 1.6; }
+  #kg-info-content .field { margin-bottom: 5px; }
+  #kg-info-content .field b { color: #111827; }
+  #kg-info-content .empty { color: #9ca3af; font-style: italic; }
+  .kg-neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #d1d5db; }
+  .kg-neighbor-link:hover { background: #eff6ff; }
+  #kg-neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
+  #kg-legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
+  #kg-legend-wrap h3 { font-size: 13px; color: #6b7280; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .kg-legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 12px; }
+  .kg-legend-item:hover { background: #f3f4f6; padding-left: 4px; }
+  .kg-legend-item.dimmed { opacity: 0.35; }
+  .kg-legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); }
+  .kg-legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #111827; }
+  .kg-legend-count { color: #9ca3af; font-size: 11px; }
+  #kg-stats { padding: 10px 14px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #9ca3af; }
+  #kg-legend-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 4px 0; }
+  #kg-legend-controls label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #4b5563; user-select: none; }
+  #kg-legend-controls label:hover { color: #111827; }
+  .kg-legend-cb, #kg-select-all-cb { appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border: 1.5px solid #d1d5db; border-radius: 3px; background: #ffffff; cursor: pointer; position: relative; flex-shrink: 0; }
+  .kg-legend-cb:checked, #kg-select-all-cb:checked { background: #2563EB; border-color: #2563EB; }
+  .kg-legend-cb:checked::after, #kg-select-all-cb:checked::after { content: ''; position: absolute; left: 3.5px; top: 1px; width: 4px; height: 7px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  #kg-select-all-cb:indeterminate { background: #2563EB; border-color: #2563EB; }
+  #kg-select-all-cb:indeterminate::after { content: ''; position: absolute; left: 2px; top: 5px; width: 8px; height: 2px; background: #fff; border: none; transform: none; }
 </style>"""
 
 
 def _html_script(nodes_json: str, edges_json: str, legend_json: str) -> str:
+    """Sidebar script — drives the Pyvis network via the global `network` variable."""
     return f"""<script>
 const RAW_NODES = {nodes_json};
 const RAW_EDGES = {edges_json};
@@ -118,89 +125,68 @@ function esc(s) {{
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }}
 
-const nodesDS = new vis.DataSet(RAW_NODES.map(n => {{
-  return {{ id: n.id, label: n.label, color: n.color, size: n.size,
-    font: n.font, title: n.title,
-    _group: n.group, _source_file: n.source_file, _degree: n.degree }};
-}}));
+const nodesDS = (typeof network !== 'undefined' && network.body && network.body.nodes) ? network.body.nodes : null;
+const edgesDS = (typeof network !== 'undefined' && network.body && network.body.edges) ? network.body.edges : null;
 
-const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => {{
-  return {{ id: i, from: e.from, to: e.to,
-    label: e.label || '',
-    title: e.title,
-    dashes: e.dashes,
-    width: e.width,
-    color: e.color,
-    arrows: {{ to: {{ enabled: true, scaleFactor: 0.5 }} }} }};
-}}));
-
-const container = document.getElementById('graph');
-const network = new vis.Network(container, {{ nodes: nodesDS, edges: edgesDS }}, {{
-  physics: {{
-    enabled: true,
-    solver: 'forceAtlas2Based',
-    forceAtlas2Based: {{
-      gravitationalConstant: -60,
-      centralGravity: 0.005,
-      springLength: 120,
-      springConstant: 0.08,
-      damping: 0.4,
-      avoidOverlap: 0.8,
-    }},
-    stabilization: {{ iterations: 200, fit: true }},
-  }},
-  interaction: {{
-    hover: true,
-    tooltipDelay: 100,
-    hideEdgesOnDrag: true,
-    navigationButtons: false,
-    keyboard: false,
-  }},
-  nodes: {{ shape: 'dot', borderWidth: 1.5 }},
-  edges: {{ smooth: {{ type: 'continuous', roundness: 0.2 }}, selectionWidth: 3 }},
-}});
-
-network.once('stabilizationIterationsDone', () => {{
-  network.setOptions({{ physics: {{ enabled: false }} }});
-}});
-
-function showInfo(nodeId) {{
-  const n = nodesDS.get(nodeId);
-  if (!n) return;
-  const neighborIds = network.getConnectedNodes(nodeId);
-  const neighborItems = neighborIds.map(nid => {{
-    const nb = nodesDS.get(nid);
-    const color = nb ? nb.color.background : '#374151';
-    return `<span class="neighbor-link" style="border-left-color:${{esc(color)}}" onclick="focusNode(${{JSON.stringify(nid)}})">${{esc(nb ? nb.label : nid)}}</span>`;
-  }}).join('');
-  document.getElementById('info-content').innerHTML = `
-    <div class="field"><b>${{esc(n.label)}}</b></div>
-    <div class="field">Group: ${{esc(n._group || 'unknown')}}</div>
-    <div class="field">Source: ${{esc(n._source_file || '-')}}</div>
-    <div class="field">Degree: ${{n._degree}}</div>
-    ${{neighborIds.length ? `<div class="field" style="margin-top:8px;color:#6b7280;font-size:11px">Neighbors (${{neighborIds.length}})</div><div id="neighbors-list">${{neighborItems}}</div>` : ''}}
-  `;
+function lookupNode(id) {{
+  if (nodesDS) {{
+    if (typeof nodesDS.get === 'function') return nodesDS.get(id);
+    return nodesDS[id] || null;
+  }}
+  return RAW_NODES.find(n => n.id === id) || null;
 }}
 
 function focusNode(nodeId) {{
+  if (typeof network === 'undefined') return;
   network.focus(nodeId, {{ scale: 1.4, animation: true }});
   network.selectNodes([nodeId]);
   showInfo(nodeId);
 }}
 
-let hoveredNodeId = null;
-network.on('hoverNode', params => {{ hoveredNodeId = params.node; container.style.cursor = 'pointer'; }});
-network.on('blurNode', () => {{ hoveredNodeId = null; container.style.cursor = 'default'; }});
-container.addEventListener('click', () => {{
-  if (hoveredNodeId !== null) {{ showInfo(hoveredNodeId); network.selectNodes([hoveredNodeId]); }}
-}});
-network.on('click', params => {{
-  if (params.nodes.length > 0) {{ showInfo(params.nodes[0]); }}
-  else if (hoveredNodeId === null) {{ document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>'; }}
-}});
+function showInfo(nodeId) {{
+  const n = lookupNode(nodeId);
+  if (!n) return;
+  let neighborIds = [];
+  if (typeof network !== 'undefined' && network.getConnectedNodes) {{
+    try {{ neighborIds = network.getConnectedNodes(nodeId) || []; }} catch (_) {{ neighborIds = []; }}
+  }} else {{
+    neighborIds = Array.from(new Set([
+      ...RAW_EDGES.filter(e => e.to === nodeId).map(e => e.from),
+      ...RAW_EDGES.filter(e => e.from === nodeId).map(e => e.to),
+    ]));
+  }}
+  const neighborItems = neighborIds.map(nid => {{
+    const nb = lookupNode(nid);
+    const color = nb ? (nb.color && nb.color.background) || '#374151' : '#374151';
+    return `<span class="kg-neighbor-link" style="border-left-color:${{esc(color)}}" onclick="focusNode(${{JSON.stringify(nid)}})">${{esc(nb ? nb.label : nid)}}</span>`;
+  }}).join('');
+  const group = n._group || (n.group) || 'unknown';
+  const sourceFile = n._source_file || n.source_file || '-';
+  const degree = n._degree || n.degree || 0;
+  document.getElementById('kg-info-content').innerHTML = `
+    <div class="field"><b>${{esc(n.label)}}</b></div>
+    <div class="field">Group: ${{esc(group)}}</div>
+    <div class="field">Source: ${{esc(sourceFile)}}</div>
+    <div class="field">Degree: ${{degree}}</div>
+    ${{neighborIds.length ? `<div class="field" style="margin-top:8px;color:#6b7280;font-size:11px">Neighbors (${{neighborIds.length}})</div><div id="kg-neighbors-list">${{neighborItems}}</div>` : ''}}
+  `;
+}}
 
-const searchInput = document.getElementById('search');
-const searchResults = document.getElementById('search-results');
+let hoveredNodeId = null;
+if (typeof network !== 'undefined') {{
+  network.on('hoverNode', params => {{ hoveredNodeId = params.node; const c = document.getElementById('kg-graph'); if (c) c.style.cursor = 'pointer'; }});
+  network.on('blurNode', () => {{ hoveredNodeId = null; const c = document.getElementById('kg-graph'); if (c) c.style.cursor = 'default'; }});
+  network.on('click', params => {{
+    if (params.nodes.length > 0) {{ showInfo(params.nodes[0]); }}
+    else if (hoveredNodeId === null) {{ document.getElementById('kg-info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>'; }}
+  }});
+  network.once('stabilizationIterationsDone', () => {{
+    try {{ network.setOptions({{ physics: {{ enabled: false }} }}); }} catch (_) {{}}
+  }});
+}}
+
+const searchInput = document.getElementById('kg-search');
+const searchResults = document.getElementById('kg-search-results');
 searchInput.addEventListener('input', () => {{
   const q = searchInput.value.toLowerCase().trim();
   searchResults.innerHTML = '';
@@ -210,14 +196,13 @@ searchInput.addEventListener('input', () => {{
   searchResults.style.display = 'block';
   matches.forEach(n => {{
     const el = document.createElement('div');
-    el.className = 'search-item';
+    el.className = 'kg-search-item';
     el.textContent = n.label;
-    el.style.borderLeft = `3px solid ${{n.color.background}}`;
+    const bg = (n.color && n.color.background) || '#374151';
+    el.style.borderLeft = `3px solid ${{bg}}`;
     el.style.paddingLeft = '8px';
     el.onclick = () => {{
-      network.focus(n.id, {{ scale: 1.5, animation: true }});
-      network.selectNodes([n.id]);
-      showInfo(n.id);
+      focusNode(n.id);
       searchResults.style.display = 'none';
       searchInput.value = '';
     }};
@@ -230,7 +215,7 @@ document.addEventListener('click', e => {{
 }});
 
 const hiddenGroups = new Set();
-const selectAllCb = document.getElementById('select-all-cb');
+const selectAllCb = document.getElementById('kg-select-all-cb');
 
 function updateSelectAllState() {{
   const total = LEGEND.length;
@@ -240,21 +225,21 @@ function updateSelectAllState() {{
 }}
 
 function toggleAllGroups(hide) {{
-  document.querySelectorAll('.legend-item').forEach(item => {{ hide ? item.classList.add('dimmed') : item.classList.remove('dimmed'); }});
-  document.querySelectorAll('.legend-cb').forEach(cb => {{ cb.checked = !hide; }});
+  document.querySelectorAll('.kg-legend-item').forEach(item => {{ hide ? item.classList.add('dimmed') : item.classList.remove('dimmed'); }});
+  document.querySelectorAll('.kg-legend-cb').forEach(cb => {{ cb.checked = !hide; }});
   LEGEND.forEach(g => {{ if (hide) hiddenGroups.add(g.group); else hiddenGroups.delete(g.group); }});
   const updates = RAW_NODES.map(n => ({{ id: n.id, hidden: hide }}));
-  nodesDS.update(updates);
+  if (nodesDS && typeof nodesDS.update === 'function') nodesDS.update(updates);
   updateSelectAllState();
 }}
 
-const legendEl = document.getElementById('legend');
+const legendEl = document.getElementById('kg-legend');
 LEGEND.forEach(g => {{
   const item = document.createElement('div');
-  item.className = 'legend-item';
+  item.className = 'kg-legend-item';
   const cb = document.createElement('input');
   cb.type = 'checkbox';
-  cb.className = 'legend-cb';
+  cb.className = 'kg-legend-cb';
   cb.checked = true;
   cb.addEventListener('change', (e) => {{
     e.stopPropagation();
@@ -266,12 +251,12 @@ LEGEND.forEach(g => {{
       item.classList.add('dimmed');
     }}
     const updates = RAW_NODES.filter(n => n.group === g.group).map(n => ({{ id: n.id, hidden: !cb.checked }}));
-    nodesDS.update(updates);
+    if (nodesDS && typeof nodesDS.update === 'function') nodesDS.update(updates);
     updateSelectAllState();
   }});
-  item.innerHTML = `<div class="legend-dot" style="background:${{g.color}}"></div>
-    <span class="legend-label">${{g.label}}</span>
-    <span class="legend-count">${{g.count}}</span>`;
+  item.innerHTML = `<div class="kg-legend-dot" style="background:${{g.color}}"></div>
+    <span class="kg-legend-label">${{g.label}}</span>
+    <span class="kg-legend-count">${{g.count}}</span>`;
   item.prepend(cb);
   item.onclick = (e) => {{
     if (e.target === cb) return;
@@ -588,46 +573,206 @@ def rag_to_vis(rag: Dict[str, Dict[str, Any]]) -> Tuple[List[dict], List[dict], 
 # 5. 生成完整 HTML
 # ---------------------------------------------------------------------------
 
+def _pyvis_light_options() -> dict:
+    """Light-theme Pyvis options tuned for a code-knowledge-graph layout."""
+    return {
+        "interaction": {
+            "hover": True,
+            "tooltipDelay": 120,
+            "navigationButtons": True,
+            "keyboard": {"enabled": True, "bindToWindow": False},
+            "multiselect": True,
+            "dragNodes": True,
+            "hideEdgesOnDrag": True,
+        },
+        "physics": {
+            "enabled": True,
+            "solver": "forceAtlas2Based",
+            "forceAtlas2Based": {
+                "gravitationalConstant": -55,
+                "centralGravity": 0.010,
+                "springLength": 130,
+                "springConstant": 0.08,
+                "damping": 0.45,
+                "avoidOverlap": 0.18,
+            },
+            "stabilization": {
+                "enabled": True,
+                "iterations": 220,
+                "updateInterval": 25,
+                "fit": True,
+            },
+            "minVelocity": 0.6,
+        },
+        "nodes": {
+            "borderWidth": 1.5,
+            "shadow": False,
+            "font": {
+                "size": 12,
+                "face": "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+                "color": "#111827",
+            },
+            "scaling": {"min": 10, "max": 30},
+        },
+        "edges": {
+            "smooth": {"type": "continuous", "roundness": 0.25},
+            "scaling": {"min": 1, "max": 3},
+            "color": {"inherit": "from"},
+            "font": {
+                "size": 10,
+                "color": "#6b7280",
+                "strokeWidth": 0,
+                "align": "middle",
+            },
+        },
+    }
+
+
 def generate_html(vis_nodes: List[dict], vis_edges: List[dict], legend_data: List[dict],
                   stats: str, title: str = "RAG Knowledge Graph") -> str:
+    """Build a self-contained interactive HTML knowledge graph using Pyvis.
+
+    Pyvis (via vis-network) provides force-directed layout, neighbor highlighting,
+    navigation buttons, and an inlined library for offline viewing. We keep our
+    custom sidebar (search / info / legend / stats) by post-processing Pyvis's
+    output: rename ``mynetwork`` -> ``kg-graph``, inject the header before the
+    container, and append the sidebar after it.
+    """
     nodes_json = _js_safe(vis_nodes)
     edges_json = _js_safe(vis_edges)
     legend_json = _js_safe(legend_data)
+    safe_title = _html.escape(title)
 
-    return f"""<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{_html.escape(title)}</title>
-<script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"
-        integrity="sha384-Ux6phic9PEHJ38YtrijhkzyJ8yQlH8i/+buBR8s3mAZOJrP1gwyvAcIYl3GWtpX1"
-        crossorigin="anonymous"></script>
-{_html_styles()}
-</head>
-<body>
-<div id="graph"></div>
-<div id="sidebar">
-  <div id="search-wrap">
-    <input id="search" type="text" placeholder="Search nodes..." autocomplete="off">
-    <div id="search-results"></div>
-  </div>
-  <div id="info-panel">
-    <h3>Node Info</h3>
-    <div id="info-content"><span class="empty">Click a node to inspect it</span></div>
-  </div>
-  <div id="legend-wrap">
-    <h3>Node Types</h3>
-    <div id="legend-controls">
-      <label><input type="checkbox" id="select-all-cb" checked onchange="toggleAllGroups(!this.checked)">Select All</label>
-    </div>
-    <div id="legend"></div>
-  </div>
-  <div id="stats">{stats}</div>
-</div>
-{_html_script(nodes_json, edges_json, legend_json)}
-</body>
-</html>"""
+    # Imported lazily so the module is importable even when Pyvis is not yet
+    # installed (the import error should surface at visualization time only).
+    from pyvis.network import Network
+
+    net = Network(
+        height="100%",
+        width="100%",
+        directed=True,
+        notebook=False,
+        neighborhood_highlight=True,
+        bgcolor="#ffffff",
+        font_color="#111827",
+        cdn_resources="in_line",
+        heading="",
+    )
+    net.set_options(json.dumps(_pyvis_light_options()))
+
+    # Pyvis writes graph nodes/edges via JSON; mirror the colors produced by
+    # ``rag_to_vis`` so the visual style is consistent.
+    for node in vis_nodes:
+        color_obj = node.get("color") or {}
+        background = color_obj.get("background") or "#374151"
+        border = color_obj.get("border") or background
+        highlight = color_obj.get("highlight") or {
+            "background": "#e5e7eb",
+            "border": background,
+        }
+        net.add_node(
+            node["id"],
+            label=node["label"],
+            title=node.get("title", ""),
+            color={
+                "background": background,
+                "border": border,
+                "highlight": highlight,
+            },
+            size=node.get("size", 10),
+            shape="dot",
+            group=node.get("group", "Other"),
+            source_file=node.get("source_file", ""),
+            degree=node.get("degree", 0),
+            font=node.get("font", {"size": 12, "color": "#111827"}),
+        )
+
+    for edge in vis_edges:
+        edge_color_obj = edge.get("color") or {}
+        net.add_edge(
+            edge["from"],
+            edge["to"],
+            title=edge.get("title", ""),
+            label=edge.get("label", ""),
+            color=edge_color_obj.get("color", "#6b7280"),
+            arrows="to",
+            width=edge.get("width", 2),
+        )
+
+    pyvis_html = net.generate_html()
+
+    # Pyvis mounts its graph on ``#mynetwork``; rename so it lands in our cell
+    # and our CSS selectors match.
+    pyvis_html = pyvis_html.replace("mynetwork", "kg-graph")
+
+    # Replace Pyvis's default page title with our domain-specific one.
+    pyvis_html = re.sub(
+        r"<title>.*?</title>",
+        f"<title>{safe_title}</title>",
+        pyvis_html,
+        count=1,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+
+    # Inject our custom CSS right before </head>.
+    pyvis_html = re.sub(
+        r"</head>",
+        _html_styles() + "</head>",
+        pyvis_html,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+
+    # Inject the header right after <body>, then open the grid wrapper.
+    header_block = (
+        '<div class="kg-header">'
+        f"<strong>{safe_title}</strong>"
+        f"<span>{stats}</span>"
+        '<span class="hint">Drag nodes &middot; scroll to zoom &middot; hover for details</span>'
+        "</div>"
+        '<div class="kg-body">'
+    )
+    pyvis_html = re.sub(
+        r"<body[^>]*>",
+        lambda match: match.group(0) + header_block,
+        pyvis_html,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+
+    # Inject the sidebar + close the grid wrapper right before </body>.
+    sidebar_block = (
+        '<aside id="kg-sidebar">'
+        '<div id="kg-search-wrap">'
+        '<input id="kg-search" type="text" placeholder="Search nodes..." autocomplete="off">'
+        '<div id="kg-search-results"></div>'
+        "</div>"
+        '<div id="kg-info-panel">'
+        "<h3>Node Info</h3>"
+        '<div id="kg-info-content"><span class="empty">Click a node to inspect it</span></div>'
+        "</div>"
+        '<div id="kg-legend-wrap">'
+        "<h3>Node Types</h3>"
+        '<div id="kg-legend-controls">'
+        '<label><input type="checkbox" id="kg-select-all-cb" checked '
+        'onchange="toggleAllGroups(!this.checked)">Select All</label>'
+        "</div>"
+        '<div id="kg-legend"></div>'
+        "</div>"
+        f'<div id="kg-stats">{stats}</div>'
+        "</aside>"
+        "</div>"  # close .kg-body
+        + _html_script(nodes_json, edges_json, legend_json)
+    )
+    pyvis_html = re.sub(
+        r"</body>",
+        sidebar_block + "</body>",
+        pyvis_html,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+
+    return pyvis_html
 
 
 # ---------------------------------------------------------------------------

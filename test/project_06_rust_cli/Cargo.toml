@@ -1,0 +1,20 @@
+# 项目: project_06_rust_cli
+# 测试主题: Rust 命令行工具开发
+# 功能: Cargo 项目配置
+
+[package]
+name = "test_cli"
+version = "0.1.0"
+edition = "2021"
+authors = ["Test Agent"]
+description = "用于测试 coding agent 的命令行工具"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+chrono = "0.4"
+
+[dev-dependencies]
+tempfile = "3.8"

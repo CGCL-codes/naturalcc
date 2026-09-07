@@ -342,6 +342,124 @@ button {
   font-size: 0.68rem;
 }
 
+.conversation-rename-button {
+  position: absolute;
+  top: 50%;
+  right: 34px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  color: var(--faint);
+  background: transparent;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.14s ease, color 0.14s ease, background 0.14s ease;
+}
+
+.conversation-row-shell:hover .conversation-rename-button,
+.conversation-row-shell:focus-within .conversation-rename-button,
+.conversation-row-shell.active .conversation-rename-button {
+  opacity: 1;
+}
+
+.conversation-rename-button:hover,
+.conversation-rename-button:focus-visible {
+  color: var(--accent, #4f46e5);
+  background: color-mix(in srgb, var(--accent, #4f46e5) 14%, transparent);
+}
+
+.conversation-rename-button:disabled {
+  cursor: wait;
+  opacity: 0.45;
+}
+
+.conversation-row-shell.renaming {
+  background: color-mix(in srgb, var(--accent, #4f46e5) 8%, transparent);
+}
+
+.conversation-rename-form {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 49px;
+  padding: 7px 6px;
+  border: 1px solid var(--accent, #4f46e5);
+  border-radius: 9px;
+  background: var(--panel-strong);
+}
+
+.conversation-rename-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.79rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.conversation-rename-input::placeholder {
+  color: var(--faint);
+  font-weight: 400;
+}
+
+.conversation-rename-input:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.conversation-rename-confirm,
+.conversation-rename-cancel {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.conversation-rename-confirm {
+  color: var(--success, #16a34a);
+}
+
+.conversation-rename-confirm:hover:not(:disabled),
+.conversation-rename-confirm:focus-visible:not(:disabled) {
+  background: color-mix(in srgb, var(--success, #16a34a) 18%, transparent);
+}
+
+.conversation-rename-cancel {
+  color: var(--faint);
+}
+
+.conversation-rename-cancel:hover:not(:disabled),
+.conversation-rename-cancel:focus-visible:not(:disabled) {
+  color: var(--danger, #ef4444);
+  background: color-mix(in srgb, var(--danger, #ef4444) 14%, transparent);
+}
+
+.conversation-rename-confirm:disabled,
+.conversation-rename-cancel:disabled {
+  cursor: wait;
+  opacity: 0.45;
+}
+
+.conversation-rename-error {
+  margin-top: 4px;
+  padding: 4px 8px;
+  font-size: 0.68rem;
+  color: var(--danger, #ef4444);
+  background: color-mix(in srgb, var(--danger, #ef4444) 10%, transparent);
+  border-radius: 6px;
+}
+
 .conversation-empty {
   padding: 20px 8px;
   color: var(--faint);
@@ -1951,7 +2069,8 @@ p {
     transform: translateX(0);
   }
 
-  .conversation-delete-button {
+  .conversation-delete-button,
+  .conversation-rename-button {
     opacity: 1;
   }
 

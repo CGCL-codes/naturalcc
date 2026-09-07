@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import html
-import json
 import os
 import shutil
 import sqlite3
@@ -12,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from ..contracts import RiskLevel, ToolContext, ToolResult, ToolSpec
+from ...rag.visualize.visualize import GROUP_COLORS, generate_html
 
 
 DEFAULT_TIMEOUT_SECONDS = 60
@@ -359,71 +358,132 @@ def _load_bounded_graph(
     return nodes, edges
 
 
-def _safe_json(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=False).replace("<", "\\u003c")
-
-
 def _render_graph_html(
     nodes: list[dict[str, Any]],
     edges: list[dict[str, Any]],
     keyword: str | None,
 ) -> str:
-    title = "CodeGraph" + (f" - {html.escape(keyword)}" if keyword else "")
-    payload = _safe_json({"nodes": nodes, "edges": edges})
-    return f"""<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{title}</title>
-  <style>
-    :root {{ color-scheme: dark; font-family: Inter, system-ui, sans-serif; }}
-    * {{ box-sizing: border-box; }}
-    body {{ margin: 0; overflow: hidden; background: #171717; color: #ececec; }}
-    header {{ height: 52px; display: flex; align-items: center; gap: 18px; padding: 0 18px; border-bottom: 1px solid #343434; background: #202020; }}
-    header strong {{ font-size: 14px; }}
-    header span {{ color: #aaa; font-size: 12px; }}
-    main {{ display: grid; grid-template-columns: minmax(0, 1fr) 300px; height: calc(100vh - 52px); }}
-    canvas {{ width: 100%; height: 100%; cursor: grab; }}
-    aside {{ padding: 16px; overflow: auto; border-left: 1px solid #343434; background: #202020; }}
-    aside h2 {{ margin: 0 0 12px; font-size: 14px; }}
-    aside dl {{ display: grid; grid-template-columns: 82px 1fr; gap: 8px; margin: 0; font-size: 12px; }}
-    aside dt {{ color: #929292; }}
-    aside dd {{ margin: 0; overflow-wrap: anywhere; }}
-    .empty {{ color: #929292; font-size: 12px; line-height: 1.5; }}
-  </style>
-</head>
-<body>
-  <header><strong>{title}</strong><span>{len(nodes)} nodes</span><span>{len(edges)} edges</span></header>
-  <main><canvas id="graph"></canvas><aside id="details"><p class="empty">Select a node to inspect its symbol and file.</p></aside></main>
-  <script>
-    const graph = {payload};
-    const canvas = document.getElementById('graph');
-    const ctx = canvas.getContext('2d');
-    const details = document.getElementById('details');
-    const palette = ['#72a7d7','#d97757','#72b88c','#d4a84f','#b48bd0','#d77c94','#86b9b0'];
-    const colorFor = kind => palette[Math.abs([...kind].reduce((a,c)=>a+c.charCodeAt(0),0)) % palette.length];
-    const byId = new Map(graph.nodes.map((node, index) => [node.id, {{...node, x: Math.cos(index*2.399)*Math.sqrt(index+1)*34, y: Math.sin(index*2.399)*Math.sqrt(index+1)*34}}]));
-    let scale = 1, offsetX = 0, offsetY = 0, dragging = false, lastX = 0, lastY = 0;
-    function resize() {{ const r=canvas.getBoundingClientRect(); canvas.width=Math.max(1,r.width*devicePixelRatio); canvas.height=Math.max(1,r.height*devicePixelRatio); draw(); }}
-    function project(n) {{ return [canvas.width/2 + (n.x+offsetX)*scale*devicePixelRatio, canvas.height/2 + (n.y+offsetY)*scale*devicePixelRatio]; }}
-    function draw() {{
-      ctx.clearRect(0,0,canvas.width,canvas.height); ctx.lineWidth=devicePixelRatio; ctx.font=`${{11*devicePixelRatio}}px Inter,system-ui`;
-      ctx.strokeStyle='#4a4a4a';
-      for (const edge of graph.edges) {{ const a=byId.get(edge.source), b=byId.get(edge.target); if(!a||!b) continue; const [ax,ay]=project(a), [bx,by]=project(b); ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); }}
-      for (const node of byId.values()) {{ const [x,y]=project(node); const radius=5.5*devicePixelRatio; ctx.fillStyle=colorFor(node.kind); ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2); ctx.fill(); if(scale>0.7) {{ ctx.fillStyle='#ddd'; ctx.fillText(node.name.slice(0,28),x+9*devicePixelRatio,y+4*devicePixelRatio); }} }}
-    }}
-    function hit(x,y) {{ let best=null, distance=Infinity; for(const node of byId.values()) {{ const [nx,ny]=project(node); const d=Math.hypot(nx-x*devicePixelRatio,ny-y*devicePixelRatio); if(d<14*devicePixelRatio&&d<distance) {{best=node;distance=d;}} }} return best; }}
-    function escapeText(value) {{ const el=document.createElement('span'); el.textContent=value||''; return el.innerHTML; }}
-    canvas.addEventListener('click', e => {{ const node=hit(e.offsetX,e.offsetY); if(!node) return; details.innerHTML=`<h2>${{escapeText(node.name)}}</h2><dl><dt>Kind</dt><dd>${{escapeText(node.kind)}}</dd><dt>Qualified</dt><dd>${{escapeText(node.qualified_name)}}</dd><dt>File</dt><dd>${{escapeText(node.file_path)}}</dd></dl>`; }});
-    canvas.addEventListener('pointerdown', e => {{ dragging=true; lastX=e.clientX; lastY=e.clientY; canvas.setPointerCapture(e.pointerId); canvas.style.cursor='grabbing'; }});
-    canvas.addEventListener('pointermove', e => {{ if(!dragging)return; offsetX+=(e.clientX-lastX)/scale; offsetY+=(e.clientY-lastY)/scale; lastX=e.clientX; lastY=e.clientY; draw(); }});
-    canvas.addEventListener('pointerup', e => {{ dragging=false; canvas.releasePointerCapture(e.pointerId); canvas.style.cursor='grab'; }});
-    canvas.addEventListener('wheel', e => {{ e.preventDefault(); scale=Math.max(.25,Math.min(4,scale*Math.exp(-e.deltaY*.001))); draw(); }}, {{passive:false}});
-    addEventListener('resize',resize); resize();
-  </script>
-</body>
-</html>"""
+    """Render the bounded CodeGraph with the shared Pyvis knowledge-graph UI."""
+    vis_nodes, vis_edges, legend_data, stats = _codegraph_to_vis(nodes, edges)
+    title = "CodeGraph" + (f" - {keyword}" if keyword else "")
+    return generate_html(vis_nodes, vis_edges, legend_data, stats, title=title)
+
+
+def _codegraph_group(kind: str) -> str:
+    normalized = str(kind or "").strip().casefold()
+    mapping = {
+        "file": "Module",
+        "module": "Module",
+        "package": "Module",
+        "function": "Function",
+        "func": "Function",
+        "method": "Method",
+        "constructor": "Constructor",
+        "class": "Class",
+        "struct": "Struct",
+        "interface": "Interface",
+        "field": "Field",
+        "property": "Field",
+        "variable": "Variable",
+        "var": "Variable",
+        "constant": "Variable",
+        "enum": "Enum",
+        "union": "Union",
+        "import": "Import",
+        "include": "Import",
+    }
+    return mapping.get(normalized, str(kind or "Other") or "Other")
+
+
+def _color_for_group(group: str) -> str:
+    mapping = {
+        "Module": 0,
+        "Function": 1,
+        "Method": 1,
+        "Class": 2,
+        "Struct": 2,
+        "Field": 3,
+        "Variable": 3,
+        "Enum": 4,
+        "Union": 4,
+        "Interface": 5,
+        "Constructor": 6,
+        "Import": 7,
+        "Record": 8,
+        "Other": 9,
+    }
+    index = mapping.get(group, sum(ord(char) for char in group) % len(GROUP_COLORS))
+    return GROUP_COLORS[index]
+
+
+def _codegraph_to_vis(
+    nodes: list[dict[str, Any]],
+    edges: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], str]:
+    degree: dict[str, int] = {}
+    for edge in edges:
+        source = str(edge["source"])
+        target = str(edge["target"])
+        degree[source] = degree.get(source, 0) + 1
+        degree[target] = degree.get(target, 0) + 1
+    max_degree = max(degree.values(), default=1) or 1
+
+    group_counts: dict[str, int] = {}
+    vis_nodes: list[dict[str, Any]] = []
+    for node in nodes:
+        node_id = str(node["id"])
+        name = str(node.get("name") or node_id)
+        qualified = str(node.get("qualified_name") or "")
+        kind = str(node.get("kind") or "Other")
+        file_path = str(node.get("file_path") or "")
+        group = _codegraph_group(kind)
+        group_counts[group] = group_counts.get(group, 0) + 1
+        color = _color_for_group(group)
+        node_degree = degree.get(node_id, 1)
+        title_parts = [qualified or name, f"Kind: {kind}"]
+        if file_path:
+            title_parts.append(f"File: {file_path}")
+        vis_nodes.append(
+            {
+                "id": node_id,
+                "label": name[:120],
+                "group": group,
+                "source_file": file_path,
+                "title": "\n".join(title_parts),
+                "degree": node_degree,
+                "color": {
+                    "background": color,
+                    "border": color,
+                    "highlight": {"background": "#e5e7eb", "border": color},
+                },
+                "size": round(10 + 30 * (node_degree / max_degree), 1),
+                "font": {"size": 12 if node_degree >= max_degree * 0.12 else 0, "color": "#111827"},
+            }
+        )
+
+    vis_edges = [
+        {
+            "from": str(edge["source"]),
+            "to": str(edge["target"]),
+            "label": str(edge.get("kind") or "relation")[:24],
+            "title": str(edge.get("kind") or "relation"),
+            "dashes": False,
+            "width": 2,
+            "color": {"color": "#6b7280", "opacity": 0.75, "highlight": "#111827"},
+        }
+        for edge in edges
+    ]
+    legend_data = [
+        {
+            "group": group,
+            "label": group,
+            "color": _color_for_group(group),
+            "count": count,
+        }
+        for group, count in sorted(group_counts.items(), key=lambda item: -item[1])
+    ]
+    stats = f"{len(vis_nodes)} nodes &middot; {len(vis_edges)} edges &middot; {len(legend_data)} groups"
+    return vis_nodes, vis_edges, legend_data, stats
 
 
 def codegraph_artifact_name(thread_id: str) -> str:

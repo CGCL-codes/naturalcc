@@ -16,6 +16,7 @@ import {
   Moon,
   Network,
   PanelRightClose,
+  Pencil,
   Play,
   RefreshCcw,
   Search,
@@ -285,6 +286,10 @@ function App() {
   const [deletingThreadId, setDeletingThreadId] = useState("");
   const [cancellingThreadId, setCancellingThreadId] = useState("");
   const [threadDeleteError, setThreadDeleteError] = useState("");
+  const [renamingThreadId, setRenamingThreadId] = useState("");
+  const [renamingDraft, setRenamingDraft] = useState("");
+  const [renamingBusy, setRenamingBusy] = useState(false);
+  const [renameError, setRenameError] = useState("");
 
   // Ref to prevent duplicate user messages when Send triggers Run
   const userMessageAddedRef = useRef(false);
@@ -890,6 +895,56 @@ function App() {
     }
   }
 
+  function startThreadRename(thread) {
+    if (!thread?.id || renamingBusy) return;
+    setRenamingThreadId(thread.id);
+    setRenamingDraft(thread.title || "");
+    setRenameError("");
+  }
+
+  function cancelThreadRename() {
+    if (renamingBusy) return;
+    setRenamingThreadId("");
+    setRenamingDraft("");
+    setRenameError("");
+  }
+
+  async function commitThreadRename() {
+    const threadId = renamingThreadId;
+    const thread = agentThreads.find((item) => item.id === threadId)
+      || (activeThread?.id === threadId ? activeThread : null);
+    const nextTitle = renamingDraft.trim();
+    if (!thread || !nextTitle || nextTitle === (thread.title || "")) {
+      cancelThreadRename();
+      return;
+    }
+    setRenamingBusy(true);
+    setRenameError("");
+    setLastError("");
+    try {
+      const response = await requestJson(`/api/agent/threads/${thread.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          title: nextTitle,
+          expected_version: thread.version
+        })
+      });
+      if (activeThread?.id === thread.id) {
+        setActiveThread((current) => (
+          current && current.id === thread.id ? { ...current, ...response.thread } : current
+        ));
+      }
+      await refreshThreadList();
+      setRenamingThreadId("");
+      setRenamingDraft("");
+    } catch (error) {
+      setRenameError(error.message);
+      setLastError(error.message);
+    } finally {
+      setRenamingBusy(false);
+    }
+  }
+
   function addContextItem(item) {
     setContextItems((current) => {
       const key = item.absolute_path || item.path;
@@ -1485,37 +1540,119 @@ function App() {
             {threadGroups.map((group) => (
               <section className="conversation-group" key={group.label}>
                 <h3>{group.label}</h3>
-                {group.items.map((thread) => (
-                  <div
-                    className={classNames(
-                      "conversation-row-shell",
-                      activeThread?.id === thread.id && "active"
-                    )}
-                    key={thread.id}
-                  >
-                    <button
-                      type="button"
-                      className="conversation-row"
-                      onClick={() => loadAgentThread(thread.id).catch((error) => setLastError(error.message))}
+                {group.items.map((thread) => {
+                  const isRenaming = renamingThreadId === thread.id;
+                  const renameDisabled = renamingBusy && !isRenaming;
+                  return (
+                    <div
+                      className={classNames(
+                        "conversation-row-shell",
+                        activeThread?.id === thread.id && "active",
+                        isRenaming && "renaming"
+                      )}
+                      key={thread.id}
                     >
-                      <span>{thread.title || "Untitled task"}</span>
-                      <small>
-                        {thread.last_status || "ready"}
-                        {thread.run_count ? ` · ${thread.run_count} run${thread.run_count === 1 ? "" : "s"}` : ""}
-                      </small>
-                    </button>
-                    <button
-                      type="button"
-                      className="conversation-delete-button"
-                      aria-label={`Delete conversation ${thread.title || "Untitled task"}`}
-                      title="Delete conversation"
-                      disabled={deletingThreadId === thread.id}
-                      onClick={(event) => requestThreadDeletion(event, thread)}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
+                      {isRenaming ? (
+                        <>
+                          <form
+                            className="conversation-rename-form"
+                            onSubmit={(event) => {
+                              event.preventDefault();
+                              commitThreadRename();
+                            }}
+                          >
+                            <input
+                              className="conversation-rename-input"
+                              value={renamingDraft}
+                              autoFocus
+                              maxLength={200}
+                              disabled={renamingBusy}
+                              aria-label="Rename conversation"
+                              placeholder="Conversation name"
+                              onChange={(event) => setRenamingDraft(event.target.value)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Escape") {
+                                  event.preventDefault();
+                                  cancelThreadRename();
+                                }
+                              }}
+                              onBlur={(event) => {
+                                // Only cancel when focus leaves the form entirely.
+                                if (!event.currentTarget.parentElement?.contains(event.relatedTarget)) {
+                                  cancelThreadRename();
+                                }
+                              }}
+                            />
+                            <button
+                              type="submit"
+                              className="conversation-rename-confirm"
+                              disabled={renamingBusy || !renamingDraft.trim()}
+                              aria-label="Save new name"
+                              title="Save (Enter)"
+                            >
+                              <Check size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              className="conversation-rename-cancel"
+                              disabled={renamingBusy}
+                              aria-label="Cancel rename"
+                              title="Cancel (Esc)"
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={cancelThreadRename}
+                            >
+                              <X size={13} />
+                            </button>
+                          </form>
+                          {renameError && (
+                            <p className="conversation-rename-error" role="alert">
+                              {renameError}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="conversation-row"
+                            onClick={() => loadAgentThread(thread.id).catch((error) => setLastError(error.message))}
+                          >
+                            <span title={thread.title || "Untitled task"}>
+                              {thread.title || "Untitled task"}
+                            </span>
+                            <small>
+                              {thread.last_status || "ready"}
+                              {thread.run_count ? ` · ${thread.run_count} run${thread.run_count === 1 ? "" : "s"}` : ""}
+                            </small>
+                          </button>
+                          <button
+                            type="button"
+                            className="conversation-rename-button"
+                            aria-label={`Rename conversation ${thread.title || "Untitled task"}`}
+                            title="Rename conversation"
+                            disabled={deletingThreadId === thread.id || renameDisabled}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              startThreadRename(thread);
+                            }}
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            className="conversation-delete-button"
+                            aria-label={`Delete conversation ${thread.title || "Untitled task"}`}
+                            title="Delete conversation"
+                            disabled={deletingThreadId === thread.id || renameDisabled}
+                            onClick={(event) => requestThreadDeletion(event, thread)}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
               </section>
             ))}
             {!threadGroups.length && (

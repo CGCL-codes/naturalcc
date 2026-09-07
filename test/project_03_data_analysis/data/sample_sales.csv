@@ -1,0 +1,29 @@
+# 项目: project_03_data_analysis
+# 测试主题: Python 数据处理与可视化
+# 功能: 示例销售数据，用于测试数据分析脚本
+date,product,amount,region
+2026-01-05,Laptop,1200.00,North
+2026-01-08,Phone,800.00,South
+2026-01-12,Tablet,500.00,East
+2026-01-15,Laptop,1500.00,West
+2026-01-20,Phone,750.00,North
+2026-02-01,Tablet,450.00,South
+2026-02-05,Laptop,1800.00,East
+2026-02-10,Phone,900.00,West
+2026-02-15,Headphones,150.00,North
+2026-02-20,Laptop,1300.00,South
+2026-03-01,Phone,850.00,East
+2026-03-05,Tablet,550.00,West
+2026-03-10,Headphones,200.00,North
+2026-03-15,Laptop,2000.00,South
+2026-03-20,Phone,950.00,East
+2026-04-02,Tablet,480.00,West
+2026-04-08,Laptop,1600.00,North
+2026-04-12,Phone,780.00,South
+2026-04-18,Headphones,180.00,East
+2026-04-25,Laptop,1750.00,West
+2026-05-03,Phone,820.00,North
+2026-05-10,Tablet,520.00,South
+2026-05-15,Laptop,1900.00,East
+2026-05-22,Phone,920.00,West
+2026-05-28,Headphones,170.00,North

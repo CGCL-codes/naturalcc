@@ -242,8 +242,14 @@ def test_codegraph_visualization_reads_workspace_relative_database(tmp_path: Pat
     rendered = output.read_text(encoding="utf-8")
     assert data["node_count"] == 2
     assert data["edge_count"] == 1
-    assert "<canvas id=\"graph\">" in rendered
+    # CodeGraph visualization should use the shared Pyvis knowledge-graph UI.
+    assert 'id="kg-graph"' in rendered
+    assert 'id="kg-sidebar"' in rendered
+    assert "Node Info" in rendered
+    # Node tooltip should surface the source file path.
     assert "src/app.py" in rendered
+    # Pyvis in_line mode embeds vis-network JS/CSS inline for offline viewing.
+    assert "vis-network" in rendered
 
 
 def test_thread_capabilities_round_trip_through_event_store(tmp_path: Path):
