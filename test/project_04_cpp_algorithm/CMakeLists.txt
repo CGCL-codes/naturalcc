@@ -24,5 +24,5 @@ add_executable(test_algorithm tests/test_main.cpp
     src/linked_list.cpp
 )
 target_include_directories(test_algorithm PRIVATE include)
-target_link_libraries(test_algorithm PRIVATE algorithm_demo)
+# TODO: 若需移除重复 main，可把算法实现抽成 algorithm_core 静态库再分别链接
 add_test(NAME test_algorithm COMMAND test_algorithm)

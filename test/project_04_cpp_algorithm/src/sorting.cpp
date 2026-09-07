@@ -10,6 +10,7 @@ namespace algo {
 
 void bubble_sort(std::vector<int>& arr) {
     size_t n = arr.size();
+    if (n < 2) return;  // 空数组与单元素无需排序，避免 n-1 无符号下溢
     for (size_t i = 0; i < n - 1; ++i) {
         bool swapped = false;
         for (size_t j = 0; j < n - 1 - i; ++j) {
@@ -74,6 +75,22 @@ void heap_sort(std::vector<int>& arr) {
     std::make_heap(arr.begin(), arr.end());
     for (auto it = arr.end(); it != arr.begin(); --it) {
         std::pop_heap(arr.begin(), it);
+    }
+}
+
+void shell_sort(std::vector<int>& arr) {
+    size_t n = arr.size();
+    // 使用 3n+1 (Knuth) 或折半缩减间隔；此处用折半以保证 O(n^1.5) 量级
+    for (size_t gap = n / 2; gap > 0; gap /= 2) {
+        for (size_t i = gap; i < n; ++i) {
+            int temp = arr[i];
+            size_t j = i;
+            while (j >= gap && arr[j - gap] > temp) {
+                arr[j] = arr[j - gap];
+                j -= gap;
+            }
+            arr[j] = temp;
+        }
     }
 }
 

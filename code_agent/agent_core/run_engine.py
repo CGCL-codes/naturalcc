@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -35,6 +36,38 @@ TERMINAL = {
     RunStatus.FAILED.value,
     RunStatus.CANCELLED.value,
     RunStatus.BUDGET_EXHAUSTED.value,
+}
+
+
+_CODEGRAPH_SOURCE_SUFFIXES = {
+    ".c",
+    ".cc",
+    ".cpp",
+    ".cxx",
+    ".h",
+    ".hh",
+    ".hpp",
+    ".hxx",
+    ".java",
+    ".kt",
+    ".kts",
+    ".go",
+    ".rs",
+    ".cs",
+    ".php",
+    ".py",
+    ".rb",
+    ".scala",
+    ".swift",
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".cjs",
+    ".ts",
+    ".tsx",
+    ".vue",
+    ".m",
+    ".mm",
 }
 
 
@@ -104,6 +137,16 @@ class RunEngine:
         self.context_planner = context_planner
         self.compaction_service = compaction_service
         self._run_api_keys: dict[str, str] = {}
+        self._run_locks: dict[str, threading.RLock] = {}
+        self._run_locks_guard = threading.Lock()
+
+    def _lock_for_run(self, run_id: str) -> threading.RLock:
+        with self._run_locks_guard:
+            lock = self._run_locks.get(run_id)
+            if lock is None:
+                lock = threading.RLock()
+                self._run_locks[run_id] = lock
+            return lock
 
     def create_run(
         self,
@@ -453,6 +496,7 @@ class RunEngine:
             "started_at_epoch": run_started_at,
             "final_answer": "",
             "pending_tool_calls": [],
+            "pending_approval": None,
             "verification_pending": False,
             "verification_commands": [],
             "working_state": {
@@ -485,7 +529,9 @@ class RunEngine:
     def get_state(self, run_id: str) -> dict[str, Any]:
         state = self.store.load_snapshot(run_id)
         if state is None:
-            raise KeyError(f"run has no snapshot: {run_id}")
+            self.store.get_run(run_id)
+            raise ValueError(f"run state is unavailable: {run_id}; restore the runtime database from backup")
+        state["pending_approval"] = self._pending_approval_for_state(state)
         return state
 
     def _record(self, state: dict[str, Any], event_type: str, payload: dict[str, Any], status: str | None = None) -> None:
@@ -542,12 +588,17 @@ class RunEngine:
         return None
 
     def run(self, run_id: str) -> dict[str, Any]:
-        while True:
-            state = self.step(run_id)
-            if state["status"] in TERMINAL | {RunStatus.WAITING_APPROVAL.value, RunStatus.PAUSED.value}:
-                return state
+        with self._lock_for_run(run_id):
+            while True:
+                state = self._step_unlocked(run_id)
+                if state["status"] in TERMINAL | {RunStatus.WAITING_APPROVAL.value, RunStatus.PAUSED.value}:
+                    return state
 
     def step(self, run_id: str) -> dict[str, Any]:
+        with self._lock_for_run(run_id):
+            return self._step_unlocked(run_id)
+
+    def _step_unlocked(self, run_id: str) -> dict[str, Any]:
         state = self.get_state(run_id)
         if state["status"] in TERMINAL:
             self.store.release_workspace_lease(state["workspace"], run_id)
@@ -748,6 +799,37 @@ class RunEngine:
 
         if not response.tool_calls:
             if state.get("verification_pending"):
+                verification_results = (
+                    state.get("working_state", {})
+                    .get("verification", {})
+                    .get("results", [])
+                )
+                failed_verification = next(
+                    (
+                        item for item in reversed(verification_results)
+                        if item.get("passed") is False or item.get("status") == "error"
+                    ),
+                    None,
+                )
+                if failed_verification is not None:
+                    summary = str(
+                        failed_verification.get("summary")
+                        or "A required verification command failed."
+                    )
+                    self._record(
+                        state,
+                        "run.failed",
+                        {
+                            "error": {
+                                "type": "VerificationFailed",
+                                "message": summary,
+                            },
+                            "verification": failed_verification,
+                        },
+                        RunStatus.FAILED.value,
+                    )
+                    self.store.release_workspace_lease(state["workspace"], run_id)
+                    return state
                 exhausted = self._budget_exhausted(state, budget)
                 if exhausted:
                     self._record(
@@ -826,9 +908,10 @@ class RunEngine:
                 " Knowledge graph mode is enabled and ready. For code structure, symbol lookup, callers, callees, "
                 "call paths, and change impact, use codegraph_explore before workspace_read and instead of "
                 "workspace_search. Treat the line-numbered source returned by codegraph_explore as inspected source. "
-                "Use workspace_read only for exact files that are unindexed, newly changed, configuration/data files, "
-                "or when CodeGraph reports stale or failed results. Do not initialize or rebuild the graph unless the "
-                "user approves the requested execute action."
+                "workspace_read is blocked for indexed source-code paths; use it only for unindexed or newly changed "
+                "source files, configuration/data files, documentation, or when CodeGraph reports stale or failed "
+                "results. Do not initialize or rebuild the graph unless the user approves the requested execute "
+                "action."
             )
         return rules + (
             " Knowledge graph mode is enabled but CodeGraph is not currently ready. Use codegraph_status to inspect "
@@ -1264,6 +1347,50 @@ class RunEngine:
     def _codegraph_settings(state: dict[str, Any]) -> dict[str, Any]:
         return normalize_codegraph_capabilities(state.get("capabilities"))["codegraph"]
 
+    @staticmethod
+    def _is_codegraph_source_path(workspace: str | Path, raw_path: Any) -> bool:
+        if not isinstance(raw_path, str) or not raw_path.strip():
+            return False
+        workspace_path = Path(workspace).expanduser().resolve()
+        candidate = Path(raw_path).expanduser()
+        if not candidate.is_absolute():
+            candidate = workspace_path / candidate
+        try:
+            candidate = candidate.resolve()
+            candidate.relative_to(workspace_path)
+        except ValueError:
+            return False
+        return candidate.suffix.casefold() in _CODEGRAPH_SOURCE_SUFFIXES
+
+    @classmethod
+    def _is_codegraph_dirty_path(
+        cls,
+        workspace: str | Path,
+        raw_path: Any,
+        dirty_files: list[str] | None,
+    ) -> bool:
+        if not cls._is_codegraph_source_path(workspace, raw_path):
+            return False
+        workspace_path = Path(workspace).expanduser().resolve()
+        candidate = Path(str(raw_path)).expanduser()
+        if not candidate.is_absolute():
+            candidate = workspace_path / candidate
+        try:
+            candidate = candidate.resolve()
+            candidate.relative_to(workspace_path)
+        except ValueError:
+            return False
+        for dirty_file in dirty_files or []:
+            dirty = Path(str(dirty_file)).expanduser()
+            if not dirty.is_absolute():
+                dirty = workspace_path / dirty
+            try:
+                if dirty.resolve() == candidate:
+                    return True
+            except OSError:
+                continue
+        return False
+
     def _sync_codegraph_if_needed(self, state: dict[str, Any]) -> ToolResult | None:
         settings = self._codegraph_settings(state)
         dirty_files = list(state.get("codegraph_dirty_files", []))
@@ -1353,6 +1480,27 @@ class RunEngine:
                 state["pending_tool_calls"] = remaining
                 self._append_tool_result(state, call.id, call.name, result)
                 continue
+            if (
+                canonical_name == "workspace.read"
+                and settings["enabled"]
+                and (state.get("codegraph_status") or {}).get("ready")
+                and self._is_codegraph_source_path(
+                    state["workspace"], call.args.get("path")
+                )
+                and not self._is_codegraph_dirty_path(
+                    state["workspace"],
+                    call.args.get("path"),
+                    state.get("codegraph_dirty_files"),
+                )
+            ):
+                result = ToolResult.failure(
+                    "workspace.read is blocked for source-code paths while CodeGraph is ready; "
+                    "use codegraph.explore to inspect the source and its symbols.",
+                    "CodeGraphPreferred",
+                )
+                state["pending_tool_calls"] = remaining
+                self._append_tool_result(state, call.id, call.name, result)
+                continue
             decision = self.policy.decide(run_id, call.name, spec.risk_level)
             persisted_grants = {RiskLevel(value) for value in self.store.approvals_for(run_id)}
             if spec.risk_level in persisted_grants:
@@ -1364,6 +1512,10 @@ class RunEngine:
                 continue
             if decision == PolicyDecision.REQUIRE_APPROVAL:
                 state["pending_tool_calls"] = [item.to_dict() for item in tool_calls[index:]]
+                state["pending_approval"] = {
+                    "tool_call": call.to_dict(),
+                    "risk": spec.risk_level.value,
+                }
                 self._record(
                     state,
                     "approval.requested",
@@ -1412,8 +1564,12 @@ class RunEngine:
             if canonical_name == "tests.run":
                 if result.status == "success":
                     state["verification_pending"] = False
+                else:
+                    # Keep the run in a failed-verification state so a
+                    # later model response cannot claim completion forever.
+                    state["verification_pending"] = True
                 state["verification_commands"] = state.get("verification_commands", [])
-            elif spec.risk_level == RiskLevel.WRITE or result.changed_files:
+            elif result.changed_files:
                 from .tools.verification import discover_test_commands
 
                 commands = discover_test_commands(Path(state["workspace"]))
@@ -1430,6 +1586,8 @@ class RunEngine:
                             "stale": True,
                         }
             state["pending_tool_calls"] = remaining
+            if not remaining:
+                state["pending_approval"] = None
             self._append_tool_result(state, call.id, call.name, result)
             if canonical_name in {"codegraph.init", "codegraph.sync"}:
                 self._record(
@@ -1456,7 +1614,7 @@ class RunEngine:
                     "verification.finished",
                     verification_result,
                 )
-            elif spec.risk_level == RiskLevel.WRITE or result.changed_files:
+            elif result.changed_files:
                 if state["verification_pending"]:
                     self._record(
                         state,
@@ -1482,12 +1640,6 @@ class RunEngine:
                         "verification.finished",
                         verification_result,
                     )
-            elif spec.risk_level != RiskLevel.READ:
-                self._record(
-                    state,
-                    "verification.required",
-                    {"changed_files": result.changed_files, "tool": call.name},
-                )
         return state
 
     def _append_tool_result(
@@ -1541,52 +1693,98 @@ class RunEngine:
         state["messages"].append(message)
         self._record(state, "tool.finished", {"tool_call_id": call_id, "tool": tool_name, "result": result.to_dict()})
 
-    def approve(self, run_id: str, risk: RiskLevel) -> dict[str, Any]:
-        self.store.grant_approval(run_id, risk.value)
-        self.policy.grant(run_id, risk)
-        state = self.get_state(run_id)
-        self._record(state, "approval.resolved", {"risk": risk.value, "decision": "approved"}, RunStatus.RUNNING.value)
-        return state
+    def _pending_approval_for_state(self, state: dict[str, Any]) -> dict[str, Any] | None:
+        if state.get("status") != RunStatus.WAITING_APPROVAL.value:
+            return None
+        existing = state.get("pending_approval")
+        if isinstance(existing, dict) and existing.get("tool_call") and existing.get("risk"):
+            return existing
+        pending = state.get("pending_tool_calls") or []
+        if not pending:
+            return None
+        call_data = pending[0]
+        spec = self.registry.get(str(call_data.get("name", "")))
+        if spec is None:
+            return None
+        return {
+            "tool_call": call_data,
+            "risk": spec.risk_level.value,
+        }
+
+    def approve(self, run_id: str, risk: RiskLevel, tool_call_id: str | None = None) -> dict[str, Any]:
+        with self._lock_for_run(run_id):
+            state = self.get_state(run_id)
+            if state["status"] != RunStatus.WAITING_APPROVAL.value:
+                return state
+            pending = self._pending_approval_for_state(state)
+            if pending is None:
+                raise ValueError("run has no pending approval")
+            if tool_call_id is not None and pending["tool_call"].get("id") != tool_call_id:
+                raise ValueError("pending approval has changed; refresh the run before approving")
+            required_risk = RiskLevel(str(pending["risk"]))
+            if required_risk != risk:
+                raise ValueError(f"pending approval requires {required_risk.value} risk")
+            self.store.grant_approval(run_id, risk.value)
+            self.policy.grant(run_id, risk)
+            state["pending_approval"] = None
+            try:
+                self._record(
+                    state,
+                    "approval.resolved",
+                    {
+                        "risk": risk.value,
+                        "decision": "approved",
+                        "tool_call_id": pending["tool_call"].get("id"),
+                    },
+                    RunStatus.RUNNING.value,
+                )
+            except VersionConflict:
+                return self.get_state(run_id)
+            return state
 
     def reject(self, run_id: str) -> dict[str, Any]:
-        state = self.get_state(run_id)
-        if state["status"] != RunStatus.WAITING_APPROVAL.value or not state["pending_tool_calls"]:
-            raise ValueError("run has no pending approval")
-        call_data = state["pending_tool_calls"][0]
-        call = ToolCall(call_data["id"], call_data["name"], call_data.get("args", {}))
-        state["pending_tool_calls"] = state["pending_tool_calls"][1:]
-        spec = self.registry.get(call.name)
-        self._record(
-            state,
-            "approval.resolved",
-            {
-                "risk": spec.risk_level.value if spec else None,
-                "decision": "rejected",
-                "tool_call_id": call.id,
-            },
-            RunStatus.RUNNING.value,
-        )
-        self._append_tool_result(
-            state,
-            call.id,
-            call.name,
-            ToolResult.failure(f"action rejected by user: {call.name}", "UserRejected"),
-        )
-        return state
+        with self._lock_for_run(run_id):
+            state = self.get_state(run_id)
+            if state["status"] != RunStatus.WAITING_APPROVAL.value or not state["pending_tool_calls"]:
+                raise ValueError("run has no pending approval")
+            call_data = state["pending_tool_calls"][0]
+            call = ToolCall(call_data["id"], call_data["name"], call_data.get("args", {}))
+            state["pending_tool_calls"] = state["pending_tool_calls"][1:]
+            state["pending_approval"] = None
+            spec = self.registry.get(call.name)
+            self._record(
+                state,
+                "approval.resolved",
+                {
+                    "risk": spec.risk_level.value if spec else None,
+                    "decision": "rejected",
+                    "tool_call_id": call.id,
+                },
+                RunStatus.RUNNING.value,
+            )
+            self._append_tool_result(
+                state,
+                call.id,
+                call.name,
+                ToolResult.failure(f"action rejected by user: {call.name}", "UserRejected"),
+            )
+            return state
 
     def pause(self, run_id: str) -> dict[str, Any]:
-        state = self.get_state(run_id)
-        if state["status"] in TERMINAL:
-            raise ValueError("cannot pause a terminal run")
-        self._record(state, "run.paused", {"reason": "user"}, RunStatus.PAUSED.value)
-        return state
+        with self._lock_for_run(run_id):
+            state = self.get_state(run_id)
+            if state["status"] in TERMINAL:
+                raise ValueError("cannot pause a terminal run")
+            self._record(state, "run.paused", {"reason": "user"}, RunStatus.PAUSED.value)
+            return state
 
     def resume(self, run_id: str) -> dict[str, Any]:
-        state = self.get_state(run_id)
-        if state["status"] != RunStatus.PAUSED.value:
-            raise ValueError("run is not paused")
-        self._record(state, "run.resumed", {}, RunStatus.RUNNING.value)
-        return state
+        with self._lock_for_run(run_id):
+            state = self.get_state(run_id)
+            if state["status"] != RunStatus.PAUSED.value:
+                raise ValueError("run is not paused")
+            self._record(state, "run.resumed", {}, RunStatus.RUNNING.value)
+            return state
 
     def cancel(self, run_id: str) -> dict[str, Any]:
         from .tools.command import cancel_run_commands

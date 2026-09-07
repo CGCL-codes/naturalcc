@@ -166,6 +166,40 @@ def test_graph_mode_rejects_workspace_search_even_if_model_requests_it(
     assert finished[0].payload["result"]["error"]["type"] == "CodeGraphPreferred"
 
 
+def test_graph_mode_rejects_workspace_read_for_source_files(
+    tmp_path: Path,
+    monkeypatch,
+):
+    _fake_codegraph(tmp_path, monkeypatch)
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    _initialize_fake_index(workspace)
+    (workspace / "main.py").write_text("value = 1\n", encoding="utf-8")
+    model = ScriptedModelGateway(
+        [
+            ModelResponse(
+                tool_calls=[
+                    ToolCall("read-1", "workspace_read", {"path": "main.py"})
+                ]
+            ),
+            ModelResponse(content="used graph policy"),
+        ]
+    )
+    store = EventStore(tmp_path / "agent.db")
+    engine = RunEngine(store, build_default_registry(include_mutating=False), model)
+    run_id = engine.create_run(
+        workspace,
+        "inspect the source safely",
+        capabilities=GRAPH_CAPABILITIES,
+    )
+
+    completed = engine.run(run_id)
+    finished = [event for event in store.list_events(run_id) if event.type == "tool.finished"]
+
+    assert completed["status"] == "completed"
+    assert finished[0].payload["result"]["error"]["type"] == "CodeGraphPreferred"
+
+
 def test_changed_source_is_synced_before_next_graph_explore(tmp_path: Path, monkeypatch):
     _executable, log_path = _fake_codegraph(tmp_path, monkeypatch)
     workspace = tmp_path / "workspace"
@@ -250,6 +284,9 @@ def test_codegraph_visualization_reads_workspace_relative_database(tmp_path: Pat
     assert "src/app.py" in rendered
     # Pyvis in_line mode embeds vis-network JS/CSS inline for offline viewing.
     assert "vis-network" in rendered
+    # Relation labels use curved edges and an opaque halo so they remain readable.
+    assert '"type": "curvedCW"' in rendered
+    assert '"strokeColor": "#ffffff"' in rendered
 
 
 def test_thread_capabilities_round_trip_through_event_store(tmp_path: Path):

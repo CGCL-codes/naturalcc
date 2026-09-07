@@ -25,6 +25,11 @@ int main() {
     std::cout << "快速排序: ";
     print_array(arr3);
 
+    std::vector<int> arr4 = arr;
+    shell_sort(arr4);
+    std::cout << "希尔排序: ";
+    print_array(arr4);
+
     // 测试链表
     LinkedList list;
     list.push_back(1);

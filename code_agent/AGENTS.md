@@ -71,6 +71,7 @@ uv run python aider_runner.py -dir /path/to/project -f src/foo.c -i "补全 foo 
 - Run the deterministic suite with `uv run --project . pytest tests test_vulnerability_detection.py -q`; also run the Web UI reducer tests and production build.
 - Keep changes surgical; prefer existing patterns; do not refactor unrelated code.
 - Agent mode reads automatically; write and execute tools require a run-scoped approval.
+- Approval UI verifies the current snapshot and sends `tool_call_id` to reject stale prompts. Missing Runs return 404; missing snapshots and mismatched approvals return 409. Never recreate or execute a missing Run implicitly.
 - `workspace.create_file` creates only a new UTF-8 text file: its parent must already exist, it never overwrites, and its absent-state snapshot lets `workspace.restore_snapshot` remove the run-created file.
 - `workspace.create_directory` creates a directory or an explicit `parents=true` chain, treats existing directories as idempotent success, and snapshots every newly created directory; restore removes only empty directories.
 - Each user turn creates a Run under a durable thread. Raw chat/events remain authoritative; only committed Run/Thread checkpoints are injected as derived context, and project memories remain governed candidates.

@@ -26,7 +26,10 @@ def discover_test_commands(workspace: Path) -> list[list[str]]:
         commands.append(["gradle", "test"])
     if (workspace / "Cargo.toml").is_file():
         commands.append(["cargo", "test"])
-    if (workspace / "CMakeLists.txt").is_file():
+    # ctest requires an existing configured build tree. A source-level
+    # CMakeLists.txt alone is not enough to run it and would produce a
+    # platform-specific FileNotFoundError on Windows.
+    if (workspace / "CMakeLists.txt").is_file() and (workspace / "build").is_dir():
         commands.append(["ctest", "--test-dir", "build", "--output-on-failure"])
     if (workspace / "Makefile").is_file():
         commands.append(["make", "test"])
@@ -40,6 +43,8 @@ def _git_status(context: ToolContext, _args: dict) -> ToolResult:
         ["git", "rev-parse", "--is-inside-work-tree"],
         cwd=context.workspace,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
     )
     if probe.returncode != 0:
@@ -48,9 +53,12 @@ def _git_status(context: ToolContext, _args: dict) -> ToolResult:
         ["git", "status", "--short"],
         cwd=context.workspace,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
     )
-    return ToolResult.success(status.stdout, data={"is_repo": True, "status": status.stdout})
+    stdout = status.stdout or ""
+    return ToolResult.success(stdout, data={"is_repo": True, "status": stdout})
 
 
 def _git_diff(context: ToolContext, _args: dict) -> ToolResult:
@@ -58,22 +66,38 @@ def _git_diff(context: ToolContext, _args: dict) -> ToolResult:
         ["git", "diff", "--no-ext-diff", "--"],
         cwd=context.workspace,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
     )
     if result.returncode != 0:
         return ToolResult.failure(result.stderr or "git diff failed", "GitError")
-    return ToolResult.success(result.stdout, data={"diff": result.stdout})
+    stdout = result.stdout or ""
+    return ToolResult.success(stdout, data={"diff": stdout})
 
 
 def _discover(context: ToolContext, _args: dict) -> ToolResult:
     commands = discover_test_commands(context.workspace)
-    return ToolResult.success(f"Discovered {len(commands)} verification commands", data={"commands": commands})
+    return ToolResult.success(
+        f"Discovered {len(commands)} verification commands. Run one with tests.run using its command_index.",
+        data={
+            "commands": commands,
+            "command_index": list(range(len(commands))),
+        },
+    )
 
 
 def _run_tests(context: ToolContext, args: dict) -> ToolResult:
     discovered = discover_test_commands(context.workspace)
+    command_index = args.get("command_index")
     requested = args.get("argv")
-    if requested is None:
+    if command_index is not None:
+        if not isinstance(command_index, int) or not 0 <= command_index < len(discovered):
+            raise ValueError(
+                f"invalid command_index; choose an index from 0 to {len(discovered) - 1} returned by tests.discover"
+            )
+        requested = discovered[command_index]
+    elif requested is None:
         if not discovered:
             raise ValueError("no supported test command was discovered")
         requested = discovered[0]
@@ -99,10 +123,11 @@ def verification_tool_specs() -> list[ToolSpec]:
         ToolSpec("tests.discover", "Discover likely project test commands without running them.", empty_schema, RiskLevel.READ, _discover),
         ToolSpec(
             "tests.run",
-            "Run one approved test command that was discovered from project files.",
+            "Run a discovered test command. Prefer command_index from tests.discover; omit arguments to run the first discovered command. Do not rewrite argv.",
             {
                 "type": "object",
                 "properties": {
+                    "command_index": {"type": "integer", "minimum": 0},
                     "argv": {"type": "array", "items": {"type": "string"}},
                     "timeout_seconds": {"type": "integer"},
                     "max_output_chars": {"type": "integer"},

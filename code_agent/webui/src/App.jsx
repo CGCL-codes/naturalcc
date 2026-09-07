@@ -30,7 +30,8 @@ import {
   X
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { initialAgentState, reduceAgentEvents } from "./agentState.js";
+import { initialAgentState, hydrateAgentState } from "./agentState.js";
+import { approveAgentAction, approvalErrorMessage } from "./agentApproval.js";
 import {
   buildAgentRunMessage,
   canControlAgentRun,
@@ -117,7 +118,9 @@ async function requestJson(path, options = {}) {
     } catch {
       // Keep the HTTP status text.
     }
-    throw new Error(detail);
+    const error = new Error(typeof detail === "string" ? detail : JSON.stringify(detail));
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 }
@@ -249,6 +252,7 @@ function App() {
   const [prefix, setPrefix] = useState("");
   const [workspace, setWorkspace] = useState(emptyWorkspace);
   const [browseState, setBrowseState] = useState({ path: "", parent: "", directories: [], files: [] });
+  const [workspacePickerBusy, setWorkspacePickerBusy] = useState(false);
   const [fileFilter, setFileFilter] = useState("");
   const fileFilterRef = useRef(null);
   const chatInputRef = useRef(null);
@@ -293,6 +297,7 @@ function App() {
 
   // Ref to prevent duplicate user messages when Send triggers Run
   const userMessageAddedRef = useRef(false);
+  const approvalBusyRef = useRef(false);
 
   // New UI states
   const [messages, setMessages] = useState([]);
@@ -492,6 +497,35 @@ function App() {
     }
     setLastUpdated(new Date().toLocaleTimeString());
     return data;
+  }
+
+  async function applyWorkspace(dir = projectDir, nextTargets = targets) {
+    const data = await refreshWorkspace(dir, nextTargets);
+    const normalizedRoot = data.normalized_root || dir;
+    if (activeThread?.id) {
+      await updateActiveThread({ workspace: normalizedRoot });
+    }
+    return data;
+  }
+
+  async function chooseWorkspaceDirectory() {
+    setWorkspacePickerBusy(true);
+    setLastError("");
+    try {
+      const data = await requestJson("/api/workspace/select-directory", {
+        method: "POST",
+        body: JSON.stringify({ initial_dir: projectDir })
+      });
+      if (!data.selected || !data.path) {
+        return;
+      }
+      await applyWorkspace(data.path, []);
+      loadBrowse(data.path).catch(() => {});
+    } catch (error) {
+      setLastError(error.message);
+    } finally {
+      setWorkspacePickerBusy(false);
+    }
   }
 
   async function loadBrowse(path = projectDir) {
@@ -712,6 +746,8 @@ function App() {
   async function loadAgentThread(threadId) {
     setConversationLoading(true);
     setLastError("");
+    setAgentState(initialAgentState);
+    setAgentRunState(null);
     try {
       const detail = await requestJson(`/api/agent/threads/${threadId}`);
       const thread = detail.thread;
@@ -867,12 +903,13 @@ function App() {
 
   async function cancelPendingThreadRun() {
     const thread = threadPendingDelete;
-    if (!thread?.last_run_id || deletingThreadId || cancellingThreadId) return;
+    const activeRunId = thread?.active_run_id || thread?.last_run_id;
+    if (!activeRunId || deletingThreadId || cancellingThreadId) return;
     setCancellingThreadId(thread.id);
     setThreadDeleteError("");
     setLastError("");
     try {
-      await requestJson(`/api/agent/runs/${thread.last_run_id}/cancel`, {
+      await requestJson(`/api/agent/runs/${activeRunId}/cancel`, {
         method: "POST"
       });
       const [detail, threadsPayload, runsPayload] = await Promise.all([
@@ -885,7 +922,7 @@ function App() {
       setAgentRuns(runsPayload.runs || []);
       if (activeThread?.id === thread.id) {
         setActiveThread(detail.thread);
-        await refreshAgentState(thread.last_run_id, thread.workspace);
+        await refreshAgentState(activeRunId, thread.workspace);
       }
     } catch (error) {
       setThreadDeleteError(error.message);
@@ -1034,7 +1071,7 @@ function App() {
       requestJson(`/api/agent/memories?project_id=${encodeURIComponent(memoryProjectId)}`),
       requestJson(`/api/agent/memory-proposals?project_id=${encodeURIComponent(memoryProjectId)}`)
     ]);
-    const next = reduceAgentEvents({ ...initialAgentState, runId }, eventPayload.events || []);
+    const next = hydrateAgentState(runId, eventPayload.events || [], runState);
     setAgentState(next);
     setAgentRunState(runState);
     setAgentRuns(runsPayload.runs || []);
@@ -1176,13 +1213,12 @@ function App() {
   }
 
   async function handleAgentApproval() {
-    if (!agentState.runId || !agentState.pendingApproval?.risk) return;
+    if (busy || conversationLoading || approvalBusyRef.current || !agentState.runId || !agentState.pendingApproval?.risk) return;
+    approvalBusyRef.current = true;
     setBusy(true);
+    setLastError("");
     try {
-      await requestJson(`/api/agent/runs/${agentState.runId}/approve`, {
-        method: "POST",
-        body: JSON.stringify({ risk: agentState.pendingApproval.risk })
-      });
+      await approveAgentAction(requestJson, agentState.runId, agentState.pendingApproval);
       const state = await requestJson(`/api/agent/runs/${agentState.runId}/run`, { method: "POST" });
       const next = await refreshAgentState(agentState.runId);
       const message = buildAgentRunMessage(state, next);
@@ -1201,14 +1237,31 @@ function App() {
         await loadAgentThread(activeThread?.id);
       }
     } catch (error) {
-      setLastError(error.message);
+      await handleApprovalError(error);
     } finally {
+      approvalBusyRef.current = false;
       setBusy(false);
     }
   }
 
+  async function handleApprovalError(error) {
+    if (error.status === 404 || error.status === 409) {
+      setAgentState(initialAgentState);
+      setAgentRunState(null);
+      setMode("error");
+      try {
+        if (error.status === 409) await refreshAgentState(agentState.runId);
+        await refreshThreadList();
+      } catch {
+        // Keep the original approval error and leave stale controls cleared.
+      }
+    }
+    setLastError(approvalErrorMessage(error));
+  }
+
   async function handleAgentRejection() {
-    if (!agentState.runId || !agentState.pendingApproval) return;
+    if (busy || conversationLoading || approvalBusyRef.current || !agentState.runId || !agentState.pendingApproval) return;
+    approvalBusyRef.current = true;
     setBusy(true);
     try {
       await requestJson(`/api/agent/runs/${agentState.runId}/reject`, { method: "POST" });
@@ -1228,8 +1281,9 @@ function App() {
         await loadAgentThread(activeThread?.id);
       }
     } catch (error) {
-      setLastError(error.message);
+      await handleApprovalError(error);
     } finally {
+      approvalBusyRef.current = false;
       setBusy(false);
     }
   }
@@ -1707,12 +1761,20 @@ function App() {
               title={projectDir}
               onChange={(event) => setProjectDir(event.target.value)}
               onBlur={() => {
-                refreshWorkspace(projectDir, targets)
-                  .then(() => activeThread?.id && updateActiveThread({ workspace: projectDir }))
+                applyWorkspace(projectDir, targets)
                   .catch((error) => setLastError(error.message));
               }}
               placeholder="Workspace path"
             />
+            <button
+              type="button"
+              className="icon-button"
+              title="Choose workspace folder"
+              disabled={workspacePickerBusy}
+              onClick={chooseWorkspaceDirectory}
+            >
+              <FolderOpen size={16} />
+            </button>
             <select
               className="header-select"
               value={model}
@@ -1801,7 +1863,8 @@ function App() {
                         </div>
                       )}
                       <pre className="terminal-body">{msg.content}</pre>
-                      {msg.approval && agentState.runId === msg.runId && agentState.pendingApproval && (
+                      {msg.approval && agentState.runId === msg.runId && agentState.pendingApproval
+                        && msg.approval.tool_call?.id === agentState.pendingApproval.tool_call?.id && (
                         <div className="message-action-row">
                           <button
                             type="button"
@@ -2178,10 +2241,18 @@ function App() {
                   <button
                     type="button"
                     className="icon-button"
+                    title="Choose workspace folder"
+                    disabled={workspacePickerBusy}
+                    onClick={chooseWorkspaceDirectory}
+                  >
+                    <FolderOpen size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-button"
                     title="Apply workspace"
                     onClick={() => {
-                      refreshWorkspace(projectDir, targets)
-                        .then(() => activeThread?.id && updateActiveThread({ workspace: projectDir }))
+                      applyWorkspace(projectDir, targets)
                         .catch((error) => setLastError(error.message));
                     }}
                   >
@@ -2383,8 +2454,8 @@ function App() {
                 in this conversation will be permanently deleted.
               </p>
               <p className="confirmation-hint">
-                {threadNeedsCancellation(threadPendingDelete.last_status)
-                  ? `This conversation is currently ${threadPendingDelete.last_status}. Cancel its task before deleting it.`
+                {threadNeedsCancellation(threadPendingDelete.active_status)
+                  ? `This conversation has an active ${threadPendingDelete.active_status} task. Cancel it before deleting.`
                   : "This conversation has no active task and can now be deleted."}
               </p>
               {threadDeleteError && (
@@ -2402,11 +2473,11 @@ function App() {
               >
                 Keep conversation
               </button>
-              {threadNeedsCancellation(threadPendingDelete.last_status) ? (
+              {threadNeedsCancellation(threadPendingDelete.active_status) ? (
                 <button
                   type="button"
                   className="danger-button"
-                  disabled={Boolean(deletingThreadId || cancellingThreadId || !threadPendingDelete.last_run_id)}
+                  disabled={Boolean(deletingThreadId || cancellingThreadId || !threadPendingDelete.active_run_id)}
                   onClick={cancelPendingThreadRun}
                 >
                   {cancellingThreadId ? "Cancelling task…" : "Cancel task first"}

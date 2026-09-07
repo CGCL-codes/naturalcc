@@ -27,6 +27,12 @@ def test_command_discovery_and_metrics(tmp_path: Path):
     assert ["python", "-m", "pytest"] in commands
     assert ["npm", "test"] in commands
 
+
+def test_cmake_without_configured_build_does_not_advertise_ctest(tmp_path: Path):
+    (tmp_path / "CMakeLists.txt").write_text("project(sample)\n", encoding="utf-8")
+
+    assert ["ctest", "--test-dir", "build", "--output-on-failure"] not in discover_test_commands(tmp_path)
+
     report = EvaluationReport()
     report.record(success=True, unsafe_escape=False, duplicate_side_effect=False, recovered=True, tool_rounds=2)
     assert report.summary()["task_success_rate"] == 1.0

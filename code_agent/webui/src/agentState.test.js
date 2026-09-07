@@ -1,7 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { initialAgentState, reduceAgentEvents } from "./agentState.js";
+import { initialAgentState, reduceAgentEvents, hydrateAgentState } from "./agentState.js";
+
+test("terminal and paused events clear stale approval controls", () => {
+  for (const type of ["run.failed", "run.cancelled", "run.budget_exhausted", "run.paused"]) {
+    const state = reduceAgentEvents(initialAgentState, [
+      { type: "approval.requested", payload: { risk: "write" } },
+      { type, payload: {} }
+    ]);
+    assert.equal(state.pendingApproval, null);
+  }
+});
+
+test("current snapshot overrides old approval events", () => {
+  const state = hydrateAgentState("run-1", [
+    { type: "approval.requested", payload: { risk: "write" } }
+  ], { status: "cancelled", pending_approval: null });
+  assert.equal(state.status, "cancelled");
+  assert.equal(state.pendingApproval, null);
+});
 
 
 test("agent event reducer tracks approval, changed files, verification and completion", () => {

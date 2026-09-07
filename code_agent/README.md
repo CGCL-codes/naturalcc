@@ -543,6 +543,10 @@ POST /api/agent/memories/{memory_id}/reject
 DELETE /api/agent/memories/{memory_id}
 ```
 
+### Approval Troubleshooting
+
+If approval returns 404, the Run is not present in the connected service's database. The UI clears the stale controls; reconnect to the original service/database and reload the conversation, or submit the instruction again if the Run was deleted. Each checkout defaults to its own `code_agent/outputs/agent_runtime.db`; `CODE_AGENT_DB` selects an explicit database. A missing snapshot or changed approval returns 409, not 404. Approvals are checked against the current pending tool call before execution.
+
 ### Tests
 
 ```bash

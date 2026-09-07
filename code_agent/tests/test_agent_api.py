@@ -56,6 +56,34 @@ def test_agent_api_rejects_invalid_run_control_transitions(tmp_path: Path):
     assert client.post(f"/api/agent/runs/{run_id}/pause").status_code == 409
 
 
+def test_thread_delete_targets_an_older_active_run(tmp_path: Path):
+    store = EventStore(tmp_path / "agent.db")
+    engine = RunEngine(
+        store,
+        build_default_registry(include_mutating=False),
+        ScriptedModelGateway([ModelResponse(content="unused")]),
+    )
+    app = FastAPI()
+    app.include_router(create_agent_router(engine))
+    client = TestClient(app)
+
+    thread_id = store.create_thread("multiple runs", workspace=tmp_path)
+    paused_run = engine.create_run(tmp_path, "old paused task", thread_id=thread_id)
+    engine.pause(paused_run)
+    newer_run = engine.create_run(tmp_path, "new cancelled task", thread_id=thread_id)
+    engine.cancel(newer_run)
+
+    detail = client.get(f"/api/agent/threads/{thread_id}").json()["thread"]
+    assert detail["last_run_id"] == newer_run
+    assert detail["last_status"] == "cancelled"
+    assert detail["active_run_id"] == paused_run
+    assert detail["active_status"] == "paused"
+    assert client.delete(f"/api/agent/threads/{thread_id}").status_code == 409
+
+    assert client.post(f"/api/agent/runs/{paused_run}/cancel").status_code == 200
+    assert client.delete(f"/api/agent/threads/{thread_id}").status_code == 200
+
+
 def test_agent_api_create_run_accepts_target_files(tmp_path: Path):
     (tmp_path / "calculator.c").write_text("// English comment\n", encoding="utf-8")
     model = ScriptedModelGateway([ModelResponse(content="done")])

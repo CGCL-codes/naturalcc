@@ -72,6 +72,14 @@ IGNORE_DIRS = {
 IGNORE_FILE_EXTENSIONS = {".log", ".ps"}
 PARSABLE_SOURCE_EXTENSIONS = {".c", ".cpp", ".h", ".hpp", ".java"}
 COMPLETION_TYPES = ["", "member", "variable", "function", "function_body", "type"]
+WINDOWS_DEVICE_NAMES = {
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
+    *(f"COM{index}" for index in range(1, 10)),
+    *(f"LPT{index}" for index in range(1, 10)),
+}
 
 
 class AgentRequest(BaseModel):
@@ -92,8 +100,22 @@ class ScanRequest(BaseModel):
     target_files: List[str] = Field(default_factory=list)
 
 
+class DirectoryPickerRequest(BaseModel):
+    initial_dir: Optional[str] = None
+
+
+def is_windows_device_name(filename: str) -> bool:
+    name = Path(filename).name.strip().rstrip(" .")
+    stem = name.split(".", 1)[0].upper()
+    return stem in WINDOWS_DEVICE_NAMES
+
+
 def should_ignore_file(filename: str) -> bool:
-    return filename.startswith(".") or Path(filename).suffix.lower() in IGNORE_FILE_EXTENSIONS
+    return (
+        filename.startswith(".")
+        or is_windows_device_name(filename)
+        or Path(filename).suffix.lower() in IGNORE_FILE_EXTENSIONS
+    )
 
 
 def sanitize_target_files(target_files: Optional[Iterable[str]]) -> List[str]:
@@ -126,7 +148,10 @@ def get_local_files(root_dir: str = DEFAULT_PROJECT_DIR) -> List[str]:
         for filename in filenames:
             if should_ignore_file(filename):
                 continue
-            full_path = os.path.relpath(os.path.join(dirpath, filename), normalized_root)
+            try:
+                full_path = os.path.relpath(os.path.join(dirpath, filename), normalized_root)
+            except ValueError:
+                continue
             file_list.append(full_path.replace("\\", "/"))
     return sorted(file_list, key=str.casefold)
 
@@ -258,6 +283,51 @@ def browse_directory(path_value: Optional[str]) -> Dict[str, Any]:
     }
 
 
+def select_local_directory(initial_dir: Optional[str]) -> Dict[str, Any]:
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+    except Exception as exc:  # pragma: no cover - depends on local Python build.
+        raise RuntimeError("Local folder picker is unavailable in this Python environment.") from exc
+
+    initial_path = Path(normalize_project_dir(initial_dir or DEFAULT_PROJECT_DIR))
+    if initial_path.is_file():
+        initial_path = initial_path.parent
+    while not initial_path.exists() and initial_path.parent != initial_path:
+        initial_path = initial_path.parent
+    if not initial_path.exists():
+        initial_path = Path(DEFAULT_PROJECT_DIR)
+
+    try:
+        root = tk.Tk()
+    except Exception as exc:  # pragma: no cover - depends on local desktop session.
+        raise RuntimeError("Local folder picker could not open in this desktop session.") from exc
+
+    root.withdraw()
+    try:
+        try:
+            root.attributes("-topmost", True)
+        except Exception:
+            pass
+        root.update()
+        selected = filedialog.askdirectory(
+            parent=root,
+            initialdir=str(initial_path),
+            title="Select agent workspace",
+            mustexist=True,
+        )
+    finally:
+        root.destroy()
+
+    if not selected:
+        return {"selected": False, "path": ""}
+
+    selected_path = Path(selected).expanduser().resolve()
+    if not selected_path.is_dir():
+        raise RuntimeError(f"Selected path is not a directory: {selected_path}")
+    return {"selected": True, "path": str(selected_path)}
+
+
 def infer_status(log_text: str) -> str:
     if "✅ [NaturalCC Agent]" in log_text or "任务圆满完成" in log_text:
         return "success"
@@ -343,6 +413,14 @@ async def scan_workspace_post(request: ScanRequest) -> Dict[str, Any]:
 @app.get("/api/browse")
 async def browse(path: Optional[str] = Query(default=None)) -> Dict[str, Any]:
     return browse_directory(path)
+
+
+@app.post("/api/workspace/select-directory")
+async def select_workspace_directory(request: DirectoryPickerRequest) -> Dict[str, Any]:
+    try:
+        return await asyncio.to_thread(select_local_directory, request.initial_dir)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @app.post("/api/command-preview")

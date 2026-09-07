@@ -79,6 +79,26 @@ def test_budget_exhaustion_is_durable(tmp_path: Path):
     assert result["status"] == "budget_exhausted"
 
 
+def test_failed_verification_does_not_loop_when_model_claims_completion(tmp_path: Path):
+    (tmp_path / "pyproject.toml").write_text("[project]\nname='sample'\n", encoding="utf-8")
+    (tmp_path / "test_failure.py").write_text("def test_failure():\n    assert False\n", encoding="utf-8")
+    model = ScriptedModelGateway([
+        ModelResponse(tool_calls=[ToolCall("test-1", "tests.run", {"argv": ["python", "-m", "pytest"]})]),
+        ModelResponse(content="The task is complete."),
+    ])
+    store = EventStore(tmp_path / "agent.db")
+    engine = RunEngine(store, build_default_registry(include_mutating=True), model)
+    run_id = engine.create_run(tmp_path, "run verification", RunBudget(max_llm_calls=5, max_tool_calls=3))
+
+    assert engine.step(run_id)["status"] == "waiting_approval"
+    engine.approve(run_id, RiskLevel.EXECUTE)
+    result = engine.run(run_id)
+
+    assert result["status"] == "failed"
+    assert result["llm_calls"] == 2
+    assert store.list_events(run_id)[-1].type == "run.failed"
+
+
 def test_budget_exhaustion_after_model_response_records_unexecuted_tools(tmp_path: Path):
     model = ScriptedModelGateway([
         ModelResponse(tool_calls=[ToolCall("c1", "workspace.read", {"path": "README.md"})])

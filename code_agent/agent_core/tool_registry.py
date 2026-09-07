@@ -71,7 +71,11 @@ def validate_arguments(arguments: dict[str, Any], schema: dict[str, Any]) -> Non
             _validate_value(name, value, properties[name])
 
 
-def redact_sensitive_text(value: str) -> str:
+def redact_sensitive_text(value: Any) -> str:
+    if value is None:
+        return ""
+    if not isinstance(value, str):
+        value = str(value)
     value = _ASSIGNMENT_SECRET.sub(lambda match: f"{match.group(1)}{match.group(2)}[REDACTED]", value)
     return _TOKEN_SECRET.sub("[REDACTED]", value)
 

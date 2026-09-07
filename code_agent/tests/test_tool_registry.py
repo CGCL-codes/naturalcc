@@ -98,3 +98,21 @@ def test_registry_redacts_credentials_from_tool_results(tmp_path: Path):
     assert "super-secret-value" not in result.summary
     assert fake_token[:13] not in str(result.data)
     assert "[REDACTED]" in result.summary
+
+
+def test_registry_normalizes_empty_tool_summary(tmp_path: Path):
+    registry = ToolRegistry()
+    registry.register(
+        ToolSpec(
+            "empty",
+            "empty",
+            {"type": "object", "properties": {}},
+            RiskLevel.READ,
+            lambda c, a: ToolResult("success", None),  # type: ignore[arg-type]
+        )
+    )
+
+    result = registry.execute("empty", {}, ToolContext("r", tmp_path, tmp_path / "a"))
+
+    assert result.status == "success"
+    assert result.summary == ""

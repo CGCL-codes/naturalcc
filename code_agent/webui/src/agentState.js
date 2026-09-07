@@ -57,10 +57,22 @@ export function reduceAgentEvent(state, event) {
     next.status = "budget_exhausted";
     next.budgetExhausted = event.payload || {};
   }
+  if (next.status !== "waiting_approval") {
+    next.pendingApproval = null;
+  }
   return next;
 }
 
 
 export function reduceAgentEvents(state, events) {
   return events.reduce(reduceAgentEvent, state);
+}
+
+export function hydrateAgentState(runId, events, snapshot) {
+  const state = reduceAgentEvents({ ...initialAgentState, runId }, events);
+  return {
+    ...state,
+    status: snapshot.status,
+    pendingApproval: snapshot.status === "waiting_approval" ? snapshot.pending_approval : null
+  };
 }

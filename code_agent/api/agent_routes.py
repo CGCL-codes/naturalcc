@@ -154,6 +154,7 @@ class BudgetPatchRequest(BaseModel):
 
 class ApprovalRequest(BaseModel):
     risk: RiskLevel
+    tool_call_id: str | None = None
 
 
 class MemoryCandidateRequest(BaseModel):
@@ -242,6 +243,8 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
             )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
         return {"thread": thread, "messages": messages, "last_run": last_run}
 
     @router.patch("/threads/{thread_id}")
@@ -524,6 +527,8 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
             return await asyncio.to_thread(engine.get_state, run_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @router.patch("/runs/{run_id}/budget")
     async def update_run_budget(run_id: str, request: BudgetPatchRequest) -> dict[str, Any]:
@@ -550,6 +555,8 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
             return await asyncio.to_thread(engine.step, run_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except (ValueError, VersionConflict) as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @router.post("/runs/{run_id}/run")
     async def run_until_pause(run_id: str) -> dict[str, Any]:
@@ -557,13 +564,17 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
             return await asyncio.to_thread(engine.run, run_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except (ValueError, VersionConflict) as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @router.post("/runs/{run_id}/approve")
     async def approve_run(run_id: str, request: ApprovalRequest) -> dict[str, Any]:
         try:
-            return await asyncio.to_thread(engine.approve, run_id, request.risk)
+            return await asyncio.to_thread(engine.approve, run_id, request.risk, request.tool_call_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except (ValueError, VersionConflict) as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     @router.post("/runs/{run_id}/reject")
     async def reject_run(run_id: str) -> dict[str, Any]:

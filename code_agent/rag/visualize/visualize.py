@@ -520,13 +520,26 @@ def rag_to_vis(rag: Dict[str, Dict[str, Any]]) -> Tuple[List[dict], List[dict], 
         seen_edges.add(key)
         degree[src] += 1
         degree[tgt] += 1
+        edge_index = len(vis_edges)
         vis_edges.append({
             "from": src,
             "to": tgt,
             "label": rel,
             "title": _html.escape(f"{rel}"),
             "dashes": False,
-            "width": 2,
+            "width": 1.5,
+            "smooth": {
+                "type": "curvedCW" if edge_index % 2 == 0 else "curvedCCW",
+                "roundness": 0.28,
+            },
+            "font": {
+                "size": 10,
+                "color": "#374151",
+                "background": "#ffffff",
+                "strokeWidth": 4,
+                "strokeColor": "#ffffff",
+                "align": "horizontal",
+            },
             "color": {"color": "#6b7280", "opacity": 0.75, "highlight": "#111827"},
         })
 
@@ -615,13 +628,17 @@ def _pyvis_light_options() -> dict:
             "scaling": {"min": 10, "max": 30},
         },
         "edges": {
-            "smooth": {"type": "continuous", "roundness": 0.25},
+            # Curved edges keep relation labels away from the node-to-node
+            # axis. The opaque label background hides the line underneath.
+            "smooth": {"type": "curvedCW", "roundness": 0.28},
             "scaling": {"min": 1, "max": 3},
             "color": {"inherit": "from"},
             "font": {
                 "size": 10,
                 "color": "#6b7280",
-                "strokeWidth": 0,
+                "background": "#ffffff",
+                "strokeWidth": 4,
+                "strokeColor": "#ffffff",
                 "align": "middle",
             },
         },
@@ -697,6 +714,9 @@ def generate_html(vis_nodes: List[dict], vis_edges: List[dict], legend_data: Lis
             color=edge_color_obj.get("color", "#6b7280"),
             arrows="to",
             width=edge.get("width", 2),
+            smooth=edge.get("smooth"),
+            font=edge.get("font"),
+            labelHighlightBold=True,
         )
 
     pyvis_html = net.generate_html()

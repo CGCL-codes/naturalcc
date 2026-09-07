@@ -5,6 +5,8 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
+#include <cstddef>  // 提供 ::std::size_t
+
 namespace algo {
 
 struct ListNode {

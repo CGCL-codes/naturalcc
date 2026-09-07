@@ -21,6 +21,9 @@ void merge_sort(std::vector<int>& arr);
 // 堆排序 - O(n log n)
 void heap_sort(std::vector<int>& arr);
 
+// 希尔排序 - O(n^1.5)
+void shell_sort(std::vector<int>& arr);
+
 // 工具函数：打印数组
 void print_array(const std::vector<int>& arr);
 

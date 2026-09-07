@@ -468,10 +468,22 @@ def _codegraph_to_vis(
             "label": str(edge.get("kind") or "relation")[:24],
             "title": str(edge.get("kind") or "relation"),
             "dashes": False,
-            "width": 2,
+            "width": 1.5,
+            "smooth": {
+                "type": "curvedCW" if index % 2 == 0 else "curvedCCW",
+                "roundness": 0.28,
+            },
+            "font": {
+                "size": 10,
+                "color": "#374151",
+                "background": "#ffffff",
+                "strokeWidth": 4,
+                "strokeColor": "#ffffff",
+                "align": "horizontal",
+            },
             "color": {"color": "#6b7280", "opacity": 0.75, "highlight": "#111827"},
         }
-        for edge in edges
+        for index, edge in enumerate(edges)
     ]
     legend_data = [
         {

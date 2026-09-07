@@ -265,13 +265,26 @@ class EventStore:
         return identifier
 
     def list_threads(self, limit: int = 100) -> list[dict[str, Any]]:
+        terminal_placeholders = ", ".join("?" for _ in TERMINAL_RUN_STATUSES)
         with self._connect() as connection:
             rows = connection.execute(
-                """
+                f"""
                 SELECT
                     t.*,
                     COUNT(r.id) AS run_count,
                     lr.status AS last_status,
+                    (
+                        SELECT active.id FROM runs active
+                        WHERE active.thread_id=t.id
+                          AND active.status NOT IN ({terminal_placeholders})
+                        ORDER BY active.updated_at DESC LIMIT 1
+                    ) AS active_run_id,
+                    (
+                        SELECT active.status FROM runs active
+                        WHERE active.thread_id=t.id
+                          AND active.status NOT IN ({terminal_placeholders})
+                        ORDER BY active.updated_at DESC LIMIT 1
+                    ) AS active_status,
                     (
                         SELECT content FROM conversation_messages cm
                         WHERE cm.thread_id=t.id
@@ -281,7 +294,7 @@ class EventStore:
                 LEFT JOIN runs lr ON lr.id=t.last_run_id
                 GROUP BY t.id ORDER BY t.updated_at DESC LIMIT ?
                 """,
-                (limit,),
+                (*sorted(TERMINAL_RUN_STATUSES), *sorted(TERMINAL_RUN_STATUSES), limit),
             ).fetchall()
         return [self._decode_thread_row(row) for row in rows]
 
@@ -294,14 +307,29 @@ class EventStore:
         return result
 
     def get_thread(self, thread_id: str) -> dict[str, Any]:
+        terminal_placeholders = ", ".join("?" for _ in TERMINAL_RUN_STATUSES)
         with self._connect() as connection:
             row = connection.execute(
-                """
-                SELECT t.*, lr.status AS last_status
+                f"""
+                SELECT
+                    t.*,
+                    lr.status AS last_status,
+                    (
+                        SELECT active.id FROM runs active
+                        WHERE active.thread_id=t.id
+                          AND active.status NOT IN ({terminal_placeholders})
+                        ORDER BY active.updated_at DESC LIMIT 1
+                    ) AS active_run_id,
+                    (
+                        SELECT active.status FROM runs active
+                        WHERE active.thread_id=t.id
+                          AND active.status NOT IN ({terminal_placeholders})
+                        ORDER BY active.updated_at DESC LIMIT 1
+                    ) AS active_status
                 FROM threads t LEFT JOIN runs lr ON lr.id=t.last_run_id
                 WHERE t.id=?
                 """,
-                (thread_id,),
+                (*sorted(TERMINAL_RUN_STATUSES), *sorted(TERMINAL_RUN_STATUSES), thread_id),
             ).fetchone()
         if row is None:
             raise KeyError(f"unknown thread: {thread_id}")
