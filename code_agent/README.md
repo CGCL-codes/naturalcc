@@ -1,5 +1,9 @@
 # NaturalCC Code Agent
 
+Agent now exposes the Pipeline completion and vulnerability plugins as approved
+tools. See [Pipeline Agent tools](PIPELINE_AGENT_TOOLS.md) for usage, Cppcheck
+setup, incremental scanning, race analysis coverage and limitations.
+
 [中文文档](README.zh.md)
 
 `code_agent` is a local code-editing agent that combines NaturalCC static project understanding, a durable Agent runtime, and Aider-based edits.

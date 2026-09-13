@@ -48,6 +48,7 @@ Plugins auto-register from `plugins/` via `@register_plugin`; the frontend rende
 - `plugins/code_summary.py`: NaturalCC semantic summaries via Aider `--dry-run`.
 - `plugins/code_repair.py`: focused repair prompt via Aider.
 - `plugins/vulnerability_detection.py`: static scan with optional Aider remediation.
+- `agent_core/tools/pipeline.py`: Agent adapters for completion, scan, Cppcheck analysis and repair. `security_analysis.py` adapts analyzer evidence; see `PIPELINE_AGENT_TOOLS.md` for setup and limits.
 
 Add a plugin by creating `plugins/my_feature.py`, inheriting `FeaturePlugin`, implementing `metadata`, `config_schema`, `execute`, and decorating with `@register_plugin`.
 

@@ -173,12 +173,14 @@ def build_default_registry(include_mutating: bool = True) -> ToolRegistry:
     from .tools.codegraph import codegraph_tool_specs
     from .tools.naturalcc import naturalcc_tool_specs
     from .tools.workspace import workspace_tool_specs
+    from .tools.pipeline import pipeline_tool_specs
 
     registry = ToolRegistry()
     for spec in [
         *workspace_tool_specs(),
         *naturalcc_tool_specs(),
         *codegraph_tool_specs(),
+        *pipeline_tool_specs(include_mutating),
     ]:
         registry.register(spec)
     if include_mutating:

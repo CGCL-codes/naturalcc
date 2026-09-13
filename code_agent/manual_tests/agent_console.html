@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NaturalCC Agent API Test Console</title>
+    <style>
+      :root { color-scheme: dark; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+      body { margin: 0; background: #101319; color: #e7edf5; }
+      main { max-width: 1180px; margin: 0 auto; padding: 24px; }
+      h1 { margin: 0 0 8px; font-size: 22px; }
+      p { color: #9eacbd; }
+      .grid { display: grid; grid-template-columns: 360px 1fr; gap: 16px; }
+      section { border: 1px solid #2a3442; border-radius: 10px; background: #171d26; padding: 16px; }
+      label { display: block; margin: 12px 0 6px; color: #b9c7d8; font-size: 13px; }
+      input, textarea, button { box-sizing: border-box; font: inherit; }
+      input, textarea { width: 100%; border: 1px solid #344254; border-radius: 6px; padding: 9px; background: #0f141b; color: #edf3fb; }
+      textarea { min-height: 110px; resize: vertical; }
+      button { border: 0; border-radius: 6px; padding: 9px 12px; margin: 12px 6px 0 0; color: #081018; background: #72c7ff; cursor: pointer; }
+      button.secondary { color: #dce8f5; background: #344254; }
+      button.warn { color: #1b1000; background: #ffc857; }
+      button.danger { color: #fff; background: #b84b5b; }
+      button:disabled { opacity: .45; cursor: not-allowed; }
+      .status { display: flex; gap: 18px; flex-wrap: wrap; padding: 10px 0; color: #9eacbd; }
+      .status strong { color: #8ee6a8; }
+      .approval { border: 1px solid #8e6b22; border-radius: 7px; padding: 12px; margin: 12px 0; background: #272116; }
+      .approval strong { color: #ffd36b; }
+      pre { white-space: pre-wrap; word-break: break-word; overflow: auto; max-height: 390px; margin: 8px 0 0; padding: 12px; border-radius: 6px; background: #0d1117; color: #c9d5e3; }
+      .event { border-left: 3px solid #4c91c5; padding: 6px 10px; margin: 8px 0; background: #121923; }
+      .event b { color: #72c7ff; }
+      .hint { font-size: 12px; line-height: 1.5; }
+      @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>NaturalCC Agent API Test Console</h1>
+      <p class="hint">本页面只测试 /api/agent/*。API Key 不在页面中填写，由启动后端的环境变量提供。</p>
+
+      <div class="grid">
+        <section>
+          <label for="apiBase">Agent API 地址</label>
+          <input id="apiBase" value="http://127.0.0.1:7860" />
+
+          <label for="workspace">Workspace 绝对路径</label>
+          <input id="workspace" placeholder="D:\\path\\to\\manual-test-workspace" />
+
+          <label for="model">模型</label>
+          <input id="model" value="deepseek/deepseek-chat" />
+
+          <label for="targets">目标文件（每行一个相对 workspace 路径）</label>
+          <textarea id="targets" placeholder="vuln.c&#10;completion.c"></textarea>
+
+          <label for="prompt">提示词</label>
+          <textarea id="prompt" placeholder="请使用 vulnerability_detection 工具扫描 vuln.c，只读检查，不要修改文件。"></textarea>
+
+          <button id="newThread">新建 Thread</button>
+          <button id="send">发送提示词</button>
+          <button id="refresh" class="secondary">刷新状态</button>
+          <button id="clear" class="secondary">清空输出</button>
+        </section>
+
+        <section>
+          <div class="status">
+            <span>Thread: <strong id="threadId">-</strong></span>
+            <span>Run: <strong id="runId">-</strong></span>
+            <span>Status: <strong id="runStatus">idle</strong></span>
+          </div>
+
+          <div id="approval" class="approval" hidden>
+            <div>需要审批：<strong id="approvalRisk">-</strong></div>
+            <pre id="approvalCall"></pre>
+            <button id="approve" class="warn">批准并继续</button>
+            <button id="reject" class="danger">拒绝</button>
+          </div>
+
+          <h3>Agent 最终反馈</h3>
+          <pre id="finalAnswer">暂无</pre>
+
+          <h3>事件流</h3>
+          <div id="events"><p>暂无事件</p></div>
+
+          <h3>当前 Run JSON</h3>
+          <pre id="stateJson">暂无</pre>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      let threadId = "";
+      let runId = "";
+      let state = null;
+      let events = [];
+      let busy = false;
+
+      const $ = (id) => document.getElementById(id);
+      const apiBase = () => $("apiBase").value.replace(/\/$/, "");
+      const targets = () => $("targets").value.split(/\r?\n|,/).map((x) => x.trim()).filter(Boolean);
+
+      function print(value) {
+        return JSON.stringify(value, null, 2);
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      async function request(path, options = {}) {
+        const response = await fetch(apiBase() + path, {
+          headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+          ...options,
+        });
+        const text = await response.text();
+        let body;
+        try { body = text ? JSON.parse(text) : {}; } catch { body = { raw: text }; }
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}: ${print(body)}`);
+        return body;
+      }
+
+      function setBusy(value) {
+        busy = value;
+        $("send").disabled = value;
+        $("newThread").disabled = value;
+        $("approve").disabled = value;
+        $("reject").disabled = value;
+      }
+
+      function render() {
+        $("threadId").textContent = threadId || "-";
+        $("runId").textContent = runId || "-";
+        $("runStatus").textContent = state?.status || "idle";
+        $("stateJson").textContent = state ? print(state) : "暂无";
+        $("finalAnswer").textContent = state?.final_answer || "暂无";
+
+        const pending = state?.pending_approval;
+        $("approval").hidden = !pending;
+        if (pending) {
+          $("approvalRisk").textContent = pending.risk || "unknown";
+          $("approvalCall").textContent = print(pending.tool_call || {});
+        }
+
+        if (!events.length) {
+          $("events").innerHTML = "<p>暂无事件</p>";
+          return;
+        }
+        $("events").innerHTML = events.map((event) => {
+          const payload = event.payload || {};
+          const detail = payload.tool || payload.reason || payload.error?.message || payload.result?.summary || "";
+          return `<div class="event"><b>#${escapeHtml(event.sequence)} ${escapeHtml(event.type)}</b>${detail ? `<div>${escapeHtml(detail)}</div>` : ""}<details><summary>查看 JSON</summary><pre>${escapeHtml(print(event))}</pre></details></div>`;
+        }).join("");
+      }
+
+      async function refresh() {
+        if (!runId) return;
+        const [nextState, eventPayload] = await Promise.all([
+          request(`/api/agent/runs/${encodeURIComponent(runId)}`),
+          request(`/api/agent/runs/${encodeURIComponent(runId)}/events`),
+        ]);
+        state = nextState;
+        events = eventPayload.events || [];
+        render();
+      }
+
+      async function createThread() {
+        const workspace = $("workspace").value.trim();
+        if (!workspace) throw new Error("请先填写 Workspace 绝对路径");
+        const payload = await request("/api/agent/threads", {
+          method: "POST",
+          body: JSON.stringify({
+            title: "Manual Agent API Test",
+            workspace,
+            model: $("model").value.trim() || "deepseek/deepseek-chat",
+            runtime_mode: "agent",
+          }),
+        });
+        threadId = payload.thread_id;
+        runId = "";
+        state = null;
+        events = [];
+        render();
+      }
+
+      async function ensureThread() {
+        if (!threadId) await createThread();
+      }
+
+      async function driveRun() {
+        if (!runId) return;
+        setBusy(true);
+        const timer = window.setInterval(() => refresh().catch(showError), 1000);
+        try {
+          state = await request(`/api/agent/runs/${encodeURIComponent(runId)}/run`, { method: "POST" });
+          await refresh();
+        } finally {
+          window.clearInterval(timer);
+          setBusy(false);
+        }
+      }
+
+      async function sendPrompt() {
+        await ensureThread();
+        const content = $("prompt").value.trim();
+        if (!content) throw new Error("请先填写提示词");
+        const payload = await request(`/api/agent/threads/${encodeURIComponent(threadId)}/messages`, {
+          method: "POST",
+          body: JSON.stringify({ content, target_files: targets() }),
+        });
+        runId = payload.run_id;
+        state = payload.state;
+        events = [];
+        render();
+        await driveRun();
+      }
+
+      async function approve() {
+        if (!runId || !state?.pending_approval) return;
+        const pending = state.pending_approval;
+        await request(`/api/agent/runs/${encodeURIComponent(runId)}/approve`, {
+          method: "POST",
+          body: JSON.stringify({ risk: pending.risk, tool_call_id: pending.tool_call.id }),
+        });
+        await driveRun();
+      }
+
+      async function reject() {
+        if (!runId) return;
+        await request(`/api/agent/runs/${encodeURIComponent(runId)}/reject`, { method: "POST" });
+        await driveRun();
+      }
+
+      function showError(error) {
+        $("finalAnswer").textContent = `ERROR\n${error.message || error}`;
+        console.error(error);
+      }
+
+      $("newThread").onclick = () => createThread().catch(showError);
+      $("send").onclick = () => sendPrompt().catch(showError);
+      $("refresh").onclick = () => refresh().catch(showError);
+      $("approve").onclick = () => approve().catch(showError);
+      $("reject").onclick = () => reject().catch(showError);
+      $("clear").onclick = () => { state = null; events = []; render(); };
+      render();
+    </script>
+  </body>
+</html>

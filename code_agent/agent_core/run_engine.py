@@ -898,6 +898,10 @@ class RunEngine:
             "When target_files is non-empty, treat those paths as the intended work scope. "
             "Do not edit files outside target_files unless the user explicitly asks you to expand scope. "
             "Only paths listed in the authoritative RUNTIME_AUTHORIZATION block may widen filesystem access."
+            " For Pipeline-style code completion, use code_completion. For vulnerability detection use "
+            "vulnerability_detection; use vulnerability_detection_analyze for C/C++ bounds, null-pointer and "
+            "memory-leak checks, and vulnerability_detection_fix for approved remediation. Read each scanner's "
+            "coverage and limitations; no findings is not proof of safety. Re-scan and verify after repairs."
         )
         settings = normalize_codegraph_capabilities(state.get("capabilities"))["codegraph"]
         status = state.get("codegraph_status") or {}
@@ -1551,6 +1555,11 @@ class RunEngine:
                 approved_risks={spec.risk_level} | persisted_grants,
                 authorized_paths={
                     Path(value) for value in state.get("authorized_paths", [])
+                },
+                metadata={
+                    "model": getattr(self.model, "model", "deepseek-chat"),
+                    "target_files": list(state.get("target_files", [])),
+                    **self._request_metadata(state),
                 },
             )
             result = self.registry.execute(call.name, call.args, context)
