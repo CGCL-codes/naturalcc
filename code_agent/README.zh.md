@@ -671,6 +671,21 @@ code_agent/
 
 ---
 
-## 17. License
+## 17. 合同第 5 项 Web Agent 快速测试
+
+在 `code_agent/` 下按前文配置 OpenRouter / `anthropic/claude-sonnet-4.5` 并启动 Web 服务。另开终端，确保已设置 `OPENROUTER_API_KEY`：
+
+```bash
+uv run python scripts/check_openrouter_credits.py
+uv run python scripts/benchmark_contract5_web.py
+```
+
+脚本通过真实 Web Agent API 对 40 条 CASTLE 样本逐条建立对话、只读审计，不直接请求模型、不执行样本或批准写入/执行。额度不足或队列结束即停止；再次运行跳过已评分样本，包括错误答案。
+
+保留根目录 [合同-5-result.md](合同-5-result.md)（指标与四个范例）、`artifacts/contract5/dataset.json`、`manifest.json` 和 `web-sonnet45/checkpoint.json`（全部预测与冻结配置）。`--report-only` 可离线生成报告。临时 `workspaces/`、`runs/` 和锁文件不纳入 Git；未评分样本的日志须保留至离线解析完成。续跑需保留服务数据库与原配置。
+
+`security_review.py` 提供通用 C 语义复核规则及无长度限制的字面量 `scanf` 候选检测，不是完整分析器。实验冻结产品源码散列，防止混版续跑；同集调优成绩不能作为独立泛化成绩或正式合同验收结论。
+
+## 18. License
 
 [MIT](LICENSE) © NaturalCC contributors

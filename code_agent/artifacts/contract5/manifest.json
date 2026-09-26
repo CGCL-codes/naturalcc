@@ -1,0 +1,466 @@
+{
+  "revision": "c7391c9ec5dd944653103fbf55e7ebbf85842d82",
+  "dataset_sha256": "9a42b9fcde3c275734f901fe52a1625e16ce229366f498806c7713c9a890ebeb",
+  "selection": "All 10 entries for each of CWE-787,362,401,78; no outcome-based filtering",
+  "rules": {
+    "787": [
+      "cwe-119",
+      "cwe-120",
+      "cwe-121",
+      "cwe-122",
+      "cwe-124",
+      "cwe-787",
+      "cwe-788",
+      "cwe-805"
+    ],
+    "362": [
+      "cwe-362",
+      "cwe-366"
+    ],
+    "401": [
+      "cwe-401"
+    ],
+    "78": [
+      "cwe-78"
+    ]
+  },
+  "config": {
+    "analyzer": "cppcheck",
+    "scan_scope": "targets",
+    "severity_threshold": "medium",
+    "rule_profile": "default",
+    "max_findings": 1000,
+    "context_lines": 2,
+    "incremental": false,
+    "auto_fix": false
+  },
+  "samples": [
+    {
+      "id": "787-1",
+      "name": "CASTLE-787-1.c",
+      "cwe": 787,
+      "vulnerable": true,
+      "lines": [
+        7
+      ],
+      "description": "Buffer overflow in scanf function.",
+      "sha256": "12482e5f3f6f3970e9493bb98e3742f3fc7143b453df1debc2f6778baf7b52e2"
+    },
+    {
+      "id": "787-2",
+      "name": "CASTLE-787-2.c",
+      "cwe": 787,
+      "vulnerable": true,
+      "lines": [
+        7
+      ],
+      "description": "Buffer overflow in strcpy function.",
+      "sha256": "ccd8615037887bd26a4bc82500ce59391f6176641b6a2f0c7213f84d9b442d04"
+    },
+    {
+      "id": "787-3",
+      "name": "CASTLE-787-3.c",
+      "cwe": 787,
+      "vulnerable": true,
+      "lines": [
+        18
+      ],
+      "description": "Buffer overflow in strcpy function.",
+      "sha256": "68c6fcc9832867f44a2da269ed3b18648729ffcc7db4089f9dc851bf1086ad00"
+    },
+    {
+      "id": "787-4",
+      "name": "CASTLE-787-4.c",
+      "cwe": 787,
+      "vulnerable": true,
+      "lines": [
+        14
+      ],
+      "description": "Buffer overflow in scanf, fscanf and gets functions.",
+      "sha256": "4991d927aa5f547c3de34516a3af0e1f475fc78c005d74eeb5cd45ed9fdee6e4"
+    },
+    {
+      "id": "787-5",
+      "name": "CASTLE-787-5.c",
+      "cwe": 787,
+      "vulnerable": true,
+      "lines": [
+        51
+      ],
+      "description": "Buffer overflow in scanf functions.",
+      "sha256": "34d783732f45f02525009be728e44d186eb7ecf50f57a08cca69280a7cecdea7"
+    },
+    {
+      "id": "787-6",
+      "name": "CASTLE-787-6.c",
+      "cwe": 787,
+      "vulnerable": true,
+      "lines": [
+        10,
+        17
+      ],
+      "description": "Writing outside of array bounds due to wrong array length calculation",
+      "sha256": "0df5d1624deff657e2e4737dbd42012048d545da5d15f97a78a62ec757d41cc5"
+    },
+    {
+      "id": "787-7",
+      "name": "CASTLE-787-7.c",
+      "cwe": 787,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Not vulnerable, since memory allocation is properly null-checked.",
+      "sha256": "1099cbd287e14b15ce80795f6b9cad9deed98147ce4094c38cb98fadb19152ac"
+    },
+    {
+      "id": "787-8",
+      "name": "CASTLE-787-8.c",
+      "cwe": 787,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Both scanf and malloc functions are handled properly.",
+      "sha256": "9ec7671abc766af92d8d84bd8e7bbbbf8449a15d1a353b228a9c869fb4750fde"
+    },
+    {
+      "id": "787-9",
+      "name": "CASTLE-787-9.c",
+      "cwe": 787,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Password length is bounded below buffer length.",
+      "sha256": "21b053364ce86e76ee3296d7b938a1c90e3d0269642196569fe2636211ae5816"
+    },
+    {
+      "id": "787-10",
+      "name": "CASTLE-787-10.c",
+      "cwe": 787,
+      "vulnerable": false,
+      "lines": [],
+      "description": "The array is not indexed out of bounds",
+      "sha256": "fa6be4350fe99b88e86a7ea7db780910636b298f2bd31fc2fedfee23deed82d5"
+    },
+    {
+      "id": "362-1",
+      "name": "CASTLE-362-1.c",
+      "cwe": 362,
+      "vulnerable": true,
+      "lines": [
+        10
+      ],
+      "description": "Race condition is not properly handled in cases where mutex lock cannot be acquired.",
+      "sha256": "8e7b365b3f555a18a1750c06d4f00393d2dde8647659b1ba1f101fa09b83cc63"
+    },
+    {
+      "id": "362-2",
+      "name": "CASTLE-362-2.c",
+      "cwe": 362,
+      "vulnerable": true,
+      "lines": [
+        9,
+        17
+      ],
+      "description": "Race condition not handled properly on writing to file.",
+      "sha256": "66a5360da5d545911cc9357e3d3e316d63a0a633e239fda15dcec4da7b0e2236"
+    },
+    {
+      "id": "362-3",
+      "name": "CASTLE-362-3.c",
+      "cwe": 362,
+      "vulnerable": true,
+      "lines": [
+        22,
+        25
+      ],
+      "description": "Race condition in shared memory causes undefined behaviour.",
+      "sha256": "129d0829e6df5dfddebb1292edc07d78f3daa67c10da1258a6e6ad84fb29e621"
+    },
+    {
+      "id": "362-4",
+      "name": "CASTLE-362-4.c",
+      "cwe": 362,
+      "vulnerable": true,
+      "lines": [
+        8
+      ],
+      "description": "Clear case of a race condition with shared memory",
+      "sha256": "a154dd0a8495c948d4d858465cfbf3d53da442b119bef1a11a89036052f31501"
+    },
+    {
+      "id": "362-5",
+      "name": "CASTLE-362-5.c",
+      "cwe": 362,
+      "vulnerable": true,
+      "lines": [
+        8,
+        15,
+        19
+      ],
+      "description": "Race condition as multiple threads write to the same file",
+      "sha256": "285d5c8936966cd722119ed1158f288f03fd1cfca4e8ce9537581a3e04999d4a"
+    },
+    {
+      "id": "362-6",
+      "name": "CASTLE-362-6.c",
+      "cwe": 362,
+      "vulnerable": true,
+      "lines": [
+        14,
+        16,
+        25
+      ],
+      "description": "Race condition as multiple threads write to the same file",
+      "sha256": "0e11c2f9319ec93a61e047363b4b574e91718cedcf0327017605e40560ba5a99"
+    },
+    {
+      "id": "362-7",
+      "name": "CASTLE-362-7.c",
+      "cwe": 362,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Cases where mutex lock cannot be acquired is properly handled.",
+      "sha256": "0e5072d5df00d06b9eba9dc0862672c82f671793c228fdb5a1c1a2ccbac5fda7"
+    },
+    {
+      "id": "362-8",
+      "name": "CASTLE-362-8.c",
+      "cwe": 362,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Race condition avoided by using proper mutex locking.",
+      "sha256": "55efbd68a03f7741eb7bb00d62e5cc15bbcfe5f5675e9be3c98012f64d6a7a3f"
+    },
+    {
+      "id": "362-9",
+      "name": "CASTLE-362-9.c",
+      "cwe": 362,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Race condition avoided by using different memory for each thread",
+      "sha256": "ae5aa0adb47dc0be59ffa521526dc941843c762852ead32cbc9932d1fccf3581"
+    },
+    {
+      "id": "362-10",
+      "name": "CASTLE-362-10.c",
+      "cwe": 362,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Race condition avoided by writing to different files",
+      "sha256": "4871f349eeb59e6acb432d7aa5b79921632800ffb39f42b0123dc5478f8b5728"
+    },
+    {
+      "id": "401-1",
+      "name": "CASTLE-401-1.c",
+      "cwe": 401,
+      "vulnerable": true,
+      "lines": [
+        5,
+        16
+      ],
+      "description": "Memory is not released after effective lifetime.",
+      "sha256": "f07ebbdc5c874095f630bce90de161c886015bc5de53141c8be71f21e413f60f"
+    },
+    {
+      "id": "401-2",
+      "name": "CASTLE-401-2.c",
+      "cwe": 401,
+      "vulnerable": true,
+      "lines": [
+        14,
+        15,
+        22,
+        36
+      ],
+      "description": "Memory is not released after effective lifetime.",
+      "sha256": "8069450526b6d49886303d8739a4ca8400decb3d5492c8b69a48a97470d26432"
+    },
+    {
+      "id": "401-3",
+      "name": "CASTLE-401-3.c",
+      "cwe": 401,
+      "vulnerable": true,
+      "lines": [
+        6,
+        14
+      ],
+      "description": "Memory is not freed after function terminates.",
+      "sha256": "ab0f29bc58cbfccb0b982e3d591c4feeedac75a48418c0a47f02e69a54638aef"
+    },
+    {
+      "id": "401-4",
+      "name": "CASTLE-401-4.c",
+      "cwe": 401,
+      "vulnerable": true,
+      "lines": [
+        8,
+        31
+      ],
+      "description": "Memory is not freed after obfuscated program terminates.",
+      "sha256": "95ef97aba08f93ca031e74295573449bc6b20755718053a45929c34f9335f683"
+    },
+    {
+      "id": "401-5",
+      "name": "CASTLE-401-5.c",
+      "cwe": 401,
+      "vulnerable": true,
+      "lines": [
+        22,
+        39
+      ],
+      "description": "Memory is not released after effective lifetime, tricked by swap function",
+      "sha256": "09718aa4ef6c5ec66b7de053341833434f531c4c385fa18c893a84a33825110c"
+    },
+    {
+      "id": "401-6",
+      "name": "CASTLE-401-6.c",
+      "cwe": 401,
+      "vulnerable": true,
+      "lines": [
+        22,
+        39
+      ],
+      "description": "Memory is not released after effective lifetime, tricked by swap function called f",
+      "sha256": "7f6e24ba72362b5f8dbe0e4f7669c724fe7e335f877b4375dc036c6e10aa167e"
+    },
+    {
+      "id": "401-7",
+      "name": "CASTLE-401-7.c",
+      "cwe": 401,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Memory is freed after use in all cases.",
+      "sha256": "4c224dd618b403ceec7765dd2aaac9ef4af71027e61bb6972ddfce6cdf3d9935"
+    },
+    {
+      "id": "401-8",
+      "name": "CASTLE-401-8.c",
+      "cwe": 401,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Both allocated memory chunks are freed properly",
+      "sha256": "9036121bd19297a7b209daa1835be15af7401776031036255df74e121ac5ec38"
+    },
+    {
+      "id": "401-9",
+      "name": "CASTLE-401-9.c",
+      "cwe": 401,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Both allocated memory chunks are freed properly",
+      "sha256": "44a99d05898829b275706b6513d43d5f6723d424edf85586c8c018504630557e"
+    },
+    {
+      "id": "401-10",
+      "name": "CASTLE-401-10.c",
+      "cwe": 401,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Memory is released after effective lifetime, condition for free is always true",
+      "sha256": "641104e42142e4d5b0b9ea6461ffe05311a6a5bc1fbf7d2f7f22829894bd7282"
+    },
+    {
+      "id": "78-1",
+      "name": "CASTLE-78-1.c",
+      "cwe": 78,
+      "vulnerable": true,
+      "lines": [
+        13,
+        16
+      ],
+      "description": "Missing input validation of fgets input allows for OS command injection",
+      "sha256": "98e6b014d2da8bd58f0899794eb4d2f5b85df24855cdaa846754faf2e712800a"
+    },
+    {
+      "id": "78-2",
+      "name": "CASTLE-78-2.c",
+      "cwe": 78,
+      "vulnerable": true,
+      "lines": [
+        9,
+        10
+      ],
+      "description": "Missing input validation of command line arguments allows for OS command injection",
+      "sha256": "9b3e9bc19678c81d79dc969aa29dca845dbd70e45657e8cfe1402e3f5bc1a54c"
+    },
+    {
+      "id": "78-3",
+      "name": "CASTLE-78-3.c",
+      "cwe": 78,
+      "vulnerable": true,
+      "lines": [
+        23,
+        25
+      ],
+      "description": "Missing input validation of command line arguments allows for OS command injection",
+      "sha256": "6e2bdbc6514a205594ab68c5cb077c900e38c72a71d520d4a634d21f04fd77a6"
+    },
+    {
+      "id": "78-4",
+      "name": "CASTLE-78-4.c",
+      "cwe": 78,
+      "vulnerable": true,
+      "lines": [
+        11,
+        12
+      ],
+      "description": "Missing input validation of fgets input allows for OS command injection",
+      "sha256": "3227a6f68460ffe08511dc38de7786dbddf62102e8fa76f12e1c044316d3ef0c"
+    },
+    {
+      "id": "78-5",
+      "name": "CASTLE-78-5.c",
+      "cwe": 78,
+      "vulnerable": true,
+      "lines": [
+        10
+      ],
+      "description": "The test case exposes an OS Command Injection in scope complexity.",
+      "sha256": "a40697bcc4f090c781603c8ffc20a7f6b38f1e9bb0caea0b7b01c48a17ad86ec"
+    },
+    {
+      "id": "78-6",
+      "name": "CASTLE-78-6.c",
+      "cwe": 78,
+      "vulnerable": true,
+      "lines": [
+        29
+      ],
+      "description": "Missing input validation of fgets input allows for OS command injection",
+      "sha256": "863dfc06455b45f7cae63b80fe7a543cd5cbc1a2e5fcdf299855085fd978a96a"
+    },
+    {
+      "id": "78-7",
+      "name": "CASTLE-78-7.c",
+      "cwe": 78,
+      "vulnerable": false,
+      "lines": [],
+      "description": "OS command input is verified sufficiently.",
+      "sha256": "67d7888896b3fc29ac6e3965f29571d2e687d45aaace503e4e0f21de16fd41e8"
+    },
+    {
+      "id": "78-8",
+      "name": "CASTLE-78-8.c",
+      "cwe": 78,
+      "vulnerable": false,
+      "lines": [],
+      "description": "fgets input validated correcly disallowing OS command injection",
+      "sha256": "6a954e657bc673d4a8e564291ac9d66452b817ffb5df9f2dffd51df16397404a"
+    },
+    {
+      "id": "78-9",
+      "name": "CASTLE-78-9.c",
+      "cwe": 78,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Input is sufficienty validated before being used in a command.",
+      "sha256": "dfe9ba295a3bbd360132ed135ef3ae4261b0ea975c413e014ffab683244855aa"
+    },
+    {
+      "id": "78-10",
+      "name": "CASTLE-78-10.c",
+      "cwe": 78,
+      "vulnerable": false,
+      "lines": [],
+      "description": "Input is sufficienty validated before being used in a command.",
+      "sha256": "9138eb4aac788626ea1d1ae3b839925e17bf253eeab619fb161b26c97d3d7d61"
+    }
+  ]
+}

@@ -113,7 +113,7 @@ def pipeline_tool_specs(include_mutating=True):
     def schema(properties, required=()):
         return {"type": "object", "properties": properties, "required": list(required), "additionalProperties": False}
     specs = [ToolSpec(
-        "vulnerability_detection", "Run the Pipeline vulnerability scanner without editing source. Returns findings and coverage limits. For array bounds, null pointers and leaks use vulnerability_detection.analyze.",
+        "vulnerability_detection", "Start a vulnerability audit with this read-only Pipeline scan. Returns candidate findings, coverage limits, and a C/C++ semantic review checklist. Read source and apply the checklist before your final verdict; patterns are not proven vulnerabilities. For deeper bounds/null/leak evidence use vulnerability_detection.analyze with approval.",
         schema(scan), RiskLevel.READ,
         lambda c, a: _execute(c, a, "vulnerability_detection"), parallel_safe=False,
     )]

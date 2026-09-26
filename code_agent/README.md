@@ -605,3 +605,18 @@ npm --prefix code_agent/webui run build
 ```
 
 Required tests use scripted models and fixture workspaces; they do not need an API key or live Aider call.
+
+### Contract-5 live Web Agent evaluation
+
+From `code_agent/`, start the Web backend with the OpenRouter / `anthropic/claude-sonnet-4.5` environment configuration above, then run in a second terminal with `OPENROUTER_API_KEY` set:
+
+```bash
+uv run python scripts/check_openrouter_credits.py
+uv run python scripts/benchmark_contract5_web.py
+```
+
+The benchmark audits 40 CASTLE samples through the real Web Agent API, one conversation per file, without executing samples or granting write/execute approvals. It stops on insufficient credits or queue completion; rerunning skips scored samples, including incorrect answers.
+
+Keep [合同-5-result.md](合同-5-result.md) (metrics and four examples), `artifacts/contract5/dataset.json`, `manifest.json`, and `web-sonnet45/checkpoint.json` (all predictions and frozen configuration). `--report-only` rebuilds the report offline. Generated `workspaces/`, `runs/` and lock files are ignored; keep logs for unscored answers until offline parsing is complete. Preserve the runtime database and configuration for resuming.
+
+`security_review.py` adds general C audit guidance and unbounded literal `scanf` candidates, not a complete analyzer. Product hashes are frozen for resuming. CASTLE tuning-set results are neither independent generalization evidence nor formal contract acceptance.

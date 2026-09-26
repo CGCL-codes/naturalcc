@@ -8,7 +8,7 @@ tools. No separate `/api/agent/code_completion` endpoint is needed. The existing
 | Canonical tool | Model tool name | Approval | Behavior |
 | --- | --- | --- | --- |
 | `code_completion` | `code_completion` | write | CodeCompletionPlugin -> NaturalCC prompt -> Aider |
-| `vulnerability_detection` | `vulnerability_detection` | none | Built-in rules and optional TSan log import |
+| `vulnerability_detection` | `vulnerability_detection` | none | Built-in candidates, C semantic-review checklist and optional TSan log import |
 | `vulnerability_detection.analyze` | `vulnerability_detection_analyze` | execute | Built-in rules plus required Cppcheck analysis |
 | `vulnerability_detection.fix` | `vulnerability_detection_fix` | execute | Scan (Cppcheck if available), then Aider repair |
 

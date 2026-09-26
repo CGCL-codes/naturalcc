@@ -29,6 +29,7 @@ Common tasks: code completion, small project-aware edits/refactors, code summari
 - `rag/c/`: C/C++ parser, project graph, context retrieval. Avoid offline eval scripts unless the bug is there.
 - `rag/java/`: Java parser/prompt path.
 - `test_api.py`: API connectivity check, not a unit suite.
+- `scripts/benchmark_contract5_web.py`: resumable CASTLE checks via the Web Agent API (OpenRouter / Sonnet 4.5); stops on insufficient credits, skips scored samples. Keep `artifacts/contract5/{dataset.json,manifest.json,web-sonnet45/checkpoint.json}` and `合同-5-result.md`; workspaces/logs are ignored. `scripts/check_openrouter_credits.py` checks balance without inference.
 
 There is no legacy UI path; keep graphical work centered on `agent_web_api.py` and `webui/`.
 
@@ -52,6 +53,7 @@ Plugins auto-register from `plugins/` via `@register_plugin`; the frontend rende
 - `plugins/code_repair.py`: focused repair prompt via Aider.
 - `plugins/vulnerability_detection.py`: static scan with optional Aider remediation.
 - `agent_core/tools/pipeline.py`: Agent adapters for completion, scan, Cppcheck analysis and repair. `security_analysis.py` adapts analyzer evidence; see `PIPELINE_AGENT_TOOLS.md` for setup and limits.
+- `security_review.py`: dataset-independent C audit checklist and literal `scanf` format candidates, returned by the vulnerability plugin to both Pipeline and Web Agent users. Review guidance is not a proven finding; do not classify unrelated defects as target CWEs.
 
 Add a plugin by creating `plugins/my_feature.py`, inheriting `FeaturePlugin`, implementing `metadata`, `config_schema`, `execute`, and decorating with `@register_plugin`.
 

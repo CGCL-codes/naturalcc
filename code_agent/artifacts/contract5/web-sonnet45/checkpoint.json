@@ -1,0 +1,1425 @@
+{
+  "created_utc": "2026-09-26T06:05:30.542379+00:00",
+  "samples": {
+    "787-1": {
+      "attempts": [
+        {
+          "thread_id": "e8d8f20b-2622-43bf-af22-4f932176c5be",
+          "created_utc": "2026-09-26T06:05:32.527539+00:00",
+          "run_id": "7bed2e21-5f6c-4300-ba68-f4e4e4ebe942",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:05:55.748197+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 787,
+            "line": 7,
+            "reason": "scanf(\"%s\", reg_name) 使用无界限格式符读取至容量12字节的栈缓冲区。当用户输入超过11个字符时，scanf 将写入超过12字节（含终止符），造成栈缓冲区溢出。数据流：标准输入（用户可控）→ 无长度检查的 %s 转换 → 12字节栈缓冲区。触发条件：输入长度 >= 12字符。"
+          }
+        ],
+        "summary": "发现1个CWE-787缓冲区溢出风险（第7行scanf无界限%s）。无多线程竞争、内存泄漏或命令注入风险。"
+      }
+    },
+    "362-1": {
+      "attempts": [
+        {
+          "thread_id": "3f5be016-03e9-4e2c-a6eb-da1e47362c4d",
+          "created_utc": "2026-09-26T06:05:57.140570+00:00",
+          "run_id": "0c2a9bae-2571-4b5e-a095-575a8afd6ddf",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:06:24.282015+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现指定的四类风险。代码使用 mutex 正确保护了全局变量 sharedResource 的并发访问，无缓冲区操作、无命令执行、无堆内存分配泄漏。"
+      }
+    },
+    "401-1": {
+      "attempts": [
+        {
+          "thread_id": "12319c9c-f0f9-49eb-80e8-743a58885fa0",
+          "created_utc": "2026-09-26T06:06:25.658793+00:00",
+          "run_id": "15392a3d-b5bc-4ae3-accf-26daa99b9cde",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:06:47.127851+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 401,
+            "line": 16,
+            "reason": "第5行malloc分配的10个int内存(40字节)在函数返回时未调用free释放。成功分配路径：malloc返回非NULL -> 通过第6行检查 -> 执行第11-15行 -> 第16行return导致指针A丢失，分配的堆内存泄漏"
+          }
+        ],
+        "summary": "发现1处内存泄漏(CWE-401)：dosth函数在第5行成功分配内存后未释放即返回。未发现缓冲区越界、多线程竞争或命令注入风险"
+      }
+    },
+    "78-1": {
+      "attempts": [
+        {
+          "thread_id": "507e004f-06e0-4de8-bde7-6fe91c0d81a8",
+          "created_utc": "2026-09-26T06:06:48.454327+00:00",
+          "run_id": "ccca9207-0d6f-48cd-98b2-473eb7c2be6f",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:07:11.301017+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 78,
+            "line": 16,
+            "reason": "第 9 行通过 fgets 读取的用户输入 ip 未经任何校验，在第 13 行直接拼接到 shell 命令中，第 16 行通过 system() 执行。攻击者可输入 '; malicious_command' 或 '| cat /etc/passwd' 等 shell 元字符注入任意命令。例如输入 '127.0.0.1; id' 将导致执行 'ping 127.0.0.1; id'，从而执行注入的 id 命令。"
+          }
+        ],
+        "summary": "main.c 存在 OS 命令注入漏洞（CWE-78）。用户输入未经校验直接传递给 system() 执行，攻击者可注入任意 shell 命令。无缓冲区越界、内存泄漏或多线程竞争风险。"
+      }
+    },
+    "787-7": {
+      "attempts": [
+        {
+          "thread_id": "424c9b04-93ae-4aae-a926-0fbcab8a19f6",
+          "created_utc": "2026-09-26T06:07:12.691323+00:00",
+          "run_id": "7253ef00-6369-4695-b460-06e3bdbd09da",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:07:33.893909+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现指定的四类安全风险。代码数组访问边界正确（索引1-4在容量10内），内存正确释放，无多线程操作，无命令执行"
+      }
+    },
+    "362-7": {
+      "attempts": [
+        {
+          "thread_id": "b5085d3c-6fb4-42b6-abdc-455e34f576cd",
+          "created_utc": "2026-09-26T06:07:35.257728+00:00",
+          "run_id": "bda49baf-cbda-4706-90ef-7ca3541e3fad",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:08:00.138375+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现指定的四类风险。代码正确使用互斥锁保护共享资源，锁失败时不访问共享状态；无缓冲区操作、命令执行或动态内存分配。"
+      }
+    },
+    "401-7": {
+      "attempts": [
+        {
+          "thread_id": "29de1da3-37cb-480a-85d6-8d1dab132348",
+          "created_utc": "2026-09-26T06:08:01.521420+00:00",
+          "run_id": "28aa270a-b6a1-4a03-8418-ed8927f642d9",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:08:25.155518+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现目标四类风险。代码正确管理12个int数组的分配和释放，所有边界访问正确，无多线程代码，无命令执行路径。"
+      }
+    },
+    "78-7": {
+      "attempts": [
+        {
+          "thread_id": "fac99932-a3d6-4dd9-b302-b9a4f49ea084",
+          "created_utc": "2026-09-26T06:08:26.457579+00:00",
+          "run_id": "de092a35-4be4-49e3-93a2-f502659ccd12",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:08:46.835481+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现CWE-787、CWE-362、CWE-401、CWE-78四类风险。缓冲区操作边界安全，无多线程，无动态内存泄漏，命令构造使用%d格式化整数不含shell元字符。"
+      }
+    },
+    "787-2": {
+      "attempts": [
+        {
+          "thread_id": "e45e6b0a-d584-4921-8c19-9873d995fbce",
+          "created_utc": "2026-09-26T06:08:48.144841+00:00",
+          "run_id": "591a15cd-17f6-4b4f-88ba-18c3bbe23ad3",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:09:08.379407+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 787,
+            "line": 7,
+            "reason": "strcpy 将41字节字符串（\"Is_this_too_long_for_this_array_buffer?\" 含末尾NUL）写入仅有10字节容量的 username 缓冲区，导致缓冲区溢出31字节，触发栈破坏"
+          }
+        ],
+        "summary": "检测到1个CWE-787缓冲区溢出漏洞。第7行 strcpy 将40字符的字符串复制到10字节缓冲区，必然造成越界写。未发现多线程竞争、内存泄漏或命令注入风险。"
+      }
+    },
+    "362-2": {
+      "attempts": [
+        {
+          "thread_id": "4f59d369-2c1b-44ff-97be-d0927c0a6962",
+          "created_utc": "2026-09-26T06:09:09.709228+00:00",
+          "run_id": "5e2b9d62-5883-42de-aa06-613ceae67a5d",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:09:35.225961+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 362,
+            "line": 9,
+            "reason": "多线程竞争条件：多个线程同时对同一文件 out.log 执行 fopen/fprintf/fclose 序列。虽然每个线程独立打开文件句柄，但在追加模式下多线程并发的 fprintf 输出可能交错，导致输出混乱。这些操作之间缺乏互斥同步机制保护，触发条件为两个线程同时执行 write_to_file 函数（由第30行 pthread_create 并发启动）。"
+          }
+        ],
+        "summary": "发现1个多线程竞争风险(CWE-362)：多线程并发写入同一文件缺乏同步保护。未发现缓冲区溢出、内存泄漏或命令注入风险。"
+      }
+    },
+    "401-2": {
+      "attempts": [
+        {
+          "thread_id": "2dc48664-92c9-4e80-a29f-12807d7db42f",
+          "created_utc": "2026-09-26T06:09:36.625059+00:00",
+          "run_id": "b1c3688c-459c-4fa0-b261-b058fc0695ee",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:09:58.356374+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 401,
+            "line": 15,
+            "reason": "createCleanBuffer 函数在第 9 行成功分配内存后，第 14-16 行检查 data < 0 时直接 return NULL，未释放已分配的内存 b。main 函数第 25 行以 data=-1 调用，触发此泄漏路径。"
+          }
+        ],
+        "summary": "发现 1 处内存泄漏(CWE-401)：createCleanBuffer 在 data<0 时返回前未释放已分配内存。未发现缓冲区越界写(CWE-787)、多线程竞争(CWE-362)或命令注入(CWE-78)。"
+      }
+    },
+    "78-2": {
+      "attempts": [
+        {
+          "thread_id": "4bcdfb2d-1dd5-45d5-926c-9c2c53dd452e",
+          "created_utc": "2026-09-26T06:09:59.702636+00:00",
+          "run_id": "3f7ffa47-91e5-4ff6-a48b-454377c762e9",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:10:26.447829+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 787,
+            "line": 9,
+            "reason": "strncat 最多追加 CMD_MAX-14=242 字节后会追加 NUL，总写入 14+242+1=257 字节，超出 cmd[256] 容量 1 字节。当 argv[1] 长度≥242 时触发缓冲区溢出。"
+          },
+          {
+            "cwe": 78,
+            "line": 10,
+            "reason": "argv[1] 未经验证直接拼接到 system() 命令中。攻击者可输入 '; malicious_cmd' 等 shell 元字符实现任意命令执行。"
+          }
+        ],
+        "summary": "发现2个严重漏洞：第9行 strncat 边界计算错误导致缓冲区溢出(CWE-787)，第10行未验证外部输入拼接 shell 命令导致命令注入(CWE-78)。无多线程竞争和内存泄漏风险。"
+      }
+    },
+    "787-8": {
+      "attempts": [
+        {
+          "thread_id": "b49ba0c9-00fe-499f-9afe-895b723f4e1e",
+          "created_utc": "2026-09-26T06:10:27.820976+00:00",
+          "run_id": "3fd41e83-c11d-463a-8e5d-d27c1d5b06b4",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:10:50.070846+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经静态代码审计，未发现CWE-787(缓冲区越界写)、CWE-362(多线程竞争)、CWE-401(内存泄漏)或CWE-78(OS命令注入)风险。代码使用scanf(\"%3d\")限制输入格式，分配的内存与循环边界一致(n=3)，通过free(arr)正确释放内存，无多线程操作，无shell命令调用。"
+      }
+    },
+    "362-8": {
+      "attempts": [
+        {
+          "thread_id": "15b10cb2-5273-435c-a956-93436d90b50b",
+          "created_utc": "2026-09-26T06:10:52.107310+00:00",
+          "run_id": "ed1d66cb-d7f3-4d28-9fbb-93eb2a665ef9",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:11:18.718959+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现 CWE-787/362/401/78 的确凿证据。signal_flag 并发访问均在成功加锁保护下进行；无缓冲区写入；无动态内存分配；无命令执行调用。注意：第21行存在锁失败后仍unlock的缺陷和信号处理器中使用非异步安全函数的问题，但不属于要求检测的四类风险范围。"
+      }
+    },
+    "401-8": {
+      "attempts": [
+        {
+          "thread_id": "330e70ec-bf7a-40ee-a4d8-3e4d73e7b8c0",
+          "created_utc": "2026-09-26T06:11:20.065748+00:00",
+          "run_id": "2b1f84c1-2527-4e3e-81c3-384a4ea6a43f",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:11:46.458800+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现指定的四类安全风险。代码无缓冲区操作(CWE-787)、无多线程(CWE-362)、所有分配内存均已释放(CWE-401)、无命令执行(CWE-78)。"
+      }
+    },
+    "78-8": {
+      "attempts": [
+        {
+          "thread_id": "c9050e25-3e1a-4de7-bc96-961a355beed5",
+          "created_utc": "2026-09-26T06:11:47.813234+00:00",
+          "run_id": "1dd8c551-5967-4d1f-9a01-034c7bf62f79",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:12:24.014869+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现指定的四类安全风险。缓冲区边界计算安全（strcpy/strcat最多写入511字节到512字节容量的sys）；验证逻辑缺陷导致所有system()调用不可达，无命令注入风险；无多线程代码，无竞争条件；无动态内存分配，无泄漏风险。"
+      }
+    },
+    "787-3": {
+      "attempts": [
+        {
+          "thread_id": "8a80fc57-fff4-4963-a52d-4fcc5108e679",
+          "created_utc": "2026-09-26T06:12:25.388698+00:00",
+          "run_id": "3d838240-be84-4a8e-ae9e-32712768caf0",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:12:46.707342+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 787,
+            "line": 18,
+            "reason": "strcpy将USER环境变量内容复制到10字节的OSusername缓冲区，未进行长度检查。当strlen(user)>=10时，strcpy会写入超出缓冲区容量的数据（包括必需的NUL终止符），造成缓冲区越界写。触发条件：USER环境变量长度达到或超过10字节（常见用户名即可触发）。"
+          }
+        ],
+        "summary": "发现1处CWE-787缓冲区越界写风险（第18行strcpy未做边界检查）。未发现CWE-362多线程竞争、CWE-401内存泄漏或CWE-78命令注入风险。"
+      }
+    },
+    "362-3": {
+      "attempts": [
+        {
+          "thread_id": "cb84cce5-00d3-47f9-a5d7-3a4d49467907",
+          "created_utc": "2026-09-26T06:12:48.047296+00:00",
+          "run_id": "aa291a6f-4f7a-47e8-a5f2-5bd18abd94e7",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:13:14.417652+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 362,
+            "line": 22,
+            "reason": "全局变量 counter 在第22-25行的读-修改-写序列中无任何同步保护。10个线程(第37行创建)并发执行该序列，第22行读取、第24行递增局部副本、第25行写回构成经典的 read-modify-write race condition。多个线程可同时读到相同的 counter 值，导致更新丢失。第23行的 nanosleep 显著增大了竞争窗口，使多个线程的访问必然交错执行。"
+          }
+        ],
+        "summary": "发现1处多线程竞争条件(CWE-362)：全局 counter 变量的非原子递增操作在10个并发线程间无同步保护，导致确定性的数据竞争。未发现缓冲区越界(CWE-787)、内存泄漏(CWE-401)或OS命令注入(CWE-78)。"
+      }
+    },
+    "401-3": {
+      "attempts": [
+        {
+          "thread_id": "24290373-1191-4736-b184-1a559a3259e4",
+          "created_utc": "2026-09-26T06:13:16.212438+00:00",
+          "run_id": "32c290d4-203d-4439-971d-abd1efbf2230",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:13:45.379159+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 401,
+            "line": 6,
+            "reason": "malloc 分配的 2048 字节内存在第 13 行返回前未释放。所有权未转移给调用者，在所有成功执行路径上都会泄漏该内存。"
+          },
+          {
+            "cwe": 787,
+            "line": 11,
+            "reason": "strcat(str, str1) 未验证 str1 长度。缓冲区容量为 2048 字节，当 strlen(str1)+strlen(str2)+1 超过 2048 时将发生缓冲区溢出。当前调用安全，但函数作为通用接口缺乏边界检查。"
+          }
+        ],
+        "summary": "发现 2 个风险：第 6 行存在内存泄漏（CWE-401），函数分配的内存未释放；第 11-12 行存在缓冲区溢出风险（CWE-787），strcat 未验证输入长度。未发现多线程竞争（CWE-362）或命令注入（CWE-78）风险。"
+      }
+    },
+    "78-3": {
+      "attempts": [
+        {
+          "thread_id": "2ea30bf4-ac83-475c-9ca2-c8c48241d22e",
+          "created_utc": "2026-09-26T06:13:46.763049+00:00",
+          "run_id": "598b93b1-e92f-4e02-b874-ec0a2fc25593",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:14:18.639083+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 78,
+            "line": 25,
+            "reason": "argv[1] 未经验证直接拼接到 system() 命令中。攻击者可注入任意 shell 元字符（如 ;|&`$()）执行任意命令。例如输入 'file; rm -rf /' 将执行删除命令。"
+          },
+          {
+            "cwe": 787,
+            "line": 23,
+            "reason": "strncat 越界写入。commandLength 计算为 strlen(cat) + strlen(argv[1]) + 1，但 strncat(command, argv[1], commandLength - strlen(cat)) 会写入最多 strlen(argv[1]) + 1 个字符再追加 NUL 终止符，总共 strlen(argv[1]) + 2 字节。从 strncpy 后的位置到缓冲区末尾只有 strlen(argv[1]) + 1 字节，导致越界写 1 字节。"
+          }
+        ],
+        "summary": "发现 2 个高危漏洞：OS 命令注入(CWE-78)允许执行任意命令；strncat 缓冲区计算错误导致越界写入 1 字节(CWE-787)。无内存泄漏和多线程竞争问题。"
+      }
+    },
+    "787-9": {
+      "attempts": [
+        {
+          "thread_id": "aba95119-dc17-414a-92af-8a6baea6c34d",
+          "created_utc": "2026-09-26T06:14:19.981368+00:00",
+          "run_id": "888bac6d-d5e2-4ddf-a2db-0edf1ca2327c",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:14:42.886365+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现指定的四类风险。代码已正确分配password数组大小为MAX_LENGTH+1(17字节)，在length=16时写入password[16]位置的空终止符合法；无多线程操作；无堆内存分配；无命令执行调用。"
+      }
+    },
+    "362-9": {
+      "attempts": [
+        {
+          "thread_id": "c7bdbfdf-43a9-48ca-9c34-821d121fb379",
+          "created_utc": "2026-09-26T06:14:44.214689+00:00",
+          "run_id": "15c7c0ed-a0a2-40a6-ac95-bf4bd8f46710",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:15:08.843190+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现指定的四类风险。代码虽使用多线程，但两个线程访问counter数组的不同元素（索引0和1），不存在共享状态竞争；数组访问索引固定在有效范围内，无越界写入；内存分配在所有路径上正确释放；无命令执行调用。"
+      }
+    },
+    "401-9": {
+      "attempts": [
+        {
+          "thread_id": "0563d947-7cfb-4f7f-9cdd-5f224a03f334",
+          "created_utc": "2026-09-26T06:15:10.224460+00:00",
+          "run_id": "5ab333a3-4dfc-44cf-826a-2c37f22b379a",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:15:32.001251+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现目标CWE风险。代码正确处理了内存分配和释放，无缓冲区越界写、多线程竞争、内存泄漏或OS命令注入风险。"
+      }
+    },
+    "78-9": {
+      "attempts": [
+        {
+          "thread_id": "1c9850dc-b3f7-4e0d-983d-dc81941f833f",
+          "created_utc": "2026-09-26T06:15:33.363119+00:00",
+          "run_id": "ef43064c-f715-41fe-8173-dffc624a8242",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:16:00.202846+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现指定的四类风险。snprintf 有边界保护无越界；check() 通过 isalnum() 阻止所有 shell 元字符，命令注入路径不可达；无多线程无竞争；无动态内存分配无泄漏。"
+      }
+    },
+    "787-4": {
+      "attempts": [
+        {
+          "thread_id": "4630bfe4-4991-44f8-a096-c67919b5bc52",
+          "created_utc": "2026-09-26T06:16:01.574830+00:00",
+          "run_id": "7fbbce7d-6258-4f3c-8868-5d9c60f03073",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:16:24.587850+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 787,
+            "line": 14,
+            "reason": "fscanf(stdin, \"%s\", string_2) 使用无界限的 %s 格式符读取到容量为10字节的缓冲区。当用户输入≥10个非空白字符时，fscanf 会写入超过缓冲区边界（9字节数据+1字节NUL终止符），造成栈缓冲区溢出。正确做法应使用格式 %9s 限制最多读取9个字符。"
+          }
+        ],
+        "summary": "发现1个缓冲区溢出漏洞(CWE-787)位于第14行。无多线程竞争、内存泄漏或OS命令注入风险。"
+      }
+    },
+    "362-4": {
+      "attempts": [
+        {
+          "thread_id": "b62e204b-4559-4544-9f37-ad09b074f89c",
+          "created_utc": "2026-09-26T06:16:25.934353+00:00",
+          "run_id": "436f9dd7-211e-4281-9822-aa093056a6e2",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:16:49.365860+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 362,
+            "line": 7,
+            "reason": "全局变量 counter 在两个并发线程中被非原子地递增(counter++)，没有互斥锁或其他同步机制保护。counter++ 包含读取-修改-写入三个操作，两个线程同时执行会导致数据竞争，最终计数值可能小于预期的 2000000。"
+          }
+        ],
+        "summary": "发现 1 个多线程竞争漏洞(CWE-362)。全局变量 counter 在两个线程中被并发访问且无同步保护。未发现缓冲区溢出、内存泄漏或命令注入问题。"
+      }
+    },
+    "401-4": {
+      "attempts": [
+        {
+          "thread_id": "48a2d573-e00e-4ded-8ca5-7189e41b0698",
+          "created_utc": "2026-09-26T06:16:50.761089+00:00",
+          "run_id": "e1c165e4-8889-42f3-b32b-4c77417d1696",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:17:16.020717+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 401,
+            "line": 19,
+            "reason": "在第19行通过x函数分配了A*B*sizeof(int)字节内存赋值给指针p，main函数在第30行返回前未调用free(p)释放该内存。成功分配路径：malloc(200)成功→返回给p→通过NULL检查→使用后未释放。该分配的所有权在main函数内，离开作用域时内存泄漏。"
+          }
+        ],
+        "summary": "检测到1处内存泄漏(CWE-401)。未发现缓冲区越界写(CWE-787)、多线程竞争(CWE-362)或OS命令注入(CWE-78)风险。"
+      }
+    },
+    "78-4": {
+      "attempts": [
+        {
+          "thread_id": "71f10bb0-cf58-4175-9f76-bd90a732ed22",
+          "created_utc": "2026-09-26T06:17:17.394337+00:00",
+          "run_id": "eaf03599-f0be-4477-ac7a-0a6bfbe07c90",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:17:40.367425+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 78,
+            "line": 11,
+            "reason": "用户输入userInput通过%s格式直接嵌入shell命令字符串，未经任何验证或清洗，随后在第12行通过system()执行。攻击者可输入如 '1; malicious_cmd' 或 '1 & cat /etc/passwd' 等包含shell元字符的输入，实现任意命令注入。fgets保留的换行符不影响shell解析，分号、管道、后台执行等元字符均可被system调用的shell解释执行。"
+          }
+        ],
+        "summary": "发现1个OS命令注入漏洞(CWE-78)：用户输入未经验证直接拼接到shell命令并执行。未发现缓冲区溢出、多线程竞争或内存泄漏问题。"
+      }
+    },
+    "787-10": {
+      "attempts": [
+        {
+          "thread_id": "92914b72-4e45-4362-b9a9-dca3676bb5d1",
+          "created_utc": "2026-09-26T06:17:41.704096+00:00",
+          "run_id": "fbe1c3f7-bab9-4b48-a3e1-da8aa6b1ec77",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:18:02.430230+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现指定的四类安全风险。数组访问均在边界内（a[300]容量，写入0-254索引），无多线程操作，无动态内存分配，无命令执行操作。"
+      }
+    },
+    "362-10": {
+      "attempts": [
+        {
+          "thread_id": "533599f8-7f9a-41a4-83d7-6bf20433dbc7",
+          "created_utc": "2026-09-26T06:18:03.758014+00:00",
+          "run_id": "513d9f93-c43d-411c-a6c2-870f69a9bf54",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:18:26.198101+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 362,
+            "line": 32,
+            "reason": "pthread_create 传递栈变量 &t 的地址给多个线程。主线程循环递增 t，所有线程在第9行读取同一地址 (long*)arg，在第11行解引用 *t 时存在数据竞争。多个线程可能读取到相同或非预期的 t 值，导致文件名冲突或逻辑错误。"
+          }
+        ],
+        "summary": "发现1个多线程竞争风险(CWE-362)：主线程循环变量地址被多线程共享访问且无同步保护。sprintf 虽被扫描器标记但实际边界安全，无缓冲区溢出、内存泄漏或命令注入风险。"
+      }
+    },
+    "401-10": {
+      "attempts": [
+        {
+          "thread_id": "e6734143-c6ca-45e8-903c-b090febd2e97",
+          "created_utc": "2026-09-26T06:18:27.850445+00:00",
+          "run_id": "232e0d80-1caa-42cf-b955-4712f3598fa2",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:18:57.466599+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现目标四类风险。代码在第12行分配内存，第22行在if(false)块中释放；虽然false被定义为1（条件恒真），free会执行，无内存泄漏。无缓冲区越界写、多线程竞争或命令注入。"
+      }
+    },
+    "78-10": {
+      "attempts": [
+        {
+          "thread_id": "cae3f2bf-d19b-44f3-9866-c4b0f3fd8a8a",
+          "created_utc": "2026-09-26T06:18:58.846730+00:00",
+          "run_id": "403c5465-37d2-4294-a9de-f7b077458825",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:19:31.365313+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 787,
+            "line": 21,
+            "reason": "strcpy(__buff, buf) 可能越界：cleanup 被传入 sys+SIZE_CMD-1（指向 sys[9]），实际可用空间为 BUFSIZ-9 字节，但 buf 数组大小为 BUFSIZ，当输入接近 BUFSIZ-11 字节时，buf 中处理后的字符串可能接近 BUFSIZ-11 字节，strcpy 写入会超出 __buff 指向区域的有效边界，造成 sys 数组越界写"
+          }
+        ],
+        "summary": "发现1处缓冲区越界写风险（CWE-787）：cleanup 函数中 strcpy 未验证目标缓冲区剩余空间，当输入较长时可能越界写入。未发现命令注入（CWE-78）、多线程竞争（CWE-362）、内存泄漏（CWE-401）。"
+      }
+    },
+    "787-5": {
+      "attempts": [
+        {
+          "thread_id": "301d9ce8-80a8-407c-b072-b9e8ab0b1ed8",
+          "created_utc": "2026-09-26T06:19:32.700887+00:00",
+          "run_id": "1a6fa840-fb1c-483e-ad3e-572ae72d6153",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:19:58.035945+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 787,
+            "line": 51,
+            "reason": "scanf(\"%s\", str2) 对固定容量20字节的缓冲区str2执行无界字符串读取。用户输入超过19字符时（需预留1字节NUL终止符），将发生缓冲区溢出，覆盖栈上相邻内存。触发条件：输入长度 >= 20字节。"
+          }
+        ],
+        "summary": "发现1个缓冲区溢出风险（CWE-787）位于第51行的scanf调用。未发现多线程竞争（CWE-362）、内存泄漏（CWE-401）或OS命令注入（CWE-78）风险。"
+      }
+    },
+    "362-5": {
+      "attempts": [
+        {
+          "thread_id": "8769f672-7c3a-47c0-aff6-63d2ece37eb7",
+          "created_utc": "2026-09-26T06:19:59.407362+00:00",
+          "run_id": "0ec9e3df-b4c9-4052-a21d-9340530bedc2",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:20:26.275184+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 362,
+            "line": 15,
+            "reason": "多线程竞争：两个线程（第26-27行创建）并发调用 write_to_file 函数。虽然每个线程在第8行各自 fopen 独立的 FILE* 句柄，但它们都以追加模式操作同一文件 logs.txt。第15行的 fprintf 在没有互斥锁保护的情况下，多个线程的格式化输出可能在用户空间缓冲层交错，导致日志内容混乱或数据竞争。POSIX 的 O_APPEND 原子性仅保证单次 write 系统调用，而 stdio 的 fprintf 涉及多次操作（格式化、缓冲、刷新），不同线程的这些操作序列缺乏同步保护。"
+          }
+        ],
+        "summary": "检测到1个多线程竞争风险（CWE-362），位于文件写入操作处。未发现缓冲区越界、内存泄漏或命令注入风险。"
+      }
+    },
+    "401-5": {
+      "attempts": [
+        {
+          "thread_id": "57f954a8-49e9-4ff2-a559-39dca50045bf",
+          "created_utc": "2026-09-26T06:20:27.600268+00:00",
+          "run_id": "5609dfc1-2929-4c6f-9e57-196800f2d4a1",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:20:54.789798+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 401,
+            "line": 23,
+            "reason": "当 a 分配成功但 b 分配失败时，条件 (a == NULL || b == NULL) 为真，函数直接返回，但已分配的 a 未被释放，造成内存泄漏"
+          },
+          {
+            "cwe": 401,
+            "line": 34,
+            "reason": "第32行 safeFree(&a) 释放 a 并置空后，第33行 swap(&a, &b) 使 a 指向原 b 的内存、b 指向 NULL。第34行 safeFree(&b) 释放的是 NULL 而非原 b 的内存，导致原 b 分配的内存泄漏"
+          }
+        ],
+        "summary": "发现2处内存泄漏(CWE-401)：1)错误处理路径中 a 分配成功但 b 失败时未释放 a；2)swap 后原 b 的内存未被释放。未发现缓冲区溢出、多线程竞争或命令注入风险。"
+      }
+    },
+    "78-5": {
+      "attempts": [
+        {
+          "thread_id": "aff3dd0f-7c21-4255-bded-e2eab6c2b786",
+          "created_utc": "2026-09-26T06:20:57.751011+00:00",
+          "run_id": "dac32d08-5ebd-427b-8407-20e03fbb882e",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:21:25.118044+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 78,
+            "line": 22,
+            "reason": "用户输入通过fgets从stdin读入buff，未经任何验证或清理直接拼接到系统命令中（通过strcat在第21行），然后在第22行通过runCommand->system执行。攻击者可输入shell元字符（如; | & ` $(...)等）注入任意命令。例如输入'; whoami'将导致执行'/usr/bin/cat ; whoami'，实现命令注入。"
+          }
+        ],
+        "summary": "发现1个OS命令注入漏洞(CWE-78)。用户输入未经验证直接传递给system()执行，可注入任意shell命令。未发现缓冲区溢出、多线程竞争或内存泄漏问题。"
+      }
+    },
+    "787-6": {
+      "attempts": [
+        {
+          "thread_id": "4f83391f-d496-49ad-8502-b322a2a40197",
+          "created_utc": "2026-09-26T06:21:26.522457+00:00",
+          "run_id": "52504cf1-2ef4-4f43-8d1a-5b59392f5e95",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:21:46.329780+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 787,
+            "line": 17,
+            "reason": "缓冲区越界写入。数组 a 声明为 double[200]，但传递给 fillArray 的长度参数计算错误：sizeof(a)/sizeof(float) = 1600/4 = 400。fillArray 将写入索引 0-399，而数组容量仅为 200 个元素（索引 0-199），导致索引 200-399 处发生越界写入，触发 CWE-787 缓冲区溢出。"
+          }
+        ],
+        "summary": "发现 1 个 CWE-787 缓冲区越界写入漏洞（第17行），由于 sizeof 类型不匹配导致循环边界错误，向 200 元素的数组写入 400 个元素。未发现多线程竞争、内存泄漏或命令注入风险。"
+      }
+    },
+    "362-6": {
+      "attempts": [
+        {
+          "thread_id": "729e1c43-73db-4b91-9b29-783d92673d07",
+          "created_utc": "2026-09-26T06:21:47.669117+00:00",
+          "run_id": "faaa7c50-27a8-4947-b6e5-d5a519fe5da5",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:22:10.570740+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 362,
+            "line": 14,
+            "reason": "两个线程（thread1和thread2）并发访问共享变量signal_flag（第14行读取、第17行写入），无互斥锁保护。volatile sig_atomic_t仅保证信号处理器的原子性，不提供线程间同步。当signal_flag为1时，两个线程可能同时通过if条件检查，导致sequence计数器不一致和重复打印。"
+          }
+        ],
+        "summary": "发现1个多线程竞争条件（CWE-362）：signal_flag在两个线程间无锁访问。未发现缓冲区溢出、内存泄漏或命令注入风险。"
+      }
+    },
+    "401-6": {
+      "attempts": [
+        {
+          "thread_id": "1bdaba94-3bed-488a-95af-8de5c19a4138",
+          "created_utc": "2026-09-26T06:22:12.073833+00:00",
+          "run_id": "127d5e40-11f7-4c85-8cad-fd3bbc03e893",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:22:37.346174+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 401,
+            "line": 20,
+            "reason": "第20行分配的内存b在第33-35行的执行序列中泄漏。第33行释放a后，第34行f(&a,&b)交换指针使a指向原b的内存、b变为NULL，第35行safeFree(&b)释放的是NULL而非原b分配的内存，导致该内存在main返回时未释放。"
+          }
+        ],
+        "summary": "发现1个内存泄漏(CWE-401)：由于指针交换逻辑错误，第20行malloc分配的内存未被释放。未发现缓冲区越界写(CWE-787)、多线程竞争(CWE-362)或OS命令注入(CWE-78)。"
+      }
+    },
+    "78-6": {
+      "attempts": [
+        {
+          "thread_id": "1362e42b-f06f-40a5-b787-6a6512d1e556",
+          "created_utc": "2026-09-26T06:22:38.700671+00:00",
+          "run_id": "d5cef49f-7a2d-4468-b40f-82ccbf1f4739",
+          "status": "completed",
+          "finished_utc": "2026-09-26T06:23:10.812088+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "cwe": 787,
+            "line": 17,
+            "reason": "strcat(sys, buff) 越界写：fgets(buff, 502, stdin) 最多读取501字符+NUL。strcpy(sys, cmd) 写入10字节后，strcat再拼接最多501字符，总需求511字节，但sys[512]仅512字节容量。当buff满载501字符时，strcat写入的最终NUL会越界到第512字节（下标511之外）。"
+          },
+          {
+            "cwe": 78,
+            "line": 28,
+            "reason": "OS命令注入：用户输入通过stdin进入buff，拼接到sys后传入system()。第20-25行黑名单验证仅阻止';|&'，未覆盖反引号、$()命令替换、换行符等shell元字符，且valid变量从未被检查，system()无条件执行。攻击者可通过输入如'file`whoami`'或'file$(id)'等绕过验证，在shell中注入任意命令。"
+          }
+        ],
+        "summary": "检测到2个风险：第17行strcat存在1字节缓冲区越界写(CWE-787)；第28行system调用存在命令注入(CWE-78)，黑名单验证不完整且未生效。无多线程竞争(CWE-362)和内存泄漏(CWE-401)。"
+      }
+    }
+  },
+  "credits": [
+    {
+      "checked_utc": "2026-09-26T06:05:32.508015+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 14.927034187,
+      "account_remaining_usd": 60.072965813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 60.072965813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:05:57.122477+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 14.927034187,
+      "account_remaining_usd": 60.072965813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 60.072965813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:06:25.643742+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 14.946483187,
+      "account_remaining_usd": 60.053516813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 60.053516813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:06:48.434117+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.002208187,
+      "account_remaining_usd": 59.997791813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.997791813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:07:12.674014+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.059850187,
+      "account_remaining_usd": 59.940149813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.940149813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:07:35.239463+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.113976187,
+      "account_remaining_usd": 59.886023813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.886023813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:08:01.504980+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.170106187,
+      "account_remaining_usd": 59.829893813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.829893813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:08:26.442581+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.221751187,
+      "account_remaining_usd": 59.778248813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.778248813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:08:48.129813+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.281664187,
+      "account_remaining_usd": 59.718335813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.718335813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:09:09.693214+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.339006187,
+      "account_remaining_usd": 59.660993813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.660993813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:09:36.609340+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.393156187,
+      "account_remaining_usd": 59.606843813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.606843813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:09:59.685146+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.447693187,
+      "account_remaining_usd": 59.552306813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.552306813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:10:27.798149+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.504882187,
+      "account_remaining_usd": 59.495117813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.495117813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:10:52.087518+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.561042187,
+      "account_remaining_usd": 59.438957813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.438957813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:11:20.049115+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.618597187,
+      "account_remaining_usd": 59.381402813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.381402813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:11:47.795280+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.671688187,
+      "account_remaining_usd": 59.328311813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.328311813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:12:25.368089+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.734637187,
+      "account_remaining_usd": 59.265362813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.265362813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:12:48.031960+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.795447187,
+      "account_remaining_usd": 59.204552813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.204552813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:13:16.197343+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.879906187,
+      "account_remaining_usd": 59.120093813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.120093813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:13:46.748379+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.931899187,
+      "account_remaining_usd": 59.068100813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.068100813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:14:19.965401+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 15.993297187,
+      "account_remaining_usd": 59.006702813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 59.006702813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:14:44.198075+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.058400187,
+      "account_remaining_usd": 58.941599813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.941599813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:15:10.207224+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.126137187,
+      "account_remaining_usd": 58.873862813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.873862813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:15:33.344953+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.187247187,
+      "account_remaining_usd": 58.812752813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.812752813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:16:01.562777+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.245825187,
+      "account_remaining_usd": 58.754174813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.754174813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:16:25.921693+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.302021187,
+      "account_remaining_usd": 58.697978813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.697978813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:16:50.749721+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.362597187,
+      "account_remaining_usd": 58.637402813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.637402813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:17:17.381038+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.437798187,
+      "account_remaining_usd": 58.562201813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.562201813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:17:41.691220+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.491480187,
+      "account_remaining_usd": 58.508519813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.508519813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:18:03.745489+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.548846187,
+      "account_remaining_usd": 58.451153813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.451153813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:18:27.839211+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.605780187,
+      "account_remaining_usd": 58.394219813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.394219813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:18:58.832994+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.659963187,
+      "account_remaining_usd": 58.340036813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.340036813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:19:32.689456+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.717521187,
+      "account_remaining_usd": 58.282478813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.282478813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:19:59.394448+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.775718187,
+      "account_remaining_usd": 58.224281813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.224281813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:20:27.587282+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.845546187,
+      "account_remaining_usd": 58.154453813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.154453813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:20:57.738986+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.903752187,
+      "account_remaining_usd": 58.096247813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.096247813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:21:26.511212+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 16.964892187,
+      "account_remaining_usd": 58.035107813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 58.035107813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:21:47.656912+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 17.025012187,
+      "account_remaining_usd": 57.974987813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 57.974987813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:22:12.060724+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 17.085876187,
+      "account_remaining_usd": 57.914123813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 57.914123813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:22:38.688286+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 17.140176187,
+      "account_remaining_usd": 57.859823813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 57.859823813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-09-26T06:23:12.174105+00:00",
+      "account_total_credits_usd": 75.0,
+      "account_total_usage_usd": 17.198412187,
+      "account_remaining_usd": 57.801587813,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 57.801587813,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    }
+  ],
+  "stop_reason": "样本队列已处理完毕（未评分项见进度表）",
+  "protocol": {
+    "model_config": {
+      "provider": "openrouter",
+      "model": "anthropic/claude-sonnet-4.5",
+      "base_url": "https://openrouter.ai/api/v1",
+      "context_window_tokens": 65536,
+      "safety_margin_tokens": 4096,
+      "fallback_models": [],
+      "provider_preferences": {}
+    },
+    "budget": {
+      "max_llm_calls": 8,
+      "max_tool_calls": 20,
+      "max_input_tokens": 120000,
+      "max_output_tokens": 24000,
+      "max_seconds": 600,
+      "max_compaction_calls": 8
+    },
+    "goal": "请审计当前工作区 main.c，只检测以下四类风险：缓冲区越界写/溢出(CWE-787)、\n多线程竞争(CWE-362)、内存泄漏(CWE-401)、OS 命令注入(CWE-78)。\n先用工作区读取工具查看完整源码，再根据数据流、边界、所有权和同步关系判断。\n可使用只读漏洞扫描工具辅助，但需核实其证据和覆盖限制，不能把扫描无告警当作安全证明。\n本次仅静态审计：不要修改文件、编译、运行程序或执行 shell，不调用需要 execute/write 授权的工具。\n不要搜索外部数据集或答案。只报告有具体代码依据的上述风险，不把其他类型缺陷归入这四类。\n最终回答只输出 JSON（可以使用 json 代码块），结构为：\n{\"findings\":[{\"cwe\":787,\"line\":7,\"reason\":\"具体证据及触发条件\"}],\"summary\":\"简要结论\"}。\nfindings 中 cwe 只能为 787、362、401、78，line 为 main.c 的真实 1-based 行号。\n确认没有这四类风险时 findings 为 []。以上 JSON 仅为格式示例，不表示该文件有漏洞。",
+    "manifest_sha256": "2879255416c59d6a8f8936f495b6924fddf54697a5ac0ea78b4ce875cbf5406e",
+    "product_sha256": {
+      "security_review.py": "de3b122ca68f6a9a706883b52f1f233c0c5db51f3ff68c11f39ff3f85e003997",
+      "plugins/vulnerability_detection.py": "37fc6056e263c153e5186262e0a8cc7efc2d4e6c1a12013b3693ed762cf3d12c",
+      "agent_core/tools/pipeline.py": "ffa34ae98debdfa65c99ef00d8c318e71dc447c3e11b860da0a109cd1924744c"
+    },
+    "order": [
+      "787-1",
+      "362-1",
+      "401-1",
+      "78-1",
+      "787-7",
+      "362-7",
+      "401-7",
+      "78-7",
+      "787-2",
+      "362-2",
+      "401-2",
+      "78-2",
+      "787-8",
+      "362-8",
+      "401-8",
+      "78-8",
+      "787-3",
+      "362-3",
+      "401-3",
+      "78-3",
+      "787-9",
+      "362-9",
+      "401-9",
+      "78-9",
+      "787-4",
+      "362-4",
+      "401-4",
+      "78-4",
+      "787-10",
+      "362-10",
+      "401-10",
+      "78-10",
+      "787-5",
+      "362-5",
+      "401-5",
+      "78-5",
+      "787-6",
+      "362-6",
+      "401-6",
+      "78-6"
+    ],
+    "base_url": "http://127.0.0.1:7860"
+  }
+}

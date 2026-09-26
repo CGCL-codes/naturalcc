@@ -1,0 +1,5 @@
+# Keep the dataset, frozen manifest and scored checkpoint; omit runtime exports.
+/web-sonnet45/workspaces/
+/web-sonnet45/runs/
+/web-sonnet45/benchmark.lock
+/web-sonnet45/*.tmp
