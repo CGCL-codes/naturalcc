@@ -1,0 +1,27 @@
+import { AuthorizeResponse } from "@azure/msal-common/node";
+export declare class LoopbackClient {
+    private server;
+    private preferredPort;
+    constructor(preferredPort?: number);
+    /**
+     * Spins up a loopback server which returns the server response when the localhost redirectUri is hit
+     * @param successTemplate
+     * @param errorTemplate
+     * @returns
+     */
+    listenForAuthCode(successTemplate?: string, errorTemplate?: string): Promise<AuthorizeResponse>;
+    /**
+     * Handles POST requests for form_post response mode
+     */
+    private handlePostRequest;
+    /**
+     * Get the port that the loopback server is running on
+     * @returns
+     */
+    getRedirectUri(): string;
+    /**
+     * Close the loopback server
+     */
+    closeServer(): void;
+}
+//# sourceMappingURL=LoopbackClient.d.ts.map

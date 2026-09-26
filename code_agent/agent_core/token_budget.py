@@ -23,7 +23,7 @@ class ContextHardLimitExceeded(RuntimeError):
 
 
 @dataclass(frozen=True)
-class DeepSeekModelProfile:
+class ModelContextProfile:
     model: str = "deepseek-chat"
     context_window_tokens: int = 65_536
     default_output_reserve_tokens: int = 4_096
@@ -35,8 +35,6 @@ class DeepSeekModelProfile:
     summarizer_output_tokens: int = 2_048
 
     def __post_init__(self) -> None:
-        if self.model != "deepseek-chat":
-            raise ValueError("first-stage token budgeting only supports deepseek-chat")
         if not 0 < self.compaction_target_ratio < self.compaction_trigger_ratio < 1:
             raise ValueError(
                 "target_ratio must be below trigger_ratio and both must be between 0 and 1"
@@ -58,6 +56,12 @@ class DeepSeekModelProfile:
             >= self.context_window_tokens
         ):
             raise ValueError("output reserve and safety margin must fit the context window")
+
+
+# The local tokenizer remains DeepSeek-specific in the first rollout, but the
+# context geometry belongs to the selected runtime model. Keep this alias so
+# existing integrations and tests retain their public import path.
+DeepSeekModelProfile = ModelContextProfile
 
 
 @dataclass(frozen=True)
@@ -151,7 +155,7 @@ class DeepSeekTokenCounter:
         messages: list[dict[str, Any]],
         tools: list[dict[str, Any]],
         serializer: "DeepSeekRequestSerializer",
-        profile: DeepSeekModelProfile,
+        profile: ModelContextProfile,
         *,
         reserved_output_tokens: int | None = None,
     ) -> TokenBreakdown:
@@ -185,7 +189,7 @@ class DeepSeekTokenCounter:
         messages: list[dict[str, Any]],
         tools: list[dict[str, Any]],
         serializer: "DeepSeekRequestSerializer",
-        profile: DeepSeekModelProfile,
+        profile: ModelContextProfile,
         *,
         reserved_output_tokens: int | None = None,
     ) -> TokenBreakdown:

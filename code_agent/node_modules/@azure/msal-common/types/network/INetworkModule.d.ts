@@ -1,0 +1,34 @@
+import { NetworkResponse } from "./NetworkResponse.js";
+import { IPerformanceClient } from "../telemetry/performance/IPerformanceClient.js";
+/**
+ * Options allowed by network request APIs.
+ */
+export type NetworkRequestOptions = {
+    headers?: Record<string, string>;
+    body?: string;
+    /** Correlation id for request-scoped telemetry. Used by internal retry logic. */
+    correlationId?: string;
+    /** Performance client for request-scoped telemetry. Used by internal retry logic. */
+    performanceClient?: IPerformanceClient;
+};
+/**
+ * Client network interface to send backend requests.
+ * @interface
+ */
+export interface INetworkModule {
+    /**
+     * Interface function for async network "GET" requests. Based on the Fetch standard: https://fetch.spec.whatwg.org/
+     * @param url
+     * @param options - Headers and/or body to include on the request
+     * @param timeout
+     */
+    sendGetRequestAsync<T>(url: string, options?: NetworkRequestOptions, timeout?: number): Promise<NetworkResponse<T>>;
+    /**
+     * Interface function for async network "POST" requests. Based on the Fetch standard: https://fetch.spec.whatwg.org/
+     * @param url
+     * @param options - Headers, body, and optional telemetry context to include on the request
+     */
+    sendPostRequestAsync<T>(url: string, options?: NetworkRequestOptions): Promise<NetworkResponse<T>>;
+}
+export declare const StubbedNetworkModule: INetworkModule;
+//# sourceMappingURL=INetworkModule.d.ts.map

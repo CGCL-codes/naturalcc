@@ -53,6 +53,16 @@ test("hydrateConversationMessages restores stable chat cards from API records", 
   assert.equal(messages[1].timestamp.toISOString(), "2026-07-30T00:01:00.000Z");
 });
 
+test("refresh keeps a visible assistant card while the last run is streaming", () => {
+  const messages = hydrateConversationMessages([
+    { id: "m1", role: "user", content: "Inspect", run_id: "run-2", created_at: "2026-07-30T08:00:00+08:00" }
+  ], { run_id: "run-2", status: "running" });
+
+  assert.equal(messages.length, 2);
+  assert.equal(messages[1].runId, "run-2");
+  assert.equal(messages[1].status, "running");
+});
+
 
 test("detectContextCandidate recognizes mentions and Windows absolute paths", () => {
   assert.deepEqual(

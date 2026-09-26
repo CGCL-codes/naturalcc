@@ -71,13 +71,27 @@ class ModelResponse:
     prompt_cache_miss_tokens: int = 0
     cost_usd: float = 0.0
     model: str | None = None
+    reasoning: str = ""
+    reasoning_details: list[dict[str, Any]] = field(default_factory=list)
 
     def to_message(self) -> dict[str, Any]:
-        return {
+        message = {
             "role": "assistant",
             "content": self.content,
             "tool_calls": [call.to_dict() for call in self.tool_calls],
         }
+        if self.reasoning_details:
+            message["reasoning_details"] = self.reasoning_details
+        elif self.reasoning:
+            message["reasoning_content"] = self.reasoning
+        return message
+
+
+@dataclass(frozen=True)
+class ModelStreamEvent:
+    kind: str
+    text: str = ""
+    response: ModelResponse | None = None
 
 
 @dataclass

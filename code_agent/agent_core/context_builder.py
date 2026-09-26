@@ -110,6 +110,7 @@ class ContextPlanner:
         reserved_output_tokens: int | None = None,
         pinned_memories: list[dict[str, Any]] | None = None,
         runtime_authorization: dict[str, Any] | None = None,
+        profile: DeepSeekModelProfile | None = None,
     ) -> ContextPlan:
         return self._build_plan(
             system_rules=system_rules,
@@ -122,6 +123,7 @@ class ContextPlanner:
             checkpoint=checkpoint,
             reserved_output_tokens=reserved_output_tokens,
             runtime_authorization=runtime_authorization or {},
+            profile=profile or self.profile,
         )
 
     def _build_plan(
@@ -137,6 +139,7 @@ class ContextPlanner:
         checkpoint: dict[str, Any] | None,
         reserved_output_tokens: int | None,
         runtime_authorization: dict[str, Any],
+        profile: DeepSeekModelProfile,
     ) -> ContextPlan:
         retained_pinned_memories = list(pinned_memories)
         retained_memories = list(memories)
@@ -155,7 +158,7 @@ class ContextPlanner:
                 [system_message],
                 tools,
                 self.serializer,
-                self.profile,
+                profile,
                 reserved_output_tokens=reserved_output_tokens,
             )
             if protected.total_with_reserve <= protected.context_window_tokens:
@@ -178,7 +181,7 @@ class ContextPlanner:
             [system_message],
             tools,
             self.serializer,
-            self.profile,
+            profile,
             reserved_output_tokens=reserved_output_tokens,
         )
 
@@ -187,19 +190,19 @@ class ContextPlanner:
             full_messages,
             tools,
             self.serializer,
-            self.profile,
+            profile,
             reserved_output_tokens=reserved_output_tokens,
         )
         trigger_tokens = int(
-            self.profile.context_window_tokens
-            * self.profile.compaction_trigger_ratio
+            profile.context_window_tokens
+            * profile.compaction_trigger_ratio
         )
         requires_compaction = full_breakdown.total_with_reserve >= trigger_tokens
-        selection_limit = self.profile.context_window_tokens
+        selection_limit = profile.context_window_tokens
         if requires_compaction:
             selection_limit = int(
-                self.profile.context_window_tokens
-                * self.profile.compaction_target_ratio
+                profile.context_window_tokens
+                * profile.compaction_target_ratio
             )
 
         groups = self._exchange_groups(messages)
@@ -218,7 +221,7 @@ class ContextPlanner:
                     [system_message, *candidate_messages],
                     tools,
                     self.serializer,
-                    self.profile,
+                    profile,
                     reserved_output_tokens=reserved_output_tokens,
                 )
                 if candidate_breakdown.total_with_reserve > selection_limit:
@@ -248,7 +251,7 @@ class ContextPlanner:
             planned_messages,
             tools,
             self.serializer,
-            self.profile,
+            profile,
             reserved_output_tokens=reserved_output_tokens,
         )
 

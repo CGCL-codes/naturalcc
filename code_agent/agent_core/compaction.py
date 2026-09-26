@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import json
 import time
@@ -177,6 +177,20 @@ class CompactionService:
         self.serializer = serializer
         self.profile = profile
 
+    def with_profile(self, profile: DeepSeekModelProfile) -> "CompactionService":
+        """Return an isolated view for a Run-specific context profile.
+
+        The service instance is shared by concurrent runs, so mutating
+        ``self.profile`` per request would leak provider settings across runs.
+        """
+        return CompactionService(
+            store=self.store,
+            gateway=self.gateway,
+            counter=self.counter,
+            serializer=self.serializer,
+            profile=profile,
+        )
+
     def _preflight_maintenance_call(
         self,
         compaction_id: str,
@@ -225,6 +239,7 @@ class CompactionService:
         max_maintenance_input_tokens: int | None = None,
         max_maintenance_output_tokens: int | None = None,
         deadline_epoch: float | None = None,
+        request_metadata: dict[str, Any] | None = None,
     ) -> CompactionOutcome:
         record = self.store.create_compaction(
             scope="run",
@@ -260,7 +275,9 @@ class CompactionService:
                     "compaction maintenance call budget exhausted"
                 )
             calls += 1
-            response = self.gateway.generate(request)
+            response = self.gateway.generate(
+                replace(request, metadata={**(request_metadata or {}), **request.metadata})
+            )
             self.store.record_compaction_response_usage(
                 record["id"],
                 input_tokens=response.input_tokens,
@@ -405,6 +422,7 @@ class CompactionService:
         max_maintenance_input_tokens: int | None = None,
         max_maintenance_output_tokens: int | None = None,
         deadline_epoch: float | None = None,
+        request_metadata: dict[str, Any] | None = None,
     ) -> CompactionOutcome:
         record = self.store.get_compaction(compaction_id)
         if record["scope"] != "run" or record["run_id"] != source.run_id:
@@ -448,7 +466,9 @@ class CompactionService:
                     "compaction maintenance call budget exhausted"
                 )
             calls += 1
-            response = self.gateway.generate(request)
+            response = self.gateway.generate(
+                replace(request, metadata={**(request_metadata or {}), **request.metadata})
+            )
             self.store.record_compaction_response_usage(
                 compaction_id,
                 input_tokens=response.input_tokens,
@@ -605,6 +625,7 @@ class CompactionService:
         max_maintenance_input_tokens: int | None = None,
         max_maintenance_output_tokens: int | None = None,
         deadline_epoch: float | None = None,
+        request_metadata: dict[str, Any] | None = None,
     ) -> CompactionOutcome:
         record = self.store.create_compaction(
             scope="thread",
@@ -639,7 +660,9 @@ class CompactionService:
                     "compaction maintenance call budget exhausted"
                 )
             calls += 1
-            response = self.gateway.generate(request)
+            response = self.gateway.generate(
+                replace(request, metadata={**(request_metadata or {}), **request.metadata})
+            )
             self.store.record_compaction_response_usage(
                 record["id"],
                 input_tokens=response.input_tokens,
@@ -817,6 +840,7 @@ class CompactionService:
         max_maintenance_input_tokens: int | None = None,
         max_maintenance_output_tokens: int | None = None,
         deadline_epoch: float | None = None,
+        request_metadata: dict[str, Any] | None = None,
     ) -> CompactionOutcome:
         record = self.store.get_compaction(compaction_id)
         if record["scope"] != "thread" or record["thread_id"] != source.thread_id:
@@ -860,7 +884,9 @@ class CompactionService:
                     "compaction maintenance call budget exhausted"
                 )
             calls += 1
-            response = self.gateway.generate(request)
+            response = self.gateway.generate(
+                replace(request, metadata={**(request_metadata or {}), **request.metadata})
+            )
             self.store.record_compaction_response_usage(
                 compaction_id,
                 input_tokens=response.input_tokens,

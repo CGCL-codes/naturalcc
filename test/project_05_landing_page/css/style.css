@@ -17,11 +17,21 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text);
   background: var(--bg);
   line-height: 1.6;
+}
+
+/* 可访问性 - 焦点样式 */
+a:focus, button:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .container {
@@ -31,11 +41,36 @@ body {
 }
 
 /* 导航 */
-.site-header { border-bottom: 1px solid var(--secondary); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+.site-header { 
+  border-bottom: 1px solid var(--secondary); 
+  position: sticky; 
+  top: 0; 
+  background: var(--bg); 
+  z-index: 100;
+  transition: box-shadow 0.3s ease;
+}
+.site-header.scrolled { 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+}
 .nav { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; }
 .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-decoration: none; }
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text);
+}
 .nav-links { display: flex; list-style: none; gap: 2rem; }
-.nav-links a { color: var(--text); text-decoration: none; }
+.nav-links a { 
+  color: var(--text); 
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover {
+  color: var(--primary);
+}
 
 /* 按钮 */
 .btn-primary, .btn-secondary {
@@ -85,7 +120,99 @@ body {
 
 /* 响应式 */
 @media (max-width: 768px) {
-  .hero h1 { font-size: 2rem; }
-  .nav-links { display: none; }
-  .pricing-card.featured { transform: scale(1); }
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    flex-direction: column;
+    gap: 0;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--secondary);
+    display: none;
+  }
+  
+  .nav-links.nav-active {
+    display: flex;
+  }
+  
+  .nav-links li {
+    padding: 0.8rem 1.5rem;
+    border-bottom: 1px solid var(--secondary);
+  }
+  
+  .nav-links li:last-child {
+    border-bottom: none;
+  }
+  
+  .nav .btn-primary {
+    display: none;
+  }
+  
+  .hero { 
+    padding: 3rem 0; 
+  }
+  
+  .hero h1 { 
+    font-size: 2rem; 
+  }
+  
+  .hero p {
+    font-size: 1rem;
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .hero-actions .btn-large {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .section-title {
+    font-size: 1.75rem;
+  }
+  
+  .features,
+  .pricing {
+    padding: 3rem 0;
+  }
+  
+  .pricing-card.featured { 
+    transform: scale(1); 
+    border: 2px solid var(--primary);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .pricing-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .pricing-card:last-child {
+    grid-column: span 2;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 1.5rem;
+  }
+  
+  .container {
+    padding: 0 1rem;
+  }
 }

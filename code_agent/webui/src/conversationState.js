@@ -33,8 +33,8 @@ export function groupThreads(threads = [], now = new Date()) {
 }
 
 
-export function hydrateConversationMessages(records = []) {
-  return records.map((record) => ({
+export function hydrateConversationMessages(records = [], lastRun = null) {
+  const messages = records.map((record) => ({
     id: record.id,
     type: record.role === "user" ? "user" : "assistant",
     content: record.content || "",
@@ -44,6 +44,19 @@ export function hydrateConversationMessages(records = []) {
     kind: record.kind || "message",
     metadata: record.metadata || {}
   }));
+  if (lastRun?.run_id && ["queued", "running", "waiting_approval", "paused"].includes(lastRun.status)
+      && !messages.some((message) => message.type === "assistant" && message.runId === lastRun.run_id)) {
+    messages.push({
+      id: `pending-${lastRun.run_id}`,
+      type: "assistant",
+      content: "Agent run in progress...",
+      timestamp: new Date(),
+      status: ["queued", "running"].includes(lastRun.status) ? "running" : "attention",
+      runId: lastRun.run_id,
+      approval: lastRun.status === "waiting_approval" ? lastRun.pending_approval : null
+    });
+  }
+  return messages;
 }
 
 

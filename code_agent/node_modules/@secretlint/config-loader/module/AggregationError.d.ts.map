@@ -1,0 +1,1 @@
+{"version":3,"file":"AggregationError.d.ts","sourceRoot":"","sources":["../src/AggregationError.ts"],"names":[],"mappings":"AAAA,eAAO,MAAM,kBAAkB,GAAI,OAAO,KAAK,KAAG,KAAK,IAAI,gBAE1D,CAAC;AACF,qBAAa,gBAAiB,SAAQ,KAAK;IACvC,MAAM,EAAE,KAAK,EAAE,CAAC;gBAEJ,MAAM,EAAE,KAAK,EAAE,EAAE,OAAO,EAAE,MAAM;CAM/C"}

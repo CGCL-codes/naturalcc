@@ -65,6 +65,7 @@ class EventStore:
                     title TEXT NOT NULL,
                     workspace TEXT NOT NULL DEFAULT '',
                     model TEXT NOT NULL DEFAULT '',
+                    runtime_model_config_json TEXT NOT NULL DEFAULT '{}',
                     runtime_mode TEXT NOT NULL DEFAULT 'agent',
                     budget_json TEXT NOT NULL DEFAULT '{}',
                     authorized_paths_json TEXT NOT NULL DEFAULT '[]',
@@ -83,6 +84,7 @@ class EventStore:
                     goal TEXT NOT NULL,
                     status TEXT NOT NULL,
                     budget_json TEXT NOT NULL,
+                    runtime_model_config_json TEXT NOT NULL DEFAULT '{}',
                     version INTEGER NOT NULL DEFAULT 0,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL
@@ -181,6 +183,7 @@ class EventStore:
             thread_additions = {
                 "workspace": "TEXT NOT NULL DEFAULT ''",
                 "model": "TEXT NOT NULL DEFAULT ''",
+                "runtime_model_config_json": "TEXT NOT NULL DEFAULT '{}'",
                 "runtime_mode": "TEXT NOT NULL DEFAULT 'agent'",
                 "budget_json": "TEXT NOT NULL DEFAULT '{}'",
                 "authorized_paths_json": "TEXT NOT NULL DEFAULT '[]'",
@@ -195,6 +198,13 @@ class EventStore:
             for name, definition in thread_additions.items():
                 if name not in thread_columns:
                     connection.execute(f"ALTER TABLE threads ADD COLUMN {name} {definition}")
+            run_columns = {
+                row["name"] for row in connection.execute("PRAGMA table_info(runs)").fetchall()
+            }
+            if "runtime_model_config_json" not in run_columns:
+                connection.execute(
+                    "ALTER TABLE runs ADD COLUMN runtime_model_config_json TEXT NOT NULL DEFAULT '{}'"
+                )
             compaction_columns = {
                 row["name"]
                 for row in connection.execute("PRAGMA table_info(compactions)").fetchall()
@@ -221,6 +231,7 @@ class EventStore:
         *,
         workspace: str | Path | None = None,
         model: str = "",
+        runtime_model_config: dict[str, Any] | None = None,
         runtime_mode: str = "agent",
         budget: dict[str, Any] | None = None,
         authorized_paths: list[str] | None = None,
@@ -239,16 +250,17 @@ class EventStore:
             connection.execute(
                 """
                 INSERT INTO threads(
-                    id, title, workspace, model, runtime_mode, budget_json,
+                    id, title, workspace, model, runtime_model_config_json, runtime_mode, budget_json,
                     authorized_paths_json, context_items_json, capabilities_json,
                     summary, last_run_id, version, created_at, updated_at
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 (
                     identifier,
                     title.strip() or "Untitled task",
                     normalized_workspace,
                     model.strip(),
+                    json.dumps(runtime_model_config or {}, ensure_ascii=False),
                     runtime_mode,
                     json.dumps(budget or {}),
                     json.dumps(normalized_paths, ensure_ascii=False),
@@ -304,6 +316,9 @@ class EventStore:
         result["authorized_paths"] = json.loads(result.pop("authorized_paths_json") or "[]")
         result["context_items"] = json.loads(result.pop("context_items_json") or "[]")
         result["capabilities"] = json.loads(result.pop("capabilities_json") or "{}")
+        result["runtime_model_config"] = json.loads(
+            result.pop("runtime_model_config_json") or "{}"
+        )
         return result
 
     def get_thread(self, thread_id: str) -> dict[str, Any]:
@@ -392,6 +407,7 @@ class EventStore:
         title: str | None = None,
         workspace: str | Path | None = None,
         model: str | None = None,
+        runtime_model_config: dict[str, Any] | None = None,
         runtime_mode: str | None = None,
         budget: dict[str, Any] | None = None,
         authorized_paths: list[str] | None = None,
@@ -407,6 +423,10 @@ class EventStore:
             updates["workspace"] = str(Path(workspace).expanduser().resolve())
         if model is not None:
             updates["model"] = model.strip()
+        if runtime_model_config is not None:
+            updates["runtime_model_config_json"] = json.dumps(
+                runtime_model_config, ensure_ascii=False
+            )
         if runtime_mode is not None:
             updates["runtime_mode"] = runtime_mode
         if budget is not None:
@@ -622,14 +642,15 @@ class EventStore:
         goal: str,
         budget: dict[str, Any],
         thread_id: str | None = None,
+        runtime_model_config: dict[str, Any] | None = None,
     ) -> None:
         timestamp = now_iso()
         with self._connect() as connection:
             if thread_id and connection.execute("SELECT 1 FROM threads WHERE id=?", (thread_id,)).fetchone() is None:
                 raise KeyError(f"unknown thread: {thread_id}")
             connection.execute(
-                "INSERT INTO runs(id, thread_id, workspace, goal, status, budget_json, version, created_at, updated_at) VALUES(?,?,?,?,?,?,?,?,?)",
-                (run_id, thread_id, str(Path(workspace).resolve()), goal, "queued", json.dumps(budget), 0, timestamp, timestamp),
+                "INSERT INTO runs(id, thread_id, workspace, goal, status, budget_json, runtime_model_config_json, version, created_at, updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                (run_id, thread_id, str(Path(workspace).resolve()), goal, "queued", json.dumps(budget), json.dumps(runtime_model_config or {}, ensure_ascii=False), 0, timestamp, timestamp),
             )
             if thread_id:
                 connection.execute(
@@ -645,6 +666,9 @@ class EventStore:
             raise KeyError(f"unknown run: {run_id}")
         result = dict(row)
         result["budget"] = json.loads(result.pop("budget_json"))
+        result["runtime_model_config"] = json.loads(
+            result.pop("runtime_model_config_json") or "{}"
+        )
         return result
 
     def list_runs(self, limit: int = 100) -> list[dict[str, Any]]:

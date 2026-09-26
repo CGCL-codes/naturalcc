@@ -18,7 +18,7 @@ from .memory_prompts import (
 )
 from .memory_projection import project_memory_review
 from .memory_store import MemoryProposalConflict, MemoryStore
-from .model_gateway import ModelGateway
+from .model_gateway import ModelGateway, RuntimeModelConfig
 from .tool_registry import redact_sensitive_text
 
 
@@ -115,6 +115,13 @@ class MemoryProposalService:
         evidence = self._freeze_evidence(thread_id, evidence_refs)
         if not evidence:
             raise ProposalValidationError("select at least one evidence item")
+        runtime_model_config = RuntimeModelConfig.from_dict(
+            thread.get("runtime_model_config"),
+            default_model=str(thread.get("model") or "deepseek-chat"),
+        )
+        request_metadata = {
+            "runtime_model_config": runtime_model_config.to_dict(),
+        }
 
         analyzer_response = self._generate(
             ModelRequest(
@@ -123,7 +130,9 @@ class MemoryProposalService:
                 purpose="memory_analysis",
                 max_output_tokens=4096,
                 response_format={"type": "json_object"},
-            )
+            ),
+            request_metadata=request_metadata,
+            profile=self._profile_for(runtime_model_config),
         )
         try:
             analysis = self._parse_analysis(analyzer_response.content)
@@ -134,6 +143,8 @@ class MemoryProposalService:
                 validation_error=first_error,
                 required_schema=ANALYZER_RESPONSE_FORMAT["json_schema"]["schema"],
                 max_output_tokens=4096,
+                request_metadata=request_metadata,
+                profile=self._profile_for(runtime_model_config),
             )
             try:
                 analysis = self._parse_analysis(repaired.content)
@@ -151,7 +162,9 @@ class MemoryProposalService:
                 purpose="memory_proposal",
                 max_output_tokens=3072,
                 response_format={"type": "json_object"},
-            )
+            ),
+            request_metadata=request_metadata,
+            profile=self._profile_for(runtime_model_config),
         )
         allowed_refs = {item["ref"] for item in evidence}
         evidence_by_ref = {item["ref"]: item for item in evidence}
@@ -166,6 +179,8 @@ class MemoryProposalService:
                 validation_error=first_error,
                 required_schema=COMPOSER_RESPONSE_FORMAT["json_schema"]["schema"],
                 max_output_tokens=3072,
+                request_metadata=request_metadata,
+                profile=self._profile_for(runtime_model_config),
             )
             try:
                 validated_proposals = self._parse_proposals(
@@ -213,17 +228,44 @@ class MemoryProposalService:
             created.append(self.get_review(proposal_id))
         return created
 
-    def _generate(self, request: ModelRequest):
+    def _profile_for(self, config: RuntimeModelConfig):
+        if self.context_planner is None:
+            return None
+        from dataclasses import replace
+
+        return replace(
+            self.context_planner.profile,
+            model=config.model,
+            context_window_tokens=config.context_window_tokens,
+            safety_margin_tokens=config.safety_margin_tokens,
+        )
+
+    def _generate(
+        self,
+        request: ModelRequest,
+        *,
+        request_metadata: dict[str, Any] | None = None,
+        profile: Any | None = None,
+    ):
         if self.context_planner is not None:
             self.context_planner.counter.assert_fits(
                 request.messages,
                 request.tools,
                 self.context_planner.serializer,
-                self.context_planner.profile,
+                profile or self.context_planner.profile,
                 reserved_output_tokens=request.max_output_tokens,
             )
         try:
-            return self.gateway.generate(request)
+            return self.gateway.generate(
+                ModelRequest(
+                    messages=request.messages,
+                    tools=request.tools,
+                    purpose=request.purpose,
+                    max_output_tokens=request.max_output_tokens,
+                    response_format=request.response_format,
+                    metadata={**(request_metadata or {}), **request.metadata},
+                )
+            )
         except Exception as exc:
             detail = redact_sensitive_text(str(exc)) or type(exc).__name__
             raise MemoryProposalGenerationError(
@@ -238,6 +280,8 @@ class MemoryProposalService:
         validation_error: ProposalValidationError,
         required_schema: dict[str, Any],
         max_output_tokens: int,
+        request_metadata: dict[str, Any] | None = None,
+        profile: Any | None = None,
     ):
         return self._generate(
             ModelRequest(
@@ -251,7 +295,9 @@ class MemoryProposalService:
                 purpose=f"{stage}_repair",
                 max_output_tokens=max_output_tokens,
                 response_format={"type": "json_object"},
-            )
+            ),
+            request_metadata=request_metadata,
+            profile=profile,
         )
 
     def _parse_analysis(self, content: str) -> dict[str, Any]:

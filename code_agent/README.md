@@ -88,14 +88,15 @@ If you need GPU support (e.g. for vLLM-based offline evaluation), install it man
 uv pip install vllm
 ```
 
-Do not put real API keys in source files, README examples, screenshots, or Git history. For Web UI usage, enter the key in the Settings panel; Agent and Pipeline requests send it only with the current local request. CLI, scripts, and backend fallback paths can also read temporary environment variables:
+Agent Runtime currently supports **only DeepSeek official API keys and OpenRouter API keys**. Select the provider explicitly with `CODE_AGENT_PROVIDER` and the model with `CODE_AGENT_MODEL`; neither the key nor the model name determines the provider. See [Terminal provider and model selection](#terminal-provider-and-model-selection) for complete PowerShell instructions. Do not put real API keys in source files, README examples, or Git history.
+
+For example, configure OpenRouter in a Linux/macOS/WSL shell before starting the backend:
 
 ```bash
-export DEEPSEEK_API_KEY="your key"
-# or
-export OPENAI_API_KEY="your key"
-# or, for OpenRouter/Aider paths:
-export OPENROUTER_API_KEY="your key"
+export OPENROUTER_API_KEY="your-openrouter-key"
+export CODE_AGENT_PROVIDER="openrouter"
+export CODE_AGENT_MODEL="anthropic/claude-sonnet-4.5"
+export CODE_AGENT_API_BASE="https://openrouter.ai/api/v1"
 ```
 
 ### 3. Install Frontend Dependencies
@@ -456,10 +457,11 @@ path of that environment's Python executable, for example:
 ```
 
 Open **NaturalCC: Open Code Agent**, choose a model, and enter your own API key
-in the UI's **API Key** field for Agent or Pipeline requests. For CLI or
-environment fallback workflows, launch VS Code with `DEEPSEEK_API_KEY`,
-`OPENAI_API_KEY`, or `OPENROUTER_API_KEY` set in its environment, then restart
-the extension host.
+in the UI's **API Key** field for Agent or Pipeline requests. For Agent Runtime
+environment fallback, launch VS Code with `CODE_AGENT_PROVIDER`, `CODE_AGENT_MODEL`,
+and the matching `DEEPSEEK_API_KEY` or `OPENROUTER_API_KEY`, then restart the
+extension host. `OPENAI_API_KEY` belongs to legacy Pipeline/CLI compatibility;
+it is not an Agent Runtime credential fallback.
 ## Durable Agent mode
 
 The project now has two independent runtimes:
@@ -467,16 +469,57 @@ The project now has two independent runtimes:
 - **Pipeline** keeps the original feature-selection → NaturalCC prompt → Aider flow at `POST /api/run`.
 - **Agent** uses a persisted state machine at `/api/agent/*`. It can choose read/search/NaturalCC tools, request approval for edits or commands, resume after a process restart, enforce budgets, record an auditable event stream, and create governed long-term-memory proposals from user-selected evidence.
 
-Conversation messages, run state, events, snapshots, approvals, and memories are stored in `outputs/agent_runtime.db` by default. Override it with `CODE_AGENT_DB`. Configure the model without putting a key in source files:
+Conversation messages, run state, events, snapshots, approvals, and memories are stored in `outputs/agent_runtime.db` by default. Override it with `CODE_AGENT_DB`.
 
-```bash
-export CODE_AGENT_MODEL=deepseek-chat
-export CODE_AGENT_API_BASE=https://api.deepseek.com/v1
-export DEEPSEEK_API_KEY=...
+### Terminal provider and model selection
+
+**Agent Runtime supports only DeepSeek official API keys and OpenRouter API keys.** To access Claude or other vendors' models through OpenRouter, keep the provider set to `openrouter` and use an OpenRouter key, not the model vendor's official key. Provider routing is explicit; it is never inferred from the key or model name.
+
+| API provider | `CODE_AGENT_PROVIDER` | Key environment variable | Example model | Default API base |
+|---|---|---|---|---|
+| DeepSeek official | `deepseek` | `DEEPSEEK_API_KEY` | `deepseek-chat` | `https://api.deepseek.com/v1` |
+| OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4.5` | `https://openrouter.ai/api/v1` |
+
+Run the following PowerShell commands from the repository root. Keep the complete key on one line and start the backend in the **same terminal session**:
+
+```powershell
+cd code_agent
+uv sync
+
+# Option A: OpenRouter
+$env:OPENROUTER_API_KEY = "your-openrouter-key"
+$env:CODE_AGENT_PROVIDER = "openrouter"
+$env:CODE_AGENT_MODEL = "anthropic/claude-sonnet-4.5"
+$env:CODE_AGENT_API_BASE = "https://openrouter.ai/api/v1"
+
+# Build on first use or after frontend changes
+cd webui
+npm install
+npm run build
+cd ..
+
 uv run python agent_web_api.py --host 127.0.0.1 --port 7860
 ```
 
-Agent requests use the same DeepSeek serializer for offline counting and API submission. The following optional variables tune the explicit model-level hard budget:
+For DeepSeek, replace the four OpenRouter configuration lines with:
+
+```powershell
+$env:DEEPSEEK_API_KEY = "your-deepseek-key"
+$env:CODE_AGENT_PROVIDER = "deepseek"
+$env:CODE_AGENT_MODEL = "deepseek-chat"
+$env:CODE_AGENT_API_BASE = "https://api.deepseek.com/v1"
+```
+
+- When unset, `CODE_AGENT_PROVIDER` defaults to `deepseek`. Setting only `OPENROUTER_API_KEY` does not switch providers.
+- When `CODE_AGENT_MODEL` is unset, DeepSeek uses `deepseek-chat` and OpenRouter uses `deepseek/deepseek-chat`. Set a model ID explicitly to select another model.
+- When `CODE_AGENT_API_BASE` is unset, it defaults to the selected provider's endpoint. Update or clear old model/base variables when switching providers to avoid stale values.
+- Restart the backend after changing environment variables, then open `http://127.0.0.1:7860/`. After a frontend update, use `Ctrl+F5` to refresh the browser.
+
+Refreshing restores the last selected conversation and its saved provider/model. With no saved selection, the UI uses the startup environment defaults. **New conversation** always starts from those defaults, even after viewing a historical DeepSeek conversation. Settings changes apply to the current conversation; they do not change the startup defaults. Click outside the model input to save an edit. Existing conversations are not migrated by changing environment variables; each Run keeps its creation-time configuration.
+
+The Settings **API key** field overrides the selected provider's environment key for that request. The entered key must match the selected Provider. Keys are not saved in conversations, Run snapshots, or SQLite; a UI-entered key must be entered again after refreshing. Legacy Pipeline/CLI support for `OPENAI_API_KEY` does not imply support for OpenAI or other vendors' official keys in Agent Runtime.
+
+Agent requests use the DeepSeek tokenizer for offline counting. It is exact for DeepSeek and a conservative estimate for other providers; the selected model's context window and safety margin still define the hard budget. The following optional variables tune the default model-level hard budget:
 
 ```bash
 export CODE_AGENT_TOKENIZER_DIR=/absolute/path/to/resources/deepseek_v3_tokenizer
@@ -546,6 +589,8 @@ POST /api/agent/memories/{memory_id}/activate
 POST /api/agent/memories/{memory_id}/reject
 DELETE /api/agent/memories/{memory_id}
 ```
+
+The NDJSON event endpoint follows a queued/running Run live and accepts `?after=<sequence>` for reconnection. Agent model calls stream `model.reasoning.delta` and `model.content.delta` events; the Web UI shows provider-returned reasoning text or summaries in a collapsible panel. Availability depends on the selected model and provider. OpenRouter reasoning blocks are preserved for subsequent tool calls; DeepSeek thinking content is returned as `reasoning_content`.
 
 ### Approval Troubleshooting
 

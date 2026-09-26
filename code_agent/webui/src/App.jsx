@@ -30,7 +30,8 @@ import {
   X
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { initialAgentState, hydrateAgentState } from "./agentState.js";
+import { initialAgentState, hydrateAgentState, reduceAgentEvent } from "./agentState.js";
+import { followAgentEvents } from "./agentEventStream.js";
 import { approveAgentAction, approvalErrorMessage } from "./agentApproval.js";
 import {
   buildAgentRunMessage,
@@ -54,6 +55,7 @@ import {
 } from "./conversationState.js";
 import { loadLayoutPrefs, saveLayoutPrefs, toLayoutStyle } from "./layoutPrefs.js";
 import { loadThemePref, nextTheme, saveThemePref } from "./themePrefs.js";
+import { readActiveThreadId, rememberActiveThread, threadToRestore, runtimeConfigForEdit } from "./runtimeSettings.js";
 import { MemoryReviewPanel } from "./MemoryReviewPanel.jsx";
 import {
   buildMemoryProposalSelection,
@@ -239,6 +241,14 @@ function App() {
   const [projectDir, setProjectDir] = useState("");
   const [targets, setTargets] = useState([]);
   const [model, setModel] = useState("");
+  const [runtimeModel, setRuntimeModel] = useState("");
+  const [defaultRuntimeConfig, setDefaultRuntimeConfig] = useState(null);
+  const [bootstrapReady, setBootstrapReady] = useState(false);
+  const [runtimeProvider, setRuntimeProvider] = useState("deepseek");
+  const [runtimeProviderDefaults, setRuntimeProviderDefaults] = useState({
+    deepseek: { model: "deepseek-chat" },
+    openrouter: { model: "deepseek/deepseek-chat" }
+  });
   const [apiKey, setApiKey] = useState("");
   const [instruction, setInstruction] = useState("");
   // Feature plugin states
@@ -354,6 +364,31 @@ function App() {
     [apiKey, completionType, currentFeature, featureConfig, instruction, model, prefix, projectDir, symbol, targets]
   );
 
+  function runtimeModelConfig(modelOverride = runtimeModel, providerOverride = runtimeProvider) {
+    return runtimeConfigForEdit(
+      activeThread?.runtime_model_config || defaultRuntimeConfig,
+      providerOverride,
+      modelOverride
+    );
+  }
+
+  function changeRuntimeProvider(nextProvider) {
+    const currentDefault = runtimeProviderDefaults[runtimeProvider]?.model;
+    const nextDefault = runtimeProviderDefaults[nextProvider]?.model;
+    const nextModel = !runtimeModel || runtimeModel === currentDefault
+      ? (nextDefault || runtimeModel)
+      : runtimeModel;
+
+    setRuntimeProvider(nextProvider);
+    setRuntimeModel(nextModel);
+    if (activeThread?.id) {
+      updateActiveThread({
+        model: nextModel,
+        runtime_model_config: runtimeModelConfig(nextModel, nextProvider)
+      }).catch((error) => setLastError(error.message));
+    }
+  }
+
   const filteredFiles = useMemo(() => {
     const query = fileFilter.trim().toLowerCase();
     const files = workspace.files || [];
@@ -380,13 +415,22 @@ function App() {
   useEffect(() => {
     let active = true;
     requestJson("/api/bootstrap")
-      .then((data) => {
+      .then(async (data) => {
         if (!active) {
           return;
         }
         setModels(data.models || []);
         setCompletionTypes(data.completion_types || defaultCompletionTypes);
         setModel(data.default_model || "");
+        const runtimeDefaults = data.runtime_provider_defaults || {};
+        const runtimeConfig = data.runtime_default_model_config || {
+          provider: "deepseek",
+          model: runtimeDefaults.deepseek?.model || data.default_model || "deepseek-chat"
+        };
+        setDefaultRuntimeConfig(runtimeConfig);
+        setRuntimeProviderDefaults((current) => ({ ...current, ...runtimeDefaults }));
+        setRuntimeProvider(runtimeConfig.provider || "deepseek");
+        setRuntimeModel(runtimeConfig.model || runtimeDefaults.deepseek?.model || data.default_model || "");
         setProjectDir(data.default_project_dir || "");
         setFeatures(data.features || []);
         setFeatureSchemas(data.schemas || {});
@@ -395,6 +439,18 @@ function App() {
           refreshWorkspace(data.default_project_dir || "", []),
           loadBrowse(data.default_project_dir || "")
         ]).catch((error) => setLastError(error.message));
+        // Restore only the conversation the user selected, after bootstrap.
+        // Never let an arbitrary history entry replace the launch defaults.
+        const { threads = [] } = await requestJson("/api/agent/threads");
+        if (!active) return;
+        setAgentThreads(threads);
+        const savedId = threadToRestore(threads, readActiveThreadId());
+        if (savedId) {
+          await loadAgentThread(savedId);
+        } else {
+          rememberActiveThread(null);
+        }
+        if (active) setBootstrapReady(true);
       })
       .catch((error) => setLastError(error.message));
     return () => {
@@ -443,7 +499,8 @@ function App() {
   }, [drawerOpen, runDetailsOpen, threadPendingDelete]);
 
   useEffect(() => {
-    if (runtimeMode !== "agent") return;
+    if (runtimeMode !== "agent" || !bootstrapReady) return;
+    let active = true;
     Promise.all([
       requestJson("/api/agent/threads"),
       requestJson("/api/agent/runs"),
@@ -451,17 +508,39 @@ function App() {
       requestJson(`/api/agent/memory-proposals?project_id=${encodeURIComponent(projectDir)}`)
     ])
       .then(([threadsPayload, runsPayload, memoriesPayload, proposalsPayload]) => {
+        if (!active) return;
         const threads = threadsPayload.threads || [];
         setAgentThreads(threads);
         setAgentRuns(runsPayload.runs || []);
         setAgentMemories(memoriesPayload.memories || []);
         setMemoryProposals((proposalsPayload.proposals || []).map(normalizeMemoryReview));
-        if (!activeThread?.id && threads[0]?.id) {
-          loadAgentThread(threads[0].id).catch((error) => setLastError(error.message));
-        }
       })
-      .catch((error) => setLastError(error.message));
-  }, [runtimeMode, projectDir, activeThread?.id]);
+      .catch((error) => { if (active) setLastError(error.message); });
+    return () => { active = false; };
+  }, [bootstrapReady, runtimeMode, projectDir, activeThread?.id]);
+
+  useEffect(() => {
+    const runId = agentState.runId;
+    if (runtimeMode !== "agent" || !runId || !["queued", "running"].includes(agentState.status)) return;
+    const controller = new AbortController();
+    let after = agentState.lastSequence || 0;
+    const follow = async () => {
+      while (!controller.signal.aborted) {
+        try {
+          await followAgentEvents(runId, after, (event) => {
+            if (event.sequence <= after) return;
+            after = event.sequence;
+            setAgentState((current) => current.runId === runId ? reduceAgentEvent(current, event) : current);
+          }, controller.signal, API_BASE);
+        } catch (error) {
+          if (controller.signal.aborted) return;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 500));
+      }
+    };
+    follow();
+    return () => controller.abort();
+  }, [agentState.runId, agentState.status, runtimeMode]);
 
   useEffect(() => {
     if (runtimeMode !== "agent" || !activeThread?.id) {
@@ -753,15 +832,17 @@ function App() {
       const thread = detail.thread;
       setRuntimeMode("agent");
       setActiveThread(thread);
+      rememberActiveThread(thread.id);
       setProjectDir(thread.workspace || projectDir);
-      setModel(thread.model || model);
+      setRuntimeModel(thread.runtime_model_config?.model || thread.model || runtimeModel);
+      setRuntimeProvider(thread.runtime_model_config?.provider || "deepseek");
       setBudgetDraft(normalizeBudgetDraft(thread.budget, budgetDraft));
       setContextItems(thread.context_items || []);
       const graphEnabled = Boolean(thread.capabilities?.codegraph?.enabled);
       setCodeGraphEnabled(graphEnabled);
       setCodeGraphStatus(null);
       setTargets((thread.context_items || []).map((item) => item.path).filter(Boolean));
-      setMessages(hydrateConversationMessages(detail.messages || []));
+      setMessages(hydrateConversationMessages(detail.messages || [], detail.last_run));
       setSelectedMemoryEvidence([]);
       const proposalPayload = await requestJson(
         `/api/agent/memory-proposals?project_id=${encodeURIComponent(thread.workspace || projectDir)}&thread_id=${encodeURIComponent(thread.id)}`
@@ -785,7 +866,10 @@ function App() {
     }
   }
 
-  async function createNewThread(title = "New task") {
+  async function createNewThread(title = "New task", config = defaultRuntimeConfig) {
+    if (!bootstrapReady || !config) {
+      throw new Error("Wait for settings to finish loading before creating a conversation.");
+    }
     if (!projectDir.trim()) {
       throw new Error("Set a workspace before creating a conversation.");
     }
@@ -794,7 +878,8 @@ function App() {
       body: JSON.stringify({
         title,
         workspace: projectDir,
-        model,
+        model: config.model,
+        runtime_model_config: config,
         runtime_mode: "agent",
         budget: budgetDraft,
         context_items: [],
@@ -807,6 +892,9 @@ function App() {
       })
     });
     setActiveThread(payload.thread);
+    rememberActiveThread(payload.thread.id);
+    setRuntimeProvider(payload.thread.runtime_model_config.provider);
+    setRuntimeModel(payload.thread.runtime_model_config.model);
     setMessages([]);
     setSelectedMemoryEvidence([]);
     setContextItems([]);
@@ -822,7 +910,7 @@ function App() {
     if (activeThread?.id) {
       return activeThread;
     }
-    return createNewThread(goal.slice(0, 80) || "New task");
+    return createNewThread(goal.slice(0, 80) || "New task", runtimeModelConfig());
   }
 
   async function updateActiveThread(changes) {
@@ -841,6 +929,9 @@ function App() {
 
   function resetConversationView() {
     setActiveThread(null);
+    rememberActiveThread(null);
+    setRuntimeProvider(defaultRuntimeConfig?.provider || "deepseek");
+    setRuntimeModel(defaultRuntimeConfig?.model || "deepseek-chat");
     setMessages([]);
     setContextItems([]);
     setContextSuggestions([]);
@@ -1123,6 +1214,7 @@ function App() {
         )
       });
       const runId = created.run_id;
+      updateMessage(assistantId, { runId });
       setAgentState({ ...initialAgentState, runId, status: "queued" });
       setAgentRunState(created.state);
       const state = await requestJson(`/api/agent/runs/${runId}/run`, { method: "POST" });
@@ -1219,20 +1311,19 @@ function App() {
     setLastError("");
     try {
       await approveAgentAction(requestJson, agentState.runId, agentState.pendingApproval);
+      setAgentState((current) => ({ ...current, status: "running", pendingApproval: null }));
       const state = await requestJson(`/api/agent/runs/${agentState.runId}/run`, { method: "POST" });
       const next = await refreshAgentState(agentState.runId);
       const message = buildAgentRunMessage(state, next);
-      addMessage(
-        "assistant",
-        state.final_answer
-          ? message.content
-          : `${message.content}\nChanged files: ${next.changedFiles.join(", ") || "none"}`,
-        message.status,
-        {
-          approval: message.approval,
-          runId: agentState.runId
-        }
-      );
+      const content = state.final_answer
+        ? message.content
+        : `${message.content}\nChanged files: ${next.changedFiles.join(", ") || "none"}`;
+      const pendingCard = messages.find((item) => item.id === `pending-${agentState.runId}`);
+      if (pendingCard) {
+        updateMessage(pendingCard.id, { content, status: message.status, approval: message.approval });
+      } else {
+        addMessage("assistant", content, message.status, { approval: message.approval, runId: agentState.runId });
+      }
       if (next.status === "completed") {
         await loadAgentThread(activeThread?.id);
       }
@@ -1265,18 +1356,17 @@ function App() {
     setBusy(true);
     try {
       await requestJson(`/api/agent/runs/${agentState.runId}/reject`, { method: "POST" });
+      setAgentState((current) => ({ ...current, status: "running", pendingApproval: null }));
       const state = await requestJson(`/api/agent/runs/${agentState.runId}/run`, { method: "POST" });
       const next = await refreshAgentState(agentState.runId);
       const message = buildAgentRunMessage(state, next);
-      addMessage(
-        "assistant",
-        state.final_answer ? message.content : `Rejected action.\n${message.content}`,
-        message.status,
-        {
-          approval: message.approval,
-          runId: agentState.runId
-        }
-      );
+      const content = state.final_answer ? message.content : `Rejected action.\n${message.content}`;
+      const pendingCard = messages.find((item) => item.id === `pending-${agentState.runId}`);
+      if (pendingCard) {
+        updateMessage(pendingCard.id, { content, status: message.status, approval: message.approval });
+      } else {
+        addMessage("assistant", content, message.status, { approval: message.approval, runId: agentState.runId });
+      }
       if (next.status === "completed") {
         await loadAgentThread(activeThread?.id);
       }
@@ -1777,17 +1867,26 @@ function App() {
             </button>
             <select
               className="header-select"
-              value={model}
+              value={runtimeMode === "agent" ? runtimeModel : model}
               onChange={(event) => {
                 const value = event.target.value;
-                setModel(value);
-                if (activeThread?.id) {
-                  updateActiveThread({ model: value }).catch((error) => setLastError(error.message));
+                if (runtimeMode === "agent") {
+                  setRuntimeModel(value);
+                } else {
+                  setModel(value);
+                }
+                if (runtimeMode === "agent" && activeThread?.id) {
+                  updateActiveThread({ model: value, runtime_model_config: runtimeModelConfig(value) }).catch((error) => setLastError(error.message));
                 }
               }}
             >
               {models.map((item) => <option value={item} key={item}>{item}</option>)}
-              {!models.includes(model) && model && <option value={model}>{model}</option>}
+              {(() => {
+                const selectedModel = runtimeMode === "agent" ? runtimeModel : model;
+                return !models.includes(selectedModel) && selectedModel
+                  ? <option value={selectedModel}>{selectedModel}</option>
+                  : null;
+              })()}
             </select>
             <select
               className="header-select runtime-select"
@@ -1846,13 +1945,31 @@ function App() {
                   <span className="message-meta">{formatTime(msg.timestamp)}</span>
                 </div>
                 <div className="message-bubble">
+                  {msg.type === "assistant" && msg.runId === agentState.runId
+                    && agentState.thinking.some((item) => item.text) && (
+                    <details className="thinking-panel" defaultOpen>
+                      <summary>
+                        Model thinking
+                        {agentState.status === "running" && <span className="thinking-live">Live</span>}
+                      </summary>
+                      <div className="thinking-panel-body">
+                        {agentState.thinking.filter((item) => item.text).map((item) => (
+                          <div key={item.callIndex} className="thinking-step">
+                            <span>Model call {item.callIndex}</span>
+                            <pre>{item.text}</pre>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )}
                   {msg.type === "assistant" && msg.status === "running" ? (
                     <>
                       <div className="message-status-row">
                         <span className="status-dot running" />
                         <span style={{ color: "var(--amber)" }}>Running...</span>
                       </div>
-                      <pre className="terminal-body">{msg.content}</pre>
+                      <pre className="terminal-body">{msg.runId === agentState.runId && agentState.streamedContent
+                        ? agentState.streamedContent : msg.content}</pre>
                     </>
                   ) : msg.type === "assistant" ? (
                     <>
@@ -2155,7 +2272,7 @@ function App() {
               <section className="run-detail-section">
                 <h4>Event timeline</h4>
                 <ol className="detail-timeline">
-                  {agentState.events.slice(-30).map((event) => (
+                  {agentState.events.filter((event) => !event.type.endsWith(".delta")).slice(-30).map((event) => (
                     <li key={`${event.sequence}-${event.type}`}>
                       <strong>{event.sequence}. {event.type}</strong>
                       <span>
@@ -2341,15 +2458,25 @@ function App() {
                   <Settings2 size={16} />
                   <span>Model</span>
                 </div>
+                <label className="field-label" htmlFor="runtimeProvider">Provider</label>
+                <select
+                  id="runtimeProvider"
+                  className="text-input"
+                  value={runtimeProvider}
+                  onChange={(event) => changeRuntimeProvider(event.target.value)}
+                >
+                  <option value="deepseek">DeepSeek official</option>
+                  <option value="openrouter">OpenRouter</option>
+                </select>
                 <label className="field-label" htmlFor="model">Model</label>
                 <input
                   id="model"
                   className="text-input"
-                  value={modelInputValue(model)}
-                  onChange={(event) => setModel(event.target.value)}
+                  value={modelInputValue(runtimeModel)}
+                  onChange={(event) => setRuntimeModel(event.target.value)}
                   onBlur={() => {
                     if (activeThread?.id) {
-                      updateActiveThread({ model }).catch((error) => setLastError(error.message));
+                      updateActiveThread({ model: runtimeModel, runtime_model_config: runtimeModelConfig() }).catch((error) => setLastError(error.message));
                     }
                   }}
                   list="model-options"
@@ -2407,7 +2534,10 @@ function App() {
                   <Metric label="Custom" value={customTargetCount} />
                 </div>
                 <dl className="info-list">
-                  <Info label="Provider" value={provider} />
+                  <Info
+                    label={runtimeMode === "agent" ? "Runtime provider" : "Pipeline provider"}
+                    value={runtimeMode === "agent" ? runtimeProvider : provider}
+                  />
                   <Info label="API key" value={apiKeyLabel} />
                   <Info label="Updated" value={lastUpdated || "not yet"} />
                   <Info label="Root" value={workspace.normalized_root || projectDir} />

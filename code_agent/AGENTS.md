@@ -16,7 +16,9 @@ Common tasks: code completion, small project-aware edits/refactors, code summari
 - `agent_core/contracts.py`, `tool_registry.py`, `policy.py`: trusted tool contracts and permission boundary.
 - `agent_core/event_store.py`, `memory_store.py`: SQLite conversation/message/event/snapshot/lease storage, governed memory proposals, review audit, goal-independent pinned memory, and active-only FTS5 retrieval memory.
 - `agent_core/memory_proposals.py`, `memory_prompts.py`, `memory_projection.py`: frozen evidence, tool-free two-pass proposal generation, validation, and deterministic user-facing review DTOs.
-- `agent_core/token_budget.py`, `context_builder.py`: pinned DeepSeek offline counting, full-request hard budgets, cache-friendly stable/dynamic prompt tiers, and continuous-tail ContextPlans.
+- `agent_core/model_gateway.py`: explicit per-Run provider routing (DeepSeek/OpenRouter) while preserving the `ModelGateway` Harness contract.
+- Agent Runs use the optional Gateway `stream()` path to emit batched `model.reasoning.delta` and `model.content.delta` events; `generate()` remains available for maintenance calls and existing gateways. The NDJSON endpoint follows active Runs and the UI renders returned reasoning in a collapsible panel.
+- `agent_core/token_budget.py`, `context_builder.py`: pinned DeepSeek offline estimation, model-specific context geometry, full-request hard budgets, cache-friendly stable/dynamic prompt tiers, and continuous-tail ContextPlans.
 - `agent_core/compaction.py`, `compaction_prompts.py`: versioned Analyzer/Summarizer checkpoints, validation, recovery, and deterministic fallback.
 - `webui/src/App.jsx`, `MemoryReviewPanel.jsx`, `MemoryProposalCard.jsx`, `webui/src/styles.css`: Codex-style React workbench with conversation history, evidence selection, governed memory review, budget meters, chat output, and Run details.
 - `webui/src/conversationState.js`, `budgetUi.js`: deterministic thread hydration, context payload, grouping, call/input-token budget validation, and progress helpers.
@@ -32,7 +34,8 @@ There is no legacy UI path; keep graphical work centered on `agent_web_api.py` a
 
 ## Runtime Notes
 
-- Request fields: `project_dir`, ordered `target_files`, `instruction`, `model`, optional `api_key`, plus feature config.
+- Runtime Threads carry an explicit `runtime_model_config` (provider, model, endpoint, window, and routing preferences); each Run snapshots it. API keys remain request-scoped memory only.
+- UI refresh restores only the last selected Thread after Bootstrap; New conversation uses the separately stored Bootstrap Runtime defaults. Thread settings must never overwrite those launch defaults.
 - First target file is the NaturalCC primary parse file, even when Aider receives multiple files.
 - NaturalCC parsing must work; do not silently bypass it for completion/repair flows.
 - Python `clang` bindings must match system `libclang`; this repo pins `clang==18.1.8` for LLVM 18 / `libclang1-18`.
@@ -81,7 +84,7 @@ uv run python aider_runner.py -dir /path/to/project -f src/foo.c -i "补全 foo 
 - Keep the model prompt ordered as stable system rules -> pinned memory -> committed checkpoint -> runtime authorization -> current goal -> retrieved memory -> WorkingState -> recent message tail. Do not put workspace paths, counters, or other per-Run values in stable system rules.
 - Persist provider-reported `prompt_cache_hit_tokens` and `prompt_cache_miss_tokens` in Run state and `model.usage_recorded`; absence means “not reported”, not a zero-percent cache rate.
 - SQLite schema v6 creates a non-overwriting `.before-v6-memory-proposals.bak` snapshot before migrating an existing v1-v5 database.
-- Count the serialized messages, tool schemas, provider framing, output reserve, and safety margin with the pinned local DeepSeek tokenizer before every Agent-model request. Never silently fall back to character budgets or delete protected rules/WorkingState to make a request fit.
+- Count the serialized messages, tool schemas, provider framing, output reserve, and safety margin with the pinned local DeepSeek tokenizer before every Agent-model request. It is exact for DeepSeek and a conservative estimate for other providers; never silently fall back to character budgets or delete protected rules/WorkingState to make a request fit.
 - Compaction runs only at safe points over continuous completed prefixes. Analyzer/Summarizer/repair calls use no tools, have separate `max_compaction_calls`, and must not consume `max_llm_calls`; their token/cost/time usage still contributes to total budgets.
 - Thread deletion is permanent and transactional. Reject deletion when any Run is queued, running, waiting for approval, or paused; the UI must require an explicit cancellation action before deletion. Terminal Runs cannot transition back to active states.
 - Only user-selected absolute paths may widen filesystem access beyond the primary workspace; model-generated paths cannot widen authorization.

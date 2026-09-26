@@ -405,6 +405,27 @@ def test_thread_compaction_commits_sequence_watermark(tmp_path: Path):
     assert thread["checkpoint_covered_sequence"] == 2
 
 
+def test_compaction_forwards_run_provider_metadata(tmp_path: Path):
+    store, gateway, service, source = _service(
+        tmp_path,
+        [
+            ModelResponse(content=__import__("json").dumps(_analysis())),
+            ModelResponse(content=__import__("json").dumps(_checkpoint())),
+        ],
+    )
+    metadata = {
+        "runtime_model_config": {
+            "provider": "openrouter",
+            "model": "anthropic/claude-sonnet-4.5",
+        },
+        "api_key": "request-only-key",
+    }
+
+    service.compact_run(source, request_metadata=metadata)
+
+    assert all(request.metadata == metadata for request in gateway.requests)
+
+
 def test_thread_compaction_provider_failure_uses_fallback(tmp_path: Path):
     store, _, service, _ = _service(tmp_path, [])
     service.gateway = _FailingGateway()

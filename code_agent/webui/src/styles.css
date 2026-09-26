@@ -1053,6 +1053,53 @@ button:disabled {
   font-size: 0.82rem;
 }
 
+.thinking-panel {
+  margin-bottom: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-hover);
+}
+
+.thinking-panel summary {
+  cursor: pointer;
+  padding: 7px 10px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.thinking-live {
+  margin-left: 8px;
+  color: var(--amber);
+  font-weight: 400;
+}
+
+.thinking-panel-body {
+  max-height: 300px;
+  overflow: auto;
+  padding: 0 10px 8px;
+}
+
+.thinking-step + .thinking-step {
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.thinking-step span {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.thinking-step pre {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
 .message-action-btn {
   display: inline-flex;
   align-items: center;

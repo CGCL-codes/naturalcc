@@ -359,9 +359,17 @@ app.add_middleware(
 # The durable Agent Runtime is mounted separately from the legacy Pipeline API.
 # Construction is lazy with respect to model clients; no API key is persisted.
 if __package__ in (None, ""):
-    from code_agent.api.agent_routes import build_default_agent_router
+    from code_agent.api.agent_routes import (
+        build_default_agent_router,
+        get_default_runtime_model_config,
+        get_runtime_provider_defaults,
+    )
 else:
-    from .api.agent_routes import build_default_agent_router
+    from .api.agent_routes import (
+        build_default_agent_router,
+        get_default_runtime_model_config,
+        get_runtime_provider_defaults,
+    )
 
 app.include_router(build_default_agent_router())
 
@@ -373,10 +381,15 @@ async def health() -> Dict[str, str]:
 
 @app.get("/api/bootstrap")
 async def bootstrap() -> Dict[str, Any]:
+    runtime_default_model_config = get_default_runtime_model_config().to_dict()
     return {
         "default_project_dir": normalize_project_dir(DEFAULT_PROJECT_DIR),
         "models": MODELS,
         "default_model": DEFAULT_MODEL,
+        # ``default_model`` is the legacy Pipeline/Aider default.  The Agent
+        # Runtime reads this separate, persisted configuration instead.
+        "runtime_default_model_config": runtime_default_model_config,
+        "runtime_provider_defaults": get_runtime_provider_defaults(),
         "completion_types": COMPLETION_TYPES,
         "features": [
             {

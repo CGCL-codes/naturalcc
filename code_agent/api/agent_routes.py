@@ -9,7 +9,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any, AsyncIterator
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -25,7 +25,8 @@ from code_agent.agent_core.memory_proposals import (
 from code_agent.agent_core.memory_store import MemoryProposalConflict, MemoryStore
 from code_agent.agent_core.model_gateway import (
     DeepSeekRequestSerializer,
-    OpenAICompatibleGateway,
+    RoutedModelGateway,
+    RuntimeModelConfig,
 )
 from code_agent.agent_core.run_engine import RunEngine
 from code_agent.agent_core.tool_registry import build_default_registry
@@ -49,21 +50,54 @@ class DefaultContextRuntime:
     profile: DeepSeekModelProfile
     counter: DeepSeekTokenCounter
     serializer: DeepSeekRequestSerializer
+    default_model_config: RuntimeModelConfig
+
+
+def get_default_runtime_model_config() -> RuntimeModelConfig:
+    """Read the process-wide default without constructing tokenizer state.
+
+    The web UI calls this for its bootstrap response, while the Agent Runtime
+    snapshots the same configuration when a Thread or Run is created.
+    """
+    provider = os.environ.get("CODE_AGENT_PROVIDER", "deepseek")
+    configured_base_url = os.environ.get("CODE_AGENT_API_BASE", "").strip()
+    if provider.strip().lower() == "openrouter" and configured_base_url == "https://api.deepseek.com/v1":
+        configured_base_url = ""
+    configured_model = os.environ.get("CODE_AGENT_MODEL", "").strip()
+    config_source: dict[str, Any] = {
+        "provider": provider,
+        "base_url": configured_base_url,
+        "context_window_tokens": int(
+            os.environ.get("CODE_AGENT_CONTEXT_WINDOW_TOKENS", "65536")
+        ),
+    }
+    if configured_model:
+        config_source["model"] = configured_model
+    if "CODE_AGENT_CONTEXT_SAFETY_MARGIN_TOKENS" in os.environ:
+        config_source["safety_margin_tokens"] = int(
+            os.environ["CODE_AGENT_CONTEXT_SAFETY_MARGIN_TOKENS"]
+        )
+    return RuntimeModelConfig.from_dict(config_source)
+
+
+def get_runtime_provider_defaults() -> dict[str, dict[str, Any]]:
+    """Return safe, key-free model defaults used to populate the UI."""
+    return {
+        provider: RuntimeModelConfig.from_dict({"provider": provider}).to_dict()
+        for provider in ("deepseek", "openrouter")
+    }
 
 
 def build_default_context_runtime(code_agent_root: str | Path) -> DefaultContextRuntime:
     root = Path(code_agent_root).expanduser().resolve()
+    default_model_config = get_default_runtime_model_config()
     profile = DeepSeekModelProfile(
-        model=os.environ.get("CODE_AGENT_MODEL", "deepseek-chat"),
-        context_window_tokens=int(
-            os.environ.get("CODE_AGENT_CONTEXT_WINDOW_TOKENS", "65536")
-        ),
+        model=default_model_config.model,
+        context_window_tokens=default_model_config.context_window_tokens,
         default_output_reserve_tokens=int(
             os.environ.get("CODE_AGENT_OUTPUT_RESERVE_TOKENS", "4096")
         ),
-        safety_margin_tokens=int(
-            os.environ.get("CODE_AGENT_CONTEXT_SAFETY_MARGIN_TOKENS", "512")
-        ),
+        safety_margin_tokens=default_model_config.safety_margin_tokens,
         provider_framing_tokens=int(
             os.environ.get("CODE_AGENT_PROVIDER_FRAMING_TOKENS", "256")
         ),
@@ -88,7 +122,27 @@ def build_default_context_runtime(code_agent_root: str | Path) -> DefaultContext
     )
     serializer = DeepSeekRequestSerializer()
     counter = DeepSeekTokenCounter.from_directory(tokenizer_directory)
-    return DefaultContextRuntime(profile, counter, serializer)
+    return DefaultContextRuntime(profile, counter, serializer, default_model_config)
+
+
+def normalize_runtime_model_config(
+    value: dict[str, Any] | None,
+    default: RuntimeModelConfig,
+    *,
+    legacy_model: str = "",
+) -> dict[str, Any]:
+    source = dict(value or {})
+    if legacy_model and not source.get("model"):
+        source["model"] = legacy_model
+    config = RuntimeModelConfig.from_dict(
+        source,
+        default_provider=default.provider,
+        default_model=default.model,
+        default_base_url=default.base_url,
+        default_context_window_tokens=default.context_window_tokens,
+        default_safety_margin_tokens=default.safety_margin_tokens,
+    )
+    return config.to_dict()
 
 
 class CreateRunRequest(BaseModel):
@@ -100,12 +154,14 @@ class CreateRunRequest(BaseModel):
     thread_id: str | None = None
     capabilities: dict[str, Any] = Field(default_factory=dict)
     api_key: str | None = None
+    runtime_model_config: dict[str, Any] | None = None
 
 
 class CreateThreadRequest(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     workspace: str | None = None
     model: str = ""
+    runtime_model_config: dict[str, Any] | None = None
     runtime_mode: str = "agent"
     budget: dict[str, Any] = Field(default_factory=dict)
     authorized_paths: list[str] = Field(default_factory=list)
@@ -117,6 +173,7 @@ class UpdateThreadRequest(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     workspace: str | None = None
     model: str | None = None
+    runtime_model_config: dict[str, Any] | None = None
     runtime_mode: str | None = None
     budget: dict[str, Any] | None = None
     authorized_paths: list[str] | None = None
@@ -211,17 +268,26 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
 
     @router.post("/threads")
     async def create_thread(request: CreateThreadRequest) -> dict[str, Any]:
-        thread_id = await asyncio.to_thread(
-            engine.store.create_thread,
-            request.title,
-            workspace=request.workspace,
-            model=request.model,
-            runtime_mode=request.runtime_mode,
-            budget=request.budget,
-            authorized_paths=request.authorized_paths,
-            context_items=request.context_items,
-            capabilities=normalize_codegraph_capabilities(request.capabilities),
-        )
+        try:
+            runtime_model_config = normalize_runtime_model_config(
+                request.runtime_model_config,
+                engine.default_runtime_model_config,
+                legacy_model=request.model,
+            )
+            thread_id = await asyncio.to_thread(
+                engine.store.create_thread,
+                request.title,
+                workspace=request.workspace,
+                model=request.model or runtime_model_config["model"],
+                runtime_model_config=runtime_model_config,
+                runtime_mode=request.runtime_mode,
+                budget=request.budget,
+                authorized_paths=request.authorized_paths,
+                context_items=request.context_items,
+                capabilities=normalize_codegraph_capabilities(request.capabilities),
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
         return {"thread_id": thread_id, "thread": engine.store.get_thread(thread_id)}
 
     @router.get("/threads")
@@ -254,6 +320,13 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
         if values.get("capabilities") is not None:
             values["capabilities"] = normalize_codegraph_capabilities(values["capabilities"])
         try:
+            if "runtime_model_config" in values:
+                current = await asyncio.to_thread(engine.store.get_thread, thread_id)
+                values["runtime_model_config"] = normalize_runtime_model_config(
+                    values["runtime_model_config"],
+                    engine.default_runtime_model_config,
+                    legacy_model=values.get("model") or current.get("model", ""),
+                )
             thread = await asyncio.to_thread(
                 engine.store.update_thread,
                 thread_id,
@@ -262,7 +335,7 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
             )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except VersionConflict as exc:
+        except (ValueError, VersionConflict) as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         return {"thread": thread}
 
@@ -512,6 +585,7 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
                 request.authorized_paths,
                 request.capabilities,
                 request.api_key,
+                request.runtime_model_config,
             )
         except (ValueError, FileNotFoundError, KeyError) as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -622,18 +696,34 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
         return {"events": [event.to_dict() for event in events]}
 
     @router.get("/runs/{run_id}/events.ndjson")
-    async def stream_events(run_id: str, after: int = Query(default=0, ge=0)) -> StreamingResponse:
+    async def stream_events(request: Request, run_id: str, after: int = Query(default=0, ge=0)) -> StreamingResponse:
         try:
             engine.store.get_run(run_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
         async def generate() -> AsyncIterator[str]:
-            events = await asyncio.to_thread(engine.store.list_events, run_id, after)
-            for event in events:
-                yield json.dumps(event.to_dict(), ensure_ascii=False) + "\n"
+            cursor = after
+            last_heartbeat = asyncio.get_running_loop().time()
+            while not await request.is_disconnected():
+                events = await asyncio.to_thread(engine.store.list_events, run_id, cursor)
+                for event in events:
+                    cursor = event.sequence
+                    yield json.dumps(event.to_dict(), ensure_ascii=False) + "\n"
+                run = await asyncio.to_thread(engine.store.get_run, run_id)
+                if run["status"] in {"completed", "failed", "cancelled", "budget_exhausted", "waiting_approval", "paused"}:
+                    break
+                now = asyncio.get_running_loop().time()
+                if now - last_heartbeat >= 10:
+                    yield "\n"
+                    last_heartbeat = now
+                await asyncio.sleep(0.15)
 
-        return StreamingResponse(generate(), media_type="application/x-ndjson")
+        return StreamingResponse(
+            generate(),
+            media_type="application/x-ndjson",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
 
     if memory_store is not None:
         @router.post("/memory-proposals/from-selection")
@@ -827,11 +917,7 @@ def build_default_agent_router() -> APIRouter:
     store = EventStore(db_path)
     memory = MemoryStore(db_path)
     context_runtime = build_default_context_runtime(code_agent_root)
-    gateway = OpenAICompatibleGateway(
-        model=context_runtime.profile.model,
-        base_url=os.environ.get("CODE_AGENT_API_BASE", "https://api.deepseek.com/v1"),
-        serializer=context_runtime.serializer,
-    )
+    gateway = RoutedModelGateway(serializer=context_runtime.serializer)
     planner = ContextPlanner(
         context_runtime.counter,
         context_runtime.serializer,
@@ -851,5 +937,6 @@ def build_default_agent_router() -> APIRouter:
         memory_store=memory,
         context_planner=planner,
         compaction_service=compaction_service,
+        default_runtime_model_config=context_runtime.default_model_config,
     )
     return create_agent_router(engine, memory)

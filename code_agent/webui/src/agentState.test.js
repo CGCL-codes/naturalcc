@@ -77,3 +77,22 @@ test("budget exhaustion keeps reason and unexecuted tool proposal", () => {
   assert.equal(state.budgetExhausted.reason, "max_llm_calls");
   assert.equal(state.budgetExhausted.unexecuted_tool_calls[0].name, "workspace.apply_patch");
 });
+
+test("reasoning deltas are grouped by model call and duplicate events are ignored", () => {
+  const first = reduceAgentEvents({ ...initialAgentState, runId: "run-1" }, [
+    { sequence: 1, type: "model.reasoning.delta", payload: { call_index: 1, text: "Inspect " } },
+    { sequence: 2, type: "model.reasoning.delta", payload: { call_index: 1, text: "files." } },
+    { sequence: 3, type: "model.content.delta", payload: { call_index: 1, text: "Found" } },
+    { sequence: 4, type: "model.reasoning.delta", payload: { call_index: 2, text: "Verify." } }
+  ]);
+  const state = reduceAgentEvents(first, [
+    { sequence: 4, type: "model.reasoning.delta", payload: { call_index: 2, text: "Verify." } },
+    { sequence: 5, type: "model.content.delta", payload: { call_index: 2, text: "Done" } }
+  ]);
+  assert.deepEqual(state.thinking, [
+    { callIndex: 1, text: "Inspect files." },
+    { callIndex: 2, text: "Verify." }
+  ]);
+  assert.equal(state.streamedContent, "Done");
+  assert.equal(state.events.length, 5);
+});

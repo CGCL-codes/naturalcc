@@ -4,6 +4,7 @@ import json
 import threading
 import time
 import uuid
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -24,7 +25,7 @@ from .contracts import (
 from .context_builder import ContextBuilder, ContextPlanner
 from .event_store import EventStore, VersionConflict
 from .memory_store import PINNED_MEMORY_KINDS, MemoryStore
-from .model_gateway import ModelGateway
+from .model_gateway import ModelGateway, RuntimeModelConfig
 from .policy import PolicyDecision, PolicyEngine
 from .tool_registry import ToolRegistry, redact_sensitive_text, redact_sensitive_value
 from .token_budget import ContextHardLimitExceeded
@@ -127,6 +128,7 @@ class RunEngine:
         memory_store: MemoryStore | None = None,
         context_planner: ContextPlanner | None = None,
         compaction_service: CompactionService | None = None,
+        default_runtime_model_config: RuntimeModelConfig | dict[str, Any] | None = None,
     ) -> None:
         self.store = store
         self.registry = registry
@@ -136,6 +138,20 @@ class RunEngine:
         self.memory_store = memory_store
         self.context_planner = context_planner
         self.compaction_service = compaction_service
+        if isinstance(default_runtime_model_config, RuntimeModelConfig):
+            self.default_runtime_model_config = default_runtime_model_config
+        else:
+            default_profile = context_planner.profile if context_planner else None
+            self.default_runtime_model_config = RuntimeModelConfig.from_dict(
+                default_runtime_model_config,
+                default_model=(default_profile.model if default_profile else None),
+                default_context_window_tokens=(
+                    default_profile.context_window_tokens if default_profile else None
+                ),
+                default_safety_margin_tokens=(
+                    default_profile.safety_margin_tokens if default_profile else None
+                ),
+            )
         self._run_api_keys: dict[str, str] = {}
         self._run_locks: dict[str, threading.RLock] = {}
         self._run_locks_guard = threading.Lock()
@@ -158,6 +174,7 @@ class RunEngine:
         authorized_paths: list[str] | None = None,
         capabilities: dict[str, Any] | None = None,
         api_key: str | None = None,
+        runtime_model_config: dict[str, Any] | None = None,
     ) -> str:
         run_started_at = time.time()
         workspace_path = Path(workspace).expanduser().resolve()
@@ -171,6 +188,34 @@ class RunEngine:
                 workspace=workspace_path,
                 expected_version=thread["version"],
             )
+        selected_model_config = RuntimeModelConfig.from_dict(
+            runtime_model_config
+            if runtime_model_config is not None
+            else (thread.get("runtime_model_config") if thread else None),
+            default_provider=self.default_runtime_model_config.provider,
+            default_model=(
+                (thread.get("model") if thread else "")
+                or self.default_runtime_model_config.model
+            ),
+            default_base_url=self.default_runtime_model_config.base_url,
+            default_context_window_tokens=self.default_runtime_model_config.context_window_tokens,
+            default_safety_margin_tokens=self.default_runtime_model_config.safety_margin_tokens,
+        )
+        runtime_model_metadata = {
+            "runtime_model_config": selected_model_config.to_dict(),
+        }
+        if api_key and api_key.strip():
+            runtime_model_metadata["api_key"] = api_key.strip()
+        context_profile = (
+            self._context_profile_for(selected_model_config)
+            if self.context_planner is not None
+            else None
+        )
+        compaction_service = (
+            self.compaction_service.with_profile(context_profile)
+            if self.compaction_service is not None and context_profile is not None
+            else None
+        )
         effective_budget = budget or RunBudget.from_dict(thread.get("budget") if thread else None)
         effective_capabilities = normalize_codegraph_capabilities(
             capabilities or (thread.get("capabilities") if thread else None)
@@ -242,7 +287,7 @@ class RunEngine:
         }
         incomplete_thread_compaction = (
             self.store.latest_incomplete_thread_compaction(thread_id)
-            if thread_id and self.compaction_service is not None
+            if thread_id and compaction_service is not None
             else None
         )
         if incomplete_thread_compaction is not None and thread_id is not None:
@@ -271,13 +316,14 @@ class RunEngine:
                 )
                 if source.source_hash != incomplete_thread_compaction["source_hash"]:
                     raise ValueError("frozen conversation prefix changed before resume")
-                self.compaction_service.resume_thread(
+                compaction_service.resume_thread(
                     incomplete_thread_compaction["id"],
                     source,
                     max_maintenance_calls=effective_budget.max_compaction_calls,
                     max_maintenance_input_tokens=effective_budget.max_input_tokens,
                     max_maintenance_output_tokens=effective_budget.max_output_tokens,
                     deadline_epoch=run_started_at + effective_budget.max_seconds,
+                    request_metadata=runtime_model_metadata,
                 )
             except ValueError as exc:
                 current = self.store.get_compaction(
@@ -321,7 +367,7 @@ class RunEngine:
             and thread_id is not None
             and prior_conversation
             and self.context_planner is not None
-            and self.compaction_service is not None
+            and compaction_service is not None
             and effective_budget.max_compaction_calls
             - thread_compaction_usage["calls"]
             >= 2
@@ -359,6 +405,7 @@ class RunEngine:
                     if thread_checkpoint
                     else None
                 ),
+                profile=context_profile,
             )
             if (
                 thread_plan.requires_compaction
@@ -383,7 +430,7 @@ class RunEngine:
                         else None
                     ),
                 )
-                outcome = self.compaction_service.compact_thread(
+                outcome = compaction_service.compact_thread(
                     source,
                     max_maintenance_calls=(
                         effective_budget.max_compaction_calls
@@ -398,6 +445,7 @@ class RunEngine:
                         - thread_compaction_usage["output_tokens"]
                     ),
                     deadline_epoch=run_started_at + effective_budget.max_seconds,
+                    request_metadata=runtime_model_metadata,
                 )
                 compacted_record = self.store.get_compaction(
                     outcome.compaction_id
@@ -426,7 +474,14 @@ class RunEngine:
                     limit=None,
                     after_sequence=checkpoint_watermark,
                 )
-        self.store.create_run(run_id, str(workspace_path), safe_goal, effective_budget.to_dict(), thread_id)
+        self.store.create_run(
+            run_id,
+            str(workspace_path),
+            safe_goal,
+            effective_budget.to_dict(),
+            thread_id,
+            selected_model_config.to_dict(),
+        )
         if thread_id:
             self.store.append_conversation_message(
                 thread_id,
@@ -448,6 +503,7 @@ class RunEngine:
                 "authorized_paths": effective_authorized_paths,
                 "capabilities": effective_capabilities,
                 "codegraph_status": codegraph_status,
+                "runtime_model_config": selected_model_config.to_dict(),
             },
             expected_version=0,
             idempotency_key=f"{run_id}:created",
@@ -459,6 +515,7 @@ class RunEngine:
             "target_files": safe_target_files,
             "authorized_paths": effective_authorized_paths,
             "capabilities": effective_capabilities,
+            "runtime_model_config": selected_model_config.to_dict(),
             "codegraph_status": codegraph_status,
             "codegraph_dirty_files": [],
             "thread_id": thread_id,
@@ -531,6 +588,16 @@ class RunEngine:
         if state is None:
             self.store.get_run(run_id)
             raise ValueError(f"run state is unavailable: {run_id}; restore the runtime database from backup")
+        if "runtime_model_config" not in state:
+            persisted = self.store.get_run(run_id).get("runtime_model_config")
+            state["runtime_model_config"] = RuntimeModelConfig.from_dict(
+                persisted,
+                default_provider=self.default_runtime_model_config.provider,
+                default_model=self.default_runtime_model_config.model,
+                default_base_url=self.default_runtime_model_config.base_url,
+                default_context_window_tokens=self.default_runtime_model_config.context_window_tokens,
+                default_safety_margin_tokens=self.default_runtime_model_config.safety_margin_tokens,
+            ).to_dict()
         state["pending_approval"] = self._pending_approval_for_state(state)
         return state
 
@@ -740,7 +807,7 @@ class RunEngine:
                 model_request.messages,
                 model_request.tools,
                 self.context_planner.serializer,
-                self.context_planner.profile,
+                self._context_profile_for_state(state),
                 reserved_output_tokens=model_request.max_output_tokens,
             )
             if state["input_tokens"] + request_breakdown.input_tokens > budget.max_input_tokens:
@@ -756,9 +823,39 @@ class RunEngine:
             )
             self.store.release_workspace_lease(state["workspace"], run_id)
             return state
-        self._record(state, "model.requested", {"message_count": len(model_messages)})
+        call_index = state["llm_calls"] + 1
+        self._record(state, "model.requested", {"message_count": len(model_messages), "call_index": call_index})
         try:
-            response = self.model.generate(model_request)
+            pending: dict[str, str] = {"reasoning": "", "content": ""}
+            last_flush: dict[str, float] = {"reasoning": 0.0, "content": 0.0}
+
+            def flush(kind: str) -> None:
+                if pending[kind]:
+                    self._record(state, f"model.{kind}.delta", {
+                        "call_index": call_index,
+                        "text": redact_sensitive_text(pending[kind]),
+                    })
+                    pending[kind] = ""
+                    last_flush[kind] = time.monotonic()
+
+            response = None
+            saw_reasoning = False
+            for item in self.model.stream(model_request):
+                if item.kind in pending and item.text:
+                    if item.kind == "reasoning":
+                        saw_reasoning = True
+                    pending[item.kind] += item.text
+                    if len(pending[item.kind]) >= 160 or time.monotonic() - last_flush[item.kind] >= 0.15:
+                        flush(item.kind)
+                elif item.kind == "completed":
+                    response = item.response
+            flush("reasoning")
+            flush("content")
+            if response is None:
+                raise RuntimeError("model stream ended without a final response")
+            if response.reasoning and not saw_reasoning:
+                pending["reasoning"] = response.reasoning
+                flush("reasoning")
         except Exception as exc:
             self._record(
                 state,
@@ -788,14 +885,25 @@ class RunEngine:
                 "prompt_cache_miss_tokens": response.prompt_cache_miss_tokens,
             },
         )
-        assistant_message = redact_sensitive_value(response.to_message())
+        protocol_message = response.to_message()
+        assistant_message = redact_sensitive_value({
+            key: value for key, value in protocol_message.items()
+            if key not in {"reasoning_details", "reasoning_content"}
+        })
+        if "reasoning_details" in protocol_message:
+            assistant_message["reasoning_details"] = protocol_message["reasoning_details"]
+        elif "reasoning_content" in protocol_message:
+            assistant_message["reasoning_content"] = protocol_message["reasoning_content"]
         response.content = assistant_message["content"]
         response.tool_calls = [
             ToolCall(call["id"], self.registry.to_canonical_name(call["name"]), call.get("args", {}))
             for call in assistant_message.get("tool_calls", [])
         ]
         state["messages"].append(assistant_message)
-        self._record(state, "model.responded", assistant_message)
+        self._record(state, "model.responded", {
+            key: value for key, value in assistant_message.items()
+            if key not in {"reasoning_details", "reasoning_content"}
+        })
 
         if not response.tool_calls:
             if state.get("verification_pending"):
@@ -1067,7 +1175,12 @@ class RunEngine:
         working_state = self._active_state(state)
         committed = self.store.latest_committed_compaction(run_id=state["run_id"])
         incomplete = self.store.latest_incomplete_compaction(state["run_id"])
-        if incomplete is not None and self.compaction_service is not None:
+        compaction_service = (
+            self.compaction_service.with_profile(self._context_profile_for_state(state))
+            if self.compaction_service is not None
+            else None
+        )
+        if incomplete is not None and compaction_service is not None:
             old_checkpoint = (
                 committed.get("checkpoint")
                 if committed
@@ -1087,7 +1200,7 @@ class RunEngine:
                 )
                 if source.source_hash != incomplete["source_hash"]:
                     raise ValueError("frozen message prefix changed before resume")
-                outcome = self.compaction_service.resume_run(
+                outcome = compaction_service.resume_run(
                     incomplete["id"],
                     source,
                     max_maintenance_calls=max(
@@ -1103,6 +1216,7 @@ class RunEngine:
                         float(state.get("started_at_epoch", time.time()))
                         + budget.max_seconds
                     ),
+                    request_metadata=self._request_metadata(state),
                 )
             except ValueError as exc:
                 self.store.update_compaction(
@@ -1157,6 +1271,7 @@ class RunEngine:
             tools=tools,
             checkpoint=checkpoint,
             runtime_authorization=self._runtime_authorization(state),
+            profile=self._context_profile_for_state(state),
         )
         self._record(
             state,
@@ -1181,7 +1296,7 @@ class RunEngine:
             plan.requires_compaction
             and plan.compactable_from is not None
             and plan.compactable_to is not None
-            and self.compaction_service is not None
+            and compaction_service is not None
             and self._compaction_safe(state)
             and state["compaction_calls"] + 2 <= budget.max_compaction_calls
         )
@@ -1208,7 +1323,7 @@ class RunEngine:
                 working_state=self._active_state(state),
                 old_checkpoint=checkpoint,
             )
-            outcome = self.compaction_service.compact_run(
+            outcome = compaction_service.compact_run(
                 source,
                 max_maintenance_calls=(
                     budget.max_compaction_calls - state["compaction_calls"]
@@ -1223,6 +1338,7 @@ class RunEngine:
                     float(state.get("started_at_epoch", time.time()))
                     + budget.max_seconds
                 ),
+                request_metadata=self._request_metadata(state),
             )
             persisted = self.store.load_snapshot(state["run_id"]) or {}
             state["active_run_checkpoint_id"] = persisted.get(
@@ -1264,6 +1380,7 @@ class RunEngine:
                 tools=tools,
                 checkpoint=outcome.checkpoint,
                 runtime_authorization=self._runtime_authorization(state),
+                profile=self._context_profile_for_state(state),
             )
             if rebuilt.requires_compaction and rebuilt.compactable_from is not None:
                 return self._planned_model_request(
@@ -1308,9 +1425,10 @@ class RunEngine:
         tools: list[dict[str, Any]],
     ) -> ModelRequest:
         assert self.context_planner is not None
+        profile = self._context_profile_for_state(state)
         remaining_output = max(0, budget.max_output_tokens - state["output_tokens"])
         max_output_tokens = min(
-            self.context_planner.profile.default_output_reserve_tokens,
+            profile.default_output_reserve_tokens,
             remaining_output,
         )
         request = ModelRequest(
@@ -1323,14 +1441,39 @@ class RunEngine:
             request.messages,
             request.tools,
             self.context_planner.serializer,
-            self.context_planner.profile,
+            profile,
             reserved_output_tokens=request.max_output_tokens,
         )
         return request
 
     def _request_metadata(self, state: dict[str, Any]) -> dict[str, Any]:
         key = self._run_api_keys.get(state["run_id"])
-        return {"api_key": key} if key else {}
+        metadata = {
+            "runtime_model_config": dict(state["runtime_model_config"]),
+        }
+        if key:
+            metadata["api_key"] = key
+        return metadata
+
+    def _context_profile_for(self, config: RuntimeModelConfig):
+        if self.context_planner is None:
+            raise RuntimeError("context planner is not configured")
+        # Preserve the established Harness behavior for an implicit default:
+        # tests and embedders may install a planner before a run starts. An
+        # explicitly selected Thread/Run configuration always wins instead.
+        if config.to_dict() == self.default_runtime_model_config.to_dict():
+            return self.context_planner.profile
+        return replace(
+            self.context_planner.profile,
+            model=config.model,
+            context_window_tokens=config.context_window_tokens,
+            safety_margin_tokens=config.safety_margin_tokens,
+        )
+
+    def _context_profile_for_state(self, state: dict[str, Any]):
+        return self._context_profile_for(
+            RuntimeModelConfig.from_dict(state.get("runtime_model_config"))
+        )
 
     def _uncompacted_plan_messages(
         self,
@@ -1343,7 +1486,7 @@ class RunEngine:
             messages,
             plan.tools,
             self.context_planner.serializer,
-            self.context_planner.profile,
+            self._context_profile_for_state(state),
         )
         return messages
 

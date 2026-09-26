@@ -1,0 +1,1 @@
+{"version":3,"file":"NestedAppAuthError.d.ts","sourceRoot":"","sources":["../../src/error/NestedAppAuthError.ts"],"names":[],"mappings":"AAKA,OAAO,EAAE,SAAS,EAAE,MAAM,4BAA4B,CAAC;AAGvD,qBAAa,kBAAmB,SAAQ,SAAS;gBAEzC,SAAS,EAAE,MAAM,EACjB,aAAa,EAAE,MAAM,EACrB,YAAY,CAAC,EAAE,MAAM;WAQX,sBAAsB,CAChC,aAAa,CAAC,EAAE,MAAM,GACvB,kBAAkB;CAOxB"}

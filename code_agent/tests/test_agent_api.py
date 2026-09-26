@@ -1,12 +1,13 @@
 from pathlib import Path
+from threading import Event, Thread
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from code_agent.agent_core.contracts import ModelResponse, ToolCall
+from code_agent.agent_core.contracts import ModelResponse, ModelStreamEvent, ToolCall
 from code_agent.agent_core.event_store import EventStore
 from code_agent.agent_core.memory_store import MemoryStore
-from code_agent.agent_core.model_gateway import ScriptedModelGateway
+from code_agent.agent_core.model_gateway import ModelGateway, ScriptedModelGateway
 from code_agent.agent_core.run_engine import RunEngine
 from code_agent.agent_core.tool_registry import build_default_registry
 from code_agent.api.agent_routes import create_agent_router
@@ -34,6 +35,80 @@ def test_agent_api_create_run_step_events_and_cancel(tmp_path: Path):
     assert client.get(f"/api/agent/runs/{run_id}").status_code == 200
     assert client.get("/api/agent/runs").json()["runs"][0]["id"] == run_id
     assert client.get("/api/agent/threads").json()["threads"][0]["id"] == thread_id
+
+
+def test_agent_stream_exposes_reasoning_before_model_finishes(tmp_path: Path):
+    reached_wait = Event()
+    release = Event()
+
+    class StreamingGateway(ModelGateway):
+        def generate(self, request):
+            raise AssertionError("Agent Run should call stream")
+
+        def stream(self, request):
+            yield ModelStreamEvent("reasoning", "Inspecting the file.")
+            reached_wait.set()
+            assert release.wait(5)
+            yield ModelStreamEvent("content", "Finished.")
+            yield ModelStreamEvent("completed", response=ModelResponse(
+                content="Finished.", reasoning="Inspecting the file.",
+                input_tokens=8, output_tokens=5,
+            ))
+
+    store = EventStore(tmp_path / "agent.db")
+    engine = RunEngine(store, build_default_registry(include_mutating=False), StreamingGateway())
+    app = FastAPI()
+    app.include_router(create_agent_router(engine))
+    client = TestClient(app)
+    run_id = engine.create_run(tmp_path, "inspect")
+    worker = Thread(target=engine.run, args=(run_id,))
+    worker.start()
+    try:
+        assert reached_wait.wait(5)
+        events = store.list_events(run_id)
+        reasoning = [event for event in events if event.type == "model.reasoning.delta"]
+        assert [event.payload["text"] for event in reasoning] == ["Inspecting the file."]
+        assert store.get_run(run_id)["status"] == "running"
+    finally:
+        release.set()
+        worker.join(timeout=5)
+
+    response = client.get(f"/api/agent/runs/{run_id}/events.ndjson")
+    assert response.status_code == 200
+    assert '"type": "model.reasoning.delta"' in response.text
+    assert '"type": "run.completed"' in response.text
+
+
+def test_agent_api_snapshots_explicit_openrouter_thread_config(tmp_path: Path):
+    model = ScriptedModelGateway([ModelResponse(content="done")])
+    store = EventStore(tmp_path / "agent.db")
+    engine = RunEngine(store, build_default_registry(include_mutating=False), model)
+    app = FastAPI()
+    app.include_router(create_agent_router(engine))
+    client = TestClient(app)
+    config = {
+        "provider": "openrouter",
+        "model": "anthropic/claude-sonnet-4.5",
+        "context_window_tokens": 200000,
+        "fallback_models": ["google/gemini-2.5-pro"],
+    }
+
+    thread = client.post(
+        "/api/agent/threads",
+        json={"title": "OpenRouter task", "workspace": str(tmp_path), "runtime_model_config": config},
+    ).json()["thread"]
+    assert thread["runtime_model_config"]["provider"] == "openrouter"
+    run = client.post(
+        "/api/agent/runs",
+        json={"workspace": str(tmp_path), "goal": "inspect", "thread_id": thread["id"], "api_key": "request-key"},
+    ).json()
+
+    assert run["state"]["runtime_model_config"]["model"] == config["model"]
+    assert store.get_run(run["run_id"])["runtime_model_config"] == run["state"]["runtime_model_config"]
+    client.post(f"/api/agent/runs/{run['run_id']}/step")
+    request = model.requests[0]
+    assert request.metadata["runtime_model_config"]["provider"] == "openrouter"
+    assert request.metadata["api_key"] == "request-key"
 
 
 def test_agent_api_rejects_invalid_run_control_transitions(tmp_path: Path):

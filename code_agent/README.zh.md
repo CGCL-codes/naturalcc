@@ -140,23 +140,62 @@ codegraph --version
 
 ### 4.1 API Key 使用方式
 
-不要把真实 API Key 写进代码、README、截图或 Git 历史。
+**当前 Web UI 的 Agent Runtime 仅支持 DeepSeek 官方 API Key 和 OpenRouter API Key。** 通过终端中的 `CODE_AGENT_PROVIDER` 显式选择接入渠道，通过 `CODE_AGENT_MODEL` 选择模型；系统不会根据 Key 的内容或模型名称自动推断供应商。通过 OpenRouter 调用 Claude 等模型时，供应商仍是 `openrouter`，使用的是 OpenRouter Key，不是模型厂商的官方 Key。
 
-- **Web UI 的 Agent / Pipeline 模式**：推荐在右侧 Settings 的 **API key** 输入框中填写，只随本次本地请求发送，不写入会话、Run 快照或 SQLite；
-- **Agent 兜底路径**：如果页面没有填写 key，后端网关仍支持从启动后端的终端环境读取 `DEEPSEEK_API_KEY` / `OPENAI_API_KEY`；
-- **CLI / 脚本**：可用 `-key` / `--api-key` 显式传入，或在终端环境里设置 `DEEPSEEK_API_KEY`、`OPENROUTER_API_KEY`、`OPENAI_API_KEY`。
+| 接入渠道 | `CODE_AGENT_PROVIDER` | API Key 环境变量 | 模型示例 | 默认 API 地址 |
+|---|---|---|---|---|
+| DeepSeek 官方 | `deepseek` | `DEEPSEEK_API_KEY` | `deepseek-chat` | `https://api.deepseek.com/v1` |
+| OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4.5` | `https://openrouter.ai/api/v1` |
 
-PowerShell 当前窗口临时设置示例：
+以下 PowerShell 命令从仓库根目录执行，二选一配置供应商，再在**同一终端窗口**构建并启动服务。示例中的 Key 必须替换为你自己的完整单行 Key。
 
 ```powershell
-$env:DEEPSEEK_API_KEY = "你的新 key"
+cd code_agent
+uv sync
+
+# 方案 A：OpenRouter
+$env:OPENROUTER_API_KEY = "你的OpenRouter_Key"
+$env:CODE_AGENT_PROVIDER = "openrouter"
+$env:CODE_AGENT_MODEL = "anthropic/claude-sonnet-4.5"
+$env:CODE_AGENT_API_BASE = "https://openrouter.ai/api/v1"
+
+# 首次运行或前端代码变更后构建
+cd webui
+npm install
+npm run build
+cd ..
+
+uv run python agent_web_api.py --host 127.0.0.1 --port 7860
 ```
 
-Linux / macOS / WSL 当前 shell 临时设置示例：
+若使用 DeepSeek，将上面的四行 OpenRouter 配置替换为：
+
+```powershell
+$env:DEEPSEEK_API_KEY = "你的DeepSeek_Key"
+$env:CODE_AGENT_PROVIDER = "deepseek"
+$env:CODE_AGENT_MODEL = "deepseek-chat"
+$env:CODE_AGENT_API_BASE = "https://api.deepseek.com/v1"
+```
+
+Linux / macOS / WSL 使用 `export` 设置同样的变量，例如：
 
 ```bash
-export DEEPSEEK_API_KEY="你的新 key"
+export OPENROUTER_API_KEY="your-openrouter-key"
+export CODE_AGENT_PROVIDER="openrouter"
+export CODE_AGENT_MODEL="anthropic/claude-sonnet-4.5"
+export CODE_AGENT_API_BASE="https://openrouter.ai/api/v1"
 ```
+
+- `CODE_AGENT_PROVIDER` 未设置时默认是 `deepseek`；使用 OpenRouter 必须显式设置为 `openrouter`，仅设置 Key 不会切换供应商。
+- `CODE_AGENT_MODEL` 未设置时，DeepSeek 默认使用 `deepseek-chat`，OpenRouter 默认使用 `deepseek/deepseek-chat`。调用其他模型需填写相应的模型 ID。
+- `CODE_AGENT_API_BASE` 未设置时按供应商选择默认地址。切换供应商时应同步更新或清除旧模型、地址变量，避免残留配置。
+- 设置或更改环境变量后需重启后端，再访问 `http://127.0.0.1:7860/`；前端更新后可按 `Ctrl+F5` 强制刷新。
+
+网页刷新会恢复上次选中的会话及其保存的供应商和模型；没有保存的选择时，使用启动默认配置。“New conversation”始终使用启动默认配置。Settings 修改只作用于当前会话，旧会话不会因修改终端变量而自动切换供应商。模型输入框修改后点击框外保存；已经创建的 Run 保持创建时的配置。
+
+也可在 Settings 的 **API key** 中输入与所选 Provider 匹配的 Key；该值优先于环境变量，只随请求发送，不写入会话、Run 快照或 SQLite，刷新后需要重新输入。不要把真实 API Key 写进代码、README 或 Git 历史。
+
+旧 Pipeline / CLI 的凭据处理是独立路径；其中保留的 `OPENAI_API_KEY` 兼容逻辑不代表 Agent Runtime 支持 OpenAI 或其他厂商的官方 Key。
 
 其他配置都有合理默认值，详见 [配置参考](#8-配置参考)。项目内提供了 `.env.example` 模板：
 
@@ -233,11 +272,12 @@ Agent 模式（Runtime mode 选 `Agent`）是默认模式，对应后端 `/api/a
 
 - 在底部输入框用自然语言描述任务，例如：*「给 StudentManager.java 的 addStudent 方法补上参数校验，并写一个单元测试」*；
 - 按 `Enter` 或点击 **`Send`**；
-- 界面出现 `Creating durable Agent run...`，进入 `Running...` 状态，事件日志实时滚动显示。
+- 界面出现 `Creating durable Agent run...`，进入 `Running...` 状态；模型返回内容时，消息会逐步更新。
 
 **③ 观察运行过程**
 
-- 消息气泡里显示事件流（模型调用、工具执行、结果）；
+- 若所选模型通过 API 返回推理文字或摘要，消息气泡会出现可折叠的 **模型思考过程**，并在生成期间流式更新。没有推理输出的模型不会显示该面板；它展示的是 API 实际返回的内容，不保证完整内部推理。
+- 刷新后重新打开当前会话，最近一次 Run 的思考事件可从历史中恢复；
 - 顶部 Budget 工具栏实时更新三类消耗；
 - 点击 **`Run details`** 打开详情抽屉，可以查看：审批按钮、`Resume` / `Pause` / `Cancel` 控制、Usage（Tokens / Cost / Prompt cache hit）、**Changed files & verification**（改过哪些文件、验证状态）、**Event timeline**（最近 30 个事件的顺序与摘要）。
 
@@ -413,17 +453,18 @@ VS Code 中 `Extensions: Install from VSIX...` 安装后，命令面板可用：
 
 | 变量 | 说明 |
 |---|---|
-| `DEEPSEEK_API_KEY` | DeepSeek API Key（未在 Web UI 填写时的 Agent / CLI / 脚本兜底） |
-| `OPENAI_API_KEY` | OpenAI 或 OpenAI 兼容服务的 Key（未在 Web UI 填写时的 Agent / CLI / 脚本兜底） |
-| `OPENAI_BASE_URL` | 自定义 OpenAI 兼容地址（默认 `https://openrouter.ai/api/v1`） |
-| `OPENROUTER_API_KEY` | OpenRouter Key（CLI / aider 路径） |
+| `DEEPSEEK_API_KEY` | Agent Runtime 选择 `deepseek` 且 UI 未填写 Key 时使用 |
+| `OPENROUTER_API_KEY` | Agent Runtime 选择 `openrouter` 且 UI 未填写 Key 时使用 |
+| `OPENAI_API_KEY` | 仅旧 Pipeline / CLI 兼容路径；不用于 Agent Runtime 的供应商选择或凭据兜底 |
+| `OPENAI_BASE_URL` | 旧兼容路径配置；Agent Runtime 使用 `CODE_AGENT_API_BASE` |
 
 **Agent 运行时**
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|
-| `CODE_AGENT_MODEL` | `deepseek-chat` | 对话模型名 |
-| `CODE_AGENT_API_BASE` | `https://api.deepseek.com/v1` | 模型 API 地址 |
+| `CODE_AGENT_MODEL` | 按供应商 | DeepSeek：`deepseek-chat`；OpenRouter：`deepseek/deepseek-chat` |
+| `CODE_AGENT_PROVIDER` | `deepseek` | Agent Runtime 接入渠道：`deepseek` 或 `openrouter` |
+| `CODE_AGENT_API_BASE` | 按供应商 | DeepSeek：`https://api.deepseek.com/v1`；OpenRouter：`https://openrouter.ai/api/v1` |
 | `CODE_AGENT_DB` | `<code_agent>/outputs/agent_runtime.db` | 事件库 / 记忆库 SQLite 位置 |
 | `CODE_AGENT_TOKENIZER_DIR` | `<code_agent>/resources/deepseek_v3_tokenizer` | 分词器目录 |
 
@@ -579,7 +620,7 @@ python test_deepseek_run.py    # 真实补全流程（会修改 test/StudentMana
 `code_agent/outputs/agent_runtime.db`（事件库 + 记忆库），SQLite WAL 模式，直接复制文件即可备份；可用 `CODE_AGENT_DB` 改位置。
 
 **Q：想用其他 OpenAI 兼容模型（如本地 vLLM）？**
-设置 `CODE_AGENT_API_BASE` + `OPENAI_API_KEY` + `CODE_AGENT_MODEL` 即可；注意把 `CODE_AGENT_CONTEXT_WINDOW_TOKENS` 改成该模型真实窗口。
+当前 Agent Runtime 仅支持 DeepSeek 和 OpenRouter 两种接入渠道，尚未提供本地 vLLM 或其他厂商官方 Key 的独立接入配置。若要调用不同厂商的模型，请按 [4.1](#41-api-key-使用方式) 设置 `CODE_AGENT_PROVIDER=openrouter`、`OPENROUTER_API_KEY` 和相应的 `CODE_AGENT_MODEL`；上下文窗口仍需按所选模型配置。
 
 **Q：Agent 会把我的代码 commit / push 吗？**
 不会。Git 黑名单禁了 `push/commit/reset/clean/checkout/switch`，它只能查看状态与 diff。
