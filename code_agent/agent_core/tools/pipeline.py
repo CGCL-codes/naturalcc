@@ -104,6 +104,7 @@ def pipeline_tool_specs(include_mutating=True):
     scan = {
         "target_files": targets,
         "scan_scope": {"type": "string", "enum": ["targets", "project"]},
+        "scan_type": {"type": "string", "enum": ["frequent_defects", "high_risk"]},
         "severity_threshold": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
         "rule_profile": {"type": "string", "enum": ["default", "c_cpp", "web"]},
         "max_findings": {"type": "integer", "minimum": 1, "maximum": 1000},

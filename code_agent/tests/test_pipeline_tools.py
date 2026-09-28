@@ -29,6 +29,19 @@ def test_pipeline_registry_and_read_only_scan(tmp_path):
     assert result.data["coverage"][1]["status"] == "not_requested"
 
 
+def test_scan_tool_accepts_scan_type_and_rejects_invalid_values(tmp_path):
+    (tmp_path / "main.c").write_text("strcpy(a, b);\n", encoding="utf-8")
+    registry = build_default_registry(False)
+    context = ToolContext("r", tmp_path, tmp_path / "artifacts")
+    result = registry.execute("vulnerability_detection", {"target_files": ["main.c"], "scan_type": "frequent_defects"}, context)
+    assert result.status == "success"
+    assert result.data["scan_type"] == "frequent_defects"
+    assert result.data["contract_statistics"]["status"] == "not_evaluated"
+    assert "Scan type: frequent_defects" in result.data["report"]
+    invalid = registry.execute("vulnerability_detection", {"target_files": ["main.c"], "scan_type": "unknown"}, context)
+    assert invalid.status == "error"
+
+
 @pytest.mark.parametrize("name", ["code_completion", "vulnerability_detection.fix", "vulnerability_detection.analyze"])
 def test_plugin_actions_need_approval(tmp_path, name):
     registry = build_default_registry()

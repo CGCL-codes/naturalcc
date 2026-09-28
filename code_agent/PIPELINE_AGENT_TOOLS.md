@@ -21,8 +21,23 @@ Completion arguments:
 Scan arguments (both scan tools):
 
 ```json
-{"scan_scope":"project","incremental":true,"severity_threshold":"medium","max_findings":30}
+{"scan_scope":"project","incremental":true,"severity_threshold":"medium","max_findings":30,"scan_type":"frequent_defects"}
 ```
+
+`scan_type` is optional and accepts `frequent_defects` or `high_risk`. Omit it to
+preserve the existing scan. The Agent tool schema accepts only those two enum
+values; the Pipeline plugin also treats an empty value as unspecified. At this
+stage it is only echoed in the report and artifacts as request context; it does
+not select rules, filter findings, or calculate contract metrics. When present,
+`contract_statistics.status` is `not_evaluated` with the missing-evidence reason.
+
+The result's `finding_summary` counts candidate records after the severity
+threshold and after combining the selected analyzers, before `max_findings` is
+applied. It reports `candidate_count`, `returned_count`, `truncated`, and
+`max_findings`; the returned `findings` and report body contain at most that many
+records. These are scanner candidates, not confirmed defects or TP/FN/FP. CWE
+identifiers are analyzer labels and are not automatically mapped to contract
+categories.
 
 Repair arguments:
 
@@ -49,6 +64,33 @@ Aider stream follows the existing runner behavior.
 | Incremental analysis | SHA-256 keyed bounded in-process rule cache | Local-rule results only; restart clears cache |
 | Race risks | Non-reentrant calls in files containing thread creation | Low-confidence review hints, not general race detection |
 | Runtime races | Import a ThreadSanitizer log | No automatic instrumented build/run |
+
+### Contract metrics and ownership
+
+NaturalCC supplies analyzer candidates, coverage, the report, and the optional
+scan context above. The platform backend owns task/API forwarding and must
+explicitly pass through any new NaturalCC artifacts it wants to expose. In the
+backend snapshot checked on 2026-09-28, vulnerability tasks send no `scan_type`
+to `/api/run` and return only `findings`, `coverage`, `report`, and `execution`;
+they do not expose `finding_summary` or the other new artifacts. The contract or
+acceptance owner must provide the approved test projects, ground truth, matching
+rules and metric formulas before formal TP/FN/FP or pass/fail values can be
+reported. NaturalCC's candidate output alone does not establish those values.
+
+Current evidence and limits:
+
+| Indicator / target | Current NaturalCC capability and evidence | Boundary |
+| --- | --- | --- |
+| 1: generated-code self-check | The platform can scan generated files and return candidate findings/coverage. | The contract limit is at most 2 vulnerabilities per 100 lines. No verified code-line denominator, counting scope, or method for confirming candidates as vulnerabilities is available, so the current scan cannot establish this density. |
+| 3: array bounds, string overflow, null-pointer calls | Built-in C/C++ patterns and optional Cppcheck diagnostics include array-index and null-pointer families; Cppcheck can report memory/bounds diagnostics. The existing Contract-3 Web fixture report records 87.78% overall recall, 88.33% array, 95.00% string, and 80.00% null-pointer recall, with 0% FPR under that report's fixture-specific labels. | The reported null-pointer category is below its `>85%` target. The report does not establish `<5 s` response time or complete upstream-project coverage. Its fixtures and scoring rules are not the contract's final acceptance environment; contract text also needs clarification on the `<=10,000` versus `>=10,000` statement-count requirement. |
+| 5: buffer overflow, data races, leaks, command execution | C/C++ built-ins include buffer-related patterns and a low-confidence thread/non-reentrant-call hint; Cppcheck can emit bounds and leak diagnostics. TSan findings are imported from a user-supplied log. | The built-in C/C++ `cwe-78` command-injection rule is not enabled for C/C++; no automatic instrumented build/run is performed. Existing Contract-5 Web report uses 40 file-level samples (6 positive and 4 negative per category), reports 92.50% accuracy, 92.00% precision, 95.83% recall and 12.50% FPR; by its proxy scoring, FPR exceeds `<8%`. It is a tuned, non-independent experiment and not formal acceptance. |
+
+For target coverage, array bounds and buffer/string overflow overlap at the
+analyzer level; do not count a CWE label as a contract-category match without an
+approved mapping and case-level matching rule. Static race hints are not general
+race detection. TSan import only parses an existing log and does not verify its
+revision or authenticity. Neither an empty result nor completed analyzer coverage
+proves the absence of defects.
 
 Cppcheck uses an argv list, no shell, and a 120-second timeout; it does not execute
 the target program. This version uses default compiler configuration, not the

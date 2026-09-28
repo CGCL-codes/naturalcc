@@ -1,11 +1,15 @@
+import json
 import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from fastapi.testclient import TestClient
 
 from code_agent import security_analysis
+from code_agent.agent_web_api import app
 from code_agent.plugins.base import ExecutionContext, PluginResult
+from code_agent.plugins.dispatcher import ExecutionDispatcher
 from code_agent.plugins.vulnerability_detection import VulnerabilityDetectionPlugin
 
 
@@ -71,6 +75,93 @@ def test_incremental_reuses_findings_and_invalidates_edits_deletions_and_setting
     second.unlink()
     assert scan([first])[0] == []
     assert scan([first], "critical")[1]["scanned_files"] == 1
+
+
+def test_result_limit_reports_all_filtered_candidates_without_changing_order(tmp_path):
+    (tmp_path / "main.c").write_text("strcpy(a, b);\nprintf(input);\nstrcat(a, b);\n", encoding="utf-8")
+    result = run_plugin(tmp_path, analyzer="builtin", max_findings=1)
+    summary = result.artifacts["finding_summary"]
+    assert summary == {"candidate_count": 3, "returned_count": 1, "truncated": True, "max_findings": 1}
+    assert result.artifacts["findings"][0]["rule_id"] == "cwe-120"
+    assert "Total findings:" not in result.report
+    assert "Candidates after severity threshold: 3" in result.report
+    assert "Returned findings: 1" in result.report
+    assert "Findings truncated: yes" in result.report
+
+
+def test_scan_type_is_echo_only_and_contract_statistics_are_not_evaluated(tmp_path):
+    (tmp_path / "main.c").write_text("strcpy(a, b);\n", encoding="utf-8")
+    plugin = VulnerabilityDetectionPlugin()
+    assert plugin.validate({"scan_type": ""}) is None
+    assert plugin.validate({"scan_type": "frequent_defects"}) is None
+    assert plugin.validate({"scan_type": "high_risk"}) is None
+    assert "scan_type" in plugin.validate({"scan_type": "unknown"})
+    assert "scan_type" in plugin.validate({"scan_type": []})
+    baseline = run_plugin(tmp_path, analyzer="builtin")
+    selected = run_plugin(tmp_path, analyzer="builtin", scan_type="high_risk")
+    assert selected.artifacts["findings"] == baseline.artifacts["findings"]
+    assert selected.artifacts["scan_type"] == "high_risk"
+    assert selected.artifacts["contract_statistics"]["status"] == "not_evaluated"
+    assert "ground truth" in selected.artifacts["contract_statistics"]["reason"]
+    assert "finding-matching rules" in selected.artifacts["contract_statistics"]["reason"]
+    assert "Scan type: high_risk" in selected.report
+    assert "Contract statistics: not_evaluated" in selected.report
+    assert "ground truth" in selected.report
+    assert "scan_type" not in baseline.artifacts
+    assert "Scan type:" not in baseline.report
+    assert "scan_type" not in run_plugin(tmp_path, analyzer="builtin", scan_type="").artifacts
+
+
+def test_result_limit_counts_builtin_cppcheck_and_tsan_after_threshold(tmp_path, monkeypatch):
+    (tmp_path / "main.c").write_text("strcpy(a, b);\n", encoding="utf-8")
+    (tmp_path / "tsan.log").write_text("WARNING: ThreadSanitizer: data race\n  #0 worker main.c:1:3\n", encoding="utf-8")
+    cpp_finding = {"severity": "high", "confidence": "high", "rule_id": "cwe-476", "rule_name": "null", "file": "main.c", "line": 1, "snippet": "*p", "recommendation": "fix"}
+    monkeypatch.setattr(security_analysis, "cppcheck_scan", lambda *args: ([cpp_finding], {"engine": "cppcheck", "status": "completed"}))
+    result = run_plugin(tmp_path, analyzer="auto", sanitizer_report="tsan.log", max_findings=1, severity_threshold="high")
+    assert result.artifacts["finding_summary"] == {"candidate_count": 3, "returned_count": 1, "truncated": True, "max_findings": 1}
+    assert len(result.artifacts["findings"]) == 1
+    assert [row["engine"] for row in result.artifacts["coverage"]] == ["builtin", "cppcheck", "tsan-import"]
+
+
+def test_incremental_cache_does_not_understate_more_than_1000_candidates(tmp_path):
+    (tmp_path / "main.c").write_text("strcpy(a, b);\n" * 1001, encoding="utf-8")
+    first = run_plugin(tmp_path, analyzer="builtin", incremental=True, max_findings=1)
+    second = run_plugin(tmp_path, analyzer="builtin", incremental=True, max_findings=1)
+    assert first.artifacts["finding_summary"]["candidate_count"] == 1001
+    assert second.artifacts["finding_summary"]["candidate_count"] == 1001
+    assert second.artifacts["coverage"][0]["scanned_files"] == 0
+    assert second.artifacts["coverage"][0]["reused_files"] == 1
+    expanded = run_plugin(tmp_path, analyzer="builtin", incremental=True, max_findings=1000)
+    assert expanded.artifacts["finding_summary"] == {
+        "candidate_count": 1001, "returned_count": 1000, "truncated": True, "max_findings": 1000}
+    assert [finding["line"] for finding in expanded.artifacts["findings"]] == list(range(1, 1001))
+
+
+def test_pipeline_stream_accepts_scan_type_and_reports_invalid_value(tmp_path):
+    (tmp_path / "main.c").write_text("strcpy(a, b);\n", encoding="utf-8")
+    def events(scan_type):
+        context = ExecutionContext(str(tmp_path), ["main.c"], "", "unused", None,
+            {"feature": "vulnerability_detection", "analyzer": "builtin", "scan_type": scan_type})
+        return [json.loads(event) for event in ExecutionDispatcher().dispatch(context)]
+    accepted = events("frequent_defects")
+    assert accepted[-1]["type"] == "done"
+    assert accepted[-1]["status"] == "success"
+    assert "Contract statistics: not_evaluated" in accepted[-1]["report"]
+    invalid = events("unknown")
+    assert invalid == [{"type": "error", "status": "error",
+        "log": "Validation error: scan_type must be frequent_defects or high_risk"}]
+
+
+def test_legacy_run_accepts_scan_type_in_feature_config(tmp_path):
+    (tmp_path / "main.c").write_text("strcpy(a, b);\n", encoding="utf-8")
+    payload = {"project_dir": str(tmp_path), "target_files": ["main.c"],
+        "feature": "vulnerability_detection", "feature_config": {"analyzer": "builtin", "scan_type": "high_risk"}}
+    response = TestClient(app).post("/api/run", json=payload)
+    assert response.status_code == 200
+    events = [json.loads(line) for line in response.text.splitlines()]
+    assert events[-1]["status"] == "success"
+    assert "Scan type: high_risk" in events[-1]["report"]
+    assert "Contract statistics: not_evaluated" in events[-1]["report"]
 
 
 def test_thread_rule_is_review_hint_and_tsan_import_is_distinguished(tmp_path):

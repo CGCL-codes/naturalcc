@@ -58,6 +58,7 @@ Plugins auto-register from `plugins/` via `@register_plugin`; the frontend rende
 - `plugins/vulnerability_detection.py`: static scan with optional Aider remediation.
 - `agent_core/tools/pipeline.py`: Agent adapters for completion, scan, Cppcheck analysis and repair. `security_analysis.py` adapts analyzer evidence; see `PIPELINE_AGENT_TOOLS.md` for setup and limits.
 - `security_review.py`: dataset-independent C audit checklist and literal `scanf` format candidates, returned by the vulnerability plugin to both Pipeline and Web Agent users. Review guidance is not a proven finding; do not classify unrelated defects as target CWEs.
+- Vulnerability `scan_type` is request context only until a separately implemented and validated rule mapping exists. Preserve the documented candidate/truncation semantics; never derive contract TP/FN/FP or pass/fail from CWE labels, candidate counts, or analyzer completion alone. See `PIPELINE_AGENT_TOOLS.md` for current evidence and ownership boundaries.
 
 Add a plugin by creating `plugins/my_feature.py`, inheriting `FeaturePlugin`, implementing `metadata`, `config_schema`, `execute`, and decorating with `@register_plugin`.
 
