@@ -124,23 +124,13 @@ def format_console_summary(checkpoint: dict[str, Any], manifest: dict[str, Any],
              f"组进度：已评分 {states.get('scored', 0)}/9；状态：{checkpoint.get('stop_reason', '未知')}",
              f"函数计分：{len(rows)}；TP/FN/FP/TN：{metric(rows)['tp']}/{metric(rows)['fn']}/{metric(rows)['fp']}/{metric(rows)['tn']}",
              "类别              TP  FN  FP  TN   检出率    误报率"]
-    category_values = []
     for category in manifest["categories"]:
         value = metric([row for row in rows if row["category"] == category["id"]])
-        category_values.append(value)
         lines.append(f"{category['name']:<16} {value['tp']:>2}  {value['fn']:>2}  {value['fp']:>2}  {value['tn']:>2}  {rate(value['detection_rate']):>8}  {rate(value['false_positive_rate']):>8}")
     total = metric(rows)
     lines.append(f"{'总体':<16} {total['tp']:>2}  {total['fn']:>2}  {total['fp']:>2}  {total['tn']:>2}  {rate(total['detection_rate']):>8}  {rate(total['false_positive_rate']):>8}")
-    if len(rows) != 360:
-        verdict = "未完成，不能作完整验收判定"
-    elif suite != "balanced":
-        verdict = "独立压力集：记录能力边界，不替代平衡验收结论"
-    else:
-        passed = all(value["detection_rate"] is not None and value["detection_rate"] > .85
-                     and value["false_positive_rate"] is not None and value["false_positive_rate"] < .15
-                     for value in category_values)
-        verdict = "符合各类别检出率 >85%、误报率 <15%" if passed else "不符合各类别检出率 >85%、误报率 <15%"
-    lines += [f"判定：{verdict}", f"总报告：{report}", f"原始 checkpoint：{OUT / 'checkpoint.json'}"]
+    lines += ["说明：本命令只输出原始统计数值；阈值判定由调用方或前端完成。",
+              f"总报告：{report}", f"原始 checkpoint：{OUT / 'checkpoint.json'}"]
     return "\n".join(lines)
 
 
