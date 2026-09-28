@@ -107,6 +107,43 @@ def rate(value: float | None) -> str:
     return "N/A" if value is None else f"{value:.2%}"
 
 
+def scored_rows(checkpoint: dict[str, Any]) -> list[dict[str, Any]]:
+    return [row for record in checkpoint.get("samples", {}).values() if record.get("status") == "scored"
+            for row in (record.get("rows") or [])]
+
+
+def format_console_summary(checkpoint: dict[str, Any], manifest: dict[str, Any], suite: str, report: Path) -> str:
+    """Create a human-readable terminal summary for both new and resumed runs."""
+    records = checkpoint.get("samples", {})
+    rows = scored_rows(checkpoint)
+    states: dict[str, int] = {}
+    for record in records.values():
+        status = str(record.get("status", "未开始"))
+        states[status] = states.get(status, 0) + 1
+    lines = ["", f"=== 指标 3 Web {'平衡验收集' if suite == 'balanced' else '独立复杂压力集'}结果 ===",
+             f"组进度：已评分 {states.get('scored', 0)}/9；状态：{checkpoint.get('stop_reason', '未知')}",
+             f"函数计分：{len(rows)}；TP/FN/FP/TN：{metric(rows)['tp']}/{metric(rows)['fn']}/{metric(rows)['fp']}/{metric(rows)['tn']}",
+             "类别              TP  FN  FP  TN   检出率    误报率"]
+    category_values = []
+    for category in manifest["categories"]:
+        value = metric([row for row in rows if row["category"] == category["id"]])
+        category_values.append(value)
+        lines.append(f"{category['name']:<16} {value['tp']:>2}  {value['fn']:>2}  {value['fp']:>2}  {value['tn']:>2}  {rate(value['detection_rate']):>8}  {rate(value['false_positive_rate']):>8}")
+    total = metric(rows)
+    lines.append(f"{'总体':<16} {total['tp']:>2}  {total['fn']:>2}  {total['fp']:>2}  {total['tn']:>2}  {rate(total['detection_rate']):>8}  {rate(total['false_positive_rate']):>8}")
+    if len(rows) != 360:
+        verdict = "未完成，不能作完整验收判定"
+    elif suite != "balanced":
+        verdict = "独立压力集：记录能力边界，不替代平衡验收结论"
+    else:
+        passed = all(value["detection_rate"] is not None and value["detection_rate"] > .85
+                     and value["false_positive_rate"] is not None and value["false_positive_rate"] < .15
+                     for value in category_values)
+        verdict = "符合各类别检出率 >85%、误报率 <15%" if passed else "不符合各类别检出率 >85%、误报率 <15%"
+    lines += [f"判定：{verdict}", f"总报告：{report}", f"原始 checkpoint：{OUT / 'checkpoint.json'}"]
+    return "\n".join(lines)
+
+
 def credit_failure(events: list[dict[str, Any]]) -> bool:
     errors = [event.get("payload", {}).get("error", {}) for event in events if event.get("type") == "run.failed"]
     return any(re.search(r"\b402\b|insufficient.*credit|not enough credit|credit.*insufficient",
@@ -126,6 +163,21 @@ def refresh_credit_status(checkpoint: dict[str, Any]) -> None:
             found = True
     if found and str(checkpoint.get("stop_reason", "")).startswith("失败："):
         checkpoint["stop_reason"] = "OpenRouter 额度不足或请求输出预留超过可用额度；未把该组计分"
+
+
+def selected_sample_ids(manifest: dict[str, Any], limit: int | None = None) -> list[str]:
+    identifiers = [f"{source['id']}-{category['id']}"
+                   for source in manifest["sources"] for category in manifest["categories"]]
+    return identifiers if limit is None else identifiers[:limit]
+
+
+def is_skippable(record: dict[str, Any] | None, retry_failed: bool, force_rerun: bool = False) -> bool:
+    if force_rerun:
+        return False
+    if not record:
+        return False
+    return (record.get("rows") is not None or record.get("status") == "unscored"
+            or (record.get("status") == "failed" and not retry_failed))
 
 
 def prepare_samples(manifest: dict[str, Any], workspace: Path, suite: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -197,7 +249,7 @@ def render_report(checkpoint: dict[str, Any], manifest: dict[str, Any], suite: s
     return "\n".join(lines) + "\n"
 
 
-def run(checkpoint: dict[str, Any], manifest: dict[str, Any], samples: list[dict[str, Any]], projects: list[dict[str, Any]], base: str, suite: str, retry_failed: bool = False) -> None:
+def run(checkpoint: dict[str, Any], manifest: dict[str, Any], samples: list[dict[str, Any]], projects: list[dict[str, Any]], base: str, suite: str, retry_failed: bool = False, force_rerun: bool = False) -> None:
     client = WebClient(base)
     bootstrap = client.call("GET", "/api/bootstrap")
     config = bootstrap["runtime_default_model_config"]
@@ -219,14 +271,20 @@ def run(checkpoint: dict[str, Any], manifest: dict[str, Any], samples: list[dict
         from code_agent.scripts.render_contract3_report import write_report
         write_report()
 
+    total_groups = len(samples)
+    if force_rerun:
+        print(f"指标3 Web {suite}：强制重跑 {total_groups} 组；将保留旧 Run 尝试记录，并以本轮完成结果重新计分。", flush=True)
+    else:
+        print(f"指标3 Web {suite}：共 {total_groups} 组；已存在评分结果将跳过并在结束时汇总。", flush=True)
     for index, sample in enumerate(samples, 1):
         record = checkpoint["samples"].setdefault(sample["id"], {"attempts": []})
-        if record.get("rows") is not None or record.get("status") == "unscored" or (record.get("status") == "failed" and not retry_failed):
+        if is_skippable(record, retry_failed, force_rerun):
+            print(f"[{index}/{total_groups}] {sample['id']} {record.get('status', '已完成')}：跳过（已有结果）", flush=True)
             continue
         thread = client.call("POST", "/api/agent/threads", json={
             "title": f"合同3 · {sample['id']}", "workspace": sample["project_path"], "runtime_mode": "agent",
             "runtime_model_config": config, "budget": BUDGET})
-        attempt = {"thread_id": thread["thread_id"], "created_utc": now()}
+        attempt = {"thread_id": thread["thread_id"], "created_utc": now(), "forced": force_rerun}
         record["attempts"].append(attempt)
         record["status"] = "created"
         persist()
@@ -240,7 +298,7 @@ def run(checkpoint: dict[str, Any], manifest: dict[str, Any], samples: list[dict
         if state["runtime_model_config"] != config:
             raise ValueError("Run model snapshot changed")
         while state["status"] not in TERMINAL:
-            print(f"[{index}/9] {sample['id']} {state['status']} LLM={state.get('llm_calls', 0)}", flush=True)
+            print(f"[{index}/{total_groups}] {sample['id']} {state['status']} LLM={state.get('llm_calls', 0)}", flush=True)
             if state["status"] == "waiting_approval":
                 # Contract-3 Web mode intentionally has no automatic execute/write approval.
                 state = client.call("POST", run_path + "/reject")
@@ -275,6 +333,13 @@ def run(checkpoint: dict[str, Any], manifest: dict[str, Any], samples: list[dict
         except (TypeError, ValueError) as exc:
             record.update({"status": "unscored", "error": str(exc)})
         persist()
+        if record["status"] == "scored":
+            current = metric(rows)
+            print(f"[{index}/{total_groups}] {sample['id']} 已保存：TP/FN/FP/TN="
+                  f"{current['tp']}/{current['fn']}/{current['fp']}/{current['tn']}，"
+                  f"检出率 {rate(current['detection_rate'])}，误报率 {rate(current['false_positive_rate'])}", flush=True)
+        else:
+            print(f"[{index}/{total_groups}] {sample['id']} {record['status']}：已保存结果", flush=True)
     checkpoint["stop_reason"] = "样本队列已处理完毕（未评分项保留在 checkpoint）"
     persist()
 
@@ -287,6 +352,7 @@ def main() -> None:
                         help="balanced is the recommended acceptance mix; independent is the held-out stress mix")
     parser.add_argument("--limit", type=int, help="Only run the first N project/category groups (for a low-cost smoke test)")
     parser.add_argument("--retry-failed", action="store_true", help="Retry prior transient failed groups and continue the queue; attempts remain in checkpoint")
+    parser.add_argument("--force-rerun", action="store_true", help="Run selected groups again even when scored; preserve prior attempts and replace the current score only after completion")
     parser.add_argument("--report-only", action="store_true")
     args = parser.parse_args()
     global OUT
@@ -304,25 +370,35 @@ def main() -> None:
         if args.report_only:
             save_json(checkpoint_path, checkpoint)
             from code_agent.scripts.render_contract3_report import write_report
-            write_report()
+            report = write_report()
+            print(format_console_summary(checkpoint, manifest, args.suite, report), flush=True)
+            return
+        if args.limit is not None and args.limit < 1:
+            raise SystemExit("--limit must be at least 1")
+        selected_ids = selected_sample_ids(manifest, args.limit)
+        if not args.force_rerun and selected_ids and all(is_skippable(checkpoint["samples"].get(sample_id), args.retry_failed)
+                                for sample_id in selected_ids):
+            from code_agent.scripts.render_contract3_report import write_report
+            report = write_report()
+            print("本次选择的组均无需运行（已评分、未评分，或失败但未启用 --retry-failed）；未连接 Web 服务、未调用模型。", flush=True)
+            print(format_console_summary(checkpoint, manifest, args.suite, report), flush=True)
             return
         if not os.environ.get("OPENROUTER_API_KEY", "").strip():
             raise SystemExit("OPENROUTER_API_KEY is not set")
         samples, projects = prepare_samples(manifest, args.workspace.resolve(), args.suite)
         if args.limit is not None:
-            if args.limit < 1:
-                raise SystemExit("--limit must be at least 1")
             samples = samples[:args.limit]
         try:
             checkpoint["stop_reason"] = "测试进行中"
-            run(checkpoint, manifest, samples, projects, args.base_url, args.suite, args.retry_failed)
+            run(checkpoint, manifest, samples, projects, args.base_url, args.suite, args.retry_failed, args.force_rerun)
         except (Exception, KeyboardInterrupt) as exc:
             checkpoint["stop_reason"] = safe_text(f"已停止：{type(exc).__name__}: {exc}")
             raise SystemExit(1) from None
         finally:
             save_json(checkpoint_path, checkpoint)
             from code_agent.scripts.render_contract3_report import write_report
-            print(f"Report: {write_report()}", flush=True)
+            report = write_report()
+            print(format_console_summary(checkpoint, manifest, args.suite, report), flush=True)
 
 
 if __name__ == "__main__":

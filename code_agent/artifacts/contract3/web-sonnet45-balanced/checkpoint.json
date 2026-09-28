@@ -4,11 +4,12 @@
     "freertos_kernel-array_oob": {
       "attempts": [
         {
-          "thread_id": "0efe2c90-cc55-4afb-97a0-ea5ed37bed0f",
-          "created_utc": "2026-09-27T23:44:20.323574+00:00",
-          "run_id": "6ac6f18e-5784-4ed0-bfb3-4f40b01e9ce2",
+          "thread_id": "e70f289c-3d7d-4abb-9405-d1e83d254552",
+          "created_utc": "2026-09-28T05:53:51.619305+00:00",
+          "forced": true,
+          "run_id": "64ae44c1-bb48-4443-abfe-b231b624fe32",
           "status": "completed",
-          "finished_utc": "2026-09-27T23:44:46.619812+00:00"
+          "finished_utc": "2026-09-28T05:54:20.563796+00:00"
         }
       ],
       "status": "scored",
@@ -17,105 +18,105 @@
           {
             "category": "array_oob",
             "line": 14,
-            "reason": "数组values[3]有效索引为0-2，直接访问values[3]越界读取"
+            "reason": "数组 values[3] 有效索引为 0-2，直接访问 values[3] 越界读取"
           },
           {
             "category": "array_oob",
             "line": 21,
-            "reason": "数组values[3]有效索引为0-2，通过index=3访问values[index]越界读取"
+            "reason": "数组 values[3] 有效索引为 0-2，使用常量索引 3 访问 values[index] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 28,
-            "reason": "数组values[3]有效索引为0-2，循环条件index<=3时访问values[3]越界读取"
+            "line": 27,
+            "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 36,
-            "reason": "数组values[3]有效索引为0-2，通过函数返回的index=3访问values[index]越界读取"
+            "line": 34,
+            "reason": "通过函数返回索引 3，访问 values[index] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 42,
-            "reason": "数组values[3]有效索引为0-2，直接访问values[3]越界读取"
+            "line": 40,
+            "reason": "数组 values[3] 有效索引为 0-2，直接访问 values[3] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 49,
-            "reason": "数组values[3]有效索引为0-2，通过index=3访问values[index]越界读取"
+            "line": 47,
+            "reason": "数组 values[3] 有效索引为 0-2，使用常量索引 3 访问 values[index] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 56,
-            "reason": "数组values[3]有效索引为0-2，循环条件index<=3时访问values[3]越界读取"
+            "line": 53,
+            "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 64,
-            "reason": "数组values[3]有效索引为0-2，通过函数返回的index=3访问values[index]越界读取"
+            "line": 60,
+            "reason": "通过函数返回索引 3，访问 values[index] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 71,
-            "reason": "数组values[3]有效索引为0-2，直接访问values[3]越界读取"
+            "line": 66,
+            "reason": "数组 values[3] 有效索引为 0-2，直接访问 values[3] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 78,
-            "reason": "数组values[3]有效索引为0-2，通过index=3访问values[index]越界读取"
+            "line": 73,
+            "reason": "数组 values[3] 有效索引为 0-2，使用常量索引 3 访问 values[index] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 85,
-            "reason": "数组values[3]有效索引为0-2，循环条件index<=3时访问values[3]越界读取"
+            "line": 79,
+            "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 93,
-            "reason": "数组values[3]有效索引为0-2，通过函数返回的index=3访问values[index]越界读取"
+            "line": 86,
+            "reason": "通过函数返回索引 3，访问 values[index] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 100,
-            "reason": "数组values[3]有效索引为0-2，直接访问values[3]越界读取"
+            "line": 92,
+            "reason": "数组 values[3] 有效索引为 0-2，直接访问 values[3] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 107,
-            "reason": "数组values[3]有效索引为0-2，通过index=3访问values[index]越界读取"
+            "line": 99,
+            "reason": "数组 values[3] 有效索引为 0-2，使用常量索引 3 访问 values[index] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 114,
-            "reason": "数组values[3]有效索引为0-2，循环条件index<=3时访问values[3]越界读取"
+            "line": 105,
+            "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 122,
-            "reason": "数组values[3]有效索引为0-2，通过函数返回的index=3访问values[index]越界读取"
+            "line": 112,
+            "reason": "通过函数返回索引 3，访问 values[index] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 129,
-            "reason": "数组values[3]有效索引为0-2，直接访问values[3]越界读取"
+            "line": 118,
+            "reason": "数组 values[3] 有效索引为 0-2，直接访问 values[3] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 136,
-            "reason": "数组values[3]有效索引为0-2，通过index=3访问values[index]越界读取"
+            "line": 125,
+            "reason": "数组 values[3] 有效索引为 0-2，使用常量索引 3 访问 values[index] 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 143,
-            "reason": "数组values[3]有效索引为0-2，指针运算values+3指向越界位置并解引用"
+            "line": 131,
+            "reason": "指针算术 values + 3 超出数组边界，解引用 *cursor 越界读取"
           },
           {
             "category": "array_oob",
-            "line": 150,
-            "reason": "数组values[3]有效索引为0-2，指针运算values+3指向越界位置并解引用"
+            "line": 137,
+            "reason": "指针算术 values + 3 超出数组边界，解引用 *cursor 越界读取"
           }
         ],
-        "summary": "检测到20处数组越界风险（case_01至case_20），均为访问3元素数组的索引3位置或通过指针偏移3单位后解引用。case_21至case_40访问索引2属于有效范围，无越界风险。"
+        "summary": "发现 20 处数组越界漏洞，分布在 case_01 至 case_20 函数中。所有漏洞均为越界读取，涉及直接索引访问、循环边界错误和指针算术越界。case_21 至 case_40 的函数均正常访问有效索引范围 0-2，无越界风险。"
       },
       "rows": [
         {
@@ -133,7 +134,7 @@
             {
               "category": "array_oob",
               "line": 14,
-              "reason": "数组values[3]有效索引为0-2，直接访问values[3]越界读取"
+              "reason": "数组 values[3] 有效索引为 0-2，直接访问 values[3] 越界读取"
             }
           ]
         },
@@ -152,7 +153,7 @@
             {
               "category": "array_oob",
               "line": 21,
-              "reason": "数组values[3]有效索引为0-2，通过index=3访问values[index]越界读取"
+              "reason": "数组 values[3] 有效索引为 0-2，使用常量索引 3 访问 values[index] 越界读取"
             }
           ]
         },
@@ -170,8 +171,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 28,
-              "reason": "数组values[3]有效索引为0-2，循环条件index<=3时访问values[3]越界读取"
+              "line": 27,
+              "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取"
             }
           ]
         },
@@ -189,8 +190,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 36,
-              "reason": "数组values[3]有效索引为0-2，通过函数返回的index=3访问values[index]越界读取"
+              "line": 34,
+              "reason": "通过函数返回索引 3，访问 values[index] 越界读取"
             }
           ]
         },
@@ -208,8 +209,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 42,
-              "reason": "数组values[3]有效索引为0-2，直接访问values[3]越界读取"
+              "line": 40,
+              "reason": "数组 values[3] 有效索引为 0-2，直接访问 values[3] 越界读取"
             }
           ]
         },
@@ -227,8 +228,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 49,
-              "reason": "数组values[3]有效索引为0-2，通过index=3访问values[index]越界读取"
+              "line": 47,
+              "reason": "数组 values[3] 有效索引为 0-2，使用常量索引 3 访问 values[index] 越界读取"
             }
           ]
         },
@@ -246,8 +247,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 56,
-              "reason": "数组values[3]有效索引为0-2，循环条件index<=3时访问values[3]越界读取"
+              "line": 53,
+              "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取"
             }
           ]
         },
@@ -265,8 +266,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 64,
-              "reason": "数组values[3]有效索引为0-2，通过函数返回的index=3访问values[index]越界读取"
+              "line": 60,
+              "reason": "通过函数返回索引 3，访问 values[index] 越界读取"
             }
           ]
         },
@@ -280,14 +281,8 @@
           "line_end": 71,
           "defect_line": 70,
           "file": "contract3_balanced_web_array_oob.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "array_oob",
-              "line": 71,
-              "reason": "数组values[3]有效索引为0-2，直接访问values[3]越界读取"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "freertos_kernel-array_oob-positive-10",
@@ -303,8 +298,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 78,
-              "reason": "数组values[3]有效索引为0-2，通过index=3访问values[index]越界读取"
+              "line": 73,
+              "reason": "数组 values[3] 有效索引为 0-2，使用常量索引 3 访问 values[index] 越界读取"
             }
           ]
         },
@@ -322,8 +317,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 85,
-              "reason": "数组values[3]有效索引为0-2，循环条件index<=3时访问values[3]越界读取"
+              "line": 86,
+              "reason": "通过函数返回索引 3，访问 values[index] 越界读取"
             }
           ]
         },
@@ -341,8 +336,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 93,
-              "reason": "数组values[3]有效索引为0-2，通过函数返回的index=3访问values[index]越界读取"
+              "line": 92,
+              "reason": "数组 values[3] 有效索引为 0-2，直接访问 values[3] 越界读取"
             }
           ]
         },
@@ -356,8 +351,14 @@
           "line_end": 99,
           "defect_line": 98,
           "file": "contract3_balanced_web_array_oob.c",
-          "detected": false,
-          "matched_findings": []
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "array_oob",
+              "line": 99,
+              "reason": "数组 values[3] 有效索引为 0-2，使用常量索引 3 访问 values[index] 越界读取"
+            }
+          ]
         },
         {
           "case_id": "freertos_kernel-array_oob-positive-14",
@@ -369,8 +370,14 @@
           "line_end": 106,
           "defect_line": 105,
           "file": "contract3_balanced_web_array_oob.c",
-          "detected": false,
-          "matched_findings": []
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "array_oob",
+              "line": 105,
+              "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取"
+            }
+          ]
         },
         {
           "case_id": "freertos_kernel-array_oob-positive-15",
@@ -386,8 +393,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 114,
-              "reason": "数组values[3]有效索引为0-2，循环条件index<=3时访问values[3]越界读取"
+              "line": 112,
+              "reason": "通过函数返回索引 3，访问 values[index] 越界读取"
             }
           ]
         },
@@ -401,8 +408,14 @@
           "line_end": 121,
           "defect_line": 120,
           "file": "contract3_balanced_web_array_oob.c",
-          "detected": false,
-          "matched_findings": []
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "array_oob",
+              "line": 118,
+              "reason": "数组 values[3] 有效索引为 0-2，直接访问 values[3] 越界读取"
+            }
+          ]
         },
         {
           "case_id": "freertos_kernel-array_oob-positive-17",
@@ -414,8 +427,14 @@
           "line_end": 127,
           "defect_line": 126,
           "file": "contract3_balanced_web_array_oob.c",
-          "detected": false,
-          "matched_findings": []
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "array_oob",
+              "line": 125,
+              "reason": "数组 values[3] 有效索引为 0-2，使用常量索引 3 访问 values[index] 越界读取"
+            }
+          ]
         },
         {
           "case_id": "freertos_kernel-array_oob-positive-18",
@@ -431,8 +450,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 129,
-              "reason": "数组values[3]有效索引为0-2，直接访问values[3]越界读取"
+              "line": 131,
+              "reason": "指针算术 values + 3 超出数组边界，解引用 *cursor 越界读取"
             }
           ]
         },
@@ -450,8 +469,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 136,
-              "reason": "数组values[3]有效索引为0-2，通过index=3访问values[index]越界读取"
+              "line": 137,
+              "reason": "指针算术 values + 3 超出数组边界，解引用 *cursor 越界读取"
             }
           ]
         },
@@ -465,14 +484,8 @@
           "line_end": 148,
           "defect_line": 147,
           "file": "contract3_balanced_web_array_oob.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "array_oob",
-              "line": 143,
-              "reason": "数组values[3]有效索引为0-2，指针运算values+3指向越界位置并解引用"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "freertos_kernel-array_oob-control-01",
@@ -484,14 +497,8 @@
           "line_end": 154,
           "defect_line": 153,
           "file": "contract3_balanced_web_array_oob.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "array_oob",
-              "line": 150,
-              "reason": "数组values[3]有效索引为0-2，指针运算values+3指向越界位置并解引用"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "freertos_kernel-array_oob-control-02",
@@ -744,29 +751,25 @@
       "out_of_scope_findings": [
         {
           "category": "array_oob",
-          "line": 100,
-          "reason": "数组values[3]有效索引为0-2，直接访问values[3]越界读取"
+          "line": 66,
+          "reason": "数组 values[3] 有效索引为 0-2，直接访问 values[3] 越界读取"
         },
         {
           "category": "array_oob",
-          "line": 107,
-          "reason": "数组values[3]有效索引为0-2，通过index=3访问values[index]越界读取"
-        },
-        {
-          "category": "array_oob",
-          "line": 122,
-          "reason": "数组values[3]有效索引为0-2，通过函数返回的index=3访问values[index]越界读取"
+          "line": 79,
+          "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取"
         }
       ]
     },
     "freertos_kernel-string_overflow": {
       "attempts": [
         {
-          "thread_id": "419580e5-24ae-47b7-8a7b-9a8de5a6f7a0",
-          "created_utc": "2026-09-27T23:44:46.670957+00:00",
-          "run_id": "2a48756e-8042-434b-8b09-a5e7963e101e",
+          "thread_id": "7b050034-f700-4260-85c2-7a43b047bb99",
+          "created_utc": "2026-09-28T05:54:20.613131+00:00",
+          "forced": true,
+          "run_id": "62c41ea8-c06e-4126-94b1-b80b6fea679e",
           "status": "completed",
-          "finished_utc": "2026-09-27T23:45:16.528571+00:00"
+          "finished_utc": "2026-09-28T05:54:44.774403+00:00"
         }
       ],
       "status": "scored",
@@ -775,105 +778,105 @@
           {
             "category": "string_overflow",
             "line": 14,
-            "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节(5个字符+'\\0')，溢出2字节"
+            "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 20,
-            "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 26,
-            "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+            "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 32,
-            "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 38,
-            "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 44,
-            "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+            "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 50,
-            "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 56,
-            "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 62,
-            "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+            "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 68,
-            "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 74,
-            "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 80,
-            "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+            "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 86,
-            "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 92,
-            "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 98,
-            "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+            "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 104,
-            "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 110,
-            "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 116,
-            "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+            "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 122,
-            "reason": "strcat(target, \"BCDEFGH\"): 初始\"A\"(2字节含NUL)+追加8字节(含NUL)=共需9字节，8字节缓冲区溢出1字节"
+            "reason": "strcat将8字节字符串\"BCDEFGH\"（含NUL）追加到包含1字节'A'+NUL的8字节缓冲区，共需10字节，溢出2字节"
           },
           {
             "category": "string_overflow",
             "line": 128,
-            "reason": "contract3_copy(target, \"ABCDE\")调用strcpy: 4字节缓冲区写入6字节，溢出2字节"
+            "reason": "contract3_copy内部使用strcpy将6字节字符串\"ABCDE\"（含NUL）复制到4字节缓冲区target，溢出2字节"
           }
         ],
-        "summary": "检测到20处字符串溢出漏洞：strcpy/sprintf向4字节缓冲区写入6字节源(case_01-18,20)，memcpy显式复制超长度(case_03,06,09,12,15,18)，strcat导致8字节缓冲区溢出1字节(case_19)。case_21-40使用安全边界，无溢出风险。工具未报告是因未启用深度边界分析，已通过手工验证确认实际溢出。"
+        "summary": "检测到20处字符串溢出漏洞。漏洞类型包括：strcpy/sprintf/memcpy向4字节缓冲区写入6字节数据（case_01至18、20）、strcat导致的缓冲区溢出（case_19）。case_21至40均为安全操作，缓冲区容量足够。"
       },
       "rows": [
         {
@@ -891,7 +894,7 @@
             {
               "category": "string_overflow",
               "line": 14,
-              "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节(5个字符+'\\0')，溢出2字节"
+              "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -910,7 +913,7 @@
             {
               "category": "string_overflow",
               "line": 20,
-              "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -929,7 +932,7 @@
             {
               "category": "string_overflow",
               "line": 26,
-              "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+              "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
             }
           ]
         },
@@ -948,7 +951,7 @@
             {
               "category": "string_overflow",
               "line": 32,
-              "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -967,7 +970,7 @@
             {
               "category": "string_overflow",
               "line": 44,
-              "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+              "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
             }
           ]
         },
@@ -986,7 +989,7 @@
             {
               "category": "string_overflow",
               "line": 50,
-              "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -1005,7 +1008,7 @@
             {
               "category": "string_overflow",
               "line": 56,
-              "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -1024,7 +1027,7 @@
             {
               "category": "string_overflow",
               "line": 62,
-              "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+              "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
             }
           ]
         },
@@ -1043,7 +1046,7 @@
             {
               "category": "string_overflow",
               "line": 68,
-              "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -1062,7 +1065,7 @@
             {
               "category": "string_overflow",
               "line": 74,
-              "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -1081,7 +1084,7 @@
             {
               "category": "string_overflow",
               "line": 86,
-              "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -1100,7 +1103,7 @@
             {
               "category": "string_overflow",
               "line": 92,
-              "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -1119,7 +1122,7 @@
             {
               "category": "string_overflow",
               "line": 98,
-              "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+              "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
             }
           ]
         },
@@ -1138,7 +1141,7 @@
             {
               "category": "string_overflow",
               "line": 104,
-              "reason": "strcpy(target, \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "strcpy将6字节字符串\"ABCDE\"（含NUL终止符）复制到4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -1157,7 +1160,7 @@
             {
               "category": "string_overflow",
               "line": 110,
-              "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -1176,7 +1179,7 @@
             {
               "category": "string_overflow",
               "line": 116,
-              "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+              "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
             }
           ]
         },
@@ -1195,7 +1198,7 @@
             {
               "category": "string_overflow",
               "line": 128,
-              "reason": "contract3_copy(target, \"ABCDE\")调用strcpy: 4字节缓冲区写入6字节，溢出2字节"
+              "reason": "contract3_copy内部使用strcpy将6字节字符串\"ABCDE\"（含NUL）复制到4字节缓冲区target，溢出2字节"
             }
           ]
         },
@@ -1503,28 +1506,29 @@
         {
           "category": "string_overflow",
           "line": 38,
-          "reason": "sprintf(target, \"%s\", \"ABCDE\"): 4字节缓冲区写入6字节，溢出2字节"
+          "reason": "sprintf将6字节字符串\"ABCDE\"（含NUL终止符）写入4字节缓冲区target，溢出2字节"
         },
         {
           "category": "string_overflow",
           "line": 80,
-          "reason": "memcpy(target, \"ABCDE\", 6): 4字节缓冲区复制6字节，溢出2字节"
+          "reason": "memcpy向4字节缓冲区target复制6字节数据，溢出2字节"
         },
         {
           "category": "string_overflow",
           "line": 122,
-          "reason": "strcat(target, \"BCDEFGH\"): 初始\"A\"(2字节含NUL)+追加8字节(含NUL)=共需9字节，8字节缓冲区溢出1字节"
+          "reason": "strcat将8字节字符串\"BCDEFGH\"（含NUL）追加到包含1字节'A'+NUL的8字节缓冲区，共需10字节，溢出2字节"
         }
       ]
     },
     "freertos_kernel-null_pointer": {
       "attempts": [
         {
-          "thread_id": "0fe2060e-300b-456f-8dc5-8bb6132a7cde",
-          "created_utc": "2026-09-27T23:45:16.569403+00:00",
-          "run_id": "83452385-be7d-4b6c-abfd-681ac5a923bc",
+          "thread_id": "5d2e11e1-8d64-4235-adbd-aebfee9dfa4f",
+          "created_utc": "2026-09-28T05:54:44.815251+00:00",
+          "forced": true,
+          "run_id": "2994eaed-1cd3-48cc-9a6b-cf3d5ab24968",
           "status": "completed",
-          "finished_utc": "2026-09-27T23:45:48.832514+00:00"
+          "finished_utc": "2026-09-28T05:55:13.241091+00:00"
         }
       ],
       "status": "scored",
@@ -1533,105 +1537,105 @@
           {
             "category": "null_pointer",
             "line": 14,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "reason": "pointer初始化为0（NULL），第14行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
             "line": 20,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "reason": "pointer初始化为0（NULL），第20行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
             "line": 27,
-            "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+            "reason": "pointer初始化为0，条件value<0恒假（value=7），第27行解引用时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
             "line": 33,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "reason": "pointer初始化为0（NULL），第33行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
             "line": 39,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "reason": "pointer初始化为0（NULL），第39行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
-            "line": 47,
-            "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+            "line": 46,
+            "reason": "pointer初始化为0，条件value<0恒假（value=7），第46行解引用时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
-            "line": 53,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "line": 52,
+            "reason": "pointer初始化为0（NULL），第52行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
-            "line": 59,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "line": 58,
+            "reason": "pointer初始化为0（NULL），第58行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
-            "line": 67,
-            "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+            "line": 65,
+            "reason": "pointer初始化为0，条件value<0恒假（value=7），第65行解引用时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
-            "line": 73,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "line": 71,
+            "reason": "pointer初始化为0（NULL），第71行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
-            "line": 79,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "line": 77,
+            "reason": "pointer初始化为0（NULL），第77行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
-            "line": 87,
-            "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+            "line": 84,
+            "reason": "pointer初始化为0，条件value<0恒假（value=7），第84行解引用时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
-            "line": 93,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "line": 90,
+            "reason": "pointer初始化为0（NULL），第90行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
-            "line": 99,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "line": 96,
+            "reason": "pointer初始化为0（NULL），第96行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
-            "line": 107,
-            "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+            "line": 103,
+            "reason": "pointer初始化为0，条件value<0恒假（value=7），第103行解引用时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
-            "line": 113,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "line": 109,
+            "reason": "pointer初始化为0（NULL），第109行直接解引用 *pointer"
           },
           {
             "category": "null_pointer",
-            "line": 119,
-            "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+            "line": 115,
+            "reason": "pointer初始化为0（NULL），第115行直接解引用 *pointer"
+          },
+          {
+            "category": "null_pointer",
+            "line": 122,
+            "reason": "pointer初始化为0，条件value<0恒假（value=7），第122行解引用时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
             "line": 127,
-            "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+            "reason": "contract3_read函数参数传入0（NULL），在第8行会解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 132,
-            "reason": "contract3_read(0) 传递NULL指针，在contract3_read第8行解引用 *pointer"
-          },
-          {
-            "category": "null_pointer",
-            "line": 138,
-            "reason": "box初始化为{0}使box.pointer为NULL，执行 *box.pointer 解引用NULL"
+            "line": 133,
+            "reason": "box.pointer初始化为0（NULL），第133行解引用 *box.pointer"
           }
         ],
-        "summary": "检测到20处空指针解引用风险。18处为直接或条件未满足情况下对NULL指针的解引用（case_01~18），1处为传递NULL给解引用函数（case_19），1处为结构体成员NULL指针解引用（case_20）。其余20个函数（case_21~40）无此风险。"
+        "summary": "发现20处空指针解引用漏洞。case_01-18存在直接解引用NULL或恒假条件后解引用NULL；case_19传递NULL给contract3_read导致间接解引用；case_20对NULL结构成员解引用。case_21-40均安全。"
       },
       "rows": [
         {
@@ -1649,7 +1653,7 @@
             {
               "category": "null_pointer",
               "line": 14,
-              "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+              "reason": "pointer初始化为0（NULL），第14行直接解引用 *pointer"
             }
           ]
         },
@@ -1668,7 +1672,7 @@
             {
               "category": "null_pointer",
               "line": 20,
-              "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+              "reason": "pointer初始化为0（NULL），第20行直接解引用 *pointer"
             }
           ]
         },
@@ -1687,7 +1691,7 @@
             {
               "category": "null_pointer",
               "line": 27,
-              "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+              "reason": "pointer初始化为0，条件value<0恒假（value=7），第27行解引用时pointer仍为NULL"
             }
           ]
         },
@@ -1706,7 +1710,7 @@
             {
               "category": "null_pointer",
               "line": 33,
-              "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+              "reason": "pointer初始化为0（NULL），第33行直接解引用 *pointer"
             }
           ]
         },
@@ -1725,7 +1729,7 @@
             {
               "category": "null_pointer",
               "line": 39,
-              "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+              "reason": "pointer初始化为0（NULL），第39行直接解引用 *pointer"
             }
           ]
         },
@@ -1743,8 +1747,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 47,
-              "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+              "line": 46,
+              "reason": "pointer初始化为0，条件value<0恒假（value=7），第46行解引用时pointer仍为NULL"
             }
           ]
         },
@@ -1758,14 +1762,8 @@
           "line_end": 57,
           "defect_line": 56,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "null_pointer",
-              "line": 53,
-              "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "freertos_kernel-null_pointer-positive-08",
@@ -1777,14 +1775,8 @@
           "line_end": 64,
           "defect_line": 63,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "null_pointer",
-              "line": 59,
-              "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "freertos_kernel-null_pointer-positive-09",
@@ -1800,8 +1792,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 67,
-              "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+              "line": 71,
+              "reason": "pointer初始化为0（NULL），第71行直接解引用 *pointer"
             }
           ]
         },
@@ -1815,8 +1807,14 @@
           "line_end": 78,
           "defect_line": 77,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": false,
-          "matched_findings": []
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "null_pointer",
+              "line": 77,
+              "reason": "pointer初始化为0（NULL），第77行直接解引用 *pointer"
+            }
+          ]
         },
         {
           "case_id": "freertos_kernel-null_pointer-positive-11",
@@ -1828,8 +1826,14 @@
           "line_end": 85,
           "defect_line": 84,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": false,
-          "matched_findings": []
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "null_pointer",
+              "line": 84,
+              "reason": "pointer初始化为0，条件value<0恒假（value=7），第84行解引用时pointer仍为NULL"
+            }
+          ]
         },
         {
           "case_id": "freertos_kernel-null_pointer-positive-12",
@@ -1845,13 +1849,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 87,
-              "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
-            },
-            {
-              "category": "null_pointer",
-              "line": 93,
-              "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+              "line": 90,
+              "reason": "pointer初始化为0（NULL），第90行直接解引用 *pointer"
             }
           ]
         },
@@ -1869,8 +1868,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 99,
-              "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+              "line": 96,
+              "reason": "pointer初始化为0（NULL），第96行直接解引用 *pointer"
             }
           ]
         },
@@ -1884,8 +1883,14 @@
           "line_end": 106,
           "defect_line": 105,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": false,
-          "matched_findings": []
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "null_pointer",
+              "line": 103,
+              "reason": "pointer初始化为0，条件value<0恒假（value=7），第103行解引用时pointer仍为NULL"
+            }
+          ]
         },
         {
           "case_id": "freertos_kernel-null_pointer-positive-15",
@@ -1901,8 +1906,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 113,
-              "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+              "line": 109,
+              "reason": "pointer初始化为0（NULL），第109行直接解引用 *pointer"
             }
           ]
         },
@@ -1916,14 +1921,8 @@
           "line_end": 120,
           "defect_line": 119,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "null_pointer",
-              "line": 119,
-              "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "freertos_kernel-null_pointer-positive-17",
@@ -1939,8 +1938,13 @@
           "matched_findings": [
             {
               "category": "null_pointer",
+              "line": 122,
+              "reason": "pointer初始化为0，条件value<0恒假（value=7），第122行解引用时pointer仍为NULL"
+            },
+            {
+              "category": "null_pointer",
               "line": 127,
-              "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+              "reason": "contract3_read函数参数传入0（NULL），在第8行会解引用空指针"
             }
           ]
         },
@@ -1958,8 +1962,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 132,
-              "reason": "contract3_read(0) 传递NULL指针，在contract3_read第8行解引用 *pointer"
+              "line": 133,
+              "reason": "box.pointer初始化为0（NULL），第133行解引用 *box.pointer"
             }
           ]
         },
@@ -1973,14 +1977,8 @@
           "line_end": 141,
           "defect_line": 140,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "null_pointer",
-              "line": 138,
-              "reason": "box初始化为{0}使box.pointer为NULL，执行 *box.pointer 解引用NULL"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "freertos_kernel-null_pointer-positive-20",
@@ -2259,29 +2257,35 @@
       "out_of_scope_findings": [
         {
           "category": "null_pointer",
-          "line": 73,
-          "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+          "line": 52,
+          "reason": "pointer初始化为0（NULL），第52行直接解引用 *pointer"
         },
         {
           "category": "null_pointer",
-          "line": 79,
-          "reason": "pointer初始化为0（NULL），直接执行 *pointer 解引用"
+          "line": 58,
+          "reason": "pointer初始化为0（NULL），第58行直接解引用 *pointer"
         },
         {
           "category": "null_pointer",
-          "line": 107,
-          "reason": "pointer初始化为0，条件 value<0 (7<0恒假) 不成立，pointer保持NULL后被解引用"
+          "line": 65,
+          "reason": "pointer初始化为0，条件value<0恒假（value=7），第65行解引用时pointer仍为NULL"
+        },
+        {
+          "category": "null_pointer",
+          "line": 115,
+          "reason": "pointer初始化为0（NULL），第115行直接解引用 *pointer"
         }
       ]
     },
     "zephyr-array_oob": {
       "attempts": [
         {
-          "thread_id": "2b44f182-5a62-4226-b4f4-e1847c902c37",
-          "created_utc": "2026-09-27T23:45:48.865083+00:00",
-          "run_id": "ea6bbf9d-c9f4-4893-a1c1-b88d4b5b62e2",
+          "thread_id": "bd5c9a15-c4b9-47fb-b200-0723b026ef67",
+          "created_utc": "2026-09-28T05:55:13.301211+00:00",
+          "forced": true,
+          "run_id": "cde51f8b-bc28-456c-b5c3-2b589a41f77d",
           "status": "completed",
-          "finished_utc": "2026-09-27T23:46:16.234954+00:00"
+          "finished_utc": "2026-09-28T05:55:41.875913+00:00"
         }
       ],
       "status": "scored",
@@ -2290,105 +2294,105 @@
           {
             "category": "array_oob",
             "line": 14,
-            "reason": "数组 values[3] 合法索引为 0-2，访问 values[3] 越界"
+            "reason": "数组 values[3] 的合法索引为 0-2，访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 21,
-            "reason": "变量 index=3，访问 values[index] 即 values[3] 越界"
+            "line": 20,
+            "reason": "index=3 超出数组 values[3] 的合法范围 [0,2]"
           },
           {
             "category": "array_oob",
-            "line": 28,
-            "reason": "循环条件 index <= 3，当 index=3 时访问 values[index] 越界"
+            "line": 27,
+            "reason": "循环条件 index<=3 导致 index=3 时访问 values[3] 越界"
           },
           {
             "category": "array_oob",
             "line": 35,
-            "reason": "contract3_identity(3) 返回 3，访问 values[index] 即 values[3] 越界"
+            "reason": "contract3_identity(3) 返回3，访问 values[3] 越界"
           },
           {
             "category": "array_oob",
             "line": 41,
-            "reason": "数组 values[3] 合法索引为 0-2，访问 values[3] 越界"
+            "reason": "数组 values[3] 的合法索引为 0-2，访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 48,
-            "reason": "变量 index=3，访问 values[index] 即 values[3] 越界"
+            "line": 47,
+            "reason": "index=3 超出数组 values[3] 的合法范围 [0,2]"
           },
           {
             "category": "array_oob",
-            "line": 55,
-            "reason": "循环条件 index <= 3，当 index=3 时访问 values[index] 越界"
+            "line": 53,
+            "reason": "循环条件 index<=3 导致 index=3 时访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 62,
-            "reason": "contract3_identity(3) 返回 3，访问 values[index] 即 values[3] 越界"
+            "line": 59,
+            "reason": "contract3_identity(3) 返回3，访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 68,
-            "reason": "数组 values[3] 合法索引为 0-2，访问 values[3] 越界"
+            "line": 67,
+            "reason": "数组 values[3] 的合法索引为 0-2，访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 75,
-            "reason": "变量 index=3，访问 values[index] 即 values[3] 越界"
+            "line": 73,
+            "reason": "index=3 超出数组 values[3] 的合法范围 [0,2]"
           },
           {
             "category": "array_oob",
-            "line": 82,
-            "reason": "循环条件 index <= 3，当 index=3 时访问 values[index] 越界"
+            "line": 81,
+            "reason": "循环条件 index<=3 导致 index=3 时访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 89,
-            "reason": "contract3_identity(3) 返回 3，访问 values[index] 即 values[3] 越界"
+            "line": 87,
+            "reason": "contract3_identity(3) 返回3，访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 95,
-            "reason": "数组 values[3] 合法索引为 0-2，访问 values[3] 越界"
+            "line": 93,
+            "reason": "数组 values[3] 的合法索引为 0-2，访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 102,
-            "reason": "变量 index=3，访问 values[index] 即 values[3] 越界"
+            "line": 99,
+            "reason": "index=3 超出数组 values[3] 的合法范围 [0,2]"
           },
           {
             "category": "array_oob",
-            "line": 109,
-            "reason": "循环条件 index <= 3，当 index=3 时访问 values[index] 越界"
+            "line": 107,
+            "reason": "循环条件 index<=3 导致 index=3 时访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 116,
-            "reason": "contract3_identity(3) 返回 3，访问 values[index] 即 values[3] 越界"
+            "line": 113,
+            "reason": "contract3_identity(3) 返回3，访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 122,
-            "reason": "数组 values[3] 合法索引为 0-2，访问 values[3] 越界"
+            "line": 121,
+            "reason": "数组 values[3] 的合法索引为 0-2，访问 values[3] 越界"
           },
           {
             "category": "array_oob",
-            "line": 129,
-            "reason": "变量 index=3，访问 values[index] 即 values[3] 越界"
+            "line": 127,
+            "reason": "index=3 超出数组 values[3] 的合法范围 [0,2]"
           },
           {
             "category": "array_oob",
             "line": 134,
-            "reason": "指针运算 values + 3 指向数组末尾之外，解引用 *cursor 越界访问"
+            "reason": "指针 values+3 指向数组末尾之后一个位置，解引用 *cursor 越界"
           },
           {
             "category": "array_oob",
             "line": 140,
-            "reason": "指针运算 values + 3 指向数组末尾之外，解引用 *cursor 越界访问"
+            "reason": "指针 values+3 指向数组末尾之后一个位置，解引用 *cursor 越界"
           }
         ],
-        "summary": "检测到20处数组越界风险，分布在 case_01 至 case_20 函数中。case_01-18 通过直接索引或循环访问 values[3]（合法范围 0-2），case_19-20 通过指针运算 values+3 访问越界内存。case_21-40 使用索引2或指针+2，均在合法范围内。"
+        "summary": "检测到20处数组越界风险。数组 values[3] 合法索引范围为 [0,2]，case_01至case_20 通过直接索引、变量、循环或指针运算访问了索引3或之后的位置。case_21至case_40 访问索引2或使用正确循环边界，无越界风险。"
       },
       "rows": [
         {
@@ -2406,7 +2410,7 @@
             {
               "category": "array_oob",
               "line": 14,
-              "reason": "数组 values[3] 合法索引为 0-2，访问 values[3] 越界"
+              "reason": "数组 values[3] 的合法索引为 0-2，访问 values[3] 越界"
             }
           ]
         },
@@ -2424,8 +2428,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 21,
-              "reason": "变量 index=3，访问 values[index] 即 values[3] 越界"
+              "line": 20,
+              "reason": "index=3 超出数组 values[3] 的合法范围 [0,2]"
             }
           ]
         },
@@ -2443,8 +2447,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 28,
-              "reason": "循环条件 index <= 3，当 index=3 时访问 values[index] 越界"
+              "line": 27,
+              "reason": "循环条件 index<=3 导致 index=3 时访问 values[3] 越界"
             }
           ]
         },
@@ -2463,7 +2467,7 @@
             {
               "category": "array_oob",
               "line": 35,
-              "reason": "contract3_identity(3) 返回 3，访问 values[index] 即 values[3] 越界"
+              "reason": "contract3_identity(3) 返回3，访问 values[3] 越界"
             }
           ]
         },
@@ -2482,7 +2486,7 @@
             {
               "category": "array_oob",
               "line": 41,
-              "reason": "数组 values[3] 合法索引为 0-2，访问 values[3] 越界"
+              "reason": "数组 values[3] 的合法索引为 0-2，访问 values[3] 越界"
             }
           ]
         },
@@ -2500,8 +2504,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 48,
-              "reason": "变量 index=3，访问 values[index] 即 values[3] 越界"
+              "line": 47,
+              "reason": "index=3 超出数组 values[3] 的合法范围 [0,2]"
             }
           ]
         },
@@ -2519,8 +2523,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 55,
-              "reason": "循环条件 index <= 3，当 index=3 时访问 values[index] 越界"
+              "line": 53,
+              "reason": "循环条件 index<=3 导致 index=3 时访问 values[3] 越界"
             }
           ]
         },
@@ -2534,14 +2538,8 @@
           "line_end": 65,
           "defect_line": 64,
           "file": "contract3_balanced_web_array_oob.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "array_oob",
-              "line": 62,
-              "reason": "contract3_identity(3) 返回 3，访问 values[index] 即 values[3] 越界"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "zephyr-array_oob-positive-09",
@@ -2557,8 +2555,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 68,
-              "reason": "数组 values[3] 合法索引为 0-2，访问 values[3] 越界"
+              "line": 67,
+              "reason": "数组 values[3] 的合法索引为 0-2，访问 values[3] 越界"
             }
           ]
         },
@@ -2576,8 +2574,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 75,
-              "reason": "变量 index=3，访问 values[index] 即 values[3] 越界"
+              "line": 73,
+              "reason": "index=3 超出数组 values[3] 的合法范围 [0,2]"
             }
           ]
         },
@@ -2595,8 +2593,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 82,
-              "reason": "循环条件 index <= 3，当 index=3 时访问 values[index] 越界"
+              "line": 81,
+              "reason": "循环条件 index<=3 导致 index=3 时访问 values[3] 越界"
             }
           ]
         },
@@ -2614,8 +2612,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 89,
-              "reason": "contract3_identity(3) 返回 3，访问 values[index] 即 values[3] 越界"
+              "line": 93,
+              "reason": "数组 values[3] 的合法索引为 0-2，访问 values[3] 越界"
             }
           ]
         },
@@ -2633,8 +2631,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 95,
-              "reason": "数组 values[3] 合法索引为 0-2，访问 values[3] 越界"
+              "line": 99,
+              "reason": "index=3 超出数组 values[3] 的合法范围 [0,2]"
             }
           ]
         },
@@ -2648,14 +2646,8 @@
           "line_end": 106,
           "defect_line": 105,
           "file": "contract3_balanced_web_array_oob.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "array_oob",
-              "line": 102,
-              "reason": "变量 index=3，访问 values[index] 即 values[3] 越界"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "zephyr-array_oob-positive-15",
@@ -2671,8 +2663,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 109,
-              "reason": "循环条件 index <= 3，当 index=3 时访问 values[index] 越界"
+              "line": 113,
+              "reason": "contract3_identity(3) 返回3，访问 values[3] 越界"
             }
           ]
         },
@@ -2690,8 +2682,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 116,
-              "reason": "contract3_identity(3) 返回 3，访问 values[index] 即 values[3] 越界"
+              "line": 121,
+              "reason": "数组 values[3] 的合法索引为 0-2，访问 values[3] 越界"
             }
           ]
         },
@@ -2705,8 +2697,14 @@
           "line_end": 127,
           "defect_line": 126,
           "file": "contract3_balanced_web_array_oob.c",
-          "detected": false,
-          "matched_findings": []
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "array_oob",
+              "line": 127,
+              "reason": "index=3 超出数组 values[3] 的合法范围 [0,2]"
+            }
+          ]
         },
         {
           "case_id": "zephyr-array_oob-positive-18",
@@ -2722,13 +2720,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 129,
-              "reason": "变量 index=3，访问 values[index] 即 values[3] 越界"
-            },
-            {
-              "category": "array_oob",
               "line": 134,
-              "reason": "指针运算 values + 3 指向数组末尾之外，解引用 *cursor 越界访问"
+              "reason": "指针 values+3 指向数组末尾之后一个位置，解引用 *cursor 越界"
             }
           ]
         },
@@ -2747,7 +2740,7 @@
             {
               "category": "array_oob",
               "line": 140,
-              "reason": "指针运算 values + 3 指向数组末尾之外，解引用 *cursor 越界访问"
+              "reason": "指针 values+3 指向数组末尾之后一个位置，解引用 *cursor 越界"
             }
           ]
         },
@@ -3028,19 +3021,30 @@
       "out_of_scope_findings": [
         {
           "category": "array_oob",
-          "line": 122,
-          "reason": "数组 values[3] 合法索引为 0-2，访问 values[3] 越界"
+          "line": 59,
+          "reason": "contract3_identity(3) 返回3，访问 values[3] 越界"
+        },
+        {
+          "category": "array_oob",
+          "line": 87,
+          "reason": "contract3_identity(3) 返回3，访问 values[3] 越界"
+        },
+        {
+          "category": "array_oob",
+          "line": 107,
+          "reason": "循环条件 index<=3 导致 index=3 时访问 values[3] 越界"
         }
       ]
     },
     "zephyr-string_overflow": {
       "attempts": [
         {
-          "thread_id": "685f4891-f8fa-4919-8ea3-60fca08f08d7",
-          "created_utc": "2026-09-27T23:46:16.275040+00:00",
-          "run_id": "5aa46e8c-0c4e-4ab9-bdf3-589ae4d76b7d",
+          "thread_id": "074198fc-63b5-433c-b775-39fcf5ebe939",
+          "created_utc": "2026-09-28T05:55:41.935128+00:00",
+          "forced": true,
+          "run_id": "05442bf2-804c-404b-9482-e55017ff4792",
           "status": "completed",
-          "finished_utc": "2026-09-27T23:46:51.930521+00:00"
+          "finished_utc": "2026-09-28T05:56:10.282162+00:00"
         }
       ],
       "status": "scored",
@@ -3048,111 +3052,106 @@
         "findings": [
           {
             "category": "string_overflow",
-            "line": 9,
-            "reason": "strcpy(target, source) 无边界检查，当source长度超过target容量时导致溢出，后续case_20通过此函数触发溢出"
-          },
-          {
-            "category": "string_overflow",
             "line": 14,
-            "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节（5字符+\\0），溢出2字节"
+            "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节（5字符+NUL终止符），超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 21,
-            "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节（5字符+NUL终止符），超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 28,
-            "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 35,
-            "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 42,
-            "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 49,
-            "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 56,
-            "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 63,
-            "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 70,
-            "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 77,
-            "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 84,
-            "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 91,
-            "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 98,
-            "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 105,
-            "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 112,
-            "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 119,
-            "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 126,
-            "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 133,
-            "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 140,
-            "reason": "char target[8]初始化为\"A\"（占2字节含\\0），strcat(target, \"BCDEFGH\")追加8字节（7字符+\\0），总需9字节，溢出1字节"
+            "reason": "char target[8]容量为8字节，初始内容\"A\"占2字节（1字符+NUL），strcat(target, \"BCDEFGH\")追加8字节（7字符+NUL），总需求10字节，超出边界2字节"
           },
           {
             "category": "string_overflow",
             "line": 147,
-            "reason": "char target[4]仅4字节，contract3_copy(target, \"ABCDE\")内部调用strcpy写入6字节，溢出2字节"
+            "reason": "char target[4]容量为4字节，contract3_copy内部调用strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
           }
         ],
-        "summary": "发现21处字符串溢出漏洞：第9行contract3_copy函数使用strcpy无边界检查；case_01~18（18个函数）使用strcpy/sprintf/memcpy向4字节缓冲区写入6字节的\"ABCDE\"；case_19使用strcat向8字节缓冲区写入总计9字节；case_20通过contract3_copy触发溢出。case_21~40中使用\"ABC\"（恰好4字节）、memcpy限制3字节或strcat未超容量的函数不存在溢出。"
+        "summary": "文件存在20处字符串溢出漏洞。case_01至case_18使用strcpy/sprintf/memcpy向4字节缓冲区写入5字节字符串\"ABCDE\"（含NUL共6字节），超出2字节；case_19用strcat向8字节缓冲区追加7字节字符串导致溢出2字节；case_20通过contract3_copy间接触发strcpy溢出。case_21至case_40使用\"ABC\"字符串（含NUL共4字节）未溢出，但case_23等memcpy仅拷贝3字节未包含NUL。实际溢出漏洞17处（case_01-18排除memcpy仅3字节的情况后13处，加case_19/20共20处确认溢出）"
       },
       "rows": [
         {
@@ -3170,7 +3169,7 @@
             {
               "category": "string_overflow",
               "line": 14,
-              "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节（5字符+\\0），溢出2字节"
+              "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节（5字符+NUL终止符），超出边界2字节"
             }
           ]
         },
@@ -3189,7 +3188,7 @@
             {
               "category": "string_overflow",
               "line": 21,
-              "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节（5字符+NUL终止符），超出边界2字节"
             }
           ]
         },
@@ -3208,7 +3207,7 @@
             {
               "category": "string_overflow",
               "line": 28,
-              "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
             }
           ]
         },
@@ -3227,7 +3226,7 @@
             {
               "category": "string_overflow",
               "line": 35,
-              "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3246,7 +3245,7 @@
             {
               "category": "string_overflow",
               "line": 42,
-              "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3265,7 +3264,7 @@
             {
               "category": "string_overflow",
               "line": 49,
-              "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
             }
           ]
         },
@@ -3284,7 +3283,7 @@
             {
               "category": "string_overflow",
               "line": 56,
-              "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3303,7 +3302,7 @@
             {
               "category": "string_overflow",
               "line": 63,
-              "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3322,7 +3321,7 @@
             {
               "category": "string_overflow",
               "line": 70,
-              "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
             }
           ]
         },
@@ -3341,7 +3340,7 @@
             {
               "category": "string_overflow",
               "line": 77,
-              "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3360,7 +3359,7 @@
             {
               "category": "string_overflow",
               "line": 84,
-              "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3379,7 +3378,7 @@
             {
               "category": "string_overflow",
               "line": 91,
-              "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
             }
           ]
         },
@@ -3398,7 +3397,7 @@
             {
               "category": "string_overflow",
               "line": 98,
-              "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3417,7 +3416,7 @@
             {
               "category": "string_overflow",
               "line": 105,
-              "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3436,7 +3435,7 @@
             {
               "category": "string_overflow",
               "line": 112,
-              "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
             }
           ]
         },
@@ -3455,7 +3454,7 @@
             {
               "category": "string_overflow",
               "line": 119,
-              "reason": "char target[4]仅4字节，strcpy(target, \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3474,7 +3473,7 @@
             {
               "category": "string_overflow",
               "line": 126,
-              "reason": "char target[4]仅4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，sprintf(target, \"%s\", \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3493,7 +3492,7 @@
             {
               "category": "string_overflow",
               "line": 133,
-              "reason": "char target[4]仅4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，memcpy(target, \"ABCDE\", 6)显式拷贝6字节，超出边界2字节"
             }
           ]
         },
@@ -3512,7 +3511,7 @@
             {
               "category": "string_overflow",
               "line": 140,
-              "reason": "char target[8]初始化为\"A\"（占2字节含\\0），strcat(target, \"BCDEFGH\")追加8字节（7字符+\\0），总需9字节，溢出1字节"
+              "reason": "char target[8]容量为8字节，初始内容\"A\"占2字节（1字符+NUL），strcat(target, \"BCDEFGH\")追加8字节（7字符+NUL），总需求10字节，超出边界2字节"
             }
           ]
         },
@@ -3531,7 +3530,7 @@
             {
               "category": "string_overflow",
               "line": 147,
-              "reason": "char target[4]仅4字节，contract3_copy(target, \"ABCDE\")内部调用strcpy写入6字节，溢出2字节"
+              "reason": "char target[4]容量为4字节，contract3_copy内部调用strcpy(target, \"ABCDE\")写入6字节，超出边界2字节"
             }
           ]
         },
@@ -3796,22 +3795,17 @@
           "matched_findings": []
         }
       ],
-      "out_of_scope_findings": [
-        {
-          "category": "string_overflow",
-          "line": 9,
-          "reason": "strcpy(target, source) 无边界检查，当source长度超过target容量时导致溢出，后续case_20通过此函数触发溢出"
-        }
-      ]
+      "out_of_scope_findings": []
     },
     "zephyr-null_pointer": {
       "attempts": [
         {
-          "thread_id": "b802bc36-c090-4f8a-b2a7-1b7a43fd45d4",
-          "created_utc": "2026-09-27T23:46:51.979763+00:00",
-          "run_id": "d0b5e254-b63d-4d3d-b8a9-aa76f34fc87c",
+          "thread_id": "58c4a458-ffd7-43f6-bcbc-4c82145093dc",
+          "created_utc": "2026-09-28T05:56:10.314010+00:00",
+          "forced": true,
+          "run_id": "93160df9-5704-4e57-b86f-46714f560491",
           "status": "completed",
-          "finished_utc": "2026-09-27T23:47:17.890853+00:00"
+          "finished_utc": "2026-09-28T05:56:41.255778+00:00"
         }
       ],
       "status": "scored",
@@ -3820,105 +3814,105 @@
           {
             "category": "null_pointer",
             "line": 14,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "reason": "case_01: pointer初始化为0（NULL），第14行`return *pointer;`直接解引用空指针"
           },
           {
             "category": "null_pointer",
             "line": 20,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "reason": "case_02: pointer初始化为0，第20行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
             "line": 27,
-            "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
+            "reason": "case_03: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第27行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 33,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "line": 34,
+            "reason": "case_04: pointer初始化为0，第34行`return *pointer;`直接解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 39,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "line": 40,
+            "reason": "case_05: pointer初始化为0，第40行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 45,
-            "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
+            "line": 47,
+            "reason": "case_06: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第47行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 51,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "line": 54,
+            "reason": "case_07: pointer初始化为0，第54行`return *pointer;`直接解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 57,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "line": 60,
+            "reason": "case_08: pointer初始化为0，第60行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 63,
-            "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
+            "line": 67,
+            "reason": "case_09: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第67行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 69,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "line": 74,
+            "reason": "case_10: pointer初始化为0，第74行`return *pointer;`直接解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 75,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
-          },
-          {
-            "category": "null_pointer",
-            "line": 81,
-            "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
+            "line": 80,
+            "reason": "case_11: pointer初始化为0，第80行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
             "line": 87,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "reason": "case_12: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第87行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 93,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "line": 94,
+            "reason": "case_13: pointer初始化为0，第94行`return *pointer;`直接解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 99,
-            "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
+            "line": 100,
+            "reason": "case_14: pointer初始化为0，第100行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 105,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "line": 107,
+            "reason": "case_15: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第107行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 111,
-            "reason": "指针pointer初始化为0后直接解引用 *pointer"
+            "line": 114,
+            "reason": "case_16: pointer初始化为0，第114行`return *pointer;`直接解引用空指针"
           },
           {
             "category": "null_pointer",
-            "line": 117,
-            "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
+            "line": 120,
+            "reason": "case_17: pointer初始化为0，第120行`return *pointer;`解引用空指针"
+          },
+          {
+            "category": "null_pointer",
+            "line": 127,
+            "reason": "case_18: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第127行`return *pointer;`解引用空指针"
           },
           {
             "category": "null_pointer",
             "line": 134,
-            "reason": "传递空指针0给contract3_read函数，在函数内行8解引用"
+            "reason": "case_19: 调用`contract3_read(0)`传递空指针，函数在第8行`return *pointer;`会解引用该空指针"
           },
           {
             "category": "null_pointer",
             "line": 140,
-            "reason": "结构体box.pointer初始化为0后直接解引用 *box.pointer"
+            "reason": "case_20: 结构体初始化`box={0}`使box.pointer为NULL，第140行`return *box.pointer;`解引用空指针"
           }
         ],
-        "summary": "共检测到20处空指针解引用风险。包括18处直接或条件不满足时的局部空指针解引用、1处空指针作为函数参数传递后解引用、1处结构体成员空指针解引用。其余20个case(21-40)无此类风险。"
+        "summary": "检测到20处空指针解引用风险，分布在case_01至case_20。其中18处为局部变量初始化为0后直接或条件恒假后解引用，1处通过函数调用传递空指针，1处通过结构体字段解引用空指针。case_21至case_40均无空指针风险。"
       },
       "rows": [
         {
@@ -3936,7 +3930,7 @@
             {
               "category": "null_pointer",
               "line": 14,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
+              "reason": "case_01: pointer初始化为0（NULL），第14行`return *pointer;`直接解引用空指针"
             }
           ]
         },
@@ -3955,7 +3949,7 @@
             {
               "category": "null_pointer",
               "line": 20,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
+              "reason": "case_02: pointer初始化为0，第20行`return *pointer;`解引用空指针"
             }
           ]
         },
@@ -3974,7 +3968,7 @@
             {
               "category": "null_pointer",
               "line": 27,
-              "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
+              "reason": "case_03: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第27行`return *pointer;`解引用空指针"
             }
           ]
         },
@@ -3992,8 +3986,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 33,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
+              "line": 34,
+              "reason": "case_04: pointer初始化为0，第34行`return *pointer;`直接解引用空指针"
             }
           ]
         },
@@ -4011,8 +4005,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 39,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
+              "line": 40,
+              "reason": "case_05: pointer初始化为0，第40行`return *pointer;`解引用空指针"
             }
           ]
         },
@@ -4030,13 +4024,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 45,
-              "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
-            },
-            {
-              "category": "null_pointer",
-              "line": 51,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
+              "line": 47,
+              "reason": "case_06: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第47行`return *pointer;`解引用空指针"
             }
           ]
         },
@@ -4054,8 +4043,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 57,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
+              "line": 54,
+              "reason": "case_07: pointer初始化为0，第54行`return *pointer;`直接解引用空指针"
             }
           ]
         },
@@ -4073,8 +4062,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 63,
-              "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
+              "line": 60,
+              "reason": "case_08: pointer初始化为0，第60行`return *pointer;`解引用空指针"
             }
           ]
         },
@@ -4092,8 +4081,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 69,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
+              "line": 67,
+              "reason": "case_09: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第67行`return *pointer;`解引用空指针"
             }
           ]
         },
@@ -4111,8 +4100,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 75,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
+              "line": 74,
+              "reason": "case_10: pointer初始化为0，第74行`return *pointer;`直接解引用空指针"
             }
           ]
         },
@@ -4130,8 +4119,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 81,
-              "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
+              "line": 80,
+              "reason": "case_11: pointer初始化为0，第80行`return *pointer;`解引用空指针"
             }
           ]
         },
@@ -4150,12 +4139,7 @@
             {
               "category": "null_pointer",
               "line": 87,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
-            },
-            {
-              "category": "null_pointer",
-              "line": 93,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
+              "reason": "case_12: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第87行`return *pointer;`解引用空指针"
             }
           ]
         },
@@ -4169,14 +4153,8 @@
           "line_end": 99,
           "defect_line": 98,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "null_pointer",
-              "line": 99,
-              "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "zephyr-null_pointer-positive-14",
@@ -4188,14 +4166,8 @@
           "line_end": 106,
           "defect_line": 105,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "null_pointer",
-              "line": 105,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "zephyr-null_pointer-positive-15",
@@ -4211,8 +4183,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 111,
-              "reason": "指针pointer初始化为0后直接解引用 *pointer"
+              "line": 114,
+              "reason": "case_16: pointer初始化为0，第114行`return *pointer;`直接解引用空指针"
             }
           ]
         },
@@ -4230,8 +4202,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 117,
-              "reason": "pointer初始化为0，条件value < 0恒不满足(value=7)，解引用时pointer仍为0"
+              "line": 120,
+              "reason": "case_17: pointer初始化为0，第120行`return *pointer;`解引用空指针"
             }
           ]
         },
@@ -4245,8 +4217,14 @@
           "line_end": 127,
           "defect_line": 126,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": false,
-          "matched_findings": []
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "null_pointer",
+              "line": 127,
+              "reason": "case_18: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第127行`return *pointer;`解引用空指针"
+            }
+          ]
         },
         {
           "case_id": "zephyr-null_pointer-positive-18",
@@ -4263,7 +4241,7 @@
             {
               "category": "null_pointer",
               "line": 134,
-              "reason": "传递空指针0给contract3_read函数，在函数内行8解引用"
+              "reason": "case_19: 调用`contract3_read(0)`传递空指针，函数在第8行`return *pointer;`会解引用该空指针"
             }
           ]
         },
@@ -4282,7 +4260,7 @@
             {
               "category": "null_pointer",
               "line": 140,
-              "reason": "结构体box.pointer初始化为0后直接解引用 *box.pointer"
+              "reason": "case_20: 结构体初始化`box={0}`使box.pointer为NULL，第140行`return *box.pointer;`解引用空指针"
             }
           ]
         },
@@ -4560,16 +4538,33 @@
           "matched_findings": []
         }
       ],
-      "out_of_scope_findings": []
+      "out_of_scope_findings": [
+        {
+          "category": "null_pointer",
+          "line": 94,
+          "reason": "case_13: pointer初始化为0，第94行`return *pointer;`直接解引用空指针"
+        },
+        {
+          "category": "null_pointer",
+          "line": 100,
+          "reason": "case_14: pointer初始化为0，第100行`return *pointer;`解引用空指针"
+        },
+        {
+          "category": "null_pointer",
+          "line": 107,
+          "reason": "case_15: pointer初始化为0，由于value=7使条件`value<0`恒假，pointer保持为NULL，第107行`return *pointer;`解引用空指针"
+        }
+      ]
     },
     "rt_thread-array_oob": {
       "attempts": [
         {
-          "thread_id": "c5a888fe-6ba3-4919-ab2a-749aadda47a1",
-          "created_utc": "2026-09-27T23:47:17.947279+00:00",
-          "run_id": "713155cd-dd65-4fc4-9371-c2f2eb579b32",
+          "thread_id": "5cce839a-0d42-493c-a0da-0368da34d389",
+          "created_utc": "2026-09-28T05:56:41.314416+00:00",
+          "forced": true,
+          "run_id": "33af3839-4d1d-4069-9fc6-ea616b099378",
           "status": "completed",
-          "finished_utc": "2026-09-27T23:47:44.379521+00:00"
+          "finished_utc": "2026-09-28T05:57:09.691284+00:00"
         }
       ],
       "status": "scored",
@@ -4578,105 +4573,105 @@
           {
             "category": "array_oob",
             "line": 14,
-            "reason": "values[3] 数组大小为3，有效索引0-2，访问索引3越界"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 21,
-            "reason": "values[index] 其中 index=3 越界访问"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，使用 index=3 访问 values[index] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 27,
-            "reason": "for循环条件 index<=3 导致访问 values[3] 越界"
+            "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 34,
-            "reason": "contract3_identity(3)返回3，values[index]越界"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，contract3_identity(3) 返回 3，访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 40,
-            "reason": "values[3] 越界访问"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 47,
-            "reason": "values[index] 其中 index=3 越界访问"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，使用 index=3 访问 values[index] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 53,
-            "reason": "for循环条件 index<=3 导致访问 values[3] 越界"
+            "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 60,
-            "reason": "contract3_identity(3)返回3，values[index]越界"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，contract3_identity(3) 返回 3，访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 66,
-            "reason": "values[3] 越界访问"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 73,
-            "reason": "values[index] 其中 index=3 越界访问"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，使用 index=3 访问 values[index] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 79,
-            "reason": "for循环条件 index<=3 导致访问 values[3] 越界"
+            "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 86,
-            "reason": "contract3_identity(3)返回3，values[index]越界"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，contract3_identity(3) 返回 3，访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 92,
-            "reason": "values[3] 越界访问"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 99,
-            "reason": "values[index] 其中 index=3 越界访问"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，使用 index=3 访问 values[index] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 105,
-            "reason": "for循环条件 index<=3 导致访问 values[3] 越界"
+            "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 112,
-            "reason": "contract3_identity(3)返回3，values[index]越界"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，contract3_identity(3) 返回 3，访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 118,
-            "reason": "values[3] 越界访问"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，访问 values[3] 越界读取。"
           },
           {
             "category": "array_oob",
             "line": 125,
-            "reason": "values[index] 其中 index=3 越界访问"
+            "reason": "数组 values[3] 的有效索引范围是 0-2，使用 index=3 访问 values[index] 越界读取。"
           },
           {
             "category": "array_oob",
-            "line": 132,
-            "reason": "指针运算 values+3 超出数组末尾，解引用 *cursor 越界"
+            "line": 131,
+            "reason": "指针 cursor = values + 3 指向数组末尾后的位置，解引用 *cursor 越界读取。"
           },
           {
             "category": "array_oob",
-            "line": 139,
-            "reason": "指针运算 values+3 超出数组末尾，解引用 *cursor 越界"
+            "line": 138,
+            "reason": "指针 cursor = values + 3 指向数组末尾后的位置，解引用 *cursor 越界读取。"
           }
         ],
-        "summary": "扫描发现20处数组越界风险，均位于case_01至case_20函数中。越界模式包括：直接索引values[3]、变量索引=3、循环条件<=3、函数返回值3作为索引、指针运算超出边界。case_21至case_40函数均访问合法索引2，无越界风险。"
+        "summary": "检测到 20 处数组越界风险，均为对 int values[3] 数组的越界读取。有效索引范围为 0-2，但代码中存在直接访问 values[3]、使用 index=3 访问、循环条件错误（<= 3）以及指针偏移越界（values+3）等多种越界模式。案例 21-40 均使用正确的索引范围访问，无越界风险。"
       },
       "rows": [
         {
@@ -4694,7 +4689,7 @@
             {
               "category": "array_oob",
               "line": 14,
-              "reason": "values[3] 数组大小为3，有效索引0-2，访问索引3越界"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4713,7 +4708,7 @@
             {
               "category": "array_oob",
               "line": 21,
-              "reason": "values[index] 其中 index=3 越界访问"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，使用 index=3 访问 values[index] 越界读取。"
             }
           ]
         },
@@ -4732,7 +4727,7 @@
             {
               "category": "array_oob",
               "line": 27,
-              "reason": "for循环条件 index<=3 导致访问 values[3] 越界"
+              "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4751,7 +4746,7 @@
             {
               "category": "array_oob",
               "line": 34,
-              "reason": "contract3_identity(3)返回3，values[index]越界"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，contract3_identity(3) 返回 3，访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4770,7 +4765,7 @@
             {
               "category": "array_oob",
               "line": 40,
-              "reason": "values[3] 越界访问"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4789,7 +4784,7 @@
             {
               "category": "array_oob",
               "line": 47,
-              "reason": "values[index] 其中 index=3 越界访问"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，使用 index=3 访问 values[index] 越界读取。"
             }
           ]
         },
@@ -4808,7 +4803,7 @@
             {
               "category": "array_oob",
               "line": 53,
-              "reason": "for循环条件 index<=3 导致访问 values[3] 越界"
+              "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4827,7 +4822,7 @@
             {
               "category": "array_oob",
               "line": 60,
-              "reason": "contract3_identity(3)返回3，values[index]越界"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，contract3_identity(3) 返回 3，访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4859,7 +4854,7 @@
             {
               "category": "array_oob",
               "line": 73,
-              "reason": "values[index] 其中 index=3 越界访问"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，使用 index=3 访问 values[index] 越界读取。"
             }
           ]
         },
@@ -4878,7 +4873,7 @@
             {
               "category": "array_oob",
               "line": 86,
-              "reason": "contract3_identity(3)返回3，values[index]越界"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，contract3_identity(3) 返回 3，访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4897,7 +4892,7 @@
             {
               "category": "array_oob",
               "line": 92,
-              "reason": "values[3] 越界访问"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4916,7 +4911,7 @@
             {
               "category": "array_oob",
               "line": 99,
-              "reason": "values[index] 其中 index=3 越界访问"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，使用 index=3 访问 values[index] 越界读取。"
             }
           ]
         },
@@ -4935,7 +4930,7 @@
             {
               "category": "array_oob",
               "line": 105,
-              "reason": "for循环条件 index<=3 导致访问 values[3] 越界"
+              "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4954,7 +4949,7 @@
             {
               "category": "array_oob",
               "line": 112,
-              "reason": "contract3_identity(3)返回3，values[index]越界"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，contract3_identity(3) 返回 3，访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4973,7 +4968,7 @@
             {
               "category": "array_oob",
               "line": 118,
-              "reason": "values[3] 越界访问"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，访问 values[3] 越界读取。"
             }
           ]
         },
@@ -4992,7 +4987,7 @@
             {
               "category": "array_oob",
               "line": 125,
-              "reason": "values[index] 其中 index=3 越界访问"
+              "reason": "数组 values[3] 的有效索引范围是 0-2，使用 index=3 访问 values[index] 越界读取。"
             }
           ]
         },
@@ -5010,8 +5005,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 132,
-              "reason": "指针运算 values+3 超出数组末尾，解引用 *cursor 越界"
+              "line": 131,
+              "reason": "指针 cursor = values + 3 指向数组末尾后的位置，解引用 *cursor 越界读取。"
             }
           ]
         },
@@ -5029,8 +5024,8 @@
           "matched_findings": [
             {
               "category": "array_oob",
-              "line": 139,
-              "reason": "指针运算 values+3 超出数组末尾，解引用 *cursor 越界"
+              "line": 138,
+              "reason": "指针 cursor = values + 3 指向数组末尾后的位置，解引用 *cursor 越界读取。"
             }
           ]
         },
@@ -5312,23 +5307,24 @@
         {
           "category": "array_oob",
           "line": 66,
-          "reason": "values[3] 越界访问"
+          "reason": "数组 values[3] 的有效索引范围是 0-2，访问 values[3] 越界读取。"
         },
         {
           "category": "array_oob",
           "line": 79,
-          "reason": "for循环条件 index<=3 导致访问 values[3] 越界"
+          "reason": "循环条件 index <= 3 导致当 index=3 时访问 values[3] 越界读取。"
         }
       ]
     },
     "rt_thread-string_overflow": {
       "attempts": [
         {
-          "thread_id": "17bb5175-6a75-47a0-bafe-6f170c602435",
-          "created_utc": "2026-09-27T23:47:44.416101+00:00",
-          "run_id": "5748c663-8898-4805-9e53-b25d6deee605",
+          "thread_id": "a0114ff1-dec0-4ead-a54a-a9fc438361e0",
+          "created_utc": "2026-09-28T05:57:09.912194+00:00",
+          "forced": true,
+          "run_id": "9a0a4907-0828-4178-99fc-a3fe1f10583a",
           "status": "completed",
-          "finished_utc": "2026-09-27T23:48:12.299647+00:00"
+          "finished_utc": "2026-09-28T05:57:43.914607+00:00"
         }
       ],
       "status": "scored",
@@ -5336,111 +5332,106 @@
         "findings": [
           {
             "category": "string_overflow",
-            "line": 9,
-            "reason": "函数contract3_copy使用strcpy(target, source)无边界检查，当source长度超过target容量时触发溢出。该函数被case_20(行147)和case_40(行287)调用，传入4字节target和5字节源\"ABCDE\"(含NUL需6字节)，确认溢出。"
-          },
-          {
-            "category": "string_overflow",
             "line": 14,
-            "reason": "target[4]容量4字节，strcpy复制\"ABCDE\"(5字符+NUL=6字节)，超出容量2字节，确认溢出。"
+            "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 21,
-            "reason": "target[4]容量4字节，sprintf格式化\"ABCDE\"需写入6字节(5字符+NUL)，超出容量2字节，确认溢出。"
+            "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 28,
-            "reason": "target[4]容量4字节，memcpy显式复制6字节(\"ABCDE\"的5字符+NUL)，超出容量2字节，确认溢出。"
+            "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 35,
-            "reason": "target[4]容量4字节，strcpy复制\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+            "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 42,
-            "reason": "target[4]容量4字节，sprintf写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+            "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 49,
-            "reason": "target[4]容量4字节，memcpy复制6字节，超出容量2字节，确认溢出。"
+            "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 56,
-            "reason": "target[4]容量4字节，strcpy写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+            "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 63,
-            "reason": "target[4]容量4字节，sprintf写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+            "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 70,
-            "reason": "target[4]容量4字节，memcpy复制6字节，超出容量2字节，确认溢出。"
+            "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 77,
-            "reason": "target[4]容量4字节，strcpy写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+            "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 84,
-            "reason": "target[4]容量4字节，sprintf写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+            "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 91,
-            "reason": "target[4]容量4字节，memcpy复制6字节，超出容量2字节，确认溢出。"
+            "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 98,
-            "reason": "target[4]容量4字节，strcpy写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+            "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 105,
-            "reason": "target[4]容量4字节，sprintf写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+            "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 112,
-            "reason": "target[4]容量4字节，memcpy复制6字节，超出容量2字节，确认溢出。"
+            "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 119,
-            "reason": "target[4]容量4字节，strcpy写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+            "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 126,
-            "reason": "target[4]容量4字节，sprintf写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+            "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 133,
-            "reason": "target[4]容量4字节，memcpy复制6字节，超出容量2字节，确认溢出。"
+            "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
           },
           {
             "category": "string_overflow",
             "line": 140,
-            "reason": "target[8]初始化为\"A\"(2字节含NUL)，strcat追加\"BCDEFGH\"(7字符+NUL)需总计9字节(1+7+1)，超出容量1字节，确认溢出。"
+            "reason": "strcat 将 \"BCDEFGH\"(8字节含\\0) 连接到已含 \"A\\0\"(2字节) 的 char target[8]，总需9字节，超出1字节"
           },
           {
             "category": "string_overflow",
             "line": 147,
-            "reason": "target[4]容量4字节，调用contract3_copy传入\"ABCDE\"(6字节)，通过行9的strcpy触发溢出，超出2字节。"
+            "reason": "contract3_copy 内部使用 strcpy，将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
           }
         ],
-        "summary": "检测到21处字符串溢出漏洞。cases 01-20存在真实溢出：4字节缓冲区无法容纳5字符字符串加NUL终止符(需6字节)；cases 21-40安全：3字符字符串加NUL正好4字节，未超出容量。扫描工具报告的27个findings中，前14个和第20个为真实溢出，其余strcpy/sprintf/strcat调用虽被模式匹配但实际未溢出。"
+        "summary": "发现20处字符串溢出：strcpy/sprintf将6字节写入4字节缓冲区（16处），memcpy显式超界拷贝（3处），strcat结果超界（1处）。其余20个函数边界安全。"
       },
       "rows": [
         {
@@ -5458,7 +5449,7 @@
             {
               "category": "string_overflow",
               "line": 14,
-              "reason": "target[4]容量4字节，strcpy复制\"ABCDE\"(5字符+NUL=6字节)，超出容量2字节，确认溢出。"
+              "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5477,7 +5468,7 @@
             {
               "category": "string_overflow",
               "line": 21,
-              "reason": "target[4]容量4字节，sprintf格式化\"ABCDE\"需写入6字节(5字符+NUL)，超出容量2字节，确认溢出。"
+              "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5496,7 +5487,7 @@
             {
               "category": "string_overflow",
               "line": 28,
-              "reason": "target[4]容量4字节，memcpy显式复制6字节(\"ABCDE\"的5字符+NUL)，超出容量2字节，确认溢出。"
+              "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
             }
           ]
         },
@@ -5515,7 +5506,7 @@
             {
               "category": "string_overflow",
               "line": 35,
-              "reason": "target[4]容量4字节，strcpy复制\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+              "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5534,7 +5525,7 @@
             {
               "category": "string_overflow",
               "line": 42,
-              "reason": "target[4]容量4字节，sprintf写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+              "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5553,7 +5544,7 @@
             {
               "category": "string_overflow",
               "line": 49,
-              "reason": "target[4]容量4字节，memcpy复制6字节，超出容量2字节，确认溢出。"
+              "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
             }
           ]
         },
@@ -5572,7 +5563,7 @@
             {
               "category": "string_overflow",
               "line": 56,
-              "reason": "target[4]容量4字节，strcpy写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+              "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5591,7 +5582,7 @@
             {
               "category": "string_overflow",
               "line": 63,
-              "reason": "target[4]容量4字节，sprintf写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+              "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5610,7 +5601,7 @@
             {
               "category": "string_overflow",
               "line": 70,
-              "reason": "target[4]容量4字节，memcpy复制6字节，超出容量2字节，确认溢出。"
+              "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
             }
           ]
         },
@@ -5629,7 +5620,7 @@
             {
               "category": "string_overflow",
               "line": 77,
-              "reason": "target[4]容量4字节，strcpy写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+              "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5648,7 +5639,7 @@
             {
               "category": "string_overflow",
               "line": 84,
-              "reason": "target[4]容量4字节，sprintf写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+              "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5667,7 +5658,7 @@
             {
               "category": "string_overflow",
               "line": 91,
-              "reason": "target[4]容量4字节，memcpy复制6字节，超出容量2字节，确认溢出。"
+              "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
             }
           ]
         },
@@ -5686,7 +5677,7 @@
             {
               "category": "string_overflow",
               "line": 98,
-              "reason": "target[4]容量4字节，strcpy写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+              "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5705,7 +5696,7 @@
             {
               "category": "string_overflow",
               "line": 105,
-              "reason": "target[4]容量4字节，sprintf写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+              "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5724,7 +5715,7 @@
             {
               "category": "string_overflow",
               "line": 112,
-              "reason": "target[4]容量4字节，memcpy复制6字节，超出容量2字节，确认溢出。"
+              "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
             }
           ]
         },
@@ -5743,7 +5734,7 @@
             {
               "category": "string_overflow",
               "line": 119,
-              "reason": "target[4]容量4字节，strcpy写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+              "reason": "strcpy 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5762,7 +5753,7 @@
             {
               "category": "string_overflow",
               "line": 126,
-              "reason": "target[4]容量4字节，sprintf写入\"ABCDE\"需6字节，超出容量2字节，确认溢出。"
+              "reason": "sprintf 将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -5781,7 +5772,7 @@
             {
               "category": "string_overflow",
               "line": 133,
-              "reason": "target[4]容量4字节，memcpy复制6字节，超出容量2字节，确认溢出。"
+              "reason": "memcpy 显式拷贝6字节到 char target[4]，超出2字节"
             }
           ]
         },
@@ -5800,7 +5791,7 @@
             {
               "category": "string_overflow",
               "line": 140,
-              "reason": "target[8]初始化为\"A\"(2字节含NUL)，strcat追加\"BCDEFGH\"(7字符+NUL)需总计9字节(1+7+1)，超出容量1字节，确认溢出。"
+              "reason": "strcat 将 \"BCDEFGH\"(8字节含\\0) 连接到已含 \"A\\0\"(2字节) 的 char target[8]，总需9字节，超出1字节"
             }
           ]
         },
@@ -5819,7 +5810,7 @@
             {
               "category": "string_overflow",
               "line": 147,
-              "reason": "target[4]容量4字节，调用contract3_copy传入\"ABCDE\"(6字节)，通过行9的strcpy触发溢出，超出2字节。"
+              "reason": "contract3_copy 内部使用 strcpy，将 \"ABCDE\"(6字节含\\0) 写入 char target[4]，超出2字节"
             }
           ]
         },
@@ -6084,22 +6075,17 @@
           "matched_findings": []
         }
       ],
-      "out_of_scope_findings": [
-        {
-          "category": "string_overflow",
-          "line": 9,
-          "reason": "函数contract3_copy使用strcpy(target, source)无边界检查，当source长度超过target容量时触发溢出。该函数被case_20(行147)和case_40(行287)调用，传入4字节target和5字节源\"ABCDE\"(含NUL需6字节)，确认溢出。"
-        }
-      ]
+      "out_of_scope_findings": []
     },
     "rt_thread-null_pointer": {
       "attempts": [
         {
-          "thread_id": "9e1b4b01-a385-476e-8f7f-cbaec2409da8",
-          "created_utc": "2026-09-27T23:48:12.357410+00:00",
-          "run_id": "94f70758-5330-4bac-a8ec-3a82ce75b13f",
+          "thread_id": "f1991152-d705-486a-9c77-edcebb63586f",
+          "created_utc": "2026-09-28T05:57:43.973815+00:00",
+          "forced": true,
+          "run_id": "7c29f923-b429-4643-95f3-5bdd1d8dc152",
           "status": "completed",
-          "finished_utc": "2026-09-27T23:48:53.804827+00:00"
+          "finished_utc": "2026-09-28T05:58:09.516371+00:00"
         }
       ],
       "status": "scored",
@@ -6108,105 +6094,105 @@
           {
             "category": "null_pointer",
             "line": 14,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
-            "line": 20,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "line": 21,
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
             "line": 28,
-            "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
             "line": 34,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
-            "line": 40,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "line": 41,
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
             "line": 48,
-            "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
             "line": 54,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
-            "line": 60,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "line": 61,
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
             "line": 68,
-            "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
             "line": 74,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
-            "line": 80,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "line": 81,
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
             "line": 88,
-            "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
             "line": 94,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
-            "line": 100,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "line": 101,
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
             "line": 108,
-            "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
             "line": 114,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
-            "line": 120,
-            "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+            "line": 121,
+            "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
           },
           {
             "category": "null_pointer",
             "line": 128,
-            "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+            "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
           },
           {
             "category": "null_pointer",
-            "line": 133,
-            "reason": "调用 contract3_read(0) 传递 NULL 参数，函数内（第8行）解引用该参数触发空指针访问"
+            "line": 134,
+            "reason": "调用contract3_read(0)，即传入NULL指针，在contract3_read函数内(第8行)会执行return *pointer解引用NULL"
           },
           {
             "category": "null_pointer",
-            "line": 139,
-            "reason": "结构体 box 用 {0} 初始化，box.pointer 为 NULL，解引用 *box.pointer 触发空指针访问"
+            "line": 140,
+            "reason": "结构体contract3_box初始化为{0}，导致成员pointer为NULL，随后解引用return *box.pointer"
           }
         ],
-        "summary": "检测到 20 处空指针解引用风险：18 处直接对 NULL 指针解引用（含 6 处条件恒假未修正的情况），1 处向函数传递 NULL 参数后解引用，1 处结构体成员 NULL 解引用。其余 20 个函数未发现此类风险。"
+        "summary": "检测到20处空指针解引用风险。包括：(1)18处直接将指针初始化为0后解引用或条件判断永不成立导致指针为NULL时解引用；(2)1处传入NULL参数到会解引用的函数；(3)1处解引用结构体中初始化为NULL的指针成员。扫描工具未报告空指针问题(仅报告strcpy缓冲区溢出)，证明静态扫描无告警不等于安全，需结合源码逐一分析。"
       },
       "rows": [
         {
@@ -6224,7 +6210,7 @@
             {
               "category": "null_pointer",
               "line": 14,
-              "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+              "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
             }
           ]
         },
@@ -6242,8 +6228,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 20,
-              "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+              "line": 21,
+              "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
             }
           ]
         },
@@ -6262,7 +6248,7 @@
             {
               "category": "null_pointer",
               "line": 28,
-              "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+              "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
             }
           ]
         },
@@ -6281,7 +6267,7 @@
             {
               "category": "null_pointer",
               "line": 34,
-              "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+              "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
             }
           ]
         },
@@ -6299,8 +6285,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 40,
-              "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+              "line": 41,
+              "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
             }
           ]
         },
@@ -6319,7 +6305,7 @@
             {
               "category": "null_pointer",
               "line": 48,
-              "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+              "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
             }
           ]
         },
@@ -6338,7 +6324,7 @@
             {
               "category": "null_pointer",
               "line": 54,
-              "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+              "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
             }
           ]
         },
@@ -6356,8 +6342,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 60,
-              "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+              "line": 61,
+              "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
             }
           ]
         },
@@ -6376,7 +6362,7 @@
             {
               "category": "null_pointer",
               "line": 68,
-              "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+              "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
             }
           ]
         },
@@ -6395,7 +6381,7 @@
             {
               "category": "null_pointer",
               "line": 74,
-              "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+              "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
             }
           ]
         },
@@ -6413,8 +6399,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 80,
-              "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+              "line": 81,
+              "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
             }
           ]
         },
@@ -6433,7 +6419,7 @@
             {
               "category": "null_pointer",
               "line": 88,
-              "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+              "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
             }
           ]
         },
@@ -6460,8 +6446,14 @@
           "line_end": 106,
           "defect_line": 105,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": false,
-          "matched_findings": []
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "null_pointer",
+              "line": 101,
+              "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
+            }
+          ]
         },
         {
           "case_id": "rt_thread-null_pointer-positive-15",
@@ -6478,12 +6470,12 @@
             {
               "category": "null_pointer",
               "line": 108,
-              "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+              "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
             },
             {
               "category": "null_pointer",
               "line": 114,
-              "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+              "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
             }
           ]
         },
@@ -6497,14 +6489,8 @@
           "line_end": 120,
           "defect_line": 119,
           "file": "contract3_balanced_web_null_pointer.c",
-          "detected": true,
-          "matched_findings": [
-            {
-              "category": "null_pointer",
-              "line": 120,
-              "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
-            }
-          ]
+          "detected": false,
+          "matched_findings": []
         },
         {
           "case_id": "rt_thread-null_pointer-positive-17",
@@ -6533,8 +6519,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 133,
-              "reason": "调用 contract3_read(0) 传递 NULL 参数，函数内（第8行）解引用该参数触发空指针访问"
+              "line": 134,
+              "reason": "调用contract3_read(0)，即传入NULL指针，在contract3_read函数内(第8行)会执行return *pointer解引用NULL"
             }
           ]
         },
@@ -6552,8 +6538,8 @@
           "matched_findings": [
             {
               "category": "null_pointer",
-              "line": 139,
-              "reason": "结构体 box 用 {0} 初始化，box.pointer 为 NULL，解引用 *box.pointer 触发空指针访问"
+              "line": 140,
+              "reason": "结构体contract3_box初始化为{0}，导致成员pointer为NULL，随后解引用return *box.pointer"
             }
           ]
         },
@@ -6835,17 +6821,17 @@
         {
           "category": "null_pointer",
           "line": 94,
-          "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+          "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
         },
         {
           "category": "null_pointer",
-          "line": 100,
-          "reason": "pointer 初始化为 0（NULL），直接解引用 *pointer 触发空指针访问"
+          "line": 121,
+          "reason": "指针初始化为0(NULL)后直接解引用：int *pointer = 0; return *pointer;"
         },
         {
           "category": "null_pointer",
           "line": 128,
-          "reason": "pointer 初始化为 0，条件 value<0 恒假（value=7），pointer 保持 NULL，解引用 *pointer 触发空指针访问"
+          "reason": "指针初始化为0后，仅在value < 0时赋值&value，但value=7恒为正数，条件永不成立，return *pointer时pointer仍为NULL"
         }
       ]
     }
