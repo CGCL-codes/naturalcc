@@ -726,6 +726,8 @@ uv run python scripts/benchmark_contract3_independent.py \
 
 ## 18. 合同第 5 项 Web Agent 快速测试
 
+指标 3、指标 5 的完整脚本复现和网页手工演示步骤见 [合同-3-5-Web复现与手工演示.md](合同-3-5-Web复现与手工演示.md)。
+
 在 `code_agent/` 下按前文配置 OpenRouter / `anthropic/claude-sonnet-4.5` 并启动 Web 服务。另开终端，确保已设置 `OPENROUTER_API_KEY`：
 
 ```bash
