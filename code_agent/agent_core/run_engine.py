@@ -556,6 +556,11 @@ class RunEngine:
             "pending_approval": None,
             "verification_pending": False,
             "verification_commands": [],
+            # Files with a net workspace mutation that still need a successful
+            # verification run.  `working_state.changed_files` intentionally
+            # remains an audit trail, so it cannot be used for this purpose:
+            # a later restore_snapshot may return a file to its pre-Run state.
+            "unverified_changed_files": [],
             "working_state": {
                 "current_objective": safe_goal,
                 "plan": [],
@@ -1387,6 +1392,7 @@ class RunEngine:
                     state,
                     budget,
                     self._uncompacted_plan_messages(
+                        state,
                         rebuilt,
                         state["messages"][new_tail_from:],
                     ),
@@ -1412,7 +1418,7 @@ class RunEngine:
             return self._planned_model_request(
                 state,
                 budget,
-                self._uncompacted_plan_messages(plan, raw_tail),
+                self._uncompacted_plan_messages(state, plan, raw_tail),
                 plan.tools,
             )
         return self._planned_model_request(state, budget, plan.messages, plan.tools)
@@ -1477,6 +1483,7 @@ class RunEngine:
 
     def _uncompacted_plan_messages(
         self,
+        state: dict[str, Any],
         plan: Any,
         raw_tail: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
@@ -1716,17 +1723,44 @@ class RunEngine:
             if canonical_name == "tests.run":
                 if result.status == "success":
                     state["verification_pending"] = False
+                    state["unverified_changed_files"] = []
                 else:
                     # Keep the run in a failed-verification state so a
                     # later model response cannot claim completion forever.
                     state["verification_pending"] = True
                 state["verification_commands"] = state.get("verification_commands", [])
             elif result.changed_files:
-                from .tools.verification import discover_test_commands
+                # Older persisted runs predate net-mutation tracking.  Do not
+                # infer that their earlier writes were all restored; only
+                # Runs created with this field can safely clear verification.
+                has_net_mutation_tracking = "unverified_changed_files" in state
+                unverified_changed = state.setdefault("unverified_changed_files", [])
+                restored_path = str(result.data.get("path") or "")
+                restored_unverified_change = restored_path in unverified_changed
+                if (
+                    canonical_name == "workspace.restore_snapshot"
+                    and result.status == "success"
+                    and restored_path
+                    and has_net_mutation_tracking
+                ):
+                    # A restore_snapshot writes the exact content captured on
+                    # this Run's first mutation of the path.  It therefore
+                    # removes a net mutation even though the audit trail must
+                    # continue to list the restore as a changed-file action.
+                    state["unverified_changed_files"] = [
+                        path for path in unverified_changed if path != restored_path
+                    ]
+                    if not state["unverified_changed_files"]:
+                        state["verification_pending"] = False
+                else:
+                    for path in result.changed_files:
+                        if path not in unverified_changed:
+                            unverified_changed.append(path)
+                    from .tools.verification import discover_test_commands
 
-                commands = discover_test_commands(Path(state["workspace"]))
-                state["verification_commands"] = commands
-                state["verification_pending"] = bool(commands)
+                    commands = discover_test_commands(Path(state["workspace"]))
+                    state["verification_commands"] = commands
+                    state["verification_pending"] = bool(commands)
                 if result.status == "success" and self._codegraph_settings(state)["enabled"]:
                     dirty = state.setdefault("codegraph_dirty_files", [])
                     for path in result.changed_files:
@@ -1776,6 +1810,27 @@ class RunEngine:
                             "tool": call.name,
                             "commands": state["verification_commands"],
                         },
+                    )
+                elif (
+                    canonical_name == "workspace.restore_snapshot"
+                    and result.status == "success"
+                    and not state.get("unverified_changed_files")
+                    and has_net_mutation_tracking
+                    and restored_unverified_change
+                ):
+                    verification_result = {
+                        "status": "success",
+                        "passed": True,
+                        "kind": "restored_snapshot",
+                        "summary": "All Run-created workspace changes were restored to their pre-Run state; no test run is required.",
+                    }
+                    self._refresh_working_state(state)["verification"][
+                        "results"
+                    ].append(verification_result)
+                    self._record(
+                        state,
+                        "verification.finished",
+                        verification_result,
                     )
                 else:
                     verification_result = {

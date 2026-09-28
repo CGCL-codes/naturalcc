@@ -528,6 +528,53 @@ def test_edit_cannot_complete_before_discovered_tests_pass(tmp_path: Path):
     assert verification_results[-1]["status"] == "success"
 
 
+def test_restoring_all_run_changes_allows_completion_without_tests(tmp_path: Path):
+    target = tmp_path / "value.py"
+    target.write_text("value = 1\n", encoding="utf-8")
+    (tmp_path / "test_value.py").write_text(
+        "from value import value\n\ndef test_value():\n    assert value == 2\n",
+        encoding="utf-8",
+    )
+    model = ScriptedModelGateway(
+        [
+            ModelResponse(
+                tool_calls=[
+                    ToolCall(
+                        "edit-1",
+                        "workspace.apply_patch",
+                        {"path": "value.py", "old_text": "value = 1", "new_text": "value = 2"},
+                    )
+                ]
+            ),
+            ModelResponse(
+                tool_calls=[
+                    ToolCall(
+                        "restore-1",
+                        "workspace.restore_snapshot",
+                        {"path": "value.py"},
+                    )
+                ]
+            ),
+            ModelResponse(content="The original file has been restored."),
+        ]
+    )
+    store = EventStore(tmp_path / "agent.db")
+    engine = RunEngine(store, build_default_registry(include_mutating=True), model)
+    run_id = engine.create_run(tmp_path, "restore the original file")
+
+    assert engine.step(run_id)["status"] == "waiting_approval"
+    engine.approve(run_id, RiskLevel.WRITE)
+    result = engine.run(run_id)
+
+    assert result["status"] == "completed"
+    assert result["final_answer"] == "The original file has been restored."
+    assert target.read_text(encoding="utf-8") == "value = 1\n"
+    assert result["verification_pending"] is False
+    assert result["unverified_changed_files"] == []
+    verification_results = result["working_state"]["verification"]["results"]
+    assert verification_results[-1]["kind"] == "restored_snapshot"
+
+
 def test_thread_run_hydrates_recent_conversation_and_persists_reply(tmp_path: Path):
     store = EventStore(tmp_path / "agent.db")
     thread_id = store.create_thread(
@@ -838,6 +885,46 @@ def test_context_hard_limit_stops_before_main_model_call(tmp_path: Path):
     assert events[-2].type == "context.hard_limit_blocked"
     assert events[-1].type == "run.budget_exhausted"
     assert events[-1].payload["reason"] == "context_hard_limit"
+
+
+def test_uncompacted_plan_uses_the_current_run_profile(tmp_path: Path):
+    store = EventStore(tmp_path / "agent.db")
+    tokenizer_root = (
+        Path(__file__).resolve().parents[1]
+        / "resources"
+        / "deepseek_v3_tokenizer"
+    )
+    counter = DeepSeekTokenCounter.from_directory(tokenizer_root)
+    serializer = DeepSeekRequestSerializer()
+    planner = ContextPlanner(
+        counter,
+        serializer,
+        DeepSeekModelProfile(context_window_tokens=8192),
+    )
+    engine = RunEngine(
+        store,
+        build_default_registry(include_mutating=False),
+        ScriptedModelGateway([]),
+        context_planner=planner,
+    )
+    run_id = engine.create_run(tmp_path, "continue without compaction")
+    state = engine.get_state(run_id)
+    plan = type(
+        "Plan",
+        (),
+        {"messages": [{"role": "system", "content": "rules"}], "tools": []},
+    )()
+
+    messages = engine._uncompacted_plan_messages(
+        state,
+        plan,
+        [{"role": "user", "content": "recent evidence"}],
+    )
+
+    assert messages == [
+        {"role": "system", "content": "rules"},
+        {"role": "user", "content": "recent evidence"},
+    ]
 
 
 def test_run_input_budget_is_preflighted_before_agent_call(tmp_path: Path):

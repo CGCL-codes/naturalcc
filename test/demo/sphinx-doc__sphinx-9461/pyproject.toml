@@ -1,0 +1,9 @@
+[project]
+name = "mini-sphinx-class-property-demo"
+version = "0.1.0"
+description = "A multi-file code-repair demo inspired by SWE-bench sphinx-doc__sphinx-9461."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
