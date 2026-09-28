@@ -671,7 +671,60 @@ code_agent/
 
 ---
 
-## 17. 合同第 5 项 Web Agent 快速测试
+## 17. 合同指标 3：高频缺陷检测测试
+
+已退役的简单基线不得用于验收。请使用下方平衡验收集；它**不使用 Web Agent 或大模型**，需要后端主机已安装并可在 `PATH` 找到 Cppcheck。在 `code_agent/` 下执行：
+
+```bash
+uv run python scripts/benchmark_contract3_independent.py \
+  --profile balanced \
+  --workspace /tmp/naturalcc-contract3-independent-sources
+```
+
+脚本会下载并校验 3 套固定版本的 RTOS 源码（FreeRTOS Kernel、Zephyr、RT-Thread），只在指定的临时工作目录内加入测试 C 文件，不改动或提交上游源码。每套选定核心源码均不少于 1 万行；针对数组越界、字符串溢出、空指针调用，每类生成 20 个注入点和 20 个安全对照。正负标签只存于真值工件，不进入 Agent 工作区。脚本通过产品的 `security_analysis.cppcheck_scan` 适配层扫描，生成根目录唯一的 [合同-3-result.md](合同-3-result.md) 和 `artifacts/contract3/balanced-cppcheck/` 下的原始证据。
+
+下载的源码仅保留在 `--workspace` 指定目录。覆盖状态为 `partial` 时，表示 Cppcheck 默认工程配置仍有解析诊断；即使注入文件被完整分析，也必须保留该限制说明。
+
+如需与合同指标 5 对齐的可选 Web Agent 模式，先按相同配置启动后端，再执行一个低成本的 1 组冒烟测试（40 个函数）；省略 `--limit` 才会运行完整的 9 个“工程×类别”组：
+
+```bash
+export CODE_AGENT_PROVIDER="openrouter"
+export CODE_AGENT_MODEL="anthropic/claude-sonnet-4.5"
+export CODE_AGENT_API_BASE="https://openrouter.ai/api/v1"
+export OPENROUTER_API_KEY="..."
+cd webui && npm run build && cd ..
+uv run python agent_web_api.py --host 127.0.0.1 --port 7860
+
+# 另一终端
+uv run python scripts/benchmark_contract3_web.py --suite balanced --limit 1
+```
+
+该模式通过 Web `/api/agent/threads` 和 Run API 调用，与指标 5 使用相同冻结的 OpenRouter/Sonnet 配置，而非脚本直接推理；只允许只读工具，不会自动批准 execute/write 工具。结果统一汇总到 [合同-3-result.md](合同-3-result.md)，已评分 checkpoint 保存在 `artifacts/contract3/web-sonnet45-balanced/` 和 `artifacts/contract3/web-sonnet45-independent/`。它只扫描注入 fixture，因此不能表述为已完整覆盖 RTOS 上游工程。
+
+加上 `--suite independent` 可通过相同 Web Agent 链路运行独立复杂样例，证据写入 `artifacts/contract3/web-sonnet45-independent/`，状态统一汇总至总报告。
+
+另提供一套独立、更多形态的 C 样例集，保持相同的工程规模和“每类 20 正例 + 20 对照”协议，但增加计算下标与循环、指针算术、`sprintf`/`strcat`/`memcpy`、分支/辅助函数/结构体指针等形态；不会根据其结果修改检测规则：
+
+```bash
+uv run python scripts/benchmark_contract3_independent.py \
+  --workspace /tmp/naturalcc-contract3-independent-sources
+```
+
+原始结果写入 `artifacts/contract3/independent-cppcheck/`，并更新 [合同-3-result.md](合同-3-result.md)。它用于展示独立鲁棒性，不替代基线验收结果，更不是人为调低分数。
+
+更具代表性的固定**平衡验收集**使用每工程、每类别 18 个常规/变形正例与 2 个较难的数据流正例，运行方式如下：
+
+```bash
+uv run python scripts/benchmark_contract3_independent.py \
+  --profile balanced \
+  --workspace /tmp/naturalcc-contract3-independent-sources
+```
+
+它生成 `artifacts/contract3/balanced-cppcheck/` 并更新 [合同-3-result.md](合同-3-result.md)，建议作为指标 3 的本地验收集；原简单基线与独立压力集须保留为独立证据，不能择优合并。
+
+---
+
+## 18. 合同第 5 项 Web Agent 快速测试
 
 在 `code_agent/` 下按前文配置 OpenRouter / `anthropic/claude-sonnet-4.5` 并启动 Web 服务。另开终端，确保已设置 `OPENROUTER_API_KEY`：
 

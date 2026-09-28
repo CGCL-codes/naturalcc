@@ -606,6 +606,57 @@ npm --prefix code_agent/webui run build
 
 Required tests use scripted models and fixture workspaces; they do not need an API key or live Aider call.
 
+### Contract-3 frequent-defect evaluation
+
+The retired simple baseline must not be used for acceptance. Use the balanced local profile below; it does **not** use the Web Agent or an LLM, so install Cppcheck on the backend host:
+
+```bash
+uv run python scripts/benchmark_contract3_independent.py \
+  --profile balanced \
+  --workspace /tmp/naturalcc-contract3-independent-sources
+```
+
+The script clones three pinned RTOS revisions (FreeRTOS Kernel, Zephyr and RT-Thread), verifies their commits, and adds test-only C files to each temporary checkout. Each source core has at least 10,000 C/C++ lines; each source/category has 20 injected cases and 20 safe controls for array out-of-bounds, string overflow and null-pointer dereference. Positive/negative labels are kept only in the ground-truth artifact. It runs the product's `security_analysis.cppcheck_scan` adapter and writes the single [合同-3-result.md](合同-3-result.md) plus raw evidence under `artifacts/contract3/balanced-cppcheck/`.
+
+The downloaded source trees remain under the selected workspace and are never committed. A `partial` coverage state means Cppcheck had project parsing diagnostics with its default configuration; it must be retained as a limitation even when every injected fixture is analyzed.
+
+For the optional Web-Agent mode, start the same backend configuration used by Contract-5, then run a low-cost one-group smoke test (40 functions) or omit `--limit` for all nine project/category groups:
+
+```bash
+export CODE_AGENT_PROVIDER="openrouter"
+export CODE_AGENT_MODEL="anthropic/claude-sonnet-4.5"
+export CODE_AGENT_API_BASE="https://openrouter.ai/api/v1"
+export OPENROUTER_API_KEY="..."
+cd webui && npm run build && cd ..
+uv run python agent_web_api.py --host 127.0.0.1 --port 7860
+
+# in another terminal
+uv run python scripts/benchmark_contract3_web.py --suite balanced --limit 1
+```
+
+This mode uses the Web `/api/agent/threads` and Run API rather than direct inference, uses the same frozen OpenRouter/Sonnet configuration as Contract-5, and permits only read-level tools. It never auto-approves execute/write tools. Its result is summarized in the single [合同-3-result.md](合同-3-result.md), while scored checkpoints remain in `artifacts/contract3/web-sonnet45-balanced/` and `artifacts/contract3/web-sonnet45-independent/`; it scans only the injected fixture, so it must not be represented as complete RTOS-project coverage.
+
+Add `--suite independent` to use the held-out varied C suite through this same Web-Agent chain; its evidence is under `artifacts/contract3/web-sonnet45-independent/` and its status is included in the canonical report.
+
+An independent, more varied held-out C suite is also available. It keeps the same source count and 20-positive/20-control-per-category protocol, but uses computed indexes and loops, pointer arithmetic, `sprintf`/`strcat`/`memcpy`, and branch/helper/struct pointer flows. It does not alter detector rules based on its results:
+
+```bash
+uv run python scripts/benchmark_contract3_independent.py \
+  --workspace /tmp/naturalcc-contract3-independent-sources
+```
+
+It writes raw evidence under `artifacts/contract3/independent-cppcheck/` and updates [合同-3-result.md](合同-3-result.md). Treat it as a held-out robustness result, not a replacement or an artificial adjustment to the baseline acceptance score.
+
+For the more representative, fixed **balanced acceptance profile**—18 standard/varied positives and two harder data-flow cases per source/category—run:
+
+```bash
+uv run python scripts/benchmark_contract3_independent.py \
+  --profile balanced \
+  --workspace /tmp/naturalcc-contract3-independent-sources
+```
+
+This writes raw evidence under `artifacts/contract3/balanced-cppcheck/` and updates [合同-3-result.md](合同-3-result.md). It is the recommended Contract-3 local acceptance profile; keep the simpler baseline and harder independent profile as separate evidence.
+
 ### Contract-5 live Web Agent evaluation
 
 From `code_agent/`, start the Web backend with the OpenRouter / `anthropic/claude-sonnet-4.5` environment configuration above, then run in a second terminal with `OPENROUTER_API_KEY` set:

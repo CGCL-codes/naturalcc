@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "title": "合同指标 3：高频缺陷检测基准",
+  "statistical_unit": "单个注入或安全对照函数",
+  "protocol": "每套工程对数组越界、字符串溢出、空指针调用各注入 20 处，并为每处设置一个同类安全对照；只将匹配到 ground truth 函数范围内的目标 Cppcheck 诊断计入指标。",
+  "sources": [
+    {
+      "id": "freertos_kernel",
+      "name": "FreeRTOS Kernel",
+      "url": "https://github.com/FreeRTOS/FreeRTOS-Kernel.git",
+      "ref": "V11.1.0",
+      "commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0",
+      "scan_roots": ["."]
+    },
+    {
+      "id": "zephyr",
+      "name": "Zephyr RTOS",
+      "url": "https://github.com/zephyrproject-rtos/zephyr.git",
+      "ref": "v3.7.0",
+      "commit": "36940db938a8f4a1e919496793ed439850a221c2",
+      "scan_roots": ["kernel"]
+    },
+    {
+      "id": "rt_thread",
+      "name": "RT-Thread",
+      "url": "https://github.com/RT-Thread/rt-thread.git",
+      "ref": "v5.2.1",
+      "commit": "97893c004c65760c638fd7eb571a08fc987a55e5",
+      "scan_roots": ["src"]
+    }
+  ],
+  "categories": [
+    {
+      "id": "array_oob",
+      "name": "数组越界",
+      "cppcheck_ids": ["arrayIndexOutOfBounds", "arrayIndexOutOfBoundsCond"],
+      "cwes": [788]
+    },
+    {
+      "id": "string_overflow",
+      "name": "字符串溢出",
+      "cppcheck_ids": ["bufferAccessOutOfBounds", "bufferAccessOutOfBoundsCond"],
+      "cwes": [120, 787, 788]
+    },
+    {
+      "id": "null_pointer",
+      "name": "空指针调用",
+      "cppcheck_ids": ["nullPointer", "nullPointerRedundantCheck"],
+      "cwes": [476]
+    }
+  ]
+}

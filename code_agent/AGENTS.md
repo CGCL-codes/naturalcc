@@ -30,6 +30,10 @@ Common tasks: code completion, small project-aware edits/refactors, code summari
 - `rag/java/`: Java parser/prompt path.
 - `test_api.py`: API connectivity check, not a unit suite.
 - `scripts/benchmark_contract5_web.py`: resumable CASTLE checks via the Web Agent API (OpenRouter / Sonnet 4.5); stops on insufficient credits, skips scored samples. Keep `artifacts/contract5/{dataset.json,manifest.json,web-sonnet45/checkpoint.json}` and `合同-5-result.md`; workspaces/logs are ignored. `scripts/check_openrouter_credits.py` checks balance without inference.
+- `scripts/benchmark_contract3_cppcheck.py`: retained only as shared Contract-3 helper code; its simple baseline CLI is retired and exits with the balanced-profile command.
+- `scripts/benchmark_contract3_web.py`: optional Contract-5-aligned Web-Agent version. It requires the local Web backend and OpenRouter key, calls only the Web HTTP API, and never auto-approves execute/write tools. `--suite balanced` is the recommended acceptance mix; `--suite independent` is the stress mix; `--limit 1` is a low-cost 40-function smoke run.
+- `scripts/benchmark_contract3_independent.py`: held-out, more varied Contract-3 C examples through the same Cppcheck adapter. Default `--profile independent` writes `artifacts/contract3/independent-cppcheck/`; `--profile balanced` writes `artifacts/contract3/balanced-cppcheck/`; both refresh the one canonical `合同-3-result.md`. It changes no detector rule and retains labels outside temporary workspaces; never average or selectively combine these profiles.
+- `scripts/render_contract3_report.py`: the only Contract-3 Markdown renderer. It summarizes separate raw artifacts without collapsing their results into one score.
 
 There is no legacy UI path; keep graphical work centered on `agent_web_api.py` and `webui/`.
 

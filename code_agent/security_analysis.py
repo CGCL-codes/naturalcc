@@ -10,7 +10,7 @@ from pathlib import Path
 C_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp"}
 
 
-def cppcheck_scan(files: list[str], project_dir: str, context_lines: int):
+def cppcheck_scan(files: list[str], project_dir: str, context_lines: int, timeout_seconds: int = 120):
     targets = [str(Path(p).resolve()) for p in files if Path(p).suffix.lower() in C_EXTENSIONS]
     if not targets:
         return [], {"engine": "cppcheck", "status": "not_applicable"}
@@ -20,7 +20,7 @@ def cppcheck_scan(files: list[str], project_dir: str, context_lines: int):
     try:
         result = subprocess.run(
             [executable, "--xml", "--xml-version=2", "--enable=warning,style,performance,portability", "--inconclusive", *targets],
-            cwd=project_dir, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
+            cwd=project_dir, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout_seconds,
         )
         if result.returncode != 0:
             return [], {"engine": "cppcheck", "status": "failed", "message": result.stderr[-2000:]}

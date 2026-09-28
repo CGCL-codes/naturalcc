@@ -1,0 +1,8 @@
+# Keep frozen fixtures, local results and scored Web checkpoints; omit runtime exports.
+/web-sonnet45/
+/web-sonnet45-balanced/runs/
+/web-sonnet45-balanced/benchmark.lock
+/web-sonnet45-balanced/*.tmp
+/web-sonnet45-independent/runs/
+/web-sonnet45-independent/benchmark.lock
+/web-sonnet45-independent/*.tmp
