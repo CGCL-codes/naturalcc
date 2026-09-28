@@ -147,7 +147,7 @@ def render() -> str:
              "## Finding 过滤规则", "",
              "指标 3 只评分数组越界、字符串溢出、空指针调用三类目标 Finding。CWE-398、CWE-563 等代码质量诊断，以及目标函数范围以外的所有 Finding，可作为额外诊断保留，但绝不参与 TP/FN/FP/TN、检出率或误报率。", "",
              "例如：数组越界正例只报告 CWE-563 未使用变量，不算 TP；数组安全对照只报告 CWE-398 风格问题，不算 FP。只有类别匹配且命中函数行范围的 Finding 才能改变当前指标统计。指标 5 应采用同样原则，只把缓冲区溢出、多线程竞争、内存泄漏和命令执行漏洞纳入其统计。", "",
-             "- Web：每个任务只接受与该任务类别相同的 `prediction.findings[].category`；Finding 的 `line` 必须落在对应真值函数的 `[line_start, line_end]` 内。类别不符的项写入 `out_of_scope_findings`，不评分；每个函数最终的匹配证据写入 `rows[].matched_findings`。", "- 本地 Cppcheck：仅匹配 `manifest.json` 中该类别的 `cppcheck_ids` 或 `cwes`，再限定文件与函数行范围；原始扫描产生的其他诊断不进入 `matched_findings`。", ""]
+             "- Web：每个任务调用 `vulnerability_detection` 时固定传入 `scan_type:\"frequent_defects\"` 作为请求标识；每个任务只接受与该任务类别相同的 `prediction.findings[].category`。Finding 的 `line` 必须落在对应真值函数的 `[line_start, line_end]` 内。类别不符的项写入 `out_of_scope_findings`，不评分；每个函数最终的匹配证据写入 `rows[].matched_findings`。", "- 本地 Cppcheck：仅匹配 `manifest.json` 中该类别的 `cppcheck_ids` 或 `cwes`，再限定文件与函数行范围；原始扫描产生的其他诊断不进入 `matched_findings`。", ""]
     lines += ["## 当前结果总览", "", "| 测试集 / 运行方式 | 完成状态 | 检出率 / 误报率 | 定位 |", "|---|---|---|---|"]
     balanced_local = "—" if not balanced else f"{percent(balanced['metrics']['overall']['detection_rate'])} / {percent(balanced['metrics']['overall']['false_positive_rate'])}"
     independent_local = "—" if not independent else f"{percent(independent['metrics']['overall']['detection_rate'])} / {percent(independent['metrics']['overall']['false_positive_rate'])}"

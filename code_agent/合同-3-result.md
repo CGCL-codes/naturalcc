@@ -1,6 +1,6 @@
 # 合同指标 3：高频缺陷检测总报告
 
-更新时间（UTC）：2026-09-28T10:32:19.483829+00:00
+更新时间（UTC）：2026-09-28T11:11:02.454291+00:00
 
 本报告是唯一的指标 3 Markdown 入口。各测试集的真值、原始结果、模型 Run 和覆盖状态保留在各自工件目录；不得择优挑选或平均不同测试集的分数。
 
@@ -24,16 +24,16 @@
 
 例如：数组越界正例只报告 CWE-563 未使用变量，不算 TP；数组安全对照只报告 CWE-398 风格问题，不算 FP。只有类别匹配且命中函数行范围的 Finding 才能改变当前指标统计。指标 5 应采用同样原则，只把缓冲区溢出、多线程竞争、内存泄漏和命令执行漏洞纳入其统计。
 
-- Web：每个任务只接受与该任务类别相同的 `prediction.findings[].category`；Finding 的 `line` 必须落在对应真值函数的 `[line_start, line_end]` 内。类别不符的项写入 `out_of_scope_findings`，不评分；每个函数最终的匹配证据写入 `rows[].matched_findings`。
+- Web：每个任务调用 `vulnerability_detection` 时固定传入 `scan_type:"frequent_defects"` 作为请求标识；每个任务只接受与该任务类别相同的 `prediction.findings[].category`。Finding 的 `line` 必须落在对应真值函数的 `[line_start, line_end]` 内。类别不符的项写入 `out_of_scope_findings`，不评分；每个函数最终的匹配证据写入 `rows[].matched_findings`。
 - 本地 Cppcheck：仅匹配 `manifest.json` 中该类别的 `cppcheck_ids` 或 `cwes`，再限定文件与函数行范围；原始扫描产生的其他诊断不进入 `matched_findings`。
 
 ## 当前结果总览
 
 | 测试集 / 运行方式 | 完成状态 | 检出率 / 误报率 | 定位 |
 |---|---|---|---|
-| 平衡验收集 Web | 9/9 组有效评分；样本队列已处理完毕（未评分项保留在 checkpoint） | 87.78% / 0.00% | Web API 验收链路 |
+| 平衡验收集 Web | 9/9 组有效评分；样本队列已处理完毕（未评分项保留在 checkpoint） | 87.22% / 0.00% | Web API 验收链路 |
 | 平衡验收集本地 | 未保留 | — | 推荐本地验收口径 |
-| 独立压力集 Web | 9/9 组有效评分；样本队列已处理完毕（未评分项保留在 checkpoint） | 83.33% / 0.00% | 能力边界 Web 链路 |
+| 独立压力集 Web | 9/9 组有效评分；样本队列已处理完毕（未评分项保留在 checkpoint） | 89.44% / 2.22% | 能力边界 Web 链路 |
 | 独立压力集本地 | 未保留 | — | 能力边界对照 |
 
 ## 冻结测试来源
@@ -52,33 +52,33 @@
 
 Web 模式与合同 5 一样，固定 OpenRouter/Sonnet 配置，经 `/api/agent/threads` 与 Run API 执行；超时、模型失败和无效 JSON 不计为安全或正确。
 - 状态：样本队列已处理完毕（未评分项保留在 checkpoint）。
-- 已有效评分：9/9 组，360 个函数；TP/FN/FP/TN：158/22/0/180。
+- 已有效评分：9/9 组，360 个函数；TP/FN/FP/TN：157/23/0/180。
 - 工件：`artifacts/contract3/web-sonnet45-balanced/`。
 
 | 工程×类别 | 状态 | 已评分函数 | TP/FN/FP/TN | 最近 Run |
 |---|---|---:|---|---|
-| freertos_kernel-array_oob | scored | 40 | 18/2/0/20 | `64ae44c1-bb48-4443-abfe-b231b624fe32` |
-| freertos_kernel-null_pointer | scored | 40 | 15/5/0/20 | `2994eaed-1cd3-48cc-9a6b-cf3d5ab24968` |
-| freertos_kernel-string_overflow | scored | 40 | 17/3/0/20 | `62c41ea8-c06e-4126-94b1-b80b6fea679e` |
-| rt_thread-array_oob | scored | 40 | 18/2/0/20 | `33af3839-4d1d-4069-9fc6-ea616b099378` |
-| rt_thread-null_pointer | scored | 40 | 16/4/0/20 | `7c29f923-b429-4643-95f3-5bdd1d8dc152` |
-| rt_thread-string_overflow | scored | 40 | 20/0/0/20 | `9a0a4907-0828-4178-99fc-a3fe1f10583a` |
-| zephyr-array_oob | scored | 40 | 17/3/0/20 | `cde51f8b-bc28-456c-b5c3-2b589a41f77d` |
-| zephyr-null_pointer | scored | 40 | 17/3/0/20 | `93160df9-5704-4e57-b86f-46714f560491` |
-| zephyr-string_overflow | scored | 40 | 20/0/0/20 | `05442bf2-804c-404b-9482-e55017ff4792` |
+| freertos_kernel-array_oob | scored | 40 | 18/2/0/20 | `8d4cbc06-b55d-4b0b-a48c-42fa9c20570f` |
+| freertos_kernel-null_pointer | scored | 40 | 15/5/0/20 | `91be26a3-0c1e-4f87-a0ba-bf99b044ad17` |
+| freertos_kernel-string_overflow | scored | 40 | 20/0/0/20 | `457f8b5d-c472-4bc3-bcdd-e1c8ea78057d` |
+| rt_thread-array_oob | scored | 40 | 18/2/0/20 | `e8253402-5f41-4fb9-9c99-aca8e2f5a166` |
+| rt_thread-null_pointer | scored | 40 | 15/5/0/20 | `43d71b7c-b029-4dd6-9153-9d5bc51f9378` |
+| rt_thread-string_overflow | scored | 40 | 20/0/0/20 | `3a3b1ae1-518c-43bf-bb18-bf81748f5540` |
+| zephyr-array_oob | scored | 40 | 16/4/0/20 | `67b113db-dad2-44d5-b492-47debe797cb3` |
+| zephyr-null_pointer | scored | 40 | 15/5/0/20 | `c3a2f049-7ec2-4180-af39-fa546d5d453a` |
+| zephyr-string_overflow | scored | 40 | 20/0/0/20 | `5dc35dfd-ca60-4b09-8abc-422fd900b5ef` |
 
 | 类别 | TP | FN | FP | TN | 检出率 | 误报率 |
 |---|---:|---:|---:|---:|---:|---:|
-| 数组越界 | 53 | 7 | 0 | 60 | 88.33% | 0.00% |
-| 字符串溢出 | 57 | 3 | 0 | 60 | 95.00% | 0.00% |
-| 空指针调用 | 48 | 12 | 0 | 60 | 80.00% | 0.00% |
-| 总体 | 158 | 22 | 0 | 180 | 87.78% | 0.00% |
+| 数组越界 | 52 | 8 | 0 | 60 | 86.67% | 0.00% |
+| 字符串溢出 | 60 | 0 | 0 | 60 | 100.00% | 0.00% |
+| 空指针调用 | 45 | 15 | 0 | 60 | 75.00% | 0.00% |
+| 总体 | 157 | 23 | 0 | 180 | 87.22% | 0.00% |
 
 | 工程 | TP | FN | FP | TN | 检出率 | 误报率 |
 |---|---:|---:|---:|---:|---:|---:|
-| FreeRTOS Kernel | 50 | 10 | 0 | 60 | 83.33% | 0.00% |
-| Zephyr | 54 | 6 | 0 | 60 | 90.00% | 0.00% |
-| RT-Thread | 54 | 6 | 0 | 60 | 90.00% | 0.00% |
+| FreeRTOS Kernel | 53 | 7 | 0 | 60 | 88.33% | 0.00% |
+| Zephyr | 51 | 9 | 0 | 60 | 85.00% | 0.00% |
+| RT-Thread | 53 | 7 | 0 | 60 | 88.33% | 0.00% |
 
 上述表为本轮原始统计值；阈值比较由前端或验收方按其配置执行。
 
@@ -90,33 +90,33 @@ Web 模式与合同 5 一样，固定 OpenRouter/Sonnet 配置，经 `/api/agent
 
 Web 模式与合同 5 一样，固定 OpenRouter/Sonnet 配置，经 `/api/agent/threads` 与 Run API 执行；超时、模型失败和无效 JSON 不计为安全或正确。
 - 状态：样本队列已处理完毕（未评分项保留在 checkpoint）。
-- 已有效评分：9/9 组，360 个函数；TP/FN/FP/TN：150/30/0/180。
+- 已有效评分：9/9 组，360 个函数；TP/FN/FP/TN：161/19/4/176。
 - 工件：`artifacts/contract3/web-sonnet45-independent/`。
 
 | 工程×类别 | 状态 | 已评分函数 | TP/FN/FP/TN | 最近 Run |
 |---|---|---:|---|---|
-| freertos_kernel-array_oob | scored | 40 | 17/3/0/20 | `f750a591-6e4a-4500-a81a-6132b351ed09` |
-| freertos_kernel-null_pointer | scored | 40 | 16/4/0/20 | `44f8a459-c772-4a7f-9e81-df1f3a2e9c24` |
-| freertos_kernel-string_overflow | scored | 40 | 17/3/0/20 | `56e29ff8-8fbb-4f1f-99f9-61aad00cf727` |
-| rt_thread-array_oob | scored | 40 | 18/2/0/20 | `aed74296-a9f6-4506-8fb3-8e763d828c3a` |
-| rt_thread-null_pointer | scored | 40 | 16/4/0/20 | `f219b0ba-b603-465f-8a6e-c3ec34d8489e` |
-| rt_thread-string_overflow | scored | 40 | 18/2/0/20 | `80b24b8a-17a2-4436-8da7-6a2bb5ac6037` |
-| zephyr-array_oob | scored | 40 | 17/3/0/20 | `45ec3f51-a9c0-404c-9c41-d8380e73a730` |
-| zephyr-null_pointer | scored | 40 | 16/4/0/20 | `b637f258-b4a7-45f3-b24f-c68587133366` |
-| zephyr-string_overflow | scored | 40 | 15/5/0/20 | `981fca4c-b180-48b5-9c72-f6181b9924bf` |
+| freertos_kernel-array_oob | scored | 40 | 18/2/0/20 | `11dc4b9c-1e49-4047-b9e5-f0645d472dc4` |
+| freertos_kernel-null_pointer | scored | 40 | 18/2/0/20 | `a77037ce-85d5-4c8d-8b64-67902d8c349f` |
+| freertos_kernel-string_overflow | scored | 40 | 19/1/0/20 | `20a1b5de-b243-4d1c-b7d2-f94b090c2ae6` |
+| rt_thread-array_oob | scored | 40 | 17/3/4/16 | `a55729d6-0ede-4a0e-b042-8bfae0aa09d6` |
+| rt_thread-null_pointer | scored | 40 | 16/4/0/20 | `bdd78ab8-5197-46e7-8e08-b1dfe509fc2b` |
+| rt_thread-string_overflow | scored | 40 | 20/0/0/20 | `af8189f8-c223-4724-9dd0-a411b7748c50` |
+| zephyr-array_oob | scored | 40 | 16/4/0/20 | `e53a2fb9-dfe5-48d2-a7ba-ef6d5cce0405` |
+| zephyr-null_pointer | scored | 40 | 17/3/0/20 | `d86b1582-996a-4499-840e-aeef6aeaf687` |
+| zephyr-string_overflow | scored | 40 | 20/0/0/20 | `635ccc78-e755-432f-88a8-9537bab4b061` |
 
 | 类别 | TP | FN | FP | TN | 检出率 | 误报率 |
 |---|---:|---:|---:|---:|---:|---:|
-| 数组越界 | 52 | 8 | 0 | 60 | 86.67% | 0.00% |
-| 字符串溢出 | 50 | 10 | 0 | 60 | 83.33% | 0.00% |
-| 空指针调用 | 48 | 12 | 0 | 60 | 80.00% | 0.00% |
-| 总体 | 150 | 30 | 0 | 180 | 83.33% | 0.00% |
+| 数组越界 | 51 | 9 | 4 | 56 | 85.00% | 6.67% |
+| 字符串溢出 | 59 | 1 | 0 | 60 | 98.33% | 0.00% |
+| 空指针调用 | 51 | 9 | 0 | 60 | 85.00% | 0.00% |
+| 总体 | 161 | 19 | 4 | 176 | 89.44% | 2.22% |
 
 | 工程 | TP | FN | FP | TN | 检出率 | 误报率 |
 |---|---:|---:|---:|---:|---:|---:|
-| FreeRTOS Kernel | 50 | 10 | 0 | 60 | 83.33% | 0.00% |
-| Zephyr | 48 | 12 | 0 | 60 | 80.00% | 0.00% |
-| RT-Thread | 52 | 8 | 0 | 60 | 86.67% | 0.00% |
+| FreeRTOS Kernel | 55 | 5 | 0 | 60 | 91.67% | 0.00% |
+| Zephyr | 53 | 7 | 0 | 60 | 88.33% | 0.00% |
+| RT-Thread | 53 | 7 | 4 | 56 | 88.33% | 6.67% |
 
 独立压力集仅用于记录复杂形态下的能力边界；表中保留原始统计值，不作阈值判定。
 

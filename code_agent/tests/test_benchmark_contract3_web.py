@@ -15,6 +15,11 @@ def test_web_answer_must_be_single_category_and_valid_line():
         web.parse_answer(answer.replace('"line":3', '"line":0'), "array_oob", 5)
 
 
+def test_web_goal_marks_contract3_as_frequent_defects():
+    prompt = web.goal({"id": "array_oob", "name": "数组越界"}, "fixture.c")
+    assert 'scan_type:"frequent_defects"' in prompt
+
+
 def test_web_scoring_is_function_range_bound(tmp_path):
     category = local.load_manifest()["categories"][0]
     _, cases = local.inject_fixture(tmp_path, "fixture", [category])

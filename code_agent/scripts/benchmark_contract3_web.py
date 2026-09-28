@@ -60,7 +60,8 @@ def save_json(path: Path, value: Any) -> None:
 def goal(category: dict[str, Any], fixture: str) -> str:
     return f'''请审计当前工作区的 `{fixture}`，仅判断“{category['name']}”这一类风险。
 先读取完整文件，然后必须调用只读工具 `vulnerability_detection` 扫描该文件，参数应包含
-`target_files:["{fixture}"]`、`scan_scope:"targets"`、`severity_threshold:"low"`、`max_findings:1000`。
+`target_files:["{fixture}"]`、`scan_scope:"targets"`、`scan_type:"frequent_defects"`、
+`severity_threshold:"low"`、`max_findings:1000`。
 结合源码和工具证据判断；扫描无告警不等于安全。只做静态审计：不修改、编译、运行任何文件，
 不执行 shell，不调用需要 execute/write 授权的工具，不搜索外部资料。
 不要根据函数名猜测正负样本；每个函数都独立按代码证据判断。
