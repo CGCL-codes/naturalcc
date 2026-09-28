@@ -34,13 +34,14 @@ def _execute(context: ToolContext, args: dict, feature: str, *, fix=False, deep=
             raise ValueError("plugin targets exceed the run's target_files")
     config = {key: value for key, value in args.items() if key not in {"instruction", "target_files"}}
     if feature == "vulnerability_detection":
-        config.update(auto_fix=fix, analyzer="cppcheck" if deep else "auto" if fix else "builtin")
+        config.update(auto_fix=fix, analyzer=args.get("analyzer", "cppcheck") if deep else "auto" if fix else "builtin")
         config.setdefault("scan_scope", "targets" if targets else "project")
         if fix:
             config["scan_scope"] = "targets"
-        if config.get("sanitizer_report"):
-            report = resolve_workspace_path(context, config["sanitizer_report"], must_exist=True)
-            config["sanitizer_report"] = report.relative_to(context.workspace).as_posix()
+        for field in ("sanitizer_report", "ground_truth_file"):
+            if config.get(field):
+                report = resolve_workspace_path(context, config[field], must_exist=True)
+                config[field] = report.relative_to(context.workspace).as_posix()
     error = plugin.validate(config)
     if error:
         raise ValueError(error)
@@ -110,6 +111,7 @@ def pipeline_tool_specs(include_mutating=True):
         "max_findings": {"type": "integer", "minimum": 1, "maximum": 1000},
         "incremental": {"type": "boolean"},
         "sanitizer_report": {"type": "string"},
+        "ground_truth_file": {"type": "string", "description": "Workspace-relative labeled test manifest; requires scan_type. Detection never reads labels."},
     }
     def schema(properties, required=()):
         return {"type": "object", "properties": properties, "required": list(required), "additionalProperties": False}
@@ -126,7 +128,7 @@ def pipeline_tool_specs(include_mutating=True):
                     "completion_type": {"type": "string", "enum": ["", "member", "variable", "function", "function_body", "type"]}}, ("target_files", "instruction")),
                 RiskLevel.WRITE, lambda c, a: _execute(c, a, "code_completion"), idempotent=False, parallel_safe=False, default_timeout_seconds=900),
             ToolSpec("vulnerability_detection.analyze", "Run the Pipeline scanner plus installed Cppcheck for C/C++ bounds, null dereferences and leaks. Requires execute approval; never runs the target program.",
-                schema(scan), RiskLevel.EXECUTE, lambda c, a: _execute(c, a, "vulnerability_detection", deep=True), parallel_safe=False, default_timeout_seconds=180),
+                schema({**scan, "analyzer": {"type": "string", "enum": ["cppcheck", "comprehensive"]}}), RiskLevel.EXECUTE, lambda c, a: _execute(c, a, "vulnerability_detection", deep=True), parallel_safe=False, default_timeout_seconds=300),
             ToolSpec("vulnerability_detection.fix", "Scan selected files (including Cppcheck if available), then edit them with Pipeline Aider remediation. Requires execute approval for analysis and edits. Findings are pre-repair; re-scan and test afterwards.",
                 schema({**scan, "instruction": {"type": "string"}, "extra_instruction": {"type": "string"}}, ("target_files",)),
                 RiskLevel.EXECUTE, lambda c, a: _execute(c, a, "vulnerability_detection", fix=True), idempotent=False, parallel_safe=False, default_timeout_seconds=900),

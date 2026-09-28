@@ -8,8 +8,8 @@ tools. No separate `/api/agent/code_completion` endpoint is needed. The existing
 | Canonical tool | Model tool name | Approval | Behavior |
 | --- | --- | --- | --- |
 | `code_completion` | `code_completion` | write | CodeCompletionPlugin -> NaturalCC prompt -> Aider |
-| `vulnerability_detection` | `vulnerability_detection` | none | Built-in candidates, C semantic-review checklist and optional TSan log import |
-| `vulnerability_detection.analyze` | `vulnerability_detection_analyze` | execute | Built-in rules plus required Cppcheck analysis |
+| `vulnerability_detection` | `vulnerability_detection` | none | Built-in patterns, C/C++ shell-string/shared-global checks, review checklist and optional TSan log import |
+| `vulnerability_detection.analyze` | `vulnerability_detection_analyze` | execute | Required Cppcheck; optional `analyzer=comprehensive` also requires Clang |
 | `vulnerability_detection.fix` | `vulnerability_detection_fix` | execute | Scan (Cppcheck if available), then Aider repair |
 
 Completion arguments:
@@ -27,17 +27,21 @@ Scan arguments (both scan tools):
 `scan_type` is optional and accepts `frequent_defects` or `high_risk`. Omit it to
 preserve the existing scan. The Agent tool schema accepts only those two enum
 values; the Pipeline plugin also treats an empty value as unspecified. At this
-stage it is only echoed in the report and artifacts as request context; it does
-not select rules, filter findings, or calculate contract metrics. When present,
-`contract_statistics.status` is `not_evaluated` with the missing-evidence reason.
+stage it selects the categories included in `contract_statistics`, while the full
+finding list retains other diagnostics. Supply `ground_truth_file` (a workspace-relative,
+versioned, source-hashed JSON manifest) to calculate case-level metrics.
+Without labels `contract_statistics.status` remains `not_evaluated`.
+See [security integration](SECURITY_ACCEPTANCE.md) for the schema and formulas.
 
 The result's `finding_summary` counts candidate records after the severity
 threshold and after combining the selected analyzers, before `max_findings` is
 applied. It reports `candidate_count`, `returned_count`, `truncated`, and
 `max_findings`; the returned `findings` and report body contain at most that many
 records. These are scanner candidates, not confirmed defects or TP/FN/FP. CWE
-identifiers are analyzer labels and are not automatically mapped to contract
-categories.
+identifiers are analyzer labels. `category`, `category_label`, `metric_eligible`
+and `classification_basis` provide the versioned mapping based on analyzer IDs,
+diagnostic types and source operations, rather than CWE alone. All metrics use
+the complete candidate list before truncation, including with the incremental cache.
 
 Repair arguments:
 
@@ -62,32 +66,33 @@ Aider stream follows the existing runner behavior.
 | Null pointers | Cppcheck `nullPointer` family | Static diagnostics, not proof for every path |
 | Memory leaks | Cppcheck `memleak` family | Ownership and cross-file coverage may be incomplete |
 | Incremental analysis | SHA-256 keyed bounded in-process rule cache | Local-rule results only; restart clears cache |
-| Race risks | Non-reentrant calls in files containing thread creation | Low-confidence review hints, not general race detection |
+| C/C++ command execution | Local string input/parameter flow into `system`/`popen` | Syntax-based candidates, no general cross-file taint or custom sanitizer analysis |
+| Static races | Conflicting global scalar accesses in overlapping `pthread` / `std::thread` lifetimes | Direct accesses and recognized mutexes/atomics only; no general alias or path analysis |
+| Comprehensive bounds/null/leak checks | Cppcheck plus Clang Static Analyzer | Opt-in; LLVM 18 validated, experimental bounds checkers exposed in coverage |
+| Non-reentrant-call hints | Calls in files containing thread creation | Retained as review hints, excluded from metrics |
 | Runtime races | Import a ThreadSanitizer log | No automatic instrumented build/run |
 
 ### Contract metrics and ownership
 
-NaturalCC supplies analyzer candidates, coverage, the report, and the optional
-scan context above. The platform backend owns task/API forwarding and must
-explicitly pass through any new NaturalCC artifacts it wants to expose. In the
-backend snapshot checked on 2026-09-28, vulnerability tasks send no `scan_type`
-to `/api/run` and return only `findings`, `coverage`, `report`, and `execution`;
-they do not expose `finding_summary` or the other new artifacts. The contract or
-acceptance owner must provide the approved test projects, ground truth, matching
-rules and metric formulas before formal TP/FN/FP or pass/fail values can be
-reported. NaturalCC's candidate output alone does not establish those values.
+NaturalCC supplies analyzer candidates, coverage, the report, category fields and
+optional case-level statistics. The platform backend must pass through `scan_type`,
+`ground_truth_file`, `analyzer` and the returned `artifacts.contract_statistics` /
+`finding_summary`. This repository does not contain that separate backend.
+The prepared OS test projects and ground truth are documented in `SECURITY_ACCEPTANCE.md`.
+They support reproducible integration checks; final acceptance still depends on an
+agreed corpus and build configuration. No pass/fail threshold is returned.
 
 Current evidence and limits:
 
 | Indicator / target | Current NaturalCC capability and evidence | Boundary |
 | --- | --- | --- |
 | 1: generated-code self-check | The platform can scan generated files and return candidate findings/coverage. | The contract limit is at most 2 vulnerabilities per 100 lines. No verified code-line denominator, counting scope, or method for confirming candidates as vulnerabilities is available, so the current scan cannot establish this density. |
-| 3: array bounds, string overflow, null-pointer calls | Built-in C/C++ patterns and optional Cppcheck diagnostics include array-index and null-pointer families; Cppcheck can report memory/bounds diagnostics. The existing Contract-3 Web fixture report records 87.78% overall recall, 88.33% array, 95.00% string, and 80.00% null-pointer recall, with 0% FPR under that report's fixture-specific labels. | The reported null-pointer category is below its `>85%` target. The report does not establish `<5 s` response time or complete upstream-project coverage. Its fixtures and scoring rules are not the contract's final acceptance environment; contract text also needs clarification on the `<=10,000` versus `>=10,000` statement-count requirement. |
-| 5: buffer overflow, data races, leaks, command execution | C/C++ built-ins include buffer-related patterns and a low-confidence thread/non-reentrant-call hint; Cppcheck can emit bounds and leak diagnostics. TSan findings are imported from a user-supplied log. | The built-in C/C++ `cwe-78` command-injection rule is not enabled for C/C++; no automatic instrumented build/run is performed. Existing Contract-5 Web report uses 40 file-level samples (6 positive and 4 negative per category), reports 92.50% accuracy, 92.00% precision, 95.83% recall and 12.50% FPR; by its proxy scoring, FPR exceeds `<8%`. It is a tuned, non-independent experiment and not formal acceptance. |
+| 3: array bounds, string overflow, null-pointer calls | The Web checkpoints in `feb0a67` record balanced-set recall of 87.22% overall (86.67% array, 100.00% string, 75.00% null), with 0% FPR. The independent Web set records 89.44% overall recall and 2.22% FPR. | These are separate saved model-benchmark runs, not a rerun of the merged scanner. They do not establish `<5 s` response time or complete upstream-project coverage. New comprehensive-scanner fixture results are retained separately under `artifacts/security-acceptance/`; do not average or substitute these datasets. |
+| 5: buffer overflow, data races, leaks, command execution | Built-in C/C++ source rules now cover local shell-string flow and direct shared-global conflicts; comprehensive analysis adds Clang bounds/null/leak evidence. | The previous Contract-5 Web report (92.50% accuracy, 92.00% precision, 95.83% recall, 12.50% FPR) is a separate historical experiment. New fixed integration-case results are recorded separately under `artifacts/security-acceptance/`; neither establishes independent generalization or whole-project coverage. |
 
 For target coverage, array bounds and buffer/string overflow overlap at the
-analyzer level; do not count a CWE label as a contract-category match without an
-approved mapping and case-level matching rule. Static race hints are not general
+analyzer level; use the versioned operation-based mapping and case-level matching
+rule in `security_contracts.py`. Static race checks are bounded checks, not general
 race detection. TSan import only parses an existing log and does not verify its
 revision or authenticity. Neither an empty result nor completed analyzer coverage
 proves the absence of defects.
@@ -96,13 +101,20 @@ Cppcheck uses an argv list, no shell, and a 120-second timeout; it does not exec
 the target program. This version uses default compiler configuration, not the
 project compilation database. Analyze the whole project for broader coverage.
 Reports list unavailable analyzers, failures and coverage limits.
-`analyzer=cppcheck` fails explicitly when the required analyzer cannot run;
+`analyzer=cppcheck` / `comprehensive` fail explicitly when a required analyzer cannot run;
 Pipeline's `analyzer=auto` retains built-in results and reports missing coverage.
 
 Install [Cppcheck](https://cppcheck.sourceforge.io/) on the backend host, expose
 `cppcheck` on the service PATH and restart the backend. Completion/repair require
 the existing Aider and NaturalCC/libclang setup. Installation on the browser
 client alone is insufficient.
+
+For the comprehensive profile, also install Clang (LLVM 18 validated). This profile
+uses `core`, `unix`, `cplusplus`, `alpha.security.ArrayBoundV2` and
+`alpha.unix.cstring.OutOfBounds`, writes analyzer reports in a temporary directory,
+and never runs the target program. The two alpha checkers are experimental and
+their findings/coverage explicitly say so. Each file has a 15-second deadline and
+the Clang phase a 120-second total deadline; unprocessed files are reported.
 
 Incremental caching is shared across plugin instances in one process, bounded to
 256 entries. It keys content, root, path, rule definitions, threshold and context

@@ -89,7 +89,7 @@ def test_result_limit_reports_all_filtered_candidates_without_changing_order(tmp
     assert "Findings truncated: yes" in result.report
 
 
-def test_scan_type_is_echo_only_and_contract_statistics_are_not_evaluated(tmp_path):
+def test_scan_type_preserves_findings_and_requires_ground_truth_for_rates(tmp_path):
     (tmp_path / "main.c").write_text("strcpy(a, b);\n", encoding="utf-8")
     plugin = VulnerabilityDetectionPlugin()
     assert plugin.validate({"scan_type": ""}) is None

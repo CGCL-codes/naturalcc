@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "fixtures_only": false,
+  "projects": [
+    {
+      "id": "freertos_kernel",
+      "name": "FreeRTOS Kernel",
+      "url": "https://github.com/FreeRTOS/FreeRTOS-Kernel.git",
+      "ref": "V11.1.0",
+      "commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0",
+      "scan_roots": [
+        "."
+      ],
+      "size": {
+        "statement_nodes": 30090,
+        "source_files": 255,
+        "parse_error_files": 166,
+        "counting_rule": "Tree-sitter statement nodes excluding compound/labeled wrappers; declarations/comments/blank lines excluded; all preprocessor branches included; not compiled coverage."
+      },
+      "cases": 120,
+      "scan_type": "frequent_defects"
+    },
+    {
+      "id": "zephyr",
+      "name": "Zephyr RTOS",
+      "url": "https://github.com/zephyrproject-rtos/zephyr.git",
+      "ref": "v3.7.0",
+      "commit": "36940db938a8f4a1e919496793ed439850a221c2",
+      "scan_roots": [
+        "kernel",
+        "lib",
+        "subsys"
+      ],
+      "size": {
+        "statement_nodes": 212624,
+        "source_files": 1110,
+        "parse_error_files": 588,
+        "counting_rule": "Tree-sitter statement nodes excluding compound/labeled wrappers; declarations/comments/blank lines excluded; all preprocessor branches included; not compiled coverage."
+      },
+      "cases": 120,
+      "scan_type": "frequent_defects"
+    },
+    {
+      "id": "rt_thread",
+      "name": "RT-Thread",
+      "url": "https://github.com/RT-Thread/rt-thread.git",
+      "ref": "v5.2.1",
+      "commit": "97893c004c65760c638fd7eb571a08fc987a55e5",
+      "scan_roots": [
+        "src",
+        "components",
+        "libcpu"
+      ],
+      "size": {
+        "statement_nodes": 190571,
+        "source_files": 1112,
+        "parse_error_files": 596,
+        "counting_rule": "Tree-sitter statement nodes excluding compound/labeled wrappers; declarations/comments/blank lines excluded; all preprocessor branches included; not compiled coverage."
+      },
+      "cases": 120,
+      "scan_type": "frequent_defects"
+    },
+    {
+      "id": "high_risk",
+      "upstream": {
+        "id": "freertos_kernel",
+        "name": "FreeRTOS Kernel",
+        "url": "https://github.com/FreeRTOS/FreeRTOS-Kernel.git",
+        "ref": "V11.1.0",
+        "commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0",
+        "scan_roots": [
+          "."
+        ]
+      },
+      "cases": 80,
+      "scan_type": "high_risk"
+    }
+  ]
+}

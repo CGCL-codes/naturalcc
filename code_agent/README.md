@@ -4,12 +4,14 @@ Agent now exposes the Pipeline completion and vulnerability plugins as approved
 tools. See [Pipeline Agent tools](PIPELINE_AGENT_TOOLS.md) for usage, Cppcheck
 setup, incremental scanning, race analysis coverage and limitations.
 
-Vulnerability scans optionally accept `scan_type=frequent_defects/high_risk`;
-currently this is echoed as request context and does not change rule selection
-or produce contract metrics. `finding_summary` separates post-threshold
-candidates from the records returned under `max_findings`; candidates are not
-confirmed defects or TP/FN/FP. See the tool guide for indicator evidence,
-limitations, and NaturalCC/backend/acceptance responsibilities.
+Vulnerability scans accept `scan_type=frequent_defects/high_risk` for seven-category
+reporting. Add `ground_truth_file` to calculate case-level TP/FN/FP/TN and rates
+before result truncation; missing labels never imply zero error rates.
+`analyzer=comprehensive` combines Cppcheck and Clang (including experimental bounds
+checks). Built-in C/C++ rules track local strings into shell calls and direct shared
+global accesses in overlapping threads without requiring TSan.
+See [security integration and test projects](SECURITY_ACCEPTANCE.md) for schemas,
+fixed source revisions, examples, metric formulas and coverage limits.
 
 [中文文档](README.zh.md)
 
