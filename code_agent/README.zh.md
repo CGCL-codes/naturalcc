@@ -1,6 +1,8 @@
 # NaturalCC Code Agent · 中文教程
 
-Agent 已接入 Pipeline 的代码补全、漏洞扫描及修复插件；详见 [工具接入说明](PIPELINE_AGENT_TOOLS.md)。数组越界、空指针和内存泄漏分析需要后端安装 Cppcheck；增量缓存复用本地规则结果；竞态检测提供风险提示和 ThreadSanitizer 日志导入，不代表完整并发验证。
+Agent 已接入 Pipeline 的代码补全、漏洞扫描及修复插件；详见 [工具接入说明](PIPELINE_AGENT_TOOLS.md)。Cppcheck 可补充数组越界、空指针和内存泄漏诊断；增量扫描缓存仅复用本地规则结果；竞态检测提供风险提示和 ThreadSanitizer 日志导入，不代表完整并发验证。
+
+漏洞扫描可选接收 `scan_type=frequent_defects/high_risk`，当前只在结果中回显请求类型，不改变扫描规则，也不生成合同统计。`finding_summary` 区分阈值筛选后的候选数与受 `max_findings` 限制的返回数；候选 findings 不是确认缺陷或 TP/FN/FP。指标 1/3/5 的能力证据、限制和 NaturalCC/后端/验收职责见[工具接入说明](PIPELINE_AGENT_TOOLS.md)。
 
 `code_agent` 是一个**本地运行的上下文感知编码 Agent**：它把 NaturalCC 的静态项目解析能力与 Aider 的代码修改能力组合在一起，通过 **Web UI、终端 CLI 和 VS Code 插件**三种方式使用。
 
