@@ -52,7 +52,7 @@ PARAMETER num_ctx 8192
 启动前在服务所在机器检查：
 
 ```bash
-ollama list
+ollama --version
 curl --fail http://127.0.0.1:11434/api/tags
 uv run aider --version
 cppcheck --version
@@ -61,14 +61,27 @@ clang --version
 
 如果只做指标 1，可跳过 Cppcheck/Clang 检查；如果只做指标 3/5，完全可以不启动 Ollama。默认模型名 `qwen2.5-coder:7b` 可被环境变量覆盖；上下文窗口示例值 8192 也必须按部署实例核实。项目 tokenizer 是随仓库提供的 DeepSeek tokenizer，对 Ollama 请求只是 token 预算估算，并非 Ollama 模型原生 tokenizer。
 
+零状态预检只执行以下只读请求和版本检查，不创建 Thread 或 Run：
+
+```bash
+curl --fail http://127.0.0.1:7860/api/health
+curl --fail http://127.0.0.1:11434/api/tags
+ollama --version
+uv run aider --version
+cppcheck --version
+clang --version
+```
+
+NaturalCC 服务启动时会初始化 SQLite 表，因此如连服务启动也不应触碰正式 DB，应先把 `CODE_AGENT_DB` 指向临时位置。部署在容器时，NaturalCC 与 Ollama 必须共享可相互访问的 loopback 网络命名空间；容器内的 `127.0.0.1` 指向该容器自身。
+
 ## 离线 smoke 步骤
 
 ### 指标 1：Agent Gateway 与 Aider
 
-1. 确认目标代码工作区在服务进程可访问的本机路径。启动 Ollama 和 NaturalCC Web 服务：`uv run python agent_web_api.py --host 127.0.0.1 --port 7860`。
-2. 在 Web UI 新建 Agent Thread，确认 Provider 为 Ollama、Model 为已拉取的本地 tag、Base URL 为 `http://127.0.0.1:11434/v1`。若通过平台 API 创建 Thread/Run，应显式传入相同的 `runtime_model_config`，并确保 Agent Gateway 与 Ollama 在同一运行主机上。
+1. 确认目标代码工作区在服务进程可访问的本机路径。实际 Agent smoke 会创建 Thread/Run 并写入持久 SQLite 数据库和事件；将 `CODE_AGENT_DB` 指向独立临时数据库，并使用临时 workspace 副本，以免混入正式状态或修改原始样本。启动 Ollama 和 NaturalCC Web 服务：`uv run python agent_web_api.py --host 127.0.0.1 --port 7860`。
+2. 在 Web UI 新建 Agent Thread，确认 Provider 为 Ollama、Model 为已拉取的本地 tag、Base URL 为 `http://127.0.0.1:11434/v1`。通过平台 API 创建 Thread/Run 时，`runtime_model_config` 可省略：Run 优先继承 Thread 保存的配置；若 Thread 未保存该配置，则按服务默认 Provider、API base 和上下文设置解析，模型名沿用非空的 Thread `model` 字段，否则用服务默认模型。因此，若平台不传此字段，应在 Thread 或服务默认环境中配置所需 Ollama 模型；只有需要覆盖既有配置时才需显式传入。无论哪种方式，都要确保 Agent Gateway 所在网络命名空间能访问本机 Ollama。
 3. 在临时副本中提交一个小型代码修改任务，让 Agent 读取目标文件并调用 `code_completion` 或 `aider.edit`。按 UI/API 返回执行审批后继续运行。检查 Run 事件中有 tool call 和成功的 Aider 结果，并核对改动 diff；仅收到模型文本而没有工具调用，不算完成此 smoke。
-4. 记录模型 tag、Ollama 上下文配置、Run ID、调用的工具、结果状态和 diff。小参数模型（例如 1.5B）最多用于连通性/工具调用 smoke，不能证明合同代码质量或指标 1 达标。
+4. 记录模型 tag、Ollama 上下文配置、Run ID、调用的工具、结果状态和 diff。低参数模型即使通过连通性/工具调用 smoke，也不能证明合同代码质量或指标 1 达标；本次测试的 `qwen2.5-coder:1.5b` 未能产生工具调用。
 
 ### 指标 3/5：本地 `/api/run` 扫描
 
@@ -107,4 +120,18 @@ TSan 字段只读取工作区内已有的预生成报告；NaturalCC 不在 `/ap
 
 ## 验收边界
 
-本指南描述可执行的离线部署与 smoke 流程，不是验收结果。本次文档更新没有在 openEuler 实机运行服务，也没有执行真实 Ollama 模型推理；测试中的 mock/单元回归不能替代这两项验证。固定 fixture 不是独立 ground truth 或正式工程样本。缺少经确认的正式 ground truth 时，指标统计应保持 `not_evaluated`；不得据候选 findings 推导 TP/FN/FP，也不得宣称合同阈值通过。
+### 2026-10-02 openEuler 实测记录
+
+环境为 openEuler 24.03 x86_64，4 CPU、约 7.3 GiB RAM、无 GPU；Ollama 0.35.0 独立运行。模型直测中，`qwen2.5-coder:1.5b` 将工具调用写成普通文本，未形成 tool call；`qwen3:4b-instruct`（模型约 2.5 GB）产生了结构化 `tool_calls`。
+
+NaturalCC 独立服务运行于 7864 端口；启动环境的 `PATH` 需包含 `/opt/naturalcc-runtime/venv/bin` 才能找到 Aider 0.86.2。直接创建 Agent Run 并完成写审批后，`workspace.apply_patch` 和 `aider.edit` 两个小型编辑 Run 均为 `completed`，目标文件有变更，且 `aider.edit` 的 `tool.finished` 为 `success`。`aider_runner.py` CLI 也使用 qwen3 完成了临时 C 文件编辑。
+
+`/api/run` 对 `frequent_defects` 和 `high_risk` 分别使用 `builtin` 与 Cppcheck 2.13.2 扫描，均返回 `done success`、coverage `completed`。未提供 ground truth，因此 `contract_statistics.status=not_evaluated`；这些结果只验证了指定环境下的服务路径和小型 smoke，不构成指标计分或合同阈值结论。
+
+### 2026-10-02 无外网网络命名空间复测
+
+使用 `unshare -n` 建立隔离网络命名空间，仅启用 `lo`；`ip route` 为空，`ip route get 1.1.1.1` 返回 `Network is unreachable`。隔离环境中，指标 3/5 的 `analyzer=cppcheck` 两次 `/api/run` 均为 `done success`，builtin 与 Cppcheck coverage 均为 `completed`；没有 ground truth，`contract_statistics.status=not_evaluated`。
+
+指标 1 的隔离 Agent Run 调用并获批 `aider.edit`；工具结果为 `success`，目标 C 文件有修改，但用户要求暂停后停止临时隔离进程，Run 最终状态为 `failed`。因此本次不算指标 1 的断网完整通过。前述非隔离主机上的 Agent/Aider Run `completed` 属于另一轮独立结果。
+
+现有平台后端仍指向旧的 7860 服务，尚未通过后端真实平台接口完成端到端联调。以上结果不构成合同计分；不能据候选 findings 推导 TP/FN/FP 或宣称合同指标达标。
