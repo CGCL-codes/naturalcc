@@ -109,7 +109,7 @@ def generate_cases(project, scan_type):
                 if path.exists() and path.read_text(encoding="utf-8") != source:
                     raise ValueError(f"Refusing to overwrite changed fixture: {path}")
                 path.write_text(source, encoding="utf-8")
-                hashes[file] = hashlib.sha256(source.encode()).hexdigest()
+                hashes[file] = hashlib.sha256(path.read_bytes()).hexdigest()
                 cases.append({"case_id": f"{project.name}-{ordinal:04d}", "category": category,
                     "file": file, "function": "worker/exercise" if category == "data_race" else "exercise",
                     "line_start": len(HEADERS.splitlines()) + 1, "line_end": len(source.splitlines()),

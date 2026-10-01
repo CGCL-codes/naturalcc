@@ -94,7 +94,7 @@ def test_incremental_metrics_include_candidates_beyond_old_internal_limit(tmp_pa
     from code_agent.plugins.vulnerability_detection import VulnerabilityDetectionPlugin
     source = "void f(char *input){\n" + "system(input);\n" * 1002 + "}\n"
     (tmp_path / "a.c").write_text(source, encoding="utf-8")
-    data = {"schema_version": 1, "scan_type": "high_risk", "source_sha256": {"a.c": hashlib.sha256(source.encode()).hexdigest()},
+    data = {"schema_version": 1, "scan_type": "high_risk", "source_sha256": {"a.c": hashlib.sha256((tmp_path / "a.c").read_bytes()).hexdigest()},
         "cases": [case(str(i), "command_execution", "defect", i + 2) for i in range(1002)]}
     (tmp_path / "truth.json").write_text(json.dumps(data), encoding="utf-8")
     context = ExecutionContext(str(tmp_path), ["a.c"], "", "unused", None,
