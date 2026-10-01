@@ -1,6 +1,8 @@
 import sys
 from types import SimpleNamespace
 
+import pytest
+
 from code_agent.agent_core.contracts import ModelRequest, ModelResponse
 from code_agent.agent_core.model_gateway import (
     DeepSeekRequestSerializer,
@@ -144,6 +146,57 @@ def test_runtime_model_config_uses_openrouter_defaults_and_routes_fallbacks():
         "models": ["google/gemini-2.5-pro"],
         "provider": {"allow_fallbacks": True},
     }
+
+
+def test_ollama_runtime_config_uses_local_defaults_and_rejects_remote_urls():
+    config = RuntimeModelConfig.from_dict({"provider": "ollama", "model": "qwen2.5-coder:1.5b"})
+    assert config.base_url == "http://127.0.0.1:11434/v1"
+    assert config.model == "qwen2.5-coder:1.5b"
+    assert RuntimeModelConfig.from_dict({"provider": "ollama", "base_url": "http://localhost:11434/v1"}).provider == "ollama"
+    for url in ("https://example.com/v1", "http://127.0.0.1.evil.test/v1", "https://127.0.0.1:11434/v1",
+                "http://localhost:11434",
+                "http://user:password@127.0.0.1:11434/v1", "http://192.168.1.2:11434/v1"):
+        with pytest.raises(ValueError, match="loopback"):
+            RuntimeModelConfig.from_dict({"provider": "ollama", "base_url": url})
+
+
+def test_ollama_gateway_ignores_cloud_keys_for_generate_and_stream(monkeypatch):
+    clients = []
+    requests = []
+    closed = []
+    def create(**kwargs):
+        requests.append(kwargs)
+        if kwargs.get("stream"):
+            return iter([SimpleNamespace(model="qwen2.5-coder:1.5b", usage=None,
+                choices=[SimpleNamespace(delta=SimpleNamespace(content="read", tool_calls=[
+                    SimpleNamespace(index=0, id="call_1", function=SimpleNamespace(name="workspace.read", arguments='{"path":"x.py"}'))]))])])
+        return SimpleNamespace(model="qwen2.5-coder:1.5b", usage=None,
+            choices=[SimpleNamespace(message=SimpleNamespace(content="read", tool_calls=[
+                SimpleNamespace(id="call_1", function=SimpleNamespace(name="workspace.read", arguments='{"path":"x.py"}'))]))])
+    def openai_client(**kwargs):
+        clients.append(kwargs)
+        return SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)),
+            close=lambda: closed.append(True))
+    transport_options = []
+    monkeypatch.setattr("httpx.Client", lambda **kwargs: transport_options.append(kwargs) or object())
+    monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=openai_client))
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "deepseek-secret")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "openrouter-secret")
+    monkeypatch.setenv("OPENAI_API_KEY", "openai-secret")
+    config = RuntimeModelConfig.from_dict({"provider": "ollama", "model": "qwen2.5-coder:1.5b"})
+    request = ModelRequest(messages=[{"role": "user", "content": "read x.py"}],
+        tools=[{"type": "function", "function": {"name": "workspace.read", "parameters": {"type": "object"}}}],
+        metadata={"api_key": "request-cloud-secret", "runtime_model_config": config.to_dict()})
+    gateway = RoutedModelGateway()
+    assert gateway.generate(request).tool_calls[0].args == {"path": "x.py"}
+    streamed = list(gateway.stream(request))
+    assert streamed[-1].response.tool_calls[0].args == {"path": "x.py"}
+    assert [item["api_key"] for item in clients] == ["ollama", "ollama"]
+    assert all(item["base_url"] == "http://127.0.0.1:11434/v1" for item in clients)
+    assert requests[0]["model"] == requests[1]["model"] == "qwen2.5-coder:1.5b"
+    assert requests[1]["stream"] is True
+    assert transport_options == [{"trust_env": False}, {"trust_env": False}]
+    assert closed == [True, True]
 
 
 def test_routed_gateway_uses_explicit_openrouter_config_and_key(monkeypatch):

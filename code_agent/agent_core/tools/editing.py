@@ -226,6 +226,16 @@ def _restore_snapshot(context: ToolContext, args: dict) -> ToolResult:
     )
 
 
+def _local_aider_runtime(metadata: dict) -> tuple[str, str] | None:
+    runtime_config = metadata.get("runtime_model_config")
+    if not isinstance(runtime_config, dict) or runtime_config.get("provider") != "ollama":
+        return None
+    from ..model_gateway import RuntimeModelConfig
+
+    config = RuntimeModelConfig.from_dict(runtime_config)
+    return f"ollama_chat/{config.model}", config.base_url
+
+
 def _aider_edit(context: ToolContext, args: dict) -> ToolResult:
     from code_agent.aider_runner import run_aider_stream
 
@@ -243,11 +253,13 @@ def _aider_edit(context: ToolContext, args: dict) -> ToolResult:
         snapshots.append(str(_write_snapshot_once(context, relative, content)))
     logs: list[str] = []
     previous = ""
+    local_runtime = _local_aider_runtime(context.metadata)
     for cumulative in run_aider_stream(
         target_files=target_files,
         user_instruction=args["instruction"],
-        model=context.metadata.get("model", "deepseek/deepseek-chat"),
-        api_key=context.metadata.get("api_key"),
+        model=local_runtime[0] if local_runtime else context.metadata.get("model", "deepseek/deepseek-chat"),
+        api_key=None if local_runtime else context.metadata.get("api_key"),
+        base_url=local_runtime[1] if local_runtime else None,
         project_dir=str(context.workspace),
     ):
         delta = cumulative[len(previous) :] if cumulative.startswith(previous) else cumulative

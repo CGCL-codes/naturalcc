@@ -16,7 +16,7 @@ Common tasks: code completion, small project-aware edits/refactors, code summari
 - `agent_core/contracts.py`, `tool_registry.py`, `policy.py`: trusted tool contracts and permission boundary.
 - `agent_core/event_store.py`, `memory_store.py`: SQLite conversation/message/event/snapshot/lease storage, governed memory proposals, review audit, goal-independent pinned memory, and active-only FTS5 retrieval memory.
 - `agent_core/memory_proposals.py`, `memory_prompts.py`, `memory_projection.py`: frozen evidence, tool-free two-pass proposal generation, validation, and deterministic user-facing review DTOs.
-- `agent_core/model_gateway.py`: explicit per-Run provider routing (DeepSeek/OpenRouter) while preserving the `ModelGateway` Harness contract.
+- `agent_core/model_gateway.py`: explicit per-Run provider routing (DeepSeek/OpenRouter and loopback-only Ollama) while preserving the `ModelGateway` Harness contract.
 - Agent Runs use the optional Gateway `stream()` path to emit batched `model.reasoning.delta` and `model.content.delta` events; `generate()` remains available for maintenance calls and existing gateways. The NDJSON endpoint follows active Runs and the UI renders returned reasoning in a collapsible panel.
 - `agent_core/token_budget.py`, `context_builder.py`: pinned DeepSeek offline estimation, model-specific context geometry, full-request hard budgets, cache-friendly stable/dynamic prompt tiers, and continuous-tail ContextPlans.
 - `agent_core/compaction.py`, `compaction_prompts.py`: versioned Analyzer/Summarizer checkpoints, validation, recovery, and deterministic fallback.
@@ -40,6 +40,7 @@ There is no legacy UI path; keep graphical work centered on `agent_web_api.py` a
 ## Runtime Notes
 
 - Runtime Threads carry an explicit `runtime_model_config` (provider, model, endpoint, window, and routing preferences); each Run snapshots it. API keys remain request-scoped memory only.
+- For offline platform indicators 1/3/5, indicator 1 uses the Agent Gateway and approved Aider edit tools with local Ollama; indicators 3/5 use `/api/run` scanning and must keep `auto_fix=false` to avoid Aider/model calls. Keep both paths independent; follow `OFFLINE_PLATFORM_1_3_5.md` for dependency prep, smoke checks, and the no-acceptance boundary.
 - UI refresh restores only the last selected Thread after Bootstrap; New conversation uses the separately stored Bootstrap Runtime defaults. Thread settings must never overwrite those launch defaults.
 - First target file is the NaturalCC primary parse file, even when Aider receives multiple files.
 - NaturalCC parsing must work; do not silently bypass it for completion/repair flows.

@@ -8,14 +8,18 @@ import sys
 import locale
 from pathlib import Path
 from typing import Generator, List, Optional, Tuple
+from urllib.parse import urlsplit
+
 
 if __package__ in (None, ""):
     package_root = Path(__file__).resolve().parent.parent
     if str(package_root) not in sys.path:
         sys.path.insert(0, str(package_root))
     from code_agent.completion_prompt_agent import CompletionPromptAgent
+    from code_agent.agent_core.model_gateway import RuntimeModelConfig
 else:
     from .completion_prompt_agent import CompletionPromptAgent
+    from .agent_core.model_gateway import RuntimeModelConfig
 
 
 ANSI_ESCAPE_PATTERN = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
@@ -65,6 +69,8 @@ def detect_provider(model: str) -> str:
       --api-key openrouter=sk-xxx
     """
     model = model or ""
+    if model.startswith("ollama_chat/"):
+        return "ollama"
     if model.startswith("deepseek/") or "deepseek" in model:
         return "deepseek"
     if model.startswith("openrouter/") or "openrouter" in model:
@@ -137,7 +143,7 @@ def write_prompt_file(final_instruction: str) -> str:
 
 
 def append_api_key_arg(aider_command: List[str], model: str, api_key: Optional[str]) -> None:
-    if api_key:
+    if api_key and not model.startswith("ollama_chat/"):
         provider = detect_provider(model)
         aider_command.extend(["--api-key", f"{provider}={api_key}"])
 
@@ -168,6 +174,8 @@ def build_aider_command(
         aider_command.append("--dry-run")
     if no_pretty:
         aider_command.append("--no-pretty")
+    if model.startswith("ollama_chat/"):
+        aider_command.extend(["--no-check-update", "--no-analytics", "--no-show-release-notes"])
     append_api_key_arg(aider_command, model, api_key)
     return aider_command
 
@@ -223,7 +231,7 @@ def build_aider_context_and_command(
     if not user_instruction or not user_instruction.strip():
         raise ValueError("user_instruction 不能为空。")
 
-    api_key, api_key_log = resolve_api_key(api_key)
+    api_key, api_key_log = (None, "") if model.startswith("ollama_chat/") else resolve_api_key(api_key)
     init_log += api_key_log
 
     init_log += "🚀 [NaturalCC] 正在扫描并分析项目图谱...\n"
@@ -283,13 +291,28 @@ def mask_command_for_log(aider_command: List[str], model: str) -> str:
     return " ".join(safe_cmd)
 
 
-def build_subprocess_env() -> dict:
+def build_subprocess_env(ollama_base_url: Optional[str] = None) -> dict:
     env = os.environ.copy()
+    if ollama_base_url is not None:
+        RuntimeModelConfig.from_dict({"provider": "ollama", "base_url": ollama_base_url})
+        for name in list(env):
+            if name.upper().endswith("_API_KEY") or name.upper() in {"HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY"}:
+                del env[name]
+        parsed = urlsplit(ollama_base_url)
+        env["OLLAMA_API_BASE"] = f"{parsed.scheme}://{parsed.netloc}"
+        env["NO_PROXY"] = "localhost,127.0.0.1,::1"
     # 在 Windows pipe 场景下强制 Python 子进程优先走 UTF-8，降低中文输出乱码概率。
     env["PYTHONIOENCODING"] = "utf-8"
     env["PYTHONUTF8"] = "1"
     env.setdefault("NO_COLOR", "1")
     return env
+
+
+def local_ollama_base_url(base_url: Optional[str] = None) -> str:
+    configured = (base_url or os.environ.get("OLLAMA_API_BASE") or "http://127.0.0.1:11434").rstrip("/")
+    versioned = configured if configured.endswith("/v1") else configured + "/v1"
+    RuntimeModelConfig.from_dict({"provider": "ollama", "base_url": versioned})
+    return versioned
 
 
 def decode_process_line(raw_line: bytes) -> str:
@@ -313,6 +336,7 @@ def run_aider_cli(
     completion_type: Optional[str] = None,
     prefix: str = "",
 ):
+    ollama_base_url = local_ollama_base_url() if model.startswith("ollama_chat/") else None
     aider_command, prompt_file_path, init_log, _final_instruction = build_aider_context_and_command(
         target_files=target_files,
         user_instruction=user_instruction,
@@ -329,7 +353,7 @@ def run_aider_cli(
     print(f"🔧 [执行命令]: {mask_command_for_log(aider_command, model)}\n" + "-" * 60)
 
     try:
-        subprocess.run(aider_command, check=True, env=build_subprocess_env())
+        subprocess.run(aider_command, check=True, env=build_subprocess_env(ollama_base_url))
         print("\n✅ [NaturalCC Agent] 任务圆满完成！")
     except subprocess.CalledProcessError as e:
         print(f"\n❌ [Aider] 执行异常退出，退出码：{e.returncode}")
@@ -348,8 +372,10 @@ def run_aider_stream(
     completion_type: Optional[str] = None,
     prefix: str = "",
     dry_run: bool = False,
+    base_url: Optional[str] = None,
 ) -> Generator[str, None, None]:
     try:
+        ollama_base_url = local_ollama_base_url(base_url) if model.startswith("ollama_chat/") else None
         project_dir = normalize_project_dir(project_dir)
         target_files = normalize_target_files(target_files, project_dir=project_dir)
 
@@ -378,7 +404,7 @@ def run_aider_stream(
         yield f"\n❌ [系统错误] 发生异常: {str(e)}\n"
         return
 
-    yield from stream_aider_command(aider_command, prompt_file_path, init_log, model)
+    yield from stream_aider_command(aider_command, prompt_file_path, init_log, model, ollama_base_url)
 
 
 def stream_aider_command(
@@ -386,6 +412,7 @@ def stream_aider_command(
     prompt_file_path: str,
     init_log: str,
     model: str,
+    ollama_base_url: Optional[str] = None,
 ) -> Generator[str, None, None]:
     output_log = ""
     try:
@@ -401,7 +428,7 @@ def stream_aider_command(
             stderr=subprocess.STDOUT,
             text=False,
             bufsize=0,
-            env=build_subprocess_env(),
+            env=build_subprocess_env(ollama_base_url),
         )
 
         assert process.stdout is not None

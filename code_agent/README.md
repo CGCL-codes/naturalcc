@@ -17,6 +17,8 @@ fixed source revisions, examples, metric formulas and coverage limits.
 
 `code_agent` is a local code-editing agent that combines NaturalCC static project understanding, a durable Agent runtime, and Aider-based edits.
 
+The Agent Runtime supports DeepSeek and OpenRouter cloud APIs plus local Ollama. For an offline platform setup, see [Offline Platform Indicators 1/3/5](OFFLINE_PLATFORM_1_3_5.md).
+
 It first parses a project to collect functions, variables, types, members, includes, and symbol relations. It then builds a semantic prompt for the requested task and hands that prompt to Aider, which edits the selected target files.
 
 The project supports three user-facing paths:
@@ -97,7 +99,7 @@ If you need GPU support (e.g. for vLLM-based offline evaluation), install it man
 uv pip install vllm
 ```
 
-Agent Runtime currently supports **only DeepSeek official API keys and OpenRouter API keys**. Select the provider explicitly with `CODE_AGENT_PROVIDER` and the model with `CODE_AGENT_MODEL`; neither the key nor the model name determines the provider. See [Terminal provider and model selection](#terminal-provider-and-model-selection) for complete PowerShell instructions. Do not put real API keys in source files, README examples, or Git history.
+Agent Runtime supports DeepSeek and OpenRouter cloud APIs, plus local Ollama over a loopback HTTP endpoint. Select the provider explicitly with `CODE_AGENT_PROVIDER` and the model with `CODE_AGENT_MODEL`; routing is not inferred from a key or model name. See [Terminal provider and model selection](#terminal-provider-and-model-selection) for cloud setup and [Offline Platform Indicators 1/3/5](OFFLINE_PLATFORM_1_3_5.md) for Ollama. Do not put real API keys in source files, README examples, or Git history.
 
 For example, configure OpenRouter in a Linux/macOS/WSL shell before starting the backend:
 
@@ -482,12 +484,13 @@ Conversation messages, run state, events, snapshots, approvals, and memories are
 
 ### Terminal provider and model selection
 
-**Agent Runtime supports only DeepSeek official API keys and OpenRouter API keys.** To access Claude or other vendors' models through OpenRouter, keep the provider set to `openrouter` and use an OpenRouter key, not the model vendor's official key. Provider routing is explicit; it is never inferred from the key or model name.
+**Agent Runtime supports DeepSeek and OpenRouter cloud APIs, plus local Ollama.** To access Claude or other vendors' models through OpenRouter, keep the provider set to `openrouter` and use an OpenRouter key, not the model vendor's official key. Provider routing is explicit; it is never inferred from the key or model name. Local Ollama needs no cloud key; see [Offline Platform Indicators 1/3/5](OFFLINE_PLATFORM_1_3_5.md). Cloud examples below remain available.
 
 | API provider | `CODE_AGENT_PROVIDER` | Key environment variable | Example model | Default API base |
 |---|---|---|---|---|
 | DeepSeek official | `deepseek` | `DEEPSEEK_API_KEY` | `deepseek-chat` | `https://api.deepseek.com/v1` |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4.5` | `https://openrouter.ai/api/v1` |
+| Local Ollama | `ollama` | None | `qwen2.5-coder:7b` | `http://127.0.0.1:11434/v1` |
 
 Run the following PowerShell commands from the repository root. Keep the complete key on one line and start the backend in the **same terminal session**:
 
@@ -519,16 +522,28 @@ $env:CODE_AGENT_MODEL = "deepseek-chat"
 $env:CODE_AGENT_API_BASE = "https://api.deepseek.com/v1"
 ```
 
+For offline Ollama, replace the provider/model/base values with the local settings below. Use a model tag already present in `ollama list`. This example assumes that the Ollama server and model support an 8192-token context; `CODE_AGENT_CONTEXT_WINDOW_TOKENS` budgets requests in NaturalCC but does not configure Ollama's `num_ctx`.
+
+```powershell
+$env:CODE_AGENT_PROVIDER = "ollama"
+$env:CODE_AGENT_MODEL = "qwen2.5-coder:7b"
+$env:CODE_AGENT_API_BASE = "http://127.0.0.1:11434/v1"
+$env:CODE_AGENT_CONTEXT_WINDOW_TOKENS = "8192"
+$env:CODE_AGENT_OUTPUT_RESERVE_TOKENS = "2048"
+```
+
+The Agent Gateway uses the versioned `/v1` URL. NaturalCC constructs Aider's local `OLLAMA_API_BASE` without `/v1`; do not set it manually for the Web Agent path. Small models are suitable for connectivity/tool-call smoke only, not indicator-1 quality evidence.
+
 - When unset, `CODE_AGENT_PROVIDER` defaults to `deepseek`. Setting only `OPENROUTER_API_KEY` does not switch providers.
-- When `CODE_AGENT_MODEL` is unset, DeepSeek uses `deepseek-chat` and OpenRouter uses `deepseek/deepseek-chat`. Set a model ID explicitly to select another model.
+- When `CODE_AGENT_MODEL` is unset, DeepSeek uses `deepseek-chat`, OpenRouter uses `deepseek/deepseek-chat`, and Ollama uses `qwen2.5-coder:7b`. Set a model ID explicitly to select another model.
 - When `CODE_AGENT_API_BASE` is unset, it defaults to the selected provider's endpoint. Update or clear old model/base variables when switching providers to avoid stale values.
 - Restart the backend after changing environment variables, then open `http://127.0.0.1:7860/`. After a frontend update, use `Ctrl+F5` to refresh the browser.
 
 Refreshing restores the last selected conversation and its saved provider/model. With no saved selection, the UI uses the startup environment defaults. **New conversation** always starts from those defaults, even after viewing a historical DeepSeek conversation. Settings changes apply to the current conversation; they do not change the startup defaults. Click outside the model input to save an edit. Existing conversations are not migrated by changing environment variables; each Run keeps its creation-time configuration.
 
-The Settings **API key** field overrides the selected provider's environment key for that request. The entered key must match the selected Provider. Keys are not saved in conversations, Run snapshots, or SQLite; a UI-entered key must be entered again after refreshing. Legacy Pipeline/CLI support for `OPENAI_API_KEY` does not imply support for OpenAI or other vendors' official keys in Agent Runtime.
+The Settings **API key** field overrides the environment key for a DeepSeek or OpenRouter request and must match that cloud provider. Ollama uses the local endpoint and needs no cloud key. Keys are not saved in conversations, Run snapshots, or SQLite; a UI-entered key must be entered again after refreshing. Legacy Pipeline/CLI support for `OPENAI_API_KEY` does not imply support for OpenAI or other vendors' official keys in Agent Runtime.
 
-Agent requests use the DeepSeek tokenizer for offline counting. It is exact for DeepSeek and a conservative estimate for other providers; the selected model's context window and safety margin still define the hard budget. The following optional variables tune the default model-level hard budget:
+Agent requests use the tokenizer bundled under `resources/deepseek_v3_tokenizer` for offline counting. It is exact for DeepSeek and an estimate for other providers, including Ollama; the selected model's actual context window and safety margin still define the hard budget. `CODE_AGENT_CONTEXT_WINDOW_TOKENS` does not change Ollama's server-side context setting. The following optional variables tune the default model-level hard budget:
 
 ```bash
 export CODE_AGENT_TOKENIZER_DIR=/absolute/path/to/resources/deepseek_v3_tokenizer

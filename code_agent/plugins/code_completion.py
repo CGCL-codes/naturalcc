@@ -101,6 +101,7 @@ class CodeCompletionPlugin(FeaturePlugin):
             user_instruction=context.instruction,
             model=context.model,
             api_key=context.api_key,
+            base_url=context.base_url,
             project_dir=context.project_dir,
             symbol=config.get("symbol") or None,
             completion_type=config.get("completion_type") or None,

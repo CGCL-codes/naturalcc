@@ -5,6 +5,8 @@ import pytest
 from code_agent.api.agent_routes import (
     build_default_context_runtime,
     get_default_runtime_model_config,
+    get_runtime_provider_defaults,
+    normalize_runtime_model_config,
 )
 
 
@@ -62,3 +64,23 @@ def test_default_runtime_model_config_uses_provider_model_when_not_configured(mo
 
     assert config.provider == "openrouter"
     assert config.model == "deepseek/deepseek-chat"
+
+
+def test_ollama_is_available_in_provider_defaults_without_cloud_settings(monkeypatch):
+    monkeypatch.setenv("CODE_AGENT_PROVIDER", "ollama")
+    monkeypatch.setenv("CODE_AGENT_API_BASE", "https://api.deepseek.com/v1")
+    monkeypatch.delenv("CODE_AGENT_MODEL", raising=False)
+    monkeypatch.delenv("CODE_AGENT_CONTEXT_WINDOW_TOKENS", raising=False)
+    config = get_default_runtime_model_config()
+    assert config.provider == "ollama"
+    assert config.base_url == "http://127.0.0.1:11434/v1"
+    assert config.context_window_tokens == 8192
+    assert get_runtime_provider_defaults()["ollama"]["model"] == "qwen2.5-coder:7b"
+
+
+def test_switching_thread_provider_to_ollama_uses_local_model_default():
+    default = get_default_runtime_model_config()
+    selected = normalize_runtime_model_config({"provider": "ollama"}, default,
+        legacy_model="deepseek-chat")
+    assert selected["model"] == "qwen2.5-coder:7b"
+    assert selected["base_url"] == "http://127.0.0.1:11434/v1"

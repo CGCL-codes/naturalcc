@@ -97,3 +97,4 @@ class ExecutionContext:
     symbol: Optional[str] = None
     completion_type: Optional[str] = None
     prefix: str = ""
+    base_url: Optional[str] = None
