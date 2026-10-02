@@ -132,6 +132,8 @@ NaturalCC 独立服务运行于 7864 端口；启动环境的 `PATH` 需包含 `
 
 使用 `unshare -n` 建立隔离网络命名空间，仅启用 `lo`；`ip route` 为空，`ip route get 1.1.1.1` 返回 `Network is unreachable`。隔离环境中，指标 3/5 的 `analyzer=cppcheck` 两次 `/api/run` 均为 `done success`，builtin 与 Cppcheck coverage 均为 `completed`；没有 ground truth，`contract_statistics.status=not_evaluated`。
 
-指标 1 的隔离 Agent Run 调用并获批 `aider.edit`；工具结果为 `success`，目标 C 文件有修改，但用户要求暂停后停止临时隔离进程，Run 最终状态为 `failed`。因此本次不算指标 1 的断网完整通过。前述非隔离主机上的 Agent/Aider Run `completed` 属于另一轮独立结果。
+随后重新执行的指标 1 smoke 在同类无外网命名空间中运行 Ollama 0.35.0、`qwen3:4b-instruct` 和 NaturalCC 测试服务（端口 7865）。Run `20a91d5a-7a41-41b9-ace2-a14e2e1c70d8` 最终为 `completed`；经写入审批后，`aider.edit` 的 `tool.finished` 为 `success`，`changed_files` 为 `twice.c`，调用统计为 `llm_calls=3`、`tool_calls=2`。文件由 `int twice(int x) { return x + 1; }` 改为 `int twice(int x) { return x + 2; }`。因此，指标 1 的本地 Ollama/Aider 断网功能 smoke 已通过；这只验证该小型编辑链路，不证明模型代码质量或合同指标达标。结果记录位于测试机 `/opt/naturalcc-fix-runtime/offline-agent-result2.json`。
+
+先前一轮指标 1 隔离 Run 在用户要求暂停后停止了临时隔离进程，最终状态为 `failed`；该次中断记录保留为历史，不代表本次重跑结果。此前非隔离主机上的 Agent/Aider Run `completed` 也属于独立测试。
 
 现有平台后端仍指向旧的 7860 服务，尚未通过后端真实平台接口完成端到端联调。以上结果不构成合同计分；不能据候选 findings 推导 TP/FN/FP 或宣称合同指标达标。
