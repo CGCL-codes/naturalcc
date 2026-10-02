@@ -23,7 +23,7 @@
 2. **本地扫描器**：安装 Cppcheck。若要使用 `analyzer=comprehensive`，另外安装 Clang 静态分析器 CLI，并确认服务进程的 `PATH` 能找到 `cppcheck` 和 `clang`。普通 `/api/run` 内置扫描不要求模型。指标 3/5 的综合 smoke 脚本要求这两个外部分析器。
 3. **Tokenizer 资源**：确认仓库内 `code_agent/resources/deepseek_v3_tokenizer/tokenizer.json` 和 `tokenizer_config.json` 已存在且有效。Agent 运行时从该目录离线计数；文件缺失时不能依靠字符数回退。不要在断网后运行会下载资源的 `scripts/install_deepseek_tokenizer.py`。
 4. **前端（仅需 Web UI 时）**：提前执行 `cd code_agent/webui && npm ci && npm run build`。仅使用 API 时无需 Node.js/npm。
-5. **Ollama（指标 1）**：提前安装并启动 Ollama，执行 `ollama pull qwen2.5-coder:7b`，确认 `ollama list` 能看到所选模型。该默认模型需要与本地 Agent 工具调用能力相匹配；换用其他模型时，用目标模型实际 smoke，不要仅按名称推断支持情况。
+5. **Ollama（指标 1）**：提前安装并启动 Ollama，执行 `ollama pull qwen3:4b-instruct`，确认 `ollama list` 能看到所选模型。该模型已在 openEuler 24.03 的断网 Agent/Aider smoke 中验证；换用其他模型时，用目标模型实际 smoke，不要仅按名称推断支持情况。
 6. **测试工程（可选）**：`scripts/prepare_security_acceptance.py` 的完整模式会下载固定上游源码，应在联网时准备并保留 `artifacts/security-acceptance/workspaces/`。离线 fixture 模式不下载源码，但只验证随附小型固定样例，不满足目标操作系统工程验收。
 
 `uv sync`、Tokenizer 安装、npm 安装和 `ollama pull` 都可能访问网络。冷启动离线安装不是本指南已验证的场景；应先在最终目标机上准备好这些依赖，再断网运行。
@@ -34,7 +34,7 @@
 
 ```bash
 export CODE_AGENT_PROVIDER=ollama
-export CODE_AGENT_MODEL=qwen2.5-coder:7b
+export CODE_AGENT_MODEL=qwen3:4b-instruct
 export CODE_AGENT_API_BASE=http://127.0.0.1:11434/v1
 export CODE_AGENT_CONTEXT_WINDOW_TOKENS=8192
 export CODE_AGENT_OUTPUT_RESERVE_TOKENS=2048
@@ -43,11 +43,11 @@ export CODE_AGENT_OUTPUT_RESERVE_TOKENS=2048
 `CODE_AGENT_CONTEXT_WINDOW_TOKENS` 只控制 NaturalCC 的请求预算，不会修改 Ollama 服务端的上下文长度。应确保模型支持范围、Ollama 实际 `num_ctx`、输入预算、输出预留、provider framing 和安全余量相互匹配。若需固定服务端上下文，可用 Ollama Modelfile 创建本地模型标签，例如：
 
 ```text
-FROM qwen2.5-coder:7b
+FROM qwen3:4b-instruct
 PARAMETER num_ctx 8192
 ```
 
-保存为 `Modelfile` 后执行 `ollama create qwen2.5-coder-local -f Modelfile`，然后把 `CODE_AGENT_MODEL` 改为 `qwen2.5-coder-local`。具体语法与模型限制见 [Ollama Modelfile 文档](https://docs.ollama.com/modelfile)。
+保存为 `Modelfile` 后执行 `ollama create qwen3-4b-instruct-local -f Modelfile`，然后把 `CODE_AGENT_MODEL` 改为 `qwen3-4b-instruct-local`。具体语法与模型限制见 [Ollama Modelfile 文档](https://docs.ollama.com/modelfile)。
 
 启动前在服务所在机器检查：
 
@@ -59,7 +59,7 @@ cppcheck --version
 clang --version
 ```
 
-如果只做指标 1，可跳过 Cppcheck/Clang 检查；如果只做指标 3/5，完全可以不启动 Ollama。默认模型名 `qwen2.5-coder:7b` 可被环境变量覆盖；上下文窗口示例值 8192 也必须按部署实例核实。项目 tokenizer 是随仓库提供的 DeepSeek tokenizer，对 Ollama 请求只是 token 预算估算，并非 Ollama 模型原生 tokenizer。
+如果只做指标 1，可跳过 Cppcheck/Clang 检查；如果只做指标 3/5，完全可以不启动 Ollama。本指南显式配置 `qwen3:4b-instruct` 用于复现已验证的断网 smoke；NaturalCC 代码默认模型仍是 `qwen2.5-coder:7b`，因此复现时应按上文显式设置 `CODE_AGENT_MODEL`。上下文窗口示例值 8192 也必须按部署实例核实。模型必须在目标环境实际产生结构化工具调用；例如，`qwen2.5-coder:1.5b` 在本次模型直测中未能产生工具调用。项目 tokenizer 是随仓库提供的 DeepSeek tokenizer，对 Ollama 请求只是 token 预算估算，并非 Ollama 模型原生 tokenizer。
 
 零状态预检只执行以下只读请求和版本检查，不创建 Thread 或 Run：
 
