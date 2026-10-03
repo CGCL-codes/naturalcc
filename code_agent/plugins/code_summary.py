@@ -138,6 +138,7 @@ class CodeSummaryPlugin(FeaturePlugin):
             user_instruction=self._build_summary_instruction(context, files),
             model=context.model,
             api_key=context.api_key,
+            base_url=context.base_url,
             project_dir=context.project_dir,
             dry_run=True,
         ):

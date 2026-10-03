@@ -5,7 +5,7 @@ import json
 from uuid import uuid4
 
 from ..contracts import RiskLevel, ToolContext, ToolResult, ToolSpec
-from .editing import _unified_diff, _write_snapshot_once
+from .editing import _local_aider_runtime, _unified_diff, _write_snapshot_once
 from .workspace import resolve_workspace_path
 
 
@@ -46,13 +46,18 @@ def _execute(context: ToolContext, args: dict, feature: str, *, fix=False, deep=
     if error:
         raise ValueError(error)
     model = context.metadata.get("model", "deepseek/deepseek-chat")
+    local_runtime = _local_aider_runtime(context.metadata)
+    if local_runtime:
+        model = local_runtime[0]
+    base_url = local_runtime[1] if local_runtime else None
     if model in {"deepseek-chat", "deepseek-reasoner"}:
         model = f"deepseek/{model}"
     execution = ExecutionContext(
         project_dir=str(context.workspace), target_files=targets,
         instruction=args.get("instruction", ""),
         model=model,
-        api_key=context.metadata.get("api_key"), feature_config=config,
+        api_key=None if base_url is not None else context.metadata.get("api_key"),
+        feature_config=config, base_url=base_url,
     )
     before, snapshots = {}, []
     if mutating:

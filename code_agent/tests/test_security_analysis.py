@@ -197,6 +197,18 @@ def test_failed_aider_is_not_reported_as_success(tmp_path, monkeypatch):
     assert not result.success
 
 
+def test_vulnerability_auto_fix_passes_custom_ollama_base(tmp_path, monkeypatch):
+    (tmp_path / "main.c").write_text("strcpy(buf, input);\n", encoding="utf-8")
+    called = []
+    monkeypatch.setattr("code_agent.plugins.vulnerability_detection.run_aider_stream", lambda **kwargs:
+        called.append(kwargs) or iter(["任务圆满完成"]))
+    context = ExecutionContext(str(tmp_path), ["main.c"], "repair", "ollama_chat/qwen2.5-coder:1.5b",
+        None, {"analyzer": "builtin", "auto_fix": True}, base_url="http://localhost:11501/v1")
+    result = [item for item in VulnerabilityDetectionPlugin().execute(context) if isinstance(item, PluginResult)][-1]
+    assert result.success
+    assert called[0]["base_url"] == "http://localhost:11501/v1"
+
+
 @pytest.mark.skipif(shutil.which("cppcheck") is None, reason="Cppcheck not installed on this host")
 def test_real_cppcheck_bounds_null_and_leak(tmp_path):
     source = tmp_path / "main.c"

@@ -108,6 +108,7 @@ class CodeRepairPlugin(FeaturePlugin):
             user_instruction=repair_instruction,
             model=context.model,
             api_key=context.api_key,
+            base_url=context.base_url,
             project_dir=context.project_dir,
             symbol=None,
             completion_type=None,

@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import json
 import os
+import ipaddress
 from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Any, Iterator
+from urllib.parse import urlsplit
 
 from .contracts import ModelRequest, ModelResponse, ModelStreamEvent, ToolCall
 
@@ -107,7 +109,27 @@ _PROVIDER_DEFAULTS = {
         # larger margin for other providers' chat framing and tokenization.
         "safety_margin_tokens": 4_096,
     },
+    "ollama": {
+        "base_url": "http://127.0.0.1:11434/v1",
+        "model": "qwen2.5-coder:7b",
+        "api_key_env": "",
+        "context_window_tokens": 8_192,
+        "safety_margin_tokens": 512,
+    },
 }
+
+
+def _validate_ollama_url(base_url: str) -> None:
+    try:
+        parsed = urlsplit(base_url)
+        host = parsed.hostname or ""
+        parsed.port
+        loopback = host == "localhost" or ipaddress.ip_address(host).is_loopback
+    except ValueError as exc:
+        raise ValueError("ollama base_url must be a local HTTP loopback URL ending in /v1") from exc
+    if (parsed.scheme != "http" or not loopback or parsed.username is not None or parsed.password is not None
+            or parsed.query or parsed.fragment or parsed.path.rstrip("/") != "/v1"):
+        raise ValueError("ollama base_url must be a local HTTP loopback URL ending in /v1")
 
 
 @dataclass(frozen=True)
@@ -133,6 +155,8 @@ class RuntimeModelConfig:
             raise ValueError("runtime model must not be empty")
         if not self.base_url.strip():
             raise ValueError("runtime model base_url must not be empty")
+        if self.provider == "ollama":
+            _validate_ollama_url(self.base_url)
         if self.context_window_tokens <= 0:
             raise ValueError("context_window_tokens must be positive")
         if self.safety_margin_tokens < 0:
@@ -317,6 +341,7 @@ class OpenAICompatibleGateway(ModelGateway):
         max_tokens: int = 4096,
         serializer: DeepSeekRequestSerializer | None = None,
         api_key_env: str | None = None,
+        use_request_api_key: bool = True,
         extra_body: dict[str, Any] | None = None,
         default_headers: dict[str, str] | None = None,
     ) -> None:
@@ -326,6 +351,7 @@ class OpenAICompatibleGateway(ModelGateway):
         self.max_tokens = max_tokens
         self.serializer = serializer or DeepSeekRequestSerializer()
         self.api_key_env = api_key_env
+        self.use_request_api_key = use_request_api_key
         self.extra_body = dict(extra_body or {})
         self.default_headers = dict(default_headers or {})
 
@@ -333,7 +359,7 @@ class OpenAICompatibleGateway(ModelGateway):
         from openai import OpenAI
 
         key = (
-            str(request.metadata.get("api_key") or "").strip()
+            (str(request.metadata.get("api_key") or "").strip() if self.use_request_api_key else "")
             or self.api_key
             or (os.environ.get(self.api_key_env) if self.api_key_env else None)
             or (
@@ -345,11 +371,6 @@ class OpenAICompatibleGateway(ModelGateway):
         )
         if not key:
             raise ValueError("No API key configured for the model gateway")
-        client = OpenAI(
-            api_key=key,
-            base_url=self.base_url,
-            default_headers=self.default_headers or None,
-        )
         serialized_tools = self.serializer.serialize_tools(request.tools)
         options: dict[str, Any] = {}
         if request.response_format is not None:
@@ -360,14 +381,29 @@ class OpenAICompatibleGateway(ModelGateway):
         extra_body = {**self.extra_body, **request_extra_body}
         if extra_body:
             options["extra_body"] = extra_body
-        response = client.chat.completions.create(
-            model=self.model,
-            messages=self.serializer.serialize_messages(request.messages),
-            tools=serialized_tools or None,
-            tool_choice="auto" if serialized_tools else None,
-            max_tokens=request.max_output_tokens,
-            **options,
-        )
+        client_options: dict[str, Any] = {"api_key": key, "base_url": self.base_url,
+            "default_headers": self.default_headers or None}
+        if not self.use_request_api_key:
+            import httpx
+            client_options["http_client"] = httpx.Client(trust_env=False)
+        try:
+            client = OpenAI(**client_options)
+        except Exception:
+            if not self.use_request_api_key:
+                client_options["http_client"].close()
+            raise
+        try:
+            response = client.chat.completions.create(
+                model=self.model,
+                messages=self.serializer.serialize_messages(request.messages),
+                tools=serialized_tools or None,
+                tool_choice="auto" if serialized_tools else None,
+                max_tokens=request.max_output_tokens,
+                **options,
+            )
+        finally:
+            if not self.use_request_api_key:
+                client.close()
         message = response.choices[0].message
         prompt, completion, hit, miss = _usage_numbers(response.usage)
         return ModelResponse(
@@ -386,7 +422,7 @@ class OpenAICompatibleGateway(ModelGateway):
         from openai import OpenAI
 
         key = (
-            str(request.metadata.get("api_key") or "").strip()
+            (str(request.metadata.get("api_key") or "").strip() if self.use_request_api_key else "")
             or self.api_key
             or (os.environ.get(self.api_key_env) if self.api_key_env else None)
             or (
@@ -396,7 +432,6 @@ class OpenAICompatibleGateway(ModelGateway):
         )
         if not key:
             raise ValueError("No API key configured for the model gateway")
-        client = OpenAI(api_key=key, base_url=self.base_url, default_headers=self.default_headers or None)
         tools = self.serializer.serialize_tools(request.tools)
         options: dict[str, Any] = {}
         if request.response_format is not None:
@@ -407,52 +442,72 @@ class OpenAICompatibleGateway(ModelGateway):
         extra_body = {**self.extra_body, **request_extra_body}
         if extra_body:
             options["extra_body"] = extra_body
-        chunks = client.chat.completions.create(
-            model=self.model,
-            messages=self.serializer.serialize_messages(request.messages),
-            tools=tools or None,
-            tool_choice="auto" if tools else None,
-            max_tokens=request.max_output_tokens,
-            stream=True,
-            stream_options={"include_usage": True},
-            **options,
-        )
+        client_options: dict[str, Any] = {"api_key": key, "base_url": self.base_url,
+            "default_headers": self.default_headers or None}
+        if not self.use_request_api_key:
+            import httpx
+            client_options["http_client"] = httpx.Client(trust_env=False)
+        try:
+            client = OpenAI(**client_options)
+        except Exception:
+            if not self.use_request_api_key:
+                client_options["http_client"].close()
+            raise
+        try:
+            chunks = client.chat.completions.create(
+                model=self.model,
+                messages=self.serializer.serialize_messages(request.messages),
+                tools=tools or None,
+                tool_choice="auto" if tools else None,
+                max_tokens=request.max_output_tokens,
+                stream=True,
+                stream_options={"include_usage": True},
+                **options,
+            )
+        except Exception:
+            if not self.use_request_api_key:
+                client.close()
+            raise
         content: list[str] = []
         reasoning: list[str] = []
         details: list[dict[str, Any]] = []
         tool_parts: dict[int, dict[str, Any]] = {}
         usage = None
         model = self.model
-        for chunk in chunks:
-            usage = _field(chunk, "usage") or usage
-            model = _field(chunk, "model") or model
-            for choice in _field(chunk, "choices", []) or []:
-                delta = _field(choice, "delta")
-                if delta is None:
-                    continue
-                raw_details = _reasoning_details(delta)
-                if raw_details:
-                    for detail in raw_details:
-                        _merge_detail(details, detail)
-                    visible = "".join(str(item.get("text") or item.get("summary") or "") for item in raw_details)
-                    if not visible:
+        try:
+            for chunk in chunks:
+                usage = _field(chunk, "usage") or usage
+                model = _field(chunk, "model") or model
+                for choice in _field(chunk, "choices", []) or []:
+                    delta = _field(choice, "delta")
+                    if delta is None:
+                        continue
+                    raw_details = _reasoning_details(delta)
+                    if raw_details:
+                        for detail in raw_details:
+                            _merge_detail(details, detail)
+                        visible = "".join(str(item.get("text") or item.get("summary") or "") for item in raw_details)
+                        if not visible:
+                            visible = str(_field(delta, "reasoning", "") or _field(delta, "reasoning_content", "") or "")
+                    else:
                         visible = str(_field(delta, "reasoning", "") or _field(delta, "reasoning_content", "") or "")
-                else:
-                    visible = str(_field(delta, "reasoning", "") or _field(delta, "reasoning_content", "") or "")
-                if visible:
-                    reasoning.append(visible)
-                    yield ModelStreamEvent("reasoning", visible)
-                part = _field(delta, "content", "") or ""
-                if part:
-                    content.append(str(part))
-                    yield ModelStreamEvent("content", str(part))
-                for raw_call in _field(delta, "tool_calls", []) or []:
-                    index = int(_field(raw_call, "index", 0) or 0)
-                    current = tool_parts.setdefault(index, {"id": "", "name": "", "arguments": ""})
-                    current["id"] += str(_field(raw_call, "id", "") or "")
-                    function = _field(raw_call, "function", {}) or {}
-                    current["name"] += str(_field(function, "name", "") or "")
-                    current["arguments"] += str(_field(function, "arguments", "") or "")
+                    if visible:
+                        reasoning.append(visible)
+                        yield ModelStreamEvent("reasoning", visible)
+                    part = _field(delta, "content", "") or ""
+                    if part:
+                        content.append(str(part))
+                        yield ModelStreamEvent("content", str(part))
+                    for raw_call in _field(delta, "tool_calls", []) or []:
+                        index = int(_field(raw_call, "index", 0) or 0)
+                        current = tool_parts.setdefault(index, {"id": "", "name": "", "arguments": ""})
+                        current["id"] += str(_field(raw_call, "id", "") or "")
+                        function = _field(raw_call, "function", {}) or {}
+                        current["name"] += str(_field(function, "name", "") or "")
+                        current["arguments"] += str(_field(function, "arguments", "") or "")
+        finally:
+            if not self.use_request_api_key:
+                client.close()
         raw_calls = [
             {"id": part["id"], "function": {"name": part["name"], "arguments": part["arguments"]}}
             for _, part in sorted(tool_parts.items())
@@ -492,9 +547,11 @@ class RoutedModelGateway(ModelGateway):
                 headers["X-Title"] = title
         gateway = OpenAICompatibleGateway(
             config.model,
+            api_key="ollama" if config.provider == "ollama" else None,
             base_url=config.base_url,
             serializer=self.serializer,
             api_key_env=config.api_key_env,
+            use_request_api_key=config.provider != "ollama",
             extra_body=config.openrouter_extra_body(),
             default_headers=headers,
         )
@@ -519,13 +576,15 @@ class RoutedModelGateway(ModelGateway):
         extra_body = config.openrouter_extra_body()
         if config.provider == "openrouter":
             extra_body["reasoning"] = {"enabled": True, "exclude": False}
-        elif config.model == "deepseek-chat":
+        elif config.provider == "deepseek" and config.model == "deepseek-chat":
             extra_body["thinking"] = {"type": "enabled"}
         gateway = OpenAICompatibleGateway(
             config.model,
+            api_key="ollama" if config.provider == "ollama" else None,
             base_url=config.base_url,
             serializer=self.serializer,
             api_key_env=config.api_key_env,
+            use_request_api_key=config.provider != "ollama",
             extra_body=extra_body,
             default_headers=headers,
         )

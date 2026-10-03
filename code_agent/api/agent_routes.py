@@ -61,16 +61,15 @@ def get_default_runtime_model_config() -> RuntimeModelConfig:
     """
     provider = os.environ.get("CODE_AGENT_PROVIDER", "deepseek")
     configured_base_url = os.environ.get("CODE_AGENT_API_BASE", "").strip()
-    if provider.strip().lower() == "openrouter" and configured_base_url == "https://api.deepseek.com/v1":
+    if provider.strip().lower() in {"openrouter", "ollama"} and configured_base_url == "https://api.deepseek.com/v1":
         configured_base_url = ""
     configured_model = os.environ.get("CODE_AGENT_MODEL", "").strip()
     config_source: dict[str, Any] = {
         "provider": provider,
         "base_url": configured_base_url,
-        "context_window_tokens": int(
-            os.environ.get("CODE_AGENT_CONTEXT_WINDOW_TOKENS", "65536")
-        ),
     }
+    if "CODE_AGENT_CONTEXT_WINDOW_TOKENS" in os.environ:
+        config_source["context_window_tokens"] = int(os.environ["CODE_AGENT_CONTEXT_WINDOW_TOKENS"])
     if configured_model:
         config_source["model"] = configured_model
     if "CODE_AGENT_CONTEXT_SAFETY_MARGIN_TOKENS" in os.environ:
@@ -84,7 +83,7 @@ def get_runtime_provider_defaults() -> dict[str, dict[str, Any]]:
     """Return safe, key-free model defaults used to populate the UI."""
     return {
         provider: RuntimeModelConfig.from_dict({"provider": provider}).to_dict()
-        for provider in ("deepseek", "openrouter")
+        for provider in ("deepseek", "openrouter", "ollama")
     }
 
 
@@ -132,7 +131,8 @@ def normalize_runtime_model_config(
     legacy_model: str = "",
 ) -> dict[str, Any]:
     source = dict(value or {})
-    if legacy_model and not source.get("model"):
+    if (legacy_model and not source.get("model")
+            and not (source.get("provider") == "ollama" and default.provider != "ollama")):
         source["model"] = legacy_model
     config = RuntimeModelConfig.from_dict(
         source,

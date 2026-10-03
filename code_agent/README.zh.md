@@ -4,6 +4,8 @@ Agent 已接入 Pipeline 的代码补全、漏洞扫描及修复插件；详见 
 
 漏洞扫描按 `scan_type=frequent_defects/high_risk` 输出七类缺陷的分类统计；提供 `ground_truth_file` 后按标注用例计算 TP/FN/FP/TN、检出率、预警准确率和误报率。统计发生在 `max_findings` 截断前，无关诊断和纯 API 风险提示不计分；没有真值不生成检出率。测试工程、调用方法和边界见[安全检测联调说明](SECURITY_ACCEPTANCE.md)。
 
+平台指标 1/3/5 的本机 Ollama 与离线扫描部署、smoke 步骤和验收边界见[离线运行指南](OFFLINE_PLATFORM_1_3_5.md)。
+
 `code_agent` 是一个**本地运行的上下文感知编码 Agent**：它把 NaturalCC 的静态项目解析能力与 Aider 的代码修改能力组合在一起，通过 **Web UI、终端 CLI 和 VS Code 插件**三种方式使用。
 
 它不是通用聊天机器人——它会读你的项目、理解符号与依赖、修改文件、跑测试验证，并在每一步都受到**审批流、预算和白名单**的约束。
@@ -142,12 +144,13 @@ codegraph --version
 
 ### 4.1 API Key 使用方式
 
-**当前 Web UI 的 Agent Runtime 仅支持 DeepSeek 官方 API Key 和 OpenRouter API Key。** 通过终端中的 `CODE_AGENT_PROVIDER` 显式选择接入渠道，通过 `CODE_AGENT_MODEL` 选择模型；系统不会根据 Key 的内容或模型名称自动推断供应商。通过 OpenRouter 调用 Claude 等模型时，供应商仍是 `openrouter`，使用的是 OpenRouter Key，不是模型厂商的官方 Key。
+**Agent Runtime 支持 DeepSeek、OpenRouter 云 API，以及本机 Ollama。** 通过 `CODE_AGENT_PROVIDER` 显式选择渠道，通过 `CODE_AGENT_MODEL` 选择模型；系统不会按 Key 或模型名称推断渠道。DeepSeek 和 OpenRouter 使用对应云 API Key；Ollama 走本机 loopback HTTP API，不需要云 Key。通过 OpenRouter 调用 Claude 等模型时，仍使用 OpenRouter Key，而不是模型厂商的官方 Key。离线部署步骤见[平台指标 1/3/5 离线指南](OFFLINE_PLATFORM_1_3_5.md)。
 
-| 接入渠道 | `CODE_AGENT_PROVIDER` | API Key 环境变量 | 模型示例 | 默认 API 地址 |
+| 接入渠道 | `CODE_AGENT_PROVIDER` | 凭据 | 模型示例 | 默认 API 地址 |
 |---|---|---|---|---|
 | DeepSeek 官方 | `deepseek` | `DEEPSEEK_API_KEY` | `deepseek-chat` | `https://api.deepseek.com/v1` |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4.5` | `https://openrouter.ai/api/v1` |
+| 本机 Ollama | `ollama` | 无 | `qwen2.5-coder:7b` | `http://127.0.0.1:11434/v1` |
 
 以下 PowerShell 命令从仓库根目录执行，二选一配置供应商，再在**同一终端窗口**构建并启动服务。示例中的 Key 必须替换为你自己的完整单行 Key。
 
@@ -179,6 +182,18 @@ $env:CODE_AGENT_MODEL = "deepseek-chat"
 $env:CODE_AGENT_API_BASE = "https://api.deepseek.com/v1"
 ```
 
+若使用离线 Ollama，把上述云渠道设置替换为以下本机配置，并将模型名换成已预拉取且支持工具调用的模型。`8192` 只是预算示例：Ollama 服务端的实际 `num_ctx` 和模型支持范围必须至少匹配它；`CODE_AGENT_CONTEXT_WINDOW_TOKENS` 不会设置 Ollama 的上下文长度。
+
+```powershell
+$env:CODE_AGENT_PROVIDER = "ollama"
+$env:CODE_AGENT_MODEL = "qwen2.5-coder:7b"
+$env:CODE_AGENT_API_BASE = "http://127.0.0.1:11434/v1"
+$env:CODE_AGENT_CONTEXT_WINDOW_TOKENS = "8192"
+$env:CODE_AGENT_OUTPUT_RESERVE_TOKENS = "2048"
+```
+
+Agent Gateway 使用 `/v1` 地址。Aider 的子进程由 NaturalCC 自动设置为本机 `OLLAMA_API_BASE`，并去掉 `/v1`；无需手工设置该变量。小模型可用于接口/工具调用 smoke，不代表指标 1 的代码生成质量。
+
 Linux / macOS / WSL 使用 `export` 设置同样的变量，例如：
 
 ```bash
@@ -188,14 +203,14 @@ export CODE_AGENT_MODEL="anthropic/claude-sonnet-4.5"
 export CODE_AGENT_API_BASE="https://openrouter.ai/api/v1"
 ```
 
-- `CODE_AGENT_PROVIDER` 未设置时默认是 `deepseek`；使用 OpenRouter 必须显式设置为 `openrouter`，仅设置 Key 不会切换供应商。
-- `CODE_AGENT_MODEL` 未设置时，DeepSeek 默认使用 `deepseek-chat`，OpenRouter 默认使用 `deepseek/deepseek-chat`。调用其他模型需填写相应的模型 ID。
-- `CODE_AGENT_API_BASE` 未设置时按供应商选择默认地址。切换供应商时应同步更新或清除旧模型、地址变量，避免残留配置。
+- `CODE_AGENT_PROVIDER` 未设置时默认是 `deepseek`；选择 `openrouter` 或 `ollama` 时须显式设置，Key 或模型名不会切换渠道。
+- `CODE_AGENT_MODEL` 未设置时，DeepSeek 默认 `deepseek-chat`、OpenRouter 默认 `deepseek/deepseek-chat`、Ollama 默认 `qwen2.5-coder:7b`。
+- `CODE_AGENT_API_BASE` 未设置时按渠道选择默认地址。切换渠道时应同步更新或清除旧模型、地址变量；Ollama 地址必须是本机 HTTP loopback 且以 `/v1` 结尾。
 - 设置或更改环境变量后需重启后端，再访问 `http://127.0.0.1:7860/`；前端更新后可按 `Ctrl+F5` 强制刷新。
 
 网页刷新会恢复上次选中的会话及其保存的供应商和模型；没有保存的选择时，使用启动默认配置。“New conversation”始终使用启动默认配置。Settings 修改只作用于当前会话，旧会话不会因修改终端变量而自动切换供应商。模型输入框修改后点击框外保存；已经创建的 Run 保持创建时的配置。
 
-也可在 Settings 的 **API key** 中输入与所选 Provider 匹配的 Key；该值优先于环境变量，只随请求发送，不写入会话、Run 快照或 SQLite，刷新后需要重新输入。不要把真实 API Key 写进代码、README 或 Git 历史。
+DeepSeek/OpenRouter 也可在 Settings 的 **API key** 中输入与渠道匹配的 Key；该值优先于环境变量，只随请求发送，不写入会话、Run 快照或 SQLite，刷新后需要重新输入。Ollama 使用本机 API，不需要云 Key。不要把真实 API Key 写进代码、README 或 Git 历史。
 
 旧 Pipeline / CLI 的凭据处理是独立路径；其中保留的 `OPENAI_API_KEY` 兼容逻辑不代表 Agent Runtime 支持 OpenAI 或其他厂商的官方 Key。
 
@@ -464,9 +479,9 @@ VS Code 中 `Extensions: Install from VSIX...` 安装后，命令面板可用：
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|
-| `CODE_AGENT_MODEL` | 按供应商 | DeepSeek：`deepseek-chat`；OpenRouter：`deepseek/deepseek-chat` |
-| `CODE_AGENT_PROVIDER` | `deepseek` | Agent Runtime 接入渠道：`deepseek` 或 `openrouter` |
-| `CODE_AGENT_API_BASE` | 按供应商 | DeepSeek：`https://api.deepseek.com/v1`；OpenRouter：`https://openrouter.ai/api/v1` |
+| `CODE_AGENT_MODEL` | 按供应商 | DeepSeek：`deepseek-chat`；OpenRouter：`deepseek/deepseek-chat`；Ollama：`qwen2.5-coder:7b` |
+| `CODE_AGENT_PROVIDER` | `deepseek` | Agent Runtime 接入渠道：`deepseek`、`openrouter` 或本机 `ollama` |
+| `CODE_AGENT_API_BASE` | 按供应商 | DeepSeek：`https://api.deepseek.com/v1`；OpenRouter：`https://openrouter.ai/api/v1`；Ollama：`http://127.0.0.1:11434/v1` |
 | `CODE_AGENT_DB` | `<code_agent>/outputs/agent_runtime.db` | 事件库 / 记忆库 SQLite 位置 |
 | `CODE_AGENT_TOKENIZER_DIR` | `<code_agent>/resources/deepseek_v3_tokenizer` | 分词器目录 |
 
@@ -621,8 +636,11 @@ python test_deepseek_run.py    # 真实补全流程（会修改 test/StudentMana
 **Q：数据库存在哪？想备份或迁移？**
 `code_agent/outputs/agent_runtime.db`（事件库 + 记忆库），SQLite WAL 模式，直接复制文件即可备份；可用 `CODE_AGENT_DB` 改位置。
 
-**Q：想用其他 OpenAI 兼容模型（如本地 vLLM）？**
-当前 Agent Runtime 仅支持 DeepSeek 和 OpenRouter 两种接入渠道，尚未提供本地 vLLM 或其他厂商官方 Key 的独立接入配置。若要调用不同厂商的模型，请按 [4.1](#41-api-key-使用方式) 设置 `CODE_AGENT_PROVIDER=openrouter`、`OPENROUTER_API_KEY` 和相应的 `CODE_AGENT_MODEL`；上下文窗口仍需按所选模型配置。
+**Q：想完全离线运行指标 1/3/5？**
+指标 1 的 Agent Gateway 和 Aider 都需要配置到本机 Ollama；指标 3/5 的 `/api/run` 扫描在 `auto_fix=false` 时不调用模型。依赖预装、离线 smoke、coverage 与 `not_evaluated` 说明见[离线指南](OFFLINE_PLATFORM_1_3_5.md)。本次没有在 openEuler 实机或真实 Ollama 模型上完成验收；smoke 结果不能证明合同阈值达标。
+
+**Q：想用其他云端模型？**
+Agent Runtime 仍支持 DeepSeek 官方 API 与 OpenRouter 云渠道。按 [4.1](#41-api-key-使用方式) 配置对应的 Key、`CODE_AGENT_PROVIDER` 和 `CODE_AGENT_MODEL`；通过 OpenRouter 使用第三方模型时，仍由 OpenRouter 提供凭据和 API。
 
 **Q：Agent 会把我的代码 commit / push 吗？**
 不会。Git 黑名单禁了 `push/commit/reset/clean/checkout/switch`，它只能查看状态与 diff。

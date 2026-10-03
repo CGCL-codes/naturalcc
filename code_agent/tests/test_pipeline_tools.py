@@ -85,6 +85,39 @@ def test_completion_api_approval_dispatch_metadata_and_snapshot(tmp_path, monkey
     assert source.read_text() == "int f() {}\n"
 
 
+def test_ollama_run_passes_local_model_and_base_to_pipeline_without_cloud_key(tmp_path, monkeypatch):
+    (tmp_path / "main.c").write_text("int f() {}\n", encoding="utf-8")
+    captured = []
+    def execute(self, context):
+        captured.append(context)
+        yield PluginResult(success=True, message="done", report="local")
+    monkeypatch.setattr(CodeCompletionPlugin, "execute", execute)
+    model = ScriptedModelGateway([
+        ModelResponse(tool_calls=[ToolCall("c", "code_completion", {"target_files": ["main.c"], "instruction": "complete f"})]),
+        ModelResponse(content="done"),
+    ])
+    store = EventStore(tmp_path / "runtime.db")
+    engine = RunEngine(store, build_default_registry(), model)
+    app = FastAPI()
+    app.include_router(create_agent_router(engine))
+    client = TestClient(app)
+    invalid = client.post("/api/agent/runs", json={"workspace": str(tmp_path), "goal": "complete f",
+        "runtime_model_config": {"provider": "ollama", "base_url": "https://remote.example/v1"}})
+    assert invalid.status_code == 400
+    assert "loopback" in invalid.text
+    response = client.post("/api/agent/runs", json={"workspace": str(tmp_path), "goal": "complete f",
+        "target_files": ["main.c"], "api_key": "cloud-secret", "runtime_model_config": {
+            "provider": "ollama", "model": "qwen2.5-coder:1.5b", "base_url": "http://localhost:11434/v1"}})
+    assert response.status_code == 200
+    run_id = response.json()["run_id"]
+    assert client.post(f"/api/agent/runs/{run_id}/step").json()["status"] == "waiting_approval"
+    client.post(f"/api/agent/runs/{run_id}/approve", json={"risk": "write", "tool_call_id": "c"})
+    assert client.post(f"/api/agent/runs/{run_id}/run").json()["status"] == "completed"
+    assert captured[0].model == "ollama_chat/qwen2.5-coder:1.5b"
+    assert captured[0].base_url == "http://localhost:11434/v1"
+    assert captured[0].api_key is None
+
+
 def test_partial_mutation_is_recorded_on_plugin_exception(tmp_path, monkeypatch):
     source = tmp_path / "main.c"
     source.write_text("before", encoding="utf-8")
