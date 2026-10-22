@@ -6,3 +6,12 @@
 /web-sonnet45-independent/runs/
 /web-sonnet45-independent/benchmark.lock
 /web-sonnet45-independent/*.tmp
+/web-sonnet45-balanced-hard/runs/
+/web-sonnet45-independent-hard/runs/
+/archive-web-sonnet45-balanced-hard-line-scored/runs/
+/juliet*/web-sonnet45-*/runs/
+/juliet*/web-sonnet45-*/workspaces/
+**/benchmark.lock
+**/*.tmp
+/juliet*/archive-*/runs/
+/juliet*/archive-*/workspaces/

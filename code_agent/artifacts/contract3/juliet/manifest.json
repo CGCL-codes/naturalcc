@@ -1,0 +1,115 @@
+{
+  "dataset_sha256": "cfe5a886949c19a9a617b440a42b140185dacfe1cc5e70b4f55b41ab949a30a1",
+  "selection_salt": "contract3-juliet-v1",
+  "per_category": 10,
+  "offset": 0,
+  "flows": [
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "21",
+    "22",
+    "41",
+    "42",
+    "44",
+    "45",
+    "51",
+    "52",
+    "53",
+    "54",
+    "61",
+    "63",
+    "64",
+    "65",
+    "66",
+    "67",
+    "68"
+  ],
+  "families": {
+    "array_oob": [
+      "CWE129_fgets",
+      "CWE129_fscanf",
+      "CWE129_large",
+      "CWE129_rand",
+      "CWE805_int_declare_loop",
+      "CWE805_int_alloca_loop"
+    ],
+    "string_overflow": [
+      "dest_char_declare_cpy",
+      "dest_char_declare_cat",
+      "dest_char_alloca_cpy",
+      "dest_char_alloca_cat",
+      "src_char_declare_cpy",
+      "src_char_declare_cat",
+      "CWE193_char_declare_cpy",
+      "CWE193_char_declare_ncpy",
+      "CWE805_char_declare_ncpy",
+      "CWE805_char_declare_ncat",
+      "CWE805_char_declare_snprintf",
+      "CWE806_char_declare_ncpy",
+      "CWE806_char_declare_ncat",
+      "CWE806_char_declare_snprintf"
+    ],
+    "null_pointer": [
+      "char",
+      "int",
+      "int64_t",
+      "long",
+      "struct",
+      "binary_if",
+      "deref_after_check",
+      "null_check_after_deref"
+    ]
+  },
+  "selection": {
+    "array_oob": {
+      "eligible": 130,
+      "chosen": [
+        "CWE121_Stack_Based_Buffer_Overflow__CWE129_large_09",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE129_fgets_22",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_63",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_42",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE129_fgets_53",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE129_large_11",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_declare_loop_67",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_09",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_09",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE129_large_65"
+      ]
+    },
+    "string_overflow": {
+      "eligible": 286,
+      "chosen": [
+        "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_09",
+        "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cat_41",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_ncat_65",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_ncat_63",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_ncat_54",
+        "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cat_09",
+        "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_14",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE193_char_declare_ncpy_41",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_ncpy_21",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_12"
+      ]
+    },
+    "null_pointer": {
+      "eligible": 123,
+      "chosen": [
+        "CWE476_NULL_Pointer_Dereference__deref_after_check_13",
+        "CWE476_NULL_Pointer_Dereference__char_44",
+        "CWE476_NULL_Pointer_Dereference__int_66",
+        "CWE476_NULL_Pointer_Dereference__int_63",
+        "CWE476_NULL_Pointer_Dereference__int_14",
+        "CWE476_NULL_Pointer_Dereference__int_51",
+        "CWE476_NULL_Pointer_Dereference__long_12",
+        "CWE476_NULL_Pointer_Dereference__struct_10",
+        "CWE476_NULL_Pointer_Dereference__long_09",
+        "CWE476_NULL_Pointer_Dereference__null_check_after_deref_14"
+      ]
+    }
+  },
+  "rule": "Eligible C test cases sorted by sha256(salt:testcase); cases [offset, offset+N) per category; no outcome-based filtering. Labels from Juliet OMITBAD/OMITGOOD split."
+}

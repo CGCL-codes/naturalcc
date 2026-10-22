@@ -31,3 +31,25 @@ def test_balanced_profile_has_eighteen_standard_and_two_harder_positive_shapes(t
         rows = [case for case in cases if case["category"] == category["id"] and case["expected"] == "defect"]
         assert len(rows) == 20
         assert independent.BALANCED_VARIANTS[category["id"]].count(4 if category["id"] != "null_pointer" else 2) >= 1
+
+
+def test_hard_profiles_shuffle_order_and_keep_labels_outside_fixture(tmp_path):
+    manifest = base.load_manifest()
+    for profile in ("balanced-hard", "independent-hard"):
+        fixture, cases = independent.inject_fixture(tmp_path, "fixture", manifest["categories"], fixture_name=f"{profile}.c", profile=profile)
+        content = fixture.read_text(encoding="utf-8")
+        assert len(cases) == 120
+        assert "positive" not in content and "control" not in content and "hard" not in content
+        for category in manifest["categories"]:
+            rows = [case for case in cases if case["category"] == category["id"]]
+            labels = [case["expected"] for case in rows]
+            assert labels.count("defect") == labels.count("control") == 20
+            assert labels != ["defect"] * 20 + ["control"] * 20
+            assert any(case["variant"].startswith("hard-") for case in rows if case["expected"] == "control")
+
+
+def test_hard_controls_are_near_neighbours_of_defects():
+    assert "index >= 3" in "\n".join(independent.hard_case_lines("array_oob", 0, False))
+    assert "index > 3" in "\n".join(independent.hard_case_lines("array_oob", 0, True))
+    assert "char target[6]" in "\n".join(independent.hard_case_lines("string_overflow", 0, False))
+    assert "return -1;" in "\n".join(independent.hard_case_lines("null_pointer", 0, False))

@@ -1,0 +1,225 @@
+{
+  "dataset_sha256": "1403e9cb79ff8cf349ebdc4e9d36e64796b90cffd41861786359d2d32583a5eb",
+  "selection_salt": "contract3-juliet-v1",
+  "per_family": 2,
+  "flows": [
+    "09",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "21",
+    "22",
+    "41",
+    "42",
+    "44",
+    "45",
+    "51",
+    "52",
+    "53",
+    "54",
+    "61",
+    "63",
+    "64",
+    "65",
+    "66",
+    "67",
+    "68"
+  ],
+  "families": {
+    "array_oob": [
+      [
+        "CWE124_Buffer_Underwrite",
+        "CWE839_fgets"
+      ],
+      [
+        "CWE124_Buffer_Underwrite",
+        "CWE839_rand"
+      ],
+      [
+        "CWE127_Buffer_Underread",
+        "CWE839_fscanf"
+      ],
+      [
+        "CWE126_Buffer_Overread",
+        "CWE129_large"
+      ],
+      [
+        "CWE122_Heap_Based_Buffer_Overflow",
+        "sizeof_int64_t"
+      ],
+      [
+        "CWE121_Stack_Based_Buffer_Overflow",
+        "CWE131_loop"
+      ]
+    ],
+    "string_overflow": [
+      [
+        "CWE121_Stack_Based_Buffer_Overflow",
+        "CWE193_char_declare_loop"
+      ],
+      [
+        "CWE126_Buffer_Overread",
+        "CWE170_char_strncpy"
+      ],
+      [
+        "CWE126_Buffer_Overread",
+        "char_declare_memcpy"
+      ],
+      [
+        "CWE122_Heap_Based_Buffer_Overflow",
+        "c_CWE193_char_memcpy"
+      ],
+      [
+        "CWE121_Stack_Based_Buffer_Overflow",
+        "CWE135"
+      ]
+    ],
+    "null_pointer": [
+      [
+        "CWE690_NULL_Deref_From_Return",
+        "int_malloc"
+      ],
+      [
+        "CWE690_NULL_Deref_From_Return",
+        "struct_realloc"
+      ],
+      [
+        "CWE690_NULL_Deref_From_Return",
+        "fopen"
+      ]
+    ]
+  },
+  "selection": {
+    "CWE124_Buffer_Underwrite__CWE839_fgets": {
+      "eligible": 23,
+      "chosen": [
+        "CWE124_Buffer_Underwrite__CWE839_fgets_22",
+        "CWE124_Buffer_Underwrite__CWE839_fgets_21"
+      ]
+    },
+    "CWE124_Buffer_Underwrite__CWE839_rand": {
+      "eligible": 23,
+      "chosen": [
+        "CWE124_Buffer_Underwrite__CWE839_rand_68",
+        "CWE124_Buffer_Underwrite__CWE839_rand_09"
+      ]
+    },
+    "CWE127_Buffer_Underread__CWE839_fscanf": {
+      "eligible": 23,
+      "chosen": [
+        "CWE127_Buffer_Underread__CWE839_fscanf_65",
+        "CWE127_Buffer_Underread__CWE839_fscanf_52"
+      ]
+    },
+    "CWE126_Buffer_Overread__CWE129_large": {
+      "eligible": 23,
+      "chosen": [
+        "CWE126_Buffer_Overread__CWE129_large_09",
+        "CWE126_Buffer_Overread__CWE129_large_11"
+      ]
+    },
+    "CWE122_Heap_Based_Buffer_Overflow__sizeof_int64_t": {
+      "eligible": 23,
+      "chosen": [
+        "CWE122_Heap_Based_Buffer_Overflow__sizeof_int64_t_11",
+        "CWE122_Heap_Based_Buffer_Overflow__sizeof_int64_t_67"
+      ]
+    },
+    "CWE121_Stack_Based_Buffer_Overflow__CWE131_loop": {
+      "eligible": 19,
+      "chosen": [
+        "CWE121_Stack_Based_Buffer_Overflow__CWE131_loop_68",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE131_loop_67"
+      ]
+    },
+    "CWE121_Stack_Based_Buffer_Overflow__CWE193_char_declare_loop": {
+      "eligible": 19,
+      "chosen": [
+        "CWE121_Stack_Based_Buffer_Overflow__CWE193_char_declare_loop_63",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE193_char_declare_loop_68"
+      ]
+    },
+    "CWE126_Buffer_Overread__CWE170_char_strncpy": {
+      "eligible": 6,
+      "chosen": [
+        "CWE126_Buffer_Overread__CWE170_char_strncpy_10",
+        "CWE126_Buffer_Overread__CWE170_char_strncpy_13"
+      ]
+    },
+    "CWE126_Buffer_Overread__char_declare_memcpy": {
+      "eligible": 19,
+      "chosen": [
+        "CWE126_Buffer_Overread__char_declare_memcpy_65",
+        "CWE126_Buffer_Overread__char_declare_memcpy_68"
+      ]
+    },
+    "CWE122_Heap_Based_Buffer_Overflow__c_CWE193_char_memcpy": {
+      "eligible": 23,
+      "chosen": [
+        "CWE122_Heap_Based_Buffer_Overflow__c_CWE193_char_memcpy_66",
+        "CWE122_Heap_Based_Buffer_Overflow__c_CWE193_char_memcpy_42"
+      ]
+    },
+    "CWE121_Stack_Based_Buffer_Overflow__CWE135": {
+      "eligible": 23,
+      "chosen": [
+        "CWE121_Stack_Based_Buffer_Overflow__CWE135_12",
+        "CWE121_Stack_Based_Buffer_Overflow__CWE135_67"
+      ]
+    },
+    "CWE690_NULL_Deref_From_Return__int_malloc": {
+      "eligible": 23,
+      "chosen": [
+        "CWE690_NULL_Deref_From_Return__int_malloc_64",
+        "CWE690_NULL_Deref_From_Return__int_malloc_42"
+      ]
+    },
+    "CWE690_NULL_Deref_From_Return__struct_realloc": {
+      "eligible": 23,
+      "chosen": [
+        "CWE690_NULL_Deref_From_Return__struct_realloc_64",
+        "CWE690_NULL_Deref_From_Return__struct_realloc_54"
+      ]
+    },
+    "CWE690_NULL_Deref_From_Return__fopen": {
+      "eligible": 23,
+      "chosen": [
+        "CWE690_NULL_Deref_From_Return__fopen_21",
+        "CWE690_NULL_Deref_From_Return__fopen_65"
+      ]
+    }
+  },
+  "rule": "Vulnerable-only difficulty probe: first N cases per hard family in sha256(salt:testcase) order. Used only to estimate per-family miss rates; the calibrated hard set must use later cases.",
+  "order": [
+    "array_oob-CWE839_fgets-22-v",
+    "array_oob-CWE839_fgets-21-v",
+    "array_oob-CWE839_rand-68-v",
+    "array_oob-CWE839_rand-09-v",
+    "array_oob-CWE839_fscanf-65-v",
+    "array_oob-CWE839_fscanf-52-v",
+    "array_oob-CWE129_large-09-v",
+    "array_oob-CWE129_large-11-v",
+    "array_oob-sizeof_int64_t-11-v",
+    "array_oob-sizeof_int64_t-67-v",
+    "array_oob-CWE131_loop-68-v",
+    "array_oob-CWE131_loop-67-v",
+    "string_overflow-CWE193_char_declare_loop-63-v",
+    "string_overflow-CWE193_char_declare_loop-68-v",
+    "string_overflow-CWE170_char_strncpy-10-v",
+    "string_overflow-CWE170_char_strncpy-13-v",
+    "string_overflow-char_declare_memcpy-65-v",
+    "string_overflow-char_declare_memcpy-68-v",
+    "string_overflow-c_CWE193_char_memcpy-66-v",
+    "string_overflow-c_CWE193_char_memcpy-42-v",
+    "string_overflow-CWE135-12-v",
+    "string_overflow-CWE135-67-v",
+    "null_pointer-int_malloc-64-v",
+    "null_pointer-int_malloc-42-v",
+    "null_pointer-struct_realloc-64-v",
+    "null_pointer-struct_realloc-54-v",
+    "null_pointer-fopen-21-v",
+    "null_pointer-fopen-65-v"
+  ]
+}

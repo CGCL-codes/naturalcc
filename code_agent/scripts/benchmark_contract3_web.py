@@ -32,6 +32,8 @@ DATA = ROOT / "artifacts" / "contract3"
 OUT = DATA / "web-sonnet45"
 REPORT = ROOT / "合同-3-web-result.md"
 MODEL = "anthropic/claude-sonnet-4.5"
+SUITE_NAMES = {"balanced": "平衡验收集", "independent": "独立复杂压力集",
+               "balanced-hard": "平衡验收集（加难版）", "independent-hard": "独立压力集（加难版）"}
 TERMINAL = {"completed", "failed", "cancelled", "budget_exhausted"}
 BUDGET = {"max_llm_calls": 6, "max_tool_calls": 12, "max_input_tokens": 120000,
           "max_output_tokens": 24000, "max_seconds": 600, "max_compaction_calls": 8}
@@ -57,7 +59,9 @@ def save_json(path: Path, value: Any) -> None:
     temporary.replace(path)
 
 
-def goal(category: dict[str, Any], fixture: str) -> str:
+def goal(category: dict[str, Any], fixture: str, by_function: bool = False) -> str:
+    function_field = '"function":"所在函数名",' if by_function else ""
+    function_rule = "function 必须是该问题所在函数的真实名称；" if by_function else ""
     return f'''请审计当前工作区的 `{fixture}`，仅判断“{category['name']}”这一类风险。
 先读取完整文件，然后必须调用只读工具 `vulnerability_detection` 扫描该文件，参数应包含
 `target_files:["{fixture}"]`、`scan_scope:"targets"`、`scan_type:"frequent_defects"`、
@@ -66,12 +70,12 @@ def goal(category: dict[str, Any], fixture: str) -> str:
 不执行 shell，不调用需要 execute/write 授权的工具，不搜索外部资料。
 不要根据函数名猜测正负样本；每个函数都独立按代码证据判断。
 最终回答只输出 JSON（可使用唯一 json 代码块）：
-{{"findings":[{{"category":"{category['id']}","line":7,"reason":"具体代码证据与触发条件"}}],"summary":"简要结论"}}。
-findings 中 category 只能为 `{category['id']}`，line 必须是该文件真实的 1-based 行号；
+{{"findings":[{{"category":"{category['id']}",{function_field}"line":7,"reason":"具体代码证据与触发条件"}}],"summary":"简要结论"}}。
+findings 中 category 只能为 `{category['id']}`，{function_rule}line 必须是该文件真实的 1-based 行号；
 确认没有该类风险时 findings 为 []。以上 JSON 仅为格式示例，不表示文件实际有漏洞。'''
 
 
-def parse_answer(answer: str, category: str, line_count: int) -> dict[str, Any]:
+def parse_answer(answer: str, category: str, line_count: int, functions: set[str] | None = None) -> dict[str, Any]:
     text = answer.strip()
     fenced = re.findall(r"```json\s*([\s\S]*?)\s*```", text)
     if len(fenced) > 1:
@@ -88,6 +92,8 @@ def parse_answer(answer: str, category: str, line_count: int) -> dict[str, Any]:
             raise ValueError("Invalid source line")
         if not isinstance(finding.get("reason"), str) or not finding["reason"].strip():
             raise ValueError("Missing evidence")
+        if functions is not None and not isinstance(finding.get("function"), str):
+            raise ValueError("Missing function name")
     return value
 
 
@@ -95,7 +101,10 @@ def classify(cases: list[dict[str, Any]], prediction: dict[str, Any]) -> list[di
     findings = prediction["findings"]
     rows = []
     for case in cases:
-        matched = [f for f in findings if case["line_start"] <= f["line"] <= case["line_end"]]
+        # Hard suites shuffle positives and controls, so the model-reported
+        # function name is authoritative; line ranges remain the legacy rule.
+        matched = [f for f in findings if (f["function"] == case["function"] if "function" in f
+                                           else case["line_start"] <= f["line"] <= case["line_end"])]
         rows.append({**case, "detected": bool(matched), "matched_findings": matched})
     return rows
 
@@ -121,7 +130,7 @@ def format_console_summary(checkpoint: dict[str, Any], manifest: dict[str, Any],
     for record in records.values():
         status = str(record.get("status", "未开始"))
         states[status] = states.get(status, 0) + 1
-    lines = ["", f"=== 指标 3 Web {'平衡验收集' if suite == 'balanced' else '独立复杂压力集'}结果 ===",
+    lines = ["", f"=== 指标 3 Web {SUITE_NAMES.get(suite, suite)}结果 ===",
              f"组进度：已评分 {states.get('scored', 0)}/9；状态：{checkpoint.get('stop_reason', '未知')}",
              f"函数计分：{len(rows)}；TP/FN/FP/TN：{metric(rows)['tp']}/{metric(rows)['fn']}/{metric(rows)['fp']}/{metric(rows)['tn']}",
              "类别              TP  FN  FP  TN   检出率    误报率"]
@@ -183,7 +192,7 @@ def prepare_samples(manifest: dict[str, Any], workspace: Path, suite: str) -> tu
         projects.append({"id": spec["id"], "name": spec["name"], "commit": spec["commit"], "source_lines": source_lines})
         for category_id, category in categories.items():
             fixture, cases = independent.inject_fixture(
-                project, spec["id"], [category], fixture_name=f"contract3_{suite}_web_{category_id}.c", profile=suite)
+                project, spec["id"], [category], fixture_name=f"contract3_{suite.replace('-', '_')}_web_{category_id}.c", profile=suite)
             samples.append({"id": f"{spec['id']}-{category_id}", "project": spec["id"],
                             "project_path": str(project), "category": category, "fixture": fixture.name,
                             "fixture_sha256": digest(fixture.read_bytes()), "cases": cases,
@@ -249,6 +258,9 @@ def run(checkpoint: dict[str, Any], manifest: dict[str, Any], samples: list[dict
     protocol = {"model_config": config, "budget": BUDGET, "manifest_sha256": digest((DATA / "manifest.json").read_bytes()),
                 "projects": projects, "fixture_protocol": "one deterministic category fixture per project; labels outside workspace",
                 "base_url": base}
+    by_function = suite.endswith("-hard")
+    if by_function:
+        protocol["scoring"] = "function_name"
     # Keep the pre-suite baseline checkpoint resumable; independent output has its
     # own directory and an explicit protocol discriminator.
     if suite != "baseline":
@@ -280,7 +292,7 @@ def run(checkpoint: dict[str, Any], manifest: dict[str, Any], samples: list[dict
         record["status"] = "created"
         persist()
         created = client.call("POST", f"/api/agent/threads/{attempt['thread_id']}/messages", json={
-            "content": goal(sample["category"], sample["fixture"]), "target_files": [sample["fixture"]],
+            "content": goal(sample["category"], sample["fixture"], by_function), "target_files": [sample["fixture"]],
             "context_items": [{"path": sample["fixture"], "absolute_path": str(Path(sample["project_path"]) / sample["fixture"]), "external": False, "type": "file"}],
             "budget": BUDGET, "api_key": os.environ["OPENROUTER_API_KEY"]})
         attempt["run_id"] = created["run_id"]
@@ -317,10 +329,12 @@ def run(checkpoint: dict[str, Any], manifest: dict[str, Any], samples: list[dict
                 continue
             return
         try:
-            prediction = parse_answer(state["final_answer"], sample["category"]["id"], sample["line_count"])
+            functions = {case["function"] for case in sample["cases"]} if by_function else None
+            prediction = parse_answer(state["final_answer"], sample["category"]["id"], sample["line_count"], functions)
             rows = classify(sample["cases"], prediction)
+            matched_ids = {id(f) for row in rows for f in row["matched_findings"]}
             record.update({"status": "scored", "prediction": prediction, "rows": rows,
-                           "out_of_scope_findings": [f for f in prediction["findings"] if not any(c["line_start"] <= f["line"] <= c["line_end"] for c in sample["cases"])]})
+                           "out_of_scope_findings": [f for f in prediction["findings"] if id(f) not in matched_ids]})
         except (TypeError, ValueError) as exc:
             record.update({"status": "unscored", "error": str(exc)})
         persist()
@@ -339,18 +353,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:7860")
     parser.add_argument("--workspace", type=Path, default=Path("/tmp/naturalcc-contract3-web-sources"))
-    parser.add_argument("--suite", choices=("balanced", "independent"), default="balanced",
-                        help="balanced is the recommended acceptance mix; independent is the held-out stress mix")
+    parser.add_argument("--suite", choices=("balanced", "independent", "balanced-hard", "independent-hard"), default="balanced",
+                        help="balanced is the recommended acceptance mix; independent is the held-out stress mix; *-hard add safe look-alike controls and shuffled order")
     parser.add_argument("--limit", type=int, help="Only run the first N project/category groups (for a low-cost smoke test)")
     parser.add_argument("--retry-failed", action="store_true", help="Retry prior transient failed groups and continue the queue; attempts remain in checkpoint")
     parser.add_argument("--force-rerun", action="store_true", help="Run selected groups again even when scored; preserve prior attempts and replace the current score only after completion")
     parser.add_argument("--report-only", action="store_true")
     args = parser.parse_args()
     global OUT
-    if args.suite == "independent":
-        OUT = DATA / "web-sonnet45-independent"
-    else:
-        OUT = DATA / "web-sonnet45-balanced"
+    OUT = DATA / f"web-sonnet45-{args.suite}"
     OUT.mkdir(parents=True, exist_ok=True)
     with (OUT / "benchmark.lock").open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)

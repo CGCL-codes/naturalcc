@@ -1,0 +1,1158 @@
+{
+ "source": "NIST SARD Juliet Test Suite for C/C++ v1.3",
+ "url": "https://samate.nist.gov/SARD/downloads/test-suites/2017-10-01-juliet-test-suite-for-c-cplusplus-v1-3.zip",
+ "zip_sha256": "ada9d7e1c323d283446df3f55bdee0d00bda1fed786785fe98764d58688f38eb",
+ "support": {
+  "std_testcase.h": "#ifndef _STD_TESTCASE_H\n#define _STD_TESTCASE_H\n\n#ifdef _WIN32\n\n#define _CRT_SECURE_NO_DEPRECATE 1\n#define _CRT_SECURE_NO_WARNING 1\n\n#define ALLOCA _alloca\n\n#pragma warning(disable:4996)\n\n#else\n\n# define __STDC_LIMIT_MACROS 1\n\n#define ALLOCA alloca\n#endif\n\n#include <stdio.h>\n#include <stdlib.h>\n#include <stddef.h>\n#include <time.h>\n#include <limits.h>\n#include <string.h>\n#include <stdint.h>\n#ifndef _WIN32\n\n# include <stdint.h>\n#endif\n#include <ctype.h>\n#include <fcntl.h>\n#include <sys/types.h>\n#include <sys/stat.h>\n#ifdef _WIN32\n#include <io.h>\n#endif\n\n#ifdef __cplusplus\n#include <new>\n\nclass TwoIntsClass\n{\n    public:\n        int intOne;\n        int intTwo;\n};\n\nclass OneIntClass\n{\n    public:\n        int intOne;\n};\n\n#endif\n\n#ifndef __cplusplus\n\n#define true 1\n#define false 0\n\n#endif\n\n#define URAND31() (((unsigned)rand()<<30) ^ ((unsigned)rand()<<15) ^ rand())\n\n#define RAND32() ((int)(rand() & 1 ? URAND31() : -URAND31() - 1))\n\n#define URAND63() (((uint64_t)rand()<<60) ^ ((uint64_t)rand()<<45) ^ ((uint64_t)rand()<<30) ^ ((uint64_t)rand()<<15) ^ rand())\n\n#define RAND64() ((int64_t)(rand() & 1 ? URAND63() : -URAND63() - 1))\n\ntypedef struct _twoIntsStruct\n{\n    int intOne;\n    int intTwo;\n} twoIntsStruct;\n\n#ifdef __cplusplus\nextern \"C\" {\n#endif\n\nextern const int GLOBAL_CONST_TRUE;\nextern const int GLOBAL_CONST_FALSE;\nextern const int GLOBAL_CONST_FIVE;\n\nextern int globalTrue;\nextern int globalFalse;\nextern int globalFive;\n\n#ifdef __cplusplus\n}\n#endif\n\n#include \"std_testcase_io.h\"\n\n#endif\n",
+  "std_testcase_io.h": "#ifndef _STD_TESTCASE_IO_H\n#define _STD_TESTCASE_IO_H\n\n#include \"std_testcase.h\"\n\n#ifdef __cplusplus\nextern \"C\" {\n#endif\n\nvoid printLine(const char * line);\n\nvoid printWLine(const wchar_t * line);\n\nvoid printIntLine (int intNumber);\n\nvoid printShortLine (short shortNumber);\n\nvoid printFloatLine (float floatNumber);\n\nvoid printLongLine(long longNumber);\n\nvoid printLongLongLine(int64_t longLongIntNumber);\n\nvoid printSizeTLine(size_t sizeTNumber);\n\nvoid printHexCharLine(char charHex);\n\nvoid printWcharLine(wchar_t wideChar);\n\nvoid printUnsignedLine(unsigned unsignedNumber);\n\nvoid printHexUnsignedCharLine(unsigned char unsignedCharacter);\n\nvoid printDoubleLine(double doubleNumber);\n\nvoid printStructLine(const twoIntsStruct * structTwoIntsStruct);\n\nvoid printBytesLine(const unsigned char * bytes, size_t numBytes);\n\nsize_t decodeHexChars(unsigned char * bytes, size_t numBytes, const char * hex);\n\nsize_t decodeHexWChars(unsigned char * bytes, size_t numBytes, const wchar_t * hex);\n\nint globalReturnsTrue();\n\nint globalReturnsFalse();\n\nint globalReturnsTrueOrFalse();\n\nextern int globalArgc;\nextern char** globalArgv;\n\n#ifdef __cplusplus\n}\n#endif\n\n#endif\n",
+  "io.c": "#include <inttypes.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <wctype.h>\n#include \"std_testcase.h\"\n\n#ifndef _WIN32\n#include <wchar.h>\n#endif\n\nvoid printLine (const char * line)\n{\n    if(line != NULL)\n    {\n        printf(\"%s\\n\", line);\n    }\n}\n\nvoid printWLine (const wchar_t * line)\n{\n    if(line != NULL)\n    {\n        wprintf(L\"%ls\\n\", line);\n    }\n}\n\nvoid printIntLine (int intNumber)\n{\n    printf(\"%d\\n\", intNumber);\n}\n\nvoid printShortLine (short shortNumber)\n{\n    printf(\"%hd\\n\", shortNumber);\n}\n\nvoid printFloatLine (float floatNumber)\n{\n    printf(\"%f\\n\", floatNumber);\n}\n\nvoid printLongLine (long longNumber)\n{\n    printf(\"%ld\\n\", longNumber);\n}\n\nvoid printLongLongLine (int64_t longLongIntNumber)\n{\n    printf(\"%\" PRId64 \"\\n\", longLongIntNumber);\n}\n\nvoid printSizeTLine (size_t sizeTNumber)\n{\n    printf(\"%zu\\n\", sizeTNumber);\n}\n\nvoid printHexCharLine (char charHex)\n{\n    printf(\"%02x\\n\", charHex);\n}\n\nvoid printWcharLine(wchar_t wideChar)\n{\n\n    wchar_t s[2];\n        s[0] = wideChar;\n        s[1] = L'\\0';\n    printf(\"%ls\\n\", s);\n}\n\nvoid printUnsignedLine(unsigned unsignedNumber)\n{\n    printf(\"%u\\n\", unsignedNumber);\n}\n\nvoid printHexUnsignedCharLine(unsigned char unsignedCharacter)\n{\n    printf(\"%02x\\n\", unsignedCharacter);\n}\n\nvoid printDoubleLine(double doubleNumber)\n{\n    printf(\"%g\\n\", doubleNumber);\n}\n\nvoid printStructLine (const twoIntsStruct * structTwoIntsStruct)\n{\n    printf(\"%d -- %d\\n\", structTwoIntsStruct->intOne, structTwoIntsStruct->intTwo);\n}\n\nvoid printBytesLine(const unsigned char * bytes, size_t numBytes)\n{\n    size_t i;\n    for (i = 0; i < numBytes; ++i)\n    {\n        printf(\"%02x\", bytes[i]);\n    }\n    puts(\"\");\n}\n\nsize_t decodeHexChars(unsigned char * bytes, size_t numBytes, const char * hex)\n{\n    size_t numWritten = 0;\n\n    while (numWritten < numBytes && isxdigit(hex[2 * numWritten]) && isxdigit(hex[2 * numWritten + 1]))\n    {\n        int byte;\n        sscanf(&hex[2 * numWritten], \"%02x\", &byte);\n        bytes[numWritten] = (unsigned char) byte;\n        ++numWritten;\n    }\n\n    return numWritten;\n}\n\n size_t decodeHexWChars(unsigned char * bytes, size_t numBytes, const wchar_t * hex)\n {\n    size_t numWritten = 0;\n\n    while (numWritten < numBytes && iswxdigit(hex[2 * numWritten]) && iswxdigit(hex[2 * numWritten + 1]))\n    {\n        int byte;\n        swscanf(&hex[2 * numWritten], L\"%02x\", &byte);\n        bytes[numWritten] = (unsigned char) byte;\n        ++numWritten;\n    }\n\n    return numWritten;\n}\n\nint globalReturnsTrue()\n{\n    return 1;\n}\n\nint globalReturnsFalse()\n{\n    return 0;\n}\n\nint globalReturnsTrueOrFalse()\n{\n    return (rand() % 2);\n}\n\nconst int GLOBAL_CONST_TRUE = 1;\nconst int GLOBAL_CONST_FALSE = 0;\nconst int GLOBAL_CONST_FIVE = 5;\n\nint globalTrue = 1;\nint globalFalse = 0;\nint globalFive = 5;\n\n\n\n#ifdef __cplusplus\nextern \"C\" {\n#endif\n\nint globalArgc = 0;\nchar** globalArgv = NULL;\n\n#ifdef __cplusplus\n}\n#endif\n"
+ },
+ "samples": [
+  {
+   "id": "array_oob-01-v",
+   "category": "array_oob",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_41",
+   "family": "CWE129_rand",
+   "flow": "41",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_41.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_41.c": "74ae3add1ff51799126b99bc6b38f2765d713184bcf4d335ede573e76fd2aa29"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nstatic void sym_01(int data)\n{\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0)\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is negative.\");\n        }\n    }\n}\n\nvoid sym_02()\n{\n    int data;\n\n    data = -1;\n\n    data = RAND32();\n    sym_01(data);\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-01-s",
+   "category": "array_oob",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_41",
+   "family": "CWE129_rand",
+   "flow": "41",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_41.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_41.c": "74ae3add1ff51799126b99bc6b38f2765d713184bcf4d335ede573e76fd2aa29"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nstatic void sym_01(int data)\n{\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0)\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is negative.\");\n        }\n    }\n}\n\nstatic void sym_02()\n{\n    int data;\n\n    data = -1;\n\n    data = 7;\n    sym_01(data);\n}\n\nstatic void sym_03(int data)\n{\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0 && data < (10))\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is out-of-bounds\");\n        }\n    }\n}\n\nstatic void sym_04()\n{\n    int data;\n\n    data = -1;\n\n    data = RAND32();\n    sym_03(data);\n}\n\nvoid sym_05()\n{\n    sym_04();\n    sym_02();\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-02-v",
+   "category": "array_oob",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_21",
+   "family": "CWE129_fscanf",
+   "flow": "21",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_21.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_21.c": "4309aa2ef4a3ab0898a7278755b3ad31e2924024f9f6767176d21e59763f30b9"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nstatic int sym_01 = 0;\n\nstatic void sym_02(int data)\n{\n    if(sym_01)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n\nvoid sym_03()\n{\n    int data;\n\n    data = -1;\n\n    fscanf(stdin, \"%d\", &data);\n    sym_01 = 1;\n    sym_02(data);\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-02-s",
+   "category": "array_oob",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_21",
+   "family": "CWE129_fscanf",
+   "flow": "21",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_21.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_21.c": "4309aa2ef4a3ab0898a7278755b3ad31e2924024f9f6767176d21e59763f30b9"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nstatic int sym_01 = 0;\nstatic int sym_02 = 0;\nstatic int sym_03 = 0;\n\nstatic void sym_04(int data)\n{\n    if(sym_01)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0 && data < (10))\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is out-of-bounds\");\n            }\n        }\n    }\n}\n\nstatic void sym_05()\n{\n    int data;\n\n    data = -1;\n\n    fscanf(stdin, \"%d\", &data);\n    sym_01 = 0;\n    sym_04(data);\n}\n\nstatic void sym_06(int data)\n{\n    if(sym_02)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0 && data < (10))\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is out-of-bounds\");\n            }\n        }\n    }\n}\n\nstatic void sym_07()\n{\n    int data;\n\n    data = -1;\n\n    fscanf(stdin, \"%d\", &data);\n    sym_02 = 1;\n    sym_06(data);\n}\n\nstatic void sym_08(int data)\n{\n    if(sym_03)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n\nstatic void sym_09()\n{\n    int data;\n\n    data = -1;\n\n    data = 7;\n    sym_03 = 1;\n    sym_08(data);\n}\n\nvoid sym_10()\n{\n    sym_05();\n    sym_07();\n    sym_09();\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-03-v",
+   "category": "array_oob",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_10",
+   "family": "CWE129_rand",
+   "flow": "10",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_10.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_10.c": "e1e3d73fad77a3af69b813dbf503917ffe366c009da2d4225b8742319a043af5"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nvoid sym_01()\n{\n    int data;\n\n    data = -1;\n    if(globalTrue)\n    {\n\n        data = RAND32();\n    }\n    if(globalTrue)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-03-s",
+   "category": "array_oob",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_10",
+   "family": "CWE129_rand",
+   "flow": "10",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_10.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_rand_10.c": "e1e3d73fad77a3af69b813dbf503917ffe366c009da2d4225b8742319a043af5"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nstatic void sym_01()\n{\n    int data;\n\n    data = -1;\n    if(globalTrue)\n    {\n\n        data = RAND32();\n    }\n    if(globalFalse)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0 && data < (10))\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is out-of-bounds\");\n            }\n        }\n    }\n}\n\nstatic void sym_02()\n{\n    int data;\n\n    data = -1;\n    if(globalTrue)\n    {\n\n        data = RAND32();\n    }\n    if(globalTrue)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0 && data < (10))\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is out-of-bounds\");\n            }\n        }\n    }\n}\n\nstatic void sym_03()\n{\n    int data;\n\n    data = -1;\n    if(globalFalse)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        data = 7;\n    }\n    if(globalTrue)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n\nstatic void sym_04()\n{\n    int data;\n\n    data = -1;\n    if(globalTrue)\n    {\n\n        data = 7;\n    }\n    if(globalTrue)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n\nvoid sym_05()\n{\n    sym_01();\n    sym_02();\n    sym_03();\n    sym_04();\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-04-v",
+   "category": "array_oob",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_11",
+   "family": "CWE805_int_alloca_loop",
+   "flow": "11",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_11.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_11.c": "c014703df3f4a58870a1564ffb40891b72b0964a594bb2b2e32aa732eeb735dd"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nvoid sym_01()\n{\n    int * data;\n    int * sym_02 = (int *)ALLOCA(50*sizeof(int));\n    int * sym_03 = (int *)ALLOCA(100*sizeof(int));\n    if(globalReturnsTrue())\n    {\n\n        data = sym_02;\n    }\n    {\n        int source[100] = {0};\n        {\n            size_t i;\n\n            for (i = 0; i < 100; i++)\n            {\n                data[i] = source[i];\n            }\n            printIntLine(data[0]);\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-04-s",
+   "category": "array_oob",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_11",
+   "family": "CWE805_int_alloca_loop",
+   "flow": "11",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_11.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_11.c": "c014703df3f4a58870a1564ffb40891b72b0964a594bb2b2e32aa732eeb735dd"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nstatic void sym_01()\n{\n    int * data;\n    int * sym_02 = (int *)ALLOCA(50*sizeof(int));\n    int * sym_03 = (int *)ALLOCA(100*sizeof(int));\n    if(globalReturnsFalse())\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        data = sym_03;\n    }\n    {\n        int source[100] = {0};\n        {\n            size_t i;\n\n            for (i = 0; i < 100; i++)\n            {\n                data[i] = source[i];\n            }\n            printIntLine(data[0]);\n        }\n    }\n}\n\nstatic void sym_04()\n{\n    int * data;\n    int * sym_02 = (int *)ALLOCA(50*sizeof(int));\n    int * sym_03 = (int *)ALLOCA(100*sizeof(int));\n    if(globalReturnsTrue())\n    {\n\n        data = sym_03;\n    }\n    {\n        int source[100] = {0};\n        {\n            size_t i;\n\n            for (i = 0; i < 100; i++)\n            {\n                data[i] = source[i];\n            }\n            printIntLine(data[0]);\n        }\n    }\n}\n\nvoid sym_05()\n{\n    sym_01();\n    sym_04();\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-05-v",
+   "category": "array_oob",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_14",
+   "family": "CWE129_fscanf",
+   "flow": "14",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_14.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_14.c": "f44e34d0af3506e986211f6a25506a699a38c4e0978680056963efaff407a136"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nvoid sym_01()\n{\n    int data;\n\n    data = -1;\n    if(globalFive==5)\n    {\n\n        fscanf(stdin, \"%d\", &data);\n    }\n    if(globalFive==5)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-05-s",
+   "category": "array_oob",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_14",
+   "family": "CWE129_fscanf",
+   "flow": "14",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_14.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_14.c": "f44e34d0af3506e986211f6a25506a699a38c4e0978680056963efaff407a136"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nstatic void sym_01()\n{\n    int data;\n\n    data = -1;\n    if(globalFive==5)\n    {\n\n        fscanf(stdin, \"%d\", &data);\n    }\n    if(globalFive!=5)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0 && data < (10))\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is out-of-bounds\");\n            }\n        }\n    }\n}\n\nstatic void sym_02()\n{\n    int data;\n\n    data = -1;\n    if(globalFive==5)\n    {\n\n        fscanf(stdin, \"%d\", &data);\n    }\n    if(globalFive==5)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0 && data < (10))\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is out-of-bounds\");\n            }\n        }\n    }\n}\n\nstatic void sym_03()\n{\n    int data;\n\n    data = -1;\n    if(globalFive!=5)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        data = 7;\n    }\n    if(globalFive==5)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n\nstatic void sym_04()\n{\n    int data;\n\n    data = -1;\n    if(globalFive==5)\n    {\n\n        data = 7;\n    }\n    if(globalFive==5)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n\nvoid sym_05()\n{\n    sym_01();\n    sym_02();\n    sym_03();\n    sym_04();\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-06-v",
+   "category": "array_oob",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_44",
+   "family": "CWE129_fscanf",
+   "flow": "44",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_44.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_44.c": "5b01e9a15a782b4867f8247fb5244c912f4833d754a7968c6e68f646742257b0"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nstatic void sym_01(int data)\n{\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0)\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is negative.\");\n        }\n    }\n}\n\nvoid sym_02()\n{\n    int data;\n\n    void (*funcPtr) (int) = sym_01;\n\n    data = -1;\n\n    fscanf(stdin, \"%d\", &data);\n\n    funcPtr(data);\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-06-s",
+   "category": "array_oob",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_44",
+   "family": "CWE129_fscanf",
+   "flow": "44",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_44.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_44.c": "5b01e9a15a782b4867f8247fb5244c912f4833d754a7968c6e68f646742257b0"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nstatic void sym_01(int data)\n{\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0)\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is negative.\");\n        }\n    }\n}\n\nstatic void sym_02()\n{\n    int data;\n    void (*funcPtr) (int) = sym_01;\n\n    data = -1;\n\n    data = 7;\n    funcPtr(data);\n}\n\nstatic void sym_03(int data)\n{\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0 && data < (10))\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is out-of-bounds\");\n        }\n    }\n}\n\nstatic void sym_04()\n{\n    int data;\n    void (*funcPtr) (int) = sym_03;\n\n    data = -1;\n\n    fscanf(stdin, \"%d\", &data);\n    funcPtr(data);\n}\n\nvoid sym_05()\n{\n    sym_02();\n    sym_04();\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-07-v",
+   "category": "array_oob",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52",
+   "family": "CWE805_int_alloca_loop",
+   "flow": "52",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52b.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52c.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52a.c": "e77c1b98cc06910e7ae92a9b89e5bab72496305ae795b4ad7724b00189032acb",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52b.c": "eb172bd4789b0040a16e4f22e5819b63511445b8d51da5640653f78486a0408b",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52c.c": "442aec4c4057a45238b171226171f1625ba63759fbd61193352d7edb73a0a6af"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nvoid sym_01(int * data);\n\nvoid sym_02()\n{\n    int * data;\n    int * sym_03 = (int *)ALLOCA(50*sizeof(int));\n    int * sym_04 = (int *)ALLOCA(100*sizeof(int));\n\n    data = sym_03;\n    sym_01(data);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\nvoid sym_05(int * data);\n\nvoid sym_01(int * data)\n{\n    sym_05(data);\n}\n",
+    "src_c.c": "#include \"std_testcase.h\"\n\nvoid sym_05(int * data)\n{\n    {\n        int source[100] = {0};\n        {\n            size_t i;\n\n            for (i = 0; i < 100; i++)\n            {\n                data[i] = source[i];\n            }\n            printIntLine(data[0]);\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-07-s",
+   "category": "array_oob",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52",
+   "family": "CWE805_int_alloca_loop",
+   "flow": "52",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52b.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52c.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52a.c": "e77c1b98cc06910e7ae92a9b89e5bab72496305ae795b4ad7724b00189032acb",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52b.c": "eb172bd4789b0040a16e4f22e5819b63511445b8d51da5640653f78486a0408b",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_int_alloca_loop_52c.c": "442aec4c4057a45238b171226171f1625ba63759fbd61193352d7edb73a0a6af"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nvoid sym_01(int * data);\n\nstatic void sym_02()\n{\n    int * data;\n    int * sym_03 = (int *)ALLOCA(50*sizeof(int));\n    int * sym_04 = (int *)ALLOCA(100*sizeof(int));\n\n    data = sym_04;\n    sym_01(data);\n}\n\nvoid sym_05()\n{\n    sym_02();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\nvoid sym_06(int * data);\n\nvoid sym_01(int * data)\n{\n    sym_06(data);\n}\n",
+    "src_c.c": "#include \"std_testcase.h\"\n\nvoid sym_06(int * data)\n{\n    {\n        int source[100] = {0};\n        {\n            size_t i;\n\n            for (i = 0; i < 100; i++)\n            {\n                data[i] = source[i];\n            }\n            printIntLine(data[0]);\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-08-v",
+   "category": "array_oob",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53",
+   "family": "CWE129_fscanf",
+   "flow": "53",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53b.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53c.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53d.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53a.c": "4805ee21cf75787e00848d5ac48d59912b6130bb93a39a08d4eee0b1dcf5c3b0",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53b.c": "c1431d816212339fc12a247976e071881a32e2ca5172f34a59bb596d387096f8",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53c.c": "4261cf0b8bdb0b955ff79622e742ac615970bc07d69c9a1ce7ba49e87c7f74a7",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53d.c": "9fe2eafbe841f5f376697113e28d95a8be26269ade421eafade58120d260b29c"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nvoid sym_01(int data);\n\nvoid sym_02()\n{\n    int data;\n\n    data = -1;\n\n    fscanf(stdin, \"%d\", &data);\n    sym_01(data);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\nvoid sym_03(int data);\n\nvoid sym_01(int data)\n{\n    sym_03(data);\n}\n",
+    "src_c.c": "#include \"std_testcase.h\"\n\nvoid sym_04(int data);\n\nvoid sym_03(int data)\n{\n    sym_04(data);\n}\n",
+    "src_d.c": "#include \"std_testcase.h\"\n\nvoid sym_04(int data)\n{\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0)\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is negative.\");\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-08-s",
+   "category": "array_oob",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53",
+   "family": "CWE129_fscanf",
+   "flow": "53",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53b.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53c.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53d.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53a.c": "4805ee21cf75787e00848d5ac48d59912b6130bb93a39a08d4eee0b1dcf5c3b0",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53b.c": "c1431d816212339fc12a247976e071881a32e2ca5172f34a59bb596d387096f8",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53c.c": "4261cf0b8bdb0b955ff79622e742ac615970bc07d69c9a1ce7ba49e87c7f74a7",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fscanf_53d.c": "9fe2eafbe841f5f376697113e28d95a8be26269ade421eafade58120d260b29c"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nvoid sym_01(int data);\n\nstatic void sym_02()\n{\n    int data;\n\n    data = -1;\n\n    data = 7;\n    sym_01(data);\n}\n\nvoid sym_03(int data);\n\nstatic void sym_04()\n{\n    int data;\n\n    data = -1;\n\n    fscanf(stdin, \"%d\", &data);\n    sym_03(data);\n}\n\nvoid sym_05()\n{\n    sym_02();\n    sym_04();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\nvoid sym_06(int data);\n\nvoid sym_01(int data)\n{\n    sym_06(data);\n}\n\nvoid sym_07(int data);\n\nvoid sym_03(int data)\n{\n    sym_07(data);\n}\n",
+    "src_c.c": "#include \"std_testcase.h\"\n\nvoid sym_08(int data);\n\nvoid sym_06(int data)\n{\n    sym_08(data);\n}\n\nvoid sym_09(int data);\n\nvoid sym_07(int data)\n{\n    sym_09(data);\n}\n",
+    "src_d.c": "#include \"std_testcase.h\"\n\nvoid sym_08(int data)\n{\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0)\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is negative.\");\n        }\n    }\n}\n\nvoid sym_09(int data)\n{\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0 && data < (10))\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is out-of-bounds\");\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-09-v",
+   "category": "array_oob",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_large_68",
+   "family": "CWE129_large",
+   "flow": "68",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_large_68a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_large_68b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_large_68a.c": "b2e315af6d19ca6297993c74f3ed68ebbf6a5ab34886fe8e8edb576484822eac",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_large_68b.c": "bce76cbde94e6f97b7df0aba6c5111031ddab5b35175205cced9b465995b75f3"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nint sym_01;\nint sym_02;\nint sym_03;\n\nvoid sym_04();\n\nvoid sym_05()\n{\n    int data;\n\n    data = -1;\n\n    data = 10;\n    sym_01 = data;\n    sym_04();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\nextern int sym_01;\nextern int sym_02;\nextern int sym_03;\n\nvoid sym_04()\n{\n    int data = sym_01;\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0)\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is negative.\");\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-09-s",
+   "category": "array_oob",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_large_68",
+   "family": "CWE129_large",
+   "flow": "68",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_large_68a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_large_68b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_large_68a.c": "b2e315af6d19ca6297993c74f3ed68ebbf6a5ab34886fe8e8edb576484822eac",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_large_68b.c": "bce76cbde94e6f97b7df0aba6c5111031ddab5b35175205cced9b465995b75f3"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nint sym_01;\nint sym_02;\nint sym_03;\n\nvoid sym_04();\nvoid sym_05();\n\nstatic void sym_06()\n{\n    int data;\n\n    data = -1;\n\n    data = 7;\n    sym_02 = data;\n    sym_04();\n}\n\nstatic void sym_07()\n{\n    int data;\n\n    data = -1;\n\n    data = 10;\n    sym_03 = data;\n    sym_05();\n}\n\nvoid sym_08()\n{\n    sym_06();\n    sym_07();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\nextern int sym_01;\nextern int sym_02;\nextern int sym_03;\n\nvoid sym_04()\n{\n    int data = sym_02;\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0)\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is negative.\");\n        }\n    }\n}\n\nvoid sym_05()\n{\n    int data = sym_03;\n    {\n        int i;\n        int buffer[10] = { 0 };\n\n        if (data >= 0 && data < (10))\n        {\n            buffer[data] = 1;\n\n            for(i = 0; i < 10; i++)\n            {\n                printIntLine(buffer[i]);\n            }\n        }\n        else\n        {\n            printLine(\"ERROR: Array index is out-of-bounds\");\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-10-v",
+   "category": "array_oob",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_fgets_13",
+   "family": "CWE129_fgets",
+   "flow": "13",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fgets_13.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fgets_13.c": "d803da99ed0c3acf626efd2655a6917231ef553a42fc6e10f5f983419081b16f"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#define CHAR_ARRAY_SIZE (3 * sizeof(data) + 2)\n\nvoid sym_01()\n{\n    int data;\n\n    data = -1;\n    if(GLOBAL_CONST_FIVE==5)\n    {\n        {\n            char inputBuffer[CHAR_ARRAY_SIZE] = \"\";\n\n            if (fgets(inputBuffer, CHAR_ARRAY_SIZE, stdin) != NULL)\n            {\n\n                data = atoi(inputBuffer);\n            }\n            else\n            {\n                printLine(\"fgets() failed.\");\n            }\n        }\n    }\n    if(GLOBAL_CONST_FIVE==5)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "array_oob-10-s",
+   "category": "array_oob",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE129_fgets_13",
+   "family": "CWE129_fgets",
+   "flow": "13",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s01/CWE121_Stack_Based_Buffer_Overflow__CWE129_fgets_13.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE129_fgets_13.c": "d803da99ed0c3acf626efd2655a6917231ef553a42fc6e10f5f983419081b16f"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#define CHAR_ARRAY_SIZE (3 * sizeof(data) + 2)\n\nstatic void sym_01()\n{\n    int data;\n\n    data = -1;\n    if(GLOBAL_CONST_FIVE==5)\n    {\n        {\n            char inputBuffer[CHAR_ARRAY_SIZE] = \"\";\n\n            if (fgets(inputBuffer, CHAR_ARRAY_SIZE, stdin) != NULL)\n            {\n\n                data = atoi(inputBuffer);\n            }\n            else\n            {\n                printLine(\"fgets() failed.\");\n            }\n        }\n    }\n    if(GLOBAL_CONST_FIVE!=5)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0 && data < (10))\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is out-of-bounds\");\n            }\n        }\n    }\n}\n\nstatic void sym_02()\n{\n    int data;\n\n    data = -1;\n    if(GLOBAL_CONST_FIVE==5)\n    {\n        {\n            char inputBuffer[CHAR_ARRAY_SIZE] = \"\";\n\n            if (fgets(inputBuffer, CHAR_ARRAY_SIZE, stdin) != NULL)\n            {\n\n                data = atoi(inputBuffer);\n            }\n            else\n            {\n                printLine(\"fgets() failed.\");\n            }\n        }\n    }\n    if(GLOBAL_CONST_FIVE==5)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0 && data < (10))\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is out-of-bounds\");\n            }\n        }\n    }\n}\n\nstatic void sym_03()\n{\n    int data;\n\n    data = -1;\n    if(GLOBAL_CONST_FIVE!=5)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        data = 7;\n    }\n    if(GLOBAL_CONST_FIVE==5)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n\nstatic void sym_04()\n{\n    int data;\n\n    data = -1;\n    if(GLOBAL_CONST_FIVE==5)\n    {\n\n        data = 7;\n    }\n    if(GLOBAL_CONST_FIVE==5)\n    {\n        {\n            int i;\n            int buffer[10] = { 0 };\n\n            if (data >= 0)\n            {\n                buffer[data] = 1;\n\n                for(i = 0; i < 10; i++)\n                {\n                    printIntLine(buffer[i]);\n                }\n            }\n            else\n            {\n                printLine(\"ERROR: Array index is negative.\");\n            }\n        }\n    }\n}\n\nvoid sym_05()\n{\n    sym_01();\n    sym_02();\n    sym_03();\n    sym_04();\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-01-v",
+   "category": "string_overflow",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE193_char_declare_cpy_13",
+   "family": "CWE193_char_declare_cpy",
+   "flow": "13",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s02/CWE121_Stack_Based_Buffer_Overflow__CWE193_char_declare_cpy_13.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE193_char_declare_cpy_13.c": "beb35acc6847063bbbdfd20009146abc66451199c8c6986e48d3899528277683"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#ifndef _WIN32\n#include <wchar.h>\n#endif\n\n#define SRC_STRING \"AAAAAAAAAA\"\n\nvoid sym_01()\n{\n    char * data;\n    char sym_02[10];\n    char sym_03[10+1];\n    if(GLOBAL_CONST_FIVE==5)\n    {\n\n        data = sym_02;\n        data[0] = '\\0';\n    }\n    {\n        char source[10+1] = SRC_STRING;\n\n        strcpy(data, source);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-01-s",
+   "category": "string_overflow",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE193_char_declare_cpy_13",
+   "family": "CWE193_char_declare_cpy",
+   "flow": "13",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s02/CWE121_Stack_Based_Buffer_Overflow__CWE193_char_declare_cpy_13.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE193_char_declare_cpy_13.c": "beb35acc6847063bbbdfd20009146abc66451199c8c6986e48d3899528277683"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#ifndef _WIN32\n#include <wchar.h>\n#endif\n\n#define SRC_STRING \"AAAAAAAAAA\"\n\nstatic void sym_01()\n{\n    char * data;\n    char sym_02[10];\n    char sym_03[10+1];\n    if(GLOBAL_CONST_FIVE!=5)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        data = sym_03;\n        data[0] = '\\0';\n    }\n    {\n        char source[10+1] = SRC_STRING;\n\n        strcpy(data, source);\n        printLine(data);\n    }\n}\n\nstatic void sym_04()\n{\n    char * data;\n    char sym_02[10];\n    char sym_03[10+1];\n    if(GLOBAL_CONST_FIVE==5)\n    {\n\n        data = sym_03;\n        data[0] = '\\0';\n    }\n    {\n        char source[10+1] = SRC_STRING;\n\n        strcpy(data, source);\n        printLine(data);\n    }\n}\n\nvoid sym_05()\n{\n    sym_01();\n    sym_04();\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-02-v",
+   "category": "string_overflow",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52",
+   "family": "CWE805_char_declare_ncpy",
+   "flow": "52",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s03/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s03/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52b.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s03/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52c.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52a.c": "bd0f27e7b62bed611a04ff4f6e8b58bc122115b401b3d0b4a4a3ffd671c12ab5",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52b.c": "94fdc259abb11ad205c9526f1fb2e796453c0037bdfb70b17b6116cbe9b069f1",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52c.c": "f83c312f5799c300b11fea5d367a2d2247bc89aa9981ee97a6a1bbc6598ec980"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(char * data);\n\nvoid sym_02()\n{\n    char * data;\n    char sym_03[50];\n    char sym_04[100];\n\n    data = sym_03;\n    data[0] = '\\0';\n    sym_01(data);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_05(char * data);\n\nvoid sym_01(char * data)\n{\n    sym_05(data);\n}\n",
+    "src_c.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_05(char * data)\n{\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strncpy(data, source, 100-1);\n        data[100-1] = '\\0';\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-02-s",
+   "category": "string_overflow",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52",
+   "family": "CWE805_char_declare_ncpy",
+   "flow": "52",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s03/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s03/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52b.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s03/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52c.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52a.c": "bd0f27e7b62bed611a04ff4f6e8b58bc122115b401b3d0b4a4a3ffd671c12ab5",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52b.c": "94fdc259abb11ad205c9526f1fb2e796453c0037bdfb70b17b6116cbe9b069f1",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_52c.c": "f83c312f5799c300b11fea5d367a2d2247bc89aa9981ee97a6a1bbc6598ec980"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(char * data);\n\nstatic void sym_02()\n{\n    char * data;\n    char sym_03[50];\n    char sym_04[100];\n\n    data = sym_04;\n    data[0] = '\\0';\n    sym_01(data);\n}\n\nvoid sym_05()\n{\n    sym_02();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_06(char * data);\n\nvoid sym_01(char * data)\n{\n    sym_06(data);\n}\n",
+    "src_c.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_06(char * data)\n{\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strncpy(data, source, 100-1);\n        data[100-1] = '\\0';\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-03-v",
+   "category": "string_overflow",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__src_char_declare_cpy_66",
+   "family": "src_char_declare_cpy",
+   "flow": "66",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s09/CWE121_Stack_Based_Buffer_Overflow__src_char_declare_cpy_66a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s09/CWE121_Stack_Based_Buffer_Overflow__src_char_declare_cpy_66b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__src_char_declare_cpy_66a.c": "382b7ef9ddbeb678b2585f4d76a2188258f7c51ba3c87a5d904ed20e09f6f6aa",
+    "CWE121_Stack_Based_Buffer_Overflow__src_char_declare_cpy_66b.c": "4a05bf864272c3d31e9560ad805a78fd9ab0779380677ffbb1928ea83ef3ec9c"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(char * dataArray[]);\n\nvoid sym_02()\n{\n    char * data;\n    char * dataArray[5];\n    char dataBuffer[100];\n    data = dataBuffer;\n\n    memset(data, 'A', 100-1);\n    data[100-1] = '\\0';\n\n    dataArray[2] = data;\n    sym_01(dataArray);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(char * dataArray[])\n{\n\n    char * data = dataArray[2];\n    {\n        char dest[50] = \"\";\n\n        strcpy(dest, data);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-03-s",
+   "category": "string_overflow",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__src_char_declare_cpy_66",
+   "family": "src_char_declare_cpy",
+   "flow": "66",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s09/CWE121_Stack_Based_Buffer_Overflow__src_char_declare_cpy_66a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s09/CWE121_Stack_Based_Buffer_Overflow__src_char_declare_cpy_66b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__src_char_declare_cpy_66a.c": "382b7ef9ddbeb678b2585f4d76a2188258f7c51ba3c87a5d904ed20e09f6f6aa",
+    "CWE121_Stack_Based_Buffer_Overflow__src_char_declare_cpy_66b.c": "4a05bf864272c3d31e9560ad805a78fd9ab0779380677ffbb1928ea83ef3ec9c"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(char * dataArray[]);\n\nstatic void sym_02()\n{\n    char * data;\n    char * dataArray[5];\n    char dataBuffer[100];\n    data = dataBuffer;\n\n    memset(data, 'A', 50-1);\n    data[50-1] = '\\0';\n    dataArray[2] = data;\n    sym_01(dataArray);\n}\n\nvoid sym_03()\n{\n    sym_02();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(char * dataArray[])\n{\n    char * data = dataArray[2];\n    {\n        char dest[50] = \"\";\n\n        strcpy(dest, data);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-04-v",
+   "category": "string_overflow",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__dest_char_alloca_cat_67",
+   "family": "dest_char_alloca_cat",
+   "flow": "67",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s08/CWE121_Stack_Based_Buffer_Overflow__dest_char_alloca_cat_67a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s08/CWE121_Stack_Based_Buffer_Overflow__dest_char_alloca_cat_67b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__dest_char_alloca_cat_67a.c": "7ded393d138411039ada537706774da7886f49b116b29b61af1ace81c5e76641",
+    "CWE121_Stack_Based_Buffer_Overflow__dest_char_alloca_cat_67b.c": "38f032a44919d92e64f4bf3f7977349eff403b2c2d1091e6947d80ea03e83ea7"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\ntypedef struct sym_01\n{\n    char * structFirst;\n} sym_02;\n\nvoid sym_03(sym_02 myStruct);\n\nvoid sym_04()\n{\n    char * data;\n    sym_02 myStruct;\n    char * sym_05 = (char *)ALLOCA(50*sizeof(char));\n    char * sym_06 = (char *)ALLOCA(100*sizeof(char));\n\n    data = sym_05;\n    data[0] = '\\0';\n    myStruct.structFirst = data;\n    sym_03(myStruct);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\ntypedef struct sym_01\n{\n    char * structFirst;\n} sym_02;\n\nvoid sym_03(sym_02 myStruct)\n{\n    char * data = myStruct.structFirst;\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strcat(data, source);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-04-s",
+   "category": "string_overflow",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__dest_char_alloca_cat_67",
+   "family": "dest_char_alloca_cat",
+   "flow": "67",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s08/CWE121_Stack_Based_Buffer_Overflow__dest_char_alloca_cat_67a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s08/CWE121_Stack_Based_Buffer_Overflow__dest_char_alloca_cat_67b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__dest_char_alloca_cat_67a.c": "7ded393d138411039ada537706774da7886f49b116b29b61af1ace81c5e76641",
+    "CWE121_Stack_Based_Buffer_Overflow__dest_char_alloca_cat_67b.c": "38f032a44919d92e64f4bf3f7977349eff403b2c2d1091e6947d80ea03e83ea7"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\ntypedef struct sym_01\n{\n    char * structFirst;\n} sym_02;\n\nvoid sym_03(sym_02 myStruct);\n\nstatic void sym_04()\n{\n    char * data;\n    sym_02 myStruct;\n    char * sym_05 = (char *)ALLOCA(50*sizeof(char));\n    char * sym_06 = (char *)ALLOCA(100*sizeof(char));\n\n    data = sym_06;\n    data[0] = '\\0';\n    myStruct.structFirst = data;\n    sym_03(myStruct);\n}\n\nvoid sym_07()\n{\n    sym_04();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\ntypedef struct sym_01\n{\n    char * structFirst;\n} sym_02;\n\nvoid sym_03(sym_02 myStruct)\n{\n    char * data = myStruct.structFirst;\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strcat(data, source);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-05-v",
+   "category": "string_overflow",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_snprintf_67",
+   "family": "CWE805_char_declare_snprintf",
+   "flow": "67",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_snprintf_67a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_snprintf_67b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_snprintf_67a.c": "98f4dc67ceedc38461ef46455f8d2e3b34035f70d338317de2bdb97b7efe44b8",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_snprintf_67b.c": "725292cc231ca1b8a6f4d390c2fa51840b768a6e1912a5103ca5a888f79c50f0"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\n#ifdef _WIN32\n#define SNPRINTF _snprintf\n#else\n#define SNPRINTF snprintf\n#endif\n\ntypedef struct sym_01\n{\n    char * structFirst;\n} sym_02;\n\nvoid sym_03(sym_02 myStruct);\n\nvoid sym_04()\n{\n    char * data;\n    sym_02 myStruct;\n    char sym_05[50];\n    char sym_06[100];\n\n    data = sym_05;\n    data[0] = '\\0';\n    myStruct.structFirst = data;\n    sym_03(myStruct);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\n#ifdef _WIN32\n#define SNPRINTF _snprintf\n#else\n#define SNPRINTF snprintf\n#endif\n\ntypedef struct sym_01\n{\n    char * structFirst;\n} sym_02;\n\nvoid sym_03(sym_02 myStruct)\n{\n    char * data = myStruct.structFirst;\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        SNPRINTF(data, 100, \"%s\", source);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-05-s",
+   "category": "string_overflow",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_snprintf_67",
+   "family": "CWE805_char_declare_snprintf",
+   "flow": "67",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_snprintf_67a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s04/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_snprintf_67b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_snprintf_67a.c": "98f4dc67ceedc38461ef46455f8d2e3b34035f70d338317de2bdb97b7efe44b8",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_snprintf_67b.c": "725292cc231ca1b8a6f4d390c2fa51840b768a6e1912a5103ca5a888f79c50f0"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\n#ifdef _WIN32\n#define SNPRINTF _snprintf\n#else\n#define SNPRINTF snprintf\n#endif\n\ntypedef struct sym_01\n{\n    char * structFirst;\n} sym_02;\n\nvoid sym_03(sym_02 myStruct);\n\nstatic void sym_04()\n{\n    char * data;\n    sym_02 myStruct;\n    char sym_05[50];\n    char sym_06[100];\n\n    data = sym_06;\n    data[0] = '\\0';\n    myStruct.structFirst = data;\n    sym_03(myStruct);\n}\n\nvoid sym_07()\n{\n    sym_04();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\n#ifdef _WIN32\n#define SNPRINTF _snprintf\n#else\n#define SNPRINTF snprintf\n#endif\n\ntypedef struct sym_01\n{\n    char * structFirst;\n} sym_02;\n\nvoid sym_03(sym_02 myStruct)\n{\n    char * data = myStruct.structFirst;\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        SNPRINTF(data, 100, \"%s\", source);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-06-v",
+   "category": "string_overflow",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_68",
+   "family": "dest_char_declare_cpy",
+   "flow": "68",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s08/CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_68a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s08/CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_68b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_68a.c": "eb0f8c1a4f6698889bf2203dfc1c5a4f9c947d6e509da3a44701ecfeaa525cd5",
+    "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_68b.c": "e34ac7b0defb821226a1f89336da0ba89b3bf9e3e82955df47d8f74c3278b396"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nchar * sym_01;\nchar * sym_02;\n\nvoid sym_03();\n\nvoid sym_04()\n{\n    char * data;\n    char sym_05[50];\n    char sym_06[100];\n\n    data = sym_05;\n    data[0] = '\\0';\n    sym_01 = data;\n    sym_03();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nextern char * sym_01;\nextern char * sym_02;\n\nvoid sym_03()\n{\n    char * data = sym_01;\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strcpy(data, source);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-06-s",
+   "category": "string_overflow",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_68",
+   "family": "dest_char_declare_cpy",
+   "flow": "68",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s08/CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_68a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s08/CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_68b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_68a.c": "eb0f8c1a4f6698889bf2203dfc1c5a4f9c947d6e509da3a44701ecfeaa525cd5",
+    "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cpy_68b.c": "e34ac7b0defb821226a1f89336da0ba89b3bf9e3e82955df47d8f74c3278b396"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nchar * sym_01;\nchar * sym_02;\n\nvoid sym_03();\n\nstatic void sym_04()\n{\n    char * data;\n    char sym_05[50];\n    char sym_06[100];\n\n    data = sym_06;\n    data[0] = '\\0';\n    sym_02 = data;\n    sym_03();\n}\n\nvoid sym_07()\n{\n    sym_04();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nextern char * sym_01;\nextern char * sym_02;\n\nvoid sym_03()\n{\n    char * data = sym_02;\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strcpy(data, source);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-07-v",
+   "category": "string_overflow",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_65",
+   "family": "CWE806_char_declare_snprintf",
+   "flow": "65",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s07/CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_65a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s07/CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_65b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_65a.c": "c07ec967a74110af46b98e7549a90c1af1ecc571c758cc661b96e0fac46be182",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_65b.c": "74edcf51ad9a7d054ee4ec00a3c33c824c4b22a3db7f8dff69f4bd6b2b1f8940"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\n#ifdef _WIN32\n#define SNPRINTF _snprintf\n#else\n#define SNPRINTF snprintf\n#endif\n\nvoid sym_01(char * data);\n\nvoid sym_02()\n{\n    char * data;\n\n    void (*funcPtr) (char *) = sym_01;\n    char dataBuffer[100];\n    data = dataBuffer;\n\n    memset(data, 'A', 100-1);\n    data[100-1] = '\\0';\n\n    funcPtr(data);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\n#ifdef _WIN32\n#define SNPRINTF _snprintf\n#else\n#define SNPRINTF snprintf\n#endif\n\nvoid sym_01(char * data)\n{\n    {\n        char dest[50] = \"\";\n\n        SNPRINTF(dest, strlen(data), \"%s\", data);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-07-s",
+   "category": "string_overflow",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_65",
+   "family": "CWE806_char_declare_snprintf",
+   "flow": "65",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s07/CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_65a.c",
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s07/CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_65b.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_65a.c": "c07ec967a74110af46b98e7549a90c1af1ecc571c758cc661b96e0fac46be182",
+    "CWE121_Stack_Based_Buffer_Overflow__CWE806_char_declare_snprintf_65b.c": "74edcf51ad9a7d054ee4ec00a3c33c824c4b22a3db7f8dff69f4bd6b2b1f8940"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\n#ifdef _WIN32\n#define SNPRINTF _snprintf\n#else\n#define SNPRINTF snprintf\n#endif\n\nvoid sym_01(char * data);\n\nstatic void sym_02()\n{\n    char * data;\n    void (*funcPtr) (char *) = sym_01;\n    char dataBuffer[100];\n    data = dataBuffer;\n\n    memset(data, 'A', 50-1);\n    data[50-1] = '\\0';\n    funcPtr(data);\n}\n\nvoid sym_03()\n{\n    sym_02();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\n#ifdef _WIN32\n#define SNPRINTF _snprintf\n#else\n#define SNPRINTF snprintf\n#endif\n\nvoid sym_01(char * data)\n{\n    {\n        char dest[50] = \"\";\n\n        SNPRINTF(dest, strlen(data), \"%s\", data);\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-08-v",
+   "category": "string_overflow",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_13",
+   "family": "CWE805_char_declare_ncpy",
+   "flow": "13",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s03/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_13.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_13.c": "ad76432ee8c3d84cd28636b73974d89404660c933d0209030f28655c8a97384d"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01()\n{\n    char * data;\n    char sym_02[50];\n    char sym_03[100];\n    if(GLOBAL_CONST_FIVE==5)\n    {\n\n        data = sym_02;\n        data[0] = '\\0';\n    }\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strncpy(data, source, 100-1);\n        data[100-1] = '\\0';\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-08-s",
+   "category": "string_overflow",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_13",
+   "family": "CWE805_char_declare_ncpy",
+   "flow": "13",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s03/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_13.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_13.c": "ad76432ee8c3d84cd28636b73974d89404660c933d0209030f28655c8a97384d"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nstatic void sym_01()\n{\n    char * data;\n    char sym_02[50];\n    char sym_03[100];\n    if(GLOBAL_CONST_FIVE!=5)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        data = sym_03;\n        data[0] = '\\0';\n    }\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strncpy(data, source, 100-1);\n        data[100-1] = '\\0';\n        printLine(data);\n    }\n}\n\nstatic void sym_04()\n{\n    char * data;\n    char sym_02[50];\n    char sym_03[100];\n    if(GLOBAL_CONST_FIVE==5)\n    {\n\n        data = sym_03;\n        data[0] = '\\0';\n    }\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strncpy(data, source, 100-1);\n        data[100-1] = '\\0';\n        printLine(data);\n    }\n}\n\nvoid sym_05()\n{\n    sym_01();\n    sym_04();\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-09-v",
+   "category": "string_overflow",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cat_44",
+   "family": "dest_char_declare_cat",
+   "flow": "44",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s08/CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cat_44.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cat_44.c": "693cc61975fe476e1eb0925d3ab8e1590b8f7cca9b604b21122894c2fdbefba6"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nstatic void sym_01(char * data)\n{\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strcat(data, source);\n        printLine(data);\n    }\n}\n\nvoid sym_02()\n{\n    char * data;\n\n    void (*funcPtr) (char *) = sym_01;\n    char sym_03[50];\n    char sym_04[100];\n\n    data = sym_03;\n    data[0] = '\\0';\n\n    funcPtr(data);\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-09-s",
+   "category": "string_overflow",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cat_44",
+   "family": "dest_char_declare_cat",
+   "flow": "44",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s08/CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cat_44.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__dest_char_declare_cat_44.c": "693cc61975fe476e1eb0925d3ab8e1590b8f7cca9b604b21122894c2fdbefba6"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nstatic void sym_01(char * data)\n{\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strcat(data, source);\n        printLine(data);\n    }\n}\n\nstatic void sym_02()\n{\n    char * data;\n    void (*funcPtr) (char *) = sym_01;\n    char sym_03[50];\n    char sym_04[100];\n\n    data = sym_04;\n    data[0] = '\\0';\n    funcPtr(data);\n}\n\nvoid sym_05()\n{\n    sym_02();\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-10-v",
+   "category": "string_overflow",
+   "vulnerable": true,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_10",
+   "family": "CWE805_char_declare_ncpy",
+   "flow": "10",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s03/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_10.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_10.c": "9b7b39578199c7834e0f8229f9f84761ac816ebb5b5a8c7144e3fc858b6d02e4"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01()\n{\n    char * data;\n    char sym_02[50];\n    char sym_03[100];\n    if(globalTrue)\n    {\n\n        data = sym_02;\n        data[0] = '\\0';\n    }\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strncpy(data, source, 100-1);\n        data[100-1] = '\\0';\n        printLine(data);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "string_overflow-10-s",
+   "category": "string_overflow",
+   "vulnerable": false,
+   "testcase": "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_10",
+   "family": "CWE805_char_declare_ncpy",
+   "flow": "10",
+   "origin": [
+    "testcases/CWE121_Stack_Based_Buffer_Overflow/s03/CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_10.c"
+   ],
+   "origin_sha256": {
+    "CWE121_Stack_Based_Buffer_Overflow__CWE805_char_declare_ncpy_10.c": "9b7b39578199c7834e0f8229f9f84761ac816ebb5b5a8c7144e3fc858b6d02e4"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nstatic void sym_01()\n{\n    char * data;\n    char sym_02[50];\n    char sym_03[100];\n    if(globalFalse)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        data = sym_03;\n        data[0] = '\\0';\n    }\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strncpy(data, source, 100-1);\n        data[100-1] = '\\0';\n        printLine(data);\n    }\n}\n\nstatic void sym_04()\n{\n    char * data;\n    char sym_02[50];\n    char sym_03[100];\n    if(globalTrue)\n    {\n\n        data = sym_03;\n        data[0] = '\\0';\n    }\n    {\n        char source[100];\n        memset(source, 'C', 100-1);\n        source[100-1] = '\\0';\n\n        strncpy(data, source, 100-1);\n        data[100-1] = '\\0';\n        printLine(data);\n    }\n}\n\nvoid sym_05()\n{\n    sym_01();\n    sym_04();\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-01-v",
+   "category": "null_pointer",
+   "vulnerable": true,
+   "testcase": "CWE476_NULL_Pointer_Dereference__long_53",
+   "family": "long",
+   "flow": "53",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__long_53a.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__long_53b.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__long_53c.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__long_53d.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__long_53a.c": "d060dddc6535e5a9e9466fda746fea68ef046e529855318d0fb0741c4ffc45b8",
+    "CWE476_NULL_Pointer_Dereference__long_53b.c": "dd75996a8b783bbbd02940f52baf71497994e69fa484bfdb1c28df4adf1801a1",
+    "CWE476_NULL_Pointer_Dereference__long_53c.c": "5b849249b12f181c84992b0fc27ded0d0f015bff17c360ce8bb85eea61b3cbbc",
+    "CWE476_NULL_Pointer_Dereference__long_53d.c": "61f8219e66ac1d961a8777932c5d7d6ef22e335b14c171b5204177f01d193ee9"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(long * data);\n\nvoid sym_02()\n{\n    long * data;\n\n    data = NULL;\n    sym_01(data);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_03(long * data);\n\nvoid sym_01(long * data)\n{\n    sym_03(data);\n}\n",
+    "src_c.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_04(long * data);\n\nvoid sym_03(long * data)\n{\n    sym_04(data);\n}\n",
+    "src_d.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_04(long * data)\n{\n\n    printLongLine(*data);\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-01-s",
+   "category": "null_pointer",
+   "vulnerable": false,
+   "testcase": "CWE476_NULL_Pointer_Dereference__long_53",
+   "family": "long",
+   "flow": "53",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__long_53a.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__long_53b.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__long_53c.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__long_53d.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__long_53a.c": "d060dddc6535e5a9e9466fda746fea68ef046e529855318d0fb0741c4ffc45b8",
+    "CWE476_NULL_Pointer_Dereference__long_53b.c": "dd75996a8b783bbbd02940f52baf71497994e69fa484bfdb1c28df4adf1801a1",
+    "CWE476_NULL_Pointer_Dereference__long_53c.c": "5b849249b12f181c84992b0fc27ded0d0f015bff17c360ce8bb85eea61b3cbbc",
+    "CWE476_NULL_Pointer_Dereference__long_53d.c": "61f8219e66ac1d961a8777932c5d7d6ef22e335b14c171b5204177f01d193ee9"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(long * data);\n\nstatic void sym_02()\n{\n    long * data;\n    long tmpData = 5L;\n\n    {\n        data = &tmpData;\n    }\n    sym_01(data);\n}\n\nvoid sym_03(long * data);\n\nstatic void sym_04()\n{\n    long * data;\n\n    data = NULL;\n    sym_03(data);\n}\n\nvoid sym_05()\n{\n    sym_02();\n    sym_04();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_06(long * data);\n\nvoid sym_01(long * data)\n{\n    sym_06(data);\n}\n\nvoid sym_07(long * data);\n\nvoid sym_03(long * data)\n{\n    sym_07(data);\n}\n",
+    "src_c.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_08(long * data);\n\nvoid sym_06(long * data)\n{\n    sym_08(data);\n}\n\nvoid sym_09(long * data);\n\nvoid sym_07(long * data)\n{\n    sym_09(data);\n}\n",
+    "src_d.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_08(long * data)\n{\n\n    printLongLine(*data);\n}\n\nvoid sym_09(long * data)\n{\n\n    if (data != NULL)\n    {\n        printLongLine(*data);\n    }\n    else\n    {\n        printLine(\"data is NULL\");\n    }\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-02-v",
+   "category": "null_pointer",
+   "vulnerable": true,
+   "testcase": "CWE476_NULL_Pointer_Dereference__struct_52",
+   "family": "struct",
+   "flow": "52",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__struct_52a.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__struct_52b.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__struct_52c.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__struct_52a.c": "60b9a87eb3d88e9a1cab5bb8813c25474aacb42a0f86d3287781d3b9689e7d94",
+    "CWE476_NULL_Pointer_Dereference__struct_52b.c": "a27ddb2840e5dda7e29636fe300f83976178398a6917f0d3489a4d064c322c93",
+    "CWE476_NULL_Pointer_Dereference__struct_52c.c": "fc21103201a40e2a33b8576ed23bb539dbfbc7e6043c2197910fcb6bc9d58e4b"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(twoIntsStruct * data);\n\nvoid sym_02()\n{\n    twoIntsStruct * data;\n\n    data = NULL;\n    sym_01(data);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_03(twoIntsStruct * data);\n\nvoid sym_01(twoIntsStruct * data)\n{\n    sym_03(data);\n}\n",
+    "src_c.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_03(twoIntsStruct * data)\n{\n\n    printIntLine(data->intOne);\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-02-s",
+   "category": "null_pointer",
+   "vulnerable": false,
+   "testcase": "CWE476_NULL_Pointer_Dereference__struct_52",
+   "family": "struct",
+   "flow": "52",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__struct_52a.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__struct_52b.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__struct_52c.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__struct_52a.c": "60b9a87eb3d88e9a1cab5bb8813c25474aacb42a0f86d3287781d3b9689e7d94",
+    "CWE476_NULL_Pointer_Dereference__struct_52b.c": "a27ddb2840e5dda7e29636fe300f83976178398a6917f0d3489a4d064c322c93",
+    "CWE476_NULL_Pointer_Dereference__struct_52c.c": "fc21103201a40e2a33b8576ed23bb539dbfbc7e6043c2197910fcb6bc9d58e4b"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(twoIntsStruct * data);\n\nstatic void sym_02()\n{\n    twoIntsStruct * data;\n    twoIntsStruct tmpData;\n\n    {\n        tmpData.intOne = 0;\n        tmpData.intTwo = 0;\n        data = &tmpData;\n    }\n    sym_01(data);\n}\n\nvoid sym_03(twoIntsStruct * data);\n\nstatic void sym_04()\n{\n    twoIntsStruct * data;\n\n    data = NULL;\n    sym_03(data);\n}\n\nvoid sym_05()\n{\n    sym_02();\n    sym_04();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_06(twoIntsStruct * data);\n\nvoid sym_01(twoIntsStruct * data)\n{\n    sym_06(data);\n}\n\nvoid sym_07(twoIntsStruct * data);\n\nvoid sym_03(twoIntsStruct * data)\n{\n    sym_07(data);\n}\n",
+    "src_c.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_06(twoIntsStruct * data)\n{\n\n    printIntLine(data->intOne);\n}\n\nvoid sym_07(twoIntsStruct * data)\n{\n\n    if (data != NULL)\n    {\n        printIntLine(data->intOne);\n    }\n    else\n    {\n        printLine(\"data is NULL\");\n    }\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-03-v",
+   "category": "null_pointer",
+   "vulnerable": true,
+   "testcase": "CWE476_NULL_Pointer_Dereference__struct_11",
+   "family": "struct",
+   "flow": "11",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__struct_11.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__struct_11.c": "6c291a113dbc21e30f3549bfbbb4cd972b6137d3bf197e7b37f17440bd264b0b"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01()\n{\n    twoIntsStruct * data;\n    if(globalReturnsTrue())\n    {\n\n        data = NULL;\n    }\n    if(globalReturnsTrue())\n    {\n\n        printIntLine(data->intOne);\n    }\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-03-s",
+   "category": "null_pointer",
+   "vulnerable": false,
+   "testcase": "CWE476_NULL_Pointer_Dereference__struct_11",
+   "family": "struct",
+   "flow": "11",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__struct_11.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__struct_11.c": "6c291a113dbc21e30f3549bfbbb4cd972b6137d3bf197e7b37f17440bd264b0b"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nstatic void sym_01()\n{\n    twoIntsStruct * data;\n    if(globalReturnsTrue())\n    {\n\n        data = NULL;\n    }\n    if(globalReturnsFalse())\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        if (data != NULL)\n        {\n            printIntLine(data->intOne);\n        }\n        else\n        {\n            printLine(\"data is NULL\");\n        }\n    }\n}\n\nstatic void sym_02()\n{\n    twoIntsStruct * data;\n    if(globalReturnsTrue())\n    {\n\n        data = NULL;\n    }\n    if(globalReturnsTrue())\n    {\n\n        if (data != NULL)\n        {\n            printIntLine(data->intOne);\n        }\n        else\n        {\n            printLine(\"data is NULL\");\n        }\n    }\n}\n\nstatic void sym_03()\n{\n    twoIntsStruct * data;\n    twoIntsStruct tmpData;\n    if(globalReturnsFalse())\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        {\n            tmpData.intOne = 0;\n            tmpData.intTwo = 0;\n            data = &tmpData;\n        }\n    }\n    if(globalReturnsTrue())\n    {\n\n        printIntLine(data->intOne);\n    }\n}\n\nstatic void sym_04()\n{\n    twoIntsStruct * data;\n    twoIntsStruct tmpData;\n    if(globalReturnsTrue())\n    {\n\n        {\n            tmpData.intOne = 0;\n            tmpData.intTwo = 0;\n            data = &tmpData;\n        }\n    }\n    if(globalReturnsTrue())\n    {\n\n        printIntLine(data->intOne);\n    }\n}\n\nvoid sym_05()\n{\n    sym_01();\n    sym_02();\n    sym_03();\n    sym_04();\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-04-v",
+   "category": "null_pointer",
+   "vulnerable": true,
+   "testcase": "CWE476_NULL_Pointer_Dereference__long_21",
+   "family": "long",
+   "flow": "21",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__long_21.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__long_21.c": "cad8c8643dd6edbcc6fa9283591a291372b11b3a3c9a1278e9250c7540df748f"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nstatic int sym_01 = 0;\n\nstatic void sym_02(long * data)\n{\n    if(sym_01)\n    {\n\n        printLongLine(*data);\n    }\n}\n\nvoid sym_03()\n{\n    long * data;\n\n    data = NULL;\n    sym_01 = 1;\n    sym_02(data);\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-04-s",
+   "category": "null_pointer",
+   "vulnerable": false,
+   "testcase": "CWE476_NULL_Pointer_Dereference__long_21",
+   "family": "long",
+   "flow": "21",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__long_21.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__long_21.c": "cad8c8643dd6edbcc6fa9283591a291372b11b3a3c9a1278e9250c7540df748f"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nstatic int sym_01 = 0;\nstatic int sym_02 = 0;\nstatic int sym_03 = 0;\n\nstatic void sym_04(long * data)\n{\n    if(sym_01)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        if (data != NULL)\n        {\n            printLongLine(*data);\n        }\n        else\n        {\n            printLine(\"data is NULL\");\n        }\n    }\n}\n\nstatic void sym_05()\n{\n    long * data;\n\n    data = NULL;\n    sym_01 = 0;\n    sym_04(data);\n}\n\nstatic void sym_06(long * data)\n{\n    if(sym_02)\n    {\n\n        if (data != NULL)\n        {\n            printLongLine(*data);\n        }\n        else\n        {\n            printLine(\"data is NULL\");\n        }\n    }\n}\n\nstatic void sym_07()\n{\n    long * data;\n\n    data = NULL;\n    sym_02 = 1;\n    sym_06(data);\n}\n\nstatic void sym_08(long * data)\n{\n    if(sym_03)\n    {\n\n        printLongLine(*data);\n    }\n}\n\nstatic void sym_09()\n{\n    long * data;\n    long tmpData = 5L;\n\n    {\n        data = &tmpData;\n    }\n    sym_03 = 1;\n    sym_08(data);\n}\n\nvoid sym_10()\n{\n    sym_05();\n    sym_07();\n    sym_09();\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-05-v",
+   "category": "null_pointer",
+   "vulnerable": true,
+   "testcase": "CWE476_NULL_Pointer_Dereference__char_21",
+   "family": "char",
+   "flow": "21",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__char_21.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__char_21.c": "30da35e3a5d768765120266350d0513e04bfb78d884157915647623e7b815dbf"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nstatic int sym_01 = 0;\n\nstatic void sym_02(char * data)\n{\n    if(sym_01)\n    {\n\n        printHexCharLine(data[0]);\n    }\n}\n\nvoid sym_03()\n{\n    char * data;\n\n    data = NULL;\n    sym_01 = 1;\n    sym_02(data);\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-05-s",
+   "category": "null_pointer",
+   "vulnerable": false,
+   "testcase": "CWE476_NULL_Pointer_Dereference__char_21",
+   "family": "char",
+   "flow": "21",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__char_21.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__char_21.c": "30da35e3a5d768765120266350d0513e04bfb78d884157915647623e7b815dbf"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nstatic int sym_01 = 0;\nstatic int sym_02 = 0;\nstatic int sym_03 = 0;\n\nstatic void sym_04(char * data)\n{\n    if(sym_01)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n\n        if (data != NULL)\n        {\n\n            printHexCharLine(data[0]);\n        }\n        else\n        {\n            printLine(\"data is NULL\");\n        }\n    }\n}\n\nstatic void sym_05()\n{\n    char * data;\n\n    data = NULL;\n    sym_01 = 0;\n    sym_04(data);\n}\n\nstatic void sym_06(char * data)\n{\n    if(sym_02)\n    {\n\n        if (data != NULL)\n        {\n\n            printHexCharLine(data[0]);\n        }\n        else\n        {\n            printLine(\"data is NULL\");\n        }\n    }\n}\n\nstatic void sym_07()\n{\n    char * data;\n\n    data = NULL;\n    sym_02 = 1;\n    sym_06(data);\n}\n\nstatic void sym_08(char * data)\n{\n    if(sym_03)\n    {\n\n        printHexCharLine(data[0]);\n    }\n}\n\nstatic void sym_09()\n{\n    char * data;\n\n    data = \"sym_10\";\n    sym_03 = 1;\n    sym_08(data);\n}\n\nvoid sym_11()\n{\n    sym_05();\n    sym_07();\n    sym_09();\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-06-v",
+   "category": "null_pointer",
+   "vulnerable": true,
+   "testcase": "CWE476_NULL_Pointer_Dereference__char_12",
+   "family": "char",
+   "flow": "12",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__char_12.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__char_12.c": "b8314f7a4bc7091d4ef3cf5276fabcfd4e21c99cc5ce2b018fce3b83ee39df0d"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01()\n{\n    char * data;\n    if(globalReturnsTrueOrFalse())\n    {\n\n        data = NULL;\n    }\n    else\n    {\n\n        data = \"sym_02\";\n    }\n    if(globalReturnsTrueOrFalse())\n    {\n\n        printHexCharLine(data[0]);\n    }\n    else\n    {\n\n        if (data != NULL)\n        {\n\n            printHexCharLine(data[0]);\n        }\n        else\n        {\n            printLine(\"data is NULL\");\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-06-s",
+   "category": "null_pointer",
+   "vulnerable": false,
+   "testcase": "CWE476_NULL_Pointer_Dereference__char_12",
+   "family": "char",
+   "flow": "12",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__char_12.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__char_12.c": "b8314f7a4bc7091d4ef3cf5276fabcfd4e21c99cc5ce2b018fce3b83ee39df0d"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nstatic void sym_01()\n{\n    char * data;\n    if(globalReturnsTrueOrFalse())\n    {\n\n        data = NULL;\n    }\n    else\n    {\n\n        data = NULL;\n    }\n    if(globalReturnsTrueOrFalse())\n    {\n\n        if (data != NULL)\n        {\n\n            printHexCharLine(data[0]);\n        }\n        else\n        {\n            printLine(\"data is NULL\");\n        }\n    }\n    else\n    {\n\n        if (data != NULL)\n        {\n\n            printHexCharLine(data[0]);\n        }\n        else\n        {\n            printLine(\"data is NULL\");\n        }\n    }\n}\n\nstatic void sym_02()\n{\n    char * data;\n    if(globalReturnsTrueOrFalse())\n    {\n\n        data = \"sym_03\";\n    }\n    else\n    {\n\n        data = \"sym_03\";\n    }\n    if(globalReturnsTrueOrFalse())\n    {\n\n        printHexCharLine(data[0]);\n    }\n    else\n    {\n\n        printHexCharLine(data[0]);\n    }\n}\n\nvoid sym_04()\n{\n    sym_01();\n    sym_02();\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-07-v",
+   "category": "null_pointer",
+   "vulnerable": true,
+   "testcase": "CWE476_NULL_Pointer_Dereference__deref_after_check_10",
+   "family": "deref_after_check",
+   "flow": "10",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__deref_after_check_10.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__deref_after_check_10.c": "9b7f8906a3bbc0544d0ad43b4d45f0b25b1691558b4377e33634c46046e871f5"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nvoid sym_01()\n{\n    if(globalTrue)\n    {\n        {\n\n            int *intPointer = NULL;\n            if (intPointer == NULL)\n            {\n                printIntLine(*intPointer);\n            }\n        }\n    }\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-07-s",
+   "category": "null_pointer",
+   "vulnerable": false,
+   "testcase": "CWE476_NULL_Pointer_Dereference__deref_after_check_10",
+   "family": "deref_after_check",
+   "flow": "10",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__deref_after_check_10.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__deref_after_check_10.c": "9b7f8906a3bbc0544d0ad43b4d45f0b25b1691558b4377e33634c46046e871f5"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\nstatic void sym_01()\n{\n    if(globalFalse)\n    {\n\n        printLine(\"Benign, fixed string\");\n    }\n    else\n    {\n        {\n\n            int *intPointer = NULL;\n            if (intPointer == NULL)\n            {\n                printLine(\"pointer is NULL\");\n            }\n        }\n    }\n}\n\nstatic void sym_02()\n{\n    if(globalTrue)\n    {\n        {\n\n            int *intPointer = NULL;\n            if (intPointer == NULL)\n            {\n                printLine(\"pointer is NULL\");\n            }\n        }\n    }\n}\n\nvoid sym_03()\n{\n    sym_01();\n    sym_02();\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-08-v",
+   "category": "null_pointer",
+   "vulnerable": true,
+   "testcase": "CWE476_NULL_Pointer_Dereference__int64_t_65",
+   "family": "int64_t",
+   "flow": "65",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_65a.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_65b.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__int64_t_65a.c": "2d183900bbc87521dcdd99f6b6304f36ce306ef110aa714b308e909afa35daa1",
+    "CWE476_NULL_Pointer_Dereference__int64_t_65b.c": "777bbfb5e7beac5f3c60fa1a253de5eda08165838e93b772216bf64aca64cf2b"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(int64_t * data);\n\nvoid sym_02()\n{\n    int64_t * data;\n\n    void (*funcPtr) (int64_t *) = sym_01;\n\n    data = NULL;\n\n    funcPtr(data);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(int64_t * data)\n{\n\n    printLongLongLine(*data);\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-08-s",
+   "category": "null_pointer",
+   "vulnerable": false,
+   "testcase": "CWE476_NULL_Pointer_Dereference__int64_t_65",
+   "family": "int64_t",
+   "flow": "65",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_65a.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_65b.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__int64_t_65a.c": "2d183900bbc87521dcdd99f6b6304f36ce306ef110aa714b308e909afa35daa1",
+    "CWE476_NULL_Pointer_Dereference__int64_t_65b.c": "777bbfb5e7beac5f3c60fa1a253de5eda08165838e93b772216bf64aca64cf2b"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(int64_t * data);\n\nstatic void sym_02()\n{\n    int64_t * data;\n    int64_t tmpData = 5LL;\n    void (*funcPtr) (int64_t *) = sym_01;\n\n    {\n        data = &tmpData;\n    }\n    funcPtr(data);\n}\n\nvoid sym_03(int64_t * data);\n\nstatic void sym_04()\n{\n    int64_t * data;\n    void (*funcPtr) (int64_t *) = sym_03;\n\n    data = NULL;\n    funcPtr(data);\n}\n\nvoid sym_05()\n{\n    sym_02();\n    sym_04();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(int64_t * data)\n{\n\n    printLongLongLine(*data);\n}\n\nvoid sym_03(int64_t * data)\n{\n\n    if (data != NULL)\n    {\n        printLongLongLine(*data);\n    }\n    else\n    {\n        printLine(\"data is NULL\");\n    }\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-09-v",
+   "category": "null_pointer",
+   "vulnerable": true,
+   "testcase": "CWE476_NULL_Pointer_Dereference__int64_t_66",
+   "family": "int64_t",
+   "flow": "66",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_66a.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_66b.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__int64_t_66a.c": "040374db067e64889796c2c37413624f4edce0491ce1f54f5b63daa85f35a513",
+    "CWE476_NULL_Pointer_Dereference__int64_t_66b.c": "3bce10730b6cb0980c10c6db3eb9de064bdda04cef905f06d90b6f87fbed2aa4"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(int64_t * dataArray[]);\n\nvoid sym_02()\n{\n    int64_t * data;\n    int64_t * dataArray[5];\n\n    data = NULL;\n\n    dataArray[2] = data;\n    sym_01(dataArray);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(int64_t * dataArray[])\n{\n\n    int64_t * data = dataArray[2];\n\n    printLongLongLine(*data);\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-09-s",
+   "category": "null_pointer",
+   "vulnerable": false,
+   "testcase": "CWE476_NULL_Pointer_Dereference__int64_t_66",
+   "family": "int64_t",
+   "flow": "66",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_66a.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_66b.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__int64_t_66a.c": "040374db067e64889796c2c37413624f4edce0491ce1f54f5b63daa85f35a513",
+    "CWE476_NULL_Pointer_Dereference__int64_t_66b.c": "3bce10730b6cb0980c10c6db3eb9de064bdda04cef905f06d90b6f87fbed2aa4"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(int64_t * dataArray[]);\n\nstatic void sym_02()\n{\n    int64_t * data;\n    int64_t tmpData = 5LL;\n    int64_t * dataArray[5];\n\n    {\n        data = &tmpData;\n    }\n    dataArray[2] = data;\n    sym_01(dataArray);\n}\n\nvoid sym_03(int64_t * dataArray[]);\n\nstatic void sym_04()\n{\n    int64_t * data;\n    int64_t * dataArray[5];\n\n    data = NULL;\n    dataArray[2] = data;\n    sym_03(dataArray);\n}\n\nvoid sym_05()\n{\n    sym_02();\n    sym_04();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(int64_t * dataArray[])\n{\n    int64_t * data = dataArray[2];\n\n    printLongLongLine(*data);\n}\n\nvoid sym_03(int64_t * dataArray[])\n{\n    int64_t * data = dataArray[2];\n\n    if (data != NULL)\n    {\n        printLongLongLine(*data);\n    }\n    else\n    {\n        printLine(\"data is NULL\");\n    }\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-10-v",
+   "category": "null_pointer",
+   "vulnerable": true,
+   "testcase": "CWE476_NULL_Pointer_Dereference__int64_t_64",
+   "family": "int64_t",
+   "flow": "64",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_64a.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_64b.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__int64_t_64a.c": "4722b71c9b59027eb7089e30dd9ecfa5d1e1da94790af818885c20cd5500a460",
+    "CWE476_NULL_Pointer_Dereference__int64_t_64b.c": "6969cf805f9c18ecc35be7349d01ce81ff229a451be00372640a82328d0e642f"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(void * dataVoidPtr);\n\nvoid sym_02()\n{\n    int64_t * data;\n\n    data = NULL;\n    sym_01(&data);\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(void * dataVoidPtr)\n{\n\n    int64_t * * dataPtr = (int64_t * *)dataVoidPtr;\n\n    int64_t * data = (*dataPtr);\n\n    printLongLongLine(*data);\n}\n"
+   }
+  },
+  {
+   "id": "null_pointer-10-s",
+   "category": "null_pointer",
+   "vulnerable": false,
+   "testcase": "CWE476_NULL_Pointer_Dereference__int64_t_64",
+   "family": "int64_t",
+   "flow": "64",
+   "origin": [
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_64a.c",
+    "testcases/CWE476_NULL_Pointer_Dereference/CWE476_NULL_Pointer_Dereference__int64_t_64b.c"
+   ],
+   "origin_sha256": {
+    "CWE476_NULL_Pointer_Dereference__int64_t_64a.c": "4722b71c9b59027eb7089e30dd9ecfa5d1e1da94790af818885c20cd5500a460",
+    "CWE476_NULL_Pointer_Dereference__int64_t_64b.c": "6969cf805f9c18ecc35be7349d01ce81ff229a451be00372640a82328d0e642f"
+   },
+   "files": {
+    "src_a.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(void * dataVoidPtr);\n\nstatic void sym_02()\n{\n    int64_t * data;\n    int64_t tmpData = 5LL;\n\n    {\n        data = &tmpData;\n    }\n    sym_01(&data);\n}\n\nvoid sym_03(void * dataVoidPtr);\n\nstatic void sym_04()\n{\n    int64_t * data;\n\n    data = NULL;\n    sym_03(&data);\n}\n\nvoid sym_05()\n{\n    sym_02();\n    sym_04();\n}\n",
+    "src_b.c": "#include \"std_testcase.h\"\n\n#include <wchar.h>\n\nvoid sym_01(void * dataVoidPtr)\n{\n\n    int64_t * * dataPtr = (int64_t * *)dataVoidPtr;\n\n    int64_t * data = (*dataPtr);\n\n    printLongLongLine(*data);\n}\n\nvoid sym_03(void * dataVoidPtr)\n{\n\n    int64_t * * dataPtr = (int64_t * *)dataVoidPtr;\n\n    int64_t * data = (*dataPtr);\n\n    if (data != NULL)\n    {\n        printLongLongLine(*data);\n    }\n    else\n    {\n        printLine(\"data is NULL\");\n    }\n}\n"
+   }
+  }
+ ]
+}
