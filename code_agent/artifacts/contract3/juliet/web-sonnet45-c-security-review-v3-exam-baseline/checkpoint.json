@@ -1,0 +1,1809 @@
+{
+  "created_utc": "2026-10-22T06:14:56.780031+00:00",
+  "samples": {
+    "array_oob-01-v": {
+      "attempts": [
+        {
+          "thread_id": "9d61d81e-06aa-4b36-b75a-6c29ab4eeb8b",
+          "created_utc": "2026-10-22T06:14:59.125011+00:00",
+          "run_id": "957faa2c-ffed-4d66-b0e4-b716c9d87cb3",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:15:42.412729+00:00",
+          "usage": {
+            "input_tokens": 36395,
+            "output_tokens": 1619,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_a.c",
+            "line": 20,
+            "reason": "数组buffer声明为int buffer[10]（有效索引0-9），但在第20行通过buffer[data]写入时，data的值为10。数据流：第7行data初始化为-1，第10行由于GLOBAL_CONST_TRUE恒为1而将data赋值为10（io.c:160定义const int GLOBAL_CONST_TRUE=1），第17行的检查if(data>=0)仅验证下界，缺少上界检查data<10，导致buffer[10]越界访问。"
+          }
+        ],
+        "summary": "src_a.c存在1处数组越界缺陷：第20行buffer[data]访问时data值为10，超出数组有效索引范围[0-9]。第17行的边界检查不完整，仅检查下界未检查上界。"
+      }
+    },
+    "array_oob-01-s": {
+      "attempts": [
+        {
+          "thread_id": "eddacbe0-a421-458f-b2ee-4dd68f40a318",
+          "created_utc": "2026-10-22T06:15:00.474838+00:00",
+          "run_id": "a5e482aa-2d9a-46aa-9fd9-39621b33ca02",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:15:47.748947+00:00",
+          "usage": {
+            "input_tokens": 36311,
+            "output_tokens": 2172,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经静态审计，src_a.c中所有数组访问均在有效范围内。sym_01/sym_02中data=10触发边界检查保护，未写入数组；sym_03/sym_04中data=7的访问虽缺少上界检查但索引值在buffer[10]的有效范围内。无数组越界缺陷，但sym_03/sym_04的不完整边界检查属于防御性编码待强化项。"
+      }
+    },
+    "string_overflow-01-v": {
+      "attempts": [
+        {
+          "thread_id": "7ec0d3b3-3523-4c4e-82d5-5eaa01b3a6a3",
+          "created_utc": "2026-10-22T06:14:59.077150+00:00",
+          "run_id": "c1650dfc-e88a-4126-bdcb-a444a162c852",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:15:41.885396+00:00",
+          "usage": {
+            "input_tokens": 36483,
+            "output_tokens": 1321,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "string_overflow",
+            "file": "src_a.c",
+            "line": 21,
+            "reason": "strcpy(data, source) 将 100 字节源数据（99 个 'C' 字符 + NUL 终止符）复制到仅有 50 字节容量的目标缓冲区 sym_02。GLOBAL_CONST_TRUE 恒为 1 确保此路径必然执行，导致确定的 50 字节缓冲区溢出（CWE-120）。"
+          }
+        ],
+        "summary": "src_a.c 第 21 行存在确定的字符串溢出漏洞。strcpy 将 100 字节源字符串复制到 50 字节目标缓冲区，触发 50 字节溢出。"
+      }
+    },
+    "string_overflow-01-s": {
+      "attempts": [
+        {
+          "thread_id": "6797ba4b-9b61-4e20-be57-ab1d11708f89",
+          "created_utc": "2026-10-22T06:14:59.953045+00:00",
+          "run_id": "829551a4-6507-4ae3-b1e4-84e221f740a6",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:15:40.176105+00:00",
+          "usage": {
+            "input_tokens": 37718,
+            "output_tokens": 1491,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "src_a.c 中两处 strcpy 调用（第26行和第47行）虽被工具标记为潜在风险，但经审计确认未发生字符串溢出。两个函数中，data 指针均指向容量为100字节的 sym_03 数组，source 数组实际填充99个字符加1个终止符（共100字节），目标缓冲区容量足够，strcpy 操作在边界上安全。建议后续可考虑使用 strncpy 等更安全的函数进行代码加固。"
+      }
+    },
+    "null_pointer-01-v": {
+      "attempts": [
+        {
+          "thread_id": "840a0cb1-1619-4fff-8996-8a9a9aaa7e9f",
+          "created_utc": "2026-10-22T06:14:59.451958+00:00",
+          "run_id": "bc6efaa8-701b-4b1d-a2f7-4d10adfb9e62",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:15:42.226560+00:00",
+          "usage": {
+            "input_tokens": 35687,
+            "output_tokens": 1542,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 12,
+            "reason": "第9行将 intPointer 显式赋值为 NULL，第10行条件 if (intPointer == NULL) 检测到指针为 NULL 后，第12行在该真分支内对 NULL 指针执行解引用操作 *intPointer 并传递给 printIntLine()。GLOBAL_CONST_FIVE 恒等于5使外层条件必然进入，因此存在确定的 NULL 指针解引用路径。"
+          }
+        ],
+        "summary": "src_a.c 存在1处空指针解引用缺陷：sym_01() 函数在确认指针为 NULL 的分支内执行解引用操作，逻辑错误导致必然触发空指针访问。"
+      }
+    },
+    "null_pointer-01-s": {
+      "attempts": [
+        {
+          "thread_id": "6fe28bf5-06c1-4c45-a552-3cbe1f0a00ed",
+          "created_utc": "2026-10-22T06:15:00.278446+00:00",
+          "run_id": "f7907770-6550-4019-a39d-25777ba8a35c",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:15:42.947603+00:00",
+          "usage": {
+            "input_tokens": 30210,
+            "output_tokens": 1699,
+            "llm_calls": 3,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "src_a.c 中不存在空指针调用风险。虽然 sym_01() 和 sym_02() 函数中都声明并初始化了 NULL 指针 (第13行和第28行)，但代码仅检查指针是否为 NULL (第14行和第29行) 并调用 printLine() 输出信息，没有对空指针进行任何解引用操作 (如 *intPointer 或 intPointer->field)。所有指针操作都在 NULL 检查保护范围内，不会导致空指针调用。"
+      }
+    },
+    "array_oob-02-v": {
+      "attempts": [
+        {
+          "thread_id": "71ab629b-06ef-4db1-9b63-73f686eebf74",
+          "created_utc": "2026-10-22T06:14:59.161239+00:00",
+          "run_id": "b6649e8a-6ca3-43fc-84c4-dd3ca7b9d0c9",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:15:49.348087+00:00",
+          "usage": {
+            "input_tokens": 40117,
+            "output_tokens": 1768,
+            "llm_calls": 4,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_b.c",
+            "line": 14,
+            "reason": "buffer[10]数组仅有索引0-9，第14行buffer[data]=1仅检查data>=0（第12行），缺少上界验证。data源自src_a.c第19行atoi(inputBuffer)，为用户可控输入。当用户输入>=10的值时（如10、100等），将发生数组越界写入。触发路径：stdin输入->atoi->sym_02(data)->data>=0通过->buffer[data]越界。"
+          }
+        ],
+        "summary": "发现1处确认的数组越界风险。src_b.c第14行对10元素数组buffer的访问仅验证索引下界(>=0)，未验证上界(<10)，索引来自外部输入且未充分验证，可触发越界写入。"
+      }
+    },
+    "array_oob-02-s": {
+      "attempts": [
+        {
+          "thread_id": "86ae01cb-0862-4763-89fd-bda127c75c23",
+          "created_utc": "2026-10-22T06:15:01.236312+00:00",
+          "run_id": "fa62df87-f15c-4083-9e18-b1f7372e6064",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:15:40.401477+00:00",
+          "usage": {
+            "input_tokens": 29798,
+            "output_tokens": 1892,
+            "llm_calls": 3,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现数组越界漏洞。src_b.c的sym_08()仅检查下界(data>=0)，但唯一调用点src_a.c:sym_09()传递常量7，该值在buffer[10]的有效范围内(0-9)。sym_04和sym_06已完整检查上下界。建议sym_08()增加上界检查(data<10)作为防御性编程加固。"
+      }
+    },
+    "string_overflow-02-v": {
+      "attempts": [
+        {
+          "thread_id": "44a21513-b8a6-4a53-850c-c732943a1bb7",
+          "created_utc": "2026-10-22T06:15:41.490198+00:00",
+          "run_id": "578493a8-62ed-45d9-948a-495a2270e893",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:16:15.191138+00:00",
+          "usage": {
+            "input_tokens": 35790,
+            "output_tokens": 1196,
+            "llm_calls": 3,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "string_overflow",
+            "file": "src_a.c",
+            "line": 12,
+            "reason": "strcat(data, source) 将99字节的source追加到data，而data指向的sym_03容量仅50字节。所需空间为strlen(data) + strlen(source) + 1 = 0 + 99 + 1 = 100字节，超出目标缓冲区容量，导致缓冲区溢出。"
+          }
+        ],
+        "summary": "src_a.c 第12行存在确认的字符串溢出漏洞，strcat操作向50字节缓冲区写入100字节数据，溢出50字节。"
+      }
+    },
+    "string_overflow-02-s": {
+      "attempts": [
+        {
+          "thread_id": "292e60c6-b1b3-4071-9737-de9b9d512af4",
+          "created_utc": "2026-10-22T06:15:40.594893+00:00",
+          "run_id": "9773ec95-b8d4-4d3a-95c3-966bdc9287af",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:16:32.148377+00:00",
+          "usage": {
+            "input_tokens": 36868,
+            "output_tokens": 1727,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "string_overflow",
+            "file": "src_a.c",
+            "line": 12,
+            "reason": "strcat(data, source) 追加99字节到data；data指向sym_04[100]，初始strlen为0，拼接后需100字节（0+99+1），容量100字节刚好临界安全，但无边界检查。若sym_02调用前data非空或source大小变化，将导致缓冲区溢出（CWE-120）"
+          }
+        ],
+        "summary": "src_a.c第12行存在字符串溢出风险。sym_01函数使用strcat将99字节的source追加到data（来自sym_02的100字节缓冲区sym_04），当前数据流下恰好不溢出（100字节需求=100字节容量），但代码缺乏显式边界检查，存在临界风险，属于CWE-120潜在字符串溢出漏洞"
+      }
+    },
+    "null_pointer-02-v": {
+      "attempts": [
+        {
+          "thread_id": "75ab1056-1ad5-47cd-8339-8fc5da4951ca",
+          "created_utc": "2026-10-22T06:15:42.132144+00:00",
+          "run_id": "219dc18b-e5e0-43b2-999d-9465cc09caca",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:16:23.349873+00:00",
+          "usage": {
+            "input_tokens": 25822,
+            "output_tokens": 1347,
+            "llm_calls": 3,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 8,
+            "reason": "在sym_01函数中，参数data被解引用为data[0]。调用链：sym_02()在第17行将data显式赋值为NULL，第19行通过函数指针funcPtr调用sym_01(NULL)，导致第8行对NULL指针进行解引用操作。触发条件：只要sym_02()被调用，必然触发该空指针解引用。"
+          }
+        ],
+        "summary": "src_a.c存在确定的空指针解引用漏洞。sym_02()函数将data显式设置为NULL后通过函数指针传递给sym_01()，在sym_01()第8行访问data[0]时触发空指针解引用。该漏洞路径确定，无条件分支，调用sym_02()必然触发。"
+      }
+    },
+    "null_pointer-02-s": {
+      "attempts": [
+        {
+          "thread_id": "b56ef69a-1f08-49f4-8836-966b33362717",
+          "created_utc": "2026-10-22T06:15:43.077212+00:00",
+          "run_id": "e066c42b-9ec8-4866-b1db-856badb98f94",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:16:23.749833+00:00",
+          "usage": {
+            "input_tokens": 36810,
+            "output_tokens": 1721,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经过静态审计，src_a.c中不存在空指针调用风险。sym_01函数虽然未检查参数data是否为NULL就直接解引用（第8行），但在分析范围内的所有调用路径中，该函数仅被sym_02以字符串字面量'sym_03'（非NULL）作为参数调用。sym_04函数在第23行对参数执行了NULL检查，确保第25行的解引用安全。sym_05传入NULL指针给sym_04，但被NULL检查正确处理，不会导致空指针解引用。"
+      }
+    },
+    "array_oob-03-v": {
+      "attempts": [
+        {
+          "thread_id": "6fbd740f-9e13-43e3-93a3-c02defd78a5a",
+          "created_utc": "2026-10-22T06:15:42.455038+00:00",
+          "run_id": "11c820e6-c752-4b39-b854-9f21176eaf59",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:16:27.563520+00:00",
+          "usage": {
+            "input_tokens": 37335,
+            "output_tokens": 2073,
+            "llm_calls": 3,
+            "tool_calls": 7
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_b.c",
+            "line": 12,
+            "reason": "buffer[10]数组通过未经上界校验的随机索引data访问。第10行仅检查data>=0（下界），未检查data<10（上界）。当RAND32()返回>=10的值时（如10、100、INT_MAX等），buffer[data]=1造成越界写入。数据流：src_a.c:11行RAND32()生成任意int值→src_a.c:12行传递给sym_01→src_b.c:5行接收→src_b.c:10行下界检查通过→src_b.c:12行越界访问。有效索引范围应为0-9。"
+          }
+        ],
+        "summary": "发现1处数组越界漏洞。src_b.c第12行buffer[data]缺少上界检查，当data>=10时发生越界写入。攻击者可通过RAND32()随机触发或稳定复现该漏洞，导致栈内存破坏。建议在第10行条件中增加 && data < 10 的上界校验。"
+      }
+    },
+    "array_oob-03-s": {
+      "attempts": [
+        {
+          "thread_id": "2ae43951-ca4d-4bec-9faa-1c0e058230cb",
+          "created_utc": "2026-10-22T06:15:43.079222+00:00",
+          "run_id": "04fee631-f05d-41bb-b069-1d1ded3a7e21",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:16:35.313144+00:00",
+          "usage": {
+            "input_tokens": 37240,
+            "output_tokens": 1578,
+            "llm_calls": 4,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_b.c",
+            "line": 11,
+            "reason": "函数sym_01在行10仅检查索引下界(data >= 0)，未检查上界(data < 10)。当从src_a.c的sym_04()调用时，data值来自RAND32()宏，可产生任意整数。若RAND32()返回值>=10(如10,100,1000等)，则行11的buffer[data]=1会写入超出buffer[10]容量的位置，造成数组越界写。对比sym_03函数在行32正确检查了data >= 0 && data < 10。"
+          }
+        ],
+        "summary": "发现1处数组越界风险。src_b.c第11行sym_01函数缺少索引上界检查，当接收来自RAND32()的不受限整数时可能越界访问10元素数组。sym_03函数已正确实现边界检查。"
+      }
+    },
+    "string_overflow-03-v": {
+      "attempts": [
+        {
+          "thread_id": "80fd118e-1271-44a3-8b7d-4e28f9769577",
+          "created_utc": "2026-10-22T06:15:47.818394+00:00",
+          "run_id": "d3ea7491-2d63-496e-8b33-40a6f26884e0",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:16:29.286609+00:00",
+          "usage": {
+            "input_tokens": 36759,
+            "output_tokens": 1829,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "string_overflow",
+            "file": "src_b.c",
+            "line": 10,
+            "reason": "strncat(dest, data, strlen(data)) 向容量为50字节的dest缓冲区写入100字节。data来自src_a.c，包含99个'A'字符（strlen=99）。strncat会追加min(99,99)=99字节内容并附加1字节空字符'\\0'，共100字节，超出dest容量50字节，导致缓冲区溢出50字节。"
+          }
+        ],
+        "summary": "发现1处字符串溢出漏洞：src_b.c第10行strncat操作向50字节缓冲区写入100字节，触发条件为sym_02调用sym_01并传递99字节字符串。"
+      }
+    },
+    "string_overflow-03-s": {
+      "attempts": [
+        {
+          "thread_id": "afa3bfa1-3a35-4ab9-a417-8c70ede4364e",
+          "created_utc": "2026-10-22T06:15:49.385459+00:00",
+          "run_id": "9fe3e34c-20fa-458d-a62b-448e320db9dc",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:16:31.909535+00:00",
+          "usage": {
+            "input_tokens": 37805,
+            "output_tokens": 1608,
+            "llm_calls": 3,
+            "tool_calls": 7
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "审计完成。src_b.c第10行的strncat调用根据审查范围规则被排除；在当前数据流下（data长度49字节，dest容量50字节），该操作恰好填满缓冲区未造成溢出。目标文件src_a.c和src_b.c均未发现字符串溢出风险。"
+      }
+    },
+    "null_pointer-03-v": {
+      "attempts": [
+        {
+          "thread_id": "5a3fa3ca-cc0a-4d69-8d9e-5d1287470e3c",
+          "created_utc": "2026-10-22T06:16:15.233414+00:00",
+          "run_id": "883df658-dc43-4553-9ed5-eabd78a12638",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:16:57.077065+00:00",
+          "usage": {
+            "input_tokens": 36905,
+            "output_tokens": 1619,
+            "llm_calls": 3,
+            "tool_calls": 7
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_b.c",
+            "line": 10,
+            "reason": "对 NULL 指针进行解引用。数据流：src_a.c:11 将 data 赋值为 NULL → src_a.c:13 存入 dataArray[2] → src_a.c:14 通过参数传递到 sym_01 → src_b.c:8 从 dataArray[2] 取出 NULL → src_b.c:10 执行 *data 解引用操作，触发空指针调用。"
+          }
+        ],
+        "summary": "发现 1 处空指针调用风险。src_b.c:10 行对从 src_a.c 传递来的 NULL 指针进行解引用操作，存在明确的跨文件数据流导致的空指针调用缺陷。"
+      }
+    },
+    "null_pointer-03-s": {
+      "attempts": [
+        {
+          "thread_id": "5d68f78d-a782-4fbb-833e-0f197acbda4b",
+          "created_utc": "2026-10-22T06:16:23.436681+00:00",
+          "run_id": "55302943-157c-4df5-b654-8b19eac7c245",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:17:11.105278+00:00",
+          "usage": {
+            "input_tokens": 37500,
+            "output_tokens": 1778,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "在当前审计范围（src_a.c, src_b.c）内，未发现可达的空指针解引用缺陷。src_b.c sym_01() 第9行虽无 NULL 检查就解引用指针，但唯一调用者 sym_02() 传递的是有效指针 &tmpData。sym_04() 传递 NULL 给 sym_03()，但该函数有完整的 NULL 检查保护（第15行）。所有数据流路径均安全。"
+      }
+    },
+    "array_oob-04-v": {
+      "attempts": [
+        {
+          "thread_id": "89db8120-a349-4071-af89-6229e51387be",
+          "created_utc": "2026-10-22T06:16:23.870898+00:00",
+          "run_id": "ef21bbde-6073-4c98-a6c6-ff86d4094e64",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:17:05.535912+00:00",
+          "usage": {
+            "input_tokens": 35691,
+            "output_tokens": 1601,
+            "llm_calls": 3,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_a.c",
+            "line": 21,
+            "reason": "buffer[10] 数组使用 data 作为索引，data 由 RAND32() 宏生成（可返回任意 int 值）。第 19 行仅检查 data >= 0（下界），未验证上界 data < 10。当 RAND32() 返回 ≥10 的值时（如 10、100、INT_MAX 等），满足 data >= 0 条件进入分支，但访问 buffer[data] 将越界写入，触发未定义行为（CWE-787）。"
+          }
+        ],
+        "summary": "src_a.c 第 21 行存在确认的数组越界风险。sym_02() 函数使用未受上界约束的随机数作为 buffer[10] 的索引，仅检查非负条件不足以防止越界。"
+      }
+    },
+    "array_oob-04-s": {
+      "attempts": [
+        {
+          "thread_id": "e76eefa7-2fda-45c0-afc4-88de52f9f38d",
+          "created_utc": "2026-10-22T06:16:28.027458+00:00",
+          "run_id": "b26cfde8-60f1-464f-90ae-8793486fd880",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:17:08.144486+00:00",
+          "usage": {
+            "input_tokens": 31112,
+            "output_tokens": 1575,
+            "llm_calls": 3,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现数组越界漏洞。sym_02()中使用固定索引7访问大小为10的数组，虽缺少上界检查但实际值在有效范围内(0-9)，不构成越界；sym_04()中RAND32()返回的随机索引在使用前有完整边界检查(data>=0 && data<10)，不存在越界风险。"
+      }
+    },
+    "string_overflow-04-v": {
+      "attempts": [
+        {
+          "thread_id": "0069b2d9-3dcc-4a05-b71e-95e4b8dbddb3",
+          "created_utc": "2026-10-22T06:16:29.355736+00:00",
+          "run_id": "403a0452-a2f3-4872-8949-1e61505e71f3",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:17:12.196241+00:00",
+          "usage": {
+            "input_tokens": 37432,
+            "output_tokens": 1539,
+            "llm_calls": 3,
+            "tool_calls": 7
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "扫描工具未发现字符串溢出告警。代码审查发现 src_b.c:11 存在 strncat 缓冲区溢出风险（99字节数据写入50字节缓冲区），但根据扫描报告的 scope_strncat 规则，该版本审查明确排除 strncat 调用，故不纳入 findings。建议后续版本将第11行改用 snprintf 或正确计算 strncat 的第三参数（应为 sizeof(dest)-strlen(dest)-1）。"
+      }
+    },
+    "string_overflow-04-s": {
+      "attempts": [
+        {
+          "thread_id": "6300c3a0-9959-4592-b0f4-b09d8cd9dda9",
+          "created_utc": "2026-10-22T06:16:32.013305+00:00",
+          "run_id": "5c58edff-c823-4fbe-b7a6-2f97731523d1",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:17:18.833080+00:00",
+          "usage": {
+            "input_tokens": 36830,
+            "output_tokens": 1787,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "审计src_a.c和src_b.c，未发现字符串溢出风险。src_a.c的sym_02分配100字节缓冲区并填充49字节加null终止符；src_b.c的sym_01使用strncat追加到50字节目标缓冲区，strlen(data)=49时写入49+1=50字节恰好等于容量，边界安全。根据审计指南scope_strncat规则，strncat调用已排除在字符串溢出审查范围外。工具扫描无告警，手工分析确认数据流边界合规。"
+      }
+    },
+    "null_pointer-04-v": {
+      "attempts": [
+        {
+          "thread_id": "1e59c16c-df3f-41ef-83e7-a49e8213230e",
+          "created_utc": "2026-10-22T06:16:32.325772+00:00",
+          "run_id": "8c9d3c87-cb58-4ac7-980e-b001946425fd",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:17:10.603020+00:00",
+          "usage": {
+            "input_tokens": 36630,
+            "output_tokens": 1386,
+            "llm_calls": 3,
+            "tool_calls": 7
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_b.c",
+            "line": 9,
+            "reason": "在 src_a.c:10 中 data 被显式赋值为 NULL，随后在第 11 行通过 sym_01(&data) 传递给 src_b.c:sym_01()。在 src_b.c:7 中 data 被赋值为 *dataPtr（即 NULL），在第 9 行 printIntLine(*data) 对 NULL 指针 data 进行解引用操作，必然触发空指针调用。"
+          }
+        ],
+        "summary": "发现 1 处空指针调用风险。src_a.c 的 sym_02() 函数将 NULL 指针通过跨文件调用传递给 src_b.c 的 sym_01() 函数，在 src_b.c:9 行对该 NULL 指针解引用时触发漏洞。"
+      }
+    },
+    "null_pointer-04-s": {
+      "attempts": [
+        {
+          "thread_id": "cba5dc02-0627-4dd7-8821-ee16b8d98b0d",
+          "created_utc": "2026-10-22T06:16:35.725330+00:00",
+          "run_id": "1baf2ecc-b8a1-4cd4-aa0b-d28037e36814",
+          "status": "completed",
+          "finished_utc": "2026-10-22T06:17:20.554967+00:00",
+          "usage": {
+            "input_tokens": 38168,
+            "output_tokens": 2082,
+            "llm_calls": 3,
+            "tool_calls": 7
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "在 src_a.c 和 src_b.c 的静态审计中，未发现空指针调用漏洞。虽然 src_b.c 的 sym_01 函数（第9行）缺少 NULL 检查直接解引用指针，但通过跨文件数据流分析，唯一调用 sym_01 的路径是 src_a.c 的 sym_02 函数，该路径传递的是有效指针（&tmpData）。src_a.c 的 sym_04 函数虽然创建了 NULL 指针，但调用的是具有 NULL 保护的 sym_03 函数，不会触发解引用。在当前分析范围内不存在可达的空指针解引用路径。"
+      }
+    },
+    "array_oob-05-v": {
+      "attempts": [
+        {
+          "thread_id": "767fa03e-5e9b-45a8-aa41-72ec63451733",
+          "created_utc": "2026-10-22T06:16:57.146465+00:00",
+          "run_id": "c66dc167-3a4b-4451-b583-3a12cd3333a3",
+          "status": "failed",
+          "finished_utc": "2026-10-22T06:17:27.845480+00:00",
+          "usage": {
+            "input_tokens": 20405,
+            "output_tokens": 752,
+            "llm_calls": 2,
+            "tool_calls": 8
+          }
+        },
+        {
+          "thread_id": "7beebd17-c111-4d4c-ad83-41650f34a7b7",
+          "created_utc": "2026-10-22T11:59:06.873227+00:00",
+          "run_id": "1dcddda8-76c5-43fb-ba95-c0175514ce6c",
+          "status": "completed",
+          "finished_utc": "2026-10-22T11:59:46.284665+00:00",
+          "usage": {
+            "input_tokens": 39991,
+            "output_tokens": 1429,
+            "llm_calls": 3,
+            "tool_calls": 8
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_d.c",
+            "line": 13,
+            "reason": "buffer[10]仅在第11行检查data >= 0，未检查上界。当用户通过stdin输入>=10的整数时，经src_a.c:sym_02→src_b.c:sym_01→src_c.c:sym_03→src_d.c:sym_04跨文件传播，导致buffer[data]=1在第13行越界写入。有效索引范围0-9，输入10即触发越界。"
+          }
+        ],
+        "summary": "发现1处数组越界风险：src_d.c第13行的buffer[data]访问仅验证下界(data>=0)，未验证上界(data<10)。攻击者可通过stdin输入>=10的整数触发越界写入。"
+      }
+    },
+    "array_oob-05-s": {
+      "attempts": [
+        {
+          "thread_id": "82579bab-fb3f-4e20-bd72-e0f17266680a",
+          "created_utc": "2026-10-22T06:17:05.625904+00:00",
+          "run_id": "c512305b-2766-4fb9-8d94-1346901e07a5",
+          "status": "failed",
+          "finished_utc": "2026-10-22T06:17:25.382293+00:00",
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "llm_calls": 0,
+            "tool_calls": 0
+          }
+        },
+        {
+          "thread_id": "7b1a8060-31cc-4ccb-8b9d-e5d922dedf1d",
+          "created_utc": "2026-10-22T11:59:06.808901+00:00",
+          "run_id": "36cb1e61-730d-44ff-9ae8-6e280a82c8cc",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:00:01.810561+00:00",
+          "usage": {
+            "input_tokens": 41495,
+            "output_tokens": 1474,
+            "llm_calls": 3,
+            "tool_calls": 8
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_d.c",
+            "line": 13,
+            "reason": "src_d.c:13 buffer[data]=1 对10元素数组仅检查data>=0，未检查上界。当data>=10时发生越界写入。虽然通过sym_02传入的常量7是安全的，但sym_08函数本身缺少上界验证，任何>=10的data值都会导致越界。"
+          }
+        ],
+        "summary": "发现1处数组越界风险：src_d.c:13的sym_08函数对10元素buffer仅验证索引下界(>=0)，缺少上界检查(<10)，当data>=10时发生写越界。sym_09函数有完整边界检查(0<=data<10)，是安全的。"
+      }
+    },
+    "string_overflow-05-v": {
+      "attempts": [
+        {
+          "thread_id": "e8803885-1ca3-4896-8655-a8706f4dca2d",
+          "created_utc": "2026-10-22T06:17:08.192899+00:00",
+          "run_id": "89a4b3ac-ac2e-470d-bf41-d23a47ed2c10",
+          "status": "failed",
+          "finished_utc": "2026-10-22T06:17:25.591870+00:00",
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "llm_calls": 0,
+            "tool_calls": 0
+          }
+        },
+        {
+          "thread_id": "7e84509d-82b6-4b3c-b15e-9931f51ac05c",
+          "created_utc": "2026-10-22T11:59:07.883387+00:00",
+          "run_id": "f5d8ed68-a749-4c7a-9f55-644d2896debd",
+          "status": "completed",
+          "finished_utc": "2026-10-22T11:59:59.469629+00:00",
+          "usage": {
+            "input_tokens": 43847,
+            "output_tokens": 1859,
+            "llm_calls": 4,
+            "tool_calls": 9
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "string_overflow",
+            "file": "src_e.c",
+            "line": 10,
+            "reason": "strncat(dest, data, strlen(data))将99字节的data追加到容量为50字节的dest缓冲区。dest初始为空字符串（长度0），追加99字节后需自动添加NUL终止符，共需100字节（0+99+1），超出dest的50字节容量，导致50字节溢出。数据流：src_a.c:sym_02填充99个'A'字符 → src_b.c:sym_01 → src_c.c:sym_03 → src_d.c:sym_04 → src_e.c:sym_05。"
+          }
+        ],
+        "summary": "发现1处字符串溢出漏洞。src_e.c第10行的strncat调用将99字节数据追加到50字节缓冲区，造成缓冲区溢出。虽然审计工具scope_strncat规则排除了strncat的自动检测，但通过跨文件数据流分析确认了实际溢出风险。"
+      }
+    },
+    "string_overflow-05-s": {
+      "attempts": [
+        {
+          "thread_id": "394b41d7-c121-43d0-9fb2-923ff1ff6057",
+          "created_utc": "2026-10-22T06:17:11.264733+00:00",
+          "run_id": "0cb3da1e-6d9c-4d70-98b1-4405bc48b0b8",
+          "status": "failed",
+          "finished_utc": "2026-10-22T06:17:27.958099+00:00",
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "llm_calls": 0,
+            "tool_calls": 0
+          }
+        },
+        {
+          "thread_id": "81519bb3-3447-42f4-b566-f88a82d63437",
+          "created_utc": "2026-10-22T11:59:08.059921+00:00",
+          "run_id": "3eb68ce5-177f-46dd-8c14-1e6d95f8f4b3",
+          "status": "completed",
+          "finished_utc": "2026-10-22T11:59:53.361079+00:00",
+          "usage": {
+            "input_tokens": 40182,
+            "output_tokens": 1664,
+            "llm_calls": 3,
+            "tool_calls": 9
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经过源码审计和工具扫描，5个目标文件中未发现字符串溢出漏洞。src_e.c第10行的strncat调用在当前数据流下边界安全（空dest+49字节源+NUL=50字节，未超出dest[50]容量），且根据审计清单scope_strncat规则，strncat调用已排除在本版本字符串溢出审查范围之外。"
+      }
+    },
+    "null_pointer-05-v": {
+      "attempts": [
+        {
+          "thread_id": "a878e507-0648-4a79-b191-f6117a9cb56f",
+          "created_utc": "2026-10-22T06:17:11.171821+00:00",
+          "run_id": "113a1d4f-809b-431d-aaf0-d0c7a9023f4a",
+          "status": "failed",
+          "finished_utc": "2026-10-22T06:17:27.496478+00:00",
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "llm_calls": 0,
+            "tool_calls": 0
+          }
+        },
+        {
+          "thread_id": "f9e425b2-3b94-424c-92ec-a39e15bd75fd",
+          "created_utc": "2026-10-22T11:59:06.794818+00:00",
+          "run_id": "5933800b-0cdf-4bf1-8700-21c0d586ee56",
+          "status": "completed",
+          "finished_utc": "2026-10-22T11:59:49.188334+00:00",
+          "usage": {
+            "input_tokens": 35687,
+            "output_tokens": 1251,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 15,
+            "reason": "在第10行data被显式赋值为NULL，第12行的条件判断globalFive==5恒为真（globalFive在io.c中初始化为5），因此第15行printIntLine(*data)必然解引用空指针，无任何防护检查"
+          }
+        ],
+        "summary": "src_a.c存在1处确定的空指针解引用漏洞：函数sym_01在两个恒真条件下依次将指针置空并解引用，触发条件100%可达"
+      }
+    },
+    "null_pointer-05-s": {
+      "attempts": [
+        {
+          "thread_id": "1d43625e-b940-42c6-b835-291e3c4c4ec0",
+          "created_utc": "2026-10-22T06:17:13.645785+00:00",
+          "run_id": "909e9464-da93-4a6f-81a0-6bae8c9e9cd1",
+          "status": "failed",
+          "finished_utc": "2026-10-22T06:17:28.420570+00:00",
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "llm_calls": 0,
+            "tool_calls": 0
+          }
+        },
+        {
+          "thread_id": "de2a692e-47b8-4839-a9de-9b781d6962cb",
+          "created_utc": "2026-10-22T11:59:06.924615+00:00",
+          "run_id": "353d1161-7632-4045-93f0-9561419d5cd4",
+          "status": "completed",
+          "finished_utc": "2026-10-22T11:59:51.632998+00:00",
+          "usage": {
+            "input_tokens": 37912,
+            "output_tokens": 1954,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "审计完成。src_a.c共包含5个函数，其中sym_01和sym_02在将指针设为NULL后有if(data!=NULL)检查保护解引用操作，sym_03和sym_04在解引用前将指针初始化指向有效局部变量。结合全局常量globalFive恒为5的条件判断，所有指针解引用路径均安全。工具扫描0告警，人工源码审计确认无空指针调用风险。"
+      }
+    },
+    "array_oob-06-v": {
+      "attempts": [
+        {
+          "thread_id": "80cc5f5c-2ab8-45cd-bb52-d3c07740876b",
+          "created_utc": "2026-10-22T06:17:19.023691+00:00",
+          "run_id": "00bcf8b1-4d2f-4f29-9cc3-68c2be87fc27",
+          "status": "failed",
+          "finished_utc": "2026-10-22T06:17:33.553440+00:00",
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "llm_calls": 0,
+            "tool_calls": 0
+          }
+        },
+        {
+          "thread_id": "09ad0a7e-9298-48fd-b7f2-1b87b0203314",
+          "created_utc": "2026-10-22T11:59:09.663327+00:00",
+          "run_id": "d35d1ab4-1e34-4768-b366-3fa00c5020a7",
+          "status": "completed",
+          "finished_utc": "2026-10-22T11:59:53.469598+00:00",
+          "usage": {
+            "input_tokens": 36339,
+            "output_tokens": 1660,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_a.c",
+            "line": 20,
+            "reason": "数组buffer声明为int buffer[10]（有效索引0-9），但在第20行使用buffer[data]时，data的值为10（第11行赋值），超出数组上界。虽然第18行检查了data >= 0以防负索引，但未检查上界data < 10。由于globalReturnsTrue()恒返回1，第8-11行的data=10赋值必然执行，导致第20行发生越界写入。"
+          }
+        ],
+        "summary": "src_a.c第20行存在数组越界写入漏洞。数组buffer容量为10（索引0-9），但使用索引data=10访问，缺少上界检查。"
+      }
+    },
+    "array_oob-06-s": {
+      "attempts": [
+        {
+          "thread_id": "6f541cd1-37f8-4bdd-8083-efab7ecf81aa",
+          "created_utc": "2026-10-22T06:17:20.620418+00:00",
+          "run_id": "1be398ce-f7a1-47f6-b17c-4d3c26ec259a",
+          "status": "failed",
+          "finished_utc": "2026-10-22T06:17:33.487329+00:00",
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "llm_calls": 0,
+            "tool_calls": 0
+          }
+        },
+        {
+          "thread_id": "87820b30-c365-48ac-8139-0c95a418981b",
+          "created_utc": "2026-10-22T11:59:07.262590+00:00",
+          "run_id": "0d70c0a1-7cd9-45d4-b384-72130711ed74",
+          "status": "completed",
+          "finished_utc": "2026-10-22T11:59:50.617605+00:00",
+          "usage": {
+            "input_tokens": 38453,
+            "output_tokens": 1567,
+            "llm_calls": 3,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "src_a.c 在当前代码的所有可达路径上不存在数组越界风险。sym_01/sym_02 中 data=10 被完整边界检查（data >= 0 && data < 10）拦截；sym_03/sym_04 中 data=7 虽然只有下界检查（data >= 0），但该常量值 7 在数组 buffer[10] 的有效范围内（0-9）。硬化建议：sym_03/sym_04 应添加上界检查以防止未来修改引入风险。"
+      }
+    },
+    "string_overflow-06-v": {
+      "attempts": [
+        {
+          "thread_id": "f88256c4-030b-4b8b-a6af-1b0a4bf3a341",
+          "created_utc": "2026-10-22T11:59:46.380502+00:00",
+          "run_id": "0c937e8d-ca01-41b6-8db0-66ad1acef3b5",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:00:24.820472+00:00",
+          "usage": {
+            "input_tokens": 36911,
+            "output_tokens": 1517,
+            "llm_calls": 4,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "string_overflow",
+            "file": "src_a.c",
+            "line": 21,
+            "reason": "strcat(data, source) 将99字节的source追加到容量仅50字节的sym_02缓冲区（通过data指针）。第13行data指向sym_02[50]，第14行初始化为空字符串（长度0），第18-19行source被设置为99个'C'字符加NUL终止符。strcat需要写入0+99+1=100字节，超出sym_02的50字节容量，造成50字节的缓冲区溢出。GLOBAL_CONST_TRUE为真常量（std_testcase.h定义），该路径必然执行。"
+          }
+        ],
+        "summary": "确认存在字符串溢出漏洞。src_a.c第21行的strcat调用尝试将99字节写入仅50字节的缓冲区，造成确定的缓冲区溢出，属于CWE-120类型漏洞。"
+      }
+    },
+    "string_overflow-06-s": {
+      "attempts": [
+        {
+          "thread_id": "3b90ea7a-12c4-4c53-93e6-1db43999c056",
+          "created_utc": "2026-10-22T11:59:49.306633+00:00",
+          "run_id": "e401206d-606f-465f-bbd1-0d45614c9a43",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:00:29.104125+00:00",
+          "usage": {
+            "input_tokens": 35675,
+            "output_tokens": 1539,
+            "llm_calls": 4,
+            "tool_calls": 4
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "扫描工具在 src_a.c 的第 26 和 47 行检测到两处 strcat 调用。经过详细边界分析：sym_01 和 sym_04 两个函数中，data 指向的 sym_03 数组容量为 100 字节，初始化为空字符串（长度0），source 数组通过 memset 填充 99 个字符加 1 个 NUL 终止符（总长度99）。strcat 操作需要 0+99+1=100 字节，正好等于目标缓冲区容量，不存在溢出。两处调用均无字符串溢出风险。"
+      }
+    },
+    "null_pointer-06-v": {
+      "attempts": [
+        {
+          "thread_id": "20e5d446-ad4e-4a15-b7fa-1a7905c6450e",
+          "created_utc": "2026-10-22T11:59:50.779442+00:00",
+          "run_id": "b587ec49-8e27-4904-997e-5fa49c824b92",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:00:31.635842+00:00",
+          "usage": {
+            "input_tokens": 36605,
+            "output_tokens": 1547,
+            "llm_calls": 3,
+            "tool_calls": 7
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_b.c",
+            "line": 8,
+            "reason": "函数 sym_01 在第8行对参数 data 解引用 (*data)，但未进行 NULL 检查。调用链：src_a.c 的 sym_02() 在第10行将 data 显式赋值为 NULL，第11行将该 NULL 指针传递给 sym_01()，导致必然的空指针解引用。"
+          }
+        ],
+        "summary": "发现1处空指针解引用漏洞。src_b.c 第8行在 sym_01 函数中直接解引用参数指针，缺少 NULL 检查。src_a.c 的 sym_02 函数以 NULL 值调用该函数，形成确定的跨文件空指针解引用路径。"
+      }
+    },
+    "null_pointer-06-s": {
+      "attempts": [
+        {
+          "thread_id": "18fabc0c-08ef-439f-a836-167837183b6f",
+          "created_utc": "2026-10-22T11:59:51.738215+00:00",
+          "run_id": "5a11d7aa-4b46-4a56-87ee-b2c2f4bd0a3a",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:00:30.385265+00:00",
+          "usage": {
+            "input_tokens": 28198,
+            "output_tokens": 1918,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现空指针调用漏洞。src_b.c中sym_01()函数在第8行直接解引用指针参数而无NULL检查，但其唯一调用者sym_02()传入的是有效的栈变量地址&tmpData，调用路径安全。sym_03()在处理NULL指针时有完整的NULL检查防护(第13行)。虽然sym_01缺少防御性检查是代码健壮性问题，但在当前代码的实际执行路径中不存在NULL指针到达解引用点的可行路径。"
+      }
+    },
+    "array_oob-07-v": {
+      "attempts": [
+        {
+          "thread_id": "ccb05323-c522-4394-a3b1-52a9d8636777",
+          "created_utc": "2026-10-22T11:59:53.442758+00:00",
+          "run_id": "6eb1d7af-83db-4b02-a1c7-1bdd50c900fa",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:00:28.377025+00:00",
+          "usage": {
+            "input_tokens": 38122,
+            "output_tokens": 1469,
+            "llm_calls": 3,
+            "tool_calls": 7
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_b.c",
+            "line": 18,
+            "reason": "循环迭代i从0到99，在第18行执行data[i]=source[i]。data指针来自src_a.c第17行，指向仅有50个元素的数组sym_05（src_a.c第16行）。当i>=50时发生数组越界写入，可写入索引50-99共50个越界元素。"
+          }
+        ],
+        "summary": "发现1处数组越界风险。src_b.c的sym_03函数中，循环写入data[0]到data[99]，但通过跨文件数据流追踪，data实际指向src_a.c中仅有50个元素的sym_05数组，导致索引50-99范围内的50次越界写入。"
+      }
+    },
+    "array_oob-07-s": {
+      "attempts": [
+        {
+          "thread_id": "de73ff69-469a-42df-b046-88f4f87ca26b",
+          "created_utc": "2026-10-22T11:59:54.598164+00:00",
+          "run_id": "c747948d-88d6-447c-bab4-596b3aeac5f5",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:00:34.668576+00:00",
+          "usage": {
+            "input_tokens": 31918,
+            "output_tokens": 1653,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现数组越界风险。src_a.c 中 sym_06[100] 通过结构体传递给 src_b.c 的 sym_03 函数，后者循环访问 data[0] 至 data[99]，所有索引均在分配的100个元素范围内，跨文件数据流分析确认边界安全。"
+      }
+    },
+    "string_overflow-07-v": {
+      "attempts": [
+        {
+          "thread_id": "464c3ed8-0555-4e9b-a73a-3ac6cfbef95f",
+          "created_utc": "2026-10-22T11:59:59.546442+00:00",
+          "run_id": "7dac5d03-2217-4053-894b-acf1e81554ea",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:00:35.124173+00:00",
+          "usage": {
+            "input_tokens": 36639,
+            "output_tokens": 1420,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "string_overflow",
+            "file": "src_a.c",
+            "line": 21,
+            "reason": "strcpy(data, source) 将长度为99的字符串（含NUL共100字节）拷贝到容量仅为50字节的缓冲区sym_02，导致50字节溢出。触发条件：globalFive在io.c中初始化为5，第10行条件恒为真，data必然指向sym_02；第17-19行构造99字节有效内容的source数组。strcpy无边界检查，第21行执行时确定性溢出。"
+          }
+        ],
+        "summary": "src_a.c 存在1个字符串溢出漏洞：第21行 strcpy 将100字节数据写入50字节缓冲区，溢出50字节，CWE-120。"
+      }
+    },
+    "string_overflow-07-s": {
+      "attempts": [
+        {
+          "thread_id": "6b34db85-aac4-4b41-a924-06645169f063",
+          "created_utc": "2026-10-22T12:00:01.940150+00:00",
+          "run_id": "167f5dab-7d9a-40aa-97c1-b219041dc26e",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:00:41.558009+00:00",
+          "usage": {
+            "input_tokens": 37928,
+            "output_tokens": 1737,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "src_a.c中不存在字符串溢出风险。工具在第26行和第47行报告了strcpy调用，但经过边界计算验证：source缓冲区包含99字节数据加终止符共100字节，目标data指向的sym_03缓冲区容量为100字节，strcpy操作边界安全。两处strcpy虽然使用了不安全的API，但在当前代码路径下实际写入字节数（包括终止符）不超过目标缓冲区容量，不构成溢出漏洞。"
+      }
+    },
+    "null_pointer-07-v": {
+      "attempts": [
+        {
+          "thread_id": "ad71642f-e176-4728-b2a6-0798411612a7",
+          "created_utc": "2026-10-22T12:00:24.898621+00:00",
+          "run_id": "fd103173-b545-4a4d-961e-bb2462f66705",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:00.890518+00:00",
+          "usage": {
+            "input_tokens": 36632,
+            "output_tokens": 1761,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 23,
+            "reason": "第11行将 data 赋值为 NULL（当第一次 globalReturnsTrueOrFalse() 返回真时），第23行在第二个 if 分支（当第二次 globalReturnsTrueOrFalse() 返回真时）直接解引用 *data 而未进行空指针检查。由于 globalReturnsTrueOrFalse() 基于 rand() 返回随机值，存在可行路径：第一次返回真使 data=NULL，第二次返回真导致对 NULL 指针解引用。"
+          }
+        ],
+        "summary": "src_a.c 第23行存在空指针解引用漏洞。通过可行路径 globalReturnsTrueOrFalse() 两次都返回真，data 在第11行被赋值为 NULL，在第23行未经检查直接解引用，触发空指针调用。"
+      }
+    },
+    "null_pointer-07-s": {
+      "attempts": [
+        {
+          "thread_id": "600af76f-fcfe-4378-b22d-cd37143111fc",
+          "created_utc": "2026-10-22T12:00:28.512398+00:00",
+          "run_id": "bafe9259-b406-4e56-8065-fa1bf003030f",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:00:59.825597+00:00",
+          "usage": {
+            "input_tokens": 37304,
+            "output_tokens": 1406,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "审计完成。src_a.c 中不存在空指针调用风险。sym_01()函数虽然将data设置为NULL，但所有解引用操作(*data)均位于显式的非空检查分支内(if (data != NULL))；sym_02()函数中data始终指向有效的栈变量tmpData。扫描工具未报告任何告警，人工审计确认代码安全。"
+      }
+    },
+    "array_oob-08-v": {
+      "attempts": [
+        {
+          "thread_id": "9fe1a2c7-4ade-449d-a67d-85e32fdf6547",
+          "created_utc": "2026-10-22T12:00:29.142404+00:00",
+          "run_id": "ae3ac707-a993-40ef-b7ee-ad57be49eafd",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:13.217786+00:00",
+          "usage": {
+            "input_tokens": 36869,
+            "output_tokens": 1567,
+            "llm_calls": 4,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_a.c",
+            "line": 20,
+            "reason": "buffer[10]数组写入仅检查下界(data>=0)，未检查上界。data由RAND32()赋值可为0到INT_MAX任意整数，当data>=10时(如10,100,1000等)触发越界写入buffer[data]=1。RAND32宏可生成完整int范围值，上界缺失导致确定性风险。"
+          }
+        ],
+        "summary": "src_a.c第20行存在数组越界写入风险。buffer容量为10(索引0-9)，data通过RAND32()获得随机整数后仅验证非负(>=0)，缺少上界检查(<10)。攻击者可通过多次调用触发data>=10的情况导致越界写入。"
+      }
+    },
+    "array_oob-08-s": {
+      "attempts": [
+        {
+          "thread_id": "c24dde3e-c02b-475e-81fa-6e03b891e52a",
+          "created_utc": "2026-10-22T12:00:30.453379+00:00",
+          "run_id": "78df9bd9-75bf-4484-9a3f-043555d6002e",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:21.153226+00:00",
+          "usage": {
+            "input_tokens": 59799,
+            "output_tokens": 1982,
+            "llm_calls": 5,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "审计完成。src_a.c 中 sym_03 和 sym_04 虽缺少上界检查（仅验证 data >= 0），但由于 GLOBAL_CONST_FALSE=0 和 GLOBAL_CONST_TRUE=1 的常量语义，data 在这两个函数的可达路径上恒为 7，访问 buffer[7]（数组长度 10）不会越界。sym_01 和 sym_02 使用不可信的 RAND32() 输入，但访问前执行了完整的边界检查（data >= 0 && data < 10）。未发现可触发的数组越界风险。建议在 sym_03 和 sym_04 中添加上界检查作为防御性编程措施。"
+      }
+    },
+    "string_overflow-08-v": {
+      "attempts": [
+        {
+          "thread_id": "9bbf2e1d-e2b5-44a1-84a3-4f8b08b02564",
+          "created_utc": "2026-10-22T12:00:31.709383+00:00",
+          "run_id": "bc93a1ca-7f81-4630-a94a-b66596aae825",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:06.917066+00:00",
+          "usage": {
+            "input_tokens": 36570,
+            "output_tokens": 1644,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "string_overflow",
+            "file": "src_a.c",
+            "line": 14,
+            "reason": "strncpy(data, source, strlen(source) + 1) 将11字节写入容量仅10字节的缓冲区。数据流：sym_02中data指向sym_03[10]（容量10字节），传递给sym_01；sym_01中source[11]存储\"AAAAAAAAAA\"（10个字符+NUL共11字节），strncpy的第三参数strlen(source)+1=11，导致向10字节目标缓冲区写入11字节，溢出1字节。"
+          }
+        ],
+        "summary": "src_a.c存在1处字符串溢出漏洞。在sym_01函数第14行，通过跨函数数据流分析，sym_02将只有10字节容量的sym_03通过data参数传递给sym_01，而sym_01中strncpy写入11字节（strlen(\"AAAAAAAAAA\")+1），造成1字节缓冲区溢出。"
+      }
+    },
+    "string_overflow-08-s": {
+      "attempts": [
+        {
+          "thread_id": "b700c19a-7f79-405a-81a3-080c7c8d5c07",
+          "created_utc": "2026-10-22T12:00:34.751558+00:00",
+          "run_id": "493e906c-720d-45ac-b6f1-e4dbb745a138",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:10.771092+00:00",
+          "usage": {
+            "input_tokens": 24942,
+            "output_tokens": 1127,
+            "llm_calls": 3,
+            "tool_calls": 4
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现字符串溢出漏洞。虽然 src_a.c 第14行的 strncpy 操作将11字节（10字符+'\\0'）写入11字节缓冲区 sym_04，但目标缓冲区容量足够（10+1=11字节），不存在溢出。代码在容量边界上安全操作。"
+      }
+    },
+    "null_pointer-08-v": {
+      "attempts": [
+        {
+          "thread_id": "3b7e4efa-39f7-463c-b906-dd2e6c086f41",
+          "created_utc": "2026-10-22T12:00:35.233924+00:00",
+          "run_id": "10ff5d9a-5e2d-4013-a652-11e96b5e2f30",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:08.760155+00:00",
+          "usage": {
+            "input_tokens": 35795,
+            "output_tokens": 1369,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 16,
+            "reason": "第16行 data->intOne 对NULL指针进行解引用。data在第11行被赋值为NULL（第8行globalTrue条件为真），在第16行解引用前无任何非NULL保护检查（第13行globalTrue条件仍为真），必然触发空指针解引用。"
+          }
+        ],
+        "summary": "src_a.c存在确定的空指针解引用漏洞：sym_01函数在第11行将data设为NULL后，第16行直接解引用data访问intOne成员，由于两处if条件的globalTrue均为1（全局常量），该漏洞路径必然触发。"
+      }
+    },
+    "null_pointer-08-s": {
+      "attempts": [
+        {
+          "thread_id": "4d45fbc3-6f9b-45f1-ab48-9e60c13de2ad",
+          "created_utc": "2026-10-22T12:00:41.803928+00:00",
+          "run_id": "7a785499-e2a9-4ffc-8827-20a2a360542c",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:42.511271+00:00",
+          "usage": {
+            "input_tokens": 51588,
+            "output_tokens": 2646,
+            "llm_calls": 4,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经过详细审计，src_a.c 中不存在空指针调用风险。sym_01() 和 sym_02() 函数虽然将 data 赋值为 NULL，但所有解引用操作都受到 if(data != NULL) 条件检查的保护。sym_03() 和 sym_04() 中 data 指针都指向有效的局部结构变量。结合 io.c 中 globalTrue=1 和 globalFalse=0 的初始值进行路径分析，所有可达的解引用路径都是安全的。"
+      }
+    },
+    "array_oob-09-v": {
+      "attempts": [
+        {
+          "thread_id": "bc734b71-010c-4229-aeac-3b3706271a20",
+          "created_utc": "2026-10-22T12:00:59.898250+00:00",
+          "run_id": "d4958c21-d0c8-4164-a114-909ae63ef851",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:50.054831+00:00",
+          "usage": {
+            "input_tokens": 37049,
+            "output_tokens": 1769,
+            "llm_calls": 4,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_a.c",
+            "line": 20,
+            "reason": "数组buffer[10]有效索引范围是0-9，第20行buffer[data]=1仅检查data>=0（下界），未检查data<10（上界）。第11行fscanf从stdin读取data为攻击者可控输入，当输入值>=10（如10、100、INT_MAX）时可触发越界写入。数据流：stdin→fscanf(line 11)→data（未完整验证）→buffer[data]（line 20）越界访问。"
+          }
+        ],
+        "summary": "发现1处数组越界风险：src_a.c第20行对buffer[10]的访问缺少上界检查（data<10），攻击者输入>=10的值可触发越界写入。"
+      }
+    },
+    "array_oob-09-s": {
+      "attempts": [
+        {
+          "thread_id": "48ad4ad5-9298-4cff-8e58-6b23e57eae16",
+          "created_utc": "2026-10-22T12:01:01.815101+00:00",
+          "run_id": "a95dc4da-4800-471c-a4be-085998a031eb",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:45.066518+00:00",
+          "usage": {
+            "input_tokens": 38768,
+            "output_tokens": 2155,
+            "llm_calls": 3,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "审计完成。src_a.c 中存在4个函数涉及数组访问：sym_01和sym_02虽然使用外部输入但有完整边界检查(data >= 0 && data < 10)保护；sym_03和sym_04虽然仅检查下界但data在可达路径上为常量7，在数组buffer[10]的有效索引范围[0,9]内。结合GLOBAL_CONST_TRUE=1、GLOBAL_CONST_FALSE=0的常量取值和数据流分析，所有数组访问均无法构造出实际越界的可达路径，未发现数组越界风险。"
+      }
+    },
+    "string_overflow-09-v": {
+      "attempts": [
+        {
+          "thread_id": "b446e263-678c-4b0b-9075-8973e7782270",
+          "created_utc": "2026-10-22T12:01:06.963294+00:00",
+          "run_id": "120671c1-4f69-4069-a86d-7a69d77406ce",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:47.648500+00:00",
+          "usage": {
+            "input_tokens": 36646,
+            "output_tokens": 1822,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "string_overflow",
+            "file": "src_a.c",
+            "line": 27,
+            "reason": "strncpy(dest, data, strlen(data)) 尝试将99字节数据拷贝到容量仅为50字节的dest缓冲区。当sym_01=1时，sym_02函数将data填充为99个'A'字符，strlen(data)=99。由于99 > 50，导致49字节溢出写入。触发条件：sym_01在第22行被设置为1，使此路径100%可达。"
+          }
+        ],
+        "summary": "发现1处确定性字符串溢出漏洞：第27行strncpy操作将99字节数据写入50字节缓冲区，造成49字节溢出。"
+      }
+    },
+    "string_overflow-09-s": {
+      "attempts": [
+        {
+          "thread_id": "08034a96-a14f-410a-9f6b-4c7aa2604c66",
+          "created_utc": "2026-10-22T12:01:08.800110+00:00",
+          "run_id": "ec256edf-b8e6-4495-814e-8560fbdc0e8d",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:48.123032+00:00",
+          "usage": {
+            "input_tokens": 37729,
+            "output_tokens": 1670,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现字符串溢出漏洞。src_a.c 中两处 strncpy 调用（第32行和第56行）均使用 strlen(data)=49 作为复制长度，目标缓冲区 dest 容量为50字节，加上终止符共需50字节，在安全范围内。代码在 strncpy 后显式设置终止符 dest[49]='\\0' 作为额外保护。所有缓冲区操作未超出其声明容量。"
+      }
+    },
+    "null_pointer-09-v": {
+      "attempts": [
+        {
+          "thread_id": "5794df78-07fa-456b-80ca-b1efa8d9b9c9",
+          "created_utc": "2026-10-22T12:01:11.233233+00:00",
+          "run_id": "e0c8cbf1-ef68-4d1f-a547-46eec1e8a10c",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:56.791535+00:00",
+          "usage": {
+            "input_tokens": 35870,
+            "output_tokens": 1899,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 16,
+            "reason": "第16行 printLongLine(*data) 对空指针解引用。数据流：第11行 data 被赋值为 NULL（GLOBAL_CONST_TRUE 恒为 1，if 块必然执行），第16行在无保护的情况下对 data 执行解引用操作 *data 并传递给 printLongLine。GLOBAL_CONST_TRUE 在 io.c 中定义为常量 1，两个 if 分支均必然执行，触发条件确定。"
+          }
+        ],
+        "summary": "src_a.c 存在 1 处确定的空指针解引用缺陷（第16行）。全局常量 GLOBAL_CONST_TRUE 值为 1，导致第11行必然将 data 置为 NULL，第16行必然对其解引用，无中间保护。自动扫描工具未识别此问题，可能因跨文件常量分析局限性。"
+      }
+    },
+    "null_pointer-09-s": {
+      "attempts": [
+        {
+          "thread_id": "c9a3c2fc-841c-428c-9497-93fa2ed17b25",
+          "created_utc": "2026-10-22T12:01:13.295548+00:00",
+          "run_id": "79c3a0fc-9e1d-4d87-80d4-22f749f18212",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:01:53.997341+00:00",
+          "usage": {
+            "input_tokens": 37796,
+            "output_tokens": 1696,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经过源码审计和工具扫描，未发现空指针调用风险。sym_01和sym_02函数中data被设置为NULL，但在调用printLongLine(*data)前均有显式的非NULL检查(data != NULL)，NULL情况进入安全分支仅调用printLine输出提示信息；sym_03和sym_04函数中data指向有效的栈变量地址，无空指针风险。"
+      }
+    },
+    "array_oob-10-v": {
+      "attempts": [
+        {
+          "thread_id": "c657b822-57d9-43ae-a589-1d81018ac87a",
+          "created_utc": "2026-10-22T12:01:21.212959+00:00",
+          "run_id": "96539d1a-df47-451e-8d7a-236daa3a1dd1",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:02:03.806142+00:00",
+          "usage": {
+            "input_tokens": 38671,
+            "output_tokens": 1462,
+            "llm_calls": 4,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "array_oob",
+            "file": "src_b.c",
+            "line": 11,
+            "reason": "buffer[10]有效索引0-9，但src_a.c:14传入data=10，仅在src_b.c:9检查下界data>=0，缺少上界检查data<10，导致src_b.c:11执行buffer[10]=1越界写入"
+          }
+        ],
+        "summary": "发现1处数组越界风险：src_b.c第11行，buffer容量10但索引值10超出合法范围[0,9]，跨文件数据流从src_a.c传入固定值10，仅有下界守卫，缺少上界检查导致确定性越界写入"
+      }
+    },
+    "array_oob-10-s": {
+      "attempts": [
+        {
+          "thread_id": "1a5ccafd-8b67-43c1-a6a3-4409b969e559",
+          "created_utc": "2026-10-22T12:01:42.578751+00:00",
+          "run_id": "c0a77181-b88a-427e-b41e-aa9c823fe868",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:02:32.328667+00:00",
+          "usage": {
+            "input_tokens": 39026,
+            "output_tokens": 2276,
+            "llm_calls": 3,
+            "tool_calls": 7
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "在当前工作区代码中未发现可实际触发的数组越界漏洞。src_b.c 的 sym_01 函数（第10行）虽然只检查了索引下界（data >= 0）而未检查上界，但在分析范围内的所有调用路径中，传入的索引值均在有效范围内：sym_02 传入常量7（< 10）。sym_03 函数正确实现了完整的边界检查（data >= 0 && data < 10），当 sym_04 传入值10时会被拒绝，不会执行数组访问。建议加固：为 sym_01 添加上界检查以提升防御性。"
+      }
+    },
+    "string_overflow-10-v": {
+      "attempts": [
+        {
+          "thread_id": "cf696096-8b14-4fc1-b748-8c1c7d315000",
+          "created_utc": "2026-10-22T12:01:45.124091+00:00",
+          "run_id": "bd2c4f1f-888c-4ba1-8534-33383598890a",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:02:17.279370+00:00",
+          "usage": {
+            "input_tokens": 35951,
+            "output_tokens": 1515,
+            "llm_calls": 3,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "string_overflow",
+            "file": "src_a.c",
+            "line": 30,
+            "reason": "SNPRINTF(dest, strlen(data), \"%s\", data) 使用 strlen(data) 作为 size 参数。当 globalReturnsTrueOrFalse() 返回 true 时，data 包含 99 个字符，strlen(data)=99，但目标缓冲区 dest 仅有 50 字节容量。snprintf 会尝试写入最多 99 个字节到 50 字节的缓冲区，导致缓冲区溢出。正确做法应使用 sizeof(dest) 作为 size 参数。"
+          }
+        ],
+        "summary": "src_a.c 第 30 行存在字符串溢出漏洞。SNPRINTF 调用使用 strlen(data) 而非 sizeof(dest) 作为 size 参数，当 data 长度为 99 时会溢出 50 字节的 dest 缓冲区。"
+      }
+    },
+    "string_overflow-10-s": {
+      "attempts": [
+        {
+          "thread_id": "cb464648-b259-4cda-b533-84bb035b2198",
+          "created_utc": "2026-10-22T12:01:47.684203+00:00",
+          "run_id": "15bae1fd-b777-4cd7-b4bd-c40404257a5c",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:02:34.532964+00:00",
+          "usage": {
+            "input_tokens": 36724,
+            "output_tokens": 2158,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经静态审计，src_a.c 第30行 SNPRINTF(dest, strlen(data), \"%s\", data) 使用源字符串长度作为大小参数而非目标缓冲区容量，属于危险的编程模式。但在当前代码路径下，data 长度固定为49，dest 容量为50，strlen(data)=49 < sizeof(dest)=50，不会发生实际溢出。扫描工具未报告告警，源码分析确认当前可行路径不存在字符串溢出漏洞。建议将第30行修改为 SNPRINTF(dest, sizeof(dest), \"%s\", data) 以提高代码健壮性。"
+      }
+    },
+    "null_pointer-10-v": {
+      "attempts": [
+        {
+          "thread_id": "7aace46a-4b81-4bb8-bb4c-a44e40b97b8e",
+          "created_utc": "2026-10-22T12:01:48.238922+00:00",
+          "run_id": "aece2508-94fa-4600-b1a4-a0bca0608f56",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:02:24.576789+00:00",
+          "usage": {
+            "input_tokens": 29657,
+            "output_tokens": 1681,
+            "llm_calls": 3,
+            "tool_calls": 5
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 10,
+            "reason": "第9行 malloc 可能失败返回 NULL，但第10行 '*intPointer = 5' 直接解引用指针而未检查 malloc 返回值。如果分配失败，此处会发生空指针解引用。"
+          },
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 11,
+            "reason": "第9行 malloc 可能失败返回 NULL，第11行 'printIntLine(*intPointer)' 解引用指针作为参数传递。如果分配失败，此处会发生空指针解引用。"
+          },
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 17,
+            "reason": "第17行 'printIntLine(*intPointer)' 解引用指针。如果第9行 malloc 失败，即使经过第13行的 NULL 检查分支，intPointer 仍为 NULL，此处会发生空指针解引用。"
+          }
+        ],
+        "summary": "src_a.c 存在空指针调用风险。第9行 malloc 未检查返回值，若分配失败返回 NULL，后续第10、11、17行的指针解引用操作会导致空指针调用。第13行的 NULL 检查位置过晚且未能阻止第17行的风险路径。建议在 malloc 之后立即检查返回值，失败时进行适当的错误处理。"
+      }
+    },
+    "null_pointer-10-s": {
+      "attempts": [
+        {
+          "thread_id": "53abd06b-e86a-4e1f-9ca9-288f1d1cb388",
+          "created_utc": "2026-10-22T12:01:50.118428+00:00",
+          "run_id": "1780ead9-4e79-465b-88fb-e91e3d32d7bf",
+          "status": "completed",
+          "finished_utc": "2026-10-22T12:02:30.173082+00:00",
+          "usage": {
+            "input_tokens": 36816,
+            "output_tokens": 1986,
+            "llm_calls": 3,
+            "tool_calls": 6
+          }
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 15,
+            "reason": "第14行 malloc 返回值未检查；若分配失败返回 NULL，第15行 '*intPointer = 5;' 将发生空指针解引用。触发条件：globalFive==5（默认值）且 malloc 失败"
+          },
+          {
+            "category": "null_pointer",
+            "file": "src_a.c",
+            "line": 31,
+            "reason": "第30行 malloc 返回值未检查；若分配失败返回 NULL，第31行 '*intPointer = 5;' 将发生空指针解引用。触发条件：globalFive==5（默认值）且 malloc 失败"
+          }
+        ],
+        "summary": "src_a.c 存在2处空指针解引用风险：sym_01()第15行和sym_02()第31行在 malloc 失败时未检查返回值直接解引用。虽然小内存分配失败概率低，但根据安全编码标准，必须检查所有动态内存分配返回值。建议在第15行和第31行之前添加 NULL 检查。"
+      }
+    }
+  },
+  "credits": [
+    {
+      "checked_utc": "2026-10-22T06:14:58.945677+00:00",
+      "account_total_credits_usd": 120.0,
+      "account_total_usage_usd": 91.335841532,
+      "account_remaining_usd": 28.664158468,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 28.664158468,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-10-22T11:59:06.637187+00:00",
+      "account_total_credits_usd": 120.0,
+      "account_total_usage_usd": 94.579834532,
+      "account_remaining_usd": 25.420165468,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 25.420165468,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-10-22T12:02:36.647672+00:00",
+      "account_total_credits_usd": 120.0,
+      "account_total_usage_usd": 98.710582532,
+      "account_remaining_usd": 21.289417468,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.289417468,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    }
+  ],
+  "stop_reason": "样本队列已处理完毕（未评分项保留在 checkpoint）",
+  "protocol": {
+    "model_config": {
+      "provider": "openrouter",
+      "model": "anthropic/claude-sonnet-4.5",
+      "base_url": "https://openrouter.ai/api/v1",
+      "context_window_tokens": 65536,
+      "safety_margin_tokens": 4096,
+      "fallback_models": [],
+      "provider_preferences": {}
+    },
+    "budget": {
+      "max_llm_calls": 8,
+      "max_tool_calls": 20,
+      "max_input_tokens": 120000,
+      "max_output_tokens": 24000,
+      "max_seconds": 600,
+      "max_compaction_calls": 8
+    },
+    "goal_sha256": "1b57396a20465c2b3539ac10bb56ad9831a7db338b37803de00ad3a9ca1c4c4b",
+    "manifest_sha256": "3cd8a37df94a1e25be1b7f1bbefe30fc6a53289cdf646686f8bb3ce2f6a6353e",
+    "product_sha256": {
+      "security_review.py": "c08be516b92f29904d8fefcc9967eab1ffa3516df00c2422cf3a9260bcaa1bf0",
+      "plugins/vulnerability_detection.py": "5d86611f94310146c8674e3ddce1c7357cb54e9679dd86763e54db3406335f6f",
+      "agent_core/tools/pipeline.py": "b3d05209d8ae82cb871eb85094cc25c9e7c35a6ec66a690e3b4e892aaee24179"
+    },
+    "order": [
+      "array_oob-01-v",
+      "array_oob-01-s",
+      "string_overflow-01-v",
+      "string_overflow-01-s",
+      "null_pointer-01-v",
+      "null_pointer-01-s",
+      "array_oob-02-v",
+      "array_oob-02-s",
+      "string_overflow-02-v",
+      "string_overflow-02-s",
+      "null_pointer-02-v",
+      "null_pointer-02-s",
+      "array_oob-03-v",
+      "array_oob-03-s",
+      "string_overflow-03-v",
+      "string_overflow-03-s",
+      "null_pointer-03-v",
+      "null_pointer-03-s",
+      "array_oob-04-v",
+      "array_oob-04-s",
+      "string_overflow-04-v",
+      "string_overflow-04-s",
+      "null_pointer-04-v",
+      "null_pointer-04-s",
+      "array_oob-05-v",
+      "array_oob-05-s",
+      "string_overflow-05-v",
+      "string_overflow-05-s",
+      "null_pointer-05-v",
+      "null_pointer-05-s",
+      "array_oob-06-v",
+      "array_oob-06-s",
+      "string_overflow-06-v",
+      "string_overflow-06-s",
+      "null_pointer-06-v",
+      "null_pointer-06-s",
+      "array_oob-07-v",
+      "array_oob-07-s",
+      "string_overflow-07-v",
+      "string_overflow-07-s",
+      "null_pointer-07-v",
+      "null_pointer-07-s",
+      "array_oob-08-v",
+      "array_oob-08-s",
+      "string_overflow-08-v",
+      "string_overflow-08-s",
+      "null_pointer-08-v",
+      "null_pointer-08-s",
+      "array_oob-09-v",
+      "array_oob-09-s",
+      "string_overflow-09-v",
+      "string_overflow-09-s",
+      "null_pointer-09-v",
+      "null_pointer-09-s",
+      "array_oob-10-v",
+      "array_oob-10-s",
+      "string_overflow-10-v",
+      "string_overflow-10-s",
+      "null_pointer-10-v",
+      "null_pointer-10-s"
+    ],
+    "base_url": "http://127.0.0.1:7860"
+  }
+}

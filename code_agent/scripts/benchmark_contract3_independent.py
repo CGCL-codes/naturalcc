@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 import shutil
 import subprocess
 import sys
@@ -33,6 +34,22 @@ BALANCED_VARIANTS = {
     "string_overflow": [0, 1, 3] * 6 + [2, 4],
     "null_pointer": [0, 1, 4] * 6 + [2, 3],
 }
+
+# Hard profiles: ("base", n) reuses case_lines, ("hard", n) uses hard_case_lines.
+# Controls include safe look-alikes, and all 40 functions are shuffled so the
+# label cannot be inferred from position.
+HARD = [("hard", variant) for variant in range(5)]
+HARD_PROFILES = {
+    "balanced-hard": {
+        category: {"defect": [("base", variant) for variant in BALANCED_VARIANTS[category][:10]] + HARD * 2,
+                   "control": [("base", variant) for variant in BALANCED_VARIANTS[category][:10]] + HARD * 2}
+        for category in BALANCED_VARIANTS},
+    "independent-hard": {
+        category: {"defect": [("base", variant) for variant in range(5)] + HARD * 3,
+                   "control": [("base", variant) for variant in range(5)] + HARD * 3}
+        for category in BALANCED_VARIANTS},
+}
+PROFILES = {"independent", "balanced", *HARD_PROFILES}
 
 
 def now() -> str:
@@ -84,35 +101,94 @@ def case_lines(category: str, variant: int, vulnerable: bool) -> list[str]:
     raise ValueError(f"Unknown category: {category}")
 
 
+def hard_case_lines(category: str, variant: int, vulnerable: bool) -> list[str]:
+    """Off-by-one defects and safe look-alikes; each control is truly safe."""
+    if category == "array_oob":
+        if variant == 0:
+            return ["    int values[3] = {1, 2, 3};", "    int index = contract3_identity(3);",
+                    f"    if (index {'>' if vulnerable else '>='} 3) return 0;", "    return values[index];"]
+        if variant == 1:
+            loop = "int index = 3; index >= 0; --index" if vulnerable else "int index = 3; index-- > 0;"
+            return ["    int values[3] = {1, 2, 3};", "    int total = 0;",
+                    f"    for ({loop}) total += values[index];", "    return total;"]
+        if variant == 2:
+            return ["    int values[3] = {1, 2, 3};",
+                    f"    return values[sizeof(values) / sizeof(values[0]){'' if vulnerable else ' - 1'}];"]
+        if variant == 3:
+            return ["    int values[3] = {1, 2, 3};", "    int *end = values + 3;", f"    return end[{'0' if vulnerable else '-1'}];"]
+        if variant == 4:
+            return ["    int values[4] = {1, 2, 3, 4};", f"    return values[{4 if vulnerable else 3}];"]
+    if category == "string_overflow":
+        if variant == 0:
+            return [f"    char target[{5 if vulnerable else 6}] = {{0}};", "    strcpy(target, \"ABCDE\");", "    return target[0];"]
+        if variant == 1:
+            size = "16" if vulnerable else "sizeof(target)"
+            return ["    char target[4] = {0};", f"    snprintf(target, {size}, \"%s\", \"ABCDEFGHIJ\");", "    return target[0];"]
+        if variant == 2:
+            if vulnerable:
+                return ["    char target[4];", "    strncpy(target, \"ABCDEFGH\", 8);", "    return target[0];"]
+            return ["    char target[4];", "    strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);",
+                    "    target[sizeof(target) - 1] = '\\0';", "    return target[0];"]
+        if variant == 3:
+            return ["    char target[8] = \"ABC\";", f"    strcat(target, \"{'DEFGH' if vulnerable else 'DEFG'}\");", "    return target[0];"]
+        if variant == 4:
+            size = "sizeof(\"ABCDE\")" if vulnerable else "sizeof(target)"
+            return ["    char target[4];", f"    memcpy(target, \"ABCDE\", {size});", "    return target[0];"]
+    if category == "null_pointer":
+        if variant == 0:
+            return ["    int value = 7;", "    int *pointer = 0;",
+                    f"    if (pointer == 0) {'value = -1;' if vulnerable else 'return -1;'}", "    return *pointer + value;"]
+        if variant == 1:
+            return ["    int value = 7;", "    int *pointer = value < 0 ? &value : 0;",
+                    "    return *pointer;" if vulnerable else "    return pointer ? *pointer : 0;"]
+        if variant == 2:
+            first, second = ("&value", "0") if vulnerable else ("0", "&value")
+            return ["    int value = 7;", f"    int *pointer = {first};", f"    pointer = {second};", "    return *pointer;"]
+        if variant == 3:
+            return ["    int value = 7;", f"    int *pointer = contract3_select(&value, {0 if vulnerable else 1});", "    return *pointer;"]
+        if variant == 4:
+            return ["    int value = 7;", "    struct contract3_box box = {0};",
+                    f"    if (box.pointer {'!=' if vulnerable else '=='} 0) box.pointer = &value;", "    return *box.pointer;"]
+    raise ValueError(f"Unknown hard case: {category}/{variant}")
+
+
 def inject_fixture(project: Path, source_id: str, categories: list[dict[str, Any]], *, fixture_name: str = "contract3_independent_examples.c", profile: str = "independent") -> tuple[Path, list[dict[str, Any]]]:
     fixture = project / fixture_name
+    hard = profile in HARD_PROFILES
     lines = ["/* Test-only independent Contract-3 fixture. Do not include in production builds. */",
              "#include <stdio.h>", "#include <string.h>", "",
              "struct contract3_box { int *pointer; };", "",
              "static int contract3_identity(int value) { return value; }",
              "static int contract3_read(int *pointer) { return *pointer; }",
-             "static void contract3_copy(char *target, const char *source) { strcpy(target, source); }", ""]
+             "static void contract3_copy(char *target, const char *source) { strcpy(target, source); }",
+             *(["static int *contract3_select(int *pointer, int key) { return key > 0 ? pointer : 0; }"] if hard else []), ""]
     cases: list[dict[str, Any]] = []
-    if profile not in {"independent", "balanced"}:
+    if profile not in PROFILES:
         raise ValueError(f"Unknown profile: {profile}")
     for category in categories:
-        for vulnerable in (True, False):
-            for index in range(1, 21):
-                ordinal = index if vulnerable else index + 20
-                function = f"contract3_independent_{category['id']}_case_{ordinal:02d}"
-                start = len(lines) + 1
-                lines.extend([f"static int {function}(void)", "{"])
+        order = [(vulnerable, index) for vulnerable in (True, False) for index in range(1, 21)]
+        if hard:
+            random.Random(f"{profile}:{source_id}:{category['id']}").shuffle(order)
+        for position, (vulnerable, index) in enumerate(order, 1):
+            ordinal = position if hard else (index if vulnerable else index + 20)
+            function = f"contract3_independent_{category['id']}_case_{ordinal:02d}"
+            start = len(lines) + 1
+            lines.extend([f"static int {function}(void)", "{"])
+            if hard:
+                kind, variant = HARD_PROFILES[profile][category["id"]]["defect" if vulnerable else "control"][index - 1]
+                body = (hard_case_lines if kind == "hard" else case_lines)(category["id"], variant, vulnerable)
+            else:
                 variant = (index - 1) % 5 if profile == "independent" else BALANCED_VARIANTS[category["id"]][index - 1]
                 body = case_lines(category["id"], variant, vulnerable)
-                lines.extend(body)
-                lines.append("}")
-                end = len(lines)
-                cases.append({"case_id": f"{source_id}-{category['id']}-{'positive' if vulnerable else 'control'}-{index:02d}",
-                              "project": source_id, "category": category["id"],
-                              "expected": "defect" if vulnerable else "control", "function": function,
-                              "line_start": start, "line_end": end, "defect_line": end - 1,
-                              "file": fixture.name})
-                lines.append("")
+            lines.extend(body)
+            lines.append("}")
+            end = len(lines)
+            cases.append({"case_id": f"{source_id}-{category['id']}-{'positive' if vulnerable else 'control'}-{index:02d}",
+                          "project": source_id, "category": category["id"],
+                          "expected": "defect" if vulnerable else "control", "function": function,
+                          "line_start": start, "line_end": end, "defect_line": end - 1,
+                          "file": fixture.name, **({"variant": f"{kind}-{variant}"} if hard else {})})
+            lines.append("")
     fixture.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return fixture, cases
 
@@ -180,13 +256,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, default=Path("/tmp/naturalcc-contract3-independent-sources"))
     parser.add_argument("--timeout", type=int, default=900)
-    parser.add_argument("--profile", choices=("independent", "balanced"), default="independent")
+    parser.add_argument("--profile", choices=sorted(PROFILES), default="independent")
     parser.add_argument("--report-only", action="store_true")
     args = parser.parse_args()
     global DATA, REPORT
-    if args.profile == "balanced":
-        DATA = ROOT / "artifacts" / "contract3" / "balanced-cppcheck"
-        REPORT = ROOT / "合同-3-平衡验收-result.md"
+    if args.profile != "independent":
+        DATA = ROOT / "artifacts" / "contract3" / f"{args.profile}-cppcheck"
+        REPORT = ROOT / ("合同-3-平衡验收-result.md" if args.profile == "balanced" else f"合同-3-{args.profile}-result.md")
     manifest = base.load_manifest()
     if args.report_only:
         result = json.loads((DATA / "result.json").read_text(encoding="utf-8"))

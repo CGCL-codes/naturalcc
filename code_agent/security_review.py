@@ -1,9 +1,10 @@
 """C audit contracts and literal-format checks, independent of evaluation datasets."""
 from __future__ import annotations
 
+import os
 import re
 
-REVIEW_VERSION = "c-security-review-v1"
+REVIEW_VERSION = "c-security-review-v3"
 REVIEW_GUIDANCE = {
     "evidence": (
         "Scanner findings are candidates, not verdicts; zero findings is not a safety proof. "
@@ -18,7 +19,9 @@ REVIEW_GUIDANCE = {
         "newline plus NUL. strcspn on that valid string returns at most its length; replacing its "
         "terminating NUL is within bounds. Check failed reads separately, without inventing an "
         "overlong successful read. strcpy/strcat require strlen(prefix)+strlen(suffix)+1 <= C; "
-        "use actual literal lengths, not the capacity of their declared arrays. Width W on scanf "
+        "use actual literal lengths, not the capacity of their declared arrays. strncat(dst,src,n) "
+        "appends min(n,strlen(src)) bytes plus NUL after strlen(dst); strncpy and snprintf are bounded "
+        "by n and the destination capacity, so n=strlen(src) is safe when strlen(src) < remaining space. Width W on scanf "
         "%s/%[ needs W+1 destination bytes; %c does not append NUL. Distinguish reads from writes."
     ),
     "commands": (
@@ -43,6 +46,35 @@ REVIEW_GUIDANCE = {
         "not evidence of concurrent unprotected accesses. Invalid unlock and cancellation cleanup "
         "are separate issues unless an actual conflicting-access path is demonstrated."
     ),
+    "reachability": (
+        "Report a defect only for a feasible path in the analysed program on which the faulty "
+        "operation actually executes with a triggering value. Evaluate global constants, global "
+        "variables, macros and helper functions that control branches (for example a constant "
+        "that is always 5 or a function that always returns 1) instead of treating them as unknown. "
+        "Follow data across functions, files, function pointers, structs and static globals to "
+        "every call site. A sink or helper without its own check is not a defect when every call "
+        "site in the analysed code passes a value proven safe on that path; a missing defensive "
+        "check alone is a hardening note, not a finding. Values from fgets/fscanf/recv/argv/rand "
+        "or other external input are attacker-controlled unless validated on that same path."
+    ),
+    "indexes": (
+        "For an array of N elements an index is safe only if 0 <= index < N on that path. A lower "
+        "bound check alone does not protect an untrusted index, but a constant or validated index "
+        "below N is safe even when the sink checks only the lower bound. For loops, compute the "
+        "last iteration value and the element count actually written. Decision rule: list an array "
+        "access in findings only if you can name a concrete out-of-range index value that reaches it on "
+        "a feasible path. If every value reaching the access is in range (for example a constant 7 for a "
+        "10-element array), it is not a finding even when the sink checks only the lower bound; mention "
+        "the missing upper-bound check in the summary as hardening. If your own reasoning says the "
+        "current path is safe, the item must not appear in findings."
+    ),
+    "null_pointer": (
+        "Name the concrete source that makes the pointer NULL on the reported path (NULL "
+        "assignment, failed allocation/lookup, or a NULL argument) and show that the "
+        "dereference is reached without an intervening non-NULL guarantee. A dereference in a "
+        "callee is safe when every caller passes a valid object. Checking for NULL after the "
+        "dereference does not protect it."
+    ),
     "ownership": (
         "For CWE-401 track each allocation identity through aliases, reassignments, swaps, helpers, "
         "return paths and loops. A free of a different allocation is not a release of the original. "
@@ -51,6 +83,31 @@ REVIEW_GUIDANCE = {
         "itself a leak. Do not conflate a null dereference, double free or use-after-free with a leak."
     ),
 }
+
+# Teaching profile: a deliberately weakened baseline for the detector-optimisation
+# exercise.  Each entry plants one realistic rule gap that students are expected to
+# find and fix; the full profile above is the reference solution.  Never enable it
+# for acceptance runs.
+EXAM_BASELINE_REVISION = "r2"
+EXAM_BASELINE_GAPS = {
+    "scope_strncat": (
+        "Report scope (applies to your final findings, not only to the scanner): strncat calls are "
+        "excluded from string-overflow reporting in this release. Even if you confirm a strncat "
+        "overflow manually, do not list it in findings; you may mention it in the summary only."
+    ),
+    "scope_null_guarded_branch": (
+        "Report scope (applies to your final findings, not only to the scanner): a dereference located "
+        "inside a branch whose condition compares the same pointer with NULL is excluded from "
+        "null-pointer reporting. Even if you confirm it manually, do not list it in findings; you may "
+        "mention it in the summary only."
+    ),
+}
+REVIEW_PROFILE = os.environ.get("CODE_AGENT_REVIEW_PROFILE", "full")
+if REVIEW_PROFILE not in {"full", "exam-baseline"}:
+    raise ValueError("CODE_AGENT_REVIEW_PROFILE must be full or exam-baseline")
+if REVIEW_PROFILE == "exam-baseline":
+    REVIEW_VERSION += f"-exam-baseline-{EXAM_BASELINE_REVISION}"
+    REVIEW_GUIDANCE = {**REVIEW_GUIDANCE, **EXAM_BASELINE_GAPS}
 
 # Preserve literal contents and source positions; discard comments, not code lines.
 _C_TOKEN = re.compile(r'//[^\n]*|/\*[\s\S]*?\*/|"(?:\\.|[^"\\])*"|'
