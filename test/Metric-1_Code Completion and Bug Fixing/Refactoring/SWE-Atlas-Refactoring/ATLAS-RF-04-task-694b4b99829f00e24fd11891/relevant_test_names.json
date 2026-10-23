@@ -1,0 +1,88 @@
+{
+  "tests": [
+    {
+      "name": "FullWidthSection > returns children directly when enabled is false"
+    },
+    {
+      "name": "FullWidthSection > returns children directly when enabled is not provided (defaults to false)"
+    },
+    {
+      "name": "FullWidthSection > wraps children in section div when enabled is true"
+    },
+    {
+      "name": "FullWidthSection > applies custom className when enabled is true"
+    },
+    {
+      "name": "FullWidthSection > does not apply className wrapper when enabled is false"
+    },
+    {
+      "name": "FullWidthSection > renders multiple children when enabled is true"
+    },
+    {
+      "name": "getCategories > returns a record of category objects with standard keys"
+    },
+    {
+      "name": "getCategories > accepts a boolean parameter without throwing"
+    },
+    {
+      "name": "getCategories > defaults to redesign disabled when called without arguments"
+    },
+    {
+      "name": "getCategories > returns different titles for paid category based on the parameter"
+    },
+    {
+      "name": "getCategories > returns different descriptions for paid category based on the parameter"
+    },
+    {
+      "name": "getCategories > returns different titles for popular category based on the parameter"
+    },
+    {
+      "name": "getCategories > returns different titles for featured category based on the parameter"
+    },
+    {
+      "name": "getCategories > returns different descriptions for featured category based on the parameter"
+    },
+    {
+      "name": "getCategories > returns different titles for monetization category based on the parameter"
+    },
+    {
+      "name": "getCategories > returns different descriptions for monetization category based on the parameter"
+    },
+    {
+      "name": "getCategories > returns different titles for business category based on the parameter"
+    },
+    {
+      "name": "getCategories > returns different descriptions for business category based on the parameter"
+    },
+    {
+      "name": "getCategories > each category has a slug property"
+    },
+    {
+      "name": "getCategories > categories that do not vary remain the same regardless of parameter"
+    },
+    {
+      "name": "useIsMarketplaceRedesignEnabled > returns false when a site is selected, regardless of other conditions"
+    },
+    {
+      "name": "useIsMarketplaceRedesignEnabled > returns false when a site is selected even with dashboard opt-in"
+    },
+    {
+      "name": "useIsMarketplaceRedesignEnabled > returns true for logged out users when no site is selected and flag is enabled"
+    },
+    {
+      "name": "useIsMarketplaceRedesignEnabled > returns true for logged in users with dashboard opt-in when no site is selected"
+    },
+    {
+      "name": "useIsMarketplaceRedesignEnabled > returns false for logged in users without dashboard opt-in when no site is selected"
+    },
+    {
+      "name": "useIsMarketplaceRedesignEnabled > returns false when the feature flag is disabled even for logged out users"
+    },
+    {
+      "name": "useIsMarketplaceRedesignEnabled > returns false when flag is disabled even with dashboard opt-in"
+    },
+    {
+      "name": "useIsMarketplaceRedesignEnabled > returns a boolean value"
+    }
+  ]
+}

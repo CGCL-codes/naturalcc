@@ -24,13 +24,13 @@ class ContextHardLimitExceeded(RuntimeError):
 
 @dataclass(frozen=True)
 class ModelContextProfile:
-    model: str = "deepseek-chat"
-    context_window_tokens: int = 65_536
+    model: str = "deepseek-v4-pro"
+    context_window_tokens: int = 262_144
     default_output_reserve_tokens: int = 4_096
     safety_margin_tokens: int = 512
     provider_framing_tokens: int = 256
-    compaction_trigger_ratio: float = 0.72
-    compaction_target_ratio: float = 0.50
+    compaction_trigger_ratio: float = 0.65
+    compaction_target_ratio: float = 0.45
     analyzer_output_tokens: int = 4_096
     summarizer_output_tokens: int = 2_048
 

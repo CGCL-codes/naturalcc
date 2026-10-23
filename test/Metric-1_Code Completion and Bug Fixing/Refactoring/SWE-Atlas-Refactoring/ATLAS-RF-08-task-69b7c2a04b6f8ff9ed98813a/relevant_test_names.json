@@ -1,0 +1,70 @@
+{
+  "tests": [
+    {
+      "name": "test_page_cache_uses_forced_inlining"
+    },
+    {
+      "name": "test_buffer_header_uses_forced_inlining"
+    },
+    {
+      "name": "test_buffer_source_uses_forced_inlining"
+    },
+    {
+      "name": "test_refcount_helpers_use_forced_inlining"
+    },
+    {
+      "name": "test_pluginsd_parser_uses_forced_inlining"
+    },
+    {
+      "name": "test_pluginsd_replication_uses_forced_inlining"
+    },
+    {
+      "name": "test_streaming_protocol_uses_forced_inlining"
+    },
+    {
+      "name": "test_collection_completion_uses_forced_inlining"
+    },
+    {
+      "name": "test_ml_public_interface_uses_forced_inlining"
+    },
+    {
+      "name": "test_inlined_number_parsers_use_forced_inlining"
+    },
+    {
+      "name": "test_line_splitter_uses_forced_inlining"
+    },
+    {
+      "name": "test_variadic_buffer_functions_not_force_inlined"
+    },
+    {
+      "name": "test_buffer_vsprintf_has_no_inline_qualifier"
+    },
+    {
+      "name": "test_connector_thread_handles_removal"
+    },
+    {
+      "name": "test_connector_thread_handles_both_operations"
+    },
+    {
+      "name": "test_stream_thread_does_not_remove_sender_inline"
+    },
+    {
+      "name": "test_receiver_survives_sender_failure"
+    },
+    {
+      "name": "test_remove_function_sets_exit_reason_internally"
+    },
+    {
+      "name": "test_exit_reason_setter_returns_value"
+    },
+    {
+      "name": "test_pulse_call_after_spinlock_release"
+    },
+    {
+      "name": "test_disconnect_hook_is_callable_from_other_files"
+    },
+    {
+      "name": "test_connect_and_disconnect_share_cleanup_logic"
+    }
+  ]
+}

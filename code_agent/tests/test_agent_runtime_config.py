@@ -53,12 +53,14 @@ def test_default_context_runtime_uses_openrouter_defaults(monkeypatch):
 
     assert runtime.default_model_config.provider == "openrouter"
     assert runtime.default_model_config.base_url == "https://openrouter.ai/api/v1"
+    assert runtime.profile.context_window_tokens == 262_144
     assert runtime.profile.safety_margin_tokens == 4096
 
 
 def test_default_runtime_model_config_uses_provider_model_when_not_configured(monkeypatch):
     monkeypatch.setenv("CODE_AGENT_PROVIDER", "openrouter")
     monkeypatch.delenv("CODE_AGENT_MODEL", raising=False)
+    monkeypatch.delenv("CODE_AGENT_CONTEXT_WINDOW_TOKENS", raising=False)
 
     config = get_default_runtime_model_config()
 
@@ -74,8 +76,9 @@ def test_ollama_is_available_in_provider_defaults_without_cloud_settings(monkeyp
     config = get_default_runtime_model_config()
     assert config.provider == "ollama"
     assert config.base_url == "http://127.0.0.1:11434/v1"
-    assert config.context_window_tokens == 8192
+    assert config.context_window_tokens == 8_192
     assert get_runtime_provider_defaults()["ollama"]["model"] == "qwen2.5-coder:7b"
+    assert get_runtime_provider_defaults()["ollama"]["context_window_tokens"] == 8_192
 
 
 def test_switching_thread_provider_to_ollama_uses_local_model_default():
@@ -84,3 +87,68 @@ def test_switching_thread_provider_to_ollama_uses_local_model_default():
         legacy_model="deepseek-chat")
     assert selected["model"] == "qwen2.5-coder:7b"
     assert selected["base_url"] == "http://127.0.0.1:11434/v1"
+    assert selected["context_window_tokens"] == 8_192
+
+
+def test_default_runtime_uses_v4_pro_context_and_compaction_profile(monkeypatch):
+    code_agent_root = Path(__file__).resolve().parents[1]
+    tokenizer_dir = code_agent_root / "resources" / "deepseek_v3_tokenizer"
+    monkeypatch.setenv("CODE_AGENT_TOKENIZER_DIR", str(tokenizer_dir))
+    monkeypatch.setenv("CODE_AGENT_PROVIDER", "deepseek")
+    monkeypatch.delenv("CODE_AGENT_MODEL", raising=False)
+    monkeypatch.delenv("CODE_AGENT_CONTEXT_WINDOW_TOKENS", raising=False)
+    monkeypatch.delenv("CODE_AGENT_COMPACTION_TRIGGER_RATIO", raising=False)
+    monkeypatch.delenv("CODE_AGENT_COMPACTION_TARGET_RATIO", raising=False)
+
+    config = get_default_runtime_model_config()
+    runtime = build_default_context_runtime(code_agent_root)
+
+    assert config.model == "deepseek-v4-pro"
+    assert config.context_window_tokens == 262_144
+    assert runtime.profile.context_window_tokens == 262_144
+    assert runtime.profile.compaction_trigger_ratio == 0.65
+    assert runtime.profile.compaction_target_ratio == 0.45
+
+
+def test_openrouter_default_window_is_256k(monkeypatch):
+    monkeypatch.setenv("CODE_AGENT_PROVIDER", "openrouter")
+    monkeypatch.delenv("CODE_AGENT_MODEL", raising=False)
+    monkeypatch.delenv("CODE_AGENT_CONTEXT_WINDOW_TOKENS", raising=False)
+
+    config = get_default_runtime_model_config()
+
+    assert config.context_window_tokens == 262_144
+
+
+def test_legacy_deepseek_model_uses_256k_default(monkeypatch):
+    monkeypatch.setenv("CODE_AGENT_PROVIDER", "deepseek")
+    monkeypatch.setenv("CODE_AGENT_MODEL", "deepseek-chat")
+    monkeypatch.delenv("CODE_AGENT_CONTEXT_WINDOW_TOKENS", raising=False)
+
+    config = get_default_runtime_model_config()
+
+    assert config.context_window_tokens == 262_144
+
+
+def test_switching_model_keeps_256k_default(monkeypatch):
+    monkeypatch.setenv("CODE_AGENT_PROVIDER", "deepseek")
+    monkeypatch.delenv("CODE_AGENT_MODEL", raising=False)
+    monkeypatch.delenv("CODE_AGENT_CONTEXT_WINDOW_TOKENS", raising=False)
+    default = get_default_runtime_model_config()
+
+    v4 = normalize_runtime_model_config({"model": "deepseek-v4-pro"}, default)
+    legacy = normalize_runtime_model_config({"model": "deepseek-flash"}, default)
+
+    assert v4["context_window_tokens"] == 262_144
+    assert legacy["context_window_tokens"] == 262_144
+
+
+def test_explicit_context_window_is_preserved_when_switching_models(monkeypatch):
+    monkeypatch.setenv("CODE_AGENT_PROVIDER", "deepseek")
+    monkeypatch.setenv("CODE_AGENT_MODEL", "deepseek-v4-pro")
+    monkeypatch.setenv("CODE_AGENT_CONTEXT_WINDOW_TOKENS", "65536")
+    default = get_default_runtime_model_config()
+
+    switched = normalize_runtime_model_config({"model": "deepseek-v4-pro"}, default)
+
+    assert switched["context_window_tokens"] == 65_536

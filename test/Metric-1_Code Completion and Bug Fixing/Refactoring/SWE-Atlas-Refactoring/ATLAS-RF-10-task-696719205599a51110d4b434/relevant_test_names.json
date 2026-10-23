@@ -1,0 +1,58 @@
+{
+  "tests": [
+    {
+      "name": "OverviewCard renders title and heading"
+    },
+    {
+      "name": "OverviewCard renders description when provided"
+    },
+    {
+      "name": "OverviewCard renders without heading or description gracefully"
+    },
+    {
+      "name": "OverviewCard renders loading skeleton when isLoading is true"
+    },
+    {
+      "name": "OverviewCard renders a relative link as a router Link"
+    },
+    {
+      "name": "OverviewCard renders with disabled state"
+    },
+    {
+      "name": "OverviewCard renders with intent variant"
+    },
+    {
+      "name": "OverviewCard relocation from sites/ to shared components/ component is no longer available at the old sites/overview-card path"
+    },
+    {
+      "name": "OverviewCard relocation from sites/ to shared components/ all domain overview consumers load after relocation"
+    },
+    {
+      "name": "OverviewCard relocation from sites/ to shared components/ all site overview consumers load after relocation"
+    },
+    {
+      "name": "OverviewCard relocation from sites/ to shared components/ hosting feature gated component loads after relocation"
+    },
+    {
+      "name": "PurchaseSettings module does not export PurchaseSettingsCard"
+    },
+    {
+      "name": "PurchaseSettings module OverviewCard is importable from shared components path"
+    },
+    {
+      "name": "MonetizeSubscriptionDetails renders subscription cards showing site, expiry, price, and interval"
+    },
+    {
+      "name": "MonetizeSubscriptionDetails renders expiry date card with correct renewal status"
+    },
+    {
+      "name": "MonetizeSubscriptionDetails renders renewal price card for recurring subscriptions"
+    },
+    {
+      "name": "MonetizeSubscriptionDetails renders renewal interval card with subscription interval"
+    },
+    {
+      "name": "MonetizeSubscriptionDetails does not depend on PurchaseSettingsCard export from billing module"
+    }
+  ]
+}

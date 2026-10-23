@@ -101,10 +101,10 @@ def build_default_context_runtime(code_agent_root: str | Path) -> DefaultContext
             os.environ.get("CODE_AGENT_PROVIDER_FRAMING_TOKENS", "256")
         ),
         compaction_trigger_ratio=float(
-            os.environ.get("CODE_AGENT_COMPACTION_TRIGGER_RATIO", "0.72")
+            os.environ.get("CODE_AGENT_COMPACTION_TRIGGER_RATIO", "0.65")
         ),
         compaction_target_ratio=float(
-            os.environ.get("CODE_AGENT_COMPACTION_TARGET_RATIO", "0.50")
+            os.environ.get("CODE_AGENT_COMPACTION_TARGET_RATIO", "0.45")
         ),
         analyzer_output_tokens=int(
             os.environ.get("CODE_AGENT_ANALYZER_OUTPUT_TOKENS", "4096")

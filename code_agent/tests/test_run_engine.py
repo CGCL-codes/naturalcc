@@ -48,6 +48,7 @@ def test_default_agent_budget_allows_multi_step_code_tasks():
 
     assert budget.max_llm_calls >= 24
     assert budget.max_tool_calls >= 24
+    assert budget.max_compaction_calls == 16
 
 
 def test_run_engine_executes_model_safe_tool_aliases(tmp_path: Path):
@@ -247,10 +248,12 @@ def test_run_splits_pinned_and_retrieved_memory_for_cache_friendly_prompt(
     assert engine.run(run_id)["status"] == "completed"
 
     system_prompt = model.requests[0].messages[0]["content"]
+    runtime_context = model.requests[0].messages[-1]["content"]
     assert system_prompt.count(pinned_id) == 1
-    assert system_prompt.count(retrieved_id) == 1
+    assert retrieved_id not in system_prompt
+    assert runtime_context.count(retrieved_id) == 1
     assert system_prompt.index(pinned_id) < system_prompt.index("[USER_GOAL]")
-    assert system_prompt.index(retrieved_id) > system_prompt.index("[USER_GOAL]")
+    assert "[ACTIVE_STATE]" in runtime_context
 
 
 def test_target_files_are_persisted_and_visible_to_model(tmp_path: Path):
@@ -272,7 +275,7 @@ def test_target_files_are_persisted_and_visible_to_model(tmp_path: Path):
     created = store.list_events(run_id)[0]
     assert created.payload["target_files"] == ["calculator.c"]
     system_prompt = model.requests[0].messages[0]["content"]
-    assert '"target_files": ["calculator.c"]' in system_prompt
+    assert "<path>calculator.c</path>" in system_prompt
     assert "Do not edit files outside target_files" in system_prompt
 
 
@@ -528,6 +531,119 @@ def test_edit_cannot_complete_before_discovered_tests_pass(tmp_path: Path):
     assert verification_results[-1]["status"] == "success"
 
 
+@pytest.mark.parametrize("test_tool", ["command.run", "tests.run"])
+def test_pytest_reporting_flags_count_as_verification(tmp_path: Path, test_tool: str):
+    (tmp_path / "value.py").write_text("value = 1\n", encoding="utf-8")
+    (tmp_path / "test_value.py").write_text(
+        "from value import value\ndef test_value():\n    assert value == 2\n",
+        encoding="utf-8",
+    )
+    model = ScriptedModelGateway([
+        ModelResponse(tool_calls=[ToolCall("edit", "workspace.apply_patch", {
+            "path": "value.py", "old_text": "value = 1", "new_text": "value = 2",
+        })]),
+        ModelResponse(tool_calls=[ToolCall("test", test_tool, {
+            "argv": ["python", "-m", "pytest", "-q"],
+        })]),
+        ModelResponse(content="Verified completion."),
+    ])
+    store = EventStore(tmp_path / "agent.db")
+    engine = RunEngine(store, build_default_registry(), model)
+    run_id = engine.create_run(tmp_path, "fix", RunBudget(max_llm_calls=6))
+    assert engine.run(run_id)["status"] == "waiting_approval"
+    engine.approve(run_id, RiskLevel.WRITE)
+    assert engine.run(run_id)["status"] == "waiting_approval"
+    engine.approve(run_id, RiskLevel.EXECUTE)
+    result = engine.run(run_id)
+
+    assert result["status"] == "completed"
+    assert result["llm_calls"] == 3
+    assert not result["verification_pending"]
+    assert result["working_state"]["verification"]["results"][-1]["passed"]
+    assert "verification.blocked_completion" not in [e.type for e in store.list_events(run_id)]
+
+
+def test_repeated_unverified_completion_stops_before_budget_exhaustion(tmp_path: Path):
+    (tmp_path / "value.py").write_text("value = 1\n", encoding="utf-8")
+    (tmp_path / "tests").mkdir()
+    model = ScriptedModelGateway([
+        ModelResponse(tool_calls=[ToolCall("edit", "workspace.apply_patch", {
+            "path": "value.py", "old_text": "value = 1", "new_text": "value = 2",
+        })]),
+        ModelResponse(content="Done, all tests passed."),
+        ModelResponse(content="Done, all tests passed."),
+    ])
+    store = EventStore(tmp_path / "agent.db")
+    engine = RunEngine(store, build_default_registry(), model)
+    run_id = engine.create_run(tmp_path, "fix", RunBudget(max_llm_calls=20))
+    engine.run(run_id)
+    engine.approve(run_id, RiskLevel.WRITE)
+    result = engine.run(run_id)
+
+    assert result["status"] == "failed"
+    assert result["llm_calls"] == 3
+    assert result["verification_pending"]
+    assert store.list_events(run_id)[-1].payload["error"]["type"] == "VerificationRequired"
+    assert store.acquire_workspace_lease(str(tmp_path), "next-run")
+
+
+@pytest.mark.parametrize("argv,cwd,expected_error", [
+    (["python", "-m", "pytest", "--collect-only", "-q"], ".", "VerificationRequired"),
+    (["python", "-m", "pytest", "-q", "tests/test_ok.py"], ".", "VerificationRequired"),
+    (["python", "-m", "pytest", "-q"], "tests", "VerificationRequired"),
+    (["python", "-m", "pytest", "-q"], ".", "VerificationFailed"),
+])
+def test_command_verification_requires_successful_full_suite(tmp_path: Path, argv, cwd, expected_error):
+    (tmp_path / "value.py").write_text("value = 1\n", encoding="utf-8")
+    (tmp_path / "test_failure.py").write_text("def test_failure():\n    assert False\n", encoding="utf-8")
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests/test_ok.py").write_text("def test_ok():\n    assert True\n", encoding="utf-8")
+    model = ScriptedModelGateway([
+        ModelResponse(tool_calls=[ToolCall("edit", "workspace.apply_patch", {
+            "path": "value.py", "old_text": "value = 1", "new_text": "value = 2",
+        })]),
+        ModelResponse(tool_calls=[ToolCall("test", "command.run", {"argv": argv, "cwd": cwd})]),
+        ModelResponse(content="Done."), ModelResponse(content="Done."),
+    ])
+    store = EventStore(tmp_path / "agent.db")
+    engine = RunEngine(store, build_default_registry(), model)
+    run_id = engine.create_run(tmp_path, "fix")
+    engine.run(run_id)
+    engine.approve(run_id, RiskLevel.WRITE)
+    engine.run(run_id)
+    engine.approve(run_id, RiskLevel.EXECUTE)
+    result = engine.run(run_id)
+    assert result["status"] == "failed"
+    assert result["verification_pending"]
+    assert store.list_events(run_id)[-1].payload["error"]["type"] == expected_error
+
+
+def test_new_edit_invalidates_successful_command_verification(tmp_path: Path):
+    (tmp_path / "value.py").write_text("value = 1\n", encoding="utf-8")
+    (tmp_path / "test_value.py").write_text("def test_ok():\n    assert True\n", encoding="utf-8")
+    def edit(call_id, old, new):
+        return ModelResponse(tool_calls=[ToolCall(call_id, "workspace.apply_patch", {
+            "path": "value.py", "old_text": old, "new_text": new,
+        })])
+    model = ScriptedModelGateway([
+        edit("edit1", "value = 1", "value = 2"),
+        ModelResponse(tool_calls=[ToolCall("test", "command.run", {"argv": ["python", "-m", "pytest", "-q"]})]),
+        edit("edit2", "value = 2", "value = 3"),
+        ModelResponse(content="Done."), ModelResponse(content="Done."),
+    ])
+    store = EventStore(tmp_path / "agent.db")
+    engine = RunEngine(store, build_default_registry(), model)
+    run_id = engine.create_run(tmp_path, "fix")
+    engine.run(run_id)
+    engine.approve(run_id, RiskLevel.WRITE)
+    engine.run(run_id)
+    engine.approve(run_id, RiskLevel.EXECUTE)
+    result = engine.run(run_id)
+    assert result["status"] == "failed"
+    assert result["verification_pending"]
+    assert store.list_events(run_id)[-1].payload["error"]["type"] == "VerificationRequired"
+
+
 def test_restoring_all_run_changes_allows_completion_without_tests(tmp_path: Path):
     target = tmp_path / "value.py"
     target.write_text("value = 1\n", encoding="utf-8")
@@ -601,12 +717,13 @@ def test_thread_run_hydrates_recent_conversation_and_persists_reply(tmp_path: Pa
 
     assert result["status"] == "completed"
     prompt = model.requests[0].messages
-    assert "Keep the public API stable." in prompt[0]["content"]
-    assert [message["content"] for message in prompt if message["role"] != "system"] == [
+    assert "Keep the public API stable." in prompt[-1]["content"]
+    assert [message["content"] for message in prompt[1:-1]] == [
         "Inspect the service.",
         "The service has one oversized method.",
         "Refactor it.",
     ]
+    assert "[ACTIVE_STATE]" in prompt[-1]["content"]
     conversation = store.list_conversation_messages(thread_id)
     assert [message["content"] for message in conversation][-2:] == [
         "Refactor it.",
@@ -887,6 +1004,70 @@ def test_context_hard_limit_stops_before_main_model_call(tmp_path: Path):
     assert events[-1].payload["reason"] == "context_hard_limit"
 
 
+def test_exhausted_compaction_budget_uses_deterministic_checkpoint(tmp_path: Path):
+    (tmp_path / "README.md").write_text("current evidence", encoding="utf-8")
+    model = ScriptedModelGateway([ModelResponse(content="done")])
+    store = EventStore(tmp_path / "agent.db")
+    tokenizer_root = (
+        Path(__file__).resolve().parents[1]
+        / "resources"
+        / "deepseek_v3_tokenizer"
+    )
+    profile = DeepSeekModelProfile(
+        context_window_tokens=8192,
+        default_output_reserve_tokens=512,
+        safety_margin_tokens=128,
+        provider_framing_tokens=64,
+        compaction_trigger_ratio=0.60,
+        compaction_target_ratio=0.45,
+        analyzer_output_tokens=1024,
+        summarizer_output_tokens=512,
+    )
+    counter = DeepSeekTokenCounter.from_directory(tokenizer_root)
+    serializer = DeepSeekRequestSerializer()
+    engine = RunEngine(
+        store,
+        build_default_registry(include_mutating=False),
+        model,
+        context_planner=ContextPlanner(counter, serializer, profile),
+        compaction_service=CompactionService(
+            store=store,
+            gateway=model,
+            counter=counter,
+            serializer=serializer,
+            profile=profile,
+        ),
+    )
+    run_id = engine.create_run(
+        tmp_path,
+        "Inspect README",
+        RunBudget(max_llm_calls=3, max_compaction_calls=0),
+    )
+    state = engine.get_state(run_id)
+    state["messages"] = [
+        {"role": "user", "content": "old evidence " * 5000},
+        {"role": "assistant", "content": "old evidence reviewed"},
+        *state["messages"],
+    ]
+    store.save_snapshot(run_id, state, expected_version=state["version"])
+
+    result = engine.run(run_id)
+
+    assert result["status"] == "completed"
+    assert result["compaction_calls"] == 0
+    committed = next(
+        event
+        for event in store.list_events(run_id)
+        if event.type == "context.compaction_committed"
+    )
+    assert committed.payload["fallback_used"] is True
+    final_request = [request for request in model.requests if request.purpose == "agent"][-1]
+    final_text = json.dumps(final_request.messages, ensure_ascii=False)
+    assert "CONTEXT_CHECKPOINT" in final_text
+    assert "Inspect README" in final_text
+    assert "old evidence " * 1000 not in final_text
+
+
 def test_uncompacted_plan_uses_the_current_run_profile(tmp_path: Path):
     store = EventStore(tmp_path / "agent.db")
     tokenizer_root = (
@@ -912,7 +1093,7 @@ def test_uncompacted_plan_uses_the_current_run_profile(tmp_path: Path):
     plan = type(
         "Plan",
         (),
-        {"messages": [{"role": "system", "content": "rules"}], "tools": []},
+        {"messages": [{"role": "system", "content": "rules"}, {"role": "user", "content": "[ACTIVE_STATE]current[/ACTIVE_STATE]"}], "tools": []},
     )()
 
     messages = engine._uncompacted_plan_messages(
@@ -924,6 +1105,7 @@ def test_uncompacted_plan_uses_the_current_run_profile(tmp_path: Path):
     assert messages == [
         {"role": "system", "content": "rules"},
         {"role": "user", "content": "recent evidence"},
+        {"role": "user", "content": "[ACTIVE_STATE]current[/ACTIVE_STATE]"},
     ]
 
 

@@ -1,0 +1,17 @@
+{
+  "changed_files": [],
+  "added_files": [],
+  "deleted_files": [],
+  "test_path_changes": [],
+  "test_tampering_detected": false,
+  "before_sha256": {
+    "buggy_function.c": "0fa0485c0afdb220017590cb12516054ae646f3ae1d229cd6f7193f6bf7dd784"
+  },
+  "after_sha256": {
+    "buggy_function.c": "0fa0485c0afdb220017590cb12516054ae646f3ae1d229cd6f7193f6bf7dd784"
+  },
+  "generated_nonblank_added_loc": 0,
+  "self_check_vulnerability_findings": null,
+  "vulnerability_density_per_100_loc": null,
+  "official_pass": null
+}

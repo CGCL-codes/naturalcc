@@ -36,6 +36,27 @@ def discover_test_commands(workspace: Path) -> list[list[str]]:
     return commands
 
 
+def matches_test_command(argv: list[str], discovered: list[list[str]]) -> bool:
+    """Recognize full discovered suites, allowing only pytest reporting flags.
+
+    Do not accept selectors, paths, collection-only, config overrides or plugin
+    options: a successful partial/dry run is not full-suite verification.
+    """
+    if not isinstance(argv, list) or not argv or not all(isinstance(arg, str) for arg in argv):
+        return False
+    if argv in discovered:
+        return True
+    if ["python", "-m", "pytest"] not in discovered:
+        return False
+    if argv[:1] == ["pytest"]:
+        flags = argv[1:]
+    elif argv[0] in {"python", "python3"} and argv[1:3] == ["-m", "pytest"]:
+        flags = argv[3:]
+    else:
+        return False
+    return all(flag in {"-q", "-qq", "--quiet", "-v", "-vv", "--verbose"} for flag in flags)
+
+
 def _git_status(context: ToolContext, _args: dict) -> ToolResult:
     if shutil.which("git") is None:
         return ToolResult.success("Git is not installed", data={"is_repo": False, "status": ""})
@@ -101,7 +122,7 @@ def _run_tests(context: ToolContext, args: dict) -> ToolResult:
         if not discovered:
             raise ValueError("no supported test command was discovered")
         requested = discovered[0]
-    if requested not in discovered:
+    if not matches_test_command(requested, discovered):
         raise ValueError("tests.run only accepts a command returned by tests.discover")
     result = _run_command(
         context,
@@ -123,7 +144,7 @@ def verification_tool_specs() -> list[ToolSpec]:
         ToolSpec("tests.discover", "Discover likely project test commands without running them.", empty_schema, RiskLevel.READ, _discover),
         ToolSpec(
             "tests.run",
-            "Run a discovered test command. Prefer command_index from tests.discover; omit arguments to run the first discovered command. Do not rewrite argv.",
+            "Run a discovered test command. Prefer command_index from tests.discover; omit arguments to run the first discovered command. Pytest quiet/verbose flags are accepted; test selection and collection-only options are not.",
             {
                 "type": "object",
                 "properties": {

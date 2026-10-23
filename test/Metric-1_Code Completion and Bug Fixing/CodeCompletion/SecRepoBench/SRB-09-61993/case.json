@@ -1,0 +1,17 @@
+{
+  "benchmark": "SecRepoBench",
+  "instance_id": "61993",
+  "project": "php-src",
+  "repository": "https://github.com/php/php-src.git",
+  "fixed_revision": "64ebadcac5ca57c686f31695eb8076e164ce1cd1",
+  "target_file": "ext/standard/file.c",
+  "cwe_id": 1284,
+  "selection": {
+    "heuristic_score": 394.7,
+    "nonempty_lines": 219,
+    "control_flow_tokens": 65,
+    "pointer_or_index_operations": 44
+  },
+  "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/61993/desc_prompt.txt",
+  "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+}

@@ -95,16 +95,16 @@ def _merge_detail(target: list[dict[str, Any]], raw: dict[str, Any]) -> None:
 _PROVIDER_DEFAULTS = {
     "deepseek": {
         "base_url": "https://api.deepseek.com/v1",
-        "model": "deepseek-chat",
+        "model": "deepseek-v4-pro",
         "api_key_env": "DEEPSEEK_API_KEY",
-        "context_window_tokens": 65_536,
+        "context_window_tokens": 262_144,
         "safety_margin_tokens": 512,
     },
     "openrouter": {
         "base_url": "https://openrouter.ai/api/v1",
         "model": "deepseek/deepseek-chat",
         "api_key_env": "OPENROUTER_API_KEY",
-        "context_window_tokens": 65_536,
+        "context_window_tokens": 262_144,
         # The first stage still estimates with DeepSeek's tokenizer. Leave a
         # larger margin for other providers' chat framing and tokenization.
         "safety_margin_tokens": 4_096,
@@ -141,9 +141,9 @@ class RuntimeModelConfig:
     """
 
     provider: str = "deepseek"
-    model: str = "deepseek-chat"
+    model: str = "deepseek-v4-pro"
     base_url: str = "https://api.deepseek.com/v1"
-    context_window_tokens: int = 65_536
+    context_window_tokens: int = 262_144
     safety_margin_tokens: int = 512
     fallback_models: tuple[str, ...] = ()
     provider_preferences: dict[str, Any] = field(default_factory=dict)
@@ -211,6 +211,17 @@ class RuntimeModelConfig:
         # the official DeepSeek endpoint expects the bare model identifier.
         if provider == "deepseek" and model.startswith("deepseek/"):
             model = model.split("/", 1)[1]
+        configured_window = source.get("context_window_tokens")
+        if configured_window is not None:
+            context_window_tokens = int(configured_window)
+        else:
+            # A missing per-thread value always inherits the provider/global
+            # default, regardless of the selected model ID.
+            context_window_tokens = int(
+                fallback_context_window
+                if fallback_context_window is not None
+                else defaults["context_window_tokens"]
+            )
         return cls(
             provider=provider,
             model=model,
@@ -219,11 +230,7 @@ class RuntimeModelConfig:
                 or fallback_base_url
                 or defaults["base_url"]
             ).strip(),
-            context_window_tokens=int(
-                source.get("context_window_tokens")
-                or fallback_context_window
-                or defaults["context_window_tokens"]
-            ),
+            context_window_tokens=context_window_tokens,
             safety_margin_tokens=int(
                 source.get("safety_margin_tokens")
                 if source.get("safety_margin_tokens") is not None

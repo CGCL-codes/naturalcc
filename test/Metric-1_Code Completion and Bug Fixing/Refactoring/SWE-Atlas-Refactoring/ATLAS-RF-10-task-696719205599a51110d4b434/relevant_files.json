@@ -1,0 +1,13 @@
+{
+  "files": [
+    {
+      "name": "client/dashboard/components/overview-card/test/index.test.tsx"
+    },
+    {
+      "name": "client/dashboard/me/billing-purchases/purchase-settings/test/index.test.tsx"
+    },
+    {
+      "name": "client/dashboard/me/monetize-subscriptions/test/monetize-subscription.test.tsx"
+    }
+  ]
+}

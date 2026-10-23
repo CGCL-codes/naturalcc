@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "gcol.innodb_virtual_stats"
+    },
+    {
+      "name": "innodb.innodb_stats_auto_recalc_on_nonexistent"
+    },
+    {
+      "name": "innodb.innodb_stats_fetch"
+    },
+    {
+      "name": "innodb.innodb_stats_flush_no_reload"
+    }
+  ]
+}

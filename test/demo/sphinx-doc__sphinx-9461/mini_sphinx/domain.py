@@ -9,7 +9,7 @@ def render_property(name: str, docstring: str | None, *, is_classmethod: bool) -
     ``is_classmethod`` is supplied by autodoc, but the pre-fix renderer ignores
     it and consequently loses the fact that the property is class-level.
     """
-    label = "property"
+    label = "class property" if is_classmethod else "property"
     description = docstring or "<missing docstring>"
     return f"{label} {name}: {description}"
 

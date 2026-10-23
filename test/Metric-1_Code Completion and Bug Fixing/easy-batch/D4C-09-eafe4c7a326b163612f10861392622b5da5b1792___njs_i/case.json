@@ -1,0 +1,19 @@
+{
+  "benchmark": "Defects4C",
+  "instance_key": "eafe4c7a326b163612f10861392622b5da5b1792___njs_iterator.c",
+  "task_type": "vulnerability-fix",
+  "project_key": "nginx/njs",
+  "source_file": "njs_iterator.c",
+  "buggy_range": {
+    "start": 460,
+    "end": 634
+  },
+  "selection": {
+    "heuristic_score": 207.2,
+    "nonempty_lines": 131,
+    "control_flow_tokens": 27,
+    "pointer_or_index_operations": 29
+  },
+  "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg_cve/single_function_repair.json",
+  "project": "nginx/njs"
+}

@@ -87,6 +87,14 @@ export function buildAgentRunMessage(runState, agentState) {
       approval: null
     };
   }
+  if (runState?.status === "failed") {
+    const failure = [...(agentState?.events || [])].reverse().find((event) => event.type === "run.failed");
+    return {
+      content: `Run failed: ${failure?.payload?.error?.message || "unknown error"}`,
+      status: "failed",
+      approval: null
+    };
+  }
   return {
     content: `Agent stopped with status: ${runState?.status || "unknown"}`,
     status: runState?.status || "unknown",

@@ -1,0 +1,192 @@
+[
+  {
+    "benchmark": "SWE-Atlas Refactoring",
+    "task_id": "task-69b7c2a04b6f8ff9ed98813b",
+    "difficulty": "hard (official task metadata)",
+    "language": "C",
+    "tags": [
+      "refactoring",
+      "master-validator",
+      "rubric-graded",
+      "C"
+    ],
+    "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_netdata_netdata_69b7c2a04b6f8ff9ed98813b_1.1@sha256:257dfcdc13692d417fdccc79fed79475f010b79863ef76540d7ba9ac06001e19",
+    "selection": {
+      "heuristic_score": 564.98,
+      "reference_patch_file_count": 53,
+      "reference_patch_changed_lines": 1175
+    },
+    "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-69b7c2a04b6f8ff9ed98813b"
+  },
+  {
+    "benchmark": "SWE-Atlas Refactoring",
+    "task_id": "task-69d196f015a150488265afc1",
+    "difficulty": "hard (official task metadata)",
+    "language": "C++",
+    "tags": [
+      "refactoring",
+      "master-validator",
+      "rubric-graded",
+      "C++"
+    ],
+    "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_MariaDB_server_69d196f015a150488265afc1_1.1@sha256:9f2c93e53d65e3ccefaf1bb482a454a540c4ffe50dfa7c6bd25cc8ceed8e51d3",
+    "selection": {
+      "heuristic_score": 242.45,
+      "reference_patch_file_count": 21,
+      "reference_patch_changed_lines": 1182
+    },
+    "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-69d196f015a150488265afc1"
+  },
+  {
+    "benchmark": "SWE-Atlas Refactoring",
+    "task_id": "task-696719205599a51110d4b458",
+    "difficulty": "hard (official task metadata)",
+    "language": "Go",
+    "tags": [
+      "refactoring",
+      "master-validator",
+      "rubric-graded",
+      "Go"
+    ],
+    "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_grafana_grafana_696719205599a51110d4b458_1.1@sha256:a5dc6ee62d0467a6972453d2dc9104437dec7340b9b780bb5962b90f39910a9e",
+    "selection": {
+      "heuristic_score": 274.93,
+      "reference_patch_file_count": 24,
+      "reference_patch_changed_lines": 1534
+    },
+    "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-696719205599a51110d4b458"
+  },
+  {
+    "benchmark": "SWE-Atlas Refactoring",
+    "task_id": "task-694b4b99829f00e24fd11891",
+    "difficulty": "hard (official task metadata)",
+    "language": "JavaScript",
+    "tags": [
+      "refactoring",
+      "master-validator",
+      "rubric-graded",
+      "JavaScript"
+    ],
+    "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_Automattic_wp-calypso_694b4b99829f00e24fd11891_1.1@sha256:3975b652725f75ce0c86d7216ad5d316755ae16e30d1bbc6e2bd864bbebb218c",
+    "selection": {
+      "heuristic_score": 190.68,
+      "reference_patch_file_count": 18,
+      "reference_patch_changed_lines": 327
+    },
+    "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-694b4b99829f00e24fd11891"
+  },
+  {
+    "benchmark": "SWE-Atlas Refactoring",
+    "task_id": "task-697e7458be1623d850a8885d",
+    "difficulty": "hard (official task metadata)",
+    "language": "TypeScript",
+    "tags": [
+      "refactoring",
+      "master-validator",
+      "rubric-graded",
+      "TypeScript"
+    ],
+    "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_grafana_grafana_697e7458be1623d850a8885d_1.1@sha256:a676dc0320cfba2dd9fc93496b3a990197f1ebd2247ff65dd7b6dc4b9e96f79a",
+    "selection": {
+      "heuristic_score": 219.24,
+      "reference_patch_file_count": 21,
+      "reference_patch_changed_lines": 196
+    },
+    "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-697e7458be1623d850a8885d"
+  },
+  {
+    "benchmark": "SWE-Atlas Refactoring",
+    "task_id": "task-696719205599a51110d4b473",
+    "difficulty": "hard (official task metadata)",
+    "language": "Python",
+    "tags": [
+      "refactoring",
+      "master-validator",
+      "rubric-graded",
+      "Python"
+    ],
+    "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_secdev_scapy_696719205599a51110d4b473_1.1@sha256:01e531f57358a1f6d5ee4e26585912bd67242fdcf0e637801c60248424dd63f2",
+    "selection": {
+      "heuristic_score": 2327.81,
+      "reference_patch_file_count": 230,
+      "reference_patch_changed_lines": 1231
+    },
+    "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-696719205599a51110d4b473"
+  },
+  {
+    "benchmark": "SWE-Atlas Refactoring",
+    "task_id": "task-69b7c2a04b6f8ff9ed98813d",
+    "difficulty": "hard (official task metadata)",
+    "language": "C",
+    "tags": [
+      "refactoring",
+      "master-validator",
+      "rubric-graded",
+      "C"
+    ],
+    "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_netdata_netdata_69b7c2a04b6f8ff9ed98813d_1.1@sha256:720228ea55eaafffd58be21c52440b65de5e337b573add13e6163fb55a700997",
+    "selection": {
+      "heuristic_score": 276.62,
+      "reference_patch_file_count": 24,
+      "reference_patch_changed_lines": 1298
+    },
+    "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-69b7c2a04b6f8ff9ed98813d"
+  },
+  {
+    "benchmark": "SWE-Atlas Refactoring",
+    "task_id": "task-69b7c2a04b6f8ff9ed98813a",
+    "difficulty": "hard (official task metadata)",
+    "language": "C",
+    "tags": [
+      "refactoring",
+      "master-validator",
+      "rubric-graded",
+      "C"
+    ],
+    "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_netdata_netdata_69b7c2a04b6f8ff9ed98813a_1.1@sha256:d4689460830d94cafef2fa24c750ce163ab7aa3a6ad2a0d8017497ccc4dc5147",
+    "selection": {
+      "heuristic_score": 244.89,
+      "reference_patch_file_count": 23,
+      "reference_patch_changed_lines": 461
+    },
+    "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-69b7c2a04b6f8ff9ed98813a"
+  },
+  {
+    "benchmark": "SWE-Atlas Refactoring",
+    "task_id": "task-69b7c2a04b6f8ff9ed988137",
+    "difficulty": "hard (official task metadata)",
+    "language": "C",
+    "tags": [
+      "refactoring",
+      "master-validator",
+      "rubric-graded",
+      "C"
+    ],
+    "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_OISF_suricata_69b7c2a04b6f8ff9ed988137_1.1@sha256:a29133c968fb3c4635a9b13b30b0de104272608e02d11dd2113f1b9038241d9f",
+    "selection": {
+      "heuristic_score": 221.1,
+      "reference_patch_file_count": 20,
+      "reference_patch_changed_lines": 448
+    },
+    "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-69b7c2a04b6f8ff9ed988137"
+  },
+  {
+    "benchmark": "SWE-Atlas Refactoring",
+    "task_id": "task-696719205599a51110d4b434",
+    "difficulty": "hard (official task metadata)",
+    "language": "TypeScript",
+    "tags": [
+      "refactoring",
+      "master-validator",
+      "rubric-graded",
+      "TypeScript"
+    ],
+    "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_Automattic_wp-calypso_696719205599a51110d4b434_1.1@sha256:4b4b819b7d1d4c9e05c4d9e293116f348778fd660d94158023033232b652afe9",
+    "selection": {
+      "heuristic_score": 205.96,
+      "reference_patch_file_count": 20,
+      "reference_patch_changed_lines": 166
+    },
+    "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-696719205599a51110d4b434"
+  }
+]

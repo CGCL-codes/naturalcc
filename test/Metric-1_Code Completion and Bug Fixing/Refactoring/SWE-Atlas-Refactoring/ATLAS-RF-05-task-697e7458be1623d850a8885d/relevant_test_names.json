@@ -1,0 +1,85 @@
+{
+  "tests": [
+    {
+      "name": "PanelTypeFilter > should provide all panel plugins as options without widget filtering"
+    },
+    {
+      "name": "PanelTypeFilter > should render the panel type filter with all plugins available"
+    },
+    {
+      "name": "PanelTypeFilter > should render without requiring an isWidget prop"
+    },
+    {
+      "name": "PanelVizTypePicker > should default to showing the visualization picker"
+    },
+    {
+      "name": "PanelVizTypePicker > should render with Visualizations and Suggestions tabs only"
+    },
+    {
+      "name": "adds a library panel when clicked on menu item Import from library"
+    },
+    {
+      "name": "creates new row when clicked on menu item Row"
+    },
+    {
+      "name": "creates new visualization when clicked on menu item Visualization"
+    },
+    {
+      "name": "renders menu list with correct menu items"
+    },
+    {
+      "name": "renders menu list without Widget button when feature flag is disabled"
+    },
+    {
+      "name": "renders with all buttons enabled"
+    },
+    {
+      "name": "renders with all buttons enabled except paste a panel"
+    },
+    {
+      "name": "VisualizationSelectPane > should default to showing the visualization type picker"
+    },
+    {
+      "name": "VisualizationSelectPane > should not render a Widgets tab option"
+    },
+    {
+      "name": "VisualizationSelectPane > should render with Visualizations, Suggestions, and Library panels tabs"
+    },
+    {
+      "name": "VisualizationSelectPaneTab > should provide Visualizations, LibraryPanels, and Suggestions tabs"
+    },
+    {
+      "name": "adds a library panel when clicked Add library panel"
+    },
+    {
+      "name": "creates new visualization when clicked Add visualization"
+    },
+    {
+      "name": "open import dashboard when clicked Import dashboard"
+    },
+    {
+      "name": "renders page with correct title for an empty dashboard"
+    },
+    {
+      "name": "renders page without Add Widget button when feature flag is disabled"
+    },
+    {
+      "name": "renders with all buttons disabled when canCreate is false"
+    },
+    {
+      "name": "renders with all buttons enabled when canCreate is true"
+    },
+    {
+      "name": "PanelLibraryOptionsGroup > should not pass isWidget=true to child components"
+    },
+    {
+      "name": "PanelLibraryOptionsGroup > should render PanelTypeFilter and LibraryPanelsView without isWidget"
+    },
+    {
+      "name": "VizTypePicker > should display all panel plugins in a single list without separating by skipDataQuery"
+    },
+    {
+      "name": "VizTypePicker > should render both visualization and widget type plugins together"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "benchmark": "SWE-Atlas Refactoring",
+  "task_id": "task-697e7458be1623d850a8885d",
+  "difficulty": "hard (official task metadata)",
+  "language": "TypeScript",
+  "tags": [
+    "refactoring",
+    "master-validator",
+    "rubric-graded",
+    "TypeScript"
+  ],
+  "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_grafana_grafana_697e7458be1623d850a8885d_1.1@sha256:a676dc0320cfba2dd9fc93496b3a990197f1ebd2247ff65dd7b6dc4b9e96f79a",
+  "selection": {
+    "heuristic_score": 219.24,
+    "reference_patch_file_count": 21,
+    "reference_patch_changed_lines": 196
+  },
+  "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-697e7458be1623d850a8885d"
+}

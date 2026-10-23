@@ -40,6 +40,6 @@ def merge_attrs(variable_attrs: list[Mapping[str, Any]], combine_attrs: str) -> 
     if combine_attrs == "drop":
         return {}
     if combine_attrs == "override":
-        return variable_attrs[0]
+        return dict(variable_attrs[0])
     raise ValueError(f"unsupported combine_attrs policy: {combine_attrs!r}")
 

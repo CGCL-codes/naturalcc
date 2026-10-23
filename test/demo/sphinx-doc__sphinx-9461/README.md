@@ -14,9 +14,8 @@ NaturalCC UI, but it is not an official SWE-bench evaluation artifact.
 
 ## UI workspace
 
-```text
-D:\桌面2\naturalcc-ncc3\test\demo\sphinx-doc__sphinx-9461
-```
+Workspace path relative to the repository root: `test/demo/sphinx-doc__sphinx-9461`.
+Select this folder in the UI after opening the repository locally.
 
 ## Demo sequence
 
@@ -35,10 +34,11 @@ python demo_repro.py
 python -m pytest -q
 ```
 
-If a regular terminal lacks pytest, use NaturalCC's environment:
+Run this command from the demo workspace. If a regular terminal lacks pytest,
+use NaturalCC's environment (the project path is relative to this workspace):
 
 ```powershell
-uv run --project D:\桌面2\naturalcc-ncc3\code_agent python -m pytest -q
+uv run --project ../../../code_agent python -m pytest -q
 ```
 
 ## Suggested UI prompt

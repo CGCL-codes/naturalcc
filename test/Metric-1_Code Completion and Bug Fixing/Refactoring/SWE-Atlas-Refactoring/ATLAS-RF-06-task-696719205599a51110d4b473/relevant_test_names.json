@@ -1,0 +1,61 @@
+{
+  "tests": [
+    {
+      "name": "_pkt_ls returns list of tuples for simple packet class"
+    },
+    {
+      "name": "_pkt_ls returns field class type in tuple"
+    },
+    {
+      "name": "_pkt_ls works with packet instance"
+    },
+    {
+      "name": "_pkt_ls raises ValueError for non-Packet input"
+    },
+    {
+      "name": "_pkt_ls raises ValueError for integer input"
+    },
+    {
+      "name": "_pkt_ls handles BitField with size info"
+    },
+    {
+      "name": "_pkt_ls handles ConditionalField"
+    },
+    {
+      "name": "_pkt_ls handles empty fields_desc"
+    },
+    {
+      "name": "_pkt_ls verbose mode with EnumField"
+    },
+    {
+      "name": "_pkt_ls handles BitField with size=1 (singular bit)"
+    },
+    {
+      "name": "_pkt_ls verbose mode with FlagsField"
+    },
+    {
+      "name": "_pkt_ls handles MultiEnumField"
+    },
+    {
+      "name": "_pkt_ls handles MultiEnumField with verbose mode"
+    },
+    {
+      "name": "_pkt_ls handles MultiEnumField with packet instance"
+    },
+    {
+      "name": "AutoTime inherits from RandNum"
+    },
+    {
+      "name": "AutoTime default initialization"
+    },
+    {
+      "name": "AutoTime with base time"
+    },
+    {
+      "name": "AutoTime repr does not crash"
+    },
+    {
+      "name": "IntAutoTime returns integer"
+    }
+  ]
+}

@@ -14,7 +14,12 @@ def is_property(member: Any) -> bool:
     This is incomplete: Python permits ``@classmethod`` to wrap ``@property``.
     Such a descriptor is a ``classmethod`` whose ``__func__`` is a property.
     """
-    return isinstance(member, property)
+    if isinstance(member, property):
+        return True
+    # Check if it's a classmethod wrapping a property
+    if isinstance(member, classmethod):
+        return isinstance(member.__func__, property)
+    return False
 
 
 def unwrap_property(member: Any) -> property:
@@ -23,9 +28,12 @@ def unwrap_property(member: Any) -> property:
     The current implementation only works for ordinary properties. A repair
     must preserve this contract for both ordinary and class properties.
     """
-    if not isinstance(member, property):
-        raise TypeError("member is not a property")
-    return member
+    if isinstance(member, property):
+        return member
+    # If it's a classmethod wrapping a property, unwrap it
+    if isinstance(member, classmethod) and isinstance(member.__func__, property):
+        return member.__func__
+    raise TypeError("member is not a property")
 
 
 def is_class_property(member: Any) -> bool:
@@ -34,5 +42,5 @@ def is_class_property(member: Any) -> bool:
     This placeholder is intentionally wrong so the rendering layer cannot
     distinguish a class property from an ordinary property.
     """
-    return False
+    return isinstance(member, classmethod) and isinstance(member.__func__, property)
 

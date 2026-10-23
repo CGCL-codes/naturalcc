@@ -1,0 +1,19 @@
+{
+  "benchmark": "Defects4C",
+  "instance_key": "5edf405d7ed9fc92f4f43e8a3d44baa4c6387562___print-802_11.c",
+  "task_type": "vulnerability-fix",
+  "project_key": "the-tcpdump-group/tcpdump",
+  "source_file": "print-802_11.c",
+  "buggy_range": {
+    "start": 997,
+    "end": 1220
+  },
+  "selection": {
+    "heuristic_score": 330.2,
+    "nonempty_lines": 218,
+    "control_flow_tokens": 36,
+    "pointer_or_index_operations": 74
+  },
+  "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg_cve/single_function_repair.json",
+  "project": "the-tcpdump-group/tcpdump"
+}

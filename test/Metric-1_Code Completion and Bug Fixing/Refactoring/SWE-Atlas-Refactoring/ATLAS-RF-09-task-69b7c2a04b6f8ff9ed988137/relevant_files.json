@@ -1,0 +1,16 @@
+{
+  "files": [
+    {
+      "name": "src/decode-api-test.c"
+    },
+    {
+      "name": "src/decode-api-test.h"
+    },
+    {
+      "name": "src/Makefile.am"
+    },
+    {
+      "name": "src/runmode-unittests.c"
+    }
+  ]
+}

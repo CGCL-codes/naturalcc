@@ -1,0 +1,172 @@
+[
+  {
+    "benchmark": "SecRepoBench",
+    "instance_id": "18942",
+    "project": "yara",
+    "repository": "https://github.com/VirusTotal/yara.git",
+    "fixed_revision": "69fd050588f8e3cb7c25ccd26e44cb6d02524e46",
+    "target_file": "libyara/grammar.c",
+    "cwe_id": 129,
+    "selection": {
+      "heuristic_score": 3374.8,
+      "nonempty_lines": 2339,
+      "control_flow_tokens": 320,
+      "pointer_or_index_operations": 786
+    },
+    "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/18942/desc_prompt.txt",
+    "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+  },
+  {
+    "benchmark": "SecRepoBench",
+    "instance_id": "24106",
+    "project": "imagemagick",
+    "repository": "https://github.com/imagemagick/imagemagick",
+    "fixed_revision": "f2d5b7615ec97abb32d24d2b021d386283d983ec",
+    "target_file": "MagickCore/draw.c",
+    "cwe_id": 122,
+    "selection": {
+      "heuristic_score": 3161.7,
+      "nonempty_lines": 1970,
+      "control_flow_tokens": 400,
+      "pointer_or_index_operations": 639
+    },
+    "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/24106/desc_prompt.txt",
+    "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+  },
+  {
+    "benchmark": "SecRepoBench",
+    "instance_id": "46981",
+    "project": "imagemagick",
+    "repository": "https://github.com/imagemagick/imagemagick",
+    "fixed_revision": "bca2fb87480b0c5ffb57e1da2e73d07f90571c6a",
+    "target_file": "coders/png.c",
+    "cwe_id": 416,
+    "selection": {
+      "heuristic_score": 3126.9,
+      "nonempty_lines": 1997,
+      "control_flow_tokens": 355,
+      "pointer_or_index_operations": 808
+    },
+    "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/46981/desc_prompt.txt",
+    "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+  },
+  {
+    "benchmark": "SecRepoBench",
+    "instance_id": "22507",
+    "project": "mruby",
+    "repository": "https://github.com/mruby/mruby",
+    "fixed_revision": "15c63688e3f1a3c6067e6af70e3e9bf999d91389",
+    "target_file": "mrbgems/mruby-sprintf/src/sprintf.c",
+    "cwe_id": 121,
+    "selection": {
+      "heuristic_score": 917.3,
+      "nonempty_lines": 488,
+      "control_flow_tokens": 165,
+      "pointer_or_index_operations": 56
+    },
+    "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/22507/desc_prompt.txt",
+    "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+  },
+  {
+    "benchmark": "SecRepoBench",
+    "instance_id": "65985",
+    "project": "gpac",
+    "repository": "https://github.com/gpac/gpac",
+    "fixed_revision": "25ca355f14a28baeb6afd911ca7ae66deb37a1ac",
+    "target_file": "src/filters/reframe_mpgvid.c",
+    "cwe_id": 475,
+    "selection": {
+      "heuristic_score": 917.0,
+      "nonempty_lines": 537,
+      "control_flow_tokens": 125,
+      "pointer_or_index_operations": 225
+    },
+    "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/65985/desc_prompt.txt",
+    "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+  },
+  {
+    "benchmark": "SecRepoBench",
+    "instance_id": "45455",
+    "project": "libxml2",
+    "repository": "https://gitlab.gnome.org/GNOME/libxml2.git",
+    "fixed_revision": "968495442964f3ea72499dfbdba9e2fa9d77f9b7",
+    "target_file": "parser.c",
+    "cwe_id": 590,
+    "selection": {
+      "heuristic_score": 660.3,
+      "nonempty_lines": 385,
+      "control_flow_tokens": 80,
+      "pointer_or_index_operations": 251
+    },
+    "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/45455/desc_prompt.txt",
+    "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+  },
+  {
+    "benchmark": "SecRepoBench",
+    "instance_id": "57317",
+    "project": "ndpi",
+    "repository": "https://github.com/ntop/nDPI.git",
+    "fixed_revision": "ddb9aa0f95ba263361b9be2ba0a122ea1e001be9",
+    "target_file": "src/lib/protocols/tls.c",
+    "cwe_id": null,
+    "selection": {
+      "heuristic_score": 599.7,
+      "nonempty_lines": 324,
+      "control_flow_tokens": 78,
+      "pointer_or_index_operations": 269
+    },
+    "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/57317/desc_prompt.txt",
+    "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+  },
+  {
+    "benchmark": "SecRepoBench",
+    "instance_id": "42115",
+    "project": "ndpi",
+    "repository": "https://github.com/ntop/nDPI.git",
+    "fixed_revision": "58b33dcb2d60faf3d0fa8f7a482752b4664c5344",
+    "target_file": "src/lib/protocols/tls.c",
+    "cwe_id": 457,
+    "selection": {
+      "heuristic_score": 433.6,
+      "nonempty_lines": 222,
+      "control_flow_tokens": 61,
+      "pointer_or_index_operations": 197
+    },
+    "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/42115/desc_prompt.txt",
+    "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+  },
+  {
+    "benchmark": "SecRepoBench",
+    "instance_id": "61993",
+    "project": "php-src",
+    "repository": "https://github.com/php/php-src.git",
+    "fixed_revision": "64ebadcac5ca57c686f31695eb8076e164ce1cd1",
+    "target_file": "ext/standard/file.c",
+    "cwe_id": 1284,
+    "selection": {
+      "heuristic_score": 394.7,
+      "nonempty_lines": 219,
+      "control_flow_tokens": 65,
+      "pointer_or_index_operations": 44
+    },
+    "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/61993/desc_prompt.txt",
+    "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+  },
+  {
+    "benchmark": "SecRepoBench",
+    "instance_id": "27025",
+    "project": "fluent-bit",
+    "repository": "https://github.com/fluent/fluent-bit/",
+    "fixed_revision": "d67f28b5b28253ff1d0732c79762bda2a12e207b",
+    "target_file": "src/flb_config_map.c",
+    "cwe_id": 415,
+    "selection": {
+      "heuristic_score": 297.4,
+      "nonempty_lines": 178,
+      "control_flow_tokens": 33,
+      "pointer_or_index_operations": 123
+    },
+    "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/27025/desc_prompt.txt",
+    "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+  }
+]

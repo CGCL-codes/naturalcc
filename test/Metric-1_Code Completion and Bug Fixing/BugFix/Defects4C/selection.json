@@ -1,0 +1,192 @@
+[
+  {
+    "benchmark": "Defects4C",
+    "instance_key": "ca46d0acbce55019b970fcd4c1e8a10edfdded93___phar.c",
+    "task_type": "bug-fix",
+    "project_key": "php/php-src",
+    "source_file": "phar.c",
+    "buggy_range": {
+      "start": 529,
+      "end": 3375
+    },
+    "selection": {
+      "heuristic_score": 4093.7,
+      "nonempty_lines": 2456,
+      "control_flow_tokens": 546,
+      "pointer_or_index_operations": 909
+    },
+    "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg/single_function_repair.json",
+    "project": "php/php-src"
+  },
+  {
+    "benchmark": "Defects4C",
+    "instance_key": "b28b8b2fee6dfa6fcd13305c581bb835689ac3be___phar.c",
+    "task_type": "bug-fix",
+    "project_key": "php/php-src",
+    "source_file": "phar.c",
+    "buggy_range": {
+      "start": 529,
+      "end": 3375
+    },
+    "selection": {
+      "heuristic_score": 4093.7,
+      "nonempty_lines": 2456,
+      "control_flow_tokens": 546,
+      "pointer_or_index_operations": 909
+    },
+    "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg/single_function_repair.json",
+    "project": "php/php-src"
+  },
+  {
+    "benchmark": "Defects4C",
+    "instance_key": "ffde45acf3348f8353fb4064a1b21683ee6b5ddf___print-bgp.c",
+    "task_type": "bug-fix",
+    "project_key": "the-tcpdump-group/tcpdump",
+    "source_file": "print-bgp.c",
+    "buggy_range": {
+      "start": 1349,
+      "end": 2305
+    },
+    "selection": {
+      "heuristic_score": 1746.1,
+      "nonempty_lines": 911,
+      "control_flow_tokens": 320,
+      "pointer_or_index_operations": 117
+    },
+    "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg/single_function_repair.json",
+    "project": "the-tcpdump-group/tcpdump"
+  },
+  {
+    "benchmark": "Defects4C",
+    "instance_key": "222d6fdcf0c6485ec8e175f3a7b70d650c234b4e___njs_vmcode.c",
+    "task_type": "bug-fix",
+    "project_key": "nginx/njs",
+    "source_file": "njs_vmcode.c",
+    "buggy_range": {
+      "start": 87,
+      "end": 1058
+    },
+    "selection": {
+      "heuristic_score": 1361.6,
+      "nonempty_lines": 740,
+      "control_flow_tokens": 228,
+      "pointer_or_index_operations": 172
+    },
+    "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg/single_function_repair.json",
+    "project": "nginx/njs"
+  },
+  {
+    "benchmark": "Defects4C",
+    "instance_key": "523f230c831d7b33353203fa34aee4e92ac12bba___http_fopen_wrapper.c",
+    "task_type": "bug-fix",
+    "project_key": "php/php-src",
+    "source_file": "http_fopen_wrapper.c",
+    "buggy_range": {
+      "start": 112,
+      "end": 976
+    },
+    "selection": {
+      "heuristic_score": 1310.4,
+      "nonempty_lines": 763,
+      "control_flow_tokens": 185,
+      "pointer_or_index_operations": 283
+    },
+    "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg/single_function_repair.json",
+    "project": "php/php-src"
+  },
+  {
+    "benchmark": "Defects4C",
+    "instance_key": "da6f1a677bfa4476abaeaf9b1afe1c4390f51b41___print-pgm.c",
+    "task_type": "bug-fix",
+    "project_key": "the-tcpdump-group/tcpdump",
+    "source_file": "print-pgm.c",
+    "buggy_range": {
+      "start": 145,
+      "end": 838
+    },
+    "selection": {
+      "heuristic_score": 960.2,
+      "nonempty_lines": 633,
+      "control_flow_tokens": 113,
+      "pointer_or_index_operations": 149
+    },
+    "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg/single_function_repair.json",
+    "project": "the-tcpdump-group/tcpdump"
+  },
+  {
+    "benchmark": "Defects4C",
+    "instance_key": "5edf405d7ed9fc92f4f43e8a3d44baa4c6387562___print-802_11.c",
+    "task_type": "vulnerability-fix",
+    "project_key": "the-tcpdump-group/tcpdump",
+    "source_file": "print-802_11.c",
+    "buggy_range": {
+      "start": 997,
+      "end": 1220
+    },
+    "selection": {
+      "heuristic_score": 330.2,
+      "nonempty_lines": 218,
+      "control_flow_tokens": 36,
+      "pointer_or_index_operations": 74
+    },
+    "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg_cve/single_function_repair.json",
+    "project": "the-tcpdump-group/tcpdump"
+  },
+  {
+    "benchmark": "Defects4C",
+    "instance_key": "fe9ed49dafa993e3af96b6a5a589efeea9bfb36f___gd_gd2.c",
+    "task_type": "vulnerability-fix",
+    "project_key": "libgd/libgd",
+    "source_file": "gd_gd2.c",
+    "buggy_range": {
+      "start": 405,
+      "end": 566
+    },
+    "selection": {
+      "heuristic_score": 237.1,
+      "nonempty_lines": 140,
+      "control_flow_tokens": 32,
+      "pointer_or_index_operations": 57
+    },
+    "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg_cve/single_function_repair.json",
+    "project": "libgd/libgd"
+  },
+  {
+    "benchmark": "Defects4C",
+    "instance_key": "eafe4c7a326b163612f10861392622b5da5b1792___njs_iterator.c",
+    "task_type": "vulnerability-fix",
+    "project_key": "nginx/njs",
+    "source_file": "njs_iterator.c",
+    "buggy_range": {
+      "start": 460,
+      "end": 634
+    },
+    "selection": {
+      "heuristic_score": 207.2,
+      "nonempty_lines": 131,
+      "control_flow_tokens": 27,
+      "pointer_or_index_operations": 29
+    },
+    "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg_cve/single_function_repair.json",
+    "project": "nginx/njs"
+  },
+  {
+    "benchmark": "Defects4C",
+    "instance_key": "7722455726bec8c53458a32851d2a87982cf0eac___gd_gd2.c",
+    "task_type": "vulnerability-fix",
+    "project_key": "php/php-src",
+    "source_file": "gd_gd2.c",
+    "buggy_range": {
+      "start": 54,
+      "end": 169
+    },
+    "selection": {
+      "heuristic_score": 200.0,
+      "nonempty_lines": 99,
+      "control_flow_tokens": 35,
+      "pointer_or_index_operations": 45
+    },
+    "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg_cve/single_function_repair.json",
+    "project": "php/php-src"
+  }
+]

@@ -1,0 +1,175 @@
+{
+  "tests": [
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaClientTypeExists"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaCommonMetadataRoundTrip"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaCopyReturnsNewObject"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaDeepCopyIsIsolated"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaDependenciesPluginsTypeConstants"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaDependencySubTypes"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaExtensionsTypes"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaGetAndSetSpec"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaIncludeAndRoute"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaIncludeTypeAndRoleConstants"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaInfoAndDependencies"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaInfoSubTypes"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaJSONCodecRoundTrip"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaJSONDataCategoryConstants"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaJSONDataStateConstants"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaJSONDataWithAllOptionalFields"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaKindRegistration"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaListDeepCopyIsIsolated"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaListGetAndSetItems"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaMetadataExists"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaRoleAndIAMTypes"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaRouteAuthTypes"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaSchemaReturnsSchema"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaSetSpecRejectsWrongType"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaSetSubresourceValidation"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaSpecNestedTypesExist"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaStaticMetadataRoundTrip"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaStatusOperatorState"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestMetaSubresourceAccess"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestNewMetaReturnsInitializedObject"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestNewPluginReturnsInitializedObject"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/apis/plugins/v0alpha1/TestPluginKindRegistration"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestCloudProvider_GetMeta"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestCloudProvider_GetMeta/successfully_fetches_plugin_metadata"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestCloudProvider_GetMeta/uses_custom_TTL_when_provided"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestCoreProvider_GetMeta"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestCoreProvider_GetMeta/ignores_version_parameter"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestCoreProvider_GetMeta/returns_cached_plugin_when_available"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestCoreProvider_GetMeta/uses_custom_TTL_when_provided"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestJsonDataToMeta"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestJsonDataToMeta/converts_basic_plugin_JSON_data"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestJsonDataToMeta/handles_optional_fields"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestProviderManager_GetMeta"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestProviderManager_GetMeta/does_not_cache_result_with_zero_TTL_and_tries_next_provider"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestProviderManager_GetMeta/fetches_from_provider_when_not_cached"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestProviderManager_GetMeta/returns_cached_result_when_available_and_not_expired"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestProviderManager_GetMeta/skips_expired_cache_entries"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestProviderManager_GetMeta/tries_next_provider_when_first_returns_ErrMetaNotFound"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestProviderManager_GetMeta/uses_first_successful_provider"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestProviderManager_cleanupExpired"
+    },
+    {
+      "name": "github.com/grafana/grafana/apps/plugins/pkg/app/meta/TestProviderManager_cleanupExpired/removes_expired_entries"
+    },
+    {
+      "name": "github.com/grafana/grafana/pkg/registry/apps/plugins/TestPluginRBACActionsUnchanged"
+    },
+    {
+      "name": "github.com/grafana/grafana/pkg/services/accesscontrol/permreg/TestPermissionRegistryPluginsKeyUnchanged"
+    },
+    {
+      "name": "github.com/grafana/grafana/pkg/services/accesscontrol/permreg/TestPermissionRegistryUsesRenamedMetasKey"
+    },
+    {
+      "name": "github.com/grafana/grafana/pkg/services/authz/rbac/TestMapperRegistryMetasScopeResolution"
+    },
+    {
+      "name": "github.com/grafana/grafana/pkg/services/authz/rbac/TestMapperRegistryPluginsResourceUnchanged"
+    },
+    {
+      "name": "github.com/grafana/grafana/pkg/services/authz/rbac/TestMapperRegistryUsesRenamedMetasResource"
+    }
+  ]
+}

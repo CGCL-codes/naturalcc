@@ -1,0 +1,19 @@
+{
+  "benchmark": "Defects4C",
+  "instance_key": "fe9ed49dafa993e3af96b6a5a589efeea9bfb36f___gd_gd2.c",
+  "task_type": "vulnerability-fix",
+  "project_key": "libgd/libgd",
+  "source_file": "gd_gd2.c",
+  "buggy_range": {
+    "start": 405,
+    "end": 566
+  },
+  "selection": {
+    "heuristic_score": 237.1,
+    "nonempty_lines": 140,
+    "control_flow_tokens": 32,
+    "pointer_or_index_operations": 57
+  },
+  "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg_cve/single_function_repair.json",
+  "project": "libgd/libgd"
+}

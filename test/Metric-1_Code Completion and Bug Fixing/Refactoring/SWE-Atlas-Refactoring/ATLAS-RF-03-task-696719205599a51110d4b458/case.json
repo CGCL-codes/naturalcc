@@ -1,0 +1,19 @@
+{
+  "benchmark": "SWE-Atlas Refactoring",
+  "task_id": "task-696719205599a51110d4b458",
+  "difficulty": "hard (official task metadata)",
+  "language": "Go",
+  "tags": [
+    "refactoring",
+    "master-validator",
+    "rubric-graded",
+    "Go"
+  ],
+  "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_grafana_grafana_696719205599a51110d4b458_1.1@sha256:a5dc6ee62d0467a6972453d2dc9104437dec7340b9b780bb5962b90f39910a9e",
+  "selection": {
+    "heuristic_score": 274.93,
+    "reference_patch_file_count": 24,
+    "reference_patch_changed_lines": 1534
+  },
+  "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-696719205599a51110d4b458"
+}

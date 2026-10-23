@@ -1,0 +1,17 @@
+{
+  "benchmark": "SecRepoBench",
+  "instance_id": "24106",
+  "project": "imagemagick",
+  "repository": "https://github.com/imagemagick/imagemagick",
+  "fixed_revision": "f2d5b7615ec97abb32d24d2b021d386283d983ec",
+  "target_file": "MagickCore/draw.c",
+  "cwe_id": 122,
+  "selection": {
+    "heuristic_score": 3161.7,
+    "nonempty_lines": 1970,
+    "control_flow_tokens": 400,
+    "pointer_or_index_operations": 639
+  },
+  "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/24106/desc_prompt.txt",
+  "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+}

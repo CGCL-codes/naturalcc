@@ -1,0 +1,37 @@
+{
+  "files": [
+    {
+      "name": "apps/plugins/pkg/apis/plugins/v0alpha1/meta_constructors_test.go"
+    },
+    {
+      "name": "apps/plugins/pkg/app/meta/cloud_test.go"
+    },
+    {
+      "name": "apps/plugins/pkg/app/meta/core_test.go"
+    },
+    {
+      "name": "apps/plugins/pkg/app/meta/manager_test.go"
+    },
+    {
+      "name": "pkg/registry/apps/plugins/accesscontrol_test.go"
+    },
+    {
+      "name": "pkg/services/accesscontrol/permreg/permreg_meta_test.go"
+    },
+    {
+      "name": "pkg/services/authz/rbac/mapper_meta_test.go"
+    },
+    {
+      "name": "pkg/tests/apis/config_test.go"
+    },
+    {
+      "name": "pkg/tests/apis/plugins/discovery_test.go"
+    },
+    {
+      "name": "pkg/tests/apis/plugins/metas_test.go"
+    },
+    {
+      "name": "pkg/tests/apis/plugins/plugins_test.go"
+    }
+  ]
+}

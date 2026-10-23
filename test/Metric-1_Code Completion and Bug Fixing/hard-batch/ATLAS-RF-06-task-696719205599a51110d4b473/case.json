@@ -1,0 +1,19 @@
+{
+  "benchmark": "SWE-Atlas Refactoring",
+  "task_id": "task-696719205599a51110d4b473",
+  "difficulty": "hard (official task metadata)",
+  "language": "Python",
+  "tags": [
+    "refactoring",
+    "master-validator",
+    "rubric-graded",
+    "Python"
+  ],
+  "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_secdev_scapy_696719205599a51110d4b473_1.1@sha256:01e531f57358a1f6d5ee4e26585912bd67242fdcf0e637801c60248424dd63f2",
+  "selection": {
+    "heuristic_score": 2327.81,
+    "reference_patch_file_count": 230,
+    "reference_patch_changed_lines": 1231
+  },
+  "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-696719205599a51110d4b473"
+}

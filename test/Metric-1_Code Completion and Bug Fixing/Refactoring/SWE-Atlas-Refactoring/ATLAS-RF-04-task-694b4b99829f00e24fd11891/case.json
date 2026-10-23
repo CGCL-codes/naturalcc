@@ -1,0 +1,19 @@
+{
+  "benchmark": "SWE-Atlas Refactoring",
+  "task_id": "task-694b4b99829f00e24fd11891",
+  "difficulty": "hard (official task metadata)",
+  "language": "JavaScript",
+  "tags": [
+    "refactoring",
+    "master-validator",
+    "rubric-graded",
+    "JavaScript"
+  ],
+  "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_Automattic_wp-calypso_694b4b99829f00e24fd11891_1.1@sha256:3975b652725f75ce0c86d7216ad5d316755ae16e30d1bbc6e2bd864bbebb218c",
+  "selection": {
+    "heuristic_score": 190.68,
+    "reference_patch_file_count": 18,
+    "reference_patch_changed_lines": 327
+  },
+  "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-694b4b99829f00e24fd11891"
+}

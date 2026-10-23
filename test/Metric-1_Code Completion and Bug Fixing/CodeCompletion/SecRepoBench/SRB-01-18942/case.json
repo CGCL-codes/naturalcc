@@ -1,0 +1,17 @@
+{
+  "benchmark": "SecRepoBench",
+  "instance_id": "18942",
+  "project": "yara",
+  "repository": "https://github.com/VirusTotal/yara.git",
+  "fixed_revision": "69fd050588f8e3cb7c25ccd26e44cb6d02524e46",
+  "target_file": "libyara/grammar.c",
+  "cwe_id": 129,
+  "selection": {
+    "heuristic_score": 3374.8,
+    "nonempty_lines": 2339,
+    "control_flow_tokens": 320,
+    "pointer_or_index_operations": 786
+  },
+  "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/18942/desc_prompt.txt",
+  "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+}

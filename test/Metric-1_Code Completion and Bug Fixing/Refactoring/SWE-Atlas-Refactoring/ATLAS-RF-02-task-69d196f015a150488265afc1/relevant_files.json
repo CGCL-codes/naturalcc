@@ -1,0 +1,25 @@
+{
+  "files": [
+    {
+      "name": "mysql-test/suite/gcol/r/innodb_virtual_stats.result"
+    },
+    {
+      "name": "mysql-test/suite/innodb/r/innodb_stats_auto_recalc_on_nonexistent.result"
+    },
+    {
+      "name": "mysql-test/suite/innodb/r/innodb_stats_fetch.result"
+    },
+    {
+      "name": "mysql-test/suite/innodb/r/innodb_stats_flush_no_reload.result"
+    },
+    {
+      "name": "mysql-test/suite/innodb/t/innodb_stats_auto_recalc_on_nonexistent.test"
+    },
+    {
+      "name": "mysql-test/suite/innodb/t/innodb_stats_fetch.test"
+    },
+    {
+      "name": "mysql-test/suite/innodb/t/innodb_stats_flush_no_reload.test"
+    }
+  ]
+}

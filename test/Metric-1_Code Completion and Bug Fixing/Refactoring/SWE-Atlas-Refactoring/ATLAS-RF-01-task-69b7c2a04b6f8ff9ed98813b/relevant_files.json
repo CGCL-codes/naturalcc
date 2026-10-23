@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "name": "src/collectors/cgroups.plugin/tests/test_doubles.c"
+    },
+    {
+      "name": "src/daemon/unit_test.c"
+    },
+    {
+      "name": "src/database/engine/dbengine-stresstest.c"
+    },
+    {
+      "name": "src/database/engine/dbengine-unittest.c"
+    },
+    {
+      "name": "src/database/tests/rrd_refactor_test.c"
+    }
+  ]
+}
