@@ -27,7 +27,7 @@ class PropertyDocumenter:
         return domain.render_property(
             member_name,
             property_member.__doc__,
-            is_classmethod=False,
+            is_classmethod=mini_inspect.is_class_property(raw_member),
         )
 
 

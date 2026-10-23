@@ -1,0 +1,17 @@
+{
+  "benchmark": "SecRepoBench",
+  "instance_id": "45455",
+  "project": "libxml2",
+  "repository": "https://gitlab.gnome.org/GNOME/libxml2.git",
+  "fixed_revision": "968495442964f3ea72499dfbdba9e2fa9d77f9b7",
+  "target_file": "parser.c",
+  "cwe_id": 590,
+  "selection": {
+    "heuristic_score": 660.3,
+    "nonempty_lines": 385,
+    "control_flow_tokens": 80,
+    "pointer_or_index_operations": 251
+  },
+  "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/45455/desc_prompt.txt",
+  "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+}

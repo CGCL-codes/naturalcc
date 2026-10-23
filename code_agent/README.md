@@ -31,6 +31,8 @@ The first selected target file is always the primary file used for NaturalCC pro
 
 ## What It Is
 
+Agent verification recognizes `tests.run` and equivalent discovered full-suite commands run through `command.run` at the workspace root (including `python -m pytest -q`). Test selectors and collection-only runs do not count as full verification. If the model repeats a final answer without recorded successful verification after a reminder, the Run stops with `VerificationRequired` and a visible explanation instead of consuming the remaining budget.
+
 This is not a general chat bot. It is a context-enhanced code agent for project-aware code completion and editing.
 
 Typical tasks:
@@ -488,7 +490,7 @@ Conversation messages, run state, events, snapshots, approvals, and memories are
 
 | API provider | `CODE_AGENT_PROVIDER` | Key environment variable | Example model | Default API base |
 |---|---|---|---|---|
-| DeepSeek official | `deepseek` | `DEEPSEEK_API_KEY` | `deepseek-chat` | `https://api.deepseek.com/v1` |
+| DeepSeek official | `deepseek` | `DEEPSEEK_API_KEY` | `deepseek-v4-pro` | `https://api.deepseek.com/v1` |
 | OpenRouter | `openrouter` | `OPENROUTER_API_KEY` | `anthropic/claude-sonnet-4.5` | `https://openrouter.ai/api/v1` |
 | Local Ollama | `ollama` | None | `qwen2.5-coder:7b` | `http://127.0.0.1:11434/v1` |
 
@@ -518,7 +520,7 @@ For DeepSeek, replace the four OpenRouter configuration lines with:
 ```powershell
 $env:DEEPSEEK_API_KEY = "your-deepseek-key"
 $env:CODE_AGENT_PROVIDER = "deepseek"
-$env:CODE_AGENT_MODEL = "deepseek-chat"
+$env:CODE_AGENT_MODEL = "deepseek-v4-pro"
 $env:CODE_AGENT_API_BASE = "https://api.deepseek.com/v1"
 ```
 
@@ -535,7 +537,7 @@ $env:CODE_AGENT_OUTPUT_RESERVE_TOKENS = "2048"
 The Agent Gateway uses the versioned `/v1` URL. NaturalCC constructs Aider's local `OLLAMA_API_BASE` without `/v1`; do not set it manually for the Web Agent path. Small models are suitable for connectivity/tool-call smoke only, not indicator-1 quality evidence.
 
 - When unset, `CODE_AGENT_PROVIDER` defaults to `deepseek`. Setting only `OPENROUTER_API_KEY` does not switch providers.
-- When `CODE_AGENT_MODEL` is unset, DeepSeek uses `deepseek-chat`, OpenRouter uses `deepseek/deepseek-chat`, and Ollama uses `qwen2.5-coder:7b`. Set a model ID explicitly to select another model.
+- When `CODE_AGENT_MODEL` is unset, DeepSeek uses `deepseek-v4-pro`, OpenRouter uses `deepseek/deepseek-v4-pro`, and Ollama uses `qwen2.5-coder:7b`. Set a model ID explicitly to select another model.
 - When `CODE_AGENT_API_BASE` is unset, it defaults to the selected provider's endpoint. Update or clear old model/base variables when switching providers to avoid stale values.
 - Restart the backend after changing environment variables, then open `http://127.0.0.1:7860/`. After a frontend update, use `Ctrl+F5` to refresh the browser.
 
@@ -547,19 +549,19 @@ Agent requests use the tokenizer bundled under `resources/deepseek_v3_tokenizer`
 
 ```bash
 export CODE_AGENT_TOKENIZER_DIR=/absolute/path/to/resources/deepseek_v3_tokenizer
-export CODE_AGENT_CONTEXT_WINDOW_TOKENS=65536
+export CODE_AGENT_CONTEXT_WINDOW_TOKENS=262144
 export CODE_AGENT_OUTPUT_RESERVE_TOKENS=4096
 export CODE_AGENT_CONTEXT_SAFETY_MARGIN_TOKENS=512
 export CODE_AGENT_PROVIDER_FRAMING_TOKENS=256
-export CODE_AGENT_COMPACTION_TRIGGER_RATIO=0.72
-export CODE_AGENT_COMPACTION_TARGET_RATIO=0.50
+export CODE_AGENT_COMPACTION_TRIGGER_RATIO=0.65
+export CODE_AGENT_COMPACTION_TARGET_RATIO=0.45
 export CODE_AGENT_ANALYZER_OUTPUT_TOKENS=4096
 export CODE_AGENT_SUMMARIZER_OUTPUT_TOKENS=2048
 ```
 
-When the soft threshold is reached at a safe point, the runtime freezes a continuous completed prefix and runs a tool-disabled, JSON-only `CompactionAnalyzer` followed by `CheckpointSummarizer`. Only the validated committed checkpoint is injected into later requests; structured analysis remains audit data, raw messages/events remain authoritative, and API/JSON failures use a bounded deterministic fallback. Maintenance calls use `max_compaction_calls` and do not consume `max_llm_calls`, while their tokens, cost, and elapsed time still count toward total Run budgets. A request that cannot fit protected rules, goal, WorkingState, checkpoint/tail, tool schemas, output reserve, and safety margin terminates with `reason=context_hard_limit` before the model API is called.
+All providers and model IDs use the same 262,144-token local request-window default; set `CODE_AGENT_CONTEXT_WINDOW_TOKENS` explicitly when a selected model has a smaller supported window. This is a NaturalCC local budget, not a claim about any provider's maximum. The default compaction trigger/target ratios are 0.65/0.45. Each Run defaults to 16 compaction maintenance model calls. When the soft threshold is reached at a safe point, the runtime freezes a continuous completed prefix and runs a tool-disabled, JSON-only `CompactionAnalyzer` followed by `CheckpointSummarizer`. Only the validated committed checkpoint is injected into later requests; structured analysis remains audit data, raw messages/events remain authoritative, and API/JSON failures use a bounded deterministic fallback. If there are too few maintenance calls left for the two-pass compaction, the runtime can still commit the bounded deterministic checkpoint without a model call. Maintenance calls do not consume `max_llm_calls`, while their tokens, cost, and elapsed time still count toward total Run budgets. A request that cannot fit protected rules, goal, WorkingState, checkpoint/tail, tool schemas, output reserve, and safety margin terminates with `reason=context_hard_limit` before the model API is called.
 
-Active memory is assembled in two cache-aware tiers. User preferences, project constraints, architecture decisions, repository conventions, and compatible legacy constraint/decision records form a deterministic, goal-independent pinned block. Other active memories are retrieved with FTS5 for the current goal (including matching Run-scoped records) and form a dynamic block. The prompt order is stable system rules -> pinned memory -> committed checkpoint -> runtime authorization -> current goal -> retrieved memory -> WorkingState -> recent message tail. This keeps the reusable prefix stable while leaving paths, counters, search results, and other changing data near the suffix; pinned IDs are excluded from dynamic retrieval to prevent duplicate injection. If the provider reports DeepSeek-compatible `prompt_cache_hit_tokens` and `prompt_cache_miss_tokens`, the Run accumulates them and **Run details -> Usage** displays the measured hit ratio. **Not reported** means the upstream API omitted these fields.
+Active memory is assembled in two cache-aware tiers. User preferences, project constraints, architecture decisions, repository conventions, and compatible legacy constraint/decision records form a deterministic, goal-independent pinned block. Other active memories are retrieved with FTS5 for the current goal (including matching Run-scoped records) and form a dynamic block. The prompt order is stable system rules -> pinned memory -> committed checkpoint -> runtime authorization -> current goal -> continuous recent message tail -> a final runtime-generated context message with retrieved memory and WorkingState. The final message is status data, not a new user request or permission grant. This lets the unchanged conversation history remain an exact reusable prefix when counters or tool state change; pinned IDs are excluded from dynamic retrieval to prevent duplicate injection. If the provider reports DeepSeek-compatible `prompt_cache_hit_tokens` and `prompt_cache_miss_tokens`, the Run accumulates them and **Run details -> Usage** displays the measured hit ratio. **Not reported** means the upstream API omitted these fields.
 
 Permission defaults:
 

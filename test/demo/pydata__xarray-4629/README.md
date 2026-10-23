@@ -21,11 +21,11 @@ NaturalCC Agent UI.
    python -m pytest -q
    ```
 
-   When running manually from a terminal whose Python does not include pytest,
-   use NaturalCC's prepared environment instead:
+   When running manually from this demo workspace in a terminal whose Python
+   does not include pytest, use NaturalCC's prepared environment instead:
 
    ```powershell
-   uv run --project D:\桌面2\naturalcc-ncc3\code_agent python -m pytest -q
+   uv run --project ../../../code_agent python -m pytest -q
    ```
 
    In the Web UI, the backend is started through that same `uv` environment,

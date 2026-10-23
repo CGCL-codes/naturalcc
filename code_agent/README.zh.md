@@ -99,7 +99,7 @@ cd code_agent
 # 1. 创建虚拟环境并安装全部依赖（含 dev 组，uv 自动读取 uv.lock）
 uv sync
 
-# 2. 下载 DeepSeek V3 分词器（Agent 模式的 token 精确计数必需）
+# 2. 下载 DeepSeek V3 分词器（Agent 模式的本地 token 估算必需；V4-Pro 请与 API 用量对照校准）
 uv run python scripts/install_deepseek_tokenizer.py
 
 # 3. 安装前端依赖
@@ -178,7 +178,7 @@ uv run python agent_web_api.py --host 127.0.0.1 --port 7860
 ```powershell
 $env:DEEPSEEK_API_KEY = "你的DeepSeek_Key"
 $env:CODE_AGENT_PROVIDER = "deepseek"
-$env:CODE_AGENT_MODEL = "deepseek-chat"
+$env:CODE_AGENT_MODEL = "deepseek-v4-pro"
 $env:CODE_AGENT_API_BASE = "https://api.deepseek.com/v1"
 ```
 
@@ -204,7 +204,7 @@ export CODE_AGENT_API_BASE="https://openrouter.ai/api/v1"
 ```
 
 - `CODE_AGENT_PROVIDER` 未设置时默认是 `deepseek`；选择 `openrouter` 或 `ollama` 时须显式设置，Key 或模型名不会切换渠道。
-- `CODE_AGENT_MODEL` 未设置时，DeepSeek 默认 `deepseek-chat`、OpenRouter 默认 `deepseek/deepseek-chat`、Ollama 默认 `qwen2.5-coder:7b`。
+- `CODE_AGENT_MODEL` 未设置时，DeepSeek 默认 `deepseek-v4-pro`、OpenRouter 默认 `deepseek/deepseek-v4-pro`、Ollama 默认 `qwen2.5-coder:7b`。
 - `CODE_AGENT_API_BASE` 未设置时按渠道选择默认地址。切换渠道时应同步更新或清除旧模型、地址变量；Ollama 地址必须是本机 HTTP loopback 且以 `/v1` 结尾。
 - 设置或更改环境变量后需重启后端，再访问 `http://127.0.0.1:7860/`；前端更新后可按 `Ctrl+F5` 强制刷新。
 
@@ -485,18 +485,20 @@ VS Code 中 `Extensions: Install from VSIX...` 安装后，命令面板可用：
 | `CODE_AGENT_DB` | `<code_agent>/outputs/agent_runtime.db` | 事件库 / 记忆库 SQLite 位置 |
 | `CODE_AGENT_TOKENIZER_DIR` | `<code_agent>/resources/deepseek_v3_tokenizer` | 分词器目录 |
 
-**上下文窗口与压缩**（默认 65k 窗口，占用率 ≥0.72 触发压缩，压缩目标 0.50）
+**上下文窗口与压缩**（所有供应商和模型默认 256k 窗口，占用率 ≥0.65 触发压缩，目标 0.45；每个 Run 最多 16 次压缩维护调用）
 
 | 变量 | 默认值 |
 |---|---|
-| `CODE_AGENT_CONTEXT_WINDOW_TOKENS` | `65536` |
+| `CODE_AGENT_CONTEXT_WINDOW_TOKENS` | `262144`（所有供应商和模型统一默认；显式设置时以设置值为准） |
 | `CODE_AGENT_OUTPUT_RESERVE_TOKENS` | `4096` |
 | `CODE_AGENT_CONTEXT_SAFETY_MARGIN_TOKENS` | `512` |
 | `CODE_AGENT_PROVIDER_FRAMING_TOKENS` | `256` |
-| `CODE_AGENT_COMPACTION_TRIGGER_RATIO` | `0.72` |
-| `CODE_AGENT_COMPACTION_TARGET_RATIO` | `0.50` |
+| `CODE_AGENT_COMPACTION_TRIGGER_RATIO` | `0.65` |
+| `CODE_AGENT_COMPACTION_TARGET_RATIO` | `0.45` |
 | `CODE_AGENT_ANALYZER_OUTPUT_TOKENS` | `4096` |
 | `CODE_AGENT_SUMMARIZER_OUTPUT_TOKENS` | `2048` |
+
+`max_compaction_calls` 默认值为每个 Run 16 次（计数单位是压缩维护模型调用，而非完整压缩轮数）。压缩预算不足以进行两阶段模型压缩时，运行时会对安全的已完成历史前缀生成确定性 checkpoint，不直接恢复整段未压缩历史。256k 是 NaturalCC 对所有供应商和模型采用的本地运行默认值，不代表模型 API 的最大窗口；若所选模型实际窗口较小，请显式调低该值。
 
 **CodeGraph**
 
@@ -552,6 +554,8 @@ Agent 的每一步写操作都受三层约束：
 
 **Run 状态机**
 
+验证既认可 `tests.run`，也认可通过 `command.run` 在工作区根目录执行的等价完整测试命令，例如 `python -m pytest -q`。只收集测试或只选择部分用例不算完整验证。模型收到验证提醒后再次直接返回最终答复、仍无成功验证记录时，Run 会以 `VerificationRequired` 明确报错结束，避免持续消耗预算；再次修改文件后需要重新验证。
+
 ```
 QUEUED → RUNNING → COMPLETED / FAILED / CANCELLED / BUDGET_EXHAUSTED
               ↓
@@ -562,9 +566,11 @@ QUEUED → RUNNING → COMPLETED / FAILED / CANCELLED / BUDGET_EXHAUSTED
 
 **事件溯源**：每个 Run 的所有事件（模型调用、工具执行、状态变化）以严格递增的 sequence 追加到 SQLite（`events` 表），关键步骤后保存完整状态快照（`snapshots` 表）——进程崩溃后可从快照恢复，历史永远可审计。
 
-**上下文压缩**：用 DeepSeek V3 分词器精确计数；`输入 + 工具 schema + 预留输出 + 安全余量 ≥ 窗口 × 0.72` 时触发压缩，把被裁剪的历史交给模型生成结构化 checkpoint（任务目标 / 必须保留的约束 / 已做决策 / 仓库当前状态 / 已完成工作 / 待办），压缩到窗口 × 0.50；模型生成失败时有确定性回退，绝不静默丢内容。
+**上下文压缩**：用仓库内固定版本的 DeepSeek V3 分词器做本地计数；使用 V4-Pro 时，应将估算值与 API 回报的实际用量对照校准。`输入 + 工具 schema + 预留输出 + 安全余量 ≥ 窗口 × 0.65` 时触发压缩，把被裁剪的历史交给模型生成结构化 checkpoint（任务目标 / 必须保留的约束 / 已做决策 / 仓库当前状态 / 已完成工作 / 待办），压缩到窗口 × 0.45；模型生成失败或压缩调用预算不足时有确定性回退，绝不静默丢内容。DeepSeek V4-Pro 默认按 256k 本地窗口检查；如改用其他模型，应按供应商能力显式配置窗口，并核对本地 token 估算。
 
 **长期记忆**：`candidate → active → superseded / rejected / expired` 生命周期；检索走 SQLite FTS5（BM25 排序），普通记忆按关键词召回，`user_preference` / `project_constraint` / `architecture_decision` 等 pinned 记忆会按 user > project > thread 的优先级固定注入系统提示。
+
+**缓存友好的提示顺序**：稳定规则、pinned 记忆、已提交 checkpoint、运行时授权和当前目标放在前面；随后是连续的近期消息历史；最后附加运行时生成的上下文消息，包含检索记忆和每轮变化的 WorkingState。末尾消息只报告进度，不增加权限或提出新用户请求。这样工具状态和计数器的变化不会截断可复用的历史前缀。
 
 ---
 

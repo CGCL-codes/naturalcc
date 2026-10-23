@@ -1,0 +1,25 @@
+{
+  "tests": [
+    {
+      "name": "src/database/tests/rrd_refactor_test.c::test_align_entries_to_pagesize"
+    },
+    {
+      "name": "src/database/engine/dbengine-unittest.c::test_dbengine"
+    },
+    {
+      "name": "src/database/tests/rrd_refactor_test.c::test_rrd_algorithm_conversions"
+    },
+    {
+      "name": "src/database/tests/rrd_refactor_test.c::test_rrd_db_mode_conversions"
+    },
+    {
+      "name": "src/database/tests/rrd_refactor_test.c::test_rrd_db_mode_enum_values"
+    },
+    {
+      "name": "src/database/tests/rrd_refactor_test.c::test_rrdset_type_conversions"
+    },
+    {
+      "name": "src/database/tests/rrd_refactor_test.c::test_storage_engine_modes"
+    }
+  ]
+}

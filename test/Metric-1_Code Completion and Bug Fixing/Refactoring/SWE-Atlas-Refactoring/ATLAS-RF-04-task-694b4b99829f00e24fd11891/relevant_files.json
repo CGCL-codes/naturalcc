@@ -1,0 +1,13 @@
+{
+  "files": [
+    {
+      "name": "client/components/full-width-section/test/index.jsx"
+    },
+    {
+      "name": "client/my-sites/plugins/categories/test/use-categories.test.tsx"
+    },
+    {
+      "name": "client/my-sites/plugins/hooks/test/use-is-marketplace-redesign-enabled.test.ts"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "files": [
+    {
+      "name": "test/packet.uts"
+    },
+    {
+      "name": "test/regression.uts"
+    }
+  ]
+}

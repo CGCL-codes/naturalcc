@@ -86,10 +86,12 @@ def test_planner_keeps_complete_tool_exchange(real_counter, serializer):
         tools=[],
     )
 
-    assert [message["role"] for message in plan.messages[-2:]] == [
+    assert [message["role"] for message in plan.messages[-3:]] == [
         "assistant",
         "tool",
+        "user",
     ]
+    assert "[ACTIVE_STATE]" in plan.messages[-1]["content"]
 
 
 def test_planner_marks_trigger_without_exceeding_hard_limit(
@@ -152,13 +154,15 @@ def test_planner_places_stable_memory_before_dynamic_run_context(
         "[CONTEXT_CHECKPOINT]",
         "[RUNTIME_AUTHORIZATION]",
         "[USER_GOAL]",
-        "[RETRIEVED_MEMORY_REFERENCES]",
-        "[ACTIVE_STATE]",
     ]
     positions = [system.index(marker) for marker in markers]
     assert positions == sorted(positions)
     assert "<subject>API</subject>" in system
-    assert "<subject>Tests</subject>" in system
+    assert "<subject>Tests</subject>" not in system
+    assert "[ACTIVE_STATE]" not in system
+    runtime_context = plan.messages[-1]["content"]
+    assert runtime_context.index("[RETRIEVED_MEMORY_REFERENCES]") < runtime_context.index("[ACTIVE_STATE]")
+    assert "<subject>Tests</subject>" in runtime_context
     assert plan.pinned_memory_tokens > 0
     assert plan.retrieved_memory_tokens > 0
 
@@ -207,6 +211,40 @@ def test_planner_keeps_exact_prefix_across_different_run_inputs(
     assert first_prefix == second_prefix
 
 
+def test_planner_reuses_history_prefix_when_runtime_state_changes(real_counter, serializer):
+    planner = make_planner(real_counter, serializer)
+    prior = [{"role": "user", "content": "fix the bug"}]
+    first = planner.plan(
+        system_rules="stable-policy",
+        goal="fix the bug",
+        messages=prior,
+        active_state={"llm_calls": 0, "tool_calls": 0},
+        memories=[{"id": "old-retrieval", "content": "first result"}],
+        tools=[],
+        runtime_authorization={"workspace": "project-a"},
+    )
+    second = planner.plan(
+        system_rules="stable-policy",
+        goal="fix the bug",
+        messages=[
+            *prior,
+            {"role": "assistant", "content": "", "tool_calls": [{"id": "c1", "name": "workspace.read", "args": {}}]},
+            {"role": "tool", "tool_call_id": "c1", "content": "file contents"},
+        ],
+        active_state={"llm_calls": 1, "tool_calls": 1},
+        memories=[{"id": "new-retrieval", "content": "second result"}],
+        tools=[],
+        runtime_authorization={"workspace": "project-a"},
+    )
+
+    first_messages = serializer.serialize_messages(first.messages)
+    second_messages = serializer.serialize_messages(second.messages)
+    assert first_messages[:-1] == second_messages[: len(first_messages) - 1]
+    assert "[ACTIVE_STATE]" in first_messages[-1]["content"]
+    assert "[ACTIVE_STATE]" in second_messages[-1]["content"]
+    assert "old-retrieval" not in second_messages[0]["content"]
+
+
 def test_context_compaction_keeps_tool_exchange_and_active_state():
     events = [
         {"role": "user", "content": "important constraint: keep API stable"},
@@ -227,6 +265,9 @@ def test_context_compaction_keeps_tool_exchange_and_active_state():
     assert "keep API stable" in text
     roles = [item["role"] for item in built if "role" in item]
     assert roles.count("tool") <= roles.count("assistant")
+    assert built[-1]["role"] == "user"
+    assert "[ACTIVE_STATE]" in built[-1]["content"]
+    assert "[ACTIVE_STATE]" not in built[0]["content"]
 
 
 def test_memory_lifecycle_scope_search_stale_and_delete(tmp_path: Path):

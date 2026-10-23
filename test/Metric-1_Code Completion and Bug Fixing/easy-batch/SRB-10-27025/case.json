@@ -1,0 +1,17 @@
+{
+  "benchmark": "SecRepoBench",
+  "instance_id": "27025",
+  "project": "fluent-bit",
+  "repository": "https://github.com/fluent/fluent-bit/",
+  "fixed_revision": "d67f28b5b28253ff1d0732c79762bda2a12e207b",
+  "target_file": "src/flb_config_map.c",
+  "cwe_id": 415,
+  "selection": {
+    "heuristic_score": 297.4,
+    "nonempty_lines": 178,
+    "control_flow_tokens": 33,
+    "pointer_or_index_operations": 123
+  },
+  "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/27025/desc_prompt.txt",
+  "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+}

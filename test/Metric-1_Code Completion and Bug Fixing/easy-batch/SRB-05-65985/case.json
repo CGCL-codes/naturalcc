@@ -1,0 +1,17 @@
+{
+  "benchmark": "SecRepoBench",
+  "instance_id": "65985",
+  "project": "gpac",
+  "repository": "https://github.com/gpac/gpac",
+  "fixed_revision": "25ca355f14a28baeb6afd911ca7ae66deb37a1ac",
+  "target_file": "src/filters/reframe_mpgvid.c",
+  "cwe_id": 475,
+  "selection": {
+    "heuristic_score": 917.0,
+    "nonempty_lines": 537,
+    "control_flow_tokens": 125,
+    "pointer_or_index_operations": 225
+  },
+  "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/65985/desc_prompt.txt",
+  "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+}

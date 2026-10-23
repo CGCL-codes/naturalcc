@@ -30,6 +30,7 @@ from .policy import PolicyDecision, PolicyEngine
 from .tool_registry import ToolRegistry, redact_sensitive_text, redact_sensitive_value
 from .token_budget import ContextHardLimitExceeded
 from .tools.codegraph import CodeGraphClient, normalize_codegraph_capabilities
+from .tools.verification import discover_test_commands, matches_test_command
 
 
 TERMINAL = {
@@ -943,6 +944,24 @@ class RunEngine:
                     )
                     self.store.release_workspace_lease(state["workspace"], run_id)
                     return state
+                state["verification_completion_attempts"] = state.get("verification_completion_attempts", 0) + 1
+                if state["verification_completion_attempts"] >= 2:
+                    self._record(
+                        state,
+                        "run.failed",
+                        {"error": {
+                            "type": "VerificationRequired",
+                            "message": (
+                                "Completion was requested again without successful verification after a reminder. "
+                                "Run the discovered test suite using tests_run (command_index=0), "
+                                "or an equivalent full-suite command at the workspace root. "
+                                "The model's completion claim is not a recorded test result."
+                            ),
+                        }, "commands": state.get("verification_commands", [])},
+                        RunStatus.FAILED.value,
+                    )
+                    self.store.release_workspace_lease(state["workspace"], run_id)
+                    return state
                 exhausted = self._budget_exhausted(state, budget)
                 if exhausted:
                     self._record(
@@ -957,7 +976,9 @@ class RunEngine:
                     "role": "system",
                     "content": (
                         "[VERIFICATION_REQUIRED] The workspace was modified and supported tests were discovered. "
-                        "Run tests.run successfully before finishing. Allowed commands: "
+                        "Call tests_run with command_index=0 successfully before finishing, "
+                        "or execute an equivalent full-suite command at the workspace root. "
+                        "A further final answer without recorded verification will stop this Run. Allowed commands: "
                         f"{json.dumps(state.get('verification_commands', []), ensure_ascii=False)}"
                     ),
                 }
@@ -1303,9 +1324,11 @@ class RunEngine:
             and plan.compactable_to is not None
             and compaction_service is not None
             and self._compaction_safe(state)
-            and state["compaction_calls"] + 2 <= budget.max_compaction_calls
         )
         if can_compact:
+            # Let CompactionService try even with fewer than two calls left:
+            # its bounded deterministic fallback can still commit a safe
+            # checkpoint without a model call when maintenance budget is gone.
             absolute_from = tail_from + int(plan.compactable_from)
             absolute_to = tail_from + int(plan.compactable_to)
             self._record(
@@ -1488,7 +1511,7 @@ class RunEngine:
         raw_tail: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
         assert self.context_planner is not None
-        messages = [plan.messages[0], *raw_tail]
+        messages = [plan.messages[0], *raw_tail, plan.messages[-1]]
         self.context_planner.counter.assert_fits(
             messages,
             plan.tools,
@@ -1720,16 +1743,27 @@ class RunEngine:
                     state["codegraph_dirty_files"] = []
             elif canonical_name == "codegraph.explore" and result.status != "success":
                 state["codegraph_status"] = CodeGraphClient(state["workspace"]).status()
-            if canonical_name == "tests.run":
+            # Count actual full-suite executions through either public tool.
+            # Use execution metadata, never a model's claim that tests passed.
+            is_verification = canonical_name == "tests.run" or (
+                canonical_name == "command.run"
+                and result.data.get("cwd") == "."
+                and matches_test_command(
+                    result.data.get("argv", []), discover_test_commands(Path(state["workspace"]))
+                )
+            )
+            if is_verification:
                 if result.status == "success":
                     state["verification_pending"] = False
                     state["unverified_changed_files"] = []
+                    state["verification_completion_attempts"] = 0
                 else:
                     # Keep the run in a failed-verification state so a
                     # later model response cannot claim completion forever.
                     state["verification_pending"] = True
                 state["verification_commands"] = state.get("verification_commands", [])
             elif result.changed_files:
+                state["verification_completion_attempts"] = 0
                 # Older persisted runs predate net-mutation tracking.  Do not
                 # infer that their earlier writes were all restored; only
                 # Runs created with this field can safely clear verification.
@@ -1756,8 +1790,6 @@ class RunEngine:
                     for path in result.changed_files:
                         if path not in unverified_changed:
                             unverified_changed.append(path)
-                    from .tools.verification import discover_test_commands
-
                     commands = discover_test_commands(Path(state["workspace"]))
                     state["verification_commands"] = commands
                     state["verification_pending"] = bool(commands)
@@ -1785,8 +1817,10 @@ class RunEngine:
                         "codegraph_status": state.get("codegraph_status", {}),
                     },
                 )
-            elif canonical_name == "tests.run":
+            elif is_verification:
                 verification_result = {
+                    "tool": canonical_name,
+                    "argv": result.data.get("argv"),
                     "status": result.status,
                     "passed": result.status == "success",
                     "exit_code": result.exit_code,

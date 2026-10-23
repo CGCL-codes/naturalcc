@@ -96,6 +96,16 @@ test("terminal agent statuses do not expose pause or cancel controls", () => {
   assert.equal(canControlAgentRun("cancelled"), false);
 });
 
+test("verification failure explains why the run stopped", () => {
+  const message = buildAgentRunMessage({ status: "failed" }, {
+    events: [{ type: "run.failed", payload: { error: {
+      type: "VerificationRequired", message: "Run the discovered test suite using tests_run.",
+    } } }],
+  });
+  assert.equal(message.status, "failed");
+  assert.match(message.content, /Run the discovered test suite/);
+});
+
 
 test("agent runtime stack only occupies space when agent content exists", () => {
   assert.equal(hasAgentRuntimeContent("pipeline", { runId: "r1" }, [], []), false);

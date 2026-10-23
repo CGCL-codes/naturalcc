@@ -1,0 +1,151 @@
+{
+  "tests": [
+    {
+      "name": "DecodeEthernetReturnsIntType"
+    },
+    {
+      "name": "DecodeSllReturnsIntType"
+    },
+    {
+      "name": "DecodePPPReturnsIntType"
+    },
+    {
+      "name": "DecodePPPOESessionReturnsIntType"
+    },
+    {
+      "name": "DecodePPPOEDiscoveryReturnsIntType"
+    },
+    {
+      "name": "DecodeTunnelReturnsIntType"
+    },
+    {
+      "name": "DecodeRawReturnsIntType"
+    },
+    {
+      "name": "DecodeIPV4ReturnsIntType"
+    },
+    {
+      "name": "DecodeIPV6ReturnsIntType"
+    },
+    {
+      "name": "DecodeICMPV4ReturnsIntType"
+    },
+    {
+      "name": "DecodeICMPV6ReturnsIntType"
+    },
+    {
+      "name": "DecodeTCPReturnsIntType"
+    },
+    {
+      "name": "DecodeUDPReturnsIntType"
+    },
+    {
+      "name": "DecodeSCTPReturnsIntType"
+    },
+    {
+      "name": "DecodeGREReturnsIntType"
+    },
+    {
+      "name": "DecodeVLANReturnsIntType"
+    },
+    {
+      "name": "PacketTunnelPktSetupExists"
+    },
+    {
+      "name": "DefragAcceptsPacketQueueParam"
+    },
+    {
+      "name": "GoldCovDecodeTunnelUnsupportedProto"
+    },
+    {
+      "name": "GoldCovDecodeTunnelVlanOverGre"
+    },
+    {
+      "name": "GoldCovGreV0Recur"
+    },
+    {
+      "name": "GoldCovGreV0VersionFlags"
+    },
+    {
+      "name": "GoldCovGreV0KeyHeaderTooBig"
+    },
+    {
+      "name": "GoldCovGreV0RouteSreTerminate"
+    },
+    {
+      "name": "GoldCovGreWrongVersion"
+    },
+    {
+      "name": "GoldCovGreV1Checksum"
+    },
+    {
+      "name": "GoldCovGreV1Route"
+    },
+    {
+      "name": "GoldCovGreV1Ssr"
+    },
+    {
+      "name": "GoldCovGreV1Recur"
+    },
+    {
+      "name": "GoldCovGreV1VersionFlags"
+    },
+    {
+      "name": "GoldCovGreV1WrongProto"
+    },
+    {
+      "name": "GoldCovGreV1NoKey"
+    },
+    {
+      "name": "GoldCovGreV1HdrTooBig"
+    },
+    {
+      "name": "GoldCovGreTunnelIpv4WithQueue"
+    },
+    {
+      "name": "GoldCovGreTunnelIpv6WithQueue"
+    },
+    {
+      "name": "GoldCovGreTunnelPppWithQueue"
+    },
+    {
+      "name": "GoldCovGreTunnelVlanWithQueue"
+    },
+    {
+      "name": "GoldCovIpv6InIpv6Tunnel"
+    },
+    {
+      "name": "GoldCovIpv4Ipv6Tunnel"
+    },
+    {
+      "name": "GoldCovPppIpv6"
+    },
+    {
+      "name": "GoldCovPppUnsupProto"
+    },
+    {
+      "name": "GoldCovPppWrongType"
+    },
+    {
+      "name": "GoldCovPppoeSessionIpv6"
+    },
+    {
+      "name": "GoldCovPppoeDiscoveryWrongCode"
+    },
+    {
+      "name": "GoldCovPppoeDiscoveryMalformedTags"
+    },
+    {
+      "name": "GoldCovVlanTooManyLayers"
+    },
+    {
+      "name": "GoldCovVlanNestedTooDeep"
+    },
+    {
+      "name": "GoldCovSllIpv4"
+    },
+    {
+      "name": "GoldCovEthernetValid"
+    }
+  ]
+}

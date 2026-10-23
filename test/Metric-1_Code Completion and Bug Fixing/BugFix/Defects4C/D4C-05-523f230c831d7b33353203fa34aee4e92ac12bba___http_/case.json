@@ -1,0 +1,19 @@
+{
+  "benchmark": "Defects4C",
+  "instance_key": "523f230c831d7b33353203fa34aee4e92ac12bba___http_fopen_wrapper.c",
+  "task_type": "bug-fix",
+  "project_key": "php/php-src",
+  "source_file": "http_fopen_wrapper.c",
+  "buggy_range": {
+    "start": 112,
+    "end": 976
+  },
+  "selection": {
+    "heuristic_score": 1310.4,
+    "nonempty_lines": 763,
+    "control_flow_tokens": 185,
+    "pointer_or_index_operations": 283
+  },
+  "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg/single_function_repair.json",
+  "project": "php/php-src"
+}

@@ -97,7 +97,7 @@ class ModelStreamEvent:
 @dataclass
 class RunBudget:
     max_llm_calls: int = 100
-    max_compaction_calls: int = 8
+    max_compaction_calls: int = 16
     max_tool_calls: int = 100
     max_input_tokens: int = 120_000
     max_output_tokens: int = 24_000

@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "name": "public/app/core/components/PanelTypeFilter/PanelTypeFilter.test.tsx"
+    },
+    {
+      "name": "public/app/features/dashboard-scene/panel-edit/PanelVizTypePicker.test.tsx"
+    },
+    {
+      "name": "public/app/features/dashboard/components/AddPanelButton/AddPanelMenu.test.tsx"
+    },
+    {
+      "name": "public/app/features/dashboard/components/PanelEditor/VisualizationSelectPane.test.tsx"
+    },
+    {
+      "name": "public/app/features/dashboard/components/PanelEditor/types.test.ts"
+    },
+    {
+      "name": "public/app/features/dashboard/dashgrid/DashboardEmpty.test.tsx"
+    },
+    {
+      "name": "public/app/features/library-panels/components/PanelLibraryOptionsGroup/PanelLibraryOptionsGroup.test.tsx"
+    },
+    {
+      "name": "public/app/features/panel/components/VizTypePicker/VizTypePicker.test.tsx"
+    }
+  ]
+}

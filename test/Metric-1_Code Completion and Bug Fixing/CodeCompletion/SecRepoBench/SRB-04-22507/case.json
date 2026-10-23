@@ -1,0 +1,17 @@
+{
+  "benchmark": "SecRepoBench",
+  "instance_id": "22507",
+  "project": "mruby",
+  "repository": "https://github.com/mruby/mruby",
+  "fixed_revision": "15c63688e3f1a3c6067e6af70e3e9bf999d91389",
+  "target_file": "mrbgems/mruby-sprintf/src/sprintf.c",
+  "cwe_id": 121,
+  "selection": {
+    "heuristic_score": 917.3,
+    "nonempty_lines": 488,
+    "control_flow_tokens": 165,
+    "pointer_or_index_operations": 56
+  },
+  "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/22507/desc_prompt.txt",
+  "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+}

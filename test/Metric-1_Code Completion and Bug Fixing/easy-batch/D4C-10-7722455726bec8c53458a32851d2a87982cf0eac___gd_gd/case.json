@@ -1,0 +1,19 @@
+{
+  "benchmark": "Defects4C",
+  "instance_key": "7722455726bec8c53458a32851d2a87982cf0eac___gd_gd2.c",
+  "task_type": "vulnerability-fix",
+  "project_key": "php/php-src",
+  "source_file": "gd_gd2.c",
+  "buggy_range": {
+    "start": 54,
+    "end": 169
+  },
+  "selection": {
+    "heuristic_score": 200.0,
+    "nonempty_lines": 99,
+    "control_flow_tokens": 35,
+    "pointer_or_index_operations": 45
+  },
+  "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg_cve/single_function_repair.json",
+  "project": "php/php-src"
+}

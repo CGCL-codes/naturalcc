@@ -1,0 +1,19 @@
+{
+  "benchmark": "Defects4C",
+  "instance_key": "ffde45acf3348f8353fb4064a1b21683ee6b5ddf___print-bgp.c",
+  "task_type": "bug-fix",
+  "project_key": "the-tcpdump-group/tcpdump",
+  "source_file": "print-bgp.c",
+  "buggy_range": {
+    "start": 1349,
+    "end": 2305
+  },
+  "selection": {
+    "heuristic_score": 1746.1,
+    "nonempty_lines": 911,
+    "control_flow_tokens": 320,
+    "pointer_or_index_operations": 117
+  },
+  "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg/single_function_repair.json",
+  "project": "the-tcpdump-group/tcpdump"
+}

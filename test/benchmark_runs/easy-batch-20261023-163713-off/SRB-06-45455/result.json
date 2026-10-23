@@ -1,0 +1,54 @@
+{
+  "case_id": "45455",
+  "case_dir": "D:\\桌面2\\naturalcc-ncc3\\test\\Metric-1_Code Completion and Bug Fixing\\easy-batch\\SRB-06-45455",
+  "workspace": "D:\\桌面2\\naturalcc-ncc3\\test\\benchmark_runs\\easy-batch-20261023-163713-off\\SRB-06-45455\\workspace",
+  "target_files": [
+    "target_function.c"
+  ],
+  "task_sha256": "743c44e337afcda7c5540360a79b21f62e20f4a136e096fe74849ad0ccf1abcb",
+  "case_json_sha256": "e7d19cc882b30781450cae831e8211886bf7f64bc5765fad5dfc7d7d609b8a2c",
+  "codegraph": "off",
+  "approval_policy": "auto_all",
+  "auto_approvals": [
+    {
+      "risk": "write",
+      "tool": "workspace.apply_patch",
+      "approved_at": "2026-10-23T08:52:44.485343+00:00"
+    }
+  ],
+  "started_at": "2026-10-23T08:52:04.569028+00:00",
+  "budget": {
+    "max_llm_calls": 30,
+    "max_compaction_calls": 16,
+    "max_tool_calls": 60,
+    "max_input_tokens": 1200000,
+    "max_output_tokens": 240000,
+    "max_seconds": 1800
+  },
+  "status": "completed",
+  "official_pass": null,
+  "vulnerability_density_per_100_loc": null,
+  "codegraph_init_seconds": null,
+  "thread_id": "ddd4c058-c6f8-4253-a413-549c80cc55dd",
+  "runtime_model_config": {
+    "provider": "deepseek",
+    "model": "deepseek-v4-pro",
+    "base_url": "https://api.deepseek.com/v1",
+    "context_window_tokens": 262144,
+    "safety_margin_tokens": 512,
+    "fallback_models": [],
+    "provider_preferences": {}
+  },
+  "run_id": "fdacc66d-f4c4-45f0-aef7-e0cd5ca935de",
+  "finished_at": "2026-10-23T08:54:03.831803+00:00",
+  "duration_seconds": 119.263,
+  "llm_calls": 8,
+  "tool_calls": 11,
+  "input_tokens": 323698,
+  "output_tokens": 5079,
+  "cost_usd": 0.0,
+  "model": "deepseek-v4-pro",
+  "provider": "deepseek",
+  "run_errors": [],
+  "test_tampering_detected": false
+}

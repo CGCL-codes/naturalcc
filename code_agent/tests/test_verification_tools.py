@@ -3,8 +3,31 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from code_agent.agent_core.contracts import ToolContext
 from code_agent.agent_core.tools import verification
+
+
+@pytest.mark.parametrize("argv,accepted", [
+    (["python", "-m", "pytest", "-q"], True),
+    (["python3", "-m", "pytest", "-vv"], True),
+    (["pytest", "--quiet"], True),
+    (["python", "demo_repro.py"], False),
+    (["pytest", "--collect-only"], False),
+    (["pytest", "-k", "one_test"], False),
+    (["pytest", "tests/test_one.py"], False),
+    (["pytest", "--ignore=tests/test_fail.py"], False),
+    (["python", "-c", "print('passed')"], False),
+])
+def test_full_test_command_matching(argv, accepted):
+    assert verification.matches_test_command(argv, [["python", "-m", "pytest"]]) is accepted
+
+
+def test_other_runners_require_exact_discovered_command():
+    assert verification.matches_test_command(["npm", "test"], [["npm", "test"]])
+    assert not verification.matches_test_command(["npm", "test", "--", "one.test.js"], [["npm", "test"]])
+    assert not verification.matches_test_command(["pytest"], [])
 
 
 def test_git_status_uses_utf8_replacement_decoding(

@@ -1,0 +1,10 @@
+{
+  "dataset": "easy-batch",
+  "codegraph": "off",
+  "cases_attempted": 10,
+  "completed_runs": 10,
+  "official_scored": 0,
+  "test_tampering_cases": 0,
+  "official_score": null,
+  "note": "Agent run status is not benchmark correctness. Attach official evaluator results before reporting benchmark accuracy."
+}

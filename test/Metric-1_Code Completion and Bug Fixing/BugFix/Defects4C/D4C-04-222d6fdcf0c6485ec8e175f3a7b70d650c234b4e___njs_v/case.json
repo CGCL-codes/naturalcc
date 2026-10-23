@@ -1,0 +1,19 @@
+{
+  "benchmark": "Defects4C",
+  "instance_key": "222d6fdcf0c6485ec8e175f3a7b70d650c234b4e___njs_vmcode.c",
+  "task_type": "bug-fix",
+  "project_key": "nginx/njs",
+  "source_file": "njs_vmcode.c",
+  "buggy_range": {
+    "start": 87,
+    "end": 1058
+  },
+  "selection": {
+    "heuristic_score": 1361.6,
+    "nonempty_lines": 740,
+    "control_flow_tokens": 228,
+    "pointer_or_index_operations": 172
+  },
+  "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg/single_function_repair.json",
+  "project": "nginx/njs"
+}

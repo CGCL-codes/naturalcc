@@ -1,0 +1,19 @@
+{
+  "benchmark": "Defects4C",
+  "instance_key": "ca46d0acbce55019b970fcd4c1e8a10edfdded93___phar.c",
+  "task_type": "bug-fix",
+  "project_key": "php/php-src",
+  "source_file": "phar.c",
+  "buggy_range": {
+    "start": 529,
+    "end": 3375
+  },
+  "selection": {
+    "heuristic_score": 4093.7,
+    "nonempty_lines": 2456,
+    "control_flow_tokens": 546,
+    "pointer_or_index_operations": 909
+  },
+  "source": "https://github.com/defects4c/defects4c/blob/master/defectsc_tpl/data/buggy_errmsg/single_function_repair.json",
+  "project": "php/php-src"
+}

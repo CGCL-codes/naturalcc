@@ -1,0 +1,17 @@
+{
+  "benchmark": "SecRepoBench",
+  "instance_id": "57317",
+  "project": "ndpi",
+  "repository": "https://github.com/ntop/nDPI.git",
+  "fixed_revision": "ddb9aa0f95ba263361b9be2ba0a122ea1e001be9",
+  "target_file": "src/lib/protocols/tls.c",
+  "cwe_id": null,
+  "selection": {
+    "heuristic_score": 599.7,
+    "nonempty_lines": 324,
+    "control_flow_tokens": 78,
+    "pointer_or_index_operations": 269
+  },
+  "source": "https://raw.githubusercontent.com/ai-sec-lab/SecRepoBench/main/descriptions/57317/desc_prompt.txt",
+  "dataset_record": "https://huggingface.co/datasets/ai-sec-lab/SecRepoBench"
+}

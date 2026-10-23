@@ -1,0 +1,19 @@
+{
+  "benchmark": "SWE-Atlas Refactoring",
+  "task_id": "task-69d196f015a150488265afc1",
+  "difficulty": "hard (official task metadata)",
+  "language": "C++",
+  "tags": [
+    "refactoring",
+    "master-validator",
+    "rubric-graded",
+    "C++"
+  ],
+  "official_container_image": "ghcr.io/scaleapi/swe-atlas-v1.1:swe_atlas_RF_MariaDB_server_69d196f015a150488265afc1_1.1@sha256:9f2c93e53d65e3ccefaf1bb482a454a540c4ffe50dfa7c6bd25cc8ceed8e51d3",
+  "selection": {
+    "heuristic_score": 242.45,
+    "reference_patch_file_count": 21,
+    "reference_patch_changed_lines": 1182
+  },
+  "source": "https://github.com/scaleapi/swe-atlas/tree/main/data/rf/task-69d196f015a150488265afc1"
+}

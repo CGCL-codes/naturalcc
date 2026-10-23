@@ -1,0 +1,21 @@
+{
+  "instance_id": "mrdoob__three.js-27395",
+  "repo": "mrdoob/three.js",
+  "base_commit": "b99b3fd955864f534b1e2649518112f7e50fef21",
+  "version": "27395",
+  "image": "swebench/sweb.eval.x86_64.mrdoob_1776_three.js-27395:latest",
+  "problem_statement": "Class Sphere is missing property isSphere\n### Description\n\nBox3 has this.isBox3 = true;\r\nSphere does not have this.isSphere;\n\n### Reproduction steps\n\nI need it for \r\nif(collider.isSphere)\n\n### Code\n\na = new Sphere()\r\nif(a.isSphere){ debugger }\n\n### Live example\n\nno example\n\n### Screenshots\n\n_No response_\n\n### Version\n\nr159\n\n### Device\n\n_No response_\n\n### Browser\n\n_No response_\n\n### OS\n\n_No response_\n",
+  "hints_text": "",
+  "created_at": "2023-12-18 10:05:09",
+  "eval_type": "pass_and_fail",
+  "log_parser": "parse_log_tap",
+  "language": "JavaScript",
+  "selection": {
+    "heuristic_score": 32.45,
+    "non_test_source_files_in_reference_patch": 5,
+    "reference_patch_changed_lines": 18,
+    "fail_to_pass_test_count": 1,
+    "pass_to_pass_test_count": 18
+  },
+  "source": "https://huggingface.co/datasets/SWE-bench/SWE-bench_Multilingual"
+}

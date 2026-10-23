@@ -1,0 +1,61 @@
+{
+  "tests": [
+    {
+      "name": "test_buffer_key_value_urlencode"
+    },
+    {
+      "name": "test_create_and_free"
+    },
+    {
+      "name": "test_foreach"
+    },
+    {
+      "name": "test_from_host_labels"
+    },
+    {
+      "name": "test_hops_accessors"
+    },
+    {
+      "name": "test_install_type_accessor"
+    },
+    {
+      "name": "test_mc_version_via_stream"
+    },
+    {
+      "name": "test_ml_capable_via_stream"
+    },
+    {
+      "name": "test_ml_enabled_via_stream"
+    },
+    {
+      "name": "test_prebuilt_dist_accessor"
+    },
+    {
+      "name": "test_set_by_name_overwrite"
+    },
+    {
+      "name": "test_set_by_name_unknown"
+    },
+    {
+      "name": "test_set_by_name_via_labels"
+    },
+    {
+      "name": "test_to_json_v1_null"
+    },
+    {
+      "name": "test_to_json_v1_populated"
+    },
+    {
+      "name": "test_to_json_v2_null"
+    },
+    {
+      "name": "test_to_json_v2_populated"
+    },
+    {
+      "name": "test_to_rrdlabels"
+    },
+    {
+      "name": "test_to_url_encode_stream"
+    }
+  ]
+}
