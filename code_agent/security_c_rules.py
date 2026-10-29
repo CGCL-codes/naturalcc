@@ -12,7 +12,7 @@ from tree_sitter import Language, Parser
 import tree_sitter_c
 import tree_sitter_cpp
 
-VERSION = "c-source-v1"
+VERSION = "c-source-v2"
 LIMITATIONS = (
     "Syntax analysis, not a compiler or proof: local string flow and direct global "
     "accesses in overlapping pthread/std::thread lifetimes. No general alias, macro, "
@@ -242,6 +242,173 @@ def _races(root, functions):
                     yield from compare(other, [event])
 
 
+_INT_EXPR = re.compile(r"^[\d\s+\-*/()]+$")
+
+
+def _int_value(node):
+    """Value of a constant integer expression such as 100-1, else None."""
+    expression = text(node).strip().replace("(size_t)", "").replace("(int)", "")
+    if not expression or not _INT_EXPR.match(expression):
+        return None
+    try:
+        value = eval(expression, {"__builtins__": {}}, {})  # digits and + - * / ( ) only
+    except (SyntaxError, ZeroDivisionError, TypeError):
+        return None
+    return int(value) if isinstance(value, (int, float)) and value >= 0 else None
+
+
+def _literal_length(node):
+    if node is None or node.type != "string_literal":
+        return None
+    body = text(node)[1:-1]
+    return len(re.sub(r"\\(x[0-9a-fA-F]+|[0-7]{1,3}|.)", "x", body))
+
+
+def _string_writes(function, functions, facts=None, depth=0):
+    """Track char-array capacities, aliases and known string lengths in one function
+    (path-insensitive, last write wins) and flag string writes that cannot fit.
+    Facts follow buffer arguments one call level into functions of the same file."""
+    capacity, length, alias = dict(facts or {}).get("capacity", {}), {}, {}
+    capacity, length, alias = dict(capacity), dict((facts or {}).get("length", {})), dict((facts or {}).get("alias", {}))
+
+    def buffer(node):
+        name = text(node).strip()
+        seen = set()
+        while name in alias and name not in seen:
+            seen.add(name)
+            name = alias[name]
+        return name
+
+    def strlen_of(node):
+        literal = _literal_length(node)
+        return literal if literal is not None else length.get(buffer(node))
+
+    def size_of(node):
+        value = _int_value(node)
+        if value is not None:
+            return value
+        if node.type == "call_expression":
+            name, arguments = call_parts(node)
+            if name == "strlen" and arguments:
+                return strlen_of(arguments[0])
+        if node.type == "binary_expression" and text(node.child_by_field_name("operator")) == "+":
+            left, right = size_of(node.child_by_field_name("left")), size_of(node.child_by_field_name("right"))
+            return left + right if left is not None and right is not None else None
+        if node.type == "sizeof_expression":
+            target = node.child_by_field_name("value") or (node.named_children[0] if node.named_children else None)
+            if target is not None:
+                inner = target.named_children[0] if target.type == "parenthesized_expression" and target.named_children else target
+                return capacity.get(buffer(inner))
+        return None
+
+    results = []
+    for node in walk(function):
+        if node.type == "declaration" and "char" in text(node.child_by_field_name("type")):
+            for declarator in node.named_children:
+                value = declarator.child_by_field_name("value") if declarator.type == "init_declarator" else None
+                target = declarator.child_by_field_name("declarator") if declarator.type == "init_declarator" else declarator
+                if target is not None and target.type == "array_declarator":
+                    size = target.child_by_field_name("size")
+                    name = declared_name(target)
+                    if size is not None and _int_value(size) is not None:
+                        capacity[name] = _int_value(size)
+                    if value is not None and value.type == "string_literal":
+                        length[name] = _literal_length(value)
+                        capacity.setdefault(name, length[name] + 1)
+                elif target is not None and target.type == "pointer_declarator" and value is not None and value.type == "identifier":
+                    alias[declared_name(target)] = text(value)
+        elif node.type == "assignment_expression" and text(node.child_by_field_name("operator")) == "=":
+            left, right = node.child_by_field_name("left"), node.child_by_field_name("right")
+            if left.type == "identifier" and right.type == "identifier" and (buffer(right) in capacity or text(right) in alias):
+                alias[text(left)] = text(right)
+            elif left.type == "subscript_expression" and text(right) in {"'\\0'", "0", "'\\x00'"}:
+                index = _int_value(left.child_by_field_name("index"))
+                if index is not None:
+                    length[buffer(left.child_by_field_name("argument"))] = index
+        elif node.type == "call_expression":
+            name, arguments = call_parts(node)
+            if name in functions and depth < 3 and functions[name] is not function:
+                parameters = [declared_name(p) for p in walk(functions[name].child_by_field_name("declarator"))
+                              if p.type == "parameter_declaration"]
+                inherited = {"capacity": {}, "length": {}, "alias": {}}
+                for parameter, argument in zip(parameters, arguments):
+                    source = buffer(argument)
+                    if source in capacity:
+                        inherited["capacity"][parameter] = capacity[source]
+                    if strlen_of(argument) is not None:
+                        inherited["length"][parameter] = strlen_of(argument)
+                if inherited["capacity"] or inherited["length"]:
+                    # Attribute a callee overflow to this call, which supplies the sizes.
+                    for _, evidence in _string_writes(functions[name], functions, inherited, depth + 1):
+                        results.append((node, [f"via call to {name}(): " + item for item in evidence]))
+                continue
+            if not arguments:
+                continue
+            destination = buffer(arguments[0])
+            room = capacity.get(destination)
+            written, evidence = None, None
+            if name == "strcpy" and len(arguments) >= 2:
+                source = strlen_of(arguments[1])
+                written = None if source is None else source + 1
+                evidence = f"strcpy copies a {source}-character string plus NUL"
+            elif name == "strcat" and len(arguments) >= 2:
+                prefix, source = length.get(destination), strlen_of(arguments[1])
+                written = None if prefix is None or source is None else prefix + source + 1
+                evidence = f"strcat appends {source} characters after {prefix} plus NUL"
+            elif name == "strncat" and len(arguments) >= 3:
+                prefix, source, limit = length.get(destination), strlen_of(arguments[1]), size_of(arguments[2])
+                appended = min(v for v in (source, limit) if v is not None) if source is not None or limit is not None else None
+                written = None if prefix is None or appended is None else prefix + appended + 1
+                evidence = f"strncat appends {appended} characters after {prefix} plus NUL"
+            elif name == "strncpy" and len(arguments) >= 3:
+                written = size_of(arguments[2])
+                evidence = f"strncpy writes {written} bytes"
+            elif name == "snprintf" and len(arguments) >= 2:
+                written = size_of(arguments[1])
+                evidence = f"snprintf is allowed to write {written} bytes"
+            if room is not None and written is not None and written > room:
+                results.append((node, [f"{evidence} into '{destination}' of capacity {room}"]))
+            if name in {"strcpy", "strncpy"} and len(arguments) >= 2 and strlen_of(arguments[1]) is not None:
+                length[destination] = strlen_of(arguments[1])
+    return results
+
+
+_NULL_TOKENS = {"0", "NULL", "nullptr", "((void *)0)", "(void *)0"}
+
+
+def _unchecked_dereferences(function, parameter):
+    """True if the parameter is dereferenced and never compared against NULL first."""
+    for node in walk(function.child_by_field_name("body")):
+        source = text(node)
+        if node.type in {"if_statement", "conditional_expression", "binary_expression"} and re.search(
+                rf"\b{re.escape(parameter)}\b\s*(==|!=)|(==|!=)\s*\b{re.escape(parameter)}\b|^\s*!\s*{re.escape(parameter)}\b|\(\s*!?\s*{re.escape(parameter)}\s*\)", source):
+            return False
+        if node.type == "pointer_expression" and text(node.child_by_field_name("argument")) == parameter and source.startswith("*"):
+            return True
+        if node.type == "field_expression" and text(node.child_by_field_name("operator")) == "->" and text(node.child_by_field_name("argument")) == parameter:
+            return True
+        if node.type == "subscript_expression" and text(node.child_by_field_name("argument")) == parameter:
+            return True
+    return False
+
+
+def _null_arguments(function, functions):
+    """A literal NULL passed to a same-file function that dereferences that parameter unchecked."""
+    results = []
+    for node in walk(function):
+        if node.type != "call_expression":
+            continue
+        name, arguments = call_parts(node)
+        callee = functions.get(name)
+        if callee is None or callee is function:
+            continue
+        parameters = [declared_name(p) for p in walk(callee.child_by_field_name("declarator")) if p.type == "parameter_declaration"]
+        for index, (parameter, argument) in enumerate(zip(parameters, arguments)):
+            if text(argument).replace(" ", "") in {t.replace(" ", "") for t in _NULL_TOKENS} and _unchecked_dereferences(callee, parameter):
+                results.append((node, [f"argument {index + 1} of {name}() is NULL and {name}() dereferences '{parameter}' without a NULL check"]))
+    return results
+
+
 def scan_c_source(source: str, file: str, context_lines: int):
     root = parse_source(source, Path(file).suffix.lower())
     functions = {declared_name(n.child_by_field_name("declarator")): n for n in walk(root)
@@ -249,16 +416,24 @@ def scan_c_source(source: str, file: str, context_lines: int):
     findings = []
     lines = source.splitlines()
 
+    names = {78: ("Untrusted string reaches a shell", "shellStringFlow"), 362: ("Conflicting shared accesses in overlapping threads", "sharedGlobalRace"),
+             120: ("String write exceeds the destination capacity", "capacityStringWrite"),
+             476: ("NULL argument reaches an unchecked dereference", "nullArgumentDeref")}
+    advice = {78: "Use a fixed executable and an argument vector without a shell.",
+              362: "Protect every conflicting access with the same mutex or an appropriate atomic operation.",
+              120: "Bound the write by the remaining destination space, including the terminating NUL.",
+              476: "Pass a valid object or check the parameter for NULL before dereferencing it."}
+
     def add(node, category, cwe, evidence):
         line = node.start_point.row + 1
         findings.append({
-            "rule_id": f"cwe-{cwe}", "rule_name": "Untrusted string reaches a shell" if cwe == 78 else "Conflicting shared accesses in overlapping threads",
-            "analyzer": "c-source", "analyzer_id": "shellStringFlow" if cwe == 78 else "sharedGlobalRace",
+            "rule_id": f"cwe-{cwe}", "rule_name": names[cwe][0],
+            "analyzer": "c-source", "analyzer_id": names[cwe][1],
             "category": category, "severity": "high", "confidence": "medium",
             "file": file, "line": line, "snippet": lines[line - 1][:300],
             "context": "\n".join(f"{i + 1}: {lines[i]}" for i in range(max(0, line - 1 - context_lines), min(len(lines), line + context_lines))),
             "evidence": evidence, "pattern": VERSION,
-            "recommendation": "Use a fixed executable and an argument vector without a shell." if cwe == 78 else "Protect every conflicting access with the same mutex or an appropriate atomic operation.",
+            "recommendation": advice[cwe],
             "references": [f"https://cwe.mitre.org/data/definitions/{cwe}.html"],
         })
 
@@ -267,4 +442,13 @@ def scan_c_source(source: str, file: str, context_lines: int):
             add(node, "command_execution", 78, evidence)
     for node, evidence in _races(root, functions):
         add(node, "data_race", 362, evidence)
+    reported = set()
+    for function in functions.values():
+        for node, evidence in _string_writes(function, functions):
+            if node.start_point.row not in reported:
+                reported.add(node.start_point.row)
+                add(node, "string_overflow", 120, evidence)
+    for function in functions.values():
+        for node, evidence in _null_arguments(function, functions):
+            add(node, "null_pointer", 476, evidence)
     return findings, root.has_error

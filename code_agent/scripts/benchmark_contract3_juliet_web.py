@@ -31,7 +31,8 @@ from code_agent.security_review import REVIEW_VERSION
 
 DATA = ROOT / "artifacts" / "contract3" / "juliet"
 OUT = DATA / f"web-sonnet45-{REVIEW_VERSION}"
-PRODUCT_FILES = ("security_review.py", "plugins/vulnerability_detection.py", "agent_core/tools/pipeline.py")
+PRODUCT_FILES = ("security_review.py", "security_analysis.py", "security_contracts.py",
+                 "plugins/vulnerability_detection.py", "agent_core/tools/pipeline.py")
 MODEL = "anthropic/claude-sonnet-4.5"
 NAMES = {"array_oob": "数组越界", "string_overflow": "字符串溢出", "null_pointer": "空指针调用"}
 TERMINAL = {"completed", "failed", "cancelled", "budget_exhausted"}
@@ -53,15 +54,29 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+ANALYZE_TOOLS = {"vulnerability_detection.analyze", "vulnerability_detection_analyze"}
+READ_TOOLS = {"vulnerability_detection", "workspace.read", "workspace.list", "workspace.search", "workspace.stat",
+              "naturalcc.parse", "naturalcc.symbol_search", "codegraph.status", "codegraph.explore", "codegraph.visualize",
+              "git.status", "git.diff", "tests.discover"}
+ALLOWED_TOOLS = {*READ_TOOLS, *{name.replace(".", "_") for name in READ_TOOLS}}
+ANALYZER = "builtin"
+
+
 def goal(category: str, files: list[str]) -> str:
     targets = json.dumps(files)
+    if ANALYZER == "comprehensive":
+        scan = (f"然后必须调用静态分析工具 `vulnerability_detection.analyze` 扫描目标文件（它运行内置规则 + Cppcheck + Clang 静态分析，"
+                f"不编译、不运行目标程序；该工具的授权会被自动批准），参数应包含 `analyzer:\"comprehensive\"`、\n")
+        forbid = "除 `vulnerability_detection.analyze` 外，不调用任何需要 execute/write 授权的工具"
+    else:
+        scan = "然后必须调用只读工具 `vulnerability_detection` 扫描目标文件，参数应包含\n"
+        forbid = "不调用需要 execute/write 授权的工具"
     return f'''请审计当前工作区的 {", ".join(f"`{name}`" for name in files)}，仅判断“{NAMES[category]}”这一类风险。
 工作区中的 `std_testcase.h`、`std_testcase_io.h`、`io.c` 是公共支持代码，可读取作为上下文，但不在报告范围内。
-先读取全部目标文件（必要时读取支持代码），然后必须调用只读工具 `vulnerability_detection` 扫描目标文件，参数应包含
-`target_files:{targets}`、`scan_scope:"targets"`、`scan_type:"frequent_defects"`、
+先读取全部目标文件（必要时读取支持代码），{scan}`target_files:{targets}`、`scan_scope:"targets"`、`scan_type:"frequent_defects"`、
 `severity_threshold:"low"`、`max_findings:1000`。
 结合源码、跨函数/跨文件数据流、宏与全局常量取值和工具证据判断；扫描无告警不等于安全，扫描有告警也需核实。
-只做静态审计：不修改、编译、运行任何文件，不执行 shell，不调用需要 execute/write 授权的工具，不搜索外部资料或数据集。
+只做静态审计：不修改、编译、运行任何文件，不执行 shell，{forbid}，不搜索外部资料或数据集。
 最终回答只输出 JSON（可使用唯一 json 代码块）：
 {{"findings":[{{"category":"{category}","file":"{files[0]}","line":7,"reason":"具体代码证据与触发条件"}}],"summary":"简要结论"}}。
 findings 中 category 只能为 `{category}`，file 只能是上述目标文件之一，line 必须是该文件真实的 1-based 行号；
@@ -136,7 +151,7 @@ def run(checkpoint: dict, manifest: dict, dataset: dict, samples: list[dict], ba
     config = client.call("GET", "/api/bootstrap")["runtime_default_model_config"]
     if (config.get("provider"), config.get("model"), config.get("base_url", "").rstrip("/")) != ("openrouter", MODEL, "https://openrouter.ai/api/v1") or config.get("fallback_models"):
         raise ValueError("Web runtime defaults must be OpenRouter / Sonnet 4.5 / no fallback")
-    protocol = {"model_config": config, "budget": BUDGET, "goal_sha256": digest(goal("array_oob", ["src_a.c"]).encode()),
+    protocol = {"model_config": config, "budget": BUDGET, "analyzer": ANALYZER, "goal_sha256": digest(goal("array_oob", ["src_a.c"]).encode()),
                 "manifest_sha256": digest((DATA / "manifest.json").read_bytes()),
                 "product_sha256": {name: digest((ROOT / name).read_bytes()) for name in PRODUCT_FILES}, "order": [s["id"] for s in samples], "base_url": base}
     if checkpoint.get("protocol", protocol) != protocol:
@@ -228,7 +243,14 @@ def run(checkpoint: dict, manifest: dict, dataset: dict, samples: list[dict], ba
             if not parallel:
                 print(f"[{index}/{total}] {sample['id']} {state['status']} LLM={state.get('llm_calls', 0)}", flush=True)
             if state["status"] == "waiting_approval":
-                state = web.call("POST", run_path + "/reject")
+                pending = state.get("pending_approval") or {}
+                call = pending.get("tool_call") or {}
+                args = call.get("args") or call.get("arguments") or {}
+                # Approve only the static analyzer with the requested analyzer; everything else is rejected.
+                if ANALYZER == "comprehensive" and call.get("name") in ANALYZE_TOOLS and args.get("analyzer") == "comprehensive":
+                    state = web.call("POST", run_path + "/approve", json={"risk": pending.get("risk", "execute"), "tool_call_id": call.get("id")})
+                else:
+                    state = web.call("POST", run_path + "/reject")
             elif state["status"] == "paused":
                 raise RuntimeError(f"Run paused: {attempt['run_id']}")
             else:
@@ -244,7 +266,12 @@ def run(checkpoint: dict, manifest: dict, dataset: dict, samples: list[dict], ba
             record["status"] = state["status"]
         events = web.call("GET", run_path + "/events")["events"]
         save_json(OUT / "runs" / f"{attempt['run_id']}.json", {"state": state, "events": events})
-        used = set(re.findall(r"c-security-review-v[\w-]*", json.dumps(events)))
+        started = {(event.get("payload", {}).get("tool_call") or event.get("payload", {})).get("name")
+                   for event in events if event.get("type") == "tool.started"}
+        unexpected = started - ALLOWED_TOOLS - (ANALYZE_TOOLS if ANALYZER == "comprehensive" else set())
+        if unexpected:
+            raise RuntimeError(f"Run {attempt['run_id']} started tools outside the allowed set: {sorted(unexpected)}")
+        used = set(re.findall(r'version[\\"]*: [\\"]*(c-security-review-v[\w-]*)', json.dumps(events)))
         if used - {REVIEW_VERSION}:
             raise RuntimeError(f"Backend review version {sorted(used)} != {REVIEW_VERSION}; restart both with the same CODE_AGENT_REVIEW_PROFILE")
         with lock:
@@ -302,13 +329,20 @@ def main() -> None:
     parser.add_argument("--base-url", default="http://127.0.0.1:7860")
     parser.add_argument("--limit", type=int, help="Only run the first N samples of the frozen order (smoke test)")
     parser.add_argument("--report-only", action="store_true")
+    parser.add_argument("--analyzer", choices=("builtin", "comprehensive"), default="builtin",
+                        help="builtin = read-only scan tool; comprehensive = auto-approve vulnerability_detection.analyze (builtin + Cppcheck + Clang)")
     parser.add_argument("--workers", type=int, default=1, help="Concurrent samples; each sample still has its own Thread and workspace")
     parser.add_argument("--set", choices=("juliet", "juliet-holdout", "juliet-probe", "juliet-hard"), default="juliet",
                         help="juliet is the tuning set; juliet-holdout is frozen separately and never used for tuning")
     args = parser.parse_args()
-    global DATA, OUT
+    global DATA, OUT, ANALYZER
+    ANALYZER = args.analyzer
+    if ANALYZER == "comprehensive":
+        denied = set(filter(None, os.environ.get("CODE_AGENT_DENIED_TOOLS", "").split(",")))
+        if not {"command.run", "vulnerability_detection.fix", "workspace.apply_patch"} <= denied:
+            raise SystemExit("comprehensive mode auto-approves execute risk: start runner and backend with CODE_AGENT_DENIED_TOOLS covering all other execute/write tools")
     DATA = ROOT / "artifacts" / "contract3" / args.set
-    OUT = DATA / f"web-sonnet45-{REVIEW_VERSION}"
+    OUT = DATA / f"web-sonnet45-{REVIEW_VERSION}" if ANALYZER == "builtin" else DATA / f"web-sonnet45-{REVIEW_VERSION}-{ANALYZER}"
     OUT.mkdir(parents=True, exist_ok=True)
     with (OUT / "benchmark.lock").open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)

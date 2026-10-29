@@ -36,13 +36,14 @@ def classify_findings(findings, project_dir):
         identifier = finding.get("analyzer_id", "")
         engine = finding.get("analyzer")
         if engine == "c-source":
-            category = {"shellStringFlow": "command_execution", "sharedGlobalRace": "data_race"}.get(identifier)
-            eligible, basis = bool(category), "Source flow/conflicting-access evidence"
+            category = {"shellStringFlow": "command_execution", "sharedGlobalRace": "data_race",
+                        "capacityStringWrite": "string_overflow", "nullArgumentDeref": "null_pointer"}.get(identifier)
+            eligible, basis = bool(category), "Source flow/conflicting-access/capacity evidence"
         elif engine == "tsan-import":
             category, eligible, basis = "data_race", True, "Imported TSan race; log provenance is user supplied"
         elif engine in {"cppcheck", "clang"}:
             if engine == "clang":
-                identifier = {"core.NullDereference": "nullPointer", "alpha.security.ArrayBoundV2": "arrayIndexOutOfBounds",
+                identifier = {"core.NullDereference": "nullPointer", "alpha.security.ArrayBoundV2": "arrayIndexOutOfBounds", "alpha.security.ArrayBound": "arrayIndexOutOfBounds",
                     "alpha.unix.cstring.OutOfBounds": "bufferAccessOutOfBounds"}.get(identifier, identifier)
                 if identifier == "unix.Malloc" and finding.get("diagnostic_type") == "Memory leak":
                     identifier = "memleak"
@@ -58,10 +59,16 @@ def classify_findings(findings, project_dir):
                     path = (Path(project_dir) / file).resolve()
                     path.relative_to(Path(project_dir).resolve())
                     source = path.read_text(encoding="utf-8", errors="replace")
-                    operations[file] = [(n.start_point.row + 1, n.end_point.row + 1, call_parts(n)[0])
-                        for n in walk(parse_source(source, path.suffix.lower())) if n.type == "call_expression"]
-                calls = {call for start, end, call in operations[file] if start <= finding["line"] <= end}
-                string, buffer = bool(calls & STRING_CALLS), bool(calls & BUFFER_CALLS)
+                    operations[file] = []
+                    for n in walk(parse_source(source, path.suffix.lower())):
+                        if n.type == "call_expression":
+                            name, arguments = call_parts(n)
+                            literal = any(a.type in {"string_literal", "concatenated_string"} for a in arguments)
+                            operations[file].append((n.start_point.row + 1, n.end_point.row + 1, name, literal))
+                at_line = [(call, literal) for start, end, call, literal in operations[file] if start <= finding["line"] <= end]
+                # A raw-memory copy whose source is a string literal moves string data into a char buffer.
+                string = any(call in STRING_CALLS or (call in BUFFER_CALLS and literal) for call, literal in at_line)
+                buffer = any(call in BUFFER_CALLS and not literal for call, literal in at_line)
                 if string != buffer:
                     category = "string_overflow" if string else "buffer_overflow"
             eligible, basis = bool(category), "Analyzer diagnostic ID/type and operation at diagnostic location"

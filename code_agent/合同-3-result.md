@@ -1,6 +1,6 @@
 # 合同指标 3：高频缺陷检测总报告
 
-更新时间（UTC）：2026-10-22T12:10:31.869395+00:00
+更新时间（UTC）：2026-10-29T11:32:40.095502+00:00
 
 本报告是唯一的指标 3 Markdown 入口。各测试集的真值、原始结果、模型 Run 和覆盖状态保留在各自工件目录；不得择优挑选或平均不同测试集的分数。
 
@@ -37,6 +37,7 @@
 | 独立压力集本地 | 未保留 | — | 能力边界对照 |
 | Juliet 调优集 Web · `c-security-review-v1` | 60/60 条有效评分；样本队列已处理完毕（未评分项保留在 checkpoint） | 100.00% / 46.67% | 跨函数/宏/上下文，第三方标签 |
 | Juliet 调优集 Web · `c-security-review-v2` | 60/60 条有效评分；样本队列已处理完毕（未评分项保留在 checkpoint） | 100.00% / 23.33% | 跨函数/宏/上下文，第三方标签 |
+| Juliet 调优集 Web · `c-security-review-v3-comprehensive` | 26/60 条有效评分；OpenRouter 402：在途请求额度占用，余额未必耗尽；已停止，待在途请求结算后可重试 | 100.00% / 0.00% | 跨函数/宏/上下文，第三方标签 |
 | Juliet 调优集 Web · `c-security-review-v3-exam-baseline` | 60/60 条有效评分；样本队列已处理完毕（未评分项保留在 checkpoint） | 96.67% / 13.33% | 出题基线（故意削弱，供学生优化） |
 | Juliet 调优集 Web · `c-security-review-v3-exam-baseline-r2` | 59/60 条有效评分；样本队列已处理完毕（未评分项保留在 checkpoint） | 89.66% / 10.00% | 出题基线（故意削弱，供学生优化） |
 | 平衡验收集（加难版） Web | 9/9 组有效评分；样本队列已处理完毕（未评分项保留在 checkpoint） | 99.44% / 0.00% | 加难验收链路 |
@@ -199,6 +200,24 @@ Web 模式与合同 5 一样，固定 OpenRouter/Sonnet 配置，经 `/api/agent
 - `null_pointer-10-s` `null_check_after_deref_14`（误报）：src_a.c 存在4处空指针调用风险，分布在 sym_01() 和 sym_02() 两个函数中。两处 malloc 调用（第14行和第30行）均未检查返回值是否为 NULL，后续直接解引用（第15、18、31、34行）。当内存分配失败时，将触发空指针解引用，导致程序崩溃（CWE-476）。
 - `string_overflow-01-s` `dest_char_declare_cpy_09`（误报）：扫描发现两处strcpy调用（第26行和第47行）。经静态分析：两处source均为100字节（99个字符+'\0'），目标sym_03容量为100字节；结合GLOBAL_CONST_FALSE=0和GLOBAL_CONST_TRUE=1的常量值，data在两个函数中均确定指向sym_03；strcpy复制的100字节
 - `string_overflow-10-s` `CWE806_char_declare_snprintf_12`（误报）：在 src_a.c 第30行发现字符串溢出风险。SNPRINTF 使用 strlen(data) 而非 sizeof(dest) 作为大小参数，在 Windows 平台上 _snprintf 不保证空终止符，会导致目标缓冲区 dest 成为非终止字符串，存在缓冲区溢出风险。
+
+### Juliet 调优集 · `c-security-review-v3-comprehensive`
+
+已有效评分 26/60 条；TP/FN/FP/TN：12/0/0/14；状态：OpenRouter 402：在途请求额度占用，余额未必耗尽；已停止，待在途请求结算后可重试。工件：`artifacts/contract3/juliet/web-sonnet45-c-security-review-v3-comprehensive/`。
+
+| 分组 | TP | FN | FP | TN | 检出率 | 误报率 |
+|---|---:|---:|---:|---:|---:|---:|
+| 数组越界 | 3 | 0 | 0 | 5 | 100.00% | 0.00% |
+| 字符串溢出 | 5 | 0 | 0 | 5 | 100.00% | 0.00% |
+| 空指针调用 | 4 | 0 | 0 | 4 | 100.00% | 0.00% |
+| 总体 | 12 | 0 | 0 | 14 | 100.00% | 0.00% |
+
+| 分组 | TP | FN | FP | TN | 检出率 | 误报率 |
+|---|---:|---:|---:|---:|---:|---:|
+| 宏/全局常量/全局函数控制流（09–14） | 3 | 0 | 0 | 3 | 100.00% | 0.00% |
+| 跨函数静态/全局标志（21–22） | 0 | 0 | 0 | 1 | N/A | 0.00% |
+| 跨函数传参/返回/函数指针/静态全局（41–45） | 3 | 0 | 0 | 3 | 100.00% | 0.00% |
+| 跨文件数据流（51–68） | 6 | 0 | 0 | 7 | 100.00% | 0.00% |
 
 ### Juliet 调优集 · `c-security-review-v3-exam-baseline`（出题基线，故意削弱）
 
