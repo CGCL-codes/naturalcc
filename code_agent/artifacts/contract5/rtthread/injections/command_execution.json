@@ -1,0 +1,274 @@
+{
+  "category": "command_execution",
+  "sites": [
+    {
+      "id": "CE-01",
+      "file": "components/finsh/msh_file.c",
+      "function": "directory_delete_for_msh",
+      "expected": "defect",
+      "difficulty": "easy",
+      "marker": "rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", full_path);",
+      "edits": [
+        {
+          "old": "    closedir(dir);\n    rt_free(full_path);\n    if (rmdir(pathname) != 0)",
+          "new": "    {\n        char cmdbuf[DFS_PATH_MAX];\n        rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", full_path);\n        msh_exec(cmdbuf, rt_strlen(cmdbuf));\n    }\n    closedir(dir);\n    rt_free(full_path);\n    if (rmdir(pathname) != 0)"
+        }
+      ],
+      "description": "full_path 由 readdir 返回的目录项名 dirent->d_name 拼接而成，属于文件系统内容而非 shell 操作者输入；这里未做任何字符过滤就拼进命令行交给 msh_exec 执行。",
+      "trigger": "当被删除目录下存在名字里含 shell 分隔/控制语义的文件项时，该名字会被当作命令的一部分进入 shell 解析。",
+      "fix": "删除该 hook，或改为对条目名做严格白名单校验后只调用 unlink 等直接文件接口，不经过 msh_exec/system。"
+    },
+    {
+      "id": "CE-02",
+      "file": "components/finsh/msh_file.c",
+      "function": "directory_setattr",
+      "expected": "defect",
+      "difficulty": "medium",
+      "marker": "rt_snprintf(cmdbuf, sizeof(cmdbuf), \"ls %s\", full_path);",
+      "edits": [
+        {
+          "old": "            rt_sprintf(full_path, \"%s/%s\", pathname, dirent->d_name);\n            if (dirent->d_type == DT_REG)",
+          "new": "            rt_sprintf(full_path, \"%s/%s\", pathname, dirent->d_name);\n            {\n                char cmdbuf[DFS_PATH_MAX];\n                rt_snprintf(cmdbuf, sizeof(cmdbuf), \"ls %s\", full_path);\n                msh_exec(cmdbuf, rt_strlen(cmdbuf));\n            }\n            if (dirent->d_type == DT_REG)"
+        }
+      ],
+      "description": "full_path 同样来自 readdir 的目录项名，是外部文件系统数据；递归设置属性时把它拼进命令行并经 msh_exec 执行，等于让磁盘上的文件名决定要运行的 shell 命令。",
+      "trigger": "遍历到一个名字含 shell 语义的文件项时，该名字成为命令行内容被 shell 解析执行。",
+      "fix": "移除该执行；属性变更应继续走 dfs_file_setattr 直接接口，条目名只作为路径参数而非命令文本。"
+    },
+    {
+      "id": "CE-03",
+      "file": "components/finsh/cmd.c",
+      "function": "list_device",
+      "expected": "defect",
+      "difficulty": "easy",
+      "marker": "rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", device->parent.name);",
+      "edits": [
+        {
+          "old": "                device = (struct rt_device *)obj;\n                device_type = \"Unknown\";",
+          "new": "                device = (struct rt_device *)obj;\n                {\n                    char cmdbuf[64];\n                    extern int system(const char *command);\n                    rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", device->parent.name);\n                    system(cmdbuf);\n                }\n                device_type = \"Unknown\";"
+        }
+      ],
+      "description": "device->parent.name 来自对象注册表，由注册该设备的任意子系统/驱动写入，不是 shell 操作者输入；列设备时把它拼进命令行交给 system 执行。",
+      "trigger": "某个注册设备的名字含 shell 语义时，仅仅执行 list device 就会让该名字被 shell 解析。",
+      "fix": "列设备只应打印名字；删除该 system 调用，不要把注册表里的名字当命令文本。"
+    },
+    {
+      "id": "CE-04",
+      "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+      "function": "dfs_mount",
+      "expected": "defect",
+      "difficulty": "medium",
+      "marker": "rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s %s\", device_name, fullpath);",
+      "edits": [
+        {
+          "old": "        /* open specific device */\n        if (device_name) dev_id = rt_device_find(device_name);",
+          "new": "        /* open specific device */\n        if (device_name) dev_id = rt_device_find(device_name);\n\n        {\n            char cmdbuf[96];\n            extern int system(const char *command);\n            rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s %s\", device_name, fullpath);\n            system(cmdbuf);\n        }"
+        }
+      ],
+      "description": "device_name 与规整后的挂载路径 fullpath 由上层挂载请求（可能来自自动挂载/热插拔等子系统）传入，而非 shell 操作者当场键入；此处未校验就拼成命令行交给 system。",
+      "trigger": "当传入的设备名或挂载路径含 shell 语义字符时，挂载流程会把它交给 shell 解析执行。",
+      "fix": "挂载不需要调用 shell；删除该通知命令，或先对设备名/路径做严格字符白名单再仅用于日志打印。"
+    },
+    {
+      "id": "CE-05",
+      "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+      "function": "dfs_umount",
+      "expected": "defect",
+      "difficulty": "medium",
+      "marker": "rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", mnt->fullpath);",
+      "edits": [
+        {
+          "old": "            if (strcmp(mnt->fullpath, fullpath) == 0)\n            {\n                /* is the mount point */",
+          "new": "            {\n                char cmdbuf[96];\n                extern int system(const char *command);\n                rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", mnt->fullpath);\n                system(cmdbuf);\n            }\n            if (strcmp(mnt->fullpath, fullpath) == 0)\n            {\n                /* is the mount point */"
+        }
+      ],
+      "description": "mnt->fullpath 是挂载表中保存的路径，由此前的挂载过程写入，属于其它子系统提供的数据；卸载时把它拼进命令行交给 system 执行。",
+      "trigger": "若挂载路径中含 shell 语义字符，卸载该挂载点时该路径会被 shell 解析。",
+      "fix": "卸载流程不应运行 shell；移除该 hook，路径只作为内部字符串比较和查找使用。"
+    },
+    {
+      "id": "CE-06",
+      "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+      "function": "dfs_remount",
+      "expected": "defect",
+      "difficulty": "hard",
+      "marker": "rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s %s\", fullpath, (const char *)data);",
+      "edits": [
+        {
+          "old": "            dfs_lock();\n            dfs_mnt_setflags(mnt, flags);\n            dfs_unlock();",
+          "new": "            dfs_lock();\n            dfs_mnt_setflags(mnt, flags);\n            dfs_unlock();\n            {\n                char cmdbuf[96];\n                extern int system(const char *command);\n                rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s %s\", fullpath, (const char *)data);\n                system(cmdbuf);\n            }"
+        }
+      ],
+      "description": "fullpath 来自调用方给的挂载路径，data 是重挂载时上层透传的文件系统私有数据块（由其它子系统填充），两者都不是 shell 操作者输入；这里跨子系统地把它们拼进命令行交给 system，污点要跨多层调用才能看清。",
+      "trigger": "当重挂载路径或透传的 data 字符串含 shell 语义时，remount 会让其进入 shell 解析。",
+      "fix": "remount 不应触发 shell；删除该命令，data 作为不透明块按长度处理，不得当作命令文本格式化。"
+    },
+    {
+      "id": "CE-07",
+      "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+      "function": "dfs_mkfs",
+      "expected": "defect",
+      "difficulty": "easy",
+      "marker": "rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s %s\", fs_name, device_name);",
+      "edits": [
+        {
+          "old": "    type = *_find_filesystem(fs_name);\n    if (!type)",
+          "new": "    {\n        char cmdbuf[96];\n        extern int system(const char *command);\n        rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s %s\", fs_name, device_name);\n        system(cmdbuf);\n    }\n    type = *_find_filesystem(fs_name);\n    if (!type)"
+        }
+      ],
+      "description": "fs_name 与 device_name 是 mkfs 请求参数，格式化设备时可能由脚本或上层自动流程传入，而非操作者当场键入；此处直接拼成命令行交给 system。",
+      "trigger": "设备名或文件系统类型名含 shell 语义时，格式化操作会把它交给 shell 解析。",
+      "fix": "格式化无需 shell；删除该通知命令，参数仅用于查找文件系统类型和设备。"
+    },
+    {
+      "id": "CE-08",
+      "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+      "function": "dfs_statfs",
+      "expected": "defect",
+      "difficulty": "easy",
+      "marker": "rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", fullpath);",
+      "edits": [
+        {
+          "old": "    DLOG(msg, \"dfs_file\", \"mnt\", DLOG_MSG, \"dfs_mnt_lookup(%s)\", fullpath);\n    mnt = dfs_mnt_lookup(fullpath);",
+          "new": "    {\n        char cmdbuf[96];\n        extern int system(const char *command);\n        rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", fullpath);\n        system(cmdbuf);\n    }\n    DLOG(msg, \"dfs_file\", \"mnt\", DLOG_MSG, \"dfs_mnt_lookup(%s)\", fullpath);\n    mnt = dfs_mnt_lookup(fullpath);"
+        }
+      ],
+      "description": "fullpath 是规整后的查询路径，由上层调用（可能是服务/脚本）给出，不是 shell 操作者输入；statfs 把它拼进命令行交给 system。",
+      "trigger": "查询路径含 shell 语义字符时，statfs 会让其进入 shell 解析。",
+      "fix": "statfs 只做查询；删除该 system 调用，路径仅用于挂载点查找。"
+    },
+    {
+      "id": "CE-09",
+      "file": "components/finsh/msh_file.c",
+      "function": "msh_exec_script",
+      "expected": "defect",
+      "difficulty": "hard",
+      "marker": "rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", pg_name);",
+      "edits": [
+        {
+          "old": "    rt_free(pg_name);\n    if (fd >= 0)",
+          "new": "    {\n        char cmdbuf[96];\n        rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", pg_name);\n        msh_exec(cmdbuf, rt_strlen(cmdbuf));\n    }\n    rt_free(pg_name);\n    if (fd >= 0)"
+        }
+      ],
+      "description": "pg_name 是在文件系统 /bin 等路径中检索得到的脚本路径，取决于磁盘上的文件布局；这里在真正读取脚本前，把该路径拼进命令行交给 msh_exec，污点要结合文件检索逻辑才能看清。",
+      "trigger": "当磁盘上存在路径含 shell 语义的匹配脚本时，仅解析命令名阶段就会让该路径进入 shell。",
+      "fix": "脚本执行应只按行读取文件内容，不要把检索到的路径本身再交给 msh_exec；删除该 hook。"
+    },
+    {
+      "id": "CE-10",
+      "file": "components/finsh/msh.c",
+      "function": "msh_exec_module",
+      "expected": "defect",
+      "difficulty": "medium",
+      "marker": "rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", pg_name);",
+      "edits": [
+        {
+          "old": "        /* found program */\n        close(fd);\n        dlmodule_exec(pg_name, cmd_line, size);",
+          "new": "        /* found program */\n        close(fd);\n        {\n            char cmdbuf[96];\n            extern int system(const char *command);\n            rt_snprintf(cmdbuf, sizeof(cmdbuf), \"echo %s\", pg_name);\n            system(cmdbuf);\n        }\n        dlmodule_exec(pg_name, cmd_line, size);"
+        }
+      ],
+      "description": "pg_name 是在文件系统 /bin 路径中检索、补全得到的模块文件路径，取决于磁盘内容；加载模块前把它拼进命令行交给 system 执行。",
+      "trigger": "当检索到的模块路径含 shell 语义时，加载流程会让该路径进入 shell 解析。",
+      "fix": "加载模块只需 dlmodule_exec 按路径打开文件；删除该 prelaunch 命令。"
+    },
+    {
+      "id": "CE-C01",
+      "file": "components/finsh/msh_file.c",
+      "function": "cmd_mkfs",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "result = dfs_mkfs(type, argv[1]);",
+      "description": "对照：设备名来自操作者当场键入的 argv，且只作为参数直接传给 dfs_mkfs 文件系统接口，不经过 shell 拼接，无命令注入。"
+    },
+    {
+      "id": "CE-C02",
+      "file": "components/finsh/msh_file.c",
+      "function": "cmd_cp",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "copy(argv[1], argv[2]);",
+      "description": "对照：源/目的路径是操作者输入的 argv，直接调用 copy 文件接口完成，不构造命令行、不进入 shell。"
+    },
+    {
+      "id": "CE-C03",
+      "file": "components/finsh/msh_file.c",
+      "function": "cmd_echo",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "write(fd, argv[1], strlen(argv[1]));",
+      "description": "对照：待写内容和文件名均为操作者 argv，经 open/write 直接写文件，不拼命令、不调用 msh_exec/system。"
+    },
+    {
+      "id": "CE-C04",
+      "file": "components/finsh/msh_file.c",
+      "function": "cmd_umount",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "if (dfs_umount(path, flags) < 0)",
+      "description": "对照：挂载点路径为操作者 argv，直接传给 dfs_umount，不经过 shell，形态与注入点相似但无注入。"
+    },
+    {
+      "id": "CE-C05",
+      "file": "components/finsh/cmd.c",
+      "function": "list_thread",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "const char *item_title = \"thread\";",
+      "description": "对照：遍历注册表中的线程名仅用于 rt_kprintf 打印，不拼进任何命令行，无命令执行路径。"
+    },
+    {
+      "id": "CE-C06",
+      "file": "components/finsh/cmd.c",
+      "function": "list_sem",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "const char *item_title = \"semaphore\";",
+      "description": "对照：信号量名来自注册表，仅打印展示，不进入 shell。"
+    },
+    {
+      "id": "CE-C07",
+      "file": "components/finsh/cmd.c",
+      "function": "list_timer",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "const char *item_title = \"timer\";",
+      "description": "对照：定时器名来自注册表，仅用于列表打印，没有任何命令拼接或执行。"
+    },
+    {
+      "id": "CE-C08",
+      "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+      "function": "dfs_register",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "LOG_D(\"register %s file system.\", fs->fs_ops->name);",
+      "description": "对照：文件系统类型名仅进入日志与链表登记，不构造命令行、不调用 shell。"
+    },
+    {
+      "id": "CE-C09",
+      "file": "components/libc/compilers/common/cstdlib.c",
+      "function": "system",
+      "expected": "control",
+      "difficulty": "hard",
+      "marker": "msh_exec((char *)command, rt_strlen(command));",
+      "description": "对照（设计使然）：这是标准 system() 实现本身，操作者显式调用并自行提供完整命令字符串，等价于主动使用 shell，不属于外部不可信数据被偷偷拼进命令的注入场景，判为安全基准。"
+    },
+    {
+      "id": "CE-C10",
+      "file": "components/finsh/msh.c",
+      "function": "msh_exec",
+      "expected": "control",
+      "difficulty": "hard",
+      "marker": "/* strim the beginning of command */",
+      "description": "对照（设计使然）：这是 shell 的命令分发入口，执行的是操作者在 shell 中键入的命令本身，是预期功能而非把外部数据偷偷注入命令，判为安全基准。"
+    },
+    {
+      "id": "CE-C11",
+      "file": "components/finsh/msh_file.c",
+      "function": "cmd_df",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "df(argv[1]);",
+      "description": "对照：路径为操作者 argv，直接传给 df 查询接口，不拼命令、不进入 shell。"
+    }
+  ]
+}

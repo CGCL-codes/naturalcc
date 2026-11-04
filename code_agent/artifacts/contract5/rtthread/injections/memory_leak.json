@@ -1,0 +1,307 @@
+{
+  "category": "memory_leak",
+  "sites": [
+    {
+      "id": "LEAK-01",
+      "file": "src/ipc.c",
+      "function": "rt_mq_delete",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "    /* free message queue pool */\n    RT_KERNEL_FREE(mq->msg_pool);\n\n    /* delete message queue object */\n    rt_object_delete(&(mq->parent.parent));\n",
+          "new": "    /* delete message queue object */\n    rt_object_delete(&mq->parent.parent);\n"
+        }
+      ],
+      "marker": "rt_object_delete(&mq->parent.parent);",
+      "description": "rt_mq_create() 分配的消息池 mq->msg_pool 在 rt_mq_delete() 中不再释放，只删除了对象本身。",
+      "trigger": "任意 rt_mq_create()+rt_mq_delete() 配对；每次删除动态消息队列泄漏整个消息池。",
+      "fix": "在 rt_object_delete() 之前恢复 RT_KERNEL_FREE(mq->msg_pool)。"
+    },
+    {
+      "id": "LEAK-02",
+      "file": "src/ipc.c",
+      "function": "rt_mb_create",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "        /* delete mailbox object */\n        rt_object_delete(&(mb->parent.parent));\n\n        return RT_NULL;\n    }\n    mb->entry      = 0;\n",
+          "new": "        /* delete mailbox object */\n        rt_object_delete(&(mb->parent.parent));\n\n        return RT_NULL;\n    }\n    /* size is kept in 16 bits, refuse a mailbox whose size would wrap */\n    if (mb->size != size)\n    {\n        rt_object_delete(&(mb->parent.parent));\n\n        return RT_NULL;\n    }\n    mb->entry      = 0;\n"
+        }
+      ],
+      "marker": "if (mb->size != size)",
+      "description": "截断检查放在了 msg_pool 分配之后：size 超过 16 位时删除对象并返回，但已分配的 mb->msg_pool 未释放。",
+      "trigger": "rt_mb_create(name, size, flag) 且 size > 0xFFFF（例如 70000）。",
+      "fix": "把该检查移到 RT_KERNEL_MALLOC 之前，或在返回前 RT_KERNEL_FREE(mb->msg_pool)。"
+    },
+    {
+      "id": "LEAK-03",
+      "file": "src/mempool.c",
+      "function": "rt_mp_create",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "        /* no memory, delete memory pool object */\n        rt_object_delete(&(mp->parent));\n\n        return RT_NULL;\n    }\n\n    mp->block_total_count = block_count;\n",
+          "new": "        /* no memory, delete memory pool object */\n        rt_object_delete(&(mp->parent));\n\n        return RT_NULL;\n    }\n\n    /* the total size must not have wrapped around */\n    if (mp->size / block_count != block_size + sizeof(rt_uint8_t *))\n    {\n        rt_object_delete(&(mp->parent));\n\n        return RT_NULL;\n    }\n\n    mp->block_total_count = block_count;\n"
+        }
+      ],
+      "marker": "if (mp->size / block_count != block_size + sizeof(rt_uint8_t *))",
+      "description": "乘法回绕检查放在 rt_malloc 之后：检查失败时删除对象并返回，但 mp->start_address 指向的堆内存未 rt_free。",
+      "trigger": "block_count * (block_size + sizeof(void*)) 发生回绕（极大的 block_count），rt_malloc 对回绕后的小尺寸成功。",
+      "fix": "把检查移到 rt_malloc 之前，或在 return 前 rt_free(mp->start_address)。"
+    },
+    {
+      "id": "LEAK-04",
+      "file": "components/drivers/ipc/workqueue.c",
+      "function": "rt_workqueue_create",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "        if (queue->work_thread == RT_NULL)\n        {\n            rt_sem_detach(&(queue->sem));\n            RT_KERNEL_FREE(queue);\n            return RT_NULL;\n        }\n",
+          "new": "        if (queue->work_thread == RT_NULL)\n        {\n            rt_sem_detach(&(queue->sem));\n            return RT_NULL;\n        }\n"
+        }
+      ],
+      "marker": "        if (queue->work_thread == RT_NULL)",
+      "description": "工作线程创建失败的错误路径不再 RT_KERNEL_FREE(queue)，已分配的 rt_workqueue 结构丢失。",
+      "trigger": "rt_workqueue_create() 内部 rt_thread_create() 返回 RT_NULL（堆不足或对象分配失败）。",
+      "fix": "在 return RT_NULL 之前恢复 RT_KERNEL_FREE(queue)。"
+    },
+    {
+      "id": "LEAK-05",
+      "file": "components/dfs/dfs_v2/src/dfs_file.c",
+      "function": "copyfile",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "        dfs_file_deinit(&dst_file);\n        dfs_file_close(&src_file);\n        dfs_file_deinit(&src_file);\n        rt_free(block_ptr);\n        rt_kprintf(\"Write %s failed\\n\", dst);\n",
+          "new": "        dfs_file_deinit(&dst_file);\n        dfs_file_close(&src_file);\n        dfs_file_deinit(&src_file);\n        rt_kprintf(\"Write %s failed\\n\", dst);\n"
+        }
+      ],
+      "marker": "rt_kprintf(\"Write %s failed\\n\", dst);",
+      "description": "目标文件打开失败的返回路径不再释放 4 KB 的 block_ptr 缓冲区。",
+      "trigger": "copy(src, dst) 中目标路径不可写（只读文件系统、目录不存在）。",
+      "fix": "在该错误路径加回 rt_free(block_ptr)。"
+    },
+    {
+      "id": "LEAK-06",
+      "file": "components/dfs/dfs_v2/src/dfs_file.c",
+      "function": "dfs_file_stat",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "            char *tmp = dfs_file_realpath(&mnt, fullpath, DFS_REALPATH_EXCEPT_NONE);\n            if (tmp)\n            {\n                rt_free(fullpath);\n                fullpath = tmp;\n            }\n\n            DLOG(msg, \"dfs_file\", \"dentry\", DLOG_MSG, \"dentry = dfs_dentry_lookup(mnt, %s)\", fullpath);\n            dentry = dfs_dentry_lookup(mnt, fullpath, 0);\n            if (dentry)\n            {\n                DLOG(msg, \"dentry\", \"dfs_file\", DLOG_MSG_RET, \"return dentry\");\n                if (mnt->fs_ops->stat)\n                {\n                    DLOG(msg, \"dfs_file\", mnt->fs_ops->name, DLOG_MSG, \"fs_ops->stat(dentry, buf)\");\n\n                    if (dfs_is_mounted(mnt) == 0)\n                    {\n                        ret = mnt->fs_ops->stat(dentry, buf);\n",
+          "new": "            char *tmp = dfs_file_realpath(&mnt, fullpath, DFS_REALPATH_EXCEPT_NONE);\n            if (tmp) fullpath = tmp;\n\n            DLOG(msg, \"dfs_file\", \"dentry\", DLOG_MSG, \"dentry = dfs_dentry_lookup(mnt, %s)\", fullpath);\n            dentry = dfs_dentry_lookup(mnt, fullpath, 0);\n            if (dentry)\n            {\n                DLOG(msg, \"dentry\", \"dfs_file\", DLOG_MSG_RET, \"return dentry\");\n                if (mnt->fs_ops->stat)\n                {\n                    DLOG(msg, \"dfs_file\", mnt->fs_ops->name, DLOG_MSG, \"fs_ops->stat(dentry, buf)\");\n\n                    if (dfs_is_mounted(mnt) == 0)\n                    {\n                        ret = mnt->fs_ops->stat(dentry, buf);\n"
+        }
+      ],
+      "marker": "if (tmp) fullpath = tmp;",
+      "description": "dfs_file_realpath() 返回新分配的解析路径时直接覆盖 fullpath，dfs_normalize_path() 分配的原路径不再释放。",
+      "trigger": "对任何经过符号链接的路径调用 stat()（realpath 返回非空）。",
+      "fix": "覆盖前 rt_free(fullpath)。"
+    },
+    {
+      "id": "LEAK-07",
+      "file": "components/dfs/dfs_v2/src/dfs_file.c",
+      "function": "dfs_file_readlink",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "int dfs_file_readlink(const char *path, char *buf, int bufsize)\n{\n    int ret = -RT_ERROR;\n    char *fullpath = RT_NULL;\n    struct dfs_mnt *mnt = RT_NULL;\n    struct dfs_dentry *dentry = RT_NULL;\n\n    fullpath = dfs_normalize_path(NULL, path);\n    if (fullpath)\n    {\n",
+          "new": "int dfs_file_readlink(const char *path, char *buf, int bufsize)\n{\n    int ret = -RT_ERROR;\n    char *fullpath = RT_NULL;\n    struct dfs_mnt *mnt = RT_NULL;\n    struct dfs_dentry *dentry = RT_NULL;\n\n    fullpath = dfs_normalize_path(NULL, path);\n    if (fullpath)\n    {\n        if (buf == RT_NULL || bufsize <= 0)\n        {\n            return -EINVAL;\n        }\n\n"
+        }
+      ],
+      "marker": "if (buf == RT_NULL || bufsize <= 0)",
+      "description": "参数校验放在 dfs_normalize_path() 分配之后，校验失败直接 return，fullpath 未释放。",
+      "trigger": "readlink(path, NULL, 0) 或 bufsize<=0 的调用。",
+      "fix": "把校验移到分配之前，或 return 前 rt_free(fullpath)。"
+    },
+    {
+      "id": "LEAK-08",
+      "file": "components/dfs/dfs_v2/src/dfs_seq_file.c",
+      "function": "dfs_seq_release",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "        rt_mutex_detach(&seq->lock);\n        if (seq->buf)\n        {\n            rt_free(seq->buf);\n        }\n        rt_free(seq);\n",
+          "new": "        rt_mutex_detach(&seq->lock);\n        seq->buf = RT_NULL;\n        seq->size = 0;\n        rt_free(seq);\n"
+        }
+      ],
+      "marker": "seq->size = 0;",
+      "description": "释放 seq 结构前只把 seq->buf 置空，dfs_seq_read() 中 dfs_seq_alloc() 分配的读缓冲区不再释放。",
+      "trigger": "打开一个 seq 文件并至少 read 一次（分配 buf），然后 close。",
+      "fix": "置空前 rt_free(seq->buf)。"
+    },
+    {
+      "id": "LEAK-09",
+      "file": "components/dfs/dfs_v2/src/dfs_mnt.c",
+      "function": "dfs_mnt_unref",
+      "expected": "defect",
+      "difficulty": "hard",
+      "edits": [
+        {
+          "old": "            /* free full path */\n            rt_free(mnt->fullpath);\n            mnt->fullpath = RT_NULL;\n",
+          "new": "            /* detach full path */\n            mnt->fullpath = RT_NULL;\n"
+        }
+      ],
+      "marker": "mnt->fullpath = RT_NULL;",
+      "description": "引用计数归零释放 mnt 时，dfs_mnt_create() 中 rt_strdup 的 fullpath 不再 rt_free，只置空指针。",
+      "trigger": "umount 任意挂载点使 ref_count 归零（dfs_mnt_destroy → dfs_mnt_unref）。",
+      "fix": "置空前恢复 rt_free(mnt->fullpath)。"
+    },
+    {
+      "id": "LEAK-10",
+      "file": "components/dfs/dfs_v2/src/dfs_pcache.c",
+      "function": "dfs_aspace_release",
+      "expected": "defect",
+      "difficulty": "hard",
+      "edits": [
+        {
+          "old": "            if (aspace->fullpath)\n            {\n                rt_free(aspace->fullpath);\n            }\n            if (aspace->pathname)\n            {\n                rt_free(aspace->pathname);\n            }\n            rt_mutex_detach(&aspace->lock);\n",
+          "new": "            if (aspace->fullpath)\n            {\n                rt_free(aspace->fullpath);\n            }\n            aspace->pathname = RT_NULL;\n            rt_mutex_detach(&aspace->lock);\n"
+        }
+      ],
+      "marker": "aspace->pathname = RT_NULL;",
+      "description": "页缓存地址空间销毁时释放了 fullpath 却只置空 pathname，_dfs_aspace_create() 中 rt_strdup 的 pathname 泄漏。",
+      "trigger": "带页缓存打开文件再关闭/删除，使 aspace 引用归零且无缓存页。",
+      "fix": "置空前恢复 rt_free(aspace->pathname)。"
+    },
+    {
+      "id": "LEAK-C01",
+      "file": "components/dfs/dfs_v2/src/dfs_file.c",
+      "function": "dfs_file_rename",
+      "expected": "control",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    if (old_fullpath && new_fullpath)\n    {\n        struct dfs_dentry *old_dentry, *new_dentry;\n\n        DLOG(msg, \"dfs_file\", \"dentry\", DLOG_MSG, \"dfs_dentry_lookup(mnt, %s)\", old_fullpath);\n        old_dentry = dfs_dentry_lookup(mnt, old_fullpath, 0);\n        DLOG(msg, \"dfs_file\", \"dentry\", DLOG_MSG, \"dfs_dentry_create(%s)\", new_fullpath);\n        new_dentry = dfs_dentry_create(mnt, new_fullpath);\n\n        if (old_dentry && new_dentry)\n        {\n            if (mnt->fs_ops->rename)\n",
+          "new": "    if (old_fullpath && new_fullpath && strcmp(old_fullpath, new_fullpath) == 0)\n    {\n        /* renaming a file onto itself changes nothing */\n        rt_free(old_fullpath);\n        rt_free(new_fullpath);\n        return 0;\n    }\n\n    if (old_fullpath && new_fullpath)\n    {\n        struct dfs_dentry *old_dentry, *new_dentry;\n\n        DLOG(msg, \"dfs_file\", \"dentry\", DLOG_MSG, \"dfs_dentry_lookup(mnt, %s)\", old_fullpath);\n        old_dentry = dfs_dentry_lookup(mnt, old_fullpath, 0);\n        DLOG(msg, \"dfs_file\", \"dentry\", DLOG_MSG, \"dfs_dentry_create(%s)\", new_fullpath);\n        new_dentry = dfs_dentry_create(mnt, new_fullpath);\n\n        if (old_dentry && new_dentry)\n        {\n            if (mnt->fs_ops->rename)\n"
+        }
+      ],
+      "marker": "if (old_fullpath && new_fullpath && strcmp(old_fullpath, new_fullpath) == 0)",
+      "description": "新增的同名重命名早返回在 return 前释放了 old_fullpath 和 new_fullpath，两块堆内存均正确回收；与 LEAK-07 形态相似但安全。"
+    },
+    {
+      "id": "LEAK-C02",
+      "file": "src/ipc.c",
+      "function": "rt_mq_create",
+      "expected": "control",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    mq->max_msgs = max_msgs;\n\n    /* allocate message pool */\n    mq->msg_pool = RT_KERNEL_MALLOC((msg_align_size + sizeof(struct rt_mq_message)) * mq->max_msgs);\n",
+          "new": "    mq->max_msgs = max_msgs;\n\n    /* an empty queue can never deliver a message */\n    if (max_msgs == 0)\n    {\n        rt_object_delete(&(mq->parent.parent));\n\n        return RT_NULL;\n    }\n\n    /* allocate message pool */\n    mq->msg_pool = RT_KERNEL_MALLOC((msg_align_size + sizeof(struct rt_mq_message)) * mq->max_msgs);\n"
+        }
+      ],
+      "marker": "if (max_msgs == 0)",
+      "description": "新增的 max_msgs 校验位于消息池分配之前，返回路径只需 rt_object_delete 即可，无堆内存丢失；msg_pool 分配后由 mq 对象持有，在 rt_mq_delete 释放。"
+    },
+    {
+      "id": "LEAK-C03",
+      "file": "components/dfs/dfs_v2/src/dfs_dentry.c",
+      "function": "_dentry_create",
+      "expected": "control",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "        dentry->pathname = strlen(dentry_path) ? rt_strdup(dentry_path) : rt_strdup(path);\n",
+          "new": "        dentry->pathname = rt_strdup(dentry_path);\n        if (dentry->pathname && dentry->pathname[0] == '\\0')\n        {\n            rt_free(dentry->pathname);\n            dentry->pathname = rt_strdup(path);\n        }\n"
+        }
+      ],
+      "marker": "dentry->pathname = rt_strdup(path);",
+      "description": "看似二次 rt_strdup 覆盖指针，但覆盖前已 rt_free 第一次复制；最终的 pathname 由 dentry 持有并在 dfs_dentry_unref 中释放。"
+    },
+    {
+      "id": "LEAK-C04",
+      "file": "components/dfs/dfs_v2/src/dfs_file.c",
+      "function": "dfs_file_isdir",
+      "expected": "control",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "int dfs_file_isdir(const char *path)\n{\n    int ret = -RT_ERROR;\n    char *fullpath = RT_NULL;\n    struct dfs_mnt *mnt = RT_NULL;\n    struct dfs_dentry *dentry = RT_NULL;\n\n    fullpath = dfs_normalize_path(NULL, path);\n",
+          "new": "int dfs_file_isdir(const char *path)\n{\n    int ret = -RT_ERROR;\n    char *fullpath = RT_NULL;\n    struct dfs_mnt *mnt = RT_NULL;\n    struct dfs_dentry *dentry = RT_NULL;\n\n    if (path == RT_NULL || path[0] == '\\0')\n    {\n        return -EINVAL;\n    }\n\n    fullpath = dfs_normalize_path(NULL, path);\n"
+        }
+      ],
+      "marker": "if (path == RT_NULL || path[0] == '\\0')",
+      "description": "新增参数校验位于 dfs_normalize_path() 分配之前，早返回时尚无堆内存需要释放；后续 fullpath 在函数末尾统一 rt_free。"
+    },
+    {
+      "id": "LEAK-C05",
+      "file": "src/kservice.c",
+      "function": "rt_calloc",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "p = rt_malloc(count * size);",
+      "description": "分配后的指针直接返回给调用者，所有权转移，函数内无需释放。"
+    },
+    {
+      "id": "LEAK-C06",
+      "file": "src/thread.c",
+      "function": "rt_thread_create",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "stack_start = (void *)RT_KERNEL_MALLOC(stack_size);",
+      "description": "栈内存交给 _thread_init() 存入 thread->stack_addr，由线程删除/回收路径释放；分配失败路径也正确删除了对象。"
+    },
+    {
+      "id": "LEAK-C07",
+      "file": "src/ipc.c",
+      "function": "rt_mb_delete",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "RT_KERNEL_FREE(mb->msg_pool);",
+      "description": "删除邮箱时先释放 msg_pool 再删除对象，资源完整回收；与 rt_mq_delete 形态相同。"
+    },
+    {
+      "id": "LEAK-C08",
+      "file": "components/utilities/ulog/ulog.c",
+      "function": "ulog_tag_lvl_filter_set",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "tag_lvl = (ulog_tag_lvl_filter_t)rt_malloc(sizeof(struct ulog_tag_lvl_filter));",
+      "description": "新分配的过滤节点被 rt_slist_append 挂入全局链表，由链表持有，在同函数的删除分支或 ulog_deinit 释放。"
+    },
+    {
+      "id": "LEAK-C09",
+      "file": "components/drivers/serial/dev_serial.c",
+      "function": "rt_serial_open",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "serial->ops->control(serial, RT_DEVICE_CTRL_SET_INT, (void *)RT_DEVICE_FLAG_INT_RX);",
+      "description": "rx_fifo 存入 serial->serial_rx 由设备持有，rt_serial_close 在引用计数归零时释放，不是泄漏。"
+    },
+    {
+      "id": "LEAK-C10",
+      "file": "components/drivers/ipc/pipe.c",
+      "function": "rt_pipe_create",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "pipe = (rt_pipe_t *)rt_malloc(sizeof(rt_pipe_t));",
+      "description": "pipe 结构注册为设备对象并返回给调用者，由 rt_pipe_delete 释放，所有权明确。"
+    },
+    {
+      "id": "LEAK-C11",
+      "file": "components/dfs/dfs_v2/src/dfs_mnt.c",
+      "function": "dfs_mnt_create",
+      "expected": "control",
+      "difficulty": "hard",
+      "marker": "mnt->fullpath = rt_strdup(path);",
+      "description": "fullpath 由 mnt 持有，引用计数归零时在 dfs_mnt_unref 中释放；创建函数本身不负责释放。"
+    },
+    {
+      "id": "LEAK-C12",
+      "file": "components/dfs/dfs_v2/src/dfs_seq_file.c",
+      "function": "dfs_seq_open",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "seq = rt_calloc(1, sizeof(struct dfs_seq_file));",
+      "description": "seq 存入 file->data 由文件对象持有，dfs_seq_release 负责释放。"
+    }
+  ]
+}

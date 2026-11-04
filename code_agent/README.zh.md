@@ -750,22 +750,43 @@ uv run python scripts/benchmark_contract3_independent.py \
 
 ---
 
-## 18. 合同第 5 项 Web Agent 快速测试
+### 合同 5 检测规则
 
-指标 3、指标 5 的完整脚本复现和网页手工演示步骤见 [合同-3-5-Web复现与手工演示.md](合同-3-5-Web复现与手工演示.md)。
+`security_rtos_rules.py` 为四类高危代码增加了面向 RTOS 的检查。原有的 `security_c_rules.py` 只认 libc 写法（`memcpy`、`pthread_mutex_lock`），且只跟踪普通全局标量；而在 RTOS 内核里同样的操作写作 `rt_memcpy`、`rt_spin_lock_irqsave`，共享状态位于通过对象指针访问的字段上，因此原规则在本数据集上一条都报不出来。新模块还能容忍 RT-Thread 宏（`rt_weak`、`rt_inline`）造成的解析错误——改为逐个校验匹配到的构造，而不是丢弃整个函数。
 
-在 `code_agent/` 下按前文配置 OpenRouter / `anthropic/claude-sonnet-4.5` 并启动 Web 服务。另开终端，确保已设置 `OPENROUTER_API_KEY`：
+单独评估静态层（不调模型、不联网）：
+
+```bash
+uv run python scripts/measure_contract5_static.py            # 汇总表
+uv run python scripts/measure_contract5_static.py --misses   # 逐条列出漏报与误报
+```
+
+与合同 3 的边界：这些告警的 `rule_id` 为 `cwe-787`，而合同 3 的本地口径按 CWE 号匹配，因此若告警落在合同 3 的真值函数内会被计为其"字符串溢出"类；合同 3 的 Web 模式只对模型自身按类别受限的预测计分，不受影响。
+
+## 18. 合同第 5 项：操作系统底层程序数据集与 Web Agent 测试
+
+指标 3、指标 5 的完整脚本复现和网页手工演示步骤见 [合同-3-5-Web复现与手工演示.md](合同-3-5-Web复现与手工演示.md)；数据集设计、真值格式与难度调节见 [合同-5-数据集说明.md](合同-5-数据集说明.md)。
+
+合同 5 数据集是一整套操作系统底层程序：RT-Thread v5.2.1 子集（内核 `src/`、finsh 命令行、DFS v2 文件系统、驱动 IPC/串口框架、libc 适配、ulog，约 10 万行源码），在真实函数内人为注入缓冲区溢出、多线程竞争、内存泄漏、命令执行 4 类高危代码各 10 处，并配有外形相似的安全对照函数和未改动的无缺陷文件。工程、`ground_truth.json`（待检哪些文件、每个文件哪处有什么毛病或没有毛病）和 `manifest.json`（全部文件 SHA256）都提交在 `artifacts/contract5/rtthread/dataset/`：
+
+```bash
+uv run python scripts/build_contract5_dataset.py --verify   # 核对已提交的工程与真值散列
+uv run python scripts/build_contract5_dataset.py --check    # 对照固定上游提交校验注入锚点
+uv run python scripts/build_contract5_dataset.py --verify    # 核对工程与真值散列
+```
+
+交付包为 `artifacts/contract5/rtthread/contract5.zip`（约 1.4 MB、344 个文件，含工程、ground truth、使用说明与脚本；已 gitignore，重建命令见 [合同-5-数据集说明.md](合同-5-数据集说明.md) § 3.1）。
+
+在 `code_agent/` 下按前文配置 OpenRouter 并启动 Web 服务（默认 `anthropic/claude-sonnet-4.5`；换更强的 Claude/GPT 模型时用 `--model` 指定，并以同一模型启动后端）。另开终端，确保已设置 `OPENROUTER_API_KEY`：
 
 ```bash
 uv run python scripts/check_openrouter_credits.py
-uv run python scripts/benchmark_contract5_web.py
+uv run python scripts/benchmark_contract5_web.py --print-prompts   # 不联网：打印每个待检文件的提示词
+uv run python scripts/benchmark_contract5_web.py --limit 2         # 低成本冒烟
+uv run python scripts/benchmark_contract5_web.py                   # 全部待检文件，默认续跑
+uv run python scripts/benchmark_contract5_web.py --report-only     # 不联网：重新生成 合同-5-result.md
 ```
 
-脚本通过真实 Web Agent API 对 40 条 CASTLE 样本逐条建立对话、只读审计，不直接请求模型、不执行样本或批准写入/执行。额度不足或队列结束即停止；再次运行跳过已评分样本，包括错误答案。
-
-保留根目录 [合同-5-result.md](合同-5-result.md)（指标与四个范例）、`artifacts/contract5/dataset.json`、`manifest.json` 和 `web-sonnet45/checkpoint.json`（全部预测与冻结配置）。`--report-only` 可离线生成报告。临时 `workspaces/`、`runs/` 和锁文件不纳入 Git；未评分样本的日志须保留至离线解析完成。续跑需保留服务数据库与原配置。
-
-`security_review.py` 提供通用 C 语义复核规则及无长度限制的字面量 `scanf` 候选检测，不是完整分析器。实验冻结产品源码散列，防止混版续跑；同集调优成绩不能作为独立泛化成绩或正式合同验收结论。
 
 ## 18. License
 

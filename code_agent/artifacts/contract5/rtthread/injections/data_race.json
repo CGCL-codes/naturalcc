@@ -1,0 +1,289 @@
+{
+  "category": "data_race",
+  "sites": [
+    {
+      "id": "RACE-01",
+      "file": "src/timer.c",
+      "function": "rt_timer_stop",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "    _timer_remove(timer);\n    /* change status */\n    timer->parent.flag &= ~RT_TIMER_FLAG_ACTIVATED;\n\n    rt_spin_unlock_irqrestore(spinlock, level);\n\n    return RT_EOK;\n}\nRTM_EXPORT(rt_timer_stop);",
+          "new": "    rt_spin_unlock_irqrestore(spinlock, level);\n\n    _timer_remove(timer);\n    /* change status */\n    timer->parent.flag &= ~RT_TIMER_FLAG_ACTIVATED;\n\n    return RT_EOK;\n}\nRTM_EXPORT(rt_timer_stop);"
+        }
+      ],
+      "marker": "/* change status */",
+      "description": "共享状态：定时器所在的全局 timer skip-list 与 timer->parent.flag。自旋锁被提前释放，_timer_remove() 的链表摘除和标志清除落在锁外；另一核的 rt_timer_start/rt_timer_check 可同时操作同一链表。",
+      "trigger": "核A进入 rt_timer_stop 释放 _htimer_lock 后、尚未执行 _timer_remove；核B的 rt_timer_check 在中断里遍历并 _timer_remove 同一 timer，两次 rt_list_remove 交错破坏链表指针。",
+      "fix": "把 rt_spin_unlock_irqrestore 移回 _timer_remove 与标志清除之后，保证链表摘除在锁内完成。"
+    },
+    {
+      "id": "RACE-02",
+      "file": "src/mempool.c",
+      "function": "rt_mp_free",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "    level = rt_spin_lock_irqsave(&(mp->spinlock));\n\n    /* increase the free block count */\n    mp->block_free_count ++;",
+          "new": "    /* increase the free block count */\n    mp->block_free_count ++;\n\n    level = rt_spin_lock_irqsave(&(mp->spinlock));"
+        }
+      ],
+      "marker": "mp->block_free_count ++;",
+      "description": "共享状态：内存池空闲块计数 mp->block_free_count。自增被移到加锁之前，与 rt_mp_alloc 中锁内的 block_free_count-- 构成非原子读改写。",
+      "trigger": "核A rt_mp_free 在锁外执行 ++ 的读改写，核B rt_mp_alloc 持锁执行 --，二者交错丢失一次更新，计数与实际空闲块不符。",
+      "fix": "把 mp->block_free_count ++ 放回 rt_spin_lock_irqsave 之后。"
+    },
+    {
+      "id": "RACE-03",
+      "file": "src/ipc.c",
+      "function": "rt_event_send",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    level = rt_spin_lock_irqsave(&(event->spinlock));\n\n    /* set event */\n    event->set |= set;",
+          "new": "    /* set event */\n    event->set |= set;\n\n    level = rt_spin_lock_irqsave(&(event->spinlock));"
+        }
+      ],
+      "marker": "event->set |= set;",
+      "description": "共享状态：事件集 event->set。置位被移出自旋锁，与另一路 rt_event_send 的置位、或 _rt_event_recv 在 RT_EVENT_FLAG_CLEAR 下的清位发生并发读改写。",
+      "trigger": "两个线程/中断几乎同时 rt_event_send，锁外的 |= 互相覆盖，部分事件位丢失，等待 AND 条件的线程永久挂起。",
+      "fix": "event->set |= set 必须在 rt_spin_lock_irqsave(&(event->spinlock)) 之后执行。"
+    },
+    {
+      "id": "RACE-04",
+      "file": "components/drivers/ipc/workqueue.c",
+      "function": "rt_workqueue_urgent_work",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "    level = rt_spin_lock_irqsave(&(queue->spinlock));\n    /* NOTE: the work MUST be initialized firstly */\n    rt_list_remove(&(work->list));\n    rt_list_insert_after(&queue->work_list, &(work->list));\n\n    rt_completion_done(&(queue->wakeup_completion));\n    rt_spin_unlock_irqrestore(&(queue->spinlock), level);",
+          "new": "    /* NOTE: the work MUST be initialized firstly */\n    rt_list_remove(&(work->list));\n    rt_list_insert_after(&queue->work_list, &(work->list));\n\n    level = rt_spin_lock_irqsave(&(queue->spinlock));\n    rt_completion_done(&(queue->wakeup_completion));\n    rt_spin_unlock_irqrestore(&(queue->spinlock), level);"
+        }
+      ],
+      "marker": "rt_list_insert_after(&queue->work_list, &(work->list));",
+      "description": "共享状态：工作队列 queue->work_list 链表。链表摘除/插入被移到自旋锁之外，与工作线程 _workqueue_thread_entry 持锁取节点并发。",
+      "trigger": "提交者在锁外 rt_list_insert_after，工作线程此刻持锁 rt_list_remove 队首，两侧同时改写相邻节点的 next/prev，链表断裂或丢工作项。",
+      "fix": "把 rt_spin_lock_irqsave 移回 rt_list_remove 之前，让链表操作都在锁内。"
+    },
+    {
+      "id": "RACE-05",
+      "file": "components/drivers/ipc/workqueue.c",
+      "function": "_workqueue_cancel_work",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "    level = rt_spin_lock_irqsave(&(queue->spinlock));\n    rt_list_remove(&(work->list));\n    work->flags     = 0;\n    err             = queue->work_current != work ? RT_EOK : -RT_EBUSY;\n    work->workqueue = RT_NULL;\n    rt_spin_unlock_irqrestore(&(queue->spinlock), level);",
+          "new": "    level = rt_spin_lock_irqsave(&(queue->spinlock));\n    err             = queue->work_current != work ? RT_EOK : -RT_EBUSY;\n    rt_spin_unlock_irqrestore(&(queue->spinlock), level);\n\n    rt_list_remove(&(work->list));\n    work->flags     = 0;\n    work->workqueue = RT_NULL;"
+        }
+      ],
+      "marker": "err             = queue->work_current != work ? RT_EOK : -RT_EBUSY;",
+      "description": "共享状态：work->list 链表与 work->flags/workqueue 字段。取消时的链表摘除与字段清零被移出锁，与工作线程取节点、其它提交者并发。",
+      "trigger": "核A锁外 rt_list_remove(&work->list) 的同时，工作线程持锁从 work_list 摘除同一 work，相邻节点指针被双方交错改写。",
+      "fix": "链表摘除和 flags/workqueue 清零应保留在自旋锁临界区内。"
+    },
+    {
+      "id": "RACE-06",
+      "file": "src/thread.c",
+      "function": "rt_thread_wakeup_set",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    rt_sched_lock(&slvl);\n    thread->wakeup_handle.func = func;\n    thread->wakeup_handle.user_data = user_data;\n    rt_sched_unlock(slvl);",
+          "new": "    thread->wakeup_handle.func = func;\n    rt_sched_lock(&slvl);\n    thread->wakeup_handle.user_data = user_data;\n    rt_sched_unlock(slvl);"
+        }
+      ],
+      "marker": "thread->wakeup_handle.func = func;",
+      "description": "共享状态：thread->wakeup_handle 的 func 与 user_data。func 的写入被移出调度锁，而 rt_thread_wakeup 在调度锁内读取 func 并清空后回调。",
+      "trigger": "核A锁外写 wakeup_handle.func，核B rt_thread_wakeup 持调度锁读取到旧/半更新的 func，并以不匹配的 user_data 回调，出现指针与数据错配。",
+      "fix": "func 与 user_data 两个字段的写入都应放在 rt_sched_lock/unlock 之间。"
+    },
+    {
+      "id": "RACE-07",
+      "file": "src/ipc.c",
+      "function": "rt_sem_release",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    if (!rt_list_isempty(&sem->parent.suspend_thread))\n    {\n        /* resume the suspended thread */\n        rt_susp_list_dequeue(&(sem->parent.suspend_thread), RT_EOK);\n        need_schedule = RT_TRUE;\n    }\n    else\n    {\n        if(sem->value < sem->max_value)\n        {\n            sem->value ++; /* increase value */\n        }\n        else\n        {\n            rt_spin_unlock_irqrestore(&(sem->spinlock), level);\n            return -RT_EFULL; /* value overflowed */\n        }\n    }\n\n    rt_spin_unlock_irqrestore(&(sem->spinlock), level);",
+          "new": "    if (!rt_list_isempty(&sem->parent.suspend_thread))\n    {\n        /* resume the suspended thread */\n        rt_susp_list_dequeue(&(sem->parent.suspend_thread), RT_EOK);\n        need_schedule = RT_TRUE;\n        rt_spin_unlock_irqrestore(&(sem->spinlock), level);\n    }\n    else\n    {\n        if(sem->value < sem->max_value)\n        {\n            rt_spin_unlock_irqrestore(&(sem->spinlock), level);\n            sem->value ++; /* increase value */\n        }\n        else\n        {\n            rt_spin_unlock_irqrestore(&(sem->spinlock), level);\n            return -RT_EFULL; /* value overflowed */\n        }\n    }"
+        }
+      ],
+      "marker": "sem->value ++; /* increase value */",
+      "description": "共享状态：信号量计数 sem->value。自旋锁在自增前被释放，sem->value++ 落在锁外，与另一路 rt_sem_release 的自增、_rt_sem_take 锁内的自减并发。",
+      "trigger": "两个线程同时 rt_sem_release：都在锁外执行 value 的读改写，一次 ++ 被覆盖，信号量计数比实际释放次数少，等待线程饿死。",
+      "fix": "保留函数末尾统一的 rt_spin_unlock_irqrestore，使 sem->value++ 在锁内完成，不要在各分支提前解锁。"
+    },
+    {
+      "id": "RACE-08",
+      "file": "src/memheap.c",
+      "function": "rt_memheap_free",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    if (heap->locked == RT_FALSE)\n    {\n        /* lock memheap */\n        result = rt_sem_take(&(heap->lock), RT_WAITING_FOREVER);\n        if (result != RT_EOK)\n        {\n            rt_set_errno(result);\n\n            return ;\n        }\n    }\n\n    /* Mark the memory as available. */\n    header_ptr->magic = (RT_MEMHEAP_MAGIC | RT_MEMHEAP_FREED);\n    /* Adjust the available number of bytes. */\n    heap->available_size += MEMITEM_SIZE(header_ptr);",
+          "new": "    /* Mark the memory as available. */\n    header_ptr->magic = (RT_MEMHEAP_MAGIC | RT_MEMHEAP_FREED);\n    /* Adjust the available number of bytes. */\n    heap->available_size += MEMITEM_SIZE(header_ptr);\n\n    if (heap->locked == RT_FALSE)\n    {\n        /* lock memheap */\n        result = rt_sem_take(&(heap->lock), RT_WAITING_FOREVER);\n        if (result != RT_EOK)\n        {\n            rt_set_errno(result);\n\n            return ;\n        }\n    }"
+        }
+      ],
+      "marker": "heap->available_size += MEMITEM_SIZE(header_ptr);",
+      "description": "共享状态：memheap 块头 magic 与 heap->available_size。标记空闲与可用字节累加被移到获取 heap->lock 之前，脱离互斥保护。",
+      "trigger": "两个线程并发 rt_memheap_free：都在取锁前把块标记为 FREED 并累加 available_size，随后合并相邻块，空闲链表与计数被重复修改，等同双重释放。",
+      "fix": "magic 置位与 available_size 更新必须在 rt_sem_take(&(heap->lock)) 成功之后进行。"
+    },
+    {
+      "id": "RACE-09",
+      "file": "src/ipc.c",
+      "function": "rt_mutex_release",
+      "expected": "defect",
+      "difficulty": "hard",
+      "edits": [
+        {
+          "old": "    rt_spin_lock(&(mutex->spinlock));\n\n    LOG_D(\"mutex_release:current thread %s, hold: %d\",\n          thread->parent.name, mutex->hold);\n\n    RT_OBJECT_HOOK_CALL(rt_object_put_hook, (&(mutex->parent.parent)));\n\n    /* mutex only can be released by owner */\n    if (thread != mutex->owner)\n    {\n        thread->error = -RT_ERROR;\n        rt_spin_unlock(&(mutex->spinlock));\n\n        return -RT_ERROR;\n    }\n\n    /* decrease hold */\n    mutex->hold --;",
+          "new": "    /* decrease hold */\n    mutex->hold --;\n\n    rt_spin_lock(&(mutex->spinlock));\n\n    LOG_D(\"mutex_release:current thread %s, hold: %d\",\n          thread->parent.name, mutex->hold);\n\n    RT_OBJECT_HOOK_CALL(rt_object_put_hook, (&(mutex->parent.parent)));\n\n    /* mutex only can be released by owner */\n    if (thread != mutex->owner)\n    {\n        thread->error = -RT_ERROR;\n        rt_spin_unlock(&(mutex->spinlock));\n\n        return -RT_ERROR;\n    }"
+        }
+      ],
+      "marker": "mutex->hold --;",
+      "description": "共享状态：互斥量递归持有计数 mutex->hold 与 owner。hold-- 被移到获取 mutex->spinlock 之前，递归计数脱离锁保护。",
+      "trigger": "持锁线程在两个核上交错进出同一递归互斥（或与 _rt_mutex_take 的 hold++ 并发），锁外的 hold-- 与锁内的 hold++ 读改写丢失，hold 计数错乱导致提前把 owner 置空。",
+      "fix": "mutex->hold-- 必须在 rt_spin_lock(&(mutex->spinlock)) 之后、且通过 owner 校验后执行。"
+    },
+    {
+      "id": "RACE-10",
+      "file": "src/ipc.c",
+      "function": "_rt_mutex_take",
+      "expected": "defect",
+      "difficulty": "hard",
+      "edits": [
+        {
+          "old": "        if (mutex->hold < RT_MUTEX_HOLD_MAX)\n        {\n            /* it's the same thread */\n            mutex->hold ++;\n        }\n        else\n        {\n            rt_spin_unlock(&(mutex->spinlock));\n            return -RT_EFULL; /* value overflowed */\n        }",
+          "new": "        if (mutex->hold < RT_MUTEX_HOLD_MAX)\n        {\n            /* it's the same thread */\n            rt_spin_unlock(&(mutex->spinlock));\n            mutex->hold ++;\n            return RT_EOK;\n        }\n        else\n        {\n            rt_spin_unlock(&(mutex->spinlock));\n            return -RT_EFULL; /* value overflowed */\n        }"
+        }
+      ],
+      "marker": "mutex->hold ++;",
+      "description": "共享状态：互斥量递归持有计数 mutex->hold。同一 owner 递归获取时，自旋锁在 hold++ 之前被释放，递归自增落在锁外。",
+      "trigger": "同一线程在一个核递归 rt_mutex_take 时锁外执行 hold++，另一核的 rt_mutex_release 持锁执行 hold--，两次读改写交错，hold 计数与实际加锁层数不符，后续解锁把仍被持有的锁错误释放给他人。",
+      "fix": "mutex->hold++ 应在持有 mutex->spinlock 时完成，不要在自增前解锁。"
+    },
+    {
+      "id": "RACE-C01",
+      "file": "src/timer.c",
+      "function": "rt_timer_detach",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "rt_object_detach(&(timer->parent));",
+      "description": "对照：链表摘除与标志清除全程在 _timerlock_idx 自旋锁内，解锁后才 rt_object_detach，无共享链表的锁外访问，安全。"
+    },
+    {
+      "id": "RACE-C02",
+      "file": "src/ipc.c",
+      "function": "rt_sem_delete",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "rt_object_delete(&(sem->parent.parent));",
+      "description": "对照：唤醒挂起链表在 sem->spinlock 内完成，解锁后才 rt_object_delete，删除时对象已不再被其它取操作引用，安全。"
+    },
+    {
+      "id": "RACE-C03",
+      "file": "components/drivers/ipc/dataqueue.c",
+      "function": "rt_data_queue_peek",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "return -RT_EEMPTY;",
+      "description": "对照：对 get_index 和队列项的读取在 queue->spinlock 内完成，is_empty 的快速判定只是提前退出，不改共享状态，安全。"
+    },
+    {
+      "id": "RACE-C04",
+      "file": "src/thread.c",
+      "function": "rt_thread_yield",
+      "expected": "control",
+      "difficulty": "easy",
+      "marker": "rt_sched_thread_yield(rt_thread_self());",
+      "description": "对照：让出操作全部在 rt_sched_lock/rt_sched_unlock_n_resched 调度锁内进行，只操作当前线程自身调度状态，安全。"
+    },
+    {
+      "id": "RACE-C05",
+      "file": "components/drivers/ipc/pipe.c",
+      "function": "rt_pipe_write",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "int len = rt_ringbuffer_put(pipe->fifo, &pbuf[write_bytes], count - write_bytes);",
+      "description": "对照：对共享 fifo 的写入全程持 pipe->lock 互斥量，循环内的 write_bytes、len 均为栈上私有变量，安全。"
+    },
+    {
+      "id": "RACE-C06",
+      "file": "components/utilities/ulog/ulog.c",
+      "function": "ulog_tag_lvl_filter_get",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "level = tag_lvl->level;",
+      "description": "对照：遍历 tag 级别过滤链表时由 output_lock/output_unlock 保护，node/level 为栈上私有，安全。"
+    },
+    {
+      "id": "RACE-C07",
+      "file": "src/timer.c",
+      "function": "rt_timer_next_timeout_tick",
+      "expected": "control",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    return htimer_next_timeout < stimer_next_timeout ? htimer_next_timeout : stimer_next_timeout;",
+          "new": "    rt_tick_t next_timeout = htimer_next_timeout < stimer_next_timeout ? htimer_next_timeout : stimer_next_timeout;\n    return next_timeout;"
+        }
+      ],
+      "marker": "rt_tick_t next_timeout = htimer_next_timeout < stimer_next_timeout",
+      "description": "对照（已改写）：两个下一超时值在各自自旋锁内读入栈上局部变量，解锁后仅对私有局部做比较并存入新局部 next_timeout，没有锁外共享访问，安全。"
+    },
+    {
+      "id": "RACE-C08",
+      "file": "components/drivers/ipc/workqueue.c",
+      "function": "rt_work_init",
+      "expected": "control",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    work->workqueue = RT_NULL;\n    work->flags     = 0;\n    work->type      = 0;",
+          "new": "    work->workqueue = RT_NULL;\n    work->type      = 0;\n    work->flags     = 0;"
+        }
+      ],
+      "marker": "work->type      = 0;",
+      "description": "对照（已改写）：初始化发生在 work 被提交到任何队列之前，对象尚未对其它线程可见，调换 type 与 flags 的赋值顺序不引入竞争，安全。"
+    },
+    {
+      "id": "RACE-C10",
+      "file": "components/utilities/ulog/ulog.c",
+      "function": "ulog_global_filter_lvl_set",
+      "expected": "control",
+      "difficulty": "hard",
+      "edits": [
+        {
+          "old": "    ulog.filter.level = level;",
+          "new": "    rt_uint32_t new_level = level;\n    ulog.filter.level = new_level;"
+        }
+      ],
+      "marker": "ulog.filter.level = new_level;",
+      "description": "对照（已改写）：全局过滤级别是单字配置项，无锁的单次对齐写入在目标架构上是原子的，读取方只读该字；经局部变量中转后仍是一次写入，看似无锁实则安全。"
+    },
+    {
+      "id": "RACE-C11",
+      "file": "src/mempool.c",
+      "function": "rt_mp_init",
+      "expected": "control",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    mp->block_list = block_ptr;\n    rt_spin_lock_init(&(mp->spinlock));\n\n    return RT_EOK;",
+          "new": "    rt_spin_lock_init(&(mp->spinlock));\n    mp->block_list = block_ptr;\n\n    return RT_EOK;"
+        }
+      ],
+      "marker": "mp->size = RT_ALIGN_DOWN(size, RT_ALIGN_SIZE);",
+      "description": "对照（已改写）：内存池初始化在对象被使用前完成，调换 block_list 赋值与自旋锁初始化的顺序不影响并发安全，安全。"
+    }
+  ]
+}

@@ -1,0 +1,293 @@
+{
+  "category": "buffer_overflow",
+  "sites": [
+    {
+      "id": "BOF-01",
+      "file": "src/kservice.c",
+      "function": "rt_kprintf",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "    length = rt_vsnprintf(rt_log_buf, sizeof(rt_log_buf) - 1, fmt, args);",
+          "new": "    length = rt_vsnprintf(rt_log_buf, sizeof(rt_log_buf) + 64, fmt, args);"
+        }
+      ],
+      "marker": "    length = rt_vsnprintf(rt_log_buf, sizeof(rt_log_buf) + 64, fmt, args);",
+      "description": "rt_kprintf 把格式化结果写入固定大小的静态缓冲 rt_log_buf[RT_CONSOLEBUF_SIZE]，却把长度上限写成 sizeof(rt_log_buf)+64，使 rt_vsnprintf 可向该缓冲写入超出其容量 64 字节的数据，造成静态缓冲区越界写。",
+      "trigger": "任意一次 rt_kprintf 的格式化输出长度超过 RT_CONSOLEBUF_SIZE-1（例如打印较长的用户字符串或路径）即触发。",
+      "fix": "长度上限应为 sizeof(rt_log_buf)-1，并对返回长度做 RT_CONSOLEBUF_SIZE-1 封顶。"
+    },
+    {
+      "id": "BOF-02",
+      "file": "src/object.c",
+      "function": "rt_object_get_name",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "        (void) rt_strncpy(name, obj_name, (rt_size_t)name_size);",
+          "new": "        (void) rt_strcpy(name, obj_name);"
+        }
+      ],
+      "marker": "        (void) rt_strcpy(name, obj_name);",
+      "description": "rt_object_get_name 收到调用方缓冲 name 及其容量 name_size，却用不带长度的 rt_strcpy 拷贝对象名，忽略了 name_size，当对象名长度接近 RT_NAME_MAX 而调用方缓冲较小时越界写。",
+      "trigger": "调用方传入的 name 缓冲小于对象名实际长度时触发。",
+      "fix": "保留 rt_strncpy(name, obj_name, name_size) 的带长度拷贝。"
+    },
+    {
+      "id": "BOF-03",
+      "file": "components/finsh/shell.c",
+      "function": "finsh_get_prompt",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "        strncpy(finsh_prompt, finsh_prompt_custom, sizeof(finsh_prompt) - 1);",
+          "new": "        strcpy(finsh_prompt, finsh_prompt_custom);"
+        }
+      ],
+      "marker": "        strcpy(finsh_prompt, finsh_prompt_custom);",
+      "description": "finsh_get_prompt 把用户通过 finsh_set_prompt 设置的自定义提示符用无界 strcpy 拷入固定缓冲 finsh_prompt[RT_CONSOLEBUF_SIZE+1]，自定义串长度不受限，可越界写该栈/静态缓冲。",
+      "trigger": "通过 finsh_set_prompt 设置长度超过 RT_CONSOLEBUF_SIZE 的提示符后，下一次取提示符即触发。",
+      "fix": "使用 strncpy(finsh_prompt, finsh_prompt_custom, sizeof(finsh_prompt) - 1) 并保证结尾 '\\0'。"
+    },
+    {
+      "id": "BOF-04",
+      "file": "components/drivers/serial/dev_serial.c",
+      "function": "_serial_int_rx",
+      "expected": "defect",
+      "difficulty": "easy",
+      "edits": [
+        {
+          "old": "        ch = rx_fifo->buffer[rx_fifo->get_index];\n        rx_fifo->get_index += 1;\n        if (rx_fifo->get_index >= serial->config.bufsz) rx_fifo->get_index = 0;",
+          "new": "        ch = rx_fifo->buffer[rx_fifo->get_index];\n        rx_fifo->get_index += 1;\n        if (rx_fifo->get_index > serial->config.bufsz) rx_fifo->get_index = 0;"
+        }
+      ],
+      "marker": "        if (rx_fifo->get_index > serial->config.bufsz) rx_fifo->get_index = 0;",
+      "description": "软件接收 FIFO 的读指针回绕判断由 >= 改成 >，当 get_index 自增到等于 bufsz 时不再归零，下一轮用 rx_fifo->buffer[get_index] 读取时越界访问 buffer[bufsz]。",
+      "trigger": "接收数据量跨越一次整缓冲回绕（get_index 递增到 bufsz）时触发。",
+      "fix": "回绕判断应为 get_index >= serial->config.bufsz。"
+    },
+    {
+      "id": "BOF-05",
+      "file": "components/drivers/ipc/ringbuffer.c",
+      "function": "rt_ringbuffer_put",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    /* drop some data */\n    if (size < length)\n        length = size;",
+          "new": "    /* caller guarantees length fits */\n    (void)size;"
+        }
+      ],
+      "marker": "    /* caller guarantees length fits */",
+      "description": "rt_ringbuffer_put 原本在剩余空间 size 小于请求长度 length 时把 length 截断到 size；删除该截断后，后续 rt_memcpy 按调用方 length 写入，可超过环形缓冲剩余容量造成越界写。",
+      "trigger": "调用方请求写入的 length 大于当前剩余空间 size 时触发。",
+      "fix": "恢复 if (size < length) length = size; 的截断。"
+    },
+    {
+      "id": "BOF-06",
+      "file": "src/ipc.c",
+      "function": "_rt_mq_send_wait",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    /* greater than one message size */\n    if (size > mq->msg_size)\n        return -RT_ERROR;\n\n    /* initialize delta tick */",
+          "new": "    /* greater than one message size */\n    if (size > mq->msg_size + sizeof(struct rt_mq_message))\n        return -RT_ERROR;\n\n    /* initialize delta tick */"
+        }
+      ],
+      "marker": "    if (size > mq->msg_size + sizeof(struct rt_mq_message))",
+      "description": "消息大小校验被放宽为 size > mq->msg_size + sizeof(struct rt_mq_message)，允许 size 超过为消息体实际分配的 msg_size 字节，随后 rt_memcpy(GET_MESSAGEBYTE_ADDR(msg), buffer, size) 越界写入消息池。",
+      "trigger": "发送的消息长度介于 msg_size 与 msg_size+sizeof(消息头) 之间时触发。",
+      "fix": "校验应为 size > mq->msg_size。"
+    },
+    {
+      "id": "BOF-07",
+      "file": "src/ipc.c",
+      "function": "_rt_mq_recv",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    if (len > size)\n        len = size;\n    /* copy message */\n    rt_memcpy(buffer, GET_MESSAGEBYTE_ADDR(msg), len);",
+          "new": "    /* copy message */\n    rt_memcpy(buffer, GET_MESSAGEBYTE_ADDR(msg), len);"
+        }
+      ],
+      "marker": "    rt_memcpy(buffer, GET_MESSAGEBYTE_ADDR(msg), len);",
+      "description": "接收时删除了 len = min(len, size) 的截断，直接按消息自身长度 len 拷入调用方缓冲 buffer；当入队消息长度大于接收方提供的 size 时越界写接收缓冲。",
+      "trigger": "接收方传入的 size 小于队列中实际消息长度时触发。",
+      "fix": "拷贝前恢复 if (len > size) len = size; 的截断。"
+    },
+    {
+      "id": "BOF-08",
+      "file": "components/finsh/msh.c",
+      "function": "msh_auto_complete_path",
+      "expected": "defect",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "            rt_memcpy(index, full_path, min_length);",
+          "new": "            rt_memcpy(index, full_path, rt_strlen(full_path) + 1);"
+        }
+      ],
+      "marker": "            rt_memcpy(index, full_path, rt_strlen(full_path) + 1);",
+      "description": "补全路径时把候选目录项名 full_path 以其完整长度拷回 index（指向调用方 path 缓冲的中段），而非受控的公共前缀长度 min_length；当候选名较长而 path 剩余空间不足时越界写命令行缓冲。",
+      "trigger": "Tab 补全的候选文件名长度超过命令缓冲 path 中 index 之后的剩余空间时触发。",
+      "fix": "拷贝长度应为受 path 容量约束的 min_length，并由调用方保证 path 足够大。"
+    },
+    {
+      "id": "BOF-09",
+      "file": "components/dfs/dfs_v2/src/dfs.c",
+      "function": "dfs_normalize_path",
+      "expected": "defect",
+      "difficulty": "hard",
+      "edits": [
+        {
+          "old": "        path_len = strlen(directory) + strlen(filename) + 2;",
+          "new": "        path_len = strlen(directory) + strlen(filename) + 1;"
+        }
+      ],
+      "marker": "        path_len = strlen(directory) + strlen(filename) + 1;",
+      "description": "为拼接 \"目录/文件\" 分配的 path_len 少算 1 字节（应为 +2：一个 '/' 加结尾 '\\0'），而随后的 rt_snprintf 仍以 strlen(directory)+strlen(filename)+2 为长度上限写入该堆缓冲，造成 1 字节堆越界写。需要对照分配长度与 snprintf 的长度参数才能发现。",
+      "trigger": "对任一相对路径做归一化时，拼接结果恰好填满缓冲即发生尾字节越界。",
+      "fix": "分配长度应为 strlen(directory)+strlen(filename)+2，与 rt_snprintf 的长度参数一致。"
+    },
+    {
+      "id": "BOF-10",
+      "file": "components/finsh/shell.c",
+      "function": "finsh_thread_entry",
+      "expected": "defect",
+      "difficulty": "hard",
+      "edits": [
+        {
+          "old": "        /* it's a large line, discard it */\n        if (shell->line_position >= FINSH_CMD_SIZE)\n            shell->line_position = 0;",
+          "new": "        /* it's a large line, discard it */\n        if (shell->line_position > FINSH_CMD_SIZE)\n            shell->line_position = 0;"
+        },
+        {
+          "old": "        shell->line_position ++;\n        shell->line_curpos++;\n        if (shell->line_position >= FINSH_CMD_SIZE)\n        {\n            /* clear command line */",
+          "new": "        shell->line_position ++;\n        shell->line_curpos++;\n        if (shell->line_position >= FINSH_CMD_SIZE + 1)\n        {\n            /* clear command line */"
+        }
+      ],
+      "marker": "        if (shell->line_position > FINSH_CMD_SIZE)",
+      "description": "命令行输入缓冲 shell->line[FINSH_CMD_SIZE+1] 的两处越界保护被同时放宽：前置丢弃判断由 >= 改为 >，尾部清行判断由 >= 改为 >= FINSH_CMD_SIZE+1，使 line_position 可达到 FINSH_CMD_SIZE+1，随后以该下标写字符时越界。需跨两处保护联立分析。",
+      "trigger": "持续输入超过 FINSH_CMD_SIZE 个字符且不含换行时触发。",
+      "fix": "两处判断都应为 line_position >= FINSH_CMD_SIZE。"
+    },
+    {
+      "id": "BOF-C01",
+      "file": "src/object.c",
+      "function": "rt_object_init",
+      "expected": "control",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    rt_strncpy(object->name, name, RT_NAME_MAX);  /* copy name */",
+          "new": "    rt_strncpy(object->name, name, RT_NAME_MAX - 1); /* copy name */\n    object->name[RT_NAME_MAX - 1] = '\\0';"
+        }
+      ],
+      "marker": "    object->name[RT_NAME_MAX - 1] = '\\0';",
+      "description": "对照项：显式写 object->name[RT_NAME_MAX-1] 看似在数组末尾写入可疑，但下标 RT_NAME_MAX-1 正是 name[RT_NAME_MAX] 的最后合法元素，且拷贝长度同步收窄为 RT_NAME_MAX-1，安全无越界。"
+    },
+    {
+      "id": "BOF-C02",
+      "file": "components/drivers/ipc/ringbuffer.c",
+      "function": "rt_ringbuffer_get",
+      "expected": "control",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    /* less data */\n    if (size < length)\n        length = size;",
+          "new": "    /* less data */\n    if (size < length)\n        length = size;\n    RT_ASSERT(length <= rb->buffer_size);"
+        }
+      ],
+      "marker": "    RT_ASSERT(length <= rb->buffer_size);",
+      "description": "对照项：新增断言看似提示长度可能超界，但前面已把 length 截断到可读数据量 size（不超过 buffer_size），后续按镜像分段拷贝均在界内，无越界。"
+    },
+    {
+      "id": "BOF-C03",
+      "file": "components/dfs/dfs_v2/src/dfs_posix.c",
+      "function": "getcwd",
+      "expected": "control",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "    /* copy to buf parameter */\n    if (buf)\n    {\n        rt_strncpy(buf, dir_buf, size);\n    }",
+          "new": "    /* copy to buf parameter */\n    if (buf)\n    {\n        rt_strncpy(buf, dir_buf, size);\n        if (size > 0) buf[size - 1] = '\\0';\n    }"
+        }
+      ],
+      "marker": "        if (size > 0) buf[size - 1] = '\\0';",
+      "description": "对照项：对 buf[size-1] 的写入看似可疑，但 size 是调用方给出的 buf 容量，下标 size-1 恒在界内，这里只是补一个结尾 '\\0'，安全。"
+    },
+    {
+      "id": "BOF-C04",
+      "file": "components/finsh/msh.c",
+      "function": "msh_split",
+      "expected": "control",
+      "difficulty": "medium",
+      "edits": [
+        {
+          "old": "            if (position >= length) break;\n        }\n    }\n\n    return argc;\n}",
+          "new": "            if (position >= length) break;\n        }\n    }\n\n    RT_ASSERT(argc <= FINSH_ARG_MAX);\n    return argc;\n}"
+        }
+      ],
+      "marker": "    RT_ASSERT(argc <= FINSH_ARG_MAX);",
+      "description": "对照项：断言看似暗示 argv 可能越界，但循环内 argc 达到 FINSH_ARG_MAX 即 break，argv 写入下标始终小于 FINSH_ARG_MAX，安全无越界。"
+    },
+    {
+      "id": "BOF-C05",
+      "file": "components/drivers/ipc/ringbuffer.c",
+      "function": "rt_ringbuffer_put_force",
+      "expected": "control",
+      "difficulty": "hard",
+      "marker": "        ptr = &ptr[length - rb->buffer_size];",
+      "description": "对照项：当 length 超过整个 buffer_size 时先把源指针前移并把 length 截到 buffer_size，再做镜像分段拷贝，所有 rt_memcpy 长度都受 buffer_size 约束，指针运算虽复杂但无越界。"
+    },
+    {
+      "id": "BOF-C06",
+      "file": "src/object.c",
+      "function": "rt_object_allocate",
+      "expected": "control",
+      "difficulty": "hard",
+      "marker": "    rt_memset(object, 0x0, information->object_size);",
+      "description": "对照项：rt_object_allocate 先 rt_memset 清零整块对象内存再用 rt_strncpy 拷 RT_NAME_MAX-1 字节到 name[RT_NAME_MAX]，看似可能缺结尾符，但清零保证末字节恒为 '\\0'，安全无越界。"
+    },
+    {
+      "id": "BOF-C07",
+      "file": "src/kservice.c",
+      "function": "rt_backtrace_to_buffer",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "        *buffer++ = (rt_ubase_t)frame->pc;",
+      "description": "对照项：循环内自增指针写入 *buffer++ 看似危险，但写入受 while (nesting < buflen) 约束，且结尾的 *buffer = RT_NULL 仅在 nesting < buflen 时执行，均在调用方给定的 buflen 范围内，无越界。"
+    },
+    {
+      "id": "BOF-C08",
+      "file": "components/drivers/ipc/ringbuffer.c",
+      "function": "rt_ringbuffer_peek",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "    *ptr = &rb->buffer_ptr[rb->read_index];",
+      "description": "对照项：返回指向内部缓冲的指针并推进 read_index，看似可能越界，但 read_index 始终小于 buffer_size，返回的可读长度也不超过到缓冲末尾的距离，调用方据返回长度读取即安全。"
+    },
+    {
+      "id": "BOF-C09",
+      "file": "components/dfs/dfs_v2/src/dfs.c",
+      "function": "dfs_subdir",
+      "expected": "control",
+      "difficulty": "hard",
+      "marker": "    dir = filename + strlen(directory);",
+      "description": "对照项：dir = filename + strlen(directory) 的指针算术看似可能越过 filename 末尾，但函数开头已判定 strlen(filename) != strlen(directory)，且调用约定保证 directory 是 filename 的前缀，dir 仍落在 filename 串内，安全。"
+    },
+    {
+      "id": "BOF-C10",
+      "file": "src/ipc.c",
+      "function": "rt_mq_urgent",
+      "expected": "control",
+      "difficulty": "medium",
+      "marker": "    if (size > mq->msg_size)",
+      "description": "对照项：rt_mq_urgent 在拷贝前用 size > mq->msg_size 正确校验消息长度，随后的 rt_memcpy 写入长度不超过为消息体分配的 msg_size 字节，无越界。"
+    }
+  ]
+}

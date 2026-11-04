@@ -1,342 +1,151 @@
-# 合同第 5 项：Web Agent 实测结果
+# 合同第 5 项：操作系统底层程序高危代码检测实测结果
 
-更新时间（UTC）：2026-09-26T06:42:37.925053+00:00
+更新时间（UTC）：2026-11-04T12:11:02.962449+00:00
 
-整体文件级正确率：**92.50% (37/40)**。已有效评分 **40/40** 条，已尝试 40 条；已尝试但未评分 0 条。
+> **本轮不是合同成绩。** 使用的是 `deepseek/deepseek-chat`，并非合同要求的 Claude/GPT 级模型，本轮仅用于验证数据集与测试链路（提示词、读取覆盖、JSON 解析、site 计分、报告生成）是否正确。合同成绩须用 `anthropic/claude-sonnet-4.5` 或更强的 Claude/GPT 模型重跑，结果写入 `web-<model>/` 独立目录。
 
-**性质：同一数据集上的调优后复测，按原始标签计分；不是独立泛化成绩或正式合同验收。**
+数据集：RT-Thread v5.2.1（提交 `97893c004c65`）子集，332 个文件、源码 108524 行；待检文件 34 个、合计 29821 行；每类注入缺陷 10 处，共 40 处缺陷 + 43 处安全对照。数据集与真值见 `artifacts/contract5/rtthread/dataset/`，构建方法见 `scripts/build_contract5_dataset.py`。
 
-状态：样本队列已处理完毕（未评分项见进度表）。
+模型：OpenRouter / `deepseek/deepseek-chat`；状态：待检文件队列已处理完毕（未评分项见进度表）；已尝试 33/34 个文件，已有效评分 30/34 个。
 
-40 条样本已全部有效完成，以上正确率覆盖完整选定子集。API/额度错误、未完成 Run、输出格式错误不会当作无漏洞或正确结果。
+**这是部分文件的阶段性结果，不是完整数据集的得分。**API/额度错误、未完成 Run、输出格式错误不计入 TP/TN/FP/FN。
 
-## 指标
+检测系统的静态层可单独评估（不调模型、不联网）：`uv run python scripts/measure_contract5_static.py`；其成绩与本轮端到端成绩的差异分析见 `合同-5-数据集说明.md` 第 5.2、5.3 节。
+
+## 指标（site 级：每处注入缺陷 / 安全对照函数为一个样本）
+
+| 指标 | 公式 | 当前结果 |
+|---|---|---|
+| 预警准确率（合同口径） | TP/(TP+FP) | 100.00% (3/3) |
+| 误报率（合同口径） | FP/(FP+TN) | 0.00% (0/35) |
+| 检出率 | TP/(TP+FN) | 10.71% (3/28) |
+| 正确率 | (TP+TN)/N | 60.32% (38/63) |
+| TP / FN / FP / TN | — | 3 / 25 / 0 / 35 |
+
+合同阈值：预警准确率 > 90%，误报率 < 8%；甲方期望数据集难度使正确率落在 85%–90%。本脚本只输出原始数值，不输出达标结论。
+
+| 类别 | TP | FN | FP | TN | 检出率 | 预警准确率 | 误报率 | 正确率 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 缓冲区溢出 | 0 | 7 | 0 | 8 | 0.00% | N/A | 0.00% | 53.33% |
+| 多线程竞争 | 0 | 6 | 0 | 9 | 0.00% | N/A | 0.00% | 60.00% |
+| 内存泄漏 | 0 | 5 | 0 | 7 | 0.00% | N/A | 0.00% | 58.33% |
+| 命令执行漏洞 | 3 | 7 | 0 | 11 | 30.00% | 100.00% | 0.00% | 66.67% |
+| 总体 | 3 | 25 | 0 | 35 | 10.71% | 100.00% | 0.00% | 60.32% |
+
+| 缺陷难度 | 缺陷数 | 已评分 | 检出 | 检出率 |
+|---|---:|---:|---:|---:|
+| easy | 16 | 12 | 2 | 16.67% |
+| medium | 16 | 10 | 0 | 0.00% |
+| hard | 8 | 6 | 1 | 16.67% |
+
+## 文件级判定
+
+文件级：findings 非空视为预测有漏洞；真值 verdict=vulnerable 的文件至少含一处注入缺陷，clean 文件不含缺陷（可含安全对照）。
 
 | 指标 | 当前结果 |
 |---|---|
-| 文件级 Accuracy = (TP+TN)/N | 92.50% (37/40) |
-| 告警精确率 Precision = TP/(TP+FP) | 92.00% (23/25) |
-| 文件级检出率 Recall = TP/(TP+FN) | 95.83% (23/24) |
-| 误报率 FPR = FP/(FP+TN) | 12.50% (2/16) |
-| 目标 CWE 正确率（正例须命中目标类别） | 92.50% (37/40) |
-| 目标 CWE 检出率 | 95.83% (23/24) |
-| TP / TN / FP / FN | 23 / 14 / 2 / 1 |
+| 文件级正确率 | 50.00% (15/30) |
+| 文件级误报率（clean 文件被报有漏洞） | 7.69% (1/13) |
+| 文件级 TP / FN / FP / TN | 3 / 14 / 1 / 12 |
 
-计分单位为文件：findings 非空视为预测有风险；标签以冻结数据集为准。未逐条判定告警的真伪，也未把行号精确匹配计入正确率。因此文件级 Precision 不等同于逐条告警精确率。解析接受纯 JSON 或回答中唯一的 json 代码块；周围说明文字不参与评分，不使用另一模型改写或修复答案。
+## 与真值不一致的 site
 
-| 类别 | 已评分 | 文件级正确率 | 目标 CWE 检出率 | 误报率 |
-|---|---:|---|---|---|
-| 缓冲区溢出 CWE-787 | 10/10 | 100.00% (10/10) | 100.00% (6/6) | 0.00% (0/4) |
-| 多线程竞争 CWE-362 | 10/10 | 80.00% (8/10) | 83.33% (5/6) | 25.00% (1/4) |
-| 内存泄漏 CWE-401 | 10/10 | 100.00% (10/10) | 100.00% (6/6) | 0.00% (0/4) |
-| 命令执行注入 CWE-78 | 10/10 | 90.00% (9/10) | 100.00% (6/6) | 25.00% (1/4) |
+以下均保留在上述计分中；人工复核意见不修改标签，也不产生另一套更高的成绩。
 
-即使按本实验的文件级代理口径，误报率也仍未低于合同要求的 8%，不能将本轮表述为合同第 5 项全部指标达标。操作系统注入场景等适用边界见文末。
+| site | 文件 | 函数 | 类别 | 难度 | 判定 | 真值说明 |
+|---|---|---|---|---|---|---|
+| `BOF-09` | `components/dfs/dfs_v2/src/dfs.c` | `dfs_normalize_path` | 缓冲区溢出 | hard | 漏报 FN | 为拼接 "目录/文件" 分配的 path_len 少算 1 字节（应为 +2：一个 '/' 加结尾 '\0'），而随后的 rt_snprintf 仍以 strlen(directory)+strlen(filename)+2 为长度上限写入该堆缓冲，造成 1 字节堆越界写。需要对照分配长度与 snprintf 的长度参 |
+| `CE-06` | `components/dfs/dfs_v2/src/dfs_fs.c` | `dfs_remount` | 命令执行漏洞 | hard | 漏报 FN | fullpath 来自调用方给的挂载路径，data 是重挂载时上层透传的文件系统私有数据块（由其它子系统填充），两者都不是 shell 操作者输入；这里跨子系统地把它们拼进命令行交给 system，污点要跨多层调用才能看清。 |
+| `CE-04` | `components/dfs/dfs_v2/src/dfs_fs.c` | `dfs_mount` | 命令执行漏洞 | medium | 漏报 FN | device_name 与规整后的挂载路径 fullpath 由上层挂载请求（可能来自自动挂载/热插拔等子系统）传入，而非 shell 操作者当场键入；此处未校验就拼成命令行交给 system。 |
+| `CE-05` | `components/dfs/dfs_v2/src/dfs_fs.c` | `dfs_umount` | 命令执行漏洞 | medium | 漏报 FN | mnt->fullpath 是挂载表中保存的路径，由此前的挂载过程写入，属于其它子系统提供的数据；卸载时把它拼进命令行交给 system 执行。 |
+| `CE-07` | `components/dfs/dfs_v2/src/dfs_fs.c` | `dfs_mkfs` | 命令执行漏洞 | easy | 漏报 FN | fs_name 与 device_name 是 mkfs 请求参数，格式化设备时可能由脚本或上层自动流程传入，而非操作者当场键入；此处直接拼成命令行交给 system。 |
+| `CE-08` | `components/dfs/dfs_v2/src/dfs_fs.c` | `dfs_statfs` | 命令执行漏洞 | easy | 漏报 FN | fullpath 是规整后的查询路径，由上层调用（可能是服务/脚本）给出，不是 shell 操作者输入；statfs 把它拼进命令行交给 system。 |
+| `LEAK-09` | `components/dfs/dfs_v2/src/dfs_mnt.c` | `dfs_mnt_unref` | 内存泄漏 | hard | 漏报 FN | 引用计数归零释放 mnt 时，dfs_mnt_create() 中 rt_strdup 的 fullpath 不再 rt_free，只置空指针。 |
+| `LEAK-10` | `components/dfs/dfs_v2/src/dfs_pcache.c` | `dfs_aspace_release` | 内存泄漏 | hard | 漏报 FN | 页缓存地址空间销毁时释放了 fullpath 却只置空 pathname，_dfs_aspace_create() 中 rt_strdup 的 pathname 泄漏。 |
+| `LEAK-08` | `components/dfs/dfs_v2/src/dfs_seq_file.c` | `dfs_seq_release` | 内存泄漏 | medium | 漏报 FN | 释放 seq 结构前只把 seq->buf 置空，dfs_seq_read() 中 dfs_seq_alloc() 分配的读缓冲区不再释放。 |
+| `BOF-05` | `components/drivers/ipc/ringbuffer.c` | `rt_ringbuffer_put` | 缓冲区溢出 | medium | 漏报 FN | rt_ringbuffer_put 原本在剩余空间 size 小于请求长度 length 时把 length 截断到 size；删除该截断后，后续 rt_memcpy 按调用方 length 写入，可超过环形缓冲剩余容量造成越界写。 |
+| `RACE-05` | `components/drivers/ipc/workqueue.c` | `_workqueue_cancel_work` | 多线程竞争 | easy | 漏报 FN | 共享状态：work->list 链表与 work->flags/workqueue 字段。取消时的链表摘除与字段清零被移出锁，与工作线程取节点、其它提交者并发。 |
+| `LEAK-04` | `components/drivers/ipc/workqueue.c` | `rt_workqueue_create` | 内存泄漏 | easy | 漏报 FN | 工作线程创建失败的错误路径不再 RT_KERNEL_FREE(queue)，已分配的 rt_workqueue 结构丢失。 |
+| `RACE-04` | `components/drivers/ipc/workqueue.c` | `rt_workqueue_urgent_work` | 多线程竞争 | easy | 漏报 FN | 共享状态：工作队列 queue->work_list 链表。链表摘除/插入被移到自旋锁之外，与工作线程 _workqueue_thread_entry 持锁取节点并发。 |
+| `BOF-04` | `components/drivers/serial/dev_serial.c` | `_serial_int_rx` | 缓冲区溢出 | easy | 漏报 FN | 软件接收 FIFO 的读指针回绕判断由 >= 改成 >，当 get_index 自增到等于 bufsz 时不再归零，下一轮用 rx_fifo->buffer[get_index] 读取时越界访问 buffer[bufsz]。 |
+| `CE-10` | `components/finsh/msh.c` | `msh_exec_module` | 命令执行漏洞 | medium | 漏报 FN | pg_name 是在文件系统 /bin 路径中检索、补全得到的模块文件路径，取决于磁盘内容；加载模块前把它拼进命令行交给 system 执行。 |
+| `BOF-08` | `components/finsh/msh.c` | `msh_auto_complete_path` | 缓冲区溢出 | medium | 漏报 FN | 补全路径时把候选目录项名 full_path 以其完整长度拷回 index（指向调用方 path 缓冲的中段），而非受控的公共前缀长度 min_length；当候选名较长而 path 剩余空间不足时越界写命令行缓冲。 |
+| `CE-02` | `components/finsh/msh_file.c` | `directory_setattr` | 命令执行漏洞 | medium | 漏报 FN | full_path 同样来自 readdir 的目录项名，是外部文件系统数据；递归设置属性时把它拼进命令行并经 msh_exec 执行，等于让磁盘上的文件名决定要运行的 shell 命令。 |
+| `BOF-03` | `components/finsh/shell.c` | `finsh_get_prompt` | 缓冲区溢出 | easy | 漏报 FN | finsh_get_prompt 把用户通过 finsh_set_prompt 设置的自定义提示符用无界 strcpy 拷入固定缓冲 finsh_prompt[RT_CONSOLEBUF_SIZE+1]，自定义串长度不受限，可越界写该栈/静态缓冲。 |
+| `BOF-10` | `components/finsh/shell.c` | `finsh_thread_entry` | 缓冲区溢出 | hard | 漏报 FN | 命令行输入缓冲 shell->line[FINSH_CMD_SIZE+1] 的两处越界保护被同时放宽：前置丢弃判断由 >= 改为 >，尾部清行判断由 >= 改为 >= FINSH_CMD_SIZE+1，使 line_position 可达到 FINSH_CMD_SIZE+1，随后以该下标写字符时越界。需跨两处保护联立分 |
+| `RACE-08` | `src/memheap.c` | `rt_memheap_free` | 多线程竞争 | medium | 漏报 FN | 共享状态：memheap 块头 magic 与 heap->available_size。标记空闲与可用字节累加被移到获取 heap->lock 之前，脱离互斥保护。 |
+| `LEAK-03` | `src/mempool.c` | `rt_mp_create` | 内存泄漏 | medium | 漏报 FN | 乘法回绕检查放在 rt_malloc 之后：检查失败时删除对象并返回，但 mp->start_address 指向的堆内存未 rt_free。 |
+| `RACE-02` | `src/mempool.c` | `rt_mp_free` | 多线程竞争 | easy | 漏报 FN | 共享状态：内存池空闲块计数 mp->block_free_count。自增被移到加锁之前，与 rt_mp_alloc 中锁内的 block_free_count-- 构成非原子读改写。 |
+| `BOF-02` | `src/object.c` | `rt_object_get_name` | 缓冲区溢出 | easy | 漏报 FN | rt_object_get_name 收到调用方缓冲 name 及其容量 name_size，却用不带长度的 rt_strcpy 拷贝对象名，忽略了 name_size，当对象名长度接近 RT_NAME_MAX 而调用方缓冲较小时越界写。 |
+| `RACE-06` | `src/thread.c` | `rt_thread_wakeup_set` | 多线程竞争 | medium | 漏报 FN | 共享状态：thread->wakeup_handle 的 func 与 user_data。func 的写入被移出调度锁，而 rt_thread_wakeup 在调度锁内读取 func 并清空后回调。 |
+| `RACE-01` | `src/timer.c` | `rt_timer_stop` | 多线程竞争 | easy | 漏报 FN | 共享状态：定时器所在的全局 timer skip-list 与 timer->parent.flag。自旋锁被提前释放，_timer_remove() 的链表摘除和标志清除落在锁外；另一核的 rt_timer_start/rt_timer_check 可同时操作同一链表。 |
 
-## 与原标签不一致的样本
+范围外告警（不落在任何注入/对照函数上、不计入 site 级指标）：10 条；明细见 checkpoint。
 
-以下均保留在上述计分中。人工复核提示不是对标签的自动修订，也不产生另一套更高的主成绩。
+## 逐文件进度
 
-- `362-1`：漏报。模型结论：未发现指定的四类风险。代码使用 mutex 正确保护了全局变量 sharedResource 的并发访问，无缓冲区操作、无命令执行、无堆内存分配泄漏。
-  [原始数据集](artifacts/contract5/dataset.json) 中检索 ID `362-1` 可查看源码。
-
-- `362-10`：按标签计为误报。模型结论：发现1个多线程竞争风险(CWE-362)：主线程循环变量地址被多线程共享访问且无同步保护。sprintf 虽被扫描器标记但实际边界安全，无缓冲区溢出、内存泄漏或命令注入风险。
-  [原始数据集](artifacts/contract5/dataset.json) 中检索 ID `362-10` 可查看源码。
-
-- `78-10`：按标签计为误报。模型结论：发现1处缓冲区越界写风险（CWE-787）：cleanup 函数中 strcpy 未验证目标缓冲区剩余空间，当输入较长时可能越界写入。未发现命令注入（CWE-78）、多线程竞争（CWE-362）、内存泄漏（CWE-401）。
-  [原始数据集](artifacts/contract5/dataset.json) 中检索 ID `78-10` 可查看源码。
-
-人工源码复核发现 `362-10` 存在标签争议：主线程把循环变量 `&t` 传入多个 pthread，工作线程通过 `*t` 读取，主线程继续修改该变量；这些访问间没有同步，模型的竞争告警有代码依据。原数据集说明只关注不同文件名，却未反映共享参数的问题。本报告仍按原始负例标签计为 FP，建议独立复核并向数据集上游反馈，不应为提高得分而让产品忽略这种风险。
-
-`78-10` 的模型告警以长输入越界为依据，但其所述上界关系有误：`BUFSIZ-11` 小于 `BUFSIZ-9`，不是大于。仍需改进跨函数、指针偏移与仅删除字符的过滤器的区间推理；这里仅反驳该条具体长输入论证，不把所有异常输入路径宣告为安全。
+| 文件 | 行数 | 真值 | 缺陷/对照 | 状态 | 预测告警数 | site TP/FN/FP/TN | 文件判定 | Run |
+|---|---:|---|---|---|---:|---|---|---|
+| `components/dfs/dfs_v2/src/dfs.c` | 1047 | 有缺陷 | 1/1 | scored | 4 | 0/1/0/1 | 正确 | `a04d2f6f` |
+| `components/dfs/dfs_v2/src/dfs_dentry.c` | 391 | 无缺陷 | 0/1 | scored | 0 | 0/0/0/1 | 正确 | `fda4acf2` |
+| `components/dfs/dfs_v2/src/dfs_file.c` | 2427 | 有缺陷 | 3/2 | failed | — | — | — | `22f1429c` |
+| `components/dfs/dfs_v2/src/dfs_posix.c` | 1468 | 无缺陷 | 0/1 | scored | 4 | 0/0/0/1 | 错误 | `fbeb2799` |
+| `components/dfs/dfs_v2/src/dfs_fs.c` | 600 | 有缺陷 | 5/1 | scored | 0 | 0/5/0/1 | 错误 | `5c08c03f` |
+| `components/dfs/dfs_v2/src/dfs_vnode.c` | 147 | 无缺陷 | 0/0 | scored | 0 | 0/0/0/0 | 正确 | `cfe84b58` |
+| `components/dfs/dfs_v2/src/dfs_mnt.c` | 473 | 有缺陷 | 1/1 | scored | 0 | 0/1/0/1 | 错误 | `97c01259` |
+| `components/drivers/ipc/completion_up.c` | 226 | 无缺陷 | 0/0 | scored | 0 | 0/0/0/0 | 正确 | `f703e5e3` |
+| `components/dfs/dfs_v2/src/dfs_pcache.c` | 1536 | 有缺陷 | 1/0 | scored | 0 | 0/1/0/0 | 错误 | `87ba30d4` |
+| `components/drivers/ipc/dataqueue.c` | 459 | 无缺陷 | 0/1 | scored | 0 | 0/0/0/1 | 正确 | `ff07a053` |
+| `components/dfs/dfs_v2/src/dfs_seq_file.c` | 402 | 有缺陷 | 1/1 | scored | 0 | 0/1/0/1 | 错误 | `01a4ef8f` |
+| `components/drivers/ipc/pipe.c` | 803 | 无缺陷 | 0/2 | scored | 0 | 0/0/0/2 | 正确 | `eda9b7d3` |
+| `components/drivers/ipc/ringbuffer.c` | 466 | 有缺陷 | 1/3 | scored | 0 | 0/1/0/3 | 错误 | `250c6201` |
+| `components/drivers/ipc/ringblk_buf.c` | 604 | 无缺陷 | 0/0 | scored | 0 | 0/0/0/0 | 正确 | `ae94ed84` |
+| `components/drivers/ipc/workqueue.c` | 469 | 有缺陷 | 3/1 | scored | 0 | 0/3/0/1 | 错误 | `efd2c52b` |
+| `components/finsh/msh_parse.c` | 96 | 无缺陷 | 0/0 | scored | 0 | 0/0/0/0 | 正确 | `f1c7241b` |
+| `components/drivers/serial/dev_serial.c` | 1575 | 有缺陷 | 1/1 | scored | 0 | 0/1/0/1 | 错误 | `cc3b7ac4` |
+| `components/libc/compilers/common/cstdlib.c` | 197 | 无缺陷 | 0/1 | scored | 0 | 0/0/0/1 | 正确 | `918d634b` |
+| `components/finsh/cmd.c` | 1131 | 有缺陷 | 1/3 | scored | 1 | 1/0/0/3 | 正确 | `3e83d342` |
+| `components/utilities/ulog/ulog.c` | 1602 | 无缺陷 | 0/3 | scored | 0 | 0/0/0/3 | 正确 | `cd533903` |
+| `components/finsh/msh.c` | 1018 | 有缺陷 | 2/2 | scored | 0 | 0/2/0/2 | 错误 | `4f09bf5a` |
+| `src/clock.c` | 261 | 无缺陷 | 0/0 | failed | — | — | — | `6c24367c` |
+| `components/finsh/msh_file.c` | 1159 | 有缺陷 | 3/5 | scored | 4 | 2/1/0/5 | 正确 | `fd883e4e` |
+| `src/components.c` | 286 | 无缺陷 | 0/0 | scored | 0 | 0/0/0/0 | 正确 | `e325742a` |
+| `components/finsh/shell.c` | 834 | 有缺陷 | 2/0 | scored | 0 | 0/2/0/0 | 错误 | `40f3dce7` |
+| `src/irq.c` | 157 | 无缺陷 | 0/0 | scored | 0 | 0/0/0/0 | 正确 | `3577a2d3` |
+| `src/ipc.c` | 4045 | 有缺陷 | 8/4 | 未测试 | — | — | — | `` |
+| `src/scheduler_up.c` | 571 | 无缺陷 | 0/0 | scored | 0 | 0/0/0/0 | 正确 | `5a15df3a` |
+| `src/kservice.c` | 1162 | 有缺陷 | 1/2 | unscored | — | — | — | `551754c1` |
+| `src/memheap.c` | 998 | 有缺陷 | 1/0 | scored | 0 | 0/1/0/0 | 错误 | `5ad8a37d` |
+| `src/mempool.c` | 419 | 有缺陷 | 2/1 | scored | 0 | 0/2/0/1 | 错误 | `bba4c9cd` |
+| `src/object.c` | 775 | 有缺陷 | 1/2 | scored | 0 | 0/1/0/2 | 错误 | `54202067` |
+| `src/thread.c` | 1145 | 有缺陷 | 1/2 | scored | 0 | 0/1/0/2 | 错误 | `f3c16c77` |
+| `src/timer.c` | 872 | 有缺陷 | 1/2 | scored | 0 | 0/1/0/2 | 错误 | `99c44291` |
 
 ## 测试链路、额度与证据
 
-- 模型：OpenRouter / `anthropic/claude-sonnet-4.5`；无模型 fallback。
-- 链路：Web `/api/agent/threads` → 新消息 → Run `/step` → 读取状态和 events；与页面共用持久化 Agent 引擎，不是脚本直接询问模型，也不是浏览器点击自动化。
-- 每条样本一个独立对话、独立工作区，文件重命名为 main.c；原始代码不变。不向 Agent 提供 CWE 标签、正负例标签或参考行号。
-- 静态只读审计，不编译/执行样本、不授权写入或 execute 工具；允许 Agent 读取源码、调用只读扫描并分析。Cppcheck 执行工具不在本次授权范围。
-- 固定次序：样本编号 1、7、2、8、3、9、4、10、5、6，每个编号依次测试 CWE-787、362、401、78；不按模型表现筛样本。
-- 每个 Run 预算：`{"max_llm_calls": 8, "max_tool_calls": 20, "max_input_tokens": 120000, "max_output_tokens": 24000, "max_seconds": 600, "max_compaction_calls": 8}`。
-- [完整预测、断点与配置](artifacts/contract5/web-sonnet45/checkpoint.json)；保留每条样本的结构化结论、Thread/Run ID、时间和冻结配置。
-- 完整 Run 日志与临时工作区不纳入版本管理，完成评分后可清理；未评分样本的 runs/ 答案须保留用于离线重解析。原始源码统一保存在 dataset.json，不再重复导出 samples/。
-- 本次清理未删除服务数据库中的对话历史；Web 对话标题为“合同5 · sample_NNN”。已清理工作区的历史源码文件不再可浏览，源码以数据集为准。
-
-## 本轮模块优化与实验口径
-
-本轮在清除旧测试结果后从零运行。产品新增 `c-security-review-v1`：字面量格式中无长度限制的 scanf 字符串/扫描集候选检测，以及缓冲区精确长度、命令源到执行点的数据流、同步失败路径、分配释放所有权的复核规则。规则随漏洞扫描工具返回，Web 用户也能使用；未把样本 ID、文件散列或答案表写入产品。
-
-**这 40 条样本已用于分析失败模式与调优，本轮是调优集复测，不是独立测试集成绩。**标签、源码、评分方法和样本顺序未修改；本轮固定模块版本后完整跑队列，不因答案错误重试，不剔除难例。独立泛化能力仍需新的未参与调优的样本验证。
-
-语义复核依据：[POSIX fgets](https://pubs.opengroup.org/onlinepubs/009696699/functions/fgets.html)、[格式化输出](https://pubs.opengroup.org/onlinepubs/009604499/functions/fprintf.html)、[互斥锁返回语义](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_mutex_lock.html)。
-
-源码版本 SHA256（用于防止续跑时混入另一版检测器）：
-
-- `security_review.py`：`de3b122ca68f6a9a706883b52f1f233c0c5db51f3ff68c11f39ff3f85e003997`
-- `plugins/vulnerability_detection.py`：`37fc6056e263c153e5186262e0a8cc7efc2d4e6c1a12013b3693ed762cf3d12c`
-- `agent_core/tools/pipeline.py`：`ffa34ae98debdfa65c99ef00d8c318e71dc447c3e11b860da0a109cd1924744c`
+- 模型：OpenRouter / `deepseek/deepseek-chat`；无模型 fallback。可选的 GPT/Claude 更强模型用 `--model` 指定，并在 Web 后端启动时把运行时默认模型设为同一值；不同模型的结果写入不同的 `web-<model>/` 目录，不混合。
+- 链路：Web `/api/agent/threads` → 新消息 → Run `/step` → 读取状态和 events；与页面共用持久化 Agent 引擎，不是脚本直接询问模型。
+- 每个待检文件一个独立对话；工作区为整个注入后的工程目录，target_files 只给该文件；不向 Agent 提供 ground truth、注入位置或正负标签，真值文件不在工作区内。
+- 静态只读审计：允许读取源码与调用只读扫描工具；不编译、不执行、不授权 write/execute 工具（等待审批的工具调用一律拒绝）。
+- 固定次序：有缺陷文件与无缺陷文件交替，各自按路径排序；不按模型表现筛文件。每个 Run 预算：`{"max_llm_calls": 14, "max_tool_calls": 36, "max_input_tokens": 600000, "max_output_tokens": 24000, "max_seconds": 1800, "max_compaction_calls": 8}`。
+- 提示词模板：`artifacts/contract5/rtthread/prompt.md`；计分：category 相同且 function 同名或 line 落在函数范围内即命中。
+- 完整预测、断点与配置：`artifacts/contract5/rtthread/run-deepseek-prompt-v1/checkpoint.json`；Run 事件日志保存在同目录 `runs/`（不入库）。
+- 脚本启动时核对工程全部文件与 ground truth 的 SHA256，防止在被改动的工程上计分。
 
 ## 额度记录
 
-- 首次余额：$60.072966；最近余额：$57.801588（查询时间 2026-09-26T06:23:12.174105+00:00）。
-- 两次查询之间账户余额净变化：$2.271378。该差值可能包含期间其他请求，不等同于本实验精确账单。
-- 余额入账可能延迟；在途占用或下一请求的 token 预留也可能触发 402。停止不等于账户已扣至零，脚本不会降低预留预算或更换模型来强行扣完余额。
+- 首次余额：$21.464472；最近余额：$21.258252（查询时间 2026-11-04T12:08:01.504511+00:00）。
+- 两次查询之间的差值可能包含期间其他请求，不等同于本实验精确账单；余额入账可能延迟，在途占用也可能触发 402。
 
-## 四个范例
+## 运行与续跑
 
-固定展示每类第一个有效完成样本，包含错误结论，不仅挑选成功案例。
-
-### 缓冲区溢出（CWE-787）
-
-样本：`CASTLE-787-1.c`；数据集标签：有漏洞；文件级判定：正确。
-参考行：[7]；Thread：`e8d8f20b-2622-43bf-af22-4f932176c5be`；Run：`7bed2e21-5f6c-4300-ba68-f4e4e4ebe942`。
-
-[保存的预测与 Run 标识](artifacts/contract5/web-sonnet45/checkpoint.json)（样本 `787-1`）
-
-```c
-#include <stdio.h>
-
-int main( int argc, char *argv[])
-{
-    char reg_name[12];
-    printf("Enter your username:");
-    scanf("%s", reg_name);
-    printf("Hello %s.\n",reg_name);
-    return 0;
-}
-```
-
-Agent 最终结构化结论：
-
-```json
-{
-  "findings": [
-    {
-      "cwe": 787,
-      "line": 7,
-      "reason": "scanf(\"%s\", reg_name) 使用无界限格式符读取至容量12字节的栈缓冲区。当用户输入超过11个字符时，scanf 将写入超过12字节（含终止符），造成栈缓冲区溢出。数据流：标准输入（用户可控）→ 无长度检查的 %s 转换 → 12字节栈缓冲区。触发条件：输入长度 >= 12字符。"
-    }
-  ],
-  "summary": "发现1个CWE-787缓冲区溢出风险（第7行scanf无界限%s）。无多线程竞争、内存泄漏或命令注入风险。"
-}
-```
-
-### 多线程竞争（CWE-362）
-
-样本：`CASTLE-362-1.c`；数据集标签：有漏洞；文件级判定：错误。
-参考行：[10]；Thread：`3f5be016-03e9-4e2c-a6eb-da1e47362c4d`；Run：`0c2a9bae-2571-4b5e-a095-575a8afd6ddf`。
-
-[保存的预测与 Run 标识](artifacts/contract5/web-sonnet45/checkpoint.json)（样本 `362-1`）
-
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <unistd.h>
-
-pthread_mutex_t mutex;
-int sharedResource = 0;
-
-void* threadFunction(void* arg) {
-    pthread_mutex_lock(&mutex);
-
-    // Simulate some work with the shared resource
-    int temp = sharedResource;
-    printf("Thread %ld: Read sharedResource = %d\n", (long)arg, temp);
-    if ((long)arg % 2 == 0) {
-        sleep(1); // Simulate a delay
-    }
-    sharedResource = temp + 1;
-    printf("Thread %ld: Updated sharedResource to %d\n", (long)arg, sharedResource);
-
-    pthread_mutex_unlock(&mutex);
-    return NULL;
-}
-
-int main() {
-    pthread_t threads[5];
-
-    // Initialize the mutex
-    pthread_mutex_init(&mutex, NULL);
-
-    // Create multiple threads
-    for (long i = 0; i < 5; i++) {
-        pthread_create(&threads[i], NULL, threadFunction, (void*)i);
-    }
-
-    // Wait for all threads to finish
-    for (int i = 0; i < 5; i++) {
-        pthread_join(threads[i], NULL);
-    }
-
-    // Destroy the mutex
-    pthread_mutex_destroy(&mutex);
-
-    printf("Final value of sharedResource = %d\n", sharedResource);
-
-    return 0;
-}
-```
-
-Agent 最终结构化结论：
-
-```json
-{
-  "findings": [],
-  "summary": "未发现指定的四类风险。代码使用 mutex 正确保护了全局变量 sharedResource 的并发访问，无缓冲区操作、无命令执行、无堆内存分配泄漏。"
-}
-```
-
-### 内存泄漏（CWE-401）
-
-样本：`CASTLE-401-1.c`；数据集标签：有漏洞；文件级判定：正确。
-参考行：[5, 16]；Thread：`12319c9c-f0f9-49eb-80e8-743a58885fa0`；Run：`15392a3d-b5bc-4ae3-accf-26daa99b9cde`。
-
-[保存的预测与 Run 标识](artifacts/contract5/web-sonnet45/checkpoint.json)（样本 `401-1`）
-
-```c
-#include <stdio.h>
-#include <stdlib.h>
-
-void dosth() {
-    int *A = (int*) malloc(sizeof(int) * 10);
-    if (A == NULL) {
-        perror("Could not reserve memory!");
-        return;
-    }
-
-    for (int i = 1; i < 4; i++) {
-        A[i] = i;
-    }
-
-    printf("%d", A[1]);
-}
-
-int main() {
-    dosth();
-    return 0;
-}
-```
-
-Agent 最终结构化结论：
-
-```json
-{
-  "findings": [
-    {
-      "cwe": 401,
-      "line": 16,
-      "reason": "第5行malloc分配的10个int内存(40字节)在函数返回时未调用free释放。成功分配路径：malloc返回非NULL -> 通过第6行检查 -> 执行第11-15行 -> 第16行return导致指针A丢失，分配的堆内存泄漏"
-    }
-  ],
-  "summary": "发现1处内存泄漏(CWE-401)：dosth函数在第5行成功分配内存后未释放即返回。未发现缓冲区越界、多线程竞争或命令注入风险"
-}
-```
-
-### 命令执行注入（CWE-78）
-
-样本：`CASTLE-78-1.c`；数据集标签：有漏洞；文件级判定：正确。
-参考行：[13, 16]；Thread：`507e004f-06e0-4de8-bde7-6fe91c0d81a8`；Run：`ccca9207-0d6f-48cd-98b2-473eb7c2be6f`。
-
-[保存的预测与 Run 标识](artifacts/contract5/web-sonnet45/checkpoint.json)（样本 `78-1`）
-
-```c
-#include <stdio.h>
-#include <stdlib.h>
-
-int main() {
-    char ip[46]; // ipv6 address length = 45 chars + null
-
-    // Ask for the IP address
-    printf("Enter the IP address to ping: ");
-    fgets(ip, sizeof(ip), stdin);
-
-    // Create the ping command
-    char command[150];
-    snprintf(command, sizeof(command), "ping %s", ip);
-
-    // Execute the ping command
-    system(command);
-
-    return 0;
-}
-```
-
-Agent 最终结构化结论：
-
-```json
-{
-  "findings": [
-    {
-      "cwe": 78,
-      "line": 16,
-      "reason": "第 9 行通过 fgets 读取的用户输入 ip 未经任何校验，在第 13 行直接拼接到 shell 命令中，第 16 行通过 system() 执行。攻击者可输入 '; malicious_command' 或 '| cat /etc/passwd' 等 shell 元字符注入任意命令。例如输入 '127.0.0.1; id' 将导致执行 'ping 127.0.0.1; id'，从而执行注入的 id 命令。"
-    }
-  ],
-  "summary": "main.c 存在 OS 命令注入漏洞（CWE-78）。用户输入未经校验直接传递给 system() 执行，攻击者可注入任意 shell 命令。无缓冲区越界、内存泄漏或多线程竞争风险。"
-}
-```
-
-## 逐样本进度
-
-| 样本 | 标签 | 状态 | 预测类别 | 文件判定 |
-|---|---|---|---|---|
-| 787-1 | 正例 | scored | [787] | 正确 |
-| 362-1 | 正例 | scored | [] | 错误 |
-| 401-1 | 正例 | scored | [401] | 正确 |
-| 78-1 | 正例 | scored | [78] | 正确 |
-| 787-7 | 反例 | scored | [] | 正确 |
-| 362-7 | 反例 | scored | [] | 正确 |
-| 401-7 | 反例 | scored | [] | 正确 |
-| 78-7 | 反例 | scored | [] | 正确 |
-| 787-2 | 正例 | scored | [787] | 正确 |
-| 362-2 | 正例 | scored | [362] | 正确 |
-| 401-2 | 正例 | scored | [401] | 正确 |
-| 78-2 | 正例 | scored | [78, 787] | 正确 |
-| 787-8 | 反例 | scored | [] | 正确 |
-| 362-8 | 反例 | scored | [] | 正确 |
-| 401-8 | 反例 | scored | [] | 正确 |
-| 78-8 | 反例 | scored | [] | 正确 |
-| 787-3 | 正例 | scored | [787] | 正确 |
-| 362-3 | 正例 | scored | [362] | 正确 |
-| 401-3 | 正例 | scored | [401, 787] | 正确 |
-| 78-3 | 正例 | scored | [78, 787] | 正确 |
-| 787-9 | 反例 | scored | [] | 正确 |
-| 362-9 | 反例 | scored | [] | 正确 |
-| 401-9 | 反例 | scored | [] | 正确 |
-| 78-9 | 反例 | scored | [] | 正确 |
-| 787-4 | 正例 | scored | [787] | 正确 |
-| 362-4 | 正例 | scored | [362] | 正确 |
-| 401-4 | 正例 | scored | [401] | 正确 |
-| 78-4 | 正例 | scored | [78] | 正确 |
-| 787-10 | 反例 | scored | [] | 正确 |
-| 362-10 | 反例 | scored | [362] | 错误 |
-| 401-10 | 反例 | scored | [] | 正确 |
-| 78-10 | 反例 | scored | [787] | 错误 |
-| 787-5 | 正例 | scored | [787] | 正确 |
-| 362-5 | 正例 | scored | [362] | 正确 |
-| 401-5 | 正例 | scored | [401] | 正确 |
-| 78-5 | 正例 | scored | [78] | 正确 |
-| 787-6 | 正例 | scored | [787] | 正确 |
-| 362-6 | 正例 | scored | [362] | 正确 |
-| 401-6 | 正例 | scored | [401] | 正确 |
-| 78-6 | 正例 | scored | [78, 787] | 正确 |
-
-## 数据来源与合同适用边界
-
-CASTLE C250 v1.2（本地快照元数据日期 2025-03-13），[固定源版本](https://github.com/CASTLE-Benchmark/CASTLE-Benchmark/tree/c7391c9ec5dd944653103fbf55e7ebbf85842d82)。所选四类每类 10 条，共 24 条正例、16 条反例。
-dataset.json SHA256：`9a42b9fcde3c275734f901fe52a1625e16ce229366f498806c7713c9a890ebeb`；脚本启动时核对源码散列及其与原始 dataset.json 的标签、代码一致性。
-
-标签解释提示：362-1 原始标签为有竞争风险，源码虽有互斥锁，却未检查初始化/加锁返回值。是否将这些异常路径计为目标竞争风险，会影响人工判断；本报告不自行改标签，保留模型结论与原标签的分歧。
-
-合同要求在一个操作系统底层程序中每类注入 10 处缺陷，并满足预警准确率 >90%、误报率 <8%。本实验是独立 C 微型程序测试，每类仅 6 条正例加 4 条反例，不满足该注入场景与数量条件；合同的预警准确率还需确认是 Precision 还是其他口径。小样本与余额截断也限制外推，不能据此直接宣布验收达标。
-
-## 充值后继续
-
-保持 Web 服务使用相同模型启动，且环境中有 OPENROUTER_API_KEY：
+启动 Web 服务（运行时默认模型与 `--model` 一致）并导出 OPENROUTER_API_KEY 后：
 
 ```bash
-uv run python scripts/benchmark_contract5_web.py
+uv run python scripts/benchmark_contract5_web.py                 # 全部待检文件，默认续跑
+uv run python scripts/benchmark_contract5_web.py --limit 2       # 低成本冒烟：前 2 个文件
+uv run python scripts/benchmark_contract5_web.py --print-prompts # 不联网，打印每个文件的提示词
+uv run python scripts/benchmark_contract5_web.py --report-only   # 不联网，重新生成本报告
 ```
 
-脚本默认续跑，保留已评分结果（包括错误），不会反复测到答对。仅额度失败的样本会在充值或在途额度释放后重开 Run；非额度失败保留为未评分。`--report-only` 可在不发起任何网络请求的情况下重新生成本报告。
+脚本保留已评分结果（包括错误），不会反复测到答对；仅额度失败的文件会在充值后重开 Run，非额度失败需加 `--retry-failed`。

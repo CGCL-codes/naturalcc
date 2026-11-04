@@ -8,8 +8,8 @@
 
 | 项目 | 指标 3 | 指标 5 |
 |---|---|---|
-| 测试对象 | 3 套 RTOS 工程中的 3 类注入缺陷 | 40 个 CASTLE C 语言样本 |
-| Web Run | 9 个工程×类别组 | 40 个独立样本组 |
+| 测试对象 | 3 套 RTOS 工程中的 3 类注入缺陷 | 1 套 RT-Thread v5.2.1 工程中的 4 类注入缺陷（每类 10 处 + 安全对照 + 无缺陷文件） |
+| Web Run | 9 个工程×类别组 | 每个待检文件 1 个 Run（文件清单见 `ground_truth.json`） |
 | 入口脚本 | `scripts/benchmark_contract3_web.py` | `scripts/benchmark_contract5_web.py` |
 | 结果报告 | `合同-3-result.md` | `合同-5-result.md` |
 
@@ -79,7 +79,9 @@ uv run python scripts/benchmark_contract3_web.py --suite balanced
 # 指标 3：Web 独立复杂压力集
 uv run python scripts/benchmark_contract3_web.py --suite independent
 
-# 指标 5：Web Agent 测试
+# 指标 5：Web Agent 测试（先 --print-prompts 检查提示词，再 --limit 2 冒烟，最后全量）
+uv run python scripts/benchmark_contract5_web.py --print-prompts
+uv run python scripts/benchmark_contract5_web.py --limit 2
 uv run python scripts/benchmark_contract5_web.py
 ```
 
@@ -106,7 +108,7 @@ uv run python scripts/benchmark_contract3_web.py --suite independent  --force-re
 uv run python scripts/benchmark_contract3_web.py --suite balanced --limit 1 --force-rerun
 ```
 
-指标 5 使用下面命令离线刷新已有结果：
+指标 5 的数据集说明见 [合同-5-数据集说明.md](合同-5-数据集说明.md)；离线刷新已有结果：
 
 ```bash
 uv run python scripts/benchmark_contract5_web.py --report-only

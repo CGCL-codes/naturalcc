@@ -1,7 +1,16 @@
-"""Resume the contract-5 evaluation through the same HTTP API as the Web UI.
+"""Contract-5 whole-project evaluation through the local Web Agent HTTP API.
 
-Start agent_web_api.py first, export OPENROUTER_API_KEY, then run this script.
-No direct inference, automatic model fallback, source execution or source edits.
+Dataset: ``artifacts/contract5/rtthread/dataset`` (RT-Thread v5.2.1 subset with
+10 injected defects per category and safe controls; see
+``scripts/build_contract5_dataset.py``).  One Thread + Run per ground-truth
+target file; the Agent workspace is the whole injected project and ground truth
+stays outside it.  Scoring is per injected/control site (function match or line
+range) plus a per-file verdict.
+
+Start ``agent_web_api.py`` with the OpenRouter runtime default matching
+``--model``, export ``OPENROUTER_API_KEY``, then run this script.  Without
+credits use ``--print-prompts`` (no network) or ``--report-only``.
+No direct inference, no model fallback, no source execution or edits.
 """
 from __future__ import annotations
 
@@ -11,307 +20,401 @@ import hashlib
 import json
 import os
 import re
+import shutil
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 import requests
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT.parent) not in sys.path:
+    sys.path.insert(0, str(ROOT.parent))
+
 try:
     from .check_openrouter_credits import check_credits
-except ImportError:
+except ImportError:  # executed as a script
     from check_openrouter_credits import check_credits
 
-ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "artifacts/contract5"
-OUT = DATA / "web-sonnet45"
+DATA = ROOT / "artifacts" / "contract5" / "rtthread"
+DATASET = DATA / "dataset"
+PROJECT = DATASET / "project"
+GROUND_TRUTH = DATASET / "ground_truth.json"
+MANIFEST = DATASET / "manifest.json"
+PROMPT_FILE = DATA / "prompt.md"
 REPORT = ROOT / "合同-5-result.md"
-MODEL = "anthropic/claude-sonnet-4.5"
-CATEGORIES = {787: "缓冲区溢出", 362: "多线程竞争", 401: "内存泄漏", 78: "命令执行注入"}
+DEFAULT_MODEL = "anthropic/claude-sonnet-4.5"
+CATEGORIES = {"buffer_overflow": "缓冲区溢出", "data_race": "多线程竞争",
+              "memory_leak": "内存泄漏", "command_execution": "命令执行漏洞"}
+CWE_TO_CATEGORY = {787: "buffer_overflow", 120: "buffer_overflow", 121: "buffer_overflow", 122: "buffer_overflow", 119: "buffer_overflow",
+                   362: "data_race", 366: "data_race", 367: "data_race",
+                   401: "memory_leak", 772: "memory_leak",
+                   78: "command_execution", 77: "command_execution"}
+DIFFICULTIES = ("easy", "medium", "hard")
 TERMINAL = {"completed", "failed", "cancelled", "budget_exhausted"}
-BUDGET = {"max_llm_calls": 8, "max_tool_calls": 20, "max_input_tokens": 120000,
-          "max_output_tokens": 24000, "max_seconds": 600, "max_compaction_calls": 8}
-PRODUCT_FILES = ("security_review.py", "plugins/vulnerability_detection.py", "agent_core/tools/pipeline.py")
-GOAL = '''请审计当前工作区 main.c，只检测以下四类风险：缓冲区越界写/溢出(CWE-787)、
-多线程竞争(CWE-362)、内存泄漏(CWE-401)、OS 命令注入(CWE-78)。
-先用工作区读取工具查看完整源码，再根据数据流、边界、所有权和同步关系判断。
-可使用只读漏洞扫描工具辅助，但需核实其证据和覆盖限制，不能把扫描无告警当作安全证明。
-本次仅静态审计：不要修改文件、编译、运行程序或执行 shell，不调用需要 execute/write 授权的工具。
-不要搜索外部数据集或答案。只报告有具体代码依据的上述风险，不把其他类型缺陷归入这四类。
-最终回答只输出 JSON（可以使用 json 代码块），结构为：
-{"findings":[{"cwe":787,"line":7,"reason":"具体证据及触发条件"}],"summary":"简要结论"}。
-findings 中 cwe 只能为 787、362、401、78，line 为 main.c 的真实 1-based 行号。
-确认没有这四类风险时 findings 为 []。以上 JSON 仅为格式示例，不表示该文件有漏洞。'''
+# Target files reach ~138k characters, so a full read is ~40k tokens and the
+# cumulative input across a run needs far more headroom than a single call.
+BUDGET = {"max_llm_calls": 14, "max_tool_calls": 36, "max_input_tokens": 600000,
+          "max_output_tokens": 24000, "max_seconds": 1800, "max_compaction_calls": 8}
+PRODUCT_FILES = ("security_review.py", "security_c_rules.py", "security_rtos_rules.py",
+                 "security_analysis.py", "security_contracts.py",
+                 "plugins/vulnerability_detection.py", "agent_core/tools/pipeline.py")
+OUT = DATA / "web-sonnet45"  # replaced per --model in main()
 
 
-def now():
+def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def digest(data):
+def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def safe_text(text):
+def safe_text(text: str) -> str:
     key = os.environ.get("OPENROUTER_API_KEY", "").strip()
     return text.replace(key, "[REDACTED]") if key else text
 
 
-def atomic_write(path, text):
+def atomic_write(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temp = path.with_suffix(path.suffix + ".tmp")
     temp.write_text(safe_text(text), encoding="utf-8")
     temp.replace(path)
 
 
-def save_json(path, value):
+def save_json(path: Path, value: Any) -> None:
     atomic_write(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
 
 
-def load_samples():
-    manifest = json.loads((DATA / "manifest.json").read_text())
-    raw = (DATA / "dataset.json").read_bytes()
-    if digest(raw) != manifest["dataset_sha256"]:
-        raise ValueError("dataset.json SHA256 mismatch")
-    original = {s["id"]: s for s in json.loads(raw)["tests"]}
-    samples = {s["id"]: s for s in manifest["samples"]}
-    # Four categories first, then negative controls; frozen before any inference.
-    ordered = [samples[f"{cwe}-{n}"] for n in (1, 7, 2, 8, 3, 9, 4, 10, 5, 6)
-               for cwe in CATEGORIES]
-    if len(samples) != 40:
-        raise ValueError("Expected exactly 40 selected samples")
-    for sample in ordered:
-        ref = original[sample["id"]]
-        source = ref["code"].encode("utf-8")
-        if digest(source) != sample["sha256"]:
-            raise ValueError(f"Source SHA256 mismatch: {sample['id']}")
-        if any(sample[k] != ref[k] for k in ("cwe", "vulnerable", "lines")):
-            raise ValueError(f"Label mismatch: {sample['id']}")
-    return manifest, [{**s, "code": original[s["id"]]["code"]} for s in ordered]
+def model_slug(model: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", model.lower()).strip("-")
 
 
-def parse_answer(answer, line_count):
+def prompt_template() -> str:
+    text = PROMPT_FILE.read_text(encoding="utf-8")
+    match = re.search(r"^<!-- prompt -->[ \t]*\n(.*?)^<!-- /prompt -->", text, re.S | re.M)
+    if not match or "{file}" not in match.group(1):
+        raise ValueError("prompt.md must contain a <!-- prompt --> block with a {file} placeholder")
+    return match.group(1).strip()
+
+
+def goal(file: str) -> str:
+    return prompt_template().replace("{file}", file)
+
+
+def load_ground_truth() -> dict[str, Any]:
+    gt = json.loads(GROUND_TRUTH.read_text(encoding="utf-8"))
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    if digest(GROUND_TRUTH.read_bytes()) != manifest["ground_truth_sha256"]:
+        raise ValueError("ground_truth.json does not match manifest.json")
+    return gt
+
+
+def verify_project(gt: dict[str, Any]) -> None:
+    """Refuse to run on a project whose files differ from the frozen manifest."""
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    expected = {row["file"]: row["sha256"] for row in manifest["project_files"]}
+    for relative, sha in expected.items():
+        path = PROJECT / relative
+        if not path.exists() or digest(path.read_bytes()) != sha:
+            raise ValueError(f"project file changed or missing: {relative}; rebuild with build_contract5_dataset.py")
+    for row in gt["target_files"]:
+        if row["sha256"] != digest((PROJECT / row["file"]).read_bytes()):
+            raise ValueError(f"target file hash mismatch: {row['file']}")
+
+
+def ordered_targets(gt: dict[str, Any]) -> list[dict[str, Any]]:
+    """Fixed order: alternate vulnerable and clean files, otherwise by path."""
+    vulnerable = sorted((f for f in gt["target_files"] if f["verdict"] == "vulnerable"), key=lambda f: f["file"])
+    clean = sorted((f for f in gt["target_files"] if f["verdict"] == "clean"), key=lambda f: f["file"])
+    ordered: list[dict[str, Any]] = []
+    while vulnerable or clean:
+        if vulnerable:
+            ordered.append(vulnerable.pop(0))
+        if clean:
+            ordered.append(clean.pop(0))
+    return ordered
+
+
+def _balanced_object(text: str) -> str:
+    """Return the first brace-balanced JSON object in text, ignoring braces inside strings."""
+    start = text.find("{")
+    if start < 0:
+        raise ValueError("No JSON object in answer")
+    depth, in_string, escaped = 0, False, False
+    for index in range(start, len(text)):
+        char = text[index]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start:index + 1]
+    raise ValueError("Unterminated JSON object in answer")
+
+
+def extract_json(answer: str) -> str:
+    """Tolerate fences, a stray ``json`` language tag and surrounding prose; never guess content."""
     text = answer.strip()
-    fenced = re.findall(r"```json\s*([\s\S]*?)\s*```", text)
+    fenced = re.findall(r"```(?:json)?\s*([\s\S]*?)```", text)
     if len(fenced) > 1:
         raise ValueError("Ambiguous multiple JSON answers")
-    value = json.loads(fenced[0] if fenced else text)
+    if fenced:
+        text = fenced[0].strip()
+    # A stripped fence can leave the bare language tag on its own first line.
+    text = re.sub(r"\A(?:json|JSON)\s*\n", "", text).strip()
+    return text if text.startswith("{") else _balanced_object(text)
+
+
+def parse_answer(answer: str, line_count: int) -> dict[str, Any]:
+    value = json.loads(extract_json(answer))
     if not isinstance(value, dict) or not isinstance(value.get("findings"), list):
         raise ValueError("Missing findings array")
     if not isinstance(value.get("summary"), str):
         raise ValueError("Missing summary")
     for finding in value["findings"]:
-        if not isinstance(finding, dict) or type(finding.get("cwe")) is not int:
-            raise ValueError("Invalid finding/CWE")
-        if finding["cwe"] not in CATEGORIES:
-            raise ValueError("Out-of-scope CWE")
+        if not isinstance(finding, dict):
+            raise ValueError("Invalid finding")
+        category = finding.get("category")
+        if category not in CATEGORIES:
+            cwe = finding.get("cwe")
+            if type(cwe) is int and cwe in CWE_TO_CATEGORY and category is None:
+                finding["category"] = CWE_TO_CATEGORY[cwe]
+            else:
+                raise ValueError("Out-of-scope category")
         if type(finding.get("line")) is not int or not 1 <= finding["line"] <= line_count:
             raise ValueError("Invalid source line")
+        if "function" in finding and not isinstance(finding["function"], str):
+            raise ValueError("Invalid function name")
         if not isinstance(finding.get("reason"), str) or not finding["reason"].strip():
             raise ValueError("Missing evidence")
     return value
 
 
-def metrics(rows):
-    tp = sum(s["vulnerable"] and bool(p["findings"]) for s, p in rows)
-    tn = sum(not s["vulnerable"] and not p["findings"] for s, p in rows)
-    fp = sum(not s["vulnerable"] and bool(p["findings"]) for s, p in rows)
-    fn = sum(s["vulnerable"] and not p["findings"] for s, p in rows)
-    target_hits = sum(s["vulnerable"] and any(f["cwe"] == s["cwe"] for f in p["findings"])
-                      for s, p in rows)
-    return {"n": len(rows), "tp": tp, "tn": tn, "fp": fp, "fn": fn,
-            "target_hits": target_hits, "strict_correct": target_hits + tn}
+def classify(sites: list[dict[str, Any]], prediction: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Match findings to ground-truth sites by category + (function name or line range)."""
+    findings = prediction["findings"]
+    matched_ids: set[int] = set()
+    rows = []
+    for site in sites:
+        hits = [f for f in findings if f["category"] == site["category"] and (
+            f.get("function") == site["function"] or site["line_start"] <= f["line"] <= site["line_end"])]
+        matched_ids.update(id(f) for f in hits)
+        rows.append({**site, "detected": bool(hits), "matched_findings": hits})
+    unmatched = [f for f in findings if id(f) not in matched_ids]
+    return rows, unmatched
 
 
-def rate(n, d):
-    return f"{n / d:.2%} ({n}/{d})" if d else "N/A（分母为 0）"
+def metric(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    tp = sum(r["expected"] == "defect" and r["detected"] for r in rows)
+    fn = sum(r["expected"] == "defect" and not r["detected"] for r in rows)
+    fp = sum(r["expected"] == "control" and r["detected"] for r in rows)
+    tn = sum(r["expected"] == "control" and not r["detected"] for r in rows)
+
+    def ratio(n: int, d: int) -> float | None:
+        return n / d if d else None
+
+    return {"n": len(rows), "tp": tp, "fn": fn, "fp": fp, "tn": tn,
+            "detection_rate": ratio(tp, tp + fn), "warning_accuracy": ratio(tp, tp + fp),
+            "false_positive_rate": ratio(fp, fp + tn), "accuracy": ratio(tp + tn, tp + tn + fp + fn)}
 
 
-def credit_failure(events):
-    errors = [e["payload"].get("error", {}) for e in events if e["type"] == "run.failed"]
+def rate(value: float | None) -> str:
+    return "N/A" if value is None else f"{value:.2%}"
+
+
+def file_metric(records: dict[str, Any], targets: list[dict[str, Any]]) -> dict[str, Any]:
+    tp = tn = fp = fn = 0
+    for target in targets:
+        prediction = records.get(target["file"], {}).get("prediction")
+        if prediction is None:
+            continue
+        predicted = bool(prediction["findings"])
+        actual = target["verdict"] == "vulnerable"
+        tp += predicted and actual
+        tn += (not predicted) and (not actual)
+        fp += predicted and not actual
+        fn += (not predicted) and actual
+    n = tp + tn + fp + fn
+    return {"n": n, "tp": tp, "tn": tn, "fp": fp, "fn": fn,
+            "accuracy": (tp + tn) / n if n else None,
+            "false_positive_rate": fp / (fp + tn) if fp + tn else None}
+
+
+def scored_rows(checkpoint: dict[str, Any]) -> list[dict[str, Any]]:
+    return [row for record in checkpoint.get("samples", {}).values() if record.get("status") == "scored"
+            for row in record.get("rows", [])]
+
+
+def credit_failure(events: list[dict[str, Any]]) -> bool:
+    errors = [e.get("payload", {}).get("error", {}) for e in events if e.get("type") == "run.failed"]
     return any(re.search(r"\b402\b|insufficient.*credit|not enough credit|credit.*insufficient",
                          json.dumps(e), re.I) for e in errors)
 
 
-def credit_stop_reason(events):
-    errors = [e["payload"].get("error", {}) for e in events if e["type"] == "run.failed"]
+def credit_stop_reason(events: list[dict[str, Any]]) -> str:
+    errors = [e.get("payload", {}).get("error", {}) for e in events if e.get("type") == "run.failed"]
     if any("in_flight_budget_exhausted" in json.dumps(e) for e in errors):
         return "OpenRouter 402：在途请求额度占用，余额未必耗尽；已停止，待在途请求结算后可重试"
-    return "OpenRouter 返回额度不足，已停止；充值后从此样本继续"
+    return "OpenRouter 返回额度不足，已停止；充值后从此文件继续"
 
 
-def refresh_scores(checkpoint, samples):
-    """Reparse saved completed answers offline; never spend tokens on format repair."""
-    for sample in samples:
-        rec = checkpoint["samples"].get(sample["id"], {})
-        if rec.get("status") != "unscored":
+def refresh_scores(checkpoint: dict[str, Any], gt: dict[str, Any]) -> None:
+    """Re-parse saved completed answers offline; never spend tokens on format repair."""
+    sites_by_file = sites_index(gt)
+    lines_by_file = {f["file"]: f["lines"] for f in gt["target_files"]}
+    for file, rec in checkpoint.get("samples", {}).items():
+        if rec.get("status") != "unscored" or not rec.get("attempts"):
             continue
         evidence = OUT / "runs" / f"{rec['attempts'][-1]['run_id']}.json"
-        state = json.loads(evidence.read_text())["state"]
-        if state["status"] != "completed":
+        if not evidence.exists():
+            continue
+        state = json.loads(evidence.read_text(encoding="utf-8"))["state"]
+        if state.get("status") != "completed":
             continue
         try:
-            rec["prediction"] = parse_answer(state["final_answer"], len(sample["code"].splitlines()))
-            rec["status"] = "scored"
-            rec.pop("error", None)
-        except (ValueError, TypeError):
-            pass
+            prediction = parse_answer(state["final_answer"], lines_by_file[file])
+        except (ValueError, TypeError, KeyError):
+            continue
+        rows, unmatched = classify(sites_by_file.get(file, []), prediction)
+        rec.update({"status": "scored", "prediction": prediction, "rows": rows, "out_of_scope_findings": unmatched})
+        rec.pop("error", None)
 
 
-def report(checkpoint, manifest, samples):
-    records = checkpoint["samples"]
-    rows = [(s, records[s["id"]]["prediction"]) for s in samples
-            if records.get(s["id"], {}).get("prediction") is not None]
-    m = metrics(rows)
-    attempted = sum(bool(r["attempts"]) for r in records.values())
-    balance = checkpoint.get("credits", [])
-    lines = ["# 合同第 5 项：Web Agent 实测结果", "",
-             f"更新时间（UTC）：{now()}", "",
-             f"整体文件级正确率：**{rate(m['tp'] + m['tn'], m['n'])}**。"
-             f"已有效评分 **{m['n']}/40** 条，已尝试 {attempted} 条；"
-             f"已尝试但未评分 {attempted - m['n']} 条。", "",
-             "**性质：同一数据集上的调优后复测，按原始标签计分；不是独立泛化成绩或正式合同验收。**", "",
-             f"状态：{checkpoint['stop_reason']}。", "",
-             ("40 条样本已全部有效完成，以上正确率覆盖完整选定子集。" if m["n"] == len(samples)
-              else "这是当前有效完成样本的阶段性结果，不是全部 40 条样本的得分。") +
-             "API/额度错误、未完成 Run、输出格式错误不会当作无漏洞或正确结果。", "",
-             "## 指标", "", "| 指标 | 当前结果 |", "|---|---|",
-             f"| 文件级 Accuracy = (TP+TN)/N | {rate(m['tp']+m['tn'],m['n'])} |",
-             f"| 告警精确率 Precision = TP/(TP+FP) | {rate(m['tp'],m['tp']+m['fp'])} |",
-             f"| 文件级检出率 Recall = TP/(TP+FN) | {rate(m['tp'],m['tp']+m['fn'])} |",
-             f"| 误报率 FPR = FP/(FP+TN) | {rate(m['fp'],m['fp']+m['tn'])} |",
-             f"| 目标 CWE 正确率（正例须命中目标类别） | {rate(m['strict_correct'],m['n'])} |",
-             f"| 目标 CWE 检出率 | {rate(m['target_hits'],m['tp']+m['fn'])} |",
-             f"| TP / TN / FP / FN | {m['tp']} / {m['tn']} / {m['fp']} / {m['fn']} |", "",
-             "计分单位为文件：findings 非空视为预测有风险；标签以冻结数据集为准。"
-             "未逐条判定告警的真伪，也未把行号精确匹配计入正确率。"
-             "因此文件级 Precision 不等同于逐条告警精确率。"
-             "解析接受纯 JSON 或回答中唯一的 json 代码块；周围说明文字不参与评分，"
-             "不使用另一模型改写或修复答案。", "",
-             "| 类别 | 已评分 | 文件级正确率 | 目标 CWE 检出率 | 误报率 |",
-             "|---|---:|---|---|---|"]
-    for cwe, name in CATEGORIES.items():
-        cm = metrics([(s, p) for s, p in rows if s["cwe"] == cwe])
-        lines.append(f"| {name} CWE-{cwe} | {cm['n']}/10 | "
-                     f"{rate(cm['tp']+cm['tn'],cm['n'])} | "
-                     f"{rate(cm['target_hits'],cm['tp']+cm['fn'])} | {rate(cm['fp'],cm['fp']+cm['tn'])} |")
-    if m["n"] == len(samples) and m["fp"] + m["tn"] and m["fp"] / (m["fp"] + m["tn"]) >= 0.08:
-        lines += ["", "即使按本实验的文件级代理口径，误报率也仍未低于合同要求的 8%，"
-                  "不能将本轮表述为合同第 5 项全部指标达标。操作系统注入场景等适用边界见文末。"]
-    errors = [(s, p) for s, p in rows if bool(p["findings"]) != s["vulnerable"]]
+def sites_index(gt: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    index: dict[str, list[dict[str, Any]]] = {}
+    for site in gt["sites"]:
+        index.setdefault(site["file"], []).append(site)
+    return index
+
+
+def report(checkpoint: dict[str, Any], gt: dict[str, Any], model: str) -> str:
+    records = checkpoint.get("samples", {})
+    targets = ordered_targets(gt)
+    rows = scored_rows(checkpoint)
+    overall = metric(rows)
+    files = file_metric(records, targets)
+    scored_files = sum(r.get("status") == "scored" for r in records.values())
+    attempted = sum(bool(r.get("attempts")) for r in records.values())
+    project = gt["project"]
+    lines = ["# 合同第 5 项：操作系统底层程序高危代码检测实测结果", "",
+             f"更新时间（UTC）：{now()}", ""]
+    if model != DEFAULT_MODEL:
+        lines += [f"> **本轮不是合同成绩。** 使用的是 `{model}`，并非合同要求的 Claude/GPT 级模型，"
+                  f"本轮仅用于验证数据集与测试链路（提示词、读取覆盖、JSON 解析、site 计分、报告生成）是否正确。"
+                  f"合同成绩须用 `{DEFAULT_MODEL}` 或更强的 Claude/GPT 模型重跑，结果写入 `web-<model>/` 独立目录。", ""]
+    lines += [
+             f"数据集：{project['name']} {project['ref']}（提交 `{project['commit'][:12]}`）子集，"
+             f"{project['file_count']} 个文件、源码 {project['source_lines']} 行；"
+             f"待检文件 {len(gt['target_files'])} 个、合计 {gt['target_file_lines']} 行；"
+             f"每类注入缺陷 10 处，共 {sum(c['defects'] for c in gt['categories'].values())} 处缺陷 + "
+             f"{sum(c['controls'] for c in gt['categories'].values())} 处安全对照。"
+             "数据集与真值见 `artifacts/contract5/rtthread/dataset/`，构建方法见 `scripts/build_contract5_dataset.py`。", "",
+             f"模型：OpenRouter / `{model}`；状态：{checkpoint.get('stop_reason', '尚未开始')}；"
+             f"已尝试 {attempted}/{len(targets)} 个文件，已有效评分 {scored_files}/{len(targets)} 个。", ""]
+    if not rows:
+        lines += ["**尚未产生任何有效评分结果。** 下列指标表在运行 `uv run python scripts/benchmark_contract5_web.py` 后自动填充；"
+                  "API/额度错误、未完成 Run、输出格式错误不会被当作无漏洞或正确结果。", ""]
+    else:
+        lines += [("全部待检文件已有效完成，以下为完整结果。" if scored_files == len(targets)
+                   else "**这是部分文件的阶段性结果，不是完整数据集的得分。**") +
+                  "API/额度错误、未完成 Run、输出格式错误不计入 TP/TN/FP/FN。", ""]
+    lines += ["检测系统的静态层可单独评估（不调模型、不联网）："
+              "`uv run python scripts/measure_contract5_static.py`；"
+              "其成绩与本轮端到端成绩的差异分析见 `合同-5-数据集说明.md` 第 5.2、5.3 节。", "",
+              "## 指标（site 级：每处注入缺陷 / 安全对照函数为一个样本）", "",
+              "| 指标 | 公式 | 当前结果 |", "|---|---|---|",
+              f"| 预警准确率（合同口径） | TP/(TP+FP) | {rate(overall['warning_accuracy'])} ({overall['tp']}/{overall['tp'] + overall['fp']}) |",
+              f"| 误报率（合同口径） | FP/(FP+TN) | {rate(overall['false_positive_rate'])} ({overall['fp']}/{overall['fp'] + overall['tn']}) |",
+              f"| 检出率 | TP/(TP+FN) | {rate(overall['detection_rate'])} ({overall['tp']}/{overall['tp'] + overall['fn']}) |",
+              f"| 正确率 | (TP+TN)/N | {rate(overall['accuracy'])} ({overall['tp'] + overall['tn']}/{overall['n']}) |",
+              f"| TP / FN / FP / TN | — | {overall['tp']} / {overall['fn']} / {overall['fp']} / {overall['tn']} |", "",
+              "合同阈值：预警准确率 > 90%，误报率 < 8%；甲方期望数据集难度使正确率落在 85%–90%。"
+              "本脚本只输出原始数值，不输出达标结论。", "",
+              "| 类别 | TP | FN | FP | TN | 检出率 | 预警准确率 | 误报率 | 正确率 |", "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
+    for category, name in CATEGORIES.items():
+        m = metric([r for r in rows if r["category"] == category])
+        lines.append(f"| {name} | {m['tp']} | {m['fn']} | {m['fp']} | {m['tn']} | {rate(m['detection_rate'])} | "
+                     f"{rate(m['warning_accuracy'])} | {rate(m['false_positive_rate'])} | {rate(m['accuracy'])} |")
+    lines += [f"| 总体 | {overall['tp']} | {overall['fn']} | {overall['fp']} | {overall['tn']} | {rate(overall['detection_rate'])} | "
+              f"{rate(overall['warning_accuracy'])} | {rate(overall['false_positive_rate'])} | {rate(overall['accuracy'])} |", "",
+              "| 缺陷难度 | 缺陷数 | 已评分 | 检出 | 检出率 |", "|---|---:|---:|---:|---:|"]
+    for difficulty in DIFFICULTIES:
+        total = sum(s["expected"] == "defect" and s["difficulty"] == difficulty for s in gt["sites"])
+        scored = [r for r in rows if r["expected"] == "defect" and r["difficulty"] == difficulty]
+        hit = sum(r["detected"] for r in scored)
+        lines.append(f"| {difficulty} | {total} | {len(scored)} | {hit} | {rate(hit / len(scored) if scored else None)} |")
+    lines += ["", "## 文件级判定", "",
+              "文件级：findings 非空视为预测有漏洞；真值 verdict=vulnerable 的文件至少含一处注入缺陷，clean 文件不含缺陷（可含安全对照）。", "",
+              "| 指标 | 当前结果 |", "|---|---|",
+              f"| 文件级正确率 | {rate(files['accuracy'])} ({files['tp'] + files['tn']}/{files['n']}) |",
+              f"| 文件级误报率（clean 文件被报有漏洞） | {rate(files['false_positive_rate'])} ({files['fp']}/{files['fp'] + files['tn']}) |",
+              f"| 文件级 TP / FN / FP / TN | {files['tp']} / {files['fn']} / {files['fp']} / {files['tn']} |", ""]
+    errors = [r for r in rows if r["detected"] != (r["expected"] == "defect")]
     if errors:
-        lines += ["", "## 与原标签不一致的样本", "",
-                  "以下均保留在上述计分中。人工复核提示不是对标签的自动修订，也不产生另一套更高的主成绩。"]
-        for sample, prediction in errors:
-            lines += ["", f"- `{sample['id']}`：{'漏报' if sample['vulnerable'] else '按标签计为误报'}。"
-                      f"模型结论：{prediction['summary']}",
-                      f"  [原始数据集](artifacts/contract5/dataset.json) 中检索 ID `{sample['id']}` 可查看源码。"]
-        error_ids = {s["id"] for s, _ in errors}
-        if "362-10" in error_ids:
-            lines += ["", "人工源码复核发现 `362-10` 存在标签争议：主线程把循环变量 `&t` "
-                      "传入多个 pthread，工作线程通过 `*t` 读取，主线程继续修改该变量；"
-                      "这些访问间没有同步，模型的竞争告警有代码依据。"
-                      "原数据集说明只关注不同文件名，却未反映共享参数的问题。"
-                      "本报告仍按原始负例标签计为 FP，建议独立复核并向数据集上游反馈，"
-                      "不应为提高得分而让产品忽略这种风险。"]
-        if "78-10" in error_ids:
-            lines += ["", "`78-10` 的模型告警以长输入越界为依据，但其所述上界关系有误："
-                      "`BUFSIZ-11` 小于 `BUFSIZ-9`，不是大于。"
-                      "仍需改进跨函数、指针偏移与仅删除字符的过滤器的区间推理；"
-                      "这里仅反驳该条具体长输入论证，不把所有异常输入路径宣告为安全。"]
+        lines += ["## 与真值不一致的 site", "",
+                  "以下均保留在上述计分中；人工复核意见不修改标签，也不产生另一套更高的成绩。", "",
+                  "| site | 文件 | 函数 | 类别 | 难度 | 判定 | 真值说明 |", "|---|---|---|---|---|---|---|"]
+        for r in errors:
+            verdict = "漏报 FN" if r["expected"] == "defect" else "误报 FP"
+            reason = (r["matched_findings"][0]["reason"] if r["matched_findings"] else "")[:160]
+            lines.append(f"| `{r['id']}` | `{r['file']}` | `{r['function']}` | {CATEGORIES[r['category']]} | {r['difficulty']} | {verdict} | "
+                         f"{r['description'][:160]}{'；模型理由：' + reason if reason else ''} |")
+        lines.append("")
+    out_of_scope = sum(len(rec.get("out_of_scope_findings", [])) for rec in records.values())
+    lines += [f"范围外告警（不落在任何注入/对照函数上、不计入 site 级指标）：{out_of_scope} 条；明细见 checkpoint。", "",
+              "## 逐文件进度", "", "| 文件 | 行数 | 真值 | 缺陷/对照 | 状态 | 预测告警数 | site TP/FN/FP/TN | 文件判定 | Run |",
+              "|---|---:|---|---|---|---:|---|---|---|"]
+    for target in targets:
+        rec = records.get(target["file"], {})
+        prediction = rec.get("prediction")
+        m = metric(rec.get("rows", [])) if prediction else None
+        file_ok = "—" if prediction is None else ("正确" if bool(prediction["findings"]) == (target["verdict"] == "vulnerable") else "错误")
+        run_id = rec["attempts"][-1].get("run_id", "") if rec.get("attempts") else ""
+        counts = f"{m['tp']}/{m['fn']}/{m['fp']}/{m['tn']}" if m else "—"
+        lines.append(f"| `{target['file']}` | {target['lines']} | {'有缺陷' if target['verdict'] == 'vulnerable' else '无缺陷'} | "
+                     f"{target['defect_count']}/{target['control_count']} | {rec.get('status', '未测试')} | "
+                     f"{len(prediction['findings']) if prediction else '—'} | {counts} | {file_ok} | `{run_id[:8]}` |")
     lines += ["", "## 测试链路、额度与证据", "",
-              f"- 模型：OpenRouter / `{MODEL}`；无模型 fallback。",
-              "- 链路：Web `/api/agent/threads` → 新消息 → Run `/step` → 读取状态和 events；"
-              "与页面共用持久化 Agent 引擎，不是脚本直接询问模型，也不是浏览器点击自动化。",
-              "- 每条样本一个独立对话、独立工作区，文件重命名为 main.c；原始代码不变。"
-              "不向 Agent 提供 CWE 标签、正负例标签或参考行号。",
-              "- 静态只读审计，不编译/执行样本、不授权写入或 execute 工具；"
-              "允许 Agent 读取源码、调用只读扫描并分析。Cppcheck 执行工具不在本次授权范围。",
-              "- 固定次序：样本编号 1、7、2、8、3、9、4、10、5、6，"
-              "每个编号依次测试 CWE-787、362、401、78；不按模型表现筛样本。",
-              f"- 每个 Run 预算：`{json.dumps(BUDGET)}`。",
-              "- [完整预测、断点与配置](artifacts/contract5/web-sonnet45/checkpoint.json)；"
-              "保留每条样本的结构化结论、Thread/Run ID、时间和冻结配置。",
-              "- 完整 Run 日志与临时工作区不纳入版本管理，完成评分后可清理；"
-              "未评分样本的 runs/ 答案须保留用于离线重解析。"
-              "原始源码统一保存在 dataset.json，不再重复导出 samples/。",
-              "- 本次清理未删除服务数据库中的对话历史；Web 对话标题为“合同5 · sample_NNN”。"
-              "已清理工作区的历史源码文件不再可浏览，源码以数据集为准。"]
-    lines += ["", "## 本轮模块优化与实验口径", "",
-              "本轮在清除旧测试结果后从零运行。产品新增 `c-security-review-v1`："
-              "字面量格式中无长度限制的 scanf 字符串/扫描集候选检测，以及缓冲区精确长度、"
-              "命令源到执行点的数据流、同步失败路径、分配释放所有权的复核规则。"
-              "规则随漏洞扫描工具返回，Web 用户也能使用；未把样本 ID、文件散列或答案表写入产品。", "",
-              "**这 40 条样本已用于分析失败模式与调优，本轮是调优集复测，不是独立测试集成绩。**"
-              "标签、源码、评分方法和样本顺序未修改；本轮固定模块版本后完整跑队列，"
-              "不因答案错误重试，不剔除难例。独立泛化能力仍需新的未参与调优的样本验证。", "",
-              "语义复核依据：[POSIX fgets](https://pubs.opengroup.org/onlinepubs/009696699/functions/fgets.html)、"
-              "[格式化输出](https://pubs.opengroup.org/onlinepubs/009604499/functions/fprintf.html)、"
-              "[互斥锁返回语义](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_mutex_lock.html)。", "",
-              "源码版本 SHA256（用于防止续跑时混入另一版检测器）：", ""]
-    for name, value in checkpoint.get("protocol", {}).get("product_sha256", {}).items():
-        lines.append(f"- `{name}`：`{value}`")
+              f"- 模型：OpenRouter / `{model}`；无模型 fallback。可选的 GPT/Claude 更强模型用 `--model` 指定，"
+              "并在 Web 后端启动时把运行时默认模型设为同一值；不同模型的结果写入不同的 `web-<model>/` 目录，不混合。",
+              "- 链路：Web `/api/agent/threads` → 新消息 → Run `/step` → 读取状态和 events；与页面共用持久化 Agent 引擎，不是脚本直接询问模型。",
+              "- 每个待检文件一个独立对话；工作区为整个注入后的工程目录，target_files 只给该文件；"
+              "不向 Agent 提供 ground truth、注入位置或正负标签，真值文件不在工作区内。",
+              "- 静态只读审计：允许读取源码与调用只读扫描工具；不编译、不执行、不授权 write/execute 工具（等待审批的工具调用一律拒绝）。",
+              f"- 固定次序：有缺陷文件与无缺陷文件交替，各自按路径排序；不按模型表现筛文件。每个 Run 预算：`{json.dumps(BUDGET)}`。",
+              "- 提示词模板：`artifacts/contract5/rtthread/prompt.md`；计分：category 相同且 function 同名或 line 落在函数范围内即命中。",
+              f"- 完整预测、断点与配置：`artifacts/contract5/rtthread/{OUT.name}/checkpoint.json`；Run 事件日志保存在同目录 `runs/`（不入库）。",
+              "- 脚本启动时核对工程全部文件与 ground truth 的 SHA256，防止在被改动的工程上计分。"]
+    balance = checkpoint.get("credits", [])
     if balance:
         lines += ["", "## 额度记录", "",
-                  f"- 首次余额：${balance[0]['effective_remaining_usd']:.6f}；"
-                  f"最近余额：${balance[-1]['effective_remaining_usd']:.6f}"
+                  f"- 首次余额：${balance[0]['effective_remaining_usd']:.6f}；最近余额：${balance[-1]['effective_remaining_usd']:.6f}"
                   f"（查询时间 {balance[-1]['checked_utc']}）。",
-                  f"- 两次查询之间账户余额净变化："
-                  f"${balance[0]['effective_remaining_usd']-balance[-1]['effective_remaining_usd']:.6f}。"
-                  "该差值可能包含期间其他请求，不等同于本实验精确账单。",
-                  "- 余额入账可能延迟；在途占用或下一请求的 token 预留也可能触发 402。"
-                  "停止不等于账户已扣至零，脚本不会降低预留预算或更换模型来强行扣完余额。"]
-    lines += ["", "## 四个范例", "", "固定展示每类第一个有效完成样本，包含错误结论，不仅挑选成功案例。"]
-    for cwe, name in CATEGORIES.items():
-        examples = [(s, p) for s, p in rows if s["cwe"] == cwe]
-        lines += ["", f"### {name}（CWE-{cwe}）", ""]
-        if not examples:
-            lines.append("尚无有效完成样本；充值续跑后自动填充，不编造示例结果。")
-            continue
-        sample, prediction = examples[0]
-        record = records[sample["id"]]
-        attempt = record["attempts"][-1]
-        correct = bool(prediction["findings"]) == sample["vulnerable"]
-        lines += [f"样本：`{sample['name']}`；数据集标签："
-                  f"{'有漏洞' if sample['vulnerable'] else '无漏洞'}；"
-                  f"文件级判定：{'正确' if correct else '错误'}。",
-                  f"参考行：{sample['lines']}；Thread：`{attempt['thread_id']}`；Run：`{attempt['run_id']}`。", "",
-                  f"[保存的预测与 Run 标识](artifacts/contract5/web-sonnet45/checkpoint.json)（样本 `{sample['id']}`）", "",
-                  "```c", sample["code"].rstrip(), "```", "",
-                  "Agent 最终结构化结论：", "", "```json",
-                  json.dumps(prediction, ensure_ascii=False, indent=2), "```"]
-    lines += ["", "## 逐样本进度", "", "| 样本 | 标签 | 状态 | 预测类别 | 文件判定 |",
-              "|---|---|---|---|---|"]
-    for sample in samples:
-        rec = records.get(sample["id"], {})
-        prediction = rec.get("prediction")
-        status = rec.get("status", "未测试")
-        result = "—" if prediction is None else ("正确" if bool(prediction["findings"]) == sample["vulnerable"] else "错误")
-        predicted = "—" if prediction is None else str(sorted({f["cwe"] for f in prediction["findings"]}))
-        lines.append(f"| {sample['id']} | {'正例' if sample['vulnerable'] else '反例'} | {status} | {predicted} | {result} |")
-    lines += ["", "## 数据来源与合同适用边界", "",
-              "CASTLE C250 v1.2（本地快照元数据日期 2025-03-13），"
-              f"[固定源版本](https://github.com/CASTLE-Benchmark/CASTLE-Benchmark/tree/{manifest['revision']})。"
-              "所选四类每类 10 条，共 24 条正例、16 条反例。",
-              f"dataset.json SHA256：`{manifest['dataset_sha256']}`；"
-              "脚本启动时核对源码散列及其与原始 dataset.json 的标签、代码一致性。", "",
-              "标签解释提示：362-1 原始标签为有竞争风险，源码虽有互斥锁，"
-              "却未检查初始化/加锁返回值。是否将这些异常路径计为目标竞争风险，"
-              "会影响人工判断；本报告不自行改标签，保留模型结论与原标签的分歧。", "",
-              "合同要求在一个操作系统底层程序中每类注入 10 处缺陷，并满足预警准确率 >90%、误报率 <8%。"
-              "本实验是独立 C 微型程序测试，每类仅 6 条正例加 4 条反例，"
-              "不满足该注入场景与数量条件；合同的预警准确率还需确认是 Precision 还是其他口径。"
-              "小样本与余额截断也限制外推，不能据此直接宣布验收达标。", "",
-              "## 充值后继续", "", "保持 Web 服务使用相同模型启动，且环境中有 OPENROUTER_API_KEY：", "",
-              "```bash", "uv run python scripts/benchmark_contract5_web.py", "```", "",
-              "脚本默认续跑，保留已评分结果（包括错误），不会反复测到答对。"
-              "仅额度失败的样本会在充值或在途额度释放后重开 Run；非额度失败保留为未评分。"
-              "`--report-only` 可在不发起任何网络请求的情况下重新生成本报告。"]
-    atomic_write(REPORT, "\n".join(lines) + "\n")
+                  "- 两次查询之间的差值可能包含期间其他请求，不等同于本实验精确账单；余额入账可能延迟，在途占用也可能触发 402。"]
+    lines += ["", "## 运行与续跑", "", "启动 Web 服务（运行时默认模型与 `--model` 一致）并导出 OPENROUTER_API_KEY 后：", "",
+              "```bash", "uv run python scripts/benchmark_contract5_web.py                 # 全部待检文件，默认续跑",
+              "uv run python scripts/benchmark_contract5_web.py --limit 2       # 低成本冒烟：前 2 个文件",
+              "uv run python scripts/benchmark_contract5_web.py --print-prompts # 不联网，打印每个文件的提示词",
+              "uv run python scripts/benchmark_contract5_web.py --report-only   # 不联网，重新生成本报告", "```", "",
+              "脚本保留已评分结果（包括错误），不会反复测到答对；仅额度失败的文件会在充值后重开 Run，非额度失败需加 `--retry-failed`。", ""]
+    return "\n".join(lines)
 
 
 class WebClient:
-    def __init__(self, base):
+    def __init__(self, base: str):
         url = urlparse(base)
         if url.scheme != "http" or url.hostname not in {"127.0.0.1", "localhost", "::1"}:
             raise ValueError("Only a local HTTP Web backend is allowed")
@@ -319,74 +422,82 @@ class WebClient:
         self.session = requests.Session()
         self.session.trust_env = False  # Local API must not forward the key through a proxy.
 
-    def call(self, method, path, **kwargs):
-        response = self.session.request(method, self.base + path, timeout=660,
-                                        allow_redirects=False, **kwargs)
+    def call(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
+        response = self.session.request(method, self.base + path, timeout=660, allow_redirects=False, **kwargs)
         if response.status_code != 200:
             raise RuntimeError(f"Web {path}: HTTP {response.status_code}: {safe_text(response.text[:800])}")
         return response.json()
 
 
-def run(checkpoint, manifest, samples, base):
+def clear_workspace_scratch() -> None:
+    """Drop tool scratch output so each target file is audited independently."""
+    scratch = PROJECT / ".code-agent"
+    if scratch.exists():
+        shutil.rmtree(scratch)
+
+
+def is_skippable(record: dict[str, Any], retry_failed: bool) -> bool:
+    if record.get("prediction") is not None or record.get("status") == "unscored":
+        return True
+    return record.get("status") == "failed" and not retry_failed
+
+
+def run(checkpoint: dict[str, Any], gt: dict[str, Any], targets: list[dict[str, Any]], base: str, model: str, retry_failed: bool = False) -> None:
     client = WebClient(base)
     bootstrap = client.call("GET", "/api/bootstrap")
     config = bootstrap["runtime_default_model_config"]
-    if (config["provider"], config["model"], config["base_url"].rstrip("/")) != (
-            "openrouter", MODEL, "https://openrouter.ai/api/v1") or config.get("fallback_models"):
-        raise ValueError("Web runtime defaults do not match OpenRouter / Sonnet 4.5 / no fallback")
-    signature = {"model_config": config, "budget": BUDGET, "goal": GOAL,
-                 "manifest_sha256": digest((DATA / "manifest.json").read_bytes()),
-                 "product_sha256": {name: digest((ROOT / name).read_bytes()) for name in PRODUCT_FILES},
-                 "order": [s["id"] for s in samples], "base_url": base}
+    if (config.get("provider"), config.get("model"), config.get("base_url", "").rstrip("/")) != (
+            "openrouter", model, "https://openrouter.ai/api/v1") or config.get("fallback_models"):
+        raise ValueError(f"Web runtime defaults do not match OpenRouter / {model} / no fallback")
+    signature = {"model_config": config, "budget": BUDGET, "prompt_sha256": digest(prompt_template().encode("utf-8")),
+                 "ground_truth_sha256": digest(GROUND_TRUTH.read_bytes()), "manifest_sha256": digest(MANIFEST.read_bytes()),
+                 "product_sha256": {name: digest((ROOT / name).read_bytes()) for name in PRODUCT_FILES if (ROOT / name).exists()},
+                 "order": [t["file"] for t in ordered_targets(gt)], "base_url": base, "scoring": "site:category+function_or_line_range"}
     if checkpoint.get("protocol", signature) != signature:
-        raise ValueError("Evaluation protocol changed; do not mix results in the existing checkpoint")
+        raise ValueError("Evaluation protocol changed (model/prompt/dataset/product rules); use a new output directory instead of mixing results")
     checkpoint["protocol"] = signature
+    sites_by_file = sites_index(gt)
 
-    def persist():
+    def persist() -> None:
         save_json(OUT / "checkpoint.json", checkpoint)
-        report(checkpoint, manifest, samples)
+        atomic_write(REPORT, report(checkpoint, gt, model))
 
-    def credits():
+    def credits() -> float:
         receipt = check_credits()
-        checkpoint["credits"].append(receipt)
+        checkpoint.setdefault("credits", []).append(receipt)
         persist()
         print(f"Available credit: ${receipt['effective_remaining_usd']:.6f}", flush=True)
         return receipt["effective_remaining_usd"]
 
-    for index, sample in enumerate(samples, 1):
-        rec = checkpoint["samples"].setdefault(sample["id"], {"attempts": []})
-        if rec.get("prediction") is not None or rec.get("status") in {"unscored", "failed"}:
+    total = len(targets)
+    for index, target in enumerate(targets, 1):
+        file = target["file"]
+        rec = checkpoint["samples"].setdefault(file, {"attempts": []})
+        if is_skippable(rec, retry_failed):
+            print(f"[{index}/{total}] {file} {rec.get('status')}：跳过（已有结果）", flush=True)
             continue
         if credits() <= 0:
             checkpoint["stop_reason"] = "额度不足，等待充值后续跑"
             persist()
             return
-        workspace = OUT / "workspaces" / f"sample_{index:03d}"
-        workspace.mkdir(parents=True, exist_ok=True)
-        source = sample["code"].encode("utf-8")
-        target = workspace / "main.c"
-        if target.exists() and target.read_bytes() != source:
-            raise ValueError(f"Workspace source changed: {sample['id']}")
-        if not target.exists():
-            atomic_write(target, source.decode())
+        clear_workspace_scratch()
         attempt = rec["attempts"][-1] if rec["attempts"] else None
-        if attempt is None or rec.get("status") == "credit_exhausted":
+        if attempt is None or rec.get("status") in {"credit_exhausted", "failed"}:
             thread = client.call("POST", "/api/agent/threads", json={
-                "title": f"合同5 · sample_{index:03d}", "workspace": str(workspace),
-                "runtime_mode": "agent", "runtime_model_config": config, "budget": BUDGET})
+                "title": f"合同5 · {file}", "workspace": str(PROJECT), "runtime_mode": "agent",
+                "runtime_model_config": config, "budget": BUDGET})
             attempt = {"thread_id": thread["thread_id"], "created_utc": now()}
             rec["attempts"].append(attempt)
             rec["status"] = "created"
             persist()
         if "run_id" not in attempt:
-            # Do not duplicate a message whose HTTP response was lost.
             if attempt.get("message_pending"):
                 raise RuntimeError("Message response lost; inspect saved Thread before retrying to avoid duplicate billing")
             attempt["message_pending"] = True
             persist()
             created = client.call("POST", f"/api/agent/threads/{attempt['thread_id']}/messages", json={
-                "content": GOAL, "target_files": ["main.c"],
-                "context_items": [{"path": "main.c", "absolute_path": str(target), "external": False, "type": "file"}],
+                "content": goal(file), "target_files": [file],
+                "context_items": [{"path": file, "absolute_path": str(PROJECT / file), "external": False, "type": "file"}],
                 "budget": BUDGET, "api_key": os.environ["OPENROUTER_API_KEY"]})
             attempt["run_id"] = created["run_id"]
             attempt.pop("message_pending")
@@ -396,9 +507,9 @@ def run(checkpoint, manifest, samples, base):
         if state["runtime_model_config"] != config:
             raise ValueError("Run model snapshot does not match the frozen configuration")
         while state["status"] not in TERMINAL:
-            print(f"[{index}/40] {sample['id']} {state['status']} LLM={state.get('llm_calls',0)}", flush=True)
+            print(f"[{index}/{total}] {file} {state['status']} LLM={state.get('llm_calls', 0)}", flush=True)
             if state["status"] == "waiting_approval":
-                state = client.call("POST", run_path + "/reject")
+                state = client.call("POST", run_path + "/reject")  # never approve execute/write tools
             elif state["status"] == "paused":
                 raise RuntimeError(f"Run paused: {attempt['run_id']}; review it in the Web UI")
             else:
@@ -409,8 +520,7 @@ def run(checkpoint, manifest, samples, base):
             persist()
         events = client.call("GET", run_path + "/events")["events"]
         save_json(OUT / "runs" / f"{attempt['run_id']}.json", {"state": state, "events": events})
-        attempt["status"] = state["status"]
-        attempt["finished_utc"] = now()
+        attempt.update({"status": state["status"], "finished_utc": now()})
         if credit_failure(events):
             rec["status"] = "credit_exhausted"
             checkpoint["stop_reason"] = credit_stop_reason(events)
@@ -419,53 +529,85 @@ def run(checkpoint, manifest, samples, base):
             return
         if state["status"] == "completed":
             try:
-                rec["prediction"] = parse_answer(state["final_answer"], len(source.decode().splitlines()))
-                rec["status"] = "scored"
+                prediction = parse_answer(state["final_answer"], target["lines"])
+                rows, unmatched = classify(sites_by_file.get(file, []), prediction)
+                rec.update({"status": "scored", "prediction": prediction, "rows": rows, "out_of_scope_findings": unmatched})
+                rec.pop("error", None)
+                m = metric(rows)
+                print(f"[{index}/{total}] {file} 已评分：告警 {len(prediction['findings'])} 条，site TP/FN/FP/TN={m['tp']}/{m['fn']}/{m['fp']}/{m['tn']}", flush=True)
             except (ValueError, TypeError) as exc:
-                rec["status"] = "unscored"
-                rec["error"] = str(exc)
+                rec.update({"status": "unscored", "error": str(exc)})
+                print(f"[{index}/{total}] {file} 输出无法解析：{exc}", flush=True)
         else:
             rec["status"] = "failed"
-            checkpoint["stop_reason"] = f"非额度故障：{sample['id']} / {state['status']}；查看 Run 证据"
+            checkpoint["stop_reason"] = f"非额度故障：{file} / {state['status']}；查看 Run 证据"
             persist()
+            if retry_failed:
+                continue
             credits()
             return
-        print(f"[{index}/40] {sample['id']}: {rec['status']}", flush=True)
         persist()
-    checkpoint["stop_reason"] = "样本队列已处理完毕（未评分项见进度表）"
+    checkpoint["stop_reason"] = "待检文件队列已处理完毕（未评分项见进度表）"
     credits()
     persist()
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+def main() -> None:
+    global OUT
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--base-url", default="http://127.0.0.1:7860")
-    parser.add_argument("--report-only", action="store_true")
+    parser.add_argument("--model", default=DEFAULT_MODEL, help="OpenRouter model id; must equal the Web runtime default")
+    parser.add_argument("--limit", type=int, help="only the first N target files in the fixed order (smoke test)")
+    parser.add_argument("--files", help="comma-separated project-relative target files to run (subset)")
+    parser.add_argument("--retry-failed", action="store_true", help="re-run files whose last Run failed for non-credit reasons")
+    parser.add_argument("--report-only", action="store_true", help="regenerate the report without network access")
+    parser.add_argument("--print-prompts", action="store_true", help="print the exact prompt per target file; no network")
     args = parser.parse_args()
+    OUT = DATA / f"web-{model_slug(args.model)}"
+    gt = load_ground_truth()
+    targets = ordered_targets(gt)
+    if args.files:
+        wanted = {f.strip() for f in args.files.split(",") if f.strip()}
+        unknown = wanted - {t["file"] for t in targets}
+        if unknown:
+            raise SystemExit(f"unknown target files: {sorted(unknown)}")
+        targets = [t for t in targets if t["file"] in wanted]
+    if args.limit is not None:
+        if args.limit < 1:
+            raise SystemExit("--limit must be at least 1")
+        targets = targets[:args.limit]
+    if args.print_prompts:
+        for target in targets:
+            print(f"===== {target['file']} ({target['lines']} 行) =====")
+            print(goal(target["file"]))
+            print()
+        print(f"共 {len(targets)} 个文件；每个 Run 预算 {json.dumps(BUDGET)}；模型 {args.model}")
+        return
     OUT.mkdir(parents=True, exist_ok=True)
     with (OUT / "benchmark.lock").open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        manifest, samples = load_samples()
         path = OUT / "checkpoint.json"
-        checkpoint = json.loads(path.read_text()) if path.exists() else {
-            "created_utc": now(), "samples": {}, "credits": [], "stop_reason": "尚未开始"}
-        refresh_scores(checkpoint, samples)
+        checkpoint = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {
+            "created_utc": now(), "model": args.model, "samples": {}, "credits": [], "stop_reason": "尚未开始"}
+        refresh_scores(checkpoint, gt)
         if args.report_only:
             save_json(path, checkpoint)
-            report(checkpoint, manifest, samples)
+            atomic_write(REPORT, report(checkpoint, gt, args.model))
+            print(f"Report: {REPORT}", flush=True)
             return
         try:
             if not os.environ.get("OPENROUTER_API_KEY", "").strip():
                 raise RuntimeError("OPENROUTER_API_KEY is not set")
+            verify_project(gt)
             checkpoint["stop_reason"] = "测试进行中"
-            run(checkpoint, manifest, samples, args.base_url)
+            run(checkpoint, gt, targets, args.base_url, args.model, args.retry_failed)
         except (Exception, KeyboardInterrupt) as exc:
             checkpoint["stop_reason"] = safe_text(f"已停止：{type(exc).__name__}: {exc}")
             print(checkpoint["stop_reason"], flush=True)
             raise SystemExit(1) from None
         finally:
             save_json(path, checkpoint)
-            report(checkpoint, manifest, samples)
+            atomic_write(REPORT, report(checkpoint, gt, args.model))
             print(f"Report: {REPORT}", flush=True)
 
 

@@ -1,0 +1,4 @@
+rsource "src/Kconfig"
+rsource "libcpu/Kconfig"
+rsource "components/Kconfig"
+rsource "examples/utest/testcases/Kconfig"

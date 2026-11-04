@@ -1,0 +1,40 @@
+{
+  "title": "合同指标 5：操作系统底层程序高危代码检测数据集",
+  "upstream": {
+    "id": "rt-thread",
+    "name": "RT-Thread",
+    "url": "https://github.com/RT-Thread/rt-thread.git",
+    "ref": "v5.2.1",
+    "commit": "97893c004c65760c638fd7eb571a08fc987a55e5",
+    "license": "Apache-2.0"
+  },
+  "project_paths": [
+    "LICENSE",
+    "README.md",
+    "Kconfig",
+    "src",
+    "include",
+    "libcpu/arm/common",
+    "libcpu/arm/cortex-m4",
+    "components/finsh",
+    "components/dfs/Kconfig",
+    "components/dfs/SConscript",
+    "components/dfs/dfs_v2",
+    "components/libc/compilers/common",
+    "components/drivers/include",
+    "components/drivers/core",
+    "components/drivers/ipc",
+    "components/drivers/serial",
+    "components/utilities/ulog"
+  ],
+  "clean_files": [
+    "src/clock.c",
+    "src/scheduler_up.c",
+    "src/irq.c",
+    "src/components.c",
+    "components/dfs/dfs_v2/src/dfs_vnode.c",
+    "components/drivers/ipc/ringblk_buf.c",
+    "components/drivers/ipc/completion_up.c",
+    "components/finsh/msh_parse.c"
+  ]
+}

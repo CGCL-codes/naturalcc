@@ -1,0 +1,10 @@
+# Keep injections, spec, generated project, ground truth, manifest and scored checkpoints.
+/dataset/*.tar.gz
+/web-*/workspaces/
+/web-*/runs/
+/web-*/*.lock
+/web-*/*.tmp
+/dataset/project/.code-agent/
+# Delivery archive: rebuilt from the committed project on demand.
+/contract5.zip
+/dataset/*.tar.gz

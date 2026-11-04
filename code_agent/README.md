@@ -683,17 +683,38 @@ uv run python scripts/benchmark_contract3_independent.py \
 
 This writes raw evidence under `artifacts/contract3/balanced-cppcheck/` and updates [合同-3-result.md](合同-3-result.md). It is the recommended Contract-3 local acceptance profile; keep the simpler baseline and harder independent profile as separate evidence.
 
-### Contract-5 live Web Agent evaluation
+### Contract-5 detection rules
 
-From `code_agent/`, start the Web backend with the OpenRouter / `anthropic/claude-sonnet-4.5` environment configuration above, then run in a second terminal with `OPENROUTER_API_KEY` set:
+`security_rtos_rules.py` adds RTOS-aware checks for the four high-risk categories. The older `security_c_rules.py` only recognises the libc spelling of each API (`memcpy`, `pthread_mutex_lock`) and only tracks plain global scalars, so on an RTOS kernel -- where the same operations are `rt_memcpy`/`rt_spin_lock_irqsave` and the shared state lives in fields reached through an object pointer -- it reports nothing at all. The new module also tolerates the parse errors RT-Thread's macros (`rt_weak`, `rt_inline`) induce, checking each matched construct instead of discarding the whole function.
+
+Score the static layer alone, with no model and no network:
+
+```bash
+uv run python scripts/measure_contract5_static.py            # summary table
+uv run python scripts/measure_contract5_static.py --misses   # every missed defect and false positive
+```
+
+Note for Contract-3: these findings carry `rule_id` `cwe-787`, and Contract-3's local scorer matches findings by CWE number, so one landing inside a Contract-3 ground-truth function counts there as `string_overflow`. Contract-3's Web mode scores the model's own category-restricted predictions and is unaffected.
+
+### Contract-5 whole-project evaluation
+
+The Contract-5 dataset is one OS-level C project: an RT-Thread v5.2.1 subset (kernel, finsh shell, DFS v2, driver IPC/serial framework, libc glue, ulog; about 100k source lines) with 10 artificially injected defects per contract category (buffer overflow, data race, memory leak, command execution) plus safe look-alike controls and untouched clean files. The project, `ground_truth.json` (which files to check, what is wrong in each and where, or that a file is clean) and `manifest.json` (SHA256 of every file) are committed under `artifacts/contract5/rtthread/dataset/`. Rebuild or verify them with:
+
+```bash
+uv run python scripts/build_contract5_dataset.py --verify   # committed output matches manifest
+uv run python scripts/build_contract5_dataset.py --check    # validate injection anchors against the pinned upstream clone
+```
+
+For client delivery, build `artifacts/contract5/rtthread/contract5.zip` (project + ground truth + prompt + injection sources + scripts + a Chinese usage guide; ~1.4 MB, 344 files, gitignored). The rebuild command is in [合同-5-数据集说明.md](合同-5-数据集说明.md) § 3.1. The recipient can verify all 332 file hashes offline with `python scripts/build_contract5_dataset.py --verify`.
+
+Run the evaluation from `code_agent/` with the Web backend started on the same OpenRouter model (`anthropic/claude-sonnet-4.5` by default; pass `--model` for a stronger Claude/GPT model and start the backend with that model) and `OPENROUTER_API_KEY` set:
 
 ```bash
 uv run python scripts/check_openrouter_credits.py
-uv run python scripts/benchmark_contract5_web.py
+uv run python scripts/benchmark_contract5_web.py --print-prompts   # no network: show the exact prompt per target file
+uv run python scripts/benchmark_contract5_web.py --limit 2         # low-cost smoke run
+uv run python scripts/benchmark_contract5_web.py                   # all target files, resumable
+uv run python scripts/benchmark_contract5_web.py --report-only     # rebuild 合同-5-result.md offline
 ```
 
-The benchmark audits 40 CASTLE samples through the real Web Agent API, one conversation per file, without executing samples or granting write/execute approvals. It stops on insufficient credits or queue completion; rerunning skips scored samples, including incorrect answers.
 
-Keep [合同-5-result.md](合同-5-result.md) (metrics and four examples), `artifacts/contract5/dataset.json`, `manifest.json`, and `web-sonnet45/checkpoint.json` (all predictions and frozen configuration). `--report-only` rebuilds the report offline. Generated `workspaces/`, `runs/` and lock files are ignored; keep logs for unscored answers until offline parsing is complete. Preserve the runtime database and configuration for resuming.
-
-`security_review.py` adds general C audit guidance and unbounded literal `scanf` candidates, not a complete analyzer. Product hashes are frozen for resuming. CASTLE tuning-set results are neither independent generalization evidence nor formal contract acceptance.

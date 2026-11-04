@@ -1,0 +1,2433 @@
+{
+  "created_utc": "2026-11-04T11:51:43.224523+00:00",
+  "model": "deepseek/deepseek-chat",
+  "samples": {
+    "components/dfs/dfs_v2/src/dfs.c": {
+      "attempts": [
+        {
+          "thread_id": "11744403-0f38-48cf-8c9b-e157d980b7f0",
+          "created_utc": "2026-11-04T11:51:47.704009+00:00",
+          "run_id": "a04d2f6f-6150-421e-9840-a5d2a4c042f0",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:52:11.093234+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "buffer_overflow",
+            "function": "rt_snprintf",
+            "line": 373,
+            "reason": "在函数 `dfs_normalize_path` 中，`rt_snprintf` 被用于拼接路径，但未检查目标缓冲区 `fullpath` 的大小是否足够容纳拼接后的字符串。如果 `directory` 和 `filename` 的长度总和超过 `DFS_PATH_MAX`，可能导致缓冲区溢出。"
+          },
+          {
+            "category": "memory_leak",
+            "function": "dfs_normalize_path",
+            "line": 373,
+            "reason": "在函数 `dfs_normalize_path` 中，如果 `filename[0] == '/'`，则直接调用 `rt_strdup(filename)` 复制字符串。如果后续处理中路径规范化失败（如 `dst < dst0`），`fullpath` 会被释放，但函数返回 NULL，导致内存泄漏。"
+          },
+          {
+            "category": "data_race",
+            "function": "fdt_fd_new",
+            "line": 373,
+            "reason": "在函数 `fdt_fd_new` 中，`fdt->fds[idx]` 被直接赋值，而没有在锁保护下进行。虽然函数内部调用了 `dfs_file_lock` 和 `dfs_file_unlock`，但在 `fdt->fds[idx]` 赋值时没有确保锁的有效性，可能导致多线程竞争。"
+          },
+          {
+            "category": "command_execution",
+            "function": "dfs_dlog",
+            "line": 373,
+            "reason": "在函数 `dfs_dlog` 中，`argv[1]` 被直接用于字符串比较（`strcmp`），但未检查 `argv` 的长度或内容是否合法。如果 `argv[1]` 包含恶意构造的字符串，可能导致命令执行漏洞。"
+          }
+        ],
+        "summary": "在文件 `components/dfs/dfs_v2/src/dfs.c` 中发现了 4 个高危风险：1 个缓冲区溢出、1 个内存泄漏、1 个多线程竞争和 1 个命令执行漏洞。建议修复这些问题以提高代码安全性。"
+      },
+      "rows": [
+        {
+          "id": "BOF-C09",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/dfs/dfs_v2/src/dfs.c",
+          "function": "dfs_subdir",
+          "line_start": 770,
+          "line_end": 784,
+          "line": 777,
+          "expected": "control",
+          "difficulty": "hard",
+          "modified": false,
+          "description": "对照项：dir = filename + strlen(directory) 的指针算术看似可能越过 filename 末尾，但函数开头已判定 strlen(filename) != strlen(directory)，且调用约定保证 directory 是 filename 的前缀，dir 仍落在 filename 串内，安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "BOF-09",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/dfs/dfs_v2/src/dfs.c",
+          "function": "dfs_normalize_path",
+          "line_start": 796,
+          "line_end": 934,
+          "line": 826,
+          "expected": "defect",
+          "difficulty": "hard",
+          "modified": true,
+          "description": "为拼接 \"目录/文件\" 分配的 path_len 少算 1 字节（应为 +2：一个 '/' 加结尾 '\\0'），而随后的 rt_snprintf 仍以 strlen(directory)+strlen(filename)+2 为长度上限写入该堆缓冲，造成 1 字节堆越界写。需要对照分配长度与 snprintf 的长度参数才能发现。",
+          "trigger": "对任一相对路径做归一化时，拼接结果恰好填满缓冲即发生尾字节越界。",
+          "fix": "分配长度应为 strlen(directory)+strlen(filename)+2，与 rt_snprintf 的长度参数一致。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": [
+        {
+          "category": "buffer_overflow",
+          "function": "rt_snprintf",
+          "line": 373,
+          "reason": "在函数 `dfs_normalize_path` 中，`rt_snprintf` 被用于拼接路径，但未检查目标缓冲区 `fullpath` 的大小是否足够容纳拼接后的字符串。如果 `directory` 和 `filename` 的长度总和超过 `DFS_PATH_MAX`，可能导致缓冲区溢出。"
+        },
+        {
+          "category": "memory_leak",
+          "function": "dfs_normalize_path",
+          "line": 373,
+          "reason": "在函数 `dfs_normalize_path` 中，如果 `filename[0] == '/'`，则直接调用 `rt_strdup(filename)` 复制字符串。如果后续处理中路径规范化失败（如 `dst < dst0`），`fullpath` 会被释放，但函数返回 NULL，导致内存泄漏。"
+        },
+        {
+          "category": "data_race",
+          "function": "fdt_fd_new",
+          "line": 373,
+          "reason": "在函数 `fdt_fd_new` 中，`fdt->fds[idx]` 被直接赋值，而没有在锁保护下进行。虽然函数内部调用了 `dfs_file_lock` 和 `dfs_file_unlock`，但在 `fdt->fds[idx]` 赋值时没有确保锁的有效性，可能导致多线程竞争。"
+        },
+        {
+          "category": "command_execution",
+          "function": "dfs_dlog",
+          "line": 373,
+          "reason": "在函数 `dfs_dlog` 中，`argv[1]` 被直接用于字符串比较（`strcmp`），但未检查 `argv` 的长度或内容是否合法。如果 `argv[1]` 包含恶意构造的字符串，可能导致命令执行漏洞。"
+        }
+      ]
+    },
+    "components/dfs/dfs_v2/src/dfs_dentry.c": {
+      "attempts": [
+        {
+          "thread_id": "558954f3-efc7-40b0-8f8a-4a53e3b898de",
+          "created_utc": "2026-11-04T11:52:18.437386+00:00",
+          "run_id": "fda4acf2-2864-4d38-896f-68d9d23121f6",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:52:31.587506+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未检测到缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。"
+      },
+      "rows": [
+        {
+          "id": "LEAK-C03",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "components/dfs/dfs_v2/src/dfs_dentry.c",
+          "function": "_dentry_create",
+          "line_start": 43,
+          "line_end": 81,
+          "line": 70,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "看似二次 rt_strdup 覆盖指针，但覆盖前已 rt_free 第一次复制；最终的 pathname 由 dentry 持有并在 dfs_dentry_unref 中释放。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/dfs/dfs_v2/src/dfs_file.c": {
+      "attempts": [
+        {
+          "thread_id": "38ee07e1-9071-4c69-bbf7-73dc5f6bd0b2",
+          "created_utc": "2026-11-04T11:52:35.618121+00:00",
+          "run_id": "22f1429c-c3a9-4ee2-bc31-e485ed6b96b6",
+          "status": "failed",
+          "finished_utc": "2026-11-04T11:53:19.559572+00:00"
+        }
+      ],
+      "status": "failed"
+    },
+    "components/dfs/dfs_v2/src/dfs_posix.c": {
+      "attempts": [
+        {
+          "thread_id": "ba194edd-bf70-4bb0-be14-22ba646584e3",
+          "created_utc": "2026-11-04T11:54:38.020291+00:00",
+          "run_id": "fbeb2799-d22c-4743-9bd9-66b46516fa07",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:55:23.253092+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "memory_leak",
+            "function": "open",
+            "line": 76,
+            "reason": "The function 'open' allocates a file descriptor but fails to release it on an error path (returning RT_NULL), leading to a potential memory leak."
+          },
+          {
+            "category": "memory_leak",
+            "function": "openat",
+            "line": 139,
+            "reason": "The function 'openat' allocates a file descriptor but fails to release it on an error path (returning -1), leading to a potential memory leak."
+          },
+          {
+            "category": "memory_leak",
+            "function": "utimensat",
+            "line": 167,
+            "reason": "The function 'utimensat' allocates memory for 'link_fn' but fails to release it on an error path (returning -EFAULT), leading to a potential memory leak."
+          },
+          {
+            "category": "memory_leak",
+            "function": "utimensat",
+            "line": 243,
+            "reason": "The function 'utimensat' overwrites 'fullpath' with 'link_fn' without releasing the previous allocation, potentially causing a memory leak."
+          }
+        ],
+        "summary": "The audit identified potential memory leaks in several functions where allocated resources are not properly released on error paths. No issues were found for buffer overflow, data race, or command execution vulnerabilities."
+      },
+      "rows": [
+        {
+          "id": "BOF-C03",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/dfs/dfs_v2/src/dfs_posix.c",
+          "function": "getcwd",
+          "line_start": 1339,
+          "line_end": 1371,
+          "line": 1362,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "对照项：对 buf[size-1] 的写入看似可疑，但 size 是调用方给出的 buf 容量，下标 size-1 恒在界内，这里只是补一个结尾 '\\0'，安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": [
+        {
+          "category": "memory_leak",
+          "function": "open",
+          "line": 76,
+          "reason": "The function 'open' allocates a file descriptor but fails to release it on an error path (returning RT_NULL), leading to a potential memory leak."
+        },
+        {
+          "category": "memory_leak",
+          "function": "openat",
+          "line": 139,
+          "reason": "The function 'openat' allocates a file descriptor but fails to release it on an error path (returning -1), leading to a potential memory leak."
+        },
+        {
+          "category": "memory_leak",
+          "function": "utimensat",
+          "line": 167,
+          "reason": "The function 'utimensat' allocates memory for 'link_fn' but fails to release it on an error path (returning -EFAULT), leading to a potential memory leak."
+        },
+        {
+          "category": "memory_leak",
+          "function": "utimensat",
+          "line": 243,
+          "reason": "The function 'utimensat' overwrites 'fullpath' with 'link_fn' without releasing the previous allocation, potentially causing a memory leak."
+        }
+      ]
+    },
+    "components/dfs/dfs_v2/src/dfs_fs.c": {
+      "attempts": [
+        {
+          "thread_id": "4c098e23-a1e3-423b-a33c-31d11e757780",
+          "created_utc": "2026-11-04T11:55:27.935145+00:00",
+          "run_id": "5c08c03f-44fd-4349-ac17-20a46a1c913d",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:55:59.535440+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未检测到缓冲区溢出、多线程竞争、内存泄漏或命令执行等高危风险。工具扫描未发现符合要求的问题。"
+      },
+      "rows": [
+        {
+          "id": "CE-C08",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+          "function": "dfs_register",
+          "line_start": 55,
+          "line_end": 72,
+          "line": 60,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "对照：文件系统类型名仅进入日志与链表登记，不构造命令行、不调用 shell。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-06",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+          "function": "dfs_remount",
+          "line_start": 99,
+          "line_end": 148,
+          "line": 127,
+          "expected": "defect",
+          "difficulty": "hard",
+          "modified": true,
+          "description": "fullpath 来自调用方给的挂载路径，data 是重挂载时上层透传的文件系统私有数据块（由其它子系统填充），两者都不是 shell 操作者输入；这里跨子系统地把它们拼进命令行交给 system，污点要跨多层调用才能看清。",
+          "trigger": "当重挂载路径或透传的 data 字符串含 shell 语义时，remount 会让其进入 shell 解析。",
+          "fix": "remount 不应触发 shell；删除该命令，data 作为不透明块按长度处理，不得当作命令文本格式化。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-04",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+          "function": "dfs_mount",
+          "line_start": 158,
+          "line_end": 358,
+          "line": 196,
+          "expected": "defect",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "device_name 与规整后的挂载路径 fullpath 由上层挂载请求（可能来自自动挂载/热插拔等子系统）传入，而非 shell 操作者当场键入；此处未校验就拼成命令行交给 system。",
+          "trigger": "当传入的设备名或挂载路径含 shell 语义字符时，挂载流程会把它交给 shell 解析执行。",
+          "fix": "挂载不需要调用 shell；删除该通知命令，或先对设备名/路径做严格字符白名单再仅用于日志打印。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-05",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+          "function": "dfs_umount",
+          "line_start": 360,
+          "line_end": 417,
+          "line": 376,
+          "expected": "defect",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "mnt->fullpath 是挂载表中保存的路径，由此前的挂载过程写入，属于其它子系统提供的数据；卸载时把它拼进命令行交给 system 执行。",
+          "trigger": "若挂载路径中含 shell 语义字符，卸载该挂载点时该路径会被 shell 解析。",
+          "fix": "卸载流程不应运行 shell；移除该 hook，路径只作为内部字符串比较和查找使用。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-07",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+          "function": "dfs_mkfs",
+          "line_start": 437,
+          "line_end": 494,
+          "line": 446,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "fs_name 与 device_name 是 mkfs 请求参数，格式化设备时可能由脚本或上层自动流程传入，而非操作者当场键入；此处直接拼成命令行交给 system。",
+          "trigger": "设备名或文件系统类型名含 shell 语义时，格式化操作会把它交给 shell 解析。",
+          "fix": "格式化无需 shell；删除该通知命令，参数仅用于查找文件系统类型和设备。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-08",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/dfs/dfs_v2/src/dfs_fs.c",
+          "function": "dfs_statfs",
+          "line_start": 496,
+          "line_end": 528,
+          "line": 511,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "fullpath 是规整后的查询路径，由上层调用（可能是服务/脚本）给出，不是 shell 操作者输入；statfs 把它拼进命令行交给 system。",
+          "trigger": "查询路径含 shell 语义字符时，statfs 会让其进入 shell 解析。",
+          "fix": "statfs 只做查询；删除该 system 调用，路径仅用于挂载点查找。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/dfs/dfs_v2/src/dfs_vnode.c": {
+      "attempts": [
+        {
+          "thread_id": "b0c494fa-eba6-4410-95ab-8709fc3b9411",
+          "created_utc": "2026-11-04T11:56:01.650367+00:00",
+          "run_id": "cfe84b58-c0d8-42dd-b13f-1529a4998d05",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:56:24.218946+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未检测到缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。"
+      },
+      "rows": [],
+      "out_of_scope_findings": []
+    },
+    "components/dfs/dfs_v2/src/dfs_mnt.c": {
+      "attempts": [
+        {
+          "thread_id": "be4d27e5-70e8-4c3c-bade-2127c0937e91",
+          "created_utc": "2026-11-04T11:56:29.743003+00:00",
+          "run_id": "97c01259-3867-4049-b31a-679480a90fd9",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:56:51.999653+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经过详细分析，未在文件`components/dfs/dfs_v2/src/dfs_mnt.c`中发现缓冲区溢出、线程竞争、内存泄漏或命令执行漏洞等高危风险。"
+      },
+      "rows": [
+        {
+          "id": "LEAK-C11",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "components/dfs/dfs_v2/src/dfs_mnt.c",
+          "function": "dfs_mnt_create",
+          "line_start": 41,
+          "line_end": 60,
+          "line": 48,
+          "expected": "control",
+          "difficulty": "hard",
+          "modified": false,
+          "description": "fullpath 由 mnt 持有，引用计数归零时在 dfs_mnt_unref 中释放；创建函数本身不负责释放。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "LEAK-09",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "components/dfs/dfs_v2/src/dfs_mnt.c",
+          "function": "dfs_mnt_unref",
+          "line_start": 250,
+          "line_end": 286,
+          "line": 271,
+          "expected": "defect",
+          "difficulty": "hard",
+          "modified": true,
+          "description": "引用计数归零释放 mnt 时，dfs_mnt_create() 中 rt_strdup 的 fullpath 不再 rt_free，只置空指针。",
+          "trigger": "umount 任意挂载点使 ref_count 归零（dfs_mnt_destroy → dfs_mnt_unref）。",
+          "fix": "置空前恢复 rt_free(mnt->fullpath)。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/drivers/ipc/completion_up.c": {
+      "attempts": [
+        {
+          "thread_id": "ed45bf62-8024-450b-8812-e1f7b26c7f46",
+          "created_utc": "2026-11-04T11:57:00.071982+00:00",
+          "run_id": "f703e5e3-1377-4e75-a995-53653dd8f7ad",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:57:12.330295+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未在文件 components/drivers/ipc/completion_up.c 中检测到 buffer_overflow、data_race、memory_leak 或 command_execution 四类高危风险。"
+      },
+      "rows": [],
+      "out_of_scope_findings": []
+    },
+    "components/dfs/dfs_v2/src/dfs_pcache.c": {
+      "attempts": [
+        {
+          "thread_id": "3c24668c-b252-4baf-82f9-21c300ab3a3d",
+          "created_utc": "2026-11-04T11:57:15.916330+00:00",
+          "run_id": "87ba30d4-3003-4b1a-95ed-7ce6afc1cd26",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:57:25.812073+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未检测到缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。文件中的内存管理和线程同步机制处理得当，未发现明显问题。"
+      },
+      "rows": [
+        {
+          "id": "LEAK-10",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "components/dfs/dfs_v2/src/dfs_pcache.c",
+          "function": "dfs_aspace_release",
+          "line_start": 549,
+          "line_end": 578,
+          "line": 565,
+          "expected": "defect",
+          "difficulty": "hard",
+          "modified": true,
+          "description": "页缓存地址空间销毁时释放了 fullpath 却只置空 pathname，_dfs_aspace_create() 中 rt_strdup 的 pathname 泄漏。",
+          "trigger": "带页缓存打开文件再关闭/删除，使 aspace 引用归零且无缓存页。",
+          "fix": "置空前恢复 rt_free(aspace->pathname)。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/drivers/ipc/dataqueue.c": {
+      "attempts": [
+        {
+          "thread_id": "dba66091-92c7-428c-bcbe-c28dadb632c4",
+          "created_utc": "2026-11-04T11:57:28.867380+00:00",
+          "run_id": "ff07a053-12f4-4cce-bca9-034ee0397f76",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:58:02.115629+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "在文件 components/drivers/ipc/dataqueue.c 中未检测到缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。代码中使用了 RT_ASSERT 进行参数校验，对共享数据访问使用了自旋锁保护，内存分配后都有相应的释放操作，且未发现未经校验的外部命令执行路径。"
+      },
+      "rows": [
+        {
+          "id": "RACE-C03",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "components/drivers/ipc/dataqueue.c",
+          "function": "rt_data_queue_peek",
+          "line_start": 330,
+          "line_end": 352,
+          "line": 341,
+          "expected": "control",
+          "difficulty": "easy",
+          "modified": false,
+          "description": "对照：对 get_index 和队列项的读取在 queue->spinlock 内完成，is_empty 的快速判定只是提前退出，不改共享状态，安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/dfs/dfs_v2/src/dfs_seq_file.c": {
+      "attempts": [
+        {
+          "thread_id": "6700800e-f0cf-4f68-9ff6-3be78f17fb5e",
+          "created_utc": "2026-11-04T11:58:08.031604+00:00",
+          "run_id": "01a4ef8f-4411-48fb-8431-8c47ea361164",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:58:18.523181+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未检测到缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。"
+      },
+      "rows": [
+        {
+          "id": "LEAK-C12",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "components/dfs/dfs_v2/src/dfs_seq_file.c",
+          "function": "dfs_seq_open",
+          "line_start": 31,
+          "line_end": 58,
+          "line": 46,
+          "expected": "control",
+          "difficulty": "easy",
+          "modified": false,
+          "description": "seq 存入 file->data 由文件对象持有，dfs_seq_release 负责释放。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "LEAK-08",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "components/dfs/dfs_v2/src/dfs_seq_file.c",
+          "function": "dfs_seq_release",
+          "line_start": 298,
+          "line_end": 311,
+          "line": 306,
+          "expected": "defect",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "释放 seq 结构前只把 seq->buf 置空，dfs_seq_read() 中 dfs_seq_alloc() 分配的读缓冲区不再释放。",
+          "trigger": "打开一个 seq 文件并至少 read 一次（分配 buf），然后 close。",
+          "fix": "置空前 rt_free(seq->buf)。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/drivers/ipc/pipe.c": {
+      "attempts": [
+        {
+          "thread_id": "3c414ce2-5bac-473c-a707-891ec3deb23d",
+          "created_utc": "2026-11-04T11:58:23.699525+00:00",
+          "run_id": "eda9b7d3-e38e-491f-8bc9-40625cc4e1e6",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:58:35.086421+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未检测到缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。"
+      },
+      "rows": [
+        {
+          "id": "RACE-C05",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "components/drivers/ipc/pipe.c",
+          "function": "rt_pipe_write",
+          "line_start": 543,
+          "line_end": 575,
+          "line": 564,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "对照：对共享 fifo 的写入全程持 pipe->lock 互斥量，循环内的 write_bytes、len 均为栈上私有变量，安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "LEAK-C10",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "components/drivers/ipc/pipe.c",
+          "function": "rt_pipe_create",
+          "line_start": 617,
+          "line_end": 671,
+          "line": 630,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "pipe 结构注册为设备对象并返回给调用者，由 rt_pipe_delete 释放，所有权明确。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/drivers/ipc/ringbuffer.c": {
+      "attempts": [
+        {
+          "thread_id": "f994c3f7-e0d7-4b39-b18d-1db7b09d3dbb",
+          "created_utc": "2026-11-04T11:58:38.059114+00:00",
+          "run_id": "250c6201-59ed-4c2f-9fb0-0e0a26b88d06",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:58:58.121477+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经审计，未发现当前文件存在缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。"
+      },
+      "rows": [
+        {
+          "id": "BOF-05",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/drivers/ipc/ringbuffer.c",
+          "function": "rt_ringbuffer_put",
+          "line_start": 63,
+          "line_end": 103,
+          "line": 78,
+          "expected": "defect",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "rt_ringbuffer_put 原本在剩余空间 size 小于请求长度 length 时把 length 截断到 size；删除该截断后，后续 rt_memcpy 按调用方 length 写入，可超过环形缓冲剩余容量造成越界写。",
+          "trigger": "调用方请求写入的 length 大于当前剩余空间 size 时触发。",
+          "fix": "恢复 if (size < length) length = size; 的截断。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "BOF-C05",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/drivers/ipc/ringbuffer.c",
+          "function": "rt_ringbuffer_put_force",
+          "line_start": 115,
+          "line_end": 164,
+          "line": 127,
+          "expected": "control",
+          "difficulty": "hard",
+          "modified": false,
+          "description": "对照项：当 length 超过整个 buffer_size 时先把源指针前移并把 length 截到 buffer_size，再做镜像分段拷贝，所有 rt_memcpy 长度都受 buffer_size 约束，指针运算虽复杂但无越界。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "BOF-C02",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/drivers/ipc/ringbuffer.c",
+          "function": "rt_ringbuffer_get",
+          "line_start": 176,
+          "line_end": 218,
+          "line": 194,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "对照项：新增断言看似提示长度可能超界，但前面已把 length 截断到可读数据量 size（不超过 buffer_size），后续按镜像分段拷贝均在界内，无越界。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "BOF-C08",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/drivers/ipc/ringbuffer.c",
+          "function": "rt_ringbuffer_peek",
+          "line_start": 231,
+          "line_end": 261,
+          "line": 246,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "对照项：返回指向内部缓冲的指针并推进 read_index，看似可能越界，但 read_index 始终小于 buffer_size，返回的可读长度也不超过到缓冲末尾的距离，调用方据返回长度读取即安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/drivers/ipc/ringblk_buf.c": {
+      "attempts": [
+        {
+          "thread_id": "214d1835-c42d-4a14-937b-c08a6c8fe88b",
+          "created_utc": "2026-11-04T11:59:01.517461+00:00",
+          "run_id": "ae94ed84-72a0-4189-af92-b658991586b0",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:59:18.023202+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。"
+      },
+      "rows": [],
+      "out_of_scope_findings": []
+    },
+    "components/drivers/ipc/workqueue.c": {
+      "attempts": [
+        {
+          "thread_id": "29c8c666-a680-4c62-ba2d-b2215071535a",
+          "created_utc": "2026-11-04T11:59:21.408234+00:00",
+          "run_id": "efd2c52b-1279-424d-8054-b59236a4ea42",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:59:26.555296+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现符合要求的四类高危风险（buffer_overflow、data_race、memory_leak、command_execution）。"
+      },
+      "rows": [
+        {
+          "id": "RACE-05",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "components/drivers/ipc/workqueue.c",
+          "function": "_workqueue_cancel_work",
+          "line_start": 168,
+          "line_end": 181,
+          "line": 174,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "共享状态：work->list 链表与 work->flags/workqueue 字段。取消时的链表摘除与字段清零被移出锁，与工作线程取节点、其它提交者并发。",
+          "trigger": "核A锁外 rt_list_remove(&work->list) 的同时，工作线程持锁从 work_list 摘除同一 work，相邻节点指针被双方交错改写。",
+          "fix": "链表摘除和 flags/workqueue 清零应保留在自旋锁临界区内。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "RACE-C08",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "components/drivers/ipc/workqueue.c",
+          "function": "rt_work_init",
+          "line_start": 192,
+          "line_end": 205,
+          "line": 203,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "对照（已改写）：初始化发生在 work 被提交到任何队列之前，对象尚未对其它线程可见，调换 type 与 flags 的赋值顺序不引入竞争，安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "LEAK-04",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "components/drivers/ipc/workqueue.c",
+          "function": "rt_workqueue_create",
+          "line_start": 218,
+          "line_end": 245,
+          "line": 234,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "工作线程创建失败的错误路径不再 RT_KERNEL_FREE(queue)，已分配的 rt_workqueue 结构丢失。",
+          "trigger": "rt_workqueue_create() 内部 rt_thread_create() 返回 RT_NULL（堆不足或对象分配失败）。",
+          "fix": "在 return RT_NULL 之前恢复 RT_KERNEL_FREE(queue)。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "RACE-04",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "components/drivers/ipc/workqueue.c",
+          "function": "rt_workqueue_urgent_work",
+          "line_start": 315,
+          "line_end": 331,
+          "line": 324,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "共享状态：工作队列 queue->work_list 链表。链表摘除/插入被移到自旋锁之外，与工作线程 _workqueue_thread_entry 持锁取节点并发。",
+          "trigger": "提交者在锁外 rt_list_insert_after，工作线程此刻持锁 rt_list_remove 队首，两侧同时改写相邻节点的 next/prev，链表断裂或丢工作项。",
+          "fix": "把 rt_spin_lock_irqsave 移回 rt_list_remove 之前，让链表操作都在锁内。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/finsh/msh_parse.c": {
+      "attempts": [
+        {
+          "thread_id": "0c001479-ad06-46fa-ac89-10a4b1c1e9e3",
+          "created_utc": "2026-11-04T11:59:30.359352+00:00",
+          "run_id": "f1c7241b-979c-4d14-a543-96522df9d8e6",
+          "status": "completed",
+          "finished_utc": "2026-11-04T11:59:43.896165+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞"
+      },
+      "rows": [],
+      "out_of_scope_findings": []
+    },
+    "components/drivers/serial/dev_serial.c": {
+      "attempts": [
+        {
+          "thread_id": "88039269-636a-497d-b86d-9e49ad93c898",
+          "created_utc": "2026-11-04T11:59:47.857668+00:00",
+          "run_id": "cc3b7ac4-041c-4a8d-9105-76968dfebae1",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:00:18.999923+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经全面审查RT-Thread内核的`components/drivers/serial/dev_serial.c`文件，未发现缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞等高危风险。文件中的内存管理和同步机制均符合RT-Thread的设计规范，确保了代码的稳健性和安全性。"
+      },
+      "rows": [
+        {
+          "id": "BOF-04",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/drivers/serial/dev_serial.c",
+          "function": "_serial_int_rx",
+          "line_start": 296,
+          "line_end": 359,
+          "line": 344,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "软件接收 FIFO 的读指针回绕判断由 >= 改成 >，当 get_index 自增到等于 bufsz 时不再归零，下一轮用 rx_fifo->buffer[get_index] 读取时越界访问 buffer[bufsz]。",
+          "trigger": "接收数据量跨越一次整缓冲回绕（get_index 递增到 bufsz）时触发。",
+          "fix": "回绕判断应为 get_index >= serial->config.bufsz。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "LEAK-C09",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "components/drivers/serial/dev_serial.c",
+          "function": "rt_serial_open",
+          "line_start": 640,
+          "line_end": 789,
+          "line": 691,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "rx_fifo 存入 serial->serial_rx 由设备持有，rt_serial_close 在引用计数归零时释放，不是泄漏。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/libc/compilers/common/cstdlib.c": {
+      "attempts": [
+        {
+          "thread_id": "129765e8-47e1-4221-9faa-8eaec5efc840",
+          "created_utc": "2026-11-04T12:00:24.446367+00:00",
+          "run_id": "918d634b-7e89-4eda-8f9c-dbecb7acb22c",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:01:01.847625+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未在文件 components/libc/compilers/common/cstdlib.c 中发现缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。"
+      },
+      "rows": [
+        {
+          "id": "CE-C09",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/libc/compilers/common/cstdlib.c",
+          "function": "system",
+          "line_start": 52,
+          "line_end": 62,
+          "line": 58,
+          "expected": "control",
+          "difficulty": "hard",
+          "modified": false,
+          "description": "对照（设计使然）：这是标准 system() 实现本身，操作者显式调用并自行提供完整命令字符串，等价于主动使用 shell，不属于外部不可信数据被偷偷拼进命令的注入场景，判为安全基准。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/finsh/cmd.c": {
+      "attempts": [
+        {
+          "thread_id": "eabe54f6-6759-498f-9896-54fa555cda53",
+          "created_utc": "2026-11-04T12:01:04.646850+00:00",
+          "run_id": "3e83d342-3b60-4128-92b8-bc3a7d3d015f",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:01:18.201114+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "command_execution",
+            "function": "list_device",
+            "line": 1122,
+            "reason": "调用 `system(cmdbuf)` 时，`cmdbuf` 是由 `device->parent.name` 直接拼接而成，未经校验。攻击者可通过控制设备名执行任意命令。"
+          }
+        ],
+        "summary": "发现一处命令执行漏洞（CWE-78），在 `list_device` 函数中，未经校验的设备名被拼接到命令行并执行。其他三类高危风险未发现。"
+      },
+      "rows": [
+        {
+          "id": "CE-C05",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/cmd.c",
+          "function": "list_thread",
+          "line_start": 159,
+          "line_end": 272,
+          "line": 166,
+          "expected": "control",
+          "difficulty": "easy",
+          "modified": false,
+          "description": "对照：遍历注册表中的线程名仅用于 rt_kprintf 打印，不拼进任何命令行，无命令执行路径。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-C06",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/cmd.c",
+          "function": "list_sem",
+          "line_start": 275,
+          "line_end": 339,
+          "line": 284,
+          "expected": "control",
+          "difficulty": "easy",
+          "modified": false,
+          "description": "对照：信号量名来自注册表，仅打印展示，不进入 shell。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-C07",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/cmd.c",
+          "function": "list_timer",
+          "line_start": 762,
+          "line_end": 824,
+          "line": 771,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "对照：定时器名来自注册表，仅用于列表打印，没有任何命令拼接或执行。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-03",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/cmd.c",
+          "function": "list_device",
+          "line_start": 862,
+          "line_end": 927,
+          "line": 906,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "device->parent.name 来自对象注册表，由注册该设备的任意子系统/驱动写入，不是 shell 操作者输入；列设备时把它拼进命令行交给 system 执行。",
+          "trigger": "某个注册设备的名字含 shell 语义时，仅仅执行 list device 就会让该名字被 shell 解析。",
+          "fix": "列设备只应打印名字；删除该 system 调用，不要把注册表里的名字当命令文本。",
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "command_execution",
+              "function": "list_device",
+              "line": 1122,
+              "reason": "调用 `system(cmdbuf)` 时，`cmdbuf` 是由 `device->parent.name` 直接拼接而成，未经校验。攻击者可通过控制设备名执行任意命令。"
+            }
+          ]
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/utilities/ulog/ulog.c": {
+      "attempts": [
+        {
+          "thread_id": "23cc9b9f-d4f6-4fa3-83cc-a6720fc977ba",
+          "created_utc": "2026-11-04T12:01:23.033469+00:00",
+          "run_id": "cd533903-833f-4a58-813e-78078679e99e",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:01:56.627901+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未检测到 buffer_overflow、data_race、memory_leak 和 command_execution 四类高危风险"
+      },
+      "rows": [
+        {
+          "id": "LEAK-C08",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "components/utilities/ulog/ulog.c",
+          "function": "ulog_tag_lvl_filter_set",
+          "line_start": 904,
+          "line_end": 970,
+          "line": 952,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "新分配的过滤节点被 rt_slist_append 挂入全局链表，由链表持有，在同函数的删除分支或 ulog_deinit 释放。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "RACE-C06",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "components/utilities/ulog/ulog.c",
+          "function": "ulog_tag_lvl_filter_get",
+          "line_start": 980,
+          "line_end": 1005,
+          "line": 997,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "对照：遍历 tag 级别过滤链表时由 output_lock/output_unlock 保护，node/level 为栈上私有，安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "RACE-C10",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "components/utilities/ulog/ulog.c",
+          "function": "ulog_global_filter_lvl_set",
+          "line_start": 1024,
+          "line_end": 1030,
+          "line": 1029,
+          "expected": "control",
+          "difficulty": "hard",
+          "modified": true,
+          "description": "对照（已改写）：全局过滤级别是单字配置项，无锁的单次对齐写入在目标架构上是原子的，读取方只读该字；经局部变量中转后仍是一次写入，看似无锁实则安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "components/finsh/msh.c": {
+      "attempts": [
+        {
+          "thread_id": "9043ea73-2f84-4edb-9d40-1d37a692a66d",
+          "created_utc": "2026-11-04T12:02:01.144477+00:00",
+          "run_id": "4f09bf5a-2ed2-4fd5-a5a3-0d7dd20b7561",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:02:23.963337+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未在文件 components/finsh/msh.c 中发现缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞的高风险问题。"
+      },
+      "rows": [
+        {
+          "id": "BOF-C04",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/finsh/msh.c",
+          "function": "msh_split",
+          "line_start": 151,
+          "line_end": 229,
+          "line": 227,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "对照项：断言看似暗示 argv 可能越界，但循环内 argc 达到 FINSH_ARG_MAX 即 break，argv 写入下标始终小于 FINSH_ARG_MAX，安全无越界。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-10",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/msh.c",
+          "function": "msh_exec_module",
+          "line_start": 254,
+          "line_end": 327,
+          "line": 314,
+          "expected": "defect",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "pg_name 是在文件系统 /bin 路径中检索、补全得到的模块文件路径，取决于磁盘内容；加载模块前把它拼进命令行交给 system 执行。",
+          "trigger": "当检索到的模块路径含 shell 语义时，加载流程会让该路径进入 shell 解析。",
+          "fix": "加载模块只需 dlmodule_exec 按路径打开文件；删除该 prelaunch 命令。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-C10",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/msh.c",
+          "function": "msh_exec",
+          "line_start": 547,
+          "line_end": 620,
+          "line": 551,
+          "expected": "control",
+          "difficulty": "hard",
+          "modified": false,
+          "description": "对照（设计使然）：这是 shell 的命令分发入口，执行的是操作者在 shell 中键入的命令本身，是预期功能而非把外部数据偷偷注入命令，判为安全基准。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "BOF-08",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/finsh/msh.c",
+          "function": "msh_auto_complete_path",
+          "line_start": 636,
+          "line_end": 779,
+          "line": 750,
+          "expected": "defect",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "补全路径时把候选目录项名 full_path 以其完整长度拷回 index（指向调用方 path 缓冲的中段），而非受控的公共前缀长度 min_length；当候选名较长而 path 剩余空间不足时越界写命令行缓冲。",
+          "trigger": "Tab 补全的候选文件名长度超过命令缓冲 path 中 index 之后的剩余空间时触发。",
+          "fix": "拷贝长度应为受 path 容量约束的 min_length，并由调用方保证 path 足够大。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "src/clock.c": {
+      "attempts": [
+        {
+          "thread_id": "1dc1ff10-2bc0-42e3-9f80-f817e1a8fe07",
+          "created_utc": "2026-11-04T12:02:27.924822+00:00",
+          "run_id": "6c24367c-fa64-4509-a21a-07dc29b9febf",
+          "status": "failed",
+          "finished_utc": "2026-11-04T12:02:40.160092+00:00"
+        }
+      ],
+      "status": "failed"
+    },
+    "components/finsh/msh_file.c": {
+      "attempts": [
+        {
+          "thread_id": "d39e4d23-2797-45cd-bac5-bde8d7d1bf65",
+          "created_utc": "2026-11-04T12:02:45.188897+00:00",
+          "run_id": "fd883e4e-ca60-432e-8808-9cabc73fdc9b",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:03:18.213951+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [
+          {
+            "category": "buffer_overflow",
+            "function": "msh_readline",
+            "line": 38,
+            "reason": "函数 `msh_readline` 中参数 `size` 未在校验前用于限制循环读取字符的边界，可能导致缓冲区溢出。"
+          },
+          {
+            "category": "command_execution",
+            "function": "msh_exec_script",
+            "line": 93,
+            "reason": "函数 `msh_exec_script` 中直接拼接受外部输入的字符串 `pg_name` 到命令行并执行，未进行安全校验，可能导致命令注入漏洞。"
+          },
+          {
+            "category": "command_execution",
+            "function": "directory_delete_for_msh",
+            "line": 202,
+            "reason": "函数 `directory_delete_for_msh` 中将路径名拼接到命令行中执行，未对路径名进行安全校验，可能导致命令注入漏洞。"
+          },
+          {
+            "category": "memory_leak",
+            "function": "cmd_mv",
+            "line": 123,
+            "reason": "函数 `cmd_mv` 中动态分配的内存 `dest` 在错误路径上未释放，可能导致内存泄漏。"
+          }
+        ],
+        "summary": "发现了4个高危风险，包括缓冲区溢出、命令注入和内存泄漏问题。"
+      },
+      "rows": [
+        {
+          "id": "CE-09",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/msh_file.c",
+          "function": "msh_exec_script",
+          "line_start": 69,
+          "line_end": 158,
+          "line": 108,
+          "expected": "defect",
+          "difficulty": "hard",
+          "modified": true,
+          "description": "pg_name 是在文件系统 /bin 等路径中检索得到的脚本路径，取决于磁盘上的文件布局；这里在真正读取脚本前，把该路径拼进命令行交给 msh_exec，污点要结合文件检索逻辑才能看清。",
+          "trigger": "当磁盘上存在路径含 shell 语义的匹配脚本时，仅解析命令名阶段就会让该路径进入 shell。",
+          "fix": "脚本执行应只按行读取文件内容，不要把检索到的路径本身再交给 msh_exec；删除该 hook。",
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "command_execution",
+              "function": "msh_exec_script",
+              "line": 93,
+              "reason": "函数 `msh_exec_script` 中直接拼接受外部输入的字符串 `pg_name` 到命令行并执行，未进行安全校验，可能导致命令注入漏洞。"
+            }
+          ]
+        },
+        {
+          "id": "CE-C02",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/msh_file.c",
+          "function": "cmd_cp",
+          "line_start": 229,
+          "line_end": 244,
+          "line": 240,
+          "expected": "control",
+          "difficulty": "easy",
+          "modified": false,
+          "description": "对照：源/目的路径是操作者输入的 argv，直接调用 copy 文件接口完成，不构造命令行、不进入 shell。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-01",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/msh_file.c",
+          "function": "directory_delete_for_msh",
+          "line_start": 327,
+          "line_end": 399,
+          "line": 385,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "full_path 由 readdir 返回的目录项名 dirent->d_name 拼接而成，属于文件系统内容而非 shell 操作者输入；这里未做任何字符过滤就拼进命令行交给 msh_exec 执行。",
+          "trigger": "当被删除目录下存在名字里含 shell 分隔/控制语义的文件项时，该名字会被当作命令的一部分进入 shell 解析。",
+          "fix": "删除该 hook，或改为对条目名做严格白名单校验后只调用 unlink 等直接文件接口，不经过 msh_exec/system。",
+          "detected": true,
+          "matched_findings": [
+            {
+              "category": "command_execution",
+              "function": "directory_delete_for_msh",
+              "line": 202,
+              "reason": "函数 `directory_delete_for_msh` 中将路径名拼接到命令行中执行，未对路径名进行安全校验，可能导致命令注入漏洞。"
+            }
+          ]
+        },
+        {
+          "id": "CE-C01",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/msh_file.c",
+          "function": "cmd_mkfs",
+          "line_start": 520,
+          "line_end": 549,
+          "line": 527,
+          "expected": "control",
+          "difficulty": "easy",
+          "modified": false,
+          "description": "对照：设备名来自操作者当场键入的 argv，且只作为参数直接传给 dfs_mkfs 文件系统接口，不经过 shell 拼接，无命令注入。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-C04",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/msh_file.c",
+          "function": "cmd_umount",
+          "line_start": 642,
+          "line_end": 692,
+          "line": 681,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "对照：挂载点路径为操作者 argv，直接传给 dfs_umount，不经过 shell，形态与注入点相似但无注入。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-C11",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/msh_file.c",
+          "function": "cmd_df",
+          "line_start": 695,
+          "line_end": 718,
+          "line": 712,
+          "expected": "control",
+          "difficulty": "easy",
+          "modified": false,
+          "description": "对照：路径为操作者 argv，直接传给 df 查询接口，不拼命令、不进入 shell。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-C03",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/msh_file.c",
+          "function": "cmd_echo",
+          "line_start": 721,
+          "line_end": 748,
+          "line": 734,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "对照：待写内容和文件名均为操作者 argv，经 open/write 直接写文件，不拼命令、不调用 msh_exec/system。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "CE-02",
+          "category": "command_execution",
+          "cwe": 78,
+          "file": "components/finsh/msh_file.c",
+          "function": "directory_setattr",
+          "line_start": 856,
+          "line_end": 932,
+          "line": 896,
+          "expected": "defect",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "full_path 同样来自 readdir 的目录项名，是外部文件系统数据；递归设置属性时把它拼进命令行并经 msh_exec 执行，等于让磁盘上的文件名决定要运行的 shell 命令。",
+          "trigger": "遍历到一个名字含 shell 语义的文件项时，该名字成为命令行内容被 shell 解析执行。",
+          "fix": "移除该执行；属性变更应继续走 dfs_file_setattr 直接接口，条目名只作为路径参数而非命令文本。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": [
+        {
+          "category": "buffer_overflow",
+          "function": "msh_readline",
+          "line": 38,
+          "reason": "函数 `msh_readline` 中参数 `size` 未在校验前用于限制循环读取字符的边界，可能导致缓冲区溢出。"
+        },
+        {
+          "category": "memory_leak",
+          "function": "cmd_mv",
+          "line": 123,
+          "reason": "函数 `cmd_mv` 中动态分配的内存 `dest` 在错误路径上未释放，可能导致内存泄漏。"
+        }
+      ]
+    },
+    "src/components.c": {
+      "attempts": [
+        {
+          "thread_id": "5241f719-ea44-46b7-accf-a666c13d1d91",
+          "created_utc": "2026-11-04T12:03:22.102810+00:00",
+          "run_id": "e325742a-5ef7-4067-816f-84cb0862c978",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:04:09.825856+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "No buffer_overflow, data_race, memory_leak, or command_execution vulnerabilities were found in the file src/components.c. The file appears to be safe based on the static analysis."
+      },
+      "rows": [],
+      "out_of_scope_findings": []
+    },
+    "components/finsh/shell.c": {
+      "attempts": [
+        {
+          "thread_id": "170ea5e4-5d7a-4bcd-8ca6-fbfe93912a5e",
+          "created_utc": "2026-11-04T12:04:13.734694+00:00",
+          "run_id": "40f3dce7-0bbc-4e4b-81ef-965cf226ae18",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:04:38.989162+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现缓冲区溢出、多线程竞争、内存泄漏和命令执行漏洞"
+      },
+      "rows": [
+        {
+          "id": "BOF-03",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/finsh/shell.c",
+          "function": "finsh_get_prompt",
+          "line_start": 95,
+          "line_end": 127,
+          "line": 108,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "finsh_get_prompt 把用户通过 finsh_set_prompt 设置的自定义提示符用无界 strcpy 拷入固定缓冲 finsh_prompt[RT_CONSOLEBUF_SIZE+1]，自定义串长度不受限，可越界写该栈/静态缓冲。",
+          "trigger": "通过 finsh_set_prompt 设置长度超过 RT_CONSOLEBUF_SIZE 的提示符后，下一次取提示符即触发。",
+          "fix": "使用 strncpy(finsh_prompt, finsh_prompt_custom, sizeof(finsh_prompt) - 1) 并保证结尾 '\\0'。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "BOF-10",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "components/finsh/shell.c",
+          "function": "finsh_thread_entry",
+          "line_start": 476,
+          "line_end": 718,
+          "line": 682,
+          "expected": "defect",
+          "difficulty": "hard",
+          "modified": true,
+          "description": "命令行输入缓冲 shell->line[FINSH_CMD_SIZE+1] 的两处越界保护被同时放宽：前置丢弃判断由 >= 改为 >，尾部清行判断由 >= 改为 >= FINSH_CMD_SIZE+1，使 line_position 可达到 FINSH_CMD_SIZE+1，随后以该下标写字符时越界。需跨两处保护联立分析。",
+          "trigger": "持续输入超过 FINSH_CMD_SIZE 个字符且不含换行时触发。",
+          "fix": "两处判断都应为 line_position >= FINSH_CMD_SIZE。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "src/irq.c": {
+      "attempts": [
+        {
+          "thread_id": "e356d141-9175-48c9-9b2d-dbb68df016c3",
+          "created_utc": "2026-11-04T12:04:42.680246+00:00",
+          "run_id": "3577a2d3-f3b4-4672-b498-038a7899c459",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:05:09.290235+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未在文件 src/irq.c 中检测到缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。"
+      },
+      "rows": [],
+      "out_of_scope_findings": []
+    },
+    "src/scheduler_up.c": {
+      "attempts": [
+        {
+          "thread_id": "ff7d35eb-cdfd-4d27-85c5-65ccdd278e55",
+          "created_utc": "2026-11-04T12:05:16.879557+00:00",
+          "run_id": "5a15df3a-cf51-40d3-9669-e76a751facac",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:05:53.585053+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未发现缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞等高危风险。"
+      },
+      "rows": [],
+      "out_of_scope_findings": []
+    },
+    "src/kservice.c": {
+      "attempts": [
+        {
+          "thread_id": "4613681e-17ed-4839-8b14-05ee752e2bef",
+          "created_utc": "2026-11-04T12:05:57.496789+00:00",
+          "run_id": "551754c1-fd8c-484a-b6a6-d652c1f39fa4",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:06:26.766403+00:00"
+        }
+      ],
+      "status": "unscored",
+      "error": "Expecting property name enclosed in double quotes: line 2 column 1 (char 2)"
+    },
+    "src/memheap.c": {
+      "attempts": [
+        {
+          "thread_id": "6dce2ac3-3c8d-43e9-92f5-4e6fc4f4a2df",
+          "created_utc": "2026-11-04T12:06:30.365810+00:00",
+          "run_id": "5ad8a37d-e594-4911-9b8a-5361c20db776",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:06:39.241827+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "经过对文件 `src/memheap.c` 的静态审计，未发现缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞的相关证据。"
+      },
+      "rows": [
+        {
+          "id": "RACE-08",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "src/memheap.c",
+          "function": "rt_memheap_free",
+          "line_start": 594,
+          "line_end": 719,
+          "line": 633,
+          "expected": "defect",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "共享状态：memheap 块头 magic 与 heap->available_size。标记空闲与可用字节累加被移到获取 heap->lock 之前，脱离互斥保护。",
+          "trigger": "两个线程并发 rt_memheap_free：都在取锁前把块标记为 FREED 并累加 available_size，随后合并相邻块，空闲链表与计数被重复修改，等同双重释放。",
+          "fix": "magic 置位与 available_size 更新必须在 rt_sem_take(&(heap->lock)) 成功之后进行。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "src/mempool.c": {
+      "attempts": [
+        {
+          "thread_id": "3c56e34c-0a16-4caf-b977-4313a5668d47",
+          "created_utc": "2026-11-04T12:06:44.026504+00:00",
+          "run_id": "bba4c9cd-2c17-4322-a4bd-fcbde1a4d236",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:06:54.457789+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未检测到缓冲区溢出、多线程竞争、内存泄漏或命令执行漏洞。文件中的内存池操作均通过锁保护，且未发现内存泄漏或命令拼接问题。"
+      },
+      "rows": [
+        {
+          "id": "RACE-C11",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "src/mempool.c",
+          "function": "rt_mp_init",
+          "line_start": 84,
+          "line_end": 132,
+          "line": 104,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "对照（已改写）：内存池初始化在对象被使用前完成，调换 block_list 赋值与自旋锁初始化的顺序不影响并发安全，安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "LEAK-03",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "src/mempool.c",
+          "function": "rt_mp_create",
+          "line_start": 176,
+          "line_end": 241,
+          "line": 213,
+          "expected": "defect",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "乘法回绕检查放在 rt_malloc 之后：检查失败时删除对象并返回，但 mp->start_address 指向的堆内存未 rt_free。",
+          "trigger": "block_count * (block_size + sizeof(void*)) 发生回绕（极大的 block_count），rt_malloc 对回绕后的小尺寸成功。",
+          "fix": "把检查移到 rt_malloc 之前，或在 return 前 rt_free(mp->start_address)。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "RACE-02",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "src/mempool.c",
+          "function": "rt_mp_free",
+          "line_start": 380,
+          "line_end": 414,
+          "line": 396,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "共享状态：内存池空闲块计数 mp->block_free_count。自增被移到加锁之前，与 rt_mp_alloc 中锁内的 block_free_count-- 构成非原子读改写。",
+          "trigger": "核A rt_mp_free 在锁外执行 ++ 的读改写，核B rt_mp_alloc 持锁执行 --，二者交错丢失一次更新，计数与实际空闲块不符。",
+          "fix": "把 mp->block_free_count ++ 放回 rt_spin_lock_irqsave 之后。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "src/object.c": {
+      "attempts": [
+        {
+          "thread_id": "800f757d-35c7-43dc-bb4d-4982822f92f2",
+          "created_utc": "2026-11-04T12:07:01.221698+00:00",
+          "run_id": "54202067-5c47-4abe-b4df-8b1d073096c9",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:07:15.045998+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未在文件 `src/object.c` 中发现 buffer_overflow、data_race、memory_leak 或 command_execution 四类高危风险。"
+      },
+      "rows": [
+        {
+          "id": "BOF-C01",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "src/object.c",
+          "function": "rt_object_init",
+          "line_start": 353,
+          "line_end": 416,
+          "line": 394,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "对照项：显式写 object->name[RT_NAME_MAX-1] 看似在数组末尾写入可疑，但下标 RT_NAME_MAX-1 正是 name[RT_NAME_MAX] 的最后合法元素，且拷贝长度同步收窄为 RT_NAME_MAX-1，安全无越界。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "BOF-C06",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "src/object.c",
+          "function": "rt_object_allocate",
+          "line_start": 461,
+          "line_end": 519,
+          "line": 484,
+          "expected": "control",
+          "difficulty": "hard",
+          "modified": false,
+          "description": "对照项：rt_object_allocate 先 rt_memset 清零整块对象内存再用 rt_strncpy 拷 RT_NAME_MAX-1 字节到 name[RT_NAME_MAX]，看似可能缺结尾符，但清零保证末字节恒为 '\\0'，安全无越界。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "BOF-02",
+          "category": "buffer_overflow",
+          "cwe": 787,
+          "file": "src/object.c",
+          "function": "rt_object_get_name",
+          "line_start": 707,
+          "line_end": 718,
+          "line": 713,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "rt_object_get_name 收到调用方缓冲 name 及其容量 name_size，却用不带长度的 rt_strcpy 拷贝对象名，忽略了 name_size，当对象名长度接近 RT_NAME_MAX 而调用方缓冲较小时越界写。",
+          "trigger": "调用方传入的 name 缓冲小于对象名实际长度时触发。",
+          "fix": "保留 rt_strncpy(name, obj_name, name_size) 的带长度拷贝。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "src/thread.c": {
+      "attempts": [
+        {
+          "thread_id": "97cb2719-e0ce-4823-84e3-642d79ac0b0c",
+          "created_utc": "2026-11-04T12:07:20.043780+00:00",
+          "run_id": "f3c16c77-7e52-400b-908c-7bac73263d39",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:07:36.841097+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未在文件 `src/thread.c` 中发现 buffer_overflow、data_race、memory_leak 或 command_execution 四类高危风险。"
+      },
+      "rows": [
+        {
+          "id": "LEAK-C06",
+          "category": "memory_leak",
+          "cwe": 401,
+          "file": "src/thread.c",
+          "function": "rt_thread_create",
+          "line_start": 523,
+          "line_end": 560,
+          "line": 541,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": false,
+          "description": "栈内存交给 _thread_init() 存入 thread->stack_addr，由线程删除/回收路径释放；分配失败路径也正确删除了对象。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "RACE-C04",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "src/thread.c",
+          "function": "rt_thread_yield",
+          "line_start": 592,
+          "line_end": 602,
+          "line": 597,
+          "expected": "control",
+          "difficulty": "easy",
+          "modified": false,
+          "description": "对照：让出操作全部在 rt_sched_lock/rt_sched_unlock_n_resched 调度锁内进行，只操作当前线程自身调度状态，安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "RACE-06",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "src/thread.c",
+          "function": "rt_thread_wakeup_set",
+          "line_start": 1096,
+          "line_end": 1107,
+          "line": 1103,
+          "expected": "defect",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "共享状态：thread->wakeup_handle 的 func 与 user_data。func 的写入被移出调度锁，而 rt_thread_wakeup 在调度锁内读取 func 并清空后回调。",
+          "trigger": "核A锁外写 wakeup_handle.func，核B rt_thread_wakeup 持调度锁读取到旧/半更新的 func，并以不匹配的 user_data 回调，出现指针与数据错配。",
+          "fix": "func 与 user_data 两个字段的写入都应放在 rt_sched_lock/unlock 之间。",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    },
+    "src/timer.c": {
+      "attempts": [
+        {
+          "thread_id": "910590cb-1d30-4f99-b436-67e460aa1ed9",
+          "created_utc": "2026-11-04T12:07:42.409483+00:00",
+          "run_id": "99c44291-09fe-45d2-9cf3-ce6bb4c97a76",
+          "status": "completed",
+          "finished_utc": "2026-11-04T12:07:53.836846+00:00"
+        }
+      ],
+      "status": "scored",
+      "prediction": {
+        "findings": [],
+        "summary": "未在文件 src/timer.c 中发现缓冲区溢出、数据竞争、内存泄漏或命令执行漏洞"
+      },
+      "rows": [
+        {
+          "id": "RACE-C01",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "src/timer.c",
+          "function": "rt_timer_detach",
+          "line_start": 293,
+          "line_end": 314,
+          "line": 311,
+          "expected": "control",
+          "difficulty": "easy",
+          "modified": false,
+          "description": "对照：链表摘除与标志清除全程在 _timerlock_idx 自旋锁内，解锁后才 rt_object_detach，无共享链表的锁外访问，安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "RACE-01",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "src/timer.c",
+          "function": "rt_timer_stop",
+          "line_start": 626,
+          "line_end": 653,
+          "line": 649,
+          "expected": "defect",
+          "difficulty": "easy",
+          "modified": true,
+          "description": "共享状态：定时器所在的全局 timer skip-list 与 timer->parent.flag。自旋锁被提前释放，_timer_remove() 的链表摘除和标志清除落在锁外；另一核的 rt_timer_start/rt_timer_check 可同时操作同一链表。",
+          "trigger": "核A进入 rt_timer_stop 释放 _htimer_lock 后、尚未执行 _timer_remove；核B的 rt_timer_check 在中断里遍历并 _timer_remove 同一 timer，两次 rt_list_remove 交错破坏链表指针。",
+          "fix": "把 rt_spin_unlock_irqrestore 移回 _timer_remove 与标志清除之后，保证链表摘除在锁内完成。",
+          "detected": false,
+          "matched_findings": []
+        },
+        {
+          "id": "RACE-C07",
+          "category": "data_race",
+          "cwe": 362,
+          "file": "src/timer.c",
+          "function": "rt_timer_next_timeout_tick",
+          "line_start": 780,
+          "line_end": 799,
+          "line": 797,
+          "expected": "control",
+          "difficulty": "medium",
+          "modified": true,
+          "description": "对照（已改写）：两个下一超时值在各自自旋锁内读入栈上局部变量，解锁后仅对私有局部做比较并存入新局部 next_timeout，没有锁外共享访问，安全。",
+          "trigger": "",
+          "fix": "",
+          "detected": false,
+          "matched_findings": []
+        }
+      ],
+      "out_of_scope_findings": []
+    }
+  },
+  "credits": [
+    {
+      "checked_utc": "2026-11-04T11:51:47.671256+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.535527807,
+      "account_remaining_usd": 21.464472193,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.464472193,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:52:18.399382+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.535527807,
+      "account_remaining_usd": 21.464472193,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.464472193,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:52:35.598370+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.536989805,
+      "account_remaining_usd": 21.463010195,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.463010195,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:53:26.480218+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.547092759,
+      "account_remaining_usd": 21.452907241,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.452907241,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:54:37.979950+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.556694595,
+      "account_remaining_usd": 21.443305405,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.443305405,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:55:27.902180+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.556694595,
+      "account_remaining_usd": 21.443305405,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.443305405,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:56:01.631500+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.572171648,
+      "account_remaining_usd": 21.427828352,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.427828352,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:56:29.728968+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.578269881,
+      "account_remaining_usd": 21.421730119,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.421730119,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:57:00.041797+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.578269881,
+      "account_remaining_usd": 21.421730119,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.421730119,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:57:15.881075+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.583412633,
+      "account_remaining_usd": 21.416587367,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.416587367,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:57:28.832703+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.589560841,
+      "account_remaining_usd": 21.410439159,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.410439159,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:58:08.017005+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.600884471,
+      "account_remaining_usd": 21.399115529,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.399115529,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:58:23.688216+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.610307082,
+      "account_remaining_usd": 21.389692918,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.389692918,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:58:38.046511+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.614923483,
+      "account_remaining_usd": 21.385076517,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.385076517,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:59:01.496336+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.622925725,
+      "account_remaining_usd": 21.377074275,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.377074275,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:59:21.368594+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.626552201,
+      "account_remaining_usd": 21.373447799,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.373447799,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:59:30.329472+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.626552201,
+      "account_remaining_usd": 21.373447799,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.373447799,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T11:59:47.813795+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.631969116,
+      "account_remaining_usd": 21.368030884,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.368030884,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:00:24.398880+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.635588016,
+      "account_remaining_usd": 21.364411984,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.364411984,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:01:04.625345+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.647247526,
+      "account_remaining_usd": 21.352752474,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.352752474,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:01:23.009274+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.655146669,
+      "account_remaining_usd": 21.344853331,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.344853331,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:02:01.110460+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.662040975,
+      "account_remaining_usd": 21.337959025,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.337959025,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:02:27.890725+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.670662034,
+      "account_remaining_usd": 21.329337966,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.329337966,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:02:45.176176+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.670662034,
+      "account_remaining_usd": 21.329337966,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.329337966,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:03:22.082052+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.676807126,
+      "account_remaining_usd": 21.323192874,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.323192874,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:04:13.692881+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.683573863,
+      "account_remaining_usd": 21.316426137,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.316426137,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:04:42.654822+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.685701473,
+      "account_remaining_usd": 21.314298527,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.314298527,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:05:16.833849+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.6969367,
+      "account_remaining_usd": 21.3030633,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.3030633,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:05:57.462212+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.704059607,
+      "account_remaining_usd": 21.295940393,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.295940393,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:06:30.344526+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.711362047,
+      "account_remaining_usd": 21.288637953,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.288637953,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:06:44.012159+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.713496557,
+      "account_remaining_usd": 21.286503443,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.286503443,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:07:01.200731+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.721421515,
+      "account_remaining_usd": 21.278578485,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.278578485,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:07:20.018653+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.730255455,
+      "account_remaining_usd": 21.269744545,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.269744545,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:07:42.394642+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.735948373,
+      "account_remaining_usd": 21.264051627,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.264051627,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    },
+    {
+      "checked_utc": "2026-11-04T12:08:01.504511+00:00",
+      "account_total_credits_usd": 170.0,
+      "account_total_usage_usd": 148.74174752,
+      "account_remaining_usd": 21.25825248,
+      "key_limit_usd": null,
+      "key_remaining_usd": null,
+      "key_limit_reset": null,
+      "effective_remaining_usd": 21.25825248,
+      "required_usd": 0,
+      "sufficient": true,
+      "generation_requests": 0
+    }
+  ],
+  "stop_reason": "待检文件队列已处理完毕（未评分项见进度表）",
+  "protocol": {
+    "model_config": {
+      "provider": "openrouter",
+      "model": "deepseek/deepseek-chat",
+      "base_url": "https://openrouter.ai/api/v1",
+      "context_window_tokens": 262144,
+      "safety_margin_tokens": 4096,
+      "fallback_models": [],
+      "provider_preferences": {}
+    },
+    "budget": {
+      "max_llm_calls": 14,
+      "max_tool_calls": 36,
+      "max_input_tokens": 600000,
+      "max_output_tokens": 24000,
+      "max_seconds": 1800,
+      "max_compaction_calls": 8
+    },
+    "prompt_sha256": "8c253671c5f52100cd969d8b141b2050efb2992a769506b438ede6e68536f2f6",
+    "ground_truth_sha256": "53c1a73feb48cfb5bb317ec67a840d83be0fcbdcde2677342d06301ffed99f1b",
+    "manifest_sha256": "9a0f62d0637dd5c8c928f87d4d9be6b2d8c3a05f27c1c3e83eaccb254405b138",
+    "product_sha256": {
+      "security_review.py": "9870a76a708f1528551d2a919d9d61531f5851f2882ec5ae7c55b9c83da3c52e",
+      "security_c_rules.py": "2f49c89f11aefca9802ef2c13dc5f5ec0aa89f44a55ad3620a5a4cd33f18f1b3",
+      "security_rtos_rules.py": "ca8183da031754791d19dfb8e78dddbb2754eb0c208ada245f05bdcc2da8ec5d",
+      "security_analysis.py": "6d8201edf11b6c4273afcebf03f46562a07d9782db6b4ff7723637285db3f6a5",
+      "security_contracts.py": "63eb0ee521d9942f6a753187cf1caacd409e5b6eb0961d0c167f9497ddf32c40",
+      "plugins/vulnerability_detection.py": "aac799b93739170d547a1d53aff52e190811323411a32f01e5a817eb61117984",
+      "agent_core/tools/pipeline.py": "b3d05209d8ae82cb871eb85094cc25c9e7c35a6ec66a690e3b4e892aaee24179"
+    },
+    "order": [
+      "components/dfs/dfs_v2/src/dfs.c",
+      "components/dfs/dfs_v2/src/dfs_dentry.c",
+      "components/dfs/dfs_v2/src/dfs_file.c",
+      "components/dfs/dfs_v2/src/dfs_posix.c",
+      "components/dfs/dfs_v2/src/dfs_fs.c",
+      "components/dfs/dfs_v2/src/dfs_vnode.c",
+      "components/dfs/dfs_v2/src/dfs_mnt.c",
+      "components/drivers/ipc/completion_up.c",
+      "components/dfs/dfs_v2/src/dfs_pcache.c",
+      "components/drivers/ipc/dataqueue.c",
+      "components/dfs/dfs_v2/src/dfs_seq_file.c",
+      "components/drivers/ipc/pipe.c",
+      "components/drivers/ipc/ringbuffer.c",
+      "components/drivers/ipc/ringblk_buf.c",
+      "components/drivers/ipc/workqueue.c",
+      "components/finsh/msh_parse.c",
+      "components/drivers/serial/dev_serial.c",
+      "components/libc/compilers/common/cstdlib.c",
+      "components/finsh/cmd.c",
+      "components/utilities/ulog/ulog.c",
+      "components/finsh/msh.c",
+      "src/clock.c",
+      "components/finsh/msh_file.c",
+      "src/components.c",
+      "components/finsh/shell.c",
+      "src/irq.c",
+      "src/ipc.c",
+      "src/scheduler_up.c",
+      "src/kservice.c",
+      "src/memheap.c",
+      "src/mempool.c",
+      "src/object.c",
+      "src/thread.c",
+      "src/timer.c"
+    ],
+    "base_url": "http://127.0.0.1:7860",
+    "scoring": "site:category+function_or_line_range"
+  }
+}
