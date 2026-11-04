@@ -246,6 +246,24 @@ def juliet_run(name: str, version: str, checkpoint: dict[str, Any]) -> list[str]
     return lines
 
 
+def ground_truth_section() -> list[str]:
+    path = ROOT / "artifacts" / "contract3" / "ground_truth" / "balanced.json"
+    if not path.exists():
+        return []
+    projects = json.loads(path.read_text(encoding="utf-8"))["projects"]
+    rows = [f"| {project['name']}（{', '.join(f'`{root}`' for root in project['scan_roots'])}） | {len(project['detection_files'])} | "
+            f"{project['line_totals']['upstream_detection_files']:,} |" for project in projects]
+    return ["### Ground truth 位置", "",
+            "每个注入缺陷的写法、所在文件、函数、行范围、缺陷行代码，以及每个工程的检测文件清单，见 **[合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)**。", "",
+            "机器可读的 ground truth 在 [artifacts/contract3/ground_truth/](artifacts/contract3/ground_truth/)，每套一个文件：`balanced.json`、`independent.json`、`balanced-hard.json`、`independent-hard.json`。每个文件按工程列出：", "",
+            "- `detection_files`：该工程要检测的上游源码文件及每个文件的行数；`line_totals.upstream_detection_files` 是合计行数，不少于 10,000 行。",
+            "- `fixtures`：注入的测试文件（每类一个）及其行数和 SHA-256。",
+            "- `cases`：逐函数标签，含 `expected`（`defect` 正例 / `control` 对照）、`function`、`file`、`line_start`、`line_end`、`defect_line`、`defect_code`。只有这些函数参与计分。", "",
+            "| 工程（扫描范围） | 检测文件数 | 检测文件合计行数 |", "|---|---:|---:|", *rows, "",
+            "JSON 和清单都由 [export_contract3_ground_truth.py](scripts/export_contract3_ground_truth.py) 生成（`uv run python scripts/export_contract3_ground_truth.py`），"
+            "测试文件与 Web 评测时逐字节一致；平衡集、压力集、平衡加难三套的标签已与对应 Web checkpoint 逐条核对一致。", ""]
+
+
 def render() -> str:
     manifest = load(DATA / "manifest.json") or {}
     balanced = load(DATA / "balanced-cppcheck" / "result.json")
@@ -290,6 +308,7 @@ def render() -> str:
         for source in manifest.get("sources", []):
             lines.append(f"- {source['name']}：`{source['url']}`，固定提交 `{source['commit']}`，扫描根目录 `{', '.join(source['scan_roots'])}`。")
         lines += ["", "测试 fixture 只写入临时上游 checkout，不修改或提交上游源码；真值 JSON 不进入 Web Agent 工作区。每套工程在运行时会验证扫描范围的 C/C++ 源码不少于 10,000 行。", ""]
+        lines += ground_truth_section()
     if balanced or web_balanced:
         lines += ["## 平衡验收集（推荐验收口径）", "", "该集混合计算下标、循环、格式化/复制和分支指针形态；每类每工程仍固定 20 正例 + 20 对照。它是推荐的本地检测指标证据，但不是独立泛化分数。", ""]
         if web_balanced:
@@ -315,7 +334,7 @@ def render() -> str:
                 lines += web_section(f"{name} Web", web_hard[suite], f"web-sonnet45-{suite}") + web_progress(web_hard[suite]) + [""]
                 lines += web_category_table(web_hard[suite]) + [""] + web_project_table(web_hard[suite]) + [""]
                 lines += hard_variant_table(web_hard[suite]) + [""]
-    lines += ["## 测试工程与 Ground Truth 交付状态", "", "当前可复现工程由三套固定版本的公开 RTOS 源码加运行时注入 fixture 组成：每套工程的三类各 20 个正例和 20 个同类安全对照，因此 Web 平衡验收集共 3×3=9 个任务、360 个函数。fixture、函数名、文件、行范围及预期标签由脚本固定生成，而不是由模型提供。", "", "- Ground truth 字段：`case_id`、`project`、`category`、`expected`、`function`、`file`、`line_start`、`line_end`、`defect_line`。Web 最新一轮位于 `artifacts/contract3/web-sonnet45-balanced/checkpoint.json` 的 `samples.*.rows[]`；该对象还含 `detected` 和 `matched_findings`，可供前端逐例展示。", "- 本地运行会另外生成 `artifacts/contract3/balanced-cppcheck/ground_truth.json` 与 `result.json`，字段口径相同。当前仓库按“仅保留最新 Web 输出”的清理策略没有保留它们；运行下面的本地命令即可重新生成。", "- 这套冻结来源和生成器可用于本项目复现，但**不是** NaturalCC 上游或验收方正式提供的最终验收工程/ground truth 包。若最终验收必须与外部指定样本逐字节一致，仍需要验收方提供或书面确认该工程、版本、注入位置和真值清单。", "", "## 测试链路与适用边界", "", "- 本地：通过产品 `security_analysis.cppcheck_scan` 适配层调用 Cppcheck；不执行目标程序。", "- Web：与合同 5 共用本机 Web Agent API、线程、Run、events 和持久化引擎；固定 OpenRouter/Sonnet 配置，无模型 fallback。", "- Web 运行按固定顺序串行执行，避免并发的限流、超时重试及账单归因干扰；未完成、超时、API 故障或无效 JSON 不计为安全、正确或任一统计桶。", "- 平衡验收集证明规定注入形态下的检测统计；独立压力集展示未覆盖形态的边界。两者均不能单独证明完整上游工程覆盖、所有路径安全或增量分析性能。", "- 多线程竞争/TSan、缓冲区溢出、内存泄漏、命令执行漏洞及预警准确率均属于指标 5，不在本指标 3 的统计接口或 Ground Truth 范围内。", "", "## 运行与续跑", "", "```bash", "# 推荐本地验收：同时生成本地 result.json 与 ground_truth.json", "uv run python scripts/benchmark_contract3_independent.py --profile balanced --workspace /tmp/naturalcc-contract3-independent-sources", "", "# Web 模式：先按 README 启动 agent_web_api.py，再在另一终端执行", "uv run python scripts/benchmark_contract3_web.py --suite balanced", "uv run python scripts/benchmark_contract3_web.py --suite independent", "uv run python scripts/benchmark_contract3_web.py --suite balanced-hard", "uv run python scripts/benchmark_contract3_web.py --suite independent-hard", "", "# 不发模型请求，仅从已有原始工件刷新本报告", "uv run python scripts/render_contract3_report.py", "```", "",
+    lines += ["## 测试工程与 Ground Truth 交付状态", "", "当前可复现工程由三套固定版本的公开 RTOS 源码加运行时注入 fixture 组成：每套工程的三类各 20 个正例和 20 个同类安全对照，因此 Web 平衡验收集共 3×3=9 个任务、360 个函数。fixture、函数名、文件、行范围及预期标签由脚本固定生成，而不是由模型提供。", "", "- Ground truth 字段：`case_id`、`project`、`category`、`expected`、`function`、`file`、`line_start`、`line_end`、`defect_line`。Web 最新一轮位于 `artifacts/contract3/web-sonnet45-balanced/checkpoint.json` 的 `samples.*.rows[]`；该对象还含 `detected` 和 `matched_findings`，可供前端逐例展示。", "- 四套测试集的冻结 ground truth 已入库：[artifacts/contract3/ground_truth/](artifacts/contract3/ground_truth/)，可读清单见 [合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)。本地 Cppcheck 运行另会生成 `artifacts/contract3/balanced-cppcheck/ground_truth.json` 与 `result.json`（未入库，字段口径相同）。", "- 这套冻结来源和生成器可用于本项目复现，但**不是** NaturalCC 上游或验收方正式提供的最终验收工程/ground truth 包。若最终验收必须与外部指定样本逐字节一致，仍需要验收方提供或书面确认该工程、版本、注入位置和真值清单。", "", "## 测试链路与适用边界", "", "- 本地：通过产品 `security_analysis.cppcheck_scan` 适配层调用 Cppcheck；不执行目标程序。", "- Web：与合同 5 共用本机 Web Agent API、线程、Run、events 和持久化引擎；固定 OpenRouter/Sonnet 配置，无模型 fallback。", "- Web 运行按固定顺序串行执行，避免并发的限流、超时重试及账单归因干扰；未完成、超时、API 故障或无效 JSON 不计为安全、正确或任一统计桶。", "- 平衡验收集证明规定注入形态下的检测统计；独立压力集展示未覆盖形态的边界。两者均不能单独证明完整上游工程覆盖、所有路径安全或增量分析性能。", "- 多线程竞争/TSan、缓冲区溢出、内存泄漏、命令执行漏洞及预警准确率均属于指标 5，不在本指标 3 的统计接口或 Ground Truth 范围内。", "", "## 运行与续跑", "", "```bash", "# 推荐本地验收：同时生成本地 result.json 与 ground_truth.json", "uv run python scripts/benchmark_contract3_independent.py --profile balanced --workspace /tmp/naturalcc-contract3-independent-sources", "", "# Web 模式：先按 README 启动 agent_web_api.py，再在另一终端执行", "uv run python scripts/benchmark_contract3_web.py --suite balanced", "uv run python scripts/benchmark_contract3_web.py --suite independent", "uv run python scripts/benchmark_contract3_web.py --suite balanced-hard", "uv run python scripts/benchmark_contract3_web.py --suite independent-hard", "", "# 不发模型请求，仅从已有原始工件刷新本报告", "uv run python scripts/render_contract3_report.py", "```", "",
               "## 工件索引", "", "- `artifacts/contract3/manifest.json`：固定上游版本、目标类别、Cppcheck ID/CWE 白名单。", "- `artifacts/contract3/web-sonnet45-balanced/checkpoint.json`：当前最新 Web 评分、逐例 Ground Truth、预测和 `matched_findings`。", "- `artifacts/contract3/*-cppcheck/ground_truth.json`、`result.json`：本地模式运行时生成的真值和结果；按当前清理策略不随仓库保留。", "- `artifacts/contract3/web-sonnet45-balanced/runs/`：本机原始 Run events，体积较大且含运行历史，已由 `.gitignore` 排除；checkpoint 保留最近 Run ID 用于关联复核。"]
     return "\n".join(lines) + "\n"
 
