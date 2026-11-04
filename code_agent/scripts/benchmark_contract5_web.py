@@ -120,15 +120,21 @@ def verify_project(gt: dict[str, Any]) -> None:
         path = PROJECT / relative
         if not path.exists() or digest(path.read_bytes()) != sha:
             raise ValueError(f"project file changed or missing: {relative}; rebuild with build_contract5_dataset.py")
-    for row in gt["target_files"]:
-        if row["sha256"] != digest((PROJECT / row["file"]).read_bytes()):
-            raise ValueError(f"target file hash mismatch: {row['file']}")
+    for row in gt["detection_files"]:
+        if row["sha256"] != digest((PROJECT / row["path"]).read_bytes()):
+            raise ValueError(f"detection file hash mismatch: {row['path']}")
 
 
 def ordered_targets(gt: dict[str, Any]) -> list[dict[str, Any]]:
-    """Fixed order: alternate vulnerable and clean files, otherwise by path."""
-    vulnerable = sorted((f for f in gt["target_files"] if f["verdict"] == "vulnerable"), key=lambda f: f["file"])
-    clean = sorted((f for f in gt["target_files"] if f["verdict"] == "clean"), key=lambda f: f["file"])
+    """Fixed order: alternate vulnerable and clean files, otherwise by path.
+
+    Rows are normalised to the keys the rest of this script uses, so the ground
+    truth can keep the loader's ``path``/``defects``/``controls`` spelling.
+    """
+    rows = [{**row, "file": row["path"], "defect_count": row["defects"],
+             "control_count": row["controls"]} for row in gt["detection_files"]]
+    vulnerable = sorted((f for f in rows if f["verdict"] == "vulnerable"), key=lambda f: f["file"])
+    clean = sorted((f for f in rows if f["verdict"] == "clean"), key=lambda f: f["file"])
     ordered: list[dict[str, Any]] = []
     while vulnerable or clean:
         if vulnerable:
@@ -274,7 +280,7 @@ def credit_stop_reason(events: list[dict[str, Any]]) -> str:
 def refresh_scores(checkpoint: dict[str, Any], gt: dict[str, Any]) -> None:
     """Re-parse saved completed answers offline; never spend tokens on format repair."""
     sites_by_file = sites_index(gt)
-    lines_by_file = {f["file"]: f["lines"] for f in gt["target_files"]}
+    lines_by_file = {f["path"]: f["lines"] for f in gt["detection_files"]}  # loader spelling
     for file, rec in checkpoint.get("samples", {}).items():
         if rec.get("status") != "unscored" or not rec.get("attempts"):
             continue
@@ -291,12 +297,20 @@ def refresh_scores(checkpoint: dict[str, Any], gt: dict[str, Any]) -> None:
         rows, unmatched = classify(sites_by_file.get(file, []), prediction)
         rec.update({"status": "scored", "prediction": prediction, "rows": rows, "out_of_scope_findings": unmatched})
         rec.pop("error", None)
+    # Re-derive every stored prediction against the current ground truth, so a
+    # ground-truth revision cannot leave a checkpoint scored against the old one.
+    for file, rec in checkpoint.get("samples", {}).items():
+        if rec.get("prediction") is None:
+            continue
+        rows, unmatched = classify(sites_by_file.get(file, []), rec["prediction"])
+        rec["rows"] = rows
+        rec["out_of_scope_findings"] = unmatched
 
 
 def sites_index(gt: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
     index: dict[str, list[dict[str, Any]]] = {}
-    for site in gt["sites"]:
-        index.setdefault(site["file"], []).append(site)
+    for case in gt["cases"]:
+        index.setdefault(case["file"], []).append(case)
     return index
 
 
@@ -318,7 +332,7 @@ def report(checkpoint: dict[str, Any], gt: dict[str, Any], model: str) -> str:
     lines += [
              f"数据集：{project['name']} {project['ref']}（提交 `{project['commit'][:12]}`）子集，"
              f"{project['file_count']} 个文件、源码 {project['source_lines']} 行；"
-             f"待检文件 {len(gt['target_files'])} 个、合计 {gt['target_file_lines']} 行；"
+             f"待检文件 {len(gt['detection_files'])} 个、合计 {gt['line_totals']['detection_files']} 行；"
              f"每类注入缺陷 10 处，共 {sum(c['defects'] for c in gt['categories'].values())} 处缺陷 + "
              f"{sum(c['controls'] for c in gt['categories'].values())} 处安全对照。"
              "数据集与真值见 `artifacts/contract5/rtthread/dataset/`，构建方法见 `scripts/build_contract5_dataset.py`。", "",
@@ -352,7 +366,7 @@ def report(checkpoint: dict[str, Any], gt: dict[str, Any], model: str) -> str:
               f"{rate(overall['warning_accuracy'])} | {rate(overall['false_positive_rate'])} | {rate(overall['accuracy'])} |", "",
               "| 缺陷难度 | 缺陷数 | 已评分 | 检出 | 检出率 |", "|---|---:|---:|---:|---:|"]
     for difficulty in DIFFICULTIES:
-        total = sum(s["expected"] == "defect" and s["difficulty"] == difficulty for s in gt["sites"])
+        total = sum(c["expected"] == "defect" and c["difficulty"] == difficulty for c in gt["cases"])
         scored = [r for r in rows if r["expected"] == "defect" and r["difficulty"] == difficulty]
         hit = sum(r["detected"] for r in scored)
         lines.append(f"| {difficulty} | {total} | {len(scored)} | {hit} | {rate(hit / len(scored) if scored else None)} |")
@@ -370,7 +384,7 @@ def report(checkpoint: dict[str, Any], gt: dict[str, Any], model: str) -> str:
         for r in errors:
             verdict = "漏报 FN" if r["expected"] == "defect" else "误报 FP"
             reason = (r["matched_findings"][0]["reason"] if r["matched_findings"] else "")[:160]
-            lines.append(f"| `{r['id']}` | `{r['file']}` | `{r['function']}` | {CATEGORIES[r['category']]} | {r['difficulty']} | {verdict} | "
+            lines.append(f"| `{r['site_id']}` | `{r['file']}` | `{r['function']}` | {CATEGORIES[r['category']]} | {r['difficulty']} | {verdict} | "
                          f"{r['description'][:160]}{'；模型理由：' + reason if reason else ''} |")
         lines.append("")
     out_of_scope = sum(len(rec.get("out_of_scope_findings", [])) for rec in records.values())

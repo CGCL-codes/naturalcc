@@ -49,18 +49,18 @@ def scan_file(relative: str) -> list[dict[str, Any]]:
 
 def score(ground_truth: dict[str, Any]) -> dict[str, Any]:
     by_file: dict[str, list[dict[str, Any]]] = {}
-    for site in ground_truth["sites"]:
-        by_file.setdefault(site["file"], []).append(site)
+    for case in ground_truth["cases"]:
+        by_file.setdefault(case["file"], []).append(case)
     rows, unmatched = [], []
-    for relative in sorted({f["file"] for f in ground_truth["target_files"]}):
+    for relative in sorted(f["path"] for f in ground_truth["detection_files"]):
         findings = scan_file(relative)
         claimed: set[int] = set()
-        for site in by_file.get(relative, []):
-            accepted = ACCEPTED[site["category"]]
+        for case in by_file.get(relative, []):
+            accepted = ACCEPTED[case["category"]]
             hits = [f for f in findings if f.get("category") in accepted
-                    and site["line_start"] <= f["line"] <= site["line_end"]]
+                    and case["line_start"] <= f["line"] <= case["line_end"]]
             claimed.update(id(f) for f in hits)
-            rows.append({**site, "detected": bool(hits),
+            rows.append({**case, "detected": bool(hits),
                          "matched": [{"category": f["category"], "line": f["line"],
                                       "analyzer_id": f.get("analyzer_id")} for f in hits]})
         unmatched.extend({"file": relative, "category": f.get("category"), "line": f["line"],
@@ -115,12 +115,12 @@ def main() -> None:
         print("\n--- 漏报的注入缺陷 ---")
         for r in rows:
             if r["expected"] == "defect" and not r["detected"]:
-                print(f"  {r['id']:<9} {r['category']:<18} {r['file']}:{r['line']} {r['function']}() [{r['difficulty']}]")
+                print(f"  {r['site_id']:<9} {r['category']:<18} {r['file']}:{r['defect_line']} {r['function']}() [{r['difficulty']}]")
                 print(f"            {r['description'][:110]}")
         print("\n--- 被误报的安全对照 ---")
         for r in rows:
             if r["expected"] == "control" and r["detected"]:
-                print(f"  {r['id']:<9} {r['category']:<18} {r['file']}:{r['line']} {r['function']}()  <- {r['matched']}")
+                print(f"  {r['site_id']:<9} {r['category']:<18} {r['file']}:{r['defect_line']} {r['function']}()  <- {r['matched']}")
     if args.json:
         args.json.write_text(json.dumps({"overall": overall, **result}, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"\nJSON: {args.json}")

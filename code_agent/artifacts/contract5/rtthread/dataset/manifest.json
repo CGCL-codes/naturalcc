@@ -16,7 +16,7 @@
     "memory_leak": "78da2ebe959c58128079d2ac0824b96ea060fc76b6fc23452cbb0ebc21082a3b",
     "command_execution": "ba9c3b6af747e18ba66cce87cbea32b1be9fd0499e0076b71b4081240b36c37b"
   },
-  "ground_truth_sha256": "53c1a73feb48cfb5bb317ec67a840d83be0fcbdcde2677342d06301ffed99f1b",
+  "ground_truth_sha256": "dfb53590a386d65e0280ddb1e297af4271ccc616d314ae3dc2f4f4b5ce2a528b",
   "project_files": [
     {
       "file": "Kconfig",

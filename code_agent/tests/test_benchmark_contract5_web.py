@@ -4,21 +4,31 @@ import pytest
 
 from code_agent.scripts import benchmark_contract5_web as bench
 
-SITES = [
-    {"id": "BOF-01", "category": "buffer_overflow", "cwe": 787, "file": "src/a.c", "function": "f_bad", "line_start": 10,
-     "line_end": 20, "line": 15, "expected": "defect", "difficulty": "easy", "modified": True, "description": "d", "trigger": "t", "fix": "x"},
-    {"id": "BOF-C01", "category": "buffer_overflow", "cwe": 787, "file": "src/a.c", "function": "f_ok", "line_start": 30,
-     "line_end": 40, "line": 35, "expected": "control", "difficulty": "medium", "modified": False, "description": "d", "trigger": "", "fix": ""},
-    {"id": "RACE-01", "category": "data_race", "cwe": 362, "file": "src/a.c", "function": "g_bad", "line_start": 50,
-     "line_end": 60, "line": 55, "expected": "defect", "difficulty": "hard", "modified": True, "description": "d", "trigger": "t", "fix": "x"},
+CASES = [
+    {"case_id": "rt-thread-buffer_overflow-defect-01", "site_id": "BOF-01", "project": "rt-thread",
+     "category": "buffer_overflow", "cwe": 787, "file": "src/a.c", "function": "f_bad", "line_start": 10,
+     "line_end": 20, "defect_line": 15, "defect_code": "x", "expected": "defect", "difficulty": "easy",
+     "description": "d", "trigger": "t", "fix": "x"},
+    {"case_id": "rt-thread-buffer_overflow-control-01", "site_id": "BOF-C01", "project": "rt-thread",
+     "category": "buffer_overflow", "cwe": 787, "file": "src/a.c", "function": "f_ok", "line_start": 30,
+     "line_end": 40, "defect_line": 35, "defect_code": "x", "expected": "control", "difficulty": "medium",
+     "description": "d", "trigger": "", "fix": ""},
+    {"case_id": "rt-thread-data_race-defect-01", "site_id": "RACE-01", "project": "rt-thread",
+     "category": "data_race", "cwe": 362, "file": "src/a.c", "function": "g_bad", "line_start": 50,
+     "line_end": 60, "defect_line": 55, "defect_code": "x", "expected": "defect", "difficulty": "hard",
+     "description": "d", "trigger": "t", "fix": "x"},
 ]
-GT = {"project": {"name": "RT-Thread", "ref": "v5.2.1", "commit": "97893c004c65", "file_count": 3, "source_lines": 300},
-      "target_files": [
-          {"file": "src/a.c", "lines": 100, "sha256": "", "verdict": "vulnerable", "defect_count": 2, "control_count": 1, "categories": ["buffer_overflow", "data_race"], "site_ids": ["BOF-01", "BOF-C01", "RACE-01"]},
-          {"file": "src/b.c", "lines": 50, "sha256": "", "verdict": "clean", "defect_count": 0, "control_count": 0, "categories": [], "site_ids": []}],
-      "target_file_lines": 150,
+GT = {"schema_version": 1, "scan_type": "high_risk",
+      "project": {"name": "RT-Thread", "ref": "v5.2.1", "commit": "97893c004c65", "file_count": 3, "source_lines": 300},
+      "detection_files": [
+          {"path": "src/a.c", "lines": 100, "sha256": "", "verdict": "vulnerable", "defects": 2, "controls": 1,
+           "categories": ["buffer_overflow", "data_race"]},
+          {"path": "src/b.c", "lines": 50, "sha256": "", "verdict": "clean", "defects": 0, "controls": 0,
+           "categories": []}],
+      "line_totals": {"detection_files": 150, "project_source": 300},
+      "source_sha256": {"src/a.c": "", "src/b.c": ""},
       "categories": {c: {"name": n, "cwe": 0, "defects": 0, "controls": 0} for c, n in bench.CATEGORIES.items()},
-      "sites": SITES}
+      "cases": CASES}
 
 
 def test_prompt_template_has_placeholder_and_no_labels():
@@ -66,8 +76,8 @@ def test_classify_matches_by_function_or_line_and_keeps_category_strict():
         {"category": "buffer_overflow", "function": "f_bad", "line": 99, "reason": "by name"},
         {"category": "data_race", "function": "other", "line": 35, "reason": "wrong category on control"},
         {"category": "memory_leak", "function": "elsewhere", "line": 80, "reason": "out of scope"}]}
-    rows, unmatched = bench.classify(SITES, prediction)
-    by_id = {r["id"]: r["detected"] for r in rows}
+    rows, unmatched = bench.classify(CASES, prediction)
+    by_id = {r["site_id"]: r["detected"] for r in rows}
     assert by_id == {"BOF-01": True, "BOF-C01": False, "RACE-01": False}
     assert [f["reason"] for f in unmatched] == ["wrong category on control", "out of scope"]
     m = bench.metric(rows)
@@ -92,7 +102,7 @@ def test_report_renders_without_results_and_with_results(tmp_path, monkeypatch):
     text = bench.report(empty, GT, "anthropic/claude-sonnet-4.5")
     assert "尚未产生任何有效评分结果" in text and "N/A" in text
     prediction = {"findings": [{"category": "buffer_overflow", "function": "f_ok", "line": 35, "reason": "looks unsafe"}], "summary": "s"}
-    rows, unmatched = bench.classify(SITES, prediction)
+    rows, unmatched = bench.classify(CASES, prediction)
     checkpoint = {"samples": {"src/a.c": {"status": "scored", "prediction": prediction, "rows": rows, "out_of_scope_findings": unmatched,
                                            "attempts": [{"run_id": "run-1234"}]}}, "stop_reason": "x"}
     text = bench.report(checkpoint, GT, "anthropic/claude-sonnet-4.5")
@@ -111,7 +121,7 @@ def test_offline_rescore_uses_saved_run(tmp_path, monkeypatch):
     bench.refresh_scores(checkpoint, GT)
     rec = checkpoint["samples"]["src/a.c"]
     assert rec["status"] == "scored" and "error" not in rec
-    assert {r["id"]: r["detected"] for r in rec["rows"]} == {"BOF-01": False, "BOF-C01": False, "RACE-01": True}
+    assert {r["site_id"]: r["detected"] for r in rec["rows"]} == {"BOF-01": False, "BOF-C01": False, "RACE-01": True}
 
 
 def test_credit_failure_only_uses_runtime_errors():

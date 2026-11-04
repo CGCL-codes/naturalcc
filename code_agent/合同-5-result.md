@@ -1,6 +1,6 @@
 # 合同第 5 项：操作系统底层程序高危代码检测实测结果
 
-更新时间（UTC）：2026-11-04T12:11:02.962449+00:00
+更新时间（UTC）：2026-11-04T14:53:19.277367+00:00
 
 > **本轮不是合同成绩。** 使用的是 `deepseek/deepseek-chat`，并非合同要求的 Claude/GPT 级模型，本轮仅用于验证数据集与测试链路（提示词、读取覆盖、JSON 解析、site 计分、报告生成）是否正确。合同成绩须用 `anthropic/claude-sonnet-4.5` 或更强的 Claude/GPT 模型重跑，结果写入 `web-<model>/` 独立目录。
 
@@ -65,17 +65,17 @@
 | `LEAK-08` | `components/dfs/dfs_v2/src/dfs_seq_file.c` | `dfs_seq_release` | 内存泄漏 | medium | 漏报 FN | 释放 seq 结构前只把 seq->buf 置空，dfs_seq_read() 中 dfs_seq_alloc() 分配的读缓冲区不再释放。 |
 | `BOF-05` | `components/drivers/ipc/ringbuffer.c` | `rt_ringbuffer_put` | 缓冲区溢出 | medium | 漏报 FN | rt_ringbuffer_put 原本在剩余空间 size 小于请求长度 length 时把 length 截断到 size；删除该截断后，后续 rt_memcpy 按调用方 length 写入，可超过环形缓冲剩余容量造成越界写。 |
 | `RACE-05` | `components/drivers/ipc/workqueue.c` | `_workqueue_cancel_work` | 多线程竞争 | easy | 漏报 FN | 共享状态：work->list 链表与 work->flags/workqueue 字段。取消时的链表摘除与字段清零被移出锁，与工作线程取节点、其它提交者并发。 |
-| `LEAK-04` | `components/drivers/ipc/workqueue.c` | `rt_workqueue_create` | 内存泄漏 | easy | 漏报 FN | 工作线程创建失败的错误路径不再 RT_KERNEL_FREE(queue)，已分配的 rt_workqueue 结构丢失。 |
 | `RACE-04` | `components/drivers/ipc/workqueue.c` | `rt_workqueue_urgent_work` | 多线程竞争 | easy | 漏报 FN | 共享状态：工作队列 queue->work_list 链表。链表摘除/插入被移到自旋锁之外，与工作线程 _workqueue_thread_entry 持锁取节点并发。 |
+| `LEAK-04` | `components/drivers/ipc/workqueue.c` | `rt_workqueue_create` | 内存泄漏 | easy | 漏报 FN | 工作线程创建失败的错误路径不再 RT_KERNEL_FREE(queue)，已分配的 rt_workqueue 结构丢失。 |
 | `BOF-04` | `components/drivers/serial/dev_serial.c` | `_serial_int_rx` | 缓冲区溢出 | easy | 漏报 FN | 软件接收 FIFO 的读指针回绕判断由 >= 改成 >，当 get_index 自增到等于 bufsz 时不再归零，下一轮用 rx_fifo->buffer[get_index] 读取时越界访问 buffer[bufsz]。 |
-| `CE-10` | `components/finsh/msh.c` | `msh_exec_module` | 命令执行漏洞 | medium | 漏报 FN | pg_name 是在文件系统 /bin 路径中检索、补全得到的模块文件路径，取决于磁盘内容；加载模块前把它拼进命令行交给 system 执行。 |
 | `BOF-08` | `components/finsh/msh.c` | `msh_auto_complete_path` | 缓冲区溢出 | medium | 漏报 FN | 补全路径时把候选目录项名 full_path 以其完整长度拷回 index（指向调用方 path 缓冲的中段），而非受控的公共前缀长度 min_length；当候选名较长而 path 剩余空间不足时越界写命令行缓冲。 |
+| `CE-10` | `components/finsh/msh.c` | `msh_exec_module` | 命令执行漏洞 | medium | 漏报 FN | pg_name 是在文件系统 /bin 路径中检索、补全得到的模块文件路径，取决于磁盘内容；加载模块前把它拼进命令行交给 system 执行。 |
 | `CE-02` | `components/finsh/msh_file.c` | `directory_setattr` | 命令执行漏洞 | medium | 漏报 FN | full_path 同样来自 readdir 的目录项名，是外部文件系统数据；递归设置属性时把它拼进命令行并经 msh_exec 执行，等于让磁盘上的文件名决定要运行的 shell 命令。 |
 | `BOF-03` | `components/finsh/shell.c` | `finsh_get_prompt` | 缓冲区溢出 | easy | 漏报 FN | finsh_get_prompt 把用户通过 finsh_set_prompt 设置的自定义提示符用无界 strcpy 拷入固定缓冲 finsh_prompt[RT_CONSOLEBUF_SIZE+1]，自定义串长度不受限，可越界写该栈/静态缓冲。 |
 | `BOF-10` | `components/finsh/shell.c` | `finsh_thread_entry` | 缓冲区溢出 | hard | 漏报 FN | 命令行输入缓冲 shell->line[FINSH_CMD_SIZE+1] 的两处越界保护被同时放宽：前置丢弃判断由 >= 改为 >，尾部清行判断由 >= 改为 >= FINSH_CMD_SIZE+1，使 line_position 可达到 FINSH_CMD_SIZE+1，随后以该下标写字符时越界。需跨两处保护联立分 |
 | `RACE-08` | `src/memheap.c` | `rt_memheap_free` | 多线程竞争 | medium | 漏报 FN | 共享状态：memheap 块头 magic 与 heap->available_size。标记空闲与可用字节累加被移到获取 heap->lock 之前，脱离互斥保护。 |
-| `LEAK-03` | `src/mempool.c` | `rt_mp_create` | 内存泄漏 | medium | 漏报 FN | 乘法回绕检查放在 rt_malloc 之后：检查失败时删除对象并返回，但 mp->start_address 指向的堆内存未 rt_free。 |
 | `RACE-02` | `src/mempool.c` | `rt_mp_free` | 多线程竞争 | easy | 漏报 FN | 共享状态：内存池空闲块计数 mp->block_free_count。自增被移到加锁之前，与 rt_mp_alloc 中锁内的 block_free_count-- 构成非原子读改写。 |
+| `LEAK-03` | `src/mempool.c` | `rt_mp_create` | 内存泄漏 | medium | 漏报 FN | 乘法回绕检查放在 rt_malloc 之后：检查失败时删除对象并返回，但 mp->start_address 指向的堆内存未 rt_free。 |
 | `BOF-02` | `src/object.c` | `rt_object_get_name` | 缓冲区溢出 | easy | 漏报 FN | rt_object_get_name 收到调用方缓冲 name 及其容量 name_size，却用不带长度的 rt_strcpy 拷贝对象名，忽略了 name_size，当对象名长度接近 RT_NAME_MAX 而调用方缓冲较小时越界写。 |
 | `RACE-06` | `src/thread.c` | `rt_thread_wakeup_set` | 多线程竞争 | medium | 漏报 FN | 共享状态：thread->wakeup_handle 的 func 与 user_data。func 的写入被移出调度锁，而 rt_thread_wakeup 在调度锁内读取 func 并清空后回调。 |
 | `RACE-01` | `src/timer.c` | `rt_timer_stop` | 多线程竞争 | easy | 漏报 FN | 共享状态：定时器所在的全局 timer skip-list 与 timer->parent.flag。自旋锁被提前释放，_timer_remove() 的链表摘除和标志清除落在锁外；另一核的 rt_timer_start/rt_timer_check 可同时操作同一链表。 |

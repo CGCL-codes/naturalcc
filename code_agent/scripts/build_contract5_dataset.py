@@ -288,6 +288,15 @@ def target_files(spec: dict[str, Any], sites: list[dict[str, Any]], contents: di
 
 
 def ground_truth_document(spec: dict[str, Any], sites: list[dict[str, Any]], files: list[dict[str, Any]], upstream_root: Path, contents: dict[str, str]) -> dict[str, Any]:
+    """Emit the ground truth in the schema the product's loader consumes.
+
+    Top level is ``schema_version`` / ``scan_type`` / ``source_sha256`` / flat
+    ``cases``, so the file can be handed straight to ``vulnerability_detection``
+    as ``ground_truth_file`` with ``scan_type="high_risk"`` and scored by
+    ``security_contracts.evaluate_contract``. The per-case extras
+    (``defect_line``, ``defect_code``, ``difficulty``, ``description``,
+    ``trigger``, ``fix``) follow the Contract-3 export and are ignored by the loader.
+    """
     all_files = project_files(upstream_root, spec["project_paths"])
     source_lines = 0
     for relative in all_files:
@@ -296,6 +305,33 @@ def ground_truth_document(spec: dict[str, Any], sites: list[dict[str, Any]], fil
             if text is None:
                 text = (upstream_root / relative).read_text(encoding="utf-8", errors="replace")
             source_lines += len(text.splitlines())
+
+    def source_line(site: dict[str, Any]) -> str:
+        text = contents.get(site["file"])
+        if text is None:
+            text = (upstream_root / site["file"]).read_text(encoding="utf-8", errors="replace")
+        lines = text.splitlines()
+        return lines[site["line"] - 1].strip() if 0 < site["line"] <= len(lines) else ""
+
+    project_id = spec["upstream"]["id"]
+    counters: dict[tuple[str, str], int] = {}
+    cases = []
+    for site in sorted(sites, key=lambda s: (s["category"], s["expected"] != "defect", s["file"], s["line_start"])):
+        key = (site["category"], site["expected"])
+        counters[key] = counters.get(key, 0) + 1
+        cases.append({
+            "case_id": f"{project_id}-{site['category']}-{site['expected']}-{counters[key]:02d}",
+            "site_id": site["id"], "project": project_id, "category": site["category"], "cwe": site["cwe"],
+            "expected": site["expected"], "function": site["function"], "file": site["file"],
+            "line_start": site["line_start"], "line_end": site["line_end"],
+            "defect_line": site["line"], "defect_code": source_line(site),
+            "difficulty": site["difficulty"], "description": site["description"],
+            "trigger": site["trigger"], "fix": site["fix"],
+        })
+    detection_files = [{"path": row["file"], "lines": row["lines"], "sha256": row["sha256"],
+                        "verdict": row["verdict"], "defects": row["defect_count"],
+                        "controls": row["control_count"], "categories": row["categories"]}
+                       for row in files]
     by_category = {}
     for category, meta in CATEGORIES.items():
         rows = [s for s in sites if s["category"] == category]
@@ -307,34 +343,28 @@ def ground_truth_document(spec: dict[str, Any], sites: list[dict[str, Any]], fil
         }
     return {
         "schema_version": 1,
-        "title": "合同指标 5：操作系统底层程序高危代码检测数据集（RT-Thread v5.2.1 注入版）",
+        "scan_type": "high_risk",
+        "title": "合同指标 5：操作系统底层程序高危代码检测 ground truth（RT-Thread v5.2.1 注入版）",
         "generated_utc": now(),
+        "line_rule": "detection_files 是要检测的文件清单，合计不少于 10000 行；行数按文件实际行数统计。",
+        "scoring_rule": ("只有 cases 中的函数参与计分：expected=defect 为注入缺陷、expected=control 为同类安全对照。"
+                         "告警的 category 需与 case 相同，且函数同名或行号落在 [line_start, line_end] 内才算命中。"
+                         "detection_files 中没有 case 的文件为无缺陷文件，其同类告警计为误报。"),
+        "metrics": {
+            "warning_accuracy": "TP / (TP + FP)  —— 合同“预警准确率”，要求 > 90%",
+            "false_positive_rate": "FP / (FP + TN)  —— 合同“误报率”，要求 < 8%",
+            "detection_rate": "TP / (TP + FN)",
+            "accuracy": "(TP + TN) / (TP + TN + FP + FN)  —— 甲方所说的“正确率”",
+        },
         "project": {
             **spec["upstream"], "root": "project", "project_paths": spec["project_paths"],
             "file_count": len(all_files), "source_lines": source_lines,
         },
-        "protocol": {
-            "unit": "site",
-            "site": "一个被注入缺陷的函数（expected=defect）或一个安全对照函数（expected=control）；每个函数只承载一个 site。",
-            "file_verdict": "target file 中含至少一个 defect 则 verdict=vulnerable，否则 clean（包括只含 control 的文件）。",
-            "match_rule": "预测 finding 的 category 与 site 相同，且 function 同名或 line 落在 [line_start, line_end] 内，即命中该 site。",
-            "metrics": {
-                "warning_accuracy": "TP / (TP + FP)  —— 合同“预警准确率”",
-                "false_positive_rate": "FP / (FP + TN)  —— 合同“误报率”",
-                "detection_rate": "TP / (TP + FN)",
-                "accuracy": "(TP + TN) / (TP + TN + FP + FN)  —— 甲方所说的“正确率”",
-            },
-            "thresholds": {"warning_accuracy": "> 90%", "false_positive_rate": "< 8%", "target_accuracy_band": "85%–90%"},
-            "notes": [
-                "控制项（control）与无缺陷文件中的任何同类告警均计为 FP；范围外函数上的告警单独列出，不进入 site 级 TP/FP。",
-                "line 是缺陷（或对照焦点）所在行；line_start/line_end 是函数定义到函数结束的行范围。",
-                "difficulty 为出题方的难度预估：easy = 局部单行可判断；medium = 需跨几十行理解 RT-Thread API 语义；hard = 需跨函数/跨文件推理。",
-            ],
-        },
-        "target_files": files,
-        "target_file_lines": sum(f["lines"] for f in files),
+        "line_totals": {"detection_files": sum(f["lines"] for f in files), "project_source": source_lines},
         "categories": by_category,
-        "sites": sorted(sites, key=lambda s: (s["file"], s["line_start"])),
+        "detection_files": detection_files,
+        "source_sha256": {row["file"]: row["sha256"] for row in files},
+        "cases": cases,
     }
 
 
@@ -357,8 +387,9 @@ def write_project(upstream_root: Path, spec: dict[str, Any], contents: dict[str,
 
 def validate_counts(gt: dict[str, Any], injections: dict[str, Any]) -> list[str]:
     problems = []
-    if len(injections) == len(CATEGORIES) and gt["target_file_lines"] < MIN_TARGET_LINES:
-        problems.append(f"target files total {gt['target_file_lines']} lines (< {MIN_TARGET_LINES})")
+    detection_lines = gt["line_totals"]["detection_files"]
+    if len(injections) == len(CATEGORIES) and detection_lines < MIN_TARGET_LINES:
+        problems.append(f"detection files total {detection_lines} lines (< {MIN_TARGET_LINES})")
     for category, row in gt["categories"].items():
         if category not in injections:
             continue
@@ -370,8 +401,9 @@ def validate_counts(gt: dict[str, Any], injections: dict[str, Any]) -> list[str]
 def summary(gt: dict[str, Any]) -> str:
     lines = [f"项目：{gt['project']['name']} {gt['project']['ref']} ({gt['project']['commit'][:12]})，"
              f"{gt['project']['file_count']} 个文件，源码 {gt['project']['source_lines']} 行",
-             f"待检文件：{len(gt['target_files'])} 个，合计 {gt['target_file_lines']} 行；"
-             f"有缺陷 {sum(f['verdict'] == 'vulnerable' for f in gt['target_files'])} 个，无缺陷 {sum(f['verdict'] == 'clean' for f in gt['target_files'])} 个"]
+             f"待检文件：{len(gt['detection_files'])} 个，合计 {gt['line_totals']['detection_files']} 行；"
+             f"有缺陷 {sum(f['verdict'] == 'vulnerable' for f in gt['detection_files'])} 个，"
+             f"无缺陷 {sum(f['verdict'] == 'clean' for f in gt['detection_files'])} 个"]
     for category, row in gt["categories"].items():
         lines.append(f"  {row['name']} (CWE-{row['cwe']}): 缺陷 {row['defects']} 处 (easy/medium/hard = "
                      f"{row['difficulty']['easy']}/{row['difficulty']['medium']}/{row['difficulty']['hard']})，对照 {row['controls']} 处")
@@ -403,13 +435,17 @@ def main() -> None:
     parser.add_argument("--check", action="store_true", help="validate anchors/labels only; write nothing")
     parser.add_argument("--category", action="append", help="with --check: validate only these injection files (repeatable)")
     parser.add_argument("--verify", action="store_true", help="verify committed dataset against manifest; needs no upstream")
-    parser.add_argument("--archive", action="store_true", help="also write the delivery package contract5.zip")
+    parser.add_argument("--archive", action="store_true", help="write the delivery package contract5.zip from the committed dataset (no upstream needed)")
     args = parser.parse_args()
     if args.verify:
         problems = verify_committed()
         print("\n".join(problems) if problems else "dataset matches manifest")
         raise SystemExit(1 if problems else 0)
     spec = load_spec()
+    if args.archive and not args.check:
+        # Packaging only reads what is already committed; no upstream checkout needed.
+        print(f"archive: {write_archive()}")
+        return
     if args.category and not args.check:
         raise SystemExit("--category is only valid with --check")
     injections = load_injections(args.category)
