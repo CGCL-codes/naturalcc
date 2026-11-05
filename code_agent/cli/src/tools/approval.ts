@@ -3,6 +3,7 @@ import { stdin, stderr } from 'node:process'
 import { randomUUID } from 'node:crypto'
 
 import { ToolInputError, type ToolSchema } from './types.js'
+import { inputError } from './diagnostics.js'
 
 export type ApprovalMode = 'prompt' | 'deny' | 'allow'
 
@@ -19,10 +20,76 @@ export interface ApprovalRequest {
   reason: string
 }
 
+export type ApprovalDenial =
+  | { readonly origin: 'policy'; readonly category: 'format_mismatch' | 'unsafe_command' | 'permission_denied'; readonly message?: string }
+  | { readonly origin: 'user'; readonly category: 'declined'; readonly message?: string }
+  | { readonly origin: 'unspecified'; readonly category: 'unspecified'; readonly message?: string }
+
+export type ApprovalResponse = boolean
+  | { readonly approved: true }
+  | { readonly approved: false; readonly denial: ApprovalDenial }
+
+export type NormalizedApproval = { readonly approved: true }
+  | { readonly approved: false; readonly denial: {
+      readonly origin: ApprovalDenial['origin'] | 'legacy'
+      readonly category: ApprovalDenial['category']
+      readonly message: string
+    } }
+
+/** Validate the trusted provider boundary before touching the attempt ledger. */
+export function normalizeApprovalResponse(value: unknown): NormalizedApproval {
+  try {
+    if (value === true) return Object.freeze({ approved: true })
+    if (value === false) return Object.freeze({ approved: false, denial: Object.freeze({
+      origin: 'legacy', category: 'unspecified', message: 'User denied this tool call.',
+    }) })
+    const decision = approvalData(value, ['approved', 'denial'])
+    if (decision.approved === true && Object.keys(decision).length === 1) {
+      return Object.freeze({ approved: true })
+    }
+    if (decision.approved !== false || Object.keys(decision).length !== 2) throw new Error()
+    const denial = approvalData(decision.denial, ['origin', 'category', 'message'])
+    const allowed: Record<string, readonly string[]> = {
+      policy: ['format_mismatch', 'unsafe_command', 'permission_denied'],
+      user: ['declined'], unspecified: ['unspecified'],
+    }
+    if (typeof denial.origin !== 'string' || typeof denial.category !== 'string'
+      || !Object.prototype.hasOwnProperty.call(allowed, denial.origin)
+      || !allowed[denial.origin]!.includes(denial.category)) throw new Error()
+    const message = Object.prototype.hasOwnProperty.call(denial, 'message')
+      ? denial.message
+      : denial.origin === 'user' ? 'User denied this tool call.' : 'Tool call rejected by the approval provider.'
+    if (typeof message !== 'string' || !message.trim() || [...message].length > 400
+      || Buffer.byteLength(message, 'utf8') > 1600
+      || /[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/u.test(message)) throw new Error()
+    return Object.freeze({ approved: false, denial: Object.freeze({
+      origin: denial.origin as ApprovalDenial['origin'],
+      category: denial.category as ApprovalDenial['category'], message,
+    }) })
+  } catch {
+    // Never expose an invalid return value, getter or proxy exception in history.
+    throw new Error('Invalid approval provider decision')
+  }
+}
+
+function approvalData(value: unknown, keys: readonly string[]): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error()
+  const prototype = Object.getPrototypeOf(value)
+  if (prototype !== Object.prototype && prototype !== null) throw new Error()
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  if (Reflect.ownKeys(value).some((key) => typeof key !== 'string' || !keys.includes(key))) throw new Error()
+  const data: Record<string, unknown> = Object.create(null)
+  for (const [key, descriptor] of Object.entries(descriptors)) {
+    if (!('value' in descriptor)) throw new Error()
+    data[key] = descriptor.value
+  }
+  return data
+}
+
 export interface ApprovalProvider {
   /** Identifies the single owner of a prompt presentation in one-shot mode. */
   readonly presentationOwner?: 'provider' | 'renderer'
-  request(input: ApprovalRequest, signal?: AbortSignal): Promise<boolean>
+  request(input: ApprovalRequest, signal?: AbortSignal): Promise<ApprovalResponse>
 }
 
 export interface ApprovalController {
@@ -34,7 +101,7 @@ export interface ToolPolicy {
   readonly approvalProvider: ApprovalProvider
   requiresApproval(schema: ToolSchema): boolean
   beginTurn?(): void
-  createRequestId?(callId: string, ordinal: number): string
+  createRequestId?(callId: string, ordinal: number, runOwner?: string): string
 }
 
 export class FixedApprovalProvider implements ApprovalProvider {
@@ -133,7 +200,8 @@ export function createToolPolicy(
     approvalProvider: createApprovalProvider(mode, provider),
     requiresApproval: (schema) => schema.readOnly !== true && schema.requiresApproval === true,
     beginTurn: () => {},
-    createRequestId: (callId) => `approval-${policyNonce}-${++requestSequence}-${callId}`,
+    createRequestId: (callId, ordinal, runOwner) =>
+      `approval-${runOwner ?? policyNonce}-${runOwner === undefined ? ++requestSequence : ordinal + 1}-${callId}`,
   }
 }
 
@@ -146,16 +214,17 @@ export function summarizeApprovalInput(input: Record<string, unknown>): string {
 /** Validate the model-owned reason before it can reach approval or execution. */
 export function validateApprovalReason(value: unknown): string {
   if (typeof value !== 'string' || !value.trim()) {
-    throw new ToolInputError('Approval reason must be a non-empty string')
+    throw inputError('Approval reason must be a non-empty string', value === undefined ? 'missing_required_field' : typeof value !== 'string' ? 'invalid_type' : 'invalid_value', 'reason', 'non-empty string')
   }
   const length = [...value].length
   if (length > MAX_APPROVAL_REASON_CHARS) {
-    throw new ToolInputError(
+    throw inputError(
       `Approval reason is too long (maximum ${MAX_APPROVAL_REASON_CHARS} Unicode characters)`,
+      'out_of_range', 'reason', `at most ${MAX_APPROVAL_REASON_CHARS} Unicode characters`,
     )
   }
   if (dangerousApprovalControl.test(value)) {
-    throw new ToolInputError('Approval reason must not contain terminal control characters')
+    throw inputError('Approval reason must not contain terminal control characters', 'invalid_value', 'reason', 'text without terminal controls')
   }
   return value
 }

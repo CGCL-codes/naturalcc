@@ -1,40 +1,32 @@
 import { Box, Text } from 'ink'
-import { calculateContentWidth, fillDisplayWidth, truncateDisplayText } from '../terminal/index.js'
+import { normalizeTerminalWidth, truncateDisplayText } from '../terminal/index.js'
+import { type SessionTimingSnapshot } from '../state/sessionTiming.js'
+import { renderWorkingStatusLine } from './TimingProjection.js'
 
 interface ThinkingBarProps {
   loading: boolean
-  isStreaming: boolean
-  streamingContent: string
-  thinkTime: number | null
-  elapsed: number
-  dots: string
+  isStreaming?: boolean
+  showingLatest?: boolean
+  /** Legacy props remain optional for existing embedding fixtures. */
+  thinkTime?: number | null
+  elapsed?: number
+  dots?: string
+  durationMs?: number
+  approvalPaused?: boolean
   width: number
 }
 
-export function ThinkingBar({ loading, isStreaming, streamingContent, thinkTime, elapsed, dots, width }: ThinkingBarProps) {
-  if (!loading) return null
-  if (width <= 4) {
-    return <Box width={Math.max(1, width)}><Text>{truncateDisplayText(isStreaming ? '…' : 'thinking', Math.max(1, width))}</Text></Box>
-  }
-  const dividerWidth = calculateContentWidth({ terminalWidth: width, paddingLeft: 2, minWidth: 0 })
+export function ThinkingBar({ loading, isStreaming = false, showingLatest = false, durationMs = 0, approvalPaused = false, width }: ThinkingBarProps) {
+  if (!loading || approvalPaused) return null
+  const safeWidth = normalizeTerminalWidth(width, 1)
 
   return (
-    <>
-      {!isStreaming && (
-        <Box flexDirection="column" marginBottom={1}>
-          <Text>thinking for <Text color='yellow'>{(thinkTime ?? elapsed).toFixed(1)}</Text> s {dots}</Text>
-        </Box>
-      )}
-      {isStreaming && (
-        <Box flexDirection="column" marginBottom={1}>
-          {streamingContent && <Text color="gray">streaming…</Text>}
-          <Text>{"\n"}work for <Text color='yellow'>{(thinkTime ?? elapsed).toFixed(1)}</Text> s</Text>
-        </Box>
-      )}
-      <Box flexDirection="column">
-        <Text>{fillDisplayWidth('─', dividerWidth)}</Text>
-        <Text color='gray'>Esc to interrupted</Text>
-      </Box>
-    </>
+    <Box flexDirection="column" width={safeWidth} marginBottom={1}>
+      {isStreaming && <Text color="gray">{truncateDisplayText(showingLatest ? 'Streaming… · showing latest output' : 'Streaming…', safeWidth)}</Text>}
+      <Text>{renderWorkingStatusLine(durationMs, safeWidth)}</Text>
+      <Text color="gray">{truncateDisplayText('Esc to interrupt', safeWidth)}</Text>
+    </Box>
   )
 }
+
+export type ThinkingTimingSnapshot = Pick<SessionTimingSnapshot, 'currentTurnMs' | 'approvalPaused'>

@@ -1,8 +1,10 @@
 import { ToolInputError } from './types.js'
+import { inputError } from './diagnostics.js'
 
 export const DEFAULT_FILE_LIMIT = 200
 export const MAX_FILE_LIMIT = 1000
 export const MIN_TOOL_OUTPUT_CHARS = 96
+export const MIN_CANONICAL_TOOL_OUTPUT_CHARS = 192
 export const MAX_QUERY_LENGTH = 2000
 export const MAX_PATCH_LENGTH = 200_000
 export const MAX_PATCH_FILES = 32
@@ -12,7 +14,7 @@ export const MAX_PATCH_TOTAL_TARGET_BYTES = 10_000_000
 
 export function assertObject(input: Record<string, unknown>): void {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
-    throw new ToolInputError('Tool arguments must be a JSON object')
+    throw inputError('Tool arguments must be a JSON object', 'invalid_argument_shape')
   }
 }
 
@@ -22,7 +24,7 @@ export function assertKnownKeys(
 ): void {
   const known = new Set(keys)
   for (const key of Object.keys(input)) {
-    if (!known.has(key)) throw new ToolInputError(`Unknown parameter: ${key}`)
+    if (!known.has(key)) throw inputError(`Unknown parameter: ${key}`, 'unknown_field')
   }
 }
 
@@ -33,10 +35,10 @@ export function requiredString(
 ): string {
   const value = input[key]
   if (typeof value !== 'string' || !value.trim()) {
-    throw new ToolInputError(`${key} must be a non-empty string`)
+    throw inputError(`${key} must be a non-empty string`, value === undefined ? 'missing_required_field' : typeof value !== 'string' ? 'invalid_type' : 'invalid_value', key, 'non-empty string')
   }
-  if (value.includes('\0')) throw new ToolInputError(`${key} must not contain NUL`)
-  if (value.length > maxLength) throw new ToolInputError(`${key} is too long`)
+  if (value.includes('\0')) throw inputError(`${key} must not contain NUL`, 'invalid_value', key, 'string without NUL')
+  if (value.length > maxLength) throw inputError(`${key} is too long`, 'out_of_range', key, `at most ${maxLength} characters`)
   return value
 }
 
@@ -49,10 +51,10 @@ export function optionalString(
   if (input[key] === undefined) return fallback
   const value = input[key]
   if (typeof value !== 'string' || !value.trim()) {
-    throw new ToolInputError(`${key} must be a non-empty string`)
+    throw inputError(`${key} must be a non-empty string`, value === undefined ? 'missing_required_field' : typeof value !== 'string' ? 'invalid_type' : 'invalid_value', key, 'non-empty string')
   }
-  if (value.includes('\0')) throw new ToolInputError(`${key} must not contain NUL`)
-  if (value.length > maxLength) throw new ToolInputError(`${key} is too long`)
+  if (value.includes('\0')) throw inputError(`${key} must not contain NUL`, 'invalid_value', key, 'string without NUL')
+  if (value.length > maxLength) throw inputError(`${key} is too long`, 'out_of_range', key, `at most ${maxLength} characters`)
   return value
 }
 
@@ -62,7 +64,7 @@ export function optionalBoolean(
   fallback: boolean,
 ): boolean {
   if (input[key] === undefined) return fallback
-  if (typeof input[key] !== 'boolean') throw new ToolInputError(`${key} must be a boolean`)
+  if (typeof input[key] !== 'boolean') throw inputError(`${key} must be a boolean`, 'invalid_type', key, 'boolean')
   return input[key] as boolean
 }
 
@@ -74,7 +76,7 @@ export function optionalLimit(
   if (input[key] === undefined) return fallback
   const value = input[key]
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 1 || value > MAX_FILE_LIMIT) {
-    throw new ToolInputError(`${key} must be an integer from 1 to ${MAX_FILE_LIMIT}`)
+    throw inputError(`${key} must be an integer from 1 to ${MAX_FILE_LIMIT}`, typeof value !== 'number' ? 'invalid_type' : 'out_of_range', key, `integer 1..${MAX_FILE_LIMIT}`)
   }
   return value
 }
@@ -88,7 +90,7 @@ export function optionalPositiveInteger(
   if (input[key] === undefined) return fallback
   const value = input[key]
   if (typeof value !== 'number' || !Number.isInteger(value) || value < 1 || value > max) {
-    throw new ToolInputError(`${key} must be an integer from 1 to ${max}`)
+    throw inputError(`${key} must be an integer from 1 to ${max}`, typeof value !== 'number' ? 'invalid_type' : 'out_of_range', key, `integer 1..${max}`)
   }
   return value
 }

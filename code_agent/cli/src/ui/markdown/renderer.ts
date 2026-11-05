@@ -1,15 +1,13 @@
 import { lexer, type Token, type Tokens } from 'marked'
+import { decodeHTML } from 'entities'
 import { createHash } from 'node:crypto'
-import { fillDisplayWidth, sanitizeTerminalText, truncateDisplayText } from '../terminal/index.js'
+import { displayLineWidth, fillDisplayWidth, sanitizeTerminalText, truncateDisplayText } from '../terminal/index.js'
 import { StreamingTerminalTextNormalizer } from '../terminal/text.js'
+import { buildMarkdownTableRows } from './tableLayout.js'
 
 export const MAX_MARKDOWN_SOURCE_CHARS = 100_000
 export const MAX_MARKDOWN_CACHE_ENTRIES = 64
 export const MAX_MARKDOWN_CACHE_CHARS = 300_000
-const STREAMING_PREVIEW_CHARS = 512
-const STREAMING_PREVIEW_HEAD_CHARS = 256
-const STREAMING_PREVIEW_TAIL_CHARS = STREAMING_PREVIEW_CHARS - STREAMING_PREVIEW_HEAD_CHARS
-const STREAMING_PREVIEW_MARKER = '… earlier streaming content hidden …'
 const MARKDOWN_TRUNCATION_MARKER = '\n… [markdown truncated]\n'
 const MARKDOWN_RETAINED_CONTENT_CHARS = MAX_MARKDOWN_SOURCE_CHARS - [...MARKDOWN_TRUNCATION_MARKER].length
 const MARKDOWN_RETAINED_HEAD_CHARS = Math.ceil(MARKDOWN_RETAINED_CONTENT_CHARS / 2)
@@ -29,13 +27,22 @@ export interface MarkdownListItem {
   nested: MarkdownBlock[]
 }
 
+export type MarkdownTableAlignment = 'left' | 'center' | 'right'
+
+export interface MarkdownTableBlock {
+  kind: 'table'
+  header: InlineSegment[][]
+  rows: InlineSegment[][][]
+  alignments: MarkdownTableAlignment[]
+}
+
 export type MarkdownBlock =
   | { kind: 'paragraph'; content: InlineSegment[] }
   | { kind: 'heading'; level: number; content: InlineSegment[] }
   | { kind: 'blockquote'; blocks: MarkdownBlock[] }
   | { kind: 'list'; ordered: boolean; items: MarkdownListItem[] }
   | { kind: 'code'; language?: string; lines: string[] }
-  | { kind: 'table'; header: InlineSegment[][]; rows: InlineSegment[][][] }
+  | MarkdownTableBlock
   | { kind: 'hr' }
 
 export interface MarkdownProjection {
@@ -53,6 +60,65 @@ export interface MarkdownRenderOptions {
   maxWidth?: number
   maxSourceChars?: number
   cache?: MarkdownProjectionCache
+}
+
+export interface MarkdownSummaryProjection {
+  /** Display-only Markdown assembled from complete lexer tokens. */
+  content: string
+  hiddenLines: number
+}
+
+/**
+ * Build a bounded Assistant summary from the same `marked` token stream as
+ * the terminal renderer. Whole tokens are admitted only when the final
+ * body plus its detail notice fits both budgets. An oversized first block
+ * becomes a literal notice instead of an unterminated fence/list/table.
+ */
+export function foldMarkdownSummary(
+  source: string,
+  maxLines: number,
+  maxChars: number,
+): MarkdownSummaryProjection | undefined {
+  const safeSource = sanitizeMarkdownSource(source)
+  const lineLimit = Math.max(1, Math.floor(maxLines))
+  const charLimit = Math.max(1, Math.floor(maxChars))
+  const totalLines = safeSource.split('\n').length
+  if (totalLines <= lineLimit && safeSource.length <= charLimit) return undefined
+
+  const tokens = lexer(safeSource, { gfm: true, breaks: true })
+  let selected = ''
+  let selectedLines = 0
+
+  const build = (body: string, sourceLines: number): MarkdownSummaryProjection => {
+    const hiddenLines = Math.max(1, totalLines - sourceLines)
+    const notice = `… ${hiddenLines} lines hidden · Ctrl+O view details`
+    const trimmed = body.replace(/\n+$/u, '')
+    return {
+      content: trimmed ? `${trimmed}\n\n${notice}` : notice,
+      hiddenLines,
+    }
+  }
+
+  for (const token of tokens) {
+    const raw = token.raw ?? ''
+    if (!raw) continue
+    const next = selected + raw
+    const normalized = next.replace(/\n+$/u, '')
+    const nextLines = normalized ? normalized.split('\n').length : 0
+    const candidate = build(next, nextLines)
+    if (candidate.content.length > charLimit || candidate.content.split('\n').length > lineLimit) break
+    selected = next
+    selectedLines = nextLines
+  }
+
+  const projection = build(selected, selectedLines)
+  // The fixed notice is deliberately short, but keep this helper total if a
+  // caller supplies an unusually tiny budget.
+  if (projection.content.length <= charLimit && projection.content.split('\n').length <= lineLimit) return projection
+  return {
+    content: projection.content.slice(0, charLimit),
+    hiddenLines: projection.hiddenLines,
+  }
 }
 
 export interface MarkdownCacheStats {
@@ -168,7 +234,7 @@ export function renderMarkdown(
   // downgraded at the token adapter layer so code/fence contents remain byte
   // for byte faithful to the model response.
   const parserSource = bounded.text
-  const key = `md-v3\u0000${maxWidth}\u0000${maxSourceChars}\u0000${sourceChars}\u0000plain\u0000${contentDigest(parserSource)}`
+  const key = `md-v4\u0000${maxWidth}\u0000${maxSourceChars}\u0000${sourceChars}\u0000plain\u0000${contentDigest(parserSource)}`
   const cached = cache.get(key, bounded.text)
   if (cached) return cached
 
@@ -185,9 +251,11 @@ export function renderMarkdown(
 }
 
 /**
- * Streaming draft projection. Drafts are deliberately literal and bounded;
- * only `complete()` invokes the Markdown parser. This avoids pretending that
- * an arbitrary delta boundary is a valid CommonMark container boundary.
+ * Incremental owner for one Assistant response. The terminal normalizer sees
+ * each appended chunk exactly once, while every visible snapshot is parsed
+ * from the complete bounded source retained here. A snapshot never calls
+ * `finish()`: unfinished terminal/control state remains pending until the
+ * real response boundary.
  */
 export class StreamingMarkdownRenderer {
   private readonly sourceChunks: string[] = []
@@ -198,47 +266,44 @@ export class StreamingMarkdownRenderer {
   private retainedTail = ''
   private readonly sourceNormalizer = new StreamingTerminalTextNormalizer()
   private finalized = false
-  private previewAll = ''
-  private previewHead = ''
-  private previewTail = ''
-  private previewOmittedChars = 0
+  private currentProjection: MarkdownProjection | null = null
 
   constructor(
     private readonly options: MarkdownRenderOptions = {},
   ) {}
 
-  push(delta: string): MarkdownProjection {
+  /** Append a canonical delta without forcing a display refresh/parse. */
+  append(delta: string): void {
     if (this.finalized) throw new Error('StreamingMarkdownRenderer cannot push after complete()')
     const safeDelta = normalizeMarkdownCodePoints(this.sourceNormalizer.push(delta))
     if (safeDelta) {
       this.appendNormalized(safeDelta)
-      this.updatePreview(safeDelta)
+      this.currentProjection = null
     }
-    const maxSourceChars = Math.min(MAX_MARKDOWN_SOURCE_CHARS, Math.max(1, Math.floor(this.options.maxSourceChars ?? MAX_MARKDOWN_SOURCE_CHARS)))
-    return renderLiteralPreview(
-      this.previewText(),
-      clampWidth(this.options.maxWidth ?? 80),
-      this.sourceChars,
-      this.previewOmittedChars,
-      this.sourceChars > maxSourceChars,
-    )
+  }
+
+  /** Parse the current bounded source without treating it as EOF. */
+  snapshot(): MarkdownProjection {
+    if (this.currentProjection === null) this.currentProjection = this.renderCurrentSource()
+    return this.currentProjection
+  }
+
+  push(delta: string): MarkdownProjection {
+    this.append(delta)
+    return this.snapshot()
   }
 
   complete(): MarkdownProjection {
     if (!this.finalized) {
       const normalizedTail = normalizeMarkdownCodePoints(this.sourceNormalizer.finish())
-      if (normalizedTail) this.appendNormalized(normalizedTail)
+      if (normalizedTail) {
+        this.appendNormalized(normalizedTail)
+        this.currentProjection = null
+      }
       this.finalized = true
     }
-    const projection = renderMarkdown(this.sourceText, this.options)
-    const completeSourceChars = this.sourceChars
-    if (!this.canonicalTruncated && completeSourceChars === projection.sourceChars) return projection
-    return {
-      ...projection,
-      sourceChars: completeSourceChars,
-      sourceTruncated: projection.sourceTruncated || this.canonicalTruncated,
-      canExpand: false,
-    }
+    if (this.currentProjection === null) this.currentProjection = this.renderCurrentSource()
+    return this.currentProjection
   }
 
   reset(): void {
@@ -248,10 +313,7 @@ export class StreamingMarkdownRenderer {
     this.canonicalTruncated = false
     this.retainedHead = ''
     this.retainedTail = ''
-    this.previewAll = ''
-    this.previewHead = ''
-    this.previewTail = ''
-    this.previewOmittedChars = 0
+    this.currentProjection = null
     this.sourceNormalizer.reset()
     this.finalized = false
   }
@@ -287,40 +349,17 @@ export class StreamingMarkdownRenderer {
     }
   }
 
-  private updatePreview(delta: string): void {
-    const next = this.previewAll + delta
-    const nextChars = [...next]
-    if (this.previewOmittedChars === 0 && nextChars.length <= STREAMING_PREVIEW_CHARS) {
-      this.previewAll = next
-      return
+  private renderCurrentSource(): MarkdownProjection {
+    const projection = renderMarkdown(this.sourceText, this.options)
+    if (!this.canonicalTruncated && this.sourceChars === projection.sourceChars) return projection
+    return {
+      ...projection,
+      sourceChars: this.sourceChars,
+      previewOmittedChars: 0,
+      sourceTruncated: projection.sourceTruncated || this.canonicalTruncated,
+      canExpand: false,
     }
-    if (this.previewOmittedChars === 0) {
-      this.previewHead = nextChars.slice(0, STREAMING_PREVIEW_HEAD_CHARS).join('')
-      this.previewTail = nextChars.slice(-STREAMING_PREVIEW_TAIL_CHARS).join('')
-    } else {
-      this.previewTail = [...this.previewTail, ...[...delta]].slice(-STREAMING_PREVIEW_TAIL_CHARS).join('')
-    }
-    this.previewAll = ''
-    this.previewOmittedChars = Math.max(0, this.sourceChars - [...this.previewHead, ...this.previewTail].length)
   }
-
-  private previewText(): string {
-    if (this.previewOmittedChars <= 0) return this.previewAll
-    return `${this.previewHead}\n${STREAMING_PREVIEW_MARKER}\n${this.previewTail}`
-  }
-}
-
-function renderLiteralPreview(
-  source: string,
-  maxWidth: number,
-  sourceChars: number,
-  previewOmittedChars: number,
-  sourceTruncated: boolean,
-): MarkdownProjection {
-  const blocks: MarkdownBlock[] = source
-    ? [{ kind: 'paragraph', content: [{ kind: 'text', text: source }] }]
-    : []
-  return createProjection(blocks, sourceChars, maxWidth, sourceTruncated, previewOmittedChars)
 }
 
 function createProjection(
@@ -365,7 +404,10 @@ function parseBlock(token: Token, maxWidth: number): MarkdownBlock[] {
         // is a projection concern; truncating here would make the structured
         // block look complete while silently losing code that could be
         // re-rendered after a resize.
-        lines: safeDisplayText(token.text).split('\n'),
+        // marked exposes fenced/indented code as raw source. Entity decoding
+        // belongs to the inline token adapter only; decoding here would turn
+        // literal code such as `&amp;` into a different program.
+        lines: safeRawDisplayText(token.text).split('\n'),
       }]
     case 'blockquote':
       return [{ kind: 'blockquote', blocks: (token.tokens ?? []).flatMap((item: Token) => parseBlock(item, maxWidth)) }]
@@ -380,11 +422,15 @@ function parseBlock(token: Token, maxWidth: number): MarkdownBlock[] {
         kind: 'table',
         header: token.header.map((cell: Tokens.TableCell) => inlineTokens(cell.tokens, maxWidth)),
         rows: token.rows.map((row: Tokens.TableCell[]) => row.map((cell: Tokens.TableCell) => inlineTokens(cell.tokens, maxWidth))),
+        alignments: token.align.map((alignment: 'center' | 'left' | 'right' | null) => alignment ?? 'left'),
       }]
     case 'hr':
       return [{ kind: 'hr' }]
     case 'html':
-      return safeDisplayText(token.text) ? [{ kind: 'paragraph', content: [{ kind: 'text', text: stripHtml(token.text) }] }] : []
+      {
+        const visible = safeDisplayText(stripHtml(token.text))
+        return visible ? [{ kind: 'paragraph', content: [{ kind: 'text', text: visible }] }] : []
+      }
     default:
       return []
   }
@@ -434,9 +480,15 @@ function inlineTokens(tokens: readonly Token[], maxWidth: number): InlineSegment
           break
         }
         const label = inlineTokens(nestedInlineTokens(token), maxWidth)
-        if (isSafeLink(token.href)) {
-          appendSegments(result, label, 'link', token.href)
-          appendSegment(result, { kind: 'text', text: ` (${safeDisplayText(token.href)})` })
+        // marked classifies the destination before this adapter sees it, but
+        // leaves character references in href/title. Decode exactly once,
+        // then apply the scheme policy to the decoded destination.
+        const href = decodeMarkdownEntities(token.href)
+        const title = typeof token.title === 'string' ? decodeMarkdownEntities(token.title) : undefined
+        if (isSafeLink(href)) {
+          appendSegments(result, label, 'link', safeRawDisplayText(href))
+          const titleSuffix = title ? ` "${safeRawDisplayText(title)}"` : ''
+          appendSegment(result, { kind: 'text', text: ` (${safeRawDisplayText(href)}${titleSuffix})` })
         } else {
           appendSegments(result, label, 'text')
         }
@@ -453,7 +505,7 @@ function inlineTokens(tokens: readonly Token[], maxWidth: number): InlineSegment
         appendSegment(result, { kind: 'text', text: '\n' })
         break
       case 'html':
-        appendSegment(result, { kind: 'text', text: stripHtml(safeDisplayText(token.text)) })
+        appendSegment(result, { kind: 'text', text: safeDisplayText(stripHtml(token.text)) })
         break
       default:
         if ('text' in token && typeof token.text === 'string') {
@@ -520,8 +572,9 @@ function appendBlockText(lines: string[], block: MarkdownBlock, maxWidth: number
       for (const line of block.lines) lines.push(`${prefix}${line}`)
       break
     case 'table':
-      lines.push(`${prefix}${tableRowText(block.header)}`)
-      for (const row of block.rows) lines.push(`${prefix}${tableRowText(row)}`)
+      for (const row of buildMarkdownTableRows(block, Math.max(1, maxWidth - displayLineWidth(prefix)))) {
+        lines.push(`${prefix}${inlineText(row.segments)}`)
+      }
       break
     case 'hr':
       lines.push(`${prefix}${fillDisplayWidth('─', maxWidth)}`)
@@ -537,10 +590,6 @@ function appendMultiline(lines: string[], text: string): void {
 
 function inlineText(segments: readonly InlineSegment[]): string {
   return segments.map((segment) => segment.text).join('')
-}
-
-function tableRowText(cells: readonly InlineSegment[][]): string {
-  return cells.map((cell) => inlineText(cell)).join(' │ ')
 }
 
 function boundLine(value: string, maxWidth: number): string {
@@ -629,11 +678,54 @@ function contentDigest(value: string): string {
 }
 
 function safeDisplayText(value: string): string {
+  return sanitizeMarkdownSource(decodeMarkdownEntities(value))
+}
+
+function safeRawDisplayText(value: string): string {
   return sanitizeMarkdownSource(value)
 }
 
+/** Decode marked's HTML-renderer-facing token text once, after tokenization. */
+function decodeMarkdownEntities(value: string): string {
+  return decodeHTML(value)
+}
+
 function stripHtml(value: string): string {
-  return value.replace(/<[^>]*>/g, '')
+  const visible: string[] = []
+  let index = 0
+  let rawTextTag: string | undefined
+  while (index < value.length) {
+    if (rawTextTag) {
+      const closingTag = findRawTextClosingTag(value, index, rawTextTag)
+      if (closingTag < 0) {
+        visible.push(value.slice(index))
+        break
+      }
+      visible.push(value.slice(index, closingTag))
+      const closingMarkup = findHtmlMarkupAt(value, closingTag)
+      if (closingMarkup?.closing && closingMarkup.tagName === rawTextTag) {
+        index = closingMarkup.end + 1
+        rawTextTag = undefined
+        continue
+      }
+      visible.push(value[closingTag] ?? '')
+      index = closingTag + 1
+      continue
+    }
+
+    const markup = value[index] === '<' ? findHtmlMarkupAt(value, index) : undefined
+    if (markup) {
+      if (!markup.closing && !markup.selfClosing && (markup.tagName === 'script' || markup.tagName === 'style')) {
+        rawTextTag = markup.tagName
+      }
+      index = markup.end + 1
+      continue
+    }
+
+    visible.push(value[index] ?? '')
+    index += 1
+  }
+  return visible.join('')
 }
 
 function isSafeLink(value: string): boolean {
@@ -716,7 +808,144 @@ function findHtmlTagEnd(value: string, start: number): number {
       quote = character
       continue
     }
+    if (character === '<') return -1
     if (character === '>') return index
+  }
+  return -1
+}
+
+function skipHtmlWhitespace(value: string, start: number): number {
+  let index = start
+  while (index < value.length && /\s/u.test(value[index] ?? '')) index += 1
+  return index
+}
+
+function findHtmlClosingTagEnd(value: string, start: number): number {
+  const end = skipHtmlWhitespace(value, start)
+  return value[end] === '>' ? end : -1
+}
+
+function findHtmlOpeningTagEnd(
+  value: string,
+  start: number,
+): { end: number; selfClosing: boolean } | undefined {
+  let index = start
+
+  while (index < value.length) {
+    index = skipHtmlWhitespace(value, index)
+    if (value[index] === '>') return { end: index, selfClosing: false }
+    if (value[index] === '/' && value[index + 1] === '>') {
+      return { end: index + 1, selfClosing: true }
+    }
+
+    const attribute = /^[A-Za-z_:][A-Za-z0-9_.:-]*/u.exec(value.slice(index))
+    if (!attribute) return undefined
+    index += attribute[0].length
+    index = skipHtmlWhitespace(value, index)
+
+    if (value[index] !== '=') continue
+    index = skipHtmlWhitespace(value, index + 1)
+
+    const quote = value[index]
+    if (quote === '"' || quote === "'") {
+      index += 1
+      while (index < value.length && value[index] !== quote) index += 1
+      if (value[index] !== quote) return undefined
+      index += 1
+      continue
+    }
+
+    const valueStart = index
+    while (
+      index < value.length &&
+      !/\s|>/u.test(value[index] ?? '') &&
+      value[index] !== '<' &&
+      value[index] !== '"' &&
+      value[index] !== "'" &&
+      value[index] !== '`'
+    ) {
+      index += 1
+    }
+    if (index === valueStart) return undefined
+  }
+
+  return undefined
+}
+
+interface HtmlMarkup {
+  end: number
+  tagName?: string
+  closing: boolean
+  selfClosing: boolean
+}
+
+/**
+ * Recognize markup syntax before dropping it. A bare '<' is ordinary model
+ * text (often a comparison operator), so it must not enter the tag scanner.
+ */
+function findHtmlMarkupAt(value: string, start: number): HtmlMarkup | undefined {
+  if (value[start] !== '<') return undefined
+
+  if (value.startsWith('<!--', start)) {
+    const commentEnd = value.indexOf('-->', start + 4)
+    return commentEnd >= 0
+      ? { end: commentEnd + 2, closing: false, selfClosing: false }
+      : undefined
+  }
+
+  const next = value[start + 1]
+  if (next === '!') {
+    if (/^<!doctype(?:\s|>)/iu.test(value.slice(start))) {
+      const declarationEnd = findHtmlTagEnd(value, start + 2)
+      return declarationEnd >= 0
+        ? { end: declarationEnd, closing: false, selfClosing: false }
+        : undefined
+    }
+    if (value.startsWith('<![CDATA[', start)) {
+      const cdataEnd = value.indexOf(']]>', start + '<![CDATA['.length)
+      return cdataEnd >= 0
+        ? { end: cdataEnd + 2, closing: false, selfClosing: false }
+        : undefined
+    }
+    return undefined
+  }
+  if (next === '?') {
+    const instructionEnd = value.indexOf('?>', start + 2)
+    return instructionEnd >= 0
+      ? { end: instructionEnd + 1, closing: false, selfClosing: false }
+      : undefined
+  }
+
+  const closing = next === '/'
+  const nameStart = start + (closing ? 2 : 1)
+  const nameMatch = /^[A-Za-z][A-Za-z0-9:-]*/u.exec(value.slice(nameStart))
+  if (!nameMatch) return undefined
+  const tagName = nameMatch[0]?.toLowerCase()
+  if (!tagName) return undefined
+
+  const bodyStart = nameStart + nameMatch[0].length
+  if (closing) {
+    const end = findHtmlClosingTagEnd(value, bodyStart)
+    if (end < 0) return undefined
+    return { end, tagName, closing: true, selfClosing: false }
+  }
+
+  const opening = findHtmlOpeningTagEnd(value, bodyStart)
+  if (!opening) return undefined
+  return {
+    end: opening.end,
+    tagName,
+    closing: false,
+    selfClosing: opening.selfClosing,
+  }
+}
+
+function findRawTextClosingTag(value: string, start: number, tagName: string): number {
+  let candidate = value.indexOf('</', start)
+  while (candidate >= 0) {
+    const markup = findHtmlMarkupAt(value, candidate)
+    if (markup?.closing && markup.tagName === tagName) return candidate
+    candidate = value.indexOf('</', candidate + 2)
   }
   return -1
 }

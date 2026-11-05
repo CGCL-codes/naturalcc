@@ -1,9 +1,12 @@
-import type { ModelClient } from './types/types.js'
+import type { ModelBudgetCapabilities, ModelClient } from './types/types.js'
 import { OpenAIChatModelClient } from './openaiChatClient.js'
 
 export interface CreateModelClientOptions {
   apiKey?: string | null
   baseURL?: string | null
+  requestBudgetCapability?: ModelBudgetCapabilities & {
+    readonly countInputTokens?: (body: Readonly<Record<string, unknown>>) => number
+  }
 }
 
 export function createModelClient(
@@ -12,6 +15,7 @@ export function createModelClient(
   return new OpenAIChatModelClient({
     apiKey: resolveApiKey(options.apiKey),
     baseURL: resolveBaseURL(options.baseURL),
+    requestBudgetCapability: options.requestBudgetCapability,
   })
 }
 

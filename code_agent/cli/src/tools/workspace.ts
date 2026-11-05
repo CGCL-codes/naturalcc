@@ -5,10 +5,11 @@ import {
 import { dirname, isAbsolute, relative, resolve, win32 } from 'node:path'
 
 import { ToolInputError } from './types.js'
+import { toolDiagnostic } from './diagnostics.js'
 
 export class WorkspacePathError extends ToolInputError {
   constructor(input: string, reason = 'path is outside the project workspace') {
-    super(`Invalid workspace path "${input}": ${reason}`)
+    super(`Invalid workspace path "${input}": ${reason}`, toolDiagnostic('workspace_path_invalid', { field: 'path' }))
     this.name = 'WorkspacePathError'
   }
 }

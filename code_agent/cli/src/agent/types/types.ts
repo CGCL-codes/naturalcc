@@ -11,6 +11,18 @@ export interface ModelConnectionConfig {
 export interface AgentLoopConfig {
   maxTurns: number
   maxHistoryChars: number
+  /** App/test-only budgets; maxTurns remains the absolute request cap. */
+  runBudget?: RunBudgetConfig
+}
+
+export interface RunBudgetConfig {
+  readonly segmentMaxModelRequests?: number
+  readonly maxToolAttempts?: number
+  readonly maxElapsedMs?: number
+  readonly maxTotalTokens?: number
+  readonly maxCostMicrousd?: number
+  readonly maxOutputTokensPerRequest?: number
+  readonly safetyMarginTokens?: number
 }
 
 export interface CodingAgentConfig {
@@ -32,10 +44,12 @@ export interface AgentRuntime {
   toolContext: ToolExecutionContext
   showToolResults: boolean
   toolPolicy?: ToolPolicy
+  /** sourced context compaction; app injects the model-backed default. */
+  compactionProvider?: import('../compaction/contracts.js').CompactionProvider
 }
 
 /**
- * @deprecated Kept as the M0 configuration compatibility boundary. New app
+ * @deprecated Kept as the legacy configuration compatibility boundary. New app
  * code should use the three split configuration types above.
  */
 export interface RuntimeConfig {

@@ -11,10 +11,13 @@ import type {
 
 import type {
   ModelClient,
+  ModelBudgetCapabilities,
   ModelContentBlock,
+  ModelDispatchMode,
   ModelStopReason,
   ModelMessage,
   ModelRequest,
+  PreparedModelDispatch,
   ModelResponse,
   ModelStreamEvent,
   ModelToolCall,
@@ -22,12 +25,21 @@ import type {
   ModelUsage,
 } from './types/types.js'
 import { BaseModelAdapter } from './baseAdapter.js'
+import {
+  detectToolControlEnvelope,
+} from './controlEnvelope.js'
 import { ModelProtocolError } from './errors.js'
 
 export interface OpenAIChatModelClientOptions {
   apiKey: string
   baseURL?: string
   client?: OpenAIChatTransport
+  /** Trusted endpoint/model capability supplied by the application. */
+  requestBudgetCapability?: ModelBudgetCapabilities & {
+    readonly countInputTokens?: (
+      body: Readonly<Record<string, unknown>>,
+    ) => number
+  }
 }
 
 export class OpenAIChatAdapter extends BaseModelAdapter<
@@ -109,6 +121,8 @@ export interface OpenAIChatTransport {
 export class OpenAIChatModelClient implements ModelClient {
   private readonly client: OpenAIChatTransport
   private readonly adapter: OpenAIChatAdapter
+  readonly budgetCapabilities?: ModelBudgetCapabilities
+  private readonly requestBudgetCapability?: OpenAIChatModelClientOptions['requestBudgetCapability']
 
   constructor(options: OpenAIChatModelClientOptions) {
     this.client = options.client ?? new OpenAI({
@@ -116,28 +130,112 @@ export class OpenAIChatModelClient implements ModelClient {
       baseURL: options.baseURL,
     })
     this.adapter = new OpenAIChatAdapter()
+    this.requestBudgetCapability = options.requestBudgetCapability
+    this.budgetCapabilities = options.requestBudgetCapability
+      ? Object.freeze({
+          // A counting callback implements the declared estimator; its mere
+          // presence is not evidence that the tokenizer/framing is exact.
+          inputTokenEstimation: options.requestBudgetCapability.inputTokenEstimation,
+          contextWindowTokens: options.requestBudgetCapability.contextWindowTokens,
+          tokenizerId: options.requestBudgetCapability.tokenizerId,
+          outputLimit: options.requestBudgetCapability.outputLimit,
+          transportRetryAccounting: options.requestBudgetCapability.transportRetryAccounting,
+        })
+      : undefined
   }
 
   async complete(request: ModelRequest): Promise<ModelResponse> {
-    const providerRequest = this.adapter.toProviderRequest(request)
-    const response = await this.client.chat.completions.create(providerRequest, {
-      signal: request.signal,
-    })
-    if (isAsyncIterable(response)) {
-      throw new ModelProtocolError('OpenAI returned a stream for a non-streaming request')
-    }
-    return this.adapter.fromProviderResponse(response)
+    const sent = this.prepare(request, 'complete').send()
+    if (isAsyncIterable(sent)) throw new ModelProtocolError('Prepared complete request returned a stream')
+    return sent as Promise<ModelResponse>
   }
 
   async *stream(request: ModelRequest): AsyncIterable<ModelStreamEvent> {
-    const providerRequest = {
-      ...this.adapter.toProviderRequest(request),
-      stream: true,
-      stream_options: { include_usage: true },
-    } as ChatCompletionCreateParamsStreaming
-    const response = await this.client.chat.completions.create(providerRequest, {
-      signal: request.signal,
+    const sent = this.prepare(request, 'stream').send()
+    if (!isAsyncIterable(sent)) throw new ModelProtocolError('Prepared stream request returned a response')
+    yield* sent as AsyncIterable<ModelStreamEvent>
+  }
+
+  prepare(request: ModelRequest, mode: ModelDispatchMode): PreparedModelDispatch {
+    const providerRequest = this.finalProviderRequest(request, mode)
+    const serializedBodyBytes = Buffer.byteLength(JSON.stringify(providerRequest), 'utf8')
+    const inputTokens = this.requestBudgetCapability?.countInputTokens?.(
+      providerRequest as unknown as Readonly<Record<string, unknown>>,
+    )
+    const outputTokens = request.budget?.outputTokenLimit
+    const outputCapability = this.requestBudgetCapability?.outputLimit
+    const measurement = Object.freeze({
+      providerShapeId: mode === 'stream' ? 'openai-chat-stream-v1' : 'openai-chat-complete-v1',
+      serializedBodyBytes,
+      ...(inputTokens === undefined ? {} : { inputTokens }),
+      ...(this.requestBudgetCapability?.contextWindowTokens === undefined
+        ? {}
+        : { contextWindowTokens: this.requestBudgetCapability.contextWindowTokens }),
+      // A callback implements the configured estimator. It does not prove
+      // that estimator is an exact tokenizer/framing implementation.
+      trust: (this.requestBudgetCapability?.inputTokenEstimation ?? 'unknown') as ModelBudgetCapabilities['inputTokenEstimation'],
+      ...(outputTokens === undefined || !outputCapability
+        ? {}
+        : {
+            outputLimit: {
+              ...outputCapability,
+              enforcement: 'provider' as const,
+              tokens: outputTokens,
+            },
+          }),
     })
+    let sent = false
+    return Object.freeze({
+      mode,
+      measurement,
+      send: () => {
+        if (sent) throw new ModelProtocolError('A prepared model dispatch can only be sent once')
+        sent = true
+        return mode === 'stream'
+          ? this.sendStream(request, providerRequest as ChatCompletionCreateParamsStreaming)
+          : this.sendComplete(request, providerRequest as ChatCompletionCreateParamsNonStreaming)
+      },
+    })
+  }
+
+  private finalProviderRequest(
+    request: ModelRequest,
+    mode: ModelDispatchMode,
+  ): ChatCompletionCreateParamsNonStreaming | ChatCompletionCreateParamsStreaming {
+    const body = structuredClone(
+      this.adapter.toProviderRequest(request),
+    ) as unknown as Record<string, unknown>
+    const outputTokens = request.budget?.outputTokenLimit
+    const outputCapability = this.requestBudgetCapability?.outputLimit
+    if (outputTokens !== undefined) {
+      if (!outputCapability) {
+        throw new ModelProtocolError('The configured request output token cap is not supported by this endpoint')
+      }
+      body[outputCapability.field] = outputTokens
+    }
+    if (mode === 'stream') {
+      body.stream = true
+      body.stream_options = { include_usage: true }
+    }
+    return deepFreeze(body) as unknown as ChatCompletionCreateParamsNonStreaming | ChatCompletionCreateParamsStreaming
+  }
+
+  private async sendComplete(
+    request: ModelRequest,
+    providerRequest: ChatCompletionCreateParamsNonStreaming,
+  ): Promise<ModelResponse> {
+    const response = await this.client.chat.completions.create(providerRequest, { signal: request.signal })
+    if (isAsyncIterable(response)) throw new ModelProtocolError('OpenAI returned a stream for a non-streaming request')
+    const modelResponse = this.adapter.fromProviderResponse(response)
+    assertNoTextToolEnvelope(request, modelResponse.content)
+    return modelResponse
+  }
+
+  private async *sendStream(
+    request: ModelRequest,
+    providerRequest: ChatCompletionCreateParamsStreaming,
+  ): AsyncIterable<ModelStreamEvent> {
+    const response = await this.client.chat.completions.create(providerRequest, { signal: request.signal })
     if (!isAsyncIterable(response)) {
       throw new ModelProtocolError('OpenAI did not return a streaming response')
     }
@@ -155,7 +253,9 @@ export class OpenAIChatModelClient implements ModelClient {
       const choice = chunk.choices[0]
       if (choice) {
         const text = choice.delta.content
-        if (text) yield { type: 'text_delta', text }
+        if (text) {
+          yield { type: 'text_delta', text }
+        }
         for (const toolCall of choice.delta.tool_calls ?? []) {
           yield {
             type: 'tool_call_delta',
@@ -187,15 +287,50 @@ export class OpenAIChatModelClient implements ModelClient {
   }
 }
 
+function deepFreeze<T>(value: T): T {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    for (const child of Object.values(value as Record<string, unknown>)) deepFreeze(child)
+    Object.freeze(value)
+  }
+  return value
+}
+
+/**
+ * Provider response boundary: an endpoint that answers an
+ * ordinary tool-bearing request by putting its tool-call control envelope in
+ * text content is reported as a protocol error here. The envelope is never
+ * parsed or canonicalized into a call, so no pseudo tool call can execute.
+ *
+ * Tool-free closing requests are deliberately excluded: the Runner owns that
+ * path, including its single in-budget plain-text retry and the stable
+ * `model_protocol_error` it raises when the retry is unavailable or fails.
+ */
+function assertNoTextToolEnvelope(request: ModelRequest, content: string): void {
+  const offeredTools = (request.tools?.length ?? 0) > 0 && request.toolChoice !== 'none'
+  if (!offeredTools) return
+  const diagnostic = detectToolControlEnvelope(content)
+  if (!diagnostic) return
+  throw new ModelProtocolError(
+    `OpenAI response returned a tool-control envelope as text content (${diagnostic.id})`,
+  )
+}
+
 function toModelUsage(usage: {
   prompt_tokens?: number
   completion_tokens?: number
   total_tokens?: number
+  prompt_tokens_details?: { cached_tokens?: number | null } | null
 }): ModelUsage {
+  const cached = usage.prompt_tokens_details?.cached_tokens
+  const cacheMiss = cached !== undefined && cached !== null && usage.prompt_tokens !== undefined
+    ? Math.max(0, usage.prompt_tokens - cached)
+    : undefined
   return {
     inputTokens: usage.prompt_tokens,
     outputTokens: usage.completion_tokens,
     totalTokens: usage.total_tokens,
+    ...(cached === undefined || cached === null ? {} : { cacheHitInputTokens: cached }),
+    ...(cacheMiss === undefined ? {} : { cacheMissInputTokens: cacheMiss }),
   }
 }
 
@@ -227,6 +362,14 @@ function toOpenAIMessage(message: ModelMessage): ChatCompletionMessageParam {
 }
 
 function toOpenAITool(tool: ModelToolSchema): ChatCompletionTool {
+  // the provider boundary validates the minimum wire-compatible
+  // shape BEFORE any transport request — a function schema whose parameters
+  // lack an explicit root `type: "object"` is rejected by real OpenAI-
+  // compatible endpoints (observed as a 400 on every request carrying the
+  // tool). Local registry schemas are trusted to stay narrow; this check
+  // fails closed with a bounded developer diagnostic instead of sending a
+  // known-broken declaration.
+  assertRootObjectParameters(tool)
   return {
     type: 'function',
     function: {
@@ -234,6 +377,23 @@ function toOpenAITool(tool: ModelToolSchema): ChatCompletionTool {
       description: tool.description,
       parameters: tool.parameters,
     },
+  }
+}
+
+function assertRootObjectParameters(tool: ModelToolSchema): void {
+  const parameters = tool.parameters as Record<string, unknown> | undefined
+  if (!parameters || typeof parameters !== 'object' || parameters.type !== 'object') {
+    // Bounded developer diagnostic: the schema is developer-supplied, so the
+    // message reports the offending FIELD PATH and the value's TYPE NAME —
+    // never a verbatim echo of an unbounded schema value or tool name.
+    const rawType = (parameters as { type?: unknown } | undefined)?.type
+    const typeName = rawType === undefined || rawType === null
+      ? 'missing'
+      : Array.isArray(rawType) ? 'array' : typeof rawType
+    const toolName = tool.name.length > 64 ? `${tool.name.slice(0, 61)}...` : tool.name
+    throw new Error(
+      `Outbound tool schema is not wire-compatible: tool "${toolName}" parameters must declare a root type "object" at parameters.type (found type: ${typeName}); refusing to send the request`,
+    )
   }
 }
 

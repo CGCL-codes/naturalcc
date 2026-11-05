@@ -425,9 +425,14 @@ function ansiGraphemes(value: string): string[] {
   return result
 }
 
-function graphemes(value: string): string[] {
+/** Split display text using terminal grapheme boundaries, not UTF-16/code points. */
+export function splitDisplayGraphemes(value: string): string[] {
   if (segmenter) return Array.from(segmenter.segment(value), (part) => part.segment)
   return Array.from(value)
+}
+
+function graphemes(value: string): string[] {
+  return splitDisplayGraphemes(value)
 }
 
 function normalizeWidth(width: number, fallback = 1): number {

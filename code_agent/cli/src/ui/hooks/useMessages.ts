@@ -13,6 +13,10 @@ export function useMessages() {
         dispatch({ type: 'add', role, content, status })
     }, [])
 
+    const addRunError = useCallback((runId: number, content: string): void => {
+        dispatch({ type: 'add_run_error', runId, content })
+    }, [])
+
     const beginRun = useCallback((runId: number): void => {
         dispatch({ type: 'begin_run', runId })
     }, [])
@@ -32,6 +36,7 @@ export function useMessages() {
     return{
         messages: state.messages,
         addMsg,
+        addRunError,
         beginRun,
         handleAgentEvent,
         finishRun,

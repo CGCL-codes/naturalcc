@@ -1,7 +1,11 @@
 import type { RuntimeConfig } from './types/types.js'
-import { MIN_TOOL_OUTPUT_CHARS } from '../tools/toolUtils.js'
+import {
+  MIN_CANONICAL_TOOL_OUTPUT_CHARS,
+  MIN_TOOL_OUTPUT_CHARS,
+} from '../tools/toolUtils.js'
+import { boundedInteger } from './boundedInteger.js'
 
-const DEFAULT_MAX_TURNS = 10
+const DEFAULT_MAX_TURNS = 32
 const DEFAULT_TOOL_TIMEOUT_MS = 120_000
 const DEFAULT_MAX_TOOL_OUTPUT_CHARS = 8_000
 const DEFAULT_MAX_PROJECT_MEMORY_CHARS = 12_000
@@ -27,7 +31,7 @@ export function createRuntimeConfig(
   return {
     model: options.model,
     baseURL: normalizeOptionalString(options.baseURL),
-    maxTurns: normalizePositiveInteger(options.maxTurns, DEFAULT_MAX_TURNS),
+    maxTurns: normalizeMaxTurns(options.maxTurns),
     projectDir: options.projectDir,
     toolTimeoutMs: normalizePositiveInteger(
       options.toolTimeoutMs,
@@ -67,13 +71,23 @@ function normalizePositiveInteger(
   return normalized < minimum ? fallback : normalized
 }
 
+function normalizeMaxTurns(value: number | undefined): number {
+  return boundedInteger(value, DEFAULT_MAX_TURNS, 1, 256, 'maxTurns')
+}
+
 function normalizeOutputBudget(value: number | undefined): number {
   if (value === undefined || !Number.isFinite(value) || value <= 0) {
     return DEFAULT_MAX_TOOL_OUTPUT_CHARS
   }
   const normalized = Math.floor(value)
-  if (normalized < MIN_TOOL_OUTPUT_CHARS) {
-    throw new RangeError(`maxToolOutputChars must be at least ${MIN_TOOL_OUTPUT_CHARS}`)
+  // Both configuration entry points share one canonical minimum: a budget
+  // below it cannot carry the smallest canonical tool result envelope, so it
+  // must fail here instead of surfacing as an incidental read_file runtime
+  // error inside the Runner. Direct ToolRegistry/context injection keeps the
+  // lower generic floor and fails closed per tool.
+  const minimum = Math.max(MIN_TOOL_OUTPUT_CHARS, MIN_CANONICAL_TOOL_OUTPUT_CHARS)
+  if (normalized < minimum) {
+    throw new RangeError(`maxToolOutputChars must be at least ${minimum}`)
   }
   return normalized
 }

@@ -1,14 +1,30 @@
 import type { AgentRunner } from '../../agent/AgentRunner.js'
 import type { AgentEvent } from '../../agent/types/event.js'
+import { isTerminalEvent } from '../../agent/terminal.js'
 import type { AgentRuntime } from '../../agent/types/types.js'
 import type { AgentThread } from '../../agent/thread/AgentThread.js'
 import type { CodingAgentProfile } from '../profile.js'
+import type { RunTaskSnapshot } from '../../task/contracts.js'
+import type { FrameworkContextPort } from '../../agent/types/frameworkContext.js'
+
+import { TaskLedger } from './TaskLedger.js'
 
 export interface CodingAgentSessionOptions {
   profile: CodingAgentProfile
   runtime: AgentRuntime
   thread: AgentThread
   runner: AgentRunner
+  taskLedger?: TaskLedger
+  frameworkContext?: FrameworkContextPort
+}
+
+/** Public factory for a session-consistent ledger. */
+export function createTaskLedgerForThread(thread: AgentThread, generation?: string): TaskLedger {
+  return new TaskLedger({
+    sessionId: thread.id,
+    ...(generation === undefined ? {} : { generation }),
+    resolveSource: ({ ref }) => thread.resolveSource(ref),
+  })
 }
 
 export class CodingAgentSession {
@@ -16,6 +32,8 @@ export class CodingAgentSession {
   readonly runtime: AgentRuntime
   readonly thread: AgentThread
   readonly runner: AgentRunner
+  private readonly taskLedger: TaskLedger
+  private readonly frameworkContext?: FrameworkContextPort
   private disposed = false
   private generation = 0
   private readonly activeTurns = new Set<ActiveTurn>()
@@ -26,6 +44,12 @@ export class CodingAgentSession {
     this.runtime = options.runtime
     this.thread = options.thread
     this.runner = options.runner
+    // the ledger keeps only bounded previews/hashes; the raw run
+    // source stays owned by this session's committed thread and every
+    // range read re-validates the LIVE thread, so rollback/clear/dispose
+    // surface as a real unavailability instead of a silent fallback.
+    this.taskLedger = options.taskLedger ?? createTaskLedgerForThread(options.thread)
+    this.frameworkContext = options.frameworkContext
   }
 
   get id(): string {
@@ -38,6 +62,10 @@ export class CodingAgentSession {
 
   snapshot() {
     return this.thread.snapshot()
+  }
+
+  taskSnapshots(): readonly RunTaskSnapshot[] {
+    return this.taskLedger.snapshots()
   }
 
   async *runTurn(input: {
@@ -72,11 +100,14 @@ export class CodingAgentSession {
       input.signal?.removeEventListener('abort', abortFromCaller)
     }
 
+    const taskRun = this.taskLedger.reserveRun(input.prompt)
     const runnerTurn = this.runner.runTurn({
       thread: this.thread,
       prompt: input.prompt,
       runtime: this.runtime,
       signal: controller.signal,
+      taskRun,
+      ...(this.frameworkContext ? { frameworkContext: this.frameworkContext } : {}),
     })
 
     const closeRunner = (): Promise<void> => {
@@ -228,6 +259,7 @@ export class CodingAgentSession {
 
     this.disposed = true
     this.generation += 1
+    this.frameworkContext?.dispose()
     const pendingTurns: Promise<void>[] = []
 
     for (const activeTurn of this.activeTurns) {
@@ -246,7 +278,9 @@ export class CodingAgentSession {
       }
     }
 
-    this.disposePromise = Promise.all(pendingTurns).then(() => undefined)
+    this.disposePromise = Promise.all(pendingTurns).then(() => {
+      this.taskLedger.dispose()
+    })
     return this.disposePromise
   }
 }
@@ -322,8 +356,4 @@ function hasSideEffectTool(
   } catch {
     return false
   }
-}
-
-function isTerminalEvent(event: AgentEvent): boolean {
-  return event.type === 'done' || event.type === 'error' || event.type === 'interrupted'
 }

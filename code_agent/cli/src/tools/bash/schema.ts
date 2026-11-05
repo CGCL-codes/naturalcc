@@ -4,9 +4,10 @@ import { MAX_APPROVAL_REASON_CHARS } from '../approval.js'
 export const bashSchema: ToolSchema = {
   name: 'bash',
   description:
-    '在项目当前工作目录执行一条 shell 命令，返回 stdout、stderr、exitCode 的 JSON。适合统计文件、运行测试、查看 git 状态等。',
+    '在项目当前工作目录执行一条 shell 命令，返回 stdout、stderr、exitCode 的 JSON。适合运行测试、构建、项目脚本等结构化工具无法表达的 shell 工作。查找、列举、搜索或统计项目文件时优先使用 list_files/search_text，不要仅因熟悉 find/rg/grep 绕过等价的结构化工具；执行 bash 会进入本地审批策略。',
   readOnly: false,
   requiresApproval: true,
+  repeatKind: 'opaque',
   parameters: {
     type: 'object',
     properties: {

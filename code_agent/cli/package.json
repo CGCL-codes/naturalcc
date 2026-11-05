@@ -4,20 +4,29 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "naturalcc": "bun run src/index.ts"
+    "naturalcc": "bun run src/index.ts",
+    "typecheck": "bunx tsc --noEmit",
+    "test": "bun test"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^26.1.0",
-    "@types/react": "^19.2.14"
+    "@types/react": "^19.2.14",
+    "@xterm/headless": "6.0.0"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
     "commander": "^14.0.3",
-    "ink": "^7.0.3",
+    "entities": "^6.0.1",
+    "ink": "7.0.3",
     "ink-text-input": "^6.0.0",
-    "react": "^19.2.6"
+    "marked": "^9.1.6",
+    "openai": "^6.49.0",
+    "react": "^19.2.6",
+    "string-width": "^8.2.1",
+    "strip-ansi": "^7.2.0",
+    "wrap-ansi": "^10.0.0"
   }
 }

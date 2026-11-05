@@ -1,4 +1,5 @@
 import type { AgentErrorCode } from './types/event.js'
+import type { ToolDiagnostic } from '../tools/types.js'
 
 export class AgentError extends Error {
   readonly code: AgentErrorCode
@@ -8,6 +9,7 @@ export class AgentError extends Error {
     code: AgentErrorCode,
     message: string,
     recoverable = false,
+    readonly diagnostic?: ToolDiagnostic,
   ) {
     super(message)
     this.name = 'AgentError'

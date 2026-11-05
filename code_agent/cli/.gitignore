@@ -5,6 +5,14 @@ start.md
 # docs
 docs
 
+# Local tests, evaluation tooling and generated artifacts are not published.
+/test/
+/tests/
+/scripts/*-eval/
+/artifacts/
+/eval-results/
+/.tmp-*/
+
 # dependencies (bun install)
 node_modules
 
@@ -39,3 +47,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# CodeGraph local index
+.codegraph/

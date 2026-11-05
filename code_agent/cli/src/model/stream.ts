@@ -169,6 +169,11 @@ export class ModelStreamAccumulator {
     }
     return validateModelResponse(response, this.limits)
   }
+
+  /** Validated provider usage observed so far, even if the stream later fails. */
+  usageSnapshot(): ModelUsage | undefined {
+    return this.usage === undefined ? undefined : Object.freeze({ ...this.usage })
+  }
 }
 
 /** The same bounded response validation used by complete() and stream(). */

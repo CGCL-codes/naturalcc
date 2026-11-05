@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { Box, Text, useInput } from 'ink'
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { Box, Text } from 'ink'
 import {
   cancelSelection,
   confirmSelection,
@@ -9,12 +9,15 @@ import {
   type SelectOption,
 } from '../state/selectMenu.js'
 import { calculateContentWidth, sanitizeTerminalText, wrapDisplayLines } from '../terminal/index.js'
+import { TerminalSectionStack, type TerminalSectionData } from './TerminalSection.js'
+import type { KeyboardKey, KeyboardInputHandler } from '../state/keyboardInput.js'
 
 export interface SelectMenuProps<T> {
   menuId: string
   generation?: number
   title: string
   body?: string
+  sections?: readonly TerminalSectionData[]
   options: readonly SelectOption<T>[]
   selected: T
   active: boolean
@@ -22,6 +25,8 @@ export interface SelectMenuProps<T> {
   onConfirm: (value: T) => void
   onCancel: () => void
   width?: number
+  /** Registers the handler with the single parent-owned keyboard listener. */
+  onRegisterKeyboard?: (handler: KeyboardInputHandler | null) => void
 }
 
 const MAX_MENU_TEXT_CHARS = 2400
@@ -32,6 +37,7 @@ export function SelectMenu<T>({
   generation = 0,
   title,
   body,
+  sections = [],
   options,
   selected,
   active,
@@ -39,6 +45,7 @@ export function SelectMenu<T>({
   onConfirm,
   onCancel,
   width = 80,
+  onRegisterKeyboard,
 }: SelectMenuProps<T>) {
   if (!menuId.trim()) throw new Error('SelectMenu menuId must be non-empty')
   validateSelectOptions(options)
@@ -63,7 +70,8 @@ export function SelectMenu<T>({
     optionsRef.current = options
   }, [active, generation, menuId, options, selected])
 
-  useInput((input, key) => {
+  const keyboardHandlerRef = useRef<KeyboardInputHandler | null>(null)
+  keyboardHandlerRef.current = (input, key) => {
     if (!activeRef.current || menuIdRef.current !== menuId) return
     if (key.upArrow || key.downArrow) {
       const delta = key.upArrow ? -1 : 1
@@ -92,13 +100,23 @@ export function SelectMenu<T>({
       activeRef.current = cancelSelection(state).active
       onCancel()
     }
-  }, { isActive: active })
+  }
+
+  useLayoutEffect(() => {
+    if (!active) {
+      onRegisterKeyboard?.(null)
+      return
+    }
+    const handler: KeyboardInputHandler = (input, key) => keyboardHandlerRef.current?.(input, key)
+    onRegisterKeyboard?.(handler)
+    return () => onRegisterKeyboard?.(null)
+  }, [active, onRegisterKeyboard])
 
   const contentWidth = calculateContentWidth({ terminalWidth: width, minWidth: 1 })
   const titleLines = wrapMenuText(title, contentWidth)
   const bodyLines = body === undefined ? [] : wrapMenuText(body, contentWidth)
   const optionLines = options.flatMap((option) => wrapMenuText(
-    `${Object.is(option.value, selected) ? '> ' : '  '}${safeMenuText(option.label)}`,
+    `${contentWidth <= 3 ? (Object.is(option.value, selected) ? '>' : '') : Object.is(option.value, selected) ? '> ' : '  '}${safeMenuText(option.label)}`,
     contentWidth,
   ))
   const helpLines = wrapMenuText('Use ↑/↓ to select, Enter to confirm, Esc to interrupt.', contentWidth)
@@ -106,7 +124,13 @@ export function SelectMenu<T>({
   return (
     <Box flexDirection="column" width={contentWidth}>
       {titleLines.map((line, index) => <Text color="yellow" key={`title-${index}`}>{line}</Text>)}
-      {bodyLines.map((line, index) => <Text key={`body-${index}`}>{line}</Text>)}
+      {sections.length > 0 ? (
+        <>
+          <Box height={1} />
+          <TerminalSectionStack sections={sections} width={contentWidth} />
+          <Box height={1} />
+        </>
+      ) : bodyLines.map((line, index) => <Text key={`body-${index}`}>{line}</Text>)}
       {optionLines.map((line, index) => <Text key={`option-${index}`}>{line}</Text>)}
       {helpLines.map((line, index) => <Text color="gray" key={`help-${index}`}>{line}</Text>)}
     </Box>

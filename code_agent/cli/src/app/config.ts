@@ -5,9 +5,14 @@ import type {
   AgentLoopConfig,
   CodingAgentConfig,
   ModelConnectionConfig,
+  RunBudgetConfig,
 } from '../agent/types/types.js'
 import type { ApprovalMode } from '../tools/approval.js'
-import { MIN_TOOL_OUTPUT_CHARS } from '../tools/toolUtils.js'
+import {
+  MIN_CANONICAL_TOOL_OUTPUT_CHARS,
+  MIN_TOOL_OUTPUT_CHARS,
+} from '../tools/toolUtils.js'
+import { boundedInteger } from '../agent/boundedInteger.js'
 
 export const DEFAULT_MODEL = 'gpt-5.5'
 export const DEFAULT_MAX_HISTORY_CHARS = 100_000
@@ -26,6 +31,8 @@ export interface CodingAgentConfigInput {
   maxSystemPromptChars?: number
   showToolResults?: boolean
   approvalMode?: ApprovalMode
+  /** application/test configuration; intentionally not exposed by CLI. */
+  runBudget?: RunBudgetConfig
 }
 
 export interface ResolvedCodingAgentConfig {
@@ -62,11 +69,12 @@ export async function resolveCodingAgentConfig(
       baseURL: optionalString(input.baseURL ?? process.env.OPENAI_BASE_URL),
     },
     loop: {
-      maxTurns: positiveInteger(input.maxTurns, 10),
+      maxTurns: resolveMaxTurns(input.maxTurns),
       maxHistoryChars: positiveInteger(
         input.maxHistoryChars,
         DEFAULT_MAX_HISTORY_CHARS,
       ),
+      ...(input.runBudget ? { runBudget: resolveRunBudget(input.runBudget) } : {}),
     },
     codingAgent: {
       projectDir,
@@ -88,6 +96,42 @@ export async function resolveCodingAgentConfig(
       approvalMode,
     },
   }
+}
+
+function resolveRunBudget(input: RunBudgetConfig): RunBudgetConfig {
+  const resolved: { -readonly [Key in keyof RunBudgetConfig]?: RunBudgetConfig[Key] } = {}
+  if (input.segmentMaxModelRequests !== undefined) {
+    resolved.segmentMaxModelRequests = strictInteger(input.segmentMaxModelRequests, 2, 256, 'segmentMaxModelRequests')
+  }
+  if (input.maxToolAttempts !== undefined) {
+    resolved.maxToolAttempts = strictInteger(input.maxToolAttempts, 0, 1_000_000, 'maxToolAttempts')
+  }
+  if (input.maxElapsedMs !== undefined) {
+    resolved.maxElapsedMs = strictInteger(input.maxElapsedMs, 1, Number.MAX_SAFE_INTEGER, 'maxElapsedMs')
+  }
+  if (input.maxTotalTokens !== undefined) {
+    resolved.maxTotalTokens = strictInteger(input.maxTotalTokens, 1, Number.MAX_SAFE_INTEGER, 'maxTotalTokens')
+  }
+  if (input.maxCostMicrousd !== undefined) {
+    resolved.maxCostMicrousd = strictInteger(input.maxCostMicrousd, 1, Number.MAX_SAFE_INTEGER, 'maxCostMicrousd')
+  }
+  if (input.maxOutputTokensPerRequest !== undefined) {
+    resolved.maxOutputTokensPerRequest = strictInteger(input.maxOutputTokensPerRequest, 1, Number.MAX_SAFE_INTEGER, 'maxOutputTokensPerRequest')
+  }
+  if (input.safetyMarginTokens !== undefined) {
+    resolved.safetyMarginTokens = strictInteger(input.safetyMarginTokens, 0, Number.MAX_SAFE_INTEGER, 'safetyMarginTokens')
+  }
+  if (resolved.maxTotalTokens !== undefined && resolved.maxOutputTokensPerRequest === undefined) {
+    throw new AgentError('config_error', 'maxTotalTokens requires maxOutputTokensPerRequest')
+  }
+  return Object.freeze(resolved)
+}
+
+function strictInteger(value: number, minimum: number, maximum: number, name: string): number {
+  if (!Number.isSafeInteger(value) || value < minimum || value > maximum) {
+    throw new AgentError('config_error', `${name} must be an integer between ${minimum} and ${maximum}`)
+  }
+  return value
 }
 
 async function resolveProjectDir(value: string): Promise<string> {
@@ -120,13 +164,22 @@ function positiveInteger(value: number | undefined, fallback: number): number {
   return Math.floor(value)
 }
 
+function resolveMaxTurns(value: number | undefined): number {
+  try {
+    return boundedInteger(value, 32, 1, 256, 'maxTurns')
+  } catch (error) {
+    throw new AgentError('config_error', error instanceof Error ? error.message : String(error))
+  }
+}
+
 function outputBudget(value: number | undefined): number {
   if (value === undefined || !Number.isFinite(value)) return 8_000
   const normalized = Math.floor(value)
-  if (normalized < MIN_TOOL_OUTPUT_CHARS) {
+  const minimum = Math.max(MIN_TOOL_OUTPUT_CHARS, MIN_CANONICAL_TOOL_OUTPUT_CHARS)
+  if (normalized < minimum) {
     throw new AgentError(
       'config_error',
-      `maxToolOutputChars must be at least ${MIN_TOOL_OUTPUT_CHARS}`,
+      `maxToolOutputChars must be at least ${minimum}`,
     )
   }
   return normalized

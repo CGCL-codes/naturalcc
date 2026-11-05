@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process'
+import { inputError } from '../diagnostics.js'
 
-import { ToolInputError, type ToolExecutionContext, type ToolExecutionResult } from '../types.js'
+import type { ToolExecutionContext, ToolExecutionResult } from '../types.js'
 import { assertOutputBudget, boundedJsonResult, throwIfAborted } from '../toolUtils.js'
 import { validateApprovalReason } from '../approval.js'
 
@@ -20,21 +21,22 @@ interface ExecuteBashOptions {
   signal?: AbortSignal
   timeoutMs?: number
   maxOutputChars?: number
+  env?: NodeJS.ProcessEnv
 }
 
 export function parseBashInput(input: Record<string, unknown>): { command: string; reason: string } {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
-    throw new ToolInputError('Tool arguments must be a JSON object')
+    throw inputError('Tool arguments must be a JSON object', 'invalid_argument_shape')
   }
   for (const key of Object.keys(input)) {
-    if (key !== 'command' && key !== 'reason') throw new ToolInputError(`Unknown parameter: ${key}`)
+    if (key !== 'command' && key !== 'reason') throw inputError(`Unknown parameter: ${key}`, 'unknown_field')
   }
   const command = input.command
   if (typeof command !== 'string' || !command.trim()) {
-    throw new ToolInputError('bash command is required')
+    throw inputError('bash command is required', command === undefined ? 'missing_required_field' : typeof command !== 'string' ? 'invalid_type' : 'invalid_value', 'command', 'non-empty string')
   }
-  if (command.includes('\0')) throw new ToolInputError('bash command must not contain NUL')
-  if (command.length > 100_000) throw new ToolInputError('bash command is too long')
+  if (command.includes('\0')) throw inputError('bash command must not contain NUL', 'invalid_value', 'command', 'string without NUL')
+  if (command.length > 100_000) throw inputError('bash command is too long', 'out_of_range', 'command', 'at most 100000 characters')
   return { command, reason: validateApprovalReason(input.reason) }
 }
 
@@ -50,6 +52,7 @@ export async function executeBashTool(
       signal: context.signal,
       timeoutMs: context.timeoutMs,
       maxOutputChars: context.maxOutputChars,
+      env: context.env,
     }),
   }
 }
@@ -64,6 +67,7 @@ export async function executeBash(
     cwd: options.cwd ?? process.cwd(),
     detached: process.platform !== 'win32',
     stdio: ['ignore', 'pipe', 'pipe'],
+    ...(options.env ? { env: options.env } : {}),
   })
 
   const {

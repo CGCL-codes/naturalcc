@@ -3,9 +3,10 @@ import type {
   ContextBuildInput,
   ContextContribution,
   ContextProvider,
+  GitStatusSampler,
 } from '../types/content.js'
 import { createAbortError } from '../errors.js'
-import { dynamicContextProvider } from './dynamicContext.js'
+import { createDynamicContextProvider } from './dynamicContext.js'
 import { projectMemoryProvider } from './projectMemory.js'
 
 export function composeContextProviders(
@@ -29,10 +30,11 @@ export function composeContextProviders(
 
 export function createDefaultContextProvider(
   extraProviders: readonly ContextProvider[] = [],
+  options: { readonly gitStatusSampler?: GitStatusSampler } = {},
 ): ContextProvider {
   return composeContextProviders([
     projectMemoryProvider,
-    dynamicContextProvider,
+    createDynamicContextProvider(options.gitStatusSampler),
     ...extraProviders,
   ])
 }
@@ -47,6 +49,7 @@ export async function buildAgentContext(
     gitStatus: contribution.gitStatus ?? '',
     projectName: contribution.projectName ?? '',
     currentDate: contribution.currentDate ?? '',
+    ...(contribution.environment ? { environment: contribution.environment } : {}),
     warnings: contribution.warnings ?? [],
     sections: contribution.sections ?? [],
   }
@@ -55,11 +58,20 @@ export async function buildAgentContext(
 function mergeContributions(
   contributions: readonly ContextContribution[],
 ): ContextContribution {
+  // The built-in dynamic provider is first and is the sole trusted producer
+  // of Session environment facts. Legacy extension strings remain additive
+  // but cannot override those facts by reusing currentDate/gitStatus names.
+  const environment = contributions.find((item) => item.environment)?.environment
   return {
     projectMemory: joinNonEmpty(contributions.map((item) => item.projectMemory)),
-    gitStatus: joinNonEmpty(contributions.map((item) => item.gitStatus)),
-    projectName: [...contributions].reverse().find((item) => item.projectName)?.projectName,
-    currentDate: [...contributions].reverse().find((item) => item.currentDate)?.currentDate,
+    gitStatus: environment
+      ? environment.git.result.kind === 'dirty' ? environment.git.result.status : ''
+      : joinNonEmpty(contributions.map((item) => item.gitStatus)),
+    projectName: environment?.projectName ?? [...contributions].reverse().find((item) => item.projectName)?.projectName,
+    currentDate: environment
+      ? `Today's date is ${environment.localDate}.`
+      : [...contributions].reverse().find((item) => item.currentDate)?.currentDate,
+    ...(environment ? { environment } : {}),
     warnings: contributions.flatMap((item) => item.warnings ?? []),
     sections: contributions.flatMap((item) => item.sections ?? []),
   }

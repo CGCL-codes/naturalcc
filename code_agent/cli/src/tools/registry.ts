@@ -11,22 +11,28 @@ import type {
   ToolSchema,
 } from './types.js'
 
-import { applyPatchTool } from './applyPatch.js'
-import { listFilesTool } from './listFiles.js'
-import { readFileTool } from './readFile.js'
-import { searchTextTool } from './searchText.js'
-import { createListFilesTool } from './listFiles.js'
-import { createSearchTextTool } from './searchText.js'
-import type { RipgrepRunner } from './ripgrep/types.js'
+import { applyPatchTool } from './applyPatch/index.js'
+import { createListFilesTool, listFilesTool } from './listFiles/index.js'
+import { readFileTool } from './readFile/index.js'
+import { createSearchTextTool, searchTextTool } from './searchText/index.js'
+import type { RipgrepRunner } from './backends/ripgrep/index.js'
+import type { GitChangesBackend } from './backends/git/index.js'
+import { createGitChangesTool } from './gitChanges/index.js'
 import { validateApprovalInput, validateApprovalSchema } from './approval.js'
+import { updateTaskPlanTool } from './updateTaskPlan/index.js'
 
-export function createBuiltinTools(runner?: RipgrepRunner): Tool[] {
+export function createBuiltinTools(
+  runner?: RipgrepRunner,
+  gitChangesBackend?: GitChangesBackend,
+): Tool[] {
   return [
-  runner ? createListFilesTool(runner) : listFilesTool,
-  readFileTool,
-  runner ? createSearchTextTool(runner) : searchTextTool,
-  applyPatchTool,
-  bashTool,
+    runner ? createListFilesTool(runner) : listFilesTool,
+    readFileTool,
+    runner ? createSearchTextTool(runner) : searchTextTool,
+    applyPatchTool,
+    bashTool,
+    updateTaskPlanTool,
+    ...(gitChangesBackend ? [createGitChangesTool(gitChangesBackend)] : []),
   ]
 }
 
@@ -72,8 +78,9 @@ export class DefaultToolRegistry implements ToolRegistry {
 export function createToolRegistry(
   tools?: Tool[],
   runner?: RipgrepRunner,
+  gitChangesBackend?: GitChangesBackend,
 ): ToolRegistry {
-  return new DefaultToolRegistry(tools ?? createBuiltinTools(runner))
+  return new DefaultToolRegistry(tools ?? createBuiltinTools(runner, gitChangesBackend))
 }
 
 function toToolSchema(tool: Tool): ToolSchema {
@@ -83,5 +90,7 @@ function toToolSchema(tool: Tool): ToolSchema {
     parameters: tool.parameters,
     readOnly: tool.readOnly,
     requiresApproval: tool.requiresApproval,
+    repeatKind: tool.repeatKind,
+    taskManagement: tool.taskManagement,
   }
 }
