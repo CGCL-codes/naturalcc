@@ -1,4 +1,5 @@
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -165,3 +166,45 @@ def test_committed_dataset_is_consistent_when_present():
         key = (case["file"], case["category"])
         assert not any(case["line_start"] <= b and a <= case["line_end"] for a, b in seen.get(key, []))
         seen.setdefault(key, []).append((case["line_start"], case["line_end"]))
+
+
+def test_compile_database_mirrors_the_sconscript_rules(tmp_path):
+    for relative in ("src/ipc.c", "components/drivers/ipc/pipe.c", "components/finsh/shell.c"):
+        (tmp_path / relative).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / relative).write_text("int x;\n")
+    spec = {"build_context": {"include_dirs": [".", "include"], "after_dirs": ["libc/include"],
+                              "defines": ["__RTTHREAD__"],
+                              "local_defines": {"src/": ["__RT_KERNEL_SOURCE__"],
+                                                "components/drivers/ipc/": ["__RT_IPC_SOURCE__"]}}}
+    entries = {e["file"]: e for e in build.compile_database(spec, tmp_path)}
+    assert set(entries) == {"src/ipc.c", "components/drivers/ipc/pipe.c", "components/finsh/shell.c"}
+    assert all(e["directory"] == "." for e in entries.values())
+    kernel, ipc, shell = (entries[k]["arguments"] for k in ("src/ipc.c", "components/drivers/ipc/pipe.c", "components/finsh/shell.c"))
+    assert "-D__RT_KERNEL_SOURCE__" in kernel and "-D__RT_KERNEL_SOURCE__" not in shell
+    assert "-D__RT_IPC_SOURCE__" in ipc and "-D__RT_IPC_SOURCE__" not in kernel
+    assert shell[:6] == ["cc", "-I.", "-Iinclude", "-idirafter", "libc/include", "-D__RTTHREAD__"]
+
+
+def test_committed_project_ships_its_compile_context():
+    if not build.MANIFEST.exists():
+        pytest.skip("dataset not built")
+    manifest = json.loads(build.MANIFEST.read_text(encoding="utf-8"))
+    shipped = {row["file"]: row for row in manifest["project_files"]}
+    assert shipped["rtconfig.h"]["origin"] == "overlay"
+    assert shipped["compile_commands.json"]["origin"] == "generated"
+    assert (build.PROJECT / "rtconfig.h").read_bytes() == (build.OVERLAY / "rtconfig.h").read_bytes()
+    database = json.loads((build.PROJECT / "compile_commands.json").read_text(encoding="utf-8"))
+    assert database == build.compile_database(build.load_spec(), build.PROJECT)
+
+
+@pytest.mark.skipif(shutil.which("clang") is None, reason="clang not installed")
+def test_every_detection_file_compiles_with_the_shipped_context():
+    """Clang and Cppcheck analyse what compiles; a broken context silently loses coverage."""
+    if not build.MANIFEST.exists():
+        pytest.skip("dataset not built")
+    gt = json.loads(build.GROUND_TRUTH.read_text(encoding="utf-8"))
+    failures, inactive = build.compile_check(gt)
+    assert failures == []
+    # Code that needs subsystems outside the dataset (RT-Smart, dynamic modules,
+    # the MMU page cache) is compiled out; only these three cases live there.
+    assert sorted(line.split()[0] for line in inactive) == ["CE-10", "LEAK-10", "RACE-06"]

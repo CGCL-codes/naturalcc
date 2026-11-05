@@ -17,13 +17,37 @@
   "rule_profile": "c_cpp",
   "severity_threshold": "medium",
   "max_findings": 1000,
-  "auto_fix": false
+  "auto_fix": false,
+  "analysis_timeout_seconds": 540
 }
 ```
 
 请求顶层的 `project_dir` 是后端本机工程绝对路径，`target_files` 必须包含该 `ground_truth.json` 标注的全部源文件。下方检查脚本会自动填写，无需手工复制几十个文件名。指标3改用 `scan_type=frequent_defects`。没有标注的真实项目不传 `ground_truth_file`，仍返回分类后的发现项与覆盖情况，统计状态为 `not_evaluated`，不会编造检出率。
 
 `analyzer=auto` 保持原来的“内置规则 + 可用的 Cppcheck”；`builtin` 不启动外部分析器；`cppcheck` 要求安装 Cppcheck；新增 `comprehensive` 要求 Cppcheck 和 Clang。Clang 使用 `core/unix/cplusplus` 加两个实验性越界规则 `alpha.security.ArrayBoundV2`、`alpha.unix.cstring.OutOfBounds`，用于补充指针偏移、拼接和内存复制边界检查。实验规则可能有误报，已在 `coverage.experimental_checkers` 和相关 Finding 的 `experimental` 中标出。具体检查器见 [Clang 官方说明](https://clang.llvm.org/docs/analyzer/checkers.html)。
+
+### 编译上下文（Clang / Cppcheck 必需）
+
+Clang 和 Cppcheck 需要知道工程的头文件目录和编译宏才能分析真实工程。缺少时它们只能拿到工程根目录，像 RT-Thread 这样头文件分散在各组件 `include/` 下的工程会在头文件处全部失败（Clang 报 `'dfs.h' file not found`，Cppcheck 把未展开的宏读成语法错误），`comprehensive` 因此判为失败。后端按以下顺序取编译上下文：
+
+1. `feature_config.compile_commands` 指定的文件（工程内相对路径，可指向文件或其所在目录）；未指定时读工程根目录的 `compile_commands.json`。逐文件取参数，目录级宏（如 RT-Thread 只给内核源文件的 `__RT_KERNEL_SOURCE__`）因此生效。条目里相对的 `directory` 按该 JSON 文件所在目录解析，工程解压到哪里都可用。
+2. 工程根目录的 `compile_flags.txt`，每行一个参数，对所有文件生效。
+3. 以上都没有时，按目标文件的 `#include` 自动推断头文件目录；宿主 C 库已有的同名头所在目录放到 `-idirafter`，不遮蔽系统头。推断补不出编译宏，只能作兜底。
+
+`include_dirs`（工程内相对目录）和 `defines`（`NAME` 或 `NAME=VALUE`）无论哪种来源都会追加到每个文件；两者都可传数组，或用换行/逗号分隔的字符串。`analysis_timeout_seconds` 是 Cppcheck 与 Clang 合计的时间预算（秒），平台传任务剩余时间即可；不传时两者各 120 秒。
+
+```json
+{
+  "compile_commands": "compile_commands.json",
+  "include_dirs": ["include", "components/dfs/dfs_v2/include"],
+  "defines": ["RT_USING_DFS", "O_EXEC=O_PATH"],
+  "analysis_timeout_seconds": 540
+}
+```
+
+安全约束：所有路径必须解析到 `project_dir` 之内。编译数据库来自上传内容，因此只放行 `-I/-iquote/-isystem/-idirafter`、`-include/-imacros`、`-D/-U` 和 `-std=`；`-Xclang -load`、`-fplugin=`、响应文件 `@file` 等可能让分析器加载外部代码的参数一律丢弃。编译数据库里的越界或不允许的参数会被丢弃并记入 `coverage[].build_context.dropped`；`feature_config` 里直接传入的同类问题则拒绝整个任务并说明原因。
+
+实际使用的来源、目录数和宏数记录在 Clang 与 Cppcheck 覆盖项的 `build_context` 中；Clang 因找不到头文件失败时，覆盖项另带 `hint` 说明如何补充编译上下文。
 
 Agent 模式用 `vulnerability_detection.analyze`，参数可加 `analyzer=comprehensive` 和上述统计参数，仍需当前 Run 的 execute 审批。普通 `vulnerability_detection` 工具只做内置检查；两者都不会自动编译运行待测程序。
 

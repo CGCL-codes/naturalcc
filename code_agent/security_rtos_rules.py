@@ -19,7 +19,7 @@ import re
 
 from code_agent.security_c_rules import call_parts, declared_name, parse_source, text, walk
 
-VERSION = "rtos-source-v1"
+VERSION = "rtos-source-v2"
 LIMITATIONS = (
     "Syntactic RTOS-aware heuristics: shell command construction, lock-scope escapes, "
     "allocation ownership and destination-capacity mismatches. No alias, macro expansion, "
@@ -529,10 +529,10 @@ def _exceeds(write: str, allocation: str) -> bool:
     return int(write_match[2]) > int(allocation_match[2])
 
 
-def scan_rtos_source(source: str, file: str, context_lines: int):
+def scan_rtos_source(source: str, file: str, context_lines: int, macros=None):
     """Return (findings, parse_failed) for the four high-risk contract categories."""
     suffix = "." + file.rsplit(".", 1)[-1] if "." in file else ".c"
-    root = parse_source(source, suffix.lower())
+    root = parse_source(source, suffix.lower(), macros)
     lines = source.splitlines()
     owning_fields = _owning_fields(root)
     allocators = ALLOCATORS | _inferred_allocators(root)

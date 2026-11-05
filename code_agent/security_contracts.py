@@ -37,7 +37,10 @@ def classify_findings(findings, project_dir):
         engine = finding.get("analyzer")
         if engine == "c-source":
             category = {"shellStringFlow": "command_execution", "sharedGlobalRace": "data_race",
-                        "capacityStringWrite": "string_overflow", "nullArgumentDeref": "null_pointer"}.get(identifier)
+                        "capacityStringWrite": "string_overflow", "nullArgumentDeref": "null_pointer",
+                        # RTOS-aware rules (security_rtos_rules), one per high-risk category.
+                        "shellCommandBuild": "command_execution", "lockScopeEscape": "data_race",
+                        "ownershipLeak": "memory_leak", "capacityWriteOverflow": "buffer_overflow"}.get(identifier)
             eligible, basis = bool(category), "Source flow/conflicting-access/capacity evidence"
         elif engine == "tsan-import":
             category, eligible, basis = "data_race", True, "Imported TSan race; log provenance is user supplied"

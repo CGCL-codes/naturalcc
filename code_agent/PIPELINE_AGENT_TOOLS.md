@@ -97,9 +97,12 @@ race detection. TSan import only parses an existing log and does not verify its
 revision or authenticity. Neither an empty result nor completed analyzer coverage
 proves the absence of defects.
 
-Cppcheck uses an argv list, no shell, and a 120-second timeout; it does not execute
-the target program. This version uses default compiler configuration, not the
-project compilation database. Analyze the whole project for broader coverage.
+Cppcheck uses an argv list, no shell, and a 120-second timeout (or the caller's
+`analysis_timeout_seconds`); it does not execute the target program. Clang and Cppcheck
+take the project's compile context from `compile_commands.json` (or `compile_flags.txt`)
+in the project root, falling back to include directories inferred from `#include`
+directives; `include_dirs`/`defines` add to it. See `security_build_context.py` and the
+integration notes in SECURITY_ACCEPTANCE.md. Analyze the whole project for broader coverage.
 Reports list unavailable analyzers, failures and coverage limits.
 `analyzer=cppcheck` / `comprehensive` fail explicitly when a required analyzer cannot run;
 Pipeline's `analyzer=auto` retains built-in results and reports missing coverage.

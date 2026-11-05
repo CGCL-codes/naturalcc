@@ -12,18 +12,68 @@ from tree_sitter import Language, Parser
 import tree_sitter_c
 import tree_sitter_cpp
 
-VERSION = "c-source-v2"
+from code_agent.security_c_macros import neutralize, structural_groups
+
+VERSION = "c-source-v3"
 LIMITATIONS = (
-    "Syntax analysis, not a compiler or proof: local string flow and direct global "
+    "Syntax analysis, not a compiler or proof (macros the grammar cannot expand are neutralised "
+    "first; see security_c_macros): local string flow and direct global "
     "accesses in overlapping pthread/std::thread lifetimes. No general alias, macro, "
     "cross-file, condition/path, custom sanitizer or custom synchronization analysis. "
     "Review evidence; use instrumented tests for runtime confirmation."
 )
 
 
-def parse_source(source: str, suffix: str):
+def parse_source(source: str, suffix: str, macros=None):
+    """Parse after blanking macro uses the grammar cannot model (see security_c_macros).
+
+    The blanking keeps every offset, so node positions are positions in ``source``.
+    ``macros`` is an optional (object_like, function_like) pair of extra attribute
+    macro names, typically harvested from the project's own headers.
+    """
     language = tree_sitter_cpp if suffix in {".cc", ".cpp", ".cxx", ".hpp"} else tree_sitter_c
-    return Parser(Language(language.language())).parse(source.encode()).root_node
+    parser = Parser(Language(language.language()))
+    object_like, function_like = macros or ((), ())
+    choose: dict[int, int] = {}
+    text = neutralize(source, object_like, function_like, choose)
+    root = parser.parse(text.encode()).root_node
+    if not root.has_error:
+        return root
+    # Keeping the first arm of a split #if is right for one configuration and wrong
+    # for another (a newlib-only declaration form); let the grammar decide, one
+    # group at a time, and keep a different arm only when it parses better.
+    errors = _error_count(root)
+    groups = structural_groups(source, object_like, function_like)
+    for number, (arms, start, end) in enumerate(groups):
+        if len(arms) < 2 or not _has_error_between(root, arms[0][0], end):
+            continue
+        for arm in range(1, len(arms)):
+            trial = {**choose, number: arm}
+            candidate = parser.parse(neutralize(source, object_like, function_like, trial).encode()).root_node
+            count = _error_count(candidate)
+            if count < errors:
+                choose, root, errors = trial, candidate, count
+        if not errors:
+            break
+    return root
+
+
+def _error_nodes(node):
+    if not node.has_error:
+        return
+    if node.type == "ERROR" or node.is_missing:
+        yield node
+        return
+    for child in node.children:
+        yield from _error_nodes(child)
+
+
+def _error_count(root) -> int:
+    return sum(1 for _ in _error_nodes(root))
+
+
+def _has_error_between(root, start: int, end: int) -> bool:
+    return any(start <= node.start_byte <= end for node in _error_nodes(root))
 
 
 def walk(node):
@@ -409,8 +459,8 @@ def _null_arguments(function, functions):
     return results
 
 
-def scan_c_source(source: str, file: str, context_lines: int):
-    root = parse_source(source, Path(file).suffix.lower())
+def scan_c_source(source: str, file: str, context_lines: int, macros=None):
+    root = parse_source(source, Path(file).suffix.lower(), macros)
     functions = {declared_name(n.child_by_field_name("declarator")): n for n in walk(root)
                  if n.type == "function_definition" and not n.has_error}
     findings = []

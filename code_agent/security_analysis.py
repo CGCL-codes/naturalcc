@@ -13,67 +13,136 @@ from pathlib import Path
 C_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp"}
 
 
-def cppcheck_scan(files: list[str], project_dir: str, context_lines: int, timeout_seconds: int = 120):
+def _cppcheck_flags(flags: list[str]) -> list[str]:
+    """Translate compile flags to Cppcheck's options.
+
+    Cppcheck reads no system headers, so -isystem/-idirafter directories become
+    ordinary -I paths after the project ones; -std=gnuXX becomes --std=cXX.
+    """
+    regular, later, other, index = [], [], [], 0
+    while index < len(flags):
+        flag = flags[index]
+        if flag in {"-I", "-iquote"} and index + 1 < len(flags):
+            regular += ["-I", flags[index + 1]]
+            index += 2
+        elif flag in {"-isystem", "-idirafter"} and index + 1 < len(flags):
+            later += ["-I", flags[index + 1]]
+            index += 2
+        elif flag == "-include" and index + 1 < len(flags):
+            other.append(f"--include={flags[index + 1]}")
+            index += 2
+        elif flag == "-imacros" and index + 1 < len(flags):
+            index += 2
+        elif flag.startswith(("-D", "-U")):
+            other.append(flag)
+            index += 1
+        elif flag.startswith("-std="):
+            standard = re.sub(r"^gnu", "c", flag[5:])
+            if re.fullmatch(r"c(89|99|11|17|23)", standard):
+                other.append(f"--std={standard}")
+            index += 1
+        else:
+            index += 1
+    return [*regular, *later, *other]
+
+
+def cppcheck_scan(files: list[str], project_dir: str, context_lines: int, timeout_seconds: int = 120,
+                  build_context=None):
     targets = [str(Path(p).resolve()) for p in files if Path(p).suffix.lower() in C_EXTENSIONS]
     if not targets:
         return [], {"engine": "cppcheck", "status": "not_applicable"}
     executable = shutil.which("cppcheck")
     if executable is None:
         return [], {"engine": "cppcheck", "status": "unavailable", "message": "Install Cppcheck and add it to the backend service PATH; bounds/null/leak analysis was not run."}
-    try:
-        result = subprocess.run(
-            [executable, "--xml", "--xml-version=2", "--enable=warning,style,performance,portability", "--inconclusive",
-             "-I", str(Path(project_dir).resolve()), *targets],
-            cwd=project_dir, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout_seconds,
-        )
-        if result.returncode != 0:
-            return [], {"engine": "cppcheck", "status": "failed", "message": (result.stderr or result.stdout)[-2000:]}
-        document = ET.fromstring(result.stderr)
-    except (OSError, subprocess.TimeoutExpired, ET.ParseError) as exc:
-        return [], {"engine": "cppcheck", "status": "failed", "message": str(exc)}
     root = Path(project_dir).resolve()
-    findings, diagnostics, failed_files = [], [], set()
-    for error in document.findall(".//error"):
-        identifier = error.get("id", "unknown")
-        if identifier in {"syntaxError", "internalError", "cppcheckError", "missingInclude", "missingIncludeSystem"}:
-            diagnostics.append(error.get("msg", identifier))
-            if identifier in {"syntaxError", "internalError", "cppcheckError"}:
-                locations = error.findall("location")
-                for location in locations:
-                    path = (root / location.get("file", "")).resolve()
-                    try:
-                        failed_files.add(path.relative_to(root).as_posix())
-                    except ValueError:
-                        continue
-                if not locations:
-                    failed_files.update(Path(p).relative_to(root).as_posix() for p in targets)
+    # One invocation per distinct compile context: Cppcheck takes a single set of
+    # macros per run, and RT-Thread defines differ per directory.
+    groups: dict[tuple[str, ...], list[str]] = {}
+    for target in targets:
+        relative = Path(target).relative_to(root).as_posix()
+        flags = build_context.flags_for(relative) if build_context is not None else []
+        groups.setdefault(tuple(_cppcheck_flags(flags)), []).append(target)
+    findings, diagnostics, failed_files, failures, version_text = [], [], set(), [], None
+    used, pending = 0.0, len(targets)
+    for flags, members in groups.items():
+        left = timeout_seconds - used
+        if left <= 1:
+            failures.append("Cppcheck time budget exhausted")
+            failed_files.update(Path(p).relative_to(root).as_posix() for p in members)
             continue
-        for location in error.findall("location")[:1]:
-            path = Path(location.get("file", ""))
-            if not path.is_absolute():
-                path = root / path
-            try:
-                relative = path.resolve().relative_to(root).as_posix()
-                lines = path.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
-                line = max(1, int(location.get("line", "1")))
-            except (ValueError, OSError):
+        # Split what is left of the budget by the share of files still to check; a
+        # single invocation gets the whole budget.
+        share = left * len(members) / pending
+        pending -= len(members)
+        started = time.monotonic()
+        try:
+            result = subprocess.run(
+                [executable, "--xml", "--xml-version=2", "--enable=warning,style,performance,portability", "--inconclusive",
+                 *flags, "-I", str(root), *members],
+                cwd=project_dir, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                timeout=min(left, max(share, 30.0)),
+            )
+            if result.returncode != 0:
+                failures.append((result.stderr or result.stdout)[-2000:])
+                failed_files.update(Path(p).relative_to(root).as_posix() for p in members)
                 continue
-            cwe = error.get("cwe")
-            findings.append({
-                "rule_id": f"cwe-{cwe}" if cwe and cwe != "0" else f"cppcheck-{identifier}",
-                "rule_name": error.get("msg", identifier), "analyzer": "cppcheck", "analyzer_id": identifier,
-                "severity": "high" if error.get("severity") == "error" else "medium",
-                "confidence": "low" if error.get("inconclusive") == "true" else "medium",
-                "file": relative, "line": line,
-                "snippet": lines[line - 1].strip()[:300] if line <= len(lines) else "",
-                "context": "".join(f"{i + 1}: {lines[i]}" for i in range(max(0, line - 1 - context_lines), min(len(lines), line + context_lines))),
-                "pattern": identifier, "recommendation": error.get("verbose", error.get("msg", "")),
-                "references": [f"https://cwe.mitre.org/data/definitions/{cwe}.html"] if cwe and cwe != "0" else [],
-            })
-    version = document.find("cppcheck")
-    return findings, {"engine": "cppcheck", "status": "partial" if diagnostics else "completed", "diagnostics": diagnostics, "failed_files": sorted(failed_files),
-        "version": version.get("version") if version is not None else None,
-        "limitations": "Default compiler configuration; no compile database. Cross-file and build-specific coverage is limited. All selected C/C++ files are reanalyzed on every scan."}
+            document = ET.fromstring(result.stderr)
+        except (OSError, subprocess.TimeoutExpired, ET.ParseError) as exc:
+            failures.append(str(exc))
+            failed_files.update(Path(p).relative_to(root).as_posix() for p in members)
+            continue
+        finally:
+            used += time.monotonic() - started
+        version = document.find("cppcheck")
+        version_text = version.get("version") if version is not None else version_text
+        for error in document.findall(".//error"):
+            identifier = error.get("id", "unknown")
+            if identifier in {"syntaxError", "internalError", "cppcheckError", "missingInclude", "missingIncludeSystem"}:
+                diagnostics.append(error.get("msg", identifier))
+                if identifier in {"syntaxError", "internalError", "cppcheckError"}:
+                    locations = error.findall("location")
+                    for location in locations:
+                        path = (root / location.get("file", "")).resolve()
+                        try:
+                            failed_files.add(path.relative_to(root).as_posix())
+                        except ValueError:
+                            continue
+                    if not locations:
+                        failed_files.update(Path(p).relative_to(root).as_posix() for p in members)
+                continue
+            for location in error.findall("location")[:1]:
+                path = Path(location.get("file", ""))
+                if not path.is_absolute():
+                    path = root / path
+                try:
+                    relative = path.resolve().relative_to(root).as_posix()
+                    lines = path.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)
+                    line = max(1, int(location.get("line", "1")))
+                except (ValueError, OSError):
+                    continue
+                cwe = error.get("cwe")
+                findings.append({
+                    "rule_id": f"cwe-{cwe}" if cwe and cwe != "0" else f"cppcheck-{identifier}",
+                    "rule_name": error.get("msg", identifier), "analyzer": "cppcheck", "analyzer_id": identifier,
+                    "severity": "high" if error.get("severity") == "error" else "medium",
+                    "confidence": "low" if error.get("inconclusive") == "true" else "medium",
+                    "file": relative, "line": line,
+                    "snippet": lines[line - 1].strip()[:300] if line <= len(lines) else "",
+                    "context": "".join(f"{i + 1}: {lines[i]}" for i in range(max(0, line - 1 - context_lines), min(len(lines), line + context_lines))),
+                    "pattern": identifier, "recommendation": error.get("verbose", error.get("msg", "")),
+                    "references": [f"https://cwe.mitre.org/data/definitions/{cwe}.html"] if cwe and cwe != "0" else [],
+                })
+    all_failed = len(failures) == len(groups)
+    status = "failed" if all_failed else "partial" if diagnostics or failures else "completed"
+    described = build_context.describe() if build_context is not None else {"source": "default"}
+    report = {"engine": "cppcheck", "status": status, "diagnostics": diagnostics, "failed_files": sorted(failed_files),
+        "version": version_text, "invocations": len(groups), "build_context": described,
+        "limitations": ("Compile context from " + described["source"] + ". " if described["source"] != "default"
+                        else "Default compiler configuration; no compile database. ")
+                       + "Cross-file and build-specific coverage is limited. All selected C/C++ files are reanalyzed on every scan."}
+    if failures:
+        report["message"] = failures[0][-2000:] if isinstance(failures[0], str) else str(failures[0])
+    return findings, report
 
 
 CLANG_EXPERIMENTAL = ["alpha.security.ArrayBoundV2", "alpha.security.ArrayBound", "alpha.unix.cstring.OutOfBounds",
@@ -82,9 +151,11 @@ CLANG_CWE = {"core.NullDereference": 476, "alpha.security.ArrayBoundV2": 119, "a
              "alpha.unix.cstring.OutOfBounds": 787}
 
 
-def _clang_analyze(executable: str, unit: Path, root: Path, output: Path, timeout: float, analyze_included: bool):
+def _clang_analyze(executable: str, unit: Path, root: Path, output: Path, timeout: float, analyze_included: bool,
+                   flags: tuple[str, ...] | list[str] = ()):
     output.unlink(missing_ok=True)
-    result = subprocess.run([executable, "--analyze", "-Wno-everything", "-I", str(root),
+    # Project compile context first; the project root stays as the last fallback.
+    result = subprocess.run([executable, "--analyze", "-Wno-everything", *flags, "-I", str(root),
         "-Xanalyzer", "-analyzer-checker=core,unix,cplusplus," + ",".join(CLANG_EXPERIMENTAL),
         # plist-multi-file keeps diagnostics whose path crosses translation-unit files.
         "-Xanalyzer", "-analyzer-output=plist-multi-file",
@@ -96,7 +167,8 @@ def _clang_analyze(executable: str, unit: Path, root: Path, output: Path, timeou
     return plistlib.loads(output.read_bytes())
 
 
-def clang_scan(files: list[str], project_dir: str, context_lines: int, timeout_seconds: int = 120):
+def clang_scan(files: list[str], project_dir: str, context_lines: int, timeout_seconds: int = 120,
+               build_context=None):
     """Opt-in comprehensive profile. Never compile/link/run the target program.
 
     Several C sources are analysed together as one unity translation unit so that
@@ -112,19 +184,28 @@ def clang_scan(files: list[str], project_dir: str, context_lines: int, timeout_s
     root, findings, failures, versions, seen = Path(project_dir).resolve(), [], [], set(), set()
     deadline = time.monotonic() + timeout_seconds
     sources = [t for t in targets if t.suffix.lower() in {".c", ".cc", ".cpp", ".cxx"}]
+
+    def flags_of(path: Path) -> tuple[str, ...]:
+        return tuple(build_context.flags_for(path.relative_to(root).as_posix())) if build_context is not None else ()
+
     mode = "per_file"
     with tempfile.TemporaryDirectory(prefix="naturalcc-clang-") as temporary:
         output = Path(temporary) / "findings.plist"
         documents = []
-        if len(sources) > 1 and len({t.suffix.lower() for t in sources}) == 1:
+        # A unity unit needs one compile context for all of its sources.
+        if len(sources) > 1 and len({t.suffix.lower() for t in sources}) == 1 and len({flags_of(t) for t in sources}) == 1:
             unity = Path(temporary) / f"naturalcc_unity{sources[0].suffix.lower()}"
             unity.write_text("".join(f'#include "{t}"\n' for t in sources), encoding="utf-8")
             try:
-                documents.append(_clang_analyze(executable, unity, root, output, max(1, min(60, deadline - time.monotonic())), True))
+                documents.append(_clang_analyze(executable, unity, root, output, max(1, min(60, deadline - time.monotonic())), True,
+                                                flags_of(sources[0])))
                 mode = "unity"
             except (OSError, RuntimeError, subprocess.TimeoutExpired, plistlib.InvalidFileException):
                 documents = []
         if mode == "per_file":
+            # With full project headers a translation unit is much larger, so give each
+            # file a fair share of the budget instead of a fixed 15 seconds.
+            per_file = max(15.0, timeout_seconds / max(1, len(targets)) * 2)
             for index, target in enumerate(targets):
                 relative = target.relative_to(root).as_posix()
                 remaining = deadline - time.monotonic()
@@ -132,7 +213,8 @@ def clang_scan(files: list[str], project_dir: str, context_lines: int, timeout_s
                     failures.extend({"file": p.relative_to(root).as_posix(), "message": "Total Clang timeout exceeded"} for p in targets[index:])
                     break
                 try:
-                    documents.append(_clang_analyze(executable, target, root, output, min(15, remaining), False))
+                    documents.append(_clang_analyze(executable, target, root, output, min(per_file, remaining), False,
+                                                    flags_of(target)))
                 except (OSError, RuntimeError, subprocess.TimeoutExpired, plistlib.InvalidFileException) as exc:
                     failures.append({"file": relative, "message": str(exc)})
         for document in documents:
@@ -182,11 +264,20 @@ def clang_scan(files: list[str], project_dir: str, context_lines: int, timeout_s
                             "callee_location": {"file": file, "line": line},
                             "snippet": call_lines[call_line - 1][:300] if call_line <= len(call_lines) else "",
                             "context": "\n".join(f"{i + 1}: {call_lines[i]}" for i in range(max(0, call_line - 1 - context_lines), min(len(call_lines), call_line + context_lines)))})
-    return findings, {"engine": "clang", "status": "failed" if len(failures) == len(targets) else "partial" if failures else "completed",
+    described = build_context.describe() if build_context is not None else {"source": "default"}
+    status = "failed" if len(failures) == len(targets) else "partial" if failures else "completed"
+    report = {"engine": "clang", "status": status,
         "mode": mode, "versions": sorted(versions), "failed_files": [f["file"] for f in failures], "diagnostics": failures[:50],
-        "experimental_checkers": CLANG_EXPERIMENTAL,
-        "limitations": "Default compiler configuration; no compile database. Multiple sources are analysed as one unity unit when they compile together. "
-                       "Bounds and taint checkers are LLVM experimental rules and can produce false positives. No target program was executed."}
+        "experimental_checkers": CLANG_EXPERIMENTAL, "build_context": described,
+        "limitations": ("Compile context from " + described["source"] + ". " if described["source"] != "default"
+                        else "Default compiler configuration; no compile database. ")
+                       + "Multiple sources are analysed as one unity unit when they share a compile context and compile together. "
+                         "Bounds and taint checkers are LLVM experimental rules and can produce false positives. No target program was executed."}
+    missing = [f for f in failures if "file not found" in f["message"]]
+    if missing:
+        report["hint"] = ("Headers could not be found. Provide compile_commands.json (or compile_flags.txt) in the "
+                          "project root, or pass include_dirs/defines in the feature config.")
+    return findings, report
 
 
 def import_tsan_report(project_dir: str, report_path: str):

@@ -43,10 +43,16 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "artifacts" / "contract5" / "rtthread"
 SPEC = DATA / "dataset_spec.json"
 INJECTIONS = DATA / "injections"
+OVERLAY = DATA / "overlay"
 DATASET = DATA / "dataset"
 PROJECT = DATASET / "project"
 GROUND_TRUTH = DATASET / "ground_truth.json"
 MANIFEST = DATASET / "manifest.json"
+if (ROOT / "project").is_dir() and (ROOT / "ground_truth.json").is_file():
+    # Running from an unpacked contract5.zip: everything sits next to scripts/.
+    DATA = DATASET = ROOT
+    SPEC, INJECTIONS, OVERLAY = ROOT / "dataset_spec.json", ROOT / "injections", ROOT / "overlay"
+    PROJECT, GROUND_TRUTH, MANIFEST = ROOT / "project", ROOT / "ground_truth.json", ROOT / "manifest.json"
 DEFAULT_UPSTREAM_ROOT = Path("/tmp/naturalcc-contract5-upstream")
 
 CATEGORIES = {
@@ -385,6 +391,97 @@ def write_project(upstream_root: Path, spec: dict[str, Any], contents: dict[str,
     return rows
 
 
+def compile_database(spec: dict[str, Any], project: Path) -> list[dict[str, Any]]:
+    """compile_commands.json entries for every C source, following dataset_spec's build_context.
+
+    ``directory`` is relative ("."), resolved against the database's own folder by
+    NaturalCC, so the file works wherever the project is unpacked.
+    """
+    context = spec["build_context"]
+    entries = []
+    for source in sorted(p for p in project.rglob("*.c") if p.is_file()
+                         and not any(part in SKIP_NAMES for part in p.relative_to(project).parts)):
+        relative = source.relative_to(project).as_posix()
+        local = [d for prefix, values in context.get("local_defines", {}).items() if relative.startswith(prefix) for d in values]
+        arguments = ["cc", *(f"-I{d}" for d in context["include_dirs"]),
+                     *(flag for d in context.get("after_dirs", []) for flag in ("-idirafter", d)),
+                     *(f"-D{d}" for d in [*context.get("defines", []), *local]), "-c", relative]
+        entries.append({"directory": ".", "file": relative, "arguments": arguments})
+    return entries
+
+
+def apply_build_context(spec: dict[str, Any], project: Path = PROJECT) -> list[dict[str, Any]]:
+    """Copy the overlay (rtconfig.h) into the project and write compile_commands.json.
+
+    Returns manifest rows for the files it wrote.
+    """
+    rows = []
+    for name in spec.get("build_context", {}).get("overlay", []):
+        data = (OVERLAY / name).read_bytes()
+        (project / name).parent.mkdir(parents=True, exist_ok=True)
+        (project / name).write_bytes(data)
+        rows.append({"file": name, "sha256": digest(data), "modified": False, "origin": "overlay"})
+    if "build_context" in spec:
+        data = (json.dumps(compile_database(spec, project), indent=2) + "\n").encode("utf-8")
+        (project / "compile_commands.json").write_bytes(data)
+        rows.append({"file": "compile_commands.json", "sha256": digest(data), "modified": False, "origin": "generated"})
+    return rows
+
+
+def compile_check(gt: dict[str, Any], project: Path = PROJECT) -> tuple[list[str], list[str]]:
+    """Compile every detection file with its database flags; list failures and GT cases
+    the configuration compiles out (their function emits no line after preprocessing)."""
+    import shlex
+    import subprocess
+    database = {entry["file"]: entry for entry in json.loads((project / "compile_commands.json").read_text(encoding="utf-8"))}
+    marker = re.compile(r'^# (\d+) "([^"]+)"')
+    failures, inactive = [], []
+    for row in gt["detection_files"]:
+        path = row["path"]
+        entry = database.get(path)
+        if entry is None:
+            failures.append(f"{path}: no compile_commands entry")
+            continue
+        flags = [a for a in (entry.get("arguments") or shlex.split(entry["command"]))[1:] if a not in {"-c", path}]
+        result = subprocess.run(["clang", "-fsyntax-only", "-Wno-everything", *flags, path], cwd=project,
+                                capture_output=True, text=True)
+        if result.returncode != 0:
+            errors = [line for line in result.stderr.splitlines() if " error: " in line]
+            failures.append(f"{path}: {(errors or [result.stderr.strip()])[0][:200]}")
+            continue
+        pre = subprocess.run(["clang", "-E", *flags, path], cwd=project, capture_output=True, text=True)
+        emitted, current, number = set(), None, 0
+        target = str((project / path).resolve())
+        for line in pre.stdout.splitlines():
+            found = marker.match(line)
+            if found:
+                number = int(found.group(1))
+                name = found.group(2)
+                current = name if name.startswith("<") else str((project / name).resolve())
+                continue
+            if current == target:
+                if line.strip():
+                    emitted.add(number)
+                number += 1
+        for case in gt["cases"]:
+            if case["file"] == path and not any(case["line_start"] <= n <= case["line_end"] for n in emitted):
+                inactive.append(f"{case['site_id']} {case['function']} ({path}:{case['defect_line']})")
+    return failures, inactive
+
+
+def refresh_build_context() -> list[dict[str, Any]]:
+    """Offline: re-apply the compile context to the committed project and update the manifest."""
+    spec = load_spec()
+    rows = apply_build_context(spec)
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    written = {row["file"] for row in rows}
+    manifest["project_files"] = [row for row in manifest["project_files"] if row["file"] not in written] + rows
+    manifest["project_files"].sort(key=lambda row: row["file"])
+    manifest["dataset_spec_sha256"] = digest(SPEC.read_bytes())
+    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return rows
+
+
 def validate_counts(gt: dict[str, Any], injections: dict[str, Any]) -> list[str]:
     problems = []
     detection_lines = gt["line_totals"]["detection_files"]
@@ -435,8 +532,26 @@ def main() -> None:
     parser.add_argument("--check", action="store_true", help="validate anchors/labels only; write nothing")
     parser.add_argument("--category", action="append", help="with --check: validate only these injection files (repeatable)")
     parser.add_argument("--verify", action="store_true", help="verify committed dataset against manifest; needs no upstream")
+    parser.add_argument("--build-context", action="store_true",
+                        help="re-apply rtconfig.h and compile_commands.json to the committed project; needs no upstream")
+    parser.add_argument("--compile-check", action="store_true",
+                        help="compile every detection file with clang and list GT cases the configuration compiles out")
     parser.add_argument("--archive", action="store_true", help="write the delivery package contract5.zip from the committed dataset (no upstream needed)")
     args = parser.parse_args()
+    if args.build_context:
+        for row in refresh_build_context():
+            print(f"wrote {row['file']} ({row['origin']})")
+        return
+    if args.compile_check:
+        failures, inactive = compile_check(json.loads(GROUND_TRUTH.read_text(encoding="utf-8")))
+        total = len(json.loads(GROUND_TRUTH.read_text(encoding="utf-8"))["detection_files"])
+        print(f"compiled {total - len(failures)}/{total} detection files")
+        for line in failures:
+            print(f"  FAIL {line}")
+        print(f"GT cases compiled out by this configuration: {len(inactive)}")
+        for line in inactive:
+            print(f"  - {line}")
+        raise SystemExit(1 if failures else 0)
     if args.verify:
         problems = verify_committed()
         print("\n".join(problems) if problems else "dataset matches manifest")
@@ -463,6 +578,7 @@ def main() -> None:
         return
     DATASET.mkdir(parents=True, exist_ok=True)
     rows = write_project(upstream_root, spec, contents)
+    rows = sorted(rows + apply_build_context(spec), key=lambda row: row["file"])
     GROUND_TRUTH.write_text(json.dumps(gt, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     manifest = {
         "schema_version": 1, "generated_utc": gt["generated_utc"], "upstream": spec["upstream"],

@@ -328,6 +328,12 @@ Main config fields:
 - `auto_fix`: enable/disable repair stage
 - `max_findings`: cap report size
 - `extra_instruction`: extra remediation constraints
+- `analyzer`: `auto` / `builtin` / `cppcheck` / `comprehensive` (Cppcheck + Clang)
+- `compile_commands`, `include_dirs`, `defines`: compile context for Clang/Cppcheck. By default
+  `compile_commands.json`, then `compile_flags.txt`, is read from the project root; otherwise
+  include directories are inferred. Paths must stay inside the project; only include, macro and
+  `-std` flags are passed to the analysers.
+- `analysis_timeout_seconds`: total time budget for Cppcheck and Clang together
 
 Usage tips:
 - Select target files first if you plan to enable `auto_fix`.

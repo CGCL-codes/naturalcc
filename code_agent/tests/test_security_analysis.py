@@ -116,7 +116,7 @@ def test_result_limit_counts_builtin_cppcheck_and_tsan_after_threshold(tmp_path,
     (tmp_path / "main.c").write_text("strcpy(a, b);\n", encoding="utf-8")
     (tmp_path / "tsan.log").write_text("WARNING: ThreadSanitizer: data race\n  #0 worker main.c:1:3\n", encoding="utf-8")
     cpp_finding = {"severity": "high", "confidence": "high", "rule_id": "cwe-476", "rule_name": "null", "file": "main.c", "line": 1, "snippet": "*p", "recommendation": "fix"}
-    monkeypatch.setattr(security_analysis, "cppcheck_scan", lambda *args: ([cpp_finding], {"engine": "cppcheck", "status": "completed"}))
+    monkeypatch.setattr(security_analysis, "cppcheck_scan", lambda *args, **kwargs: ([cpp_finding], {"engine": "cppcheck", "status": "completed"}))
     result = run_plugin(tmp_path, analyzer="auto", sanitizer_report="tsan.log", max_findings=1, severity_threshold="high")
     assert result.artifacts["finding_summary"] == {"candidate_count": 3, "returned_count": 1, "truncated": True, "max_findings": 1}
     assert len(result.artifacts["findings"]) == 1
@@ -217,3 +217,117 @@ def test_real_cppcheck_bounds_null_and_leak(tmp_path):
     ids = {f["analyzer_id"] for f in findings}
     assert {"arrayIndexOutOfBounds", "nullPointer", "memleak"} <= ids
     assert coverage["status"] in {"completed", "partial"}
+
+
+# --- compile context (include directories, macros, compile_commands.json) -------------
+
+def make_layered_project(root: Path) -> Path:
+    """A project whose sources only compile with its include directory, like RT-Thread."""
+    (root / "include").mkdir(parents=True)
+    (root / "include" / "kernel.h").write_text("#ifndef KERNEL_H\n#define KERNEL_H\nint kernel_value(void);\n#endif\n")
+    (root / "src").mkdir()
+    (root / "src" / "main.c").write_text(
+        '#include "kernel.h"\n'
+        "#ifndef REQUIRED\n#error REQUIRED must be defined\n#endif\n"
+        "int main(void) { int *p = 0; return *p + kernel_value(); }\n")
+    return root
+
+
+@pytest.mark.skipif(shutil.which("clang") is None, reason="clang not installed")
+def test_clang_needs_and_uses_the_compile_database(tmp_path):
+    from code_agent.security_build_context import load_build_context
+    root = make_layered_project(tmp_path)
+    source = str(root / "src" / "main.c")
+    _, without = security_analysis.clang_scan([source], str(root), 1)
+    assert without["status"] == "failed" and "hint" in without
+    (root / "compile_commands.json").write_text(json.dumps([
+        {"directory": ".", "file": "src/main.c", "arguments": ["cc", "-Iinclude", "-DREQUIRED", "-c", "src/main.c"]}]))
+    context = load_build_context(root)
+    findings, coverage = security_analysis.clang_scan([source], str(root), 1, build_context=context)
+    assert coverage["status"] == "completed"
+    assert coverage["build_context"]["source"] == "compile_commands"
+    assert any(f["analyzer_id"] == "core.NullDereference" for f in findings)
+
+
+def test_cppcheck_runs_once_per_compile_context(tmp_path, monkeypatch):
+    from code_agent.security_build_context import BuildContext
+    for name in ("kernel.c", "driver.c", "app.c"):
+        (tmp_path / name).write_text("int x;\n")
+    context = BuildContext(source="compile_commands", per_file={
+        "kernel.c": ["-I", str(tmp_path), "-D__KERNEL_SOURCE__"],
+        "driver.c": ["-I", str(tmp_path), "-idirafter", str(tmp_path), "-std=gnu11"],
+        "app.c": ["-I", str(tmp_path), "-idirafter", str(tmp_path), "-std=gnu11"]})
+    calls = []
+
+    def run(argv, **kwargs):
+        calls.append(argv)
+        return SimpleNamespace(returncode=0, stderr='<?xml version="1.0"?><results version="2"><cppcheck version="2.22"/><errors></errors></results>')
+    monkeypatch.setattr(security_analysis.shutil, "which", lambda name: "cppcheck")
+    monkeypatch.setattr(security_analysis.subprocess, "run", run)
+    _, coverage = security_analysis.cppcheck_scan([str(tmp_path / n) for n in ("kernel.c", "driver.c", "app.c")],
+                                                  str(tmp_path), 1, build_context=context)
+    assert coverage["status"] == "completed" and coverage["invocations"] == 2
+    kernel = next(argv for argv in calls if any(a.endswith("kernel.c") for a in argv))
+    assert "-D__KERNEL_SOURCE__" in kernel and not any(a.endswith("driver.c") for a in kernel)
+    shared = next(argv for argv in calls if any(a.endswith("driver.c") for a in argv))
+    assert any(a.endswith("app.c") for a in shared) and "--std=c11" in shared and "-idirafter" not in shared
+
+
+def test_cppcheck_flag_translation():
+    assert security_analysis._cppcheck_flags(
+        ["-I", "/p/a", "-idirafter", "/p/libc", "-iquote", "/p/q", "-include", "/p/cfg.h", "-DX=1", "-UY", "-std=gnu99"]
+    ) == ["-I", "/p/a", "-I", "/p/q", "-I", "/p/libc", "--include=/p/cfg.h", "-DX=1", "-UY", "--std=c99"]
+
+
+@pytest.mark.parametrize("config, message", [
+    ({"include_dirs": ["/etc"]}, "include_dirs must be project-relative"),
+    ({"defines": ["not a macro"]}, "not a valid macro"),
+    ({"analysis_timeout_seconds": "-5"}, "analysis_timeout_seconds"),
+    ({"analysis_timeout_seconds": "soon"}, "analysis_timeout_seconds"),
+    ({"compile_commands": "/abs/db.json"}, "compile_commands"),
+])
+def test_plugin_validates_compile_context_config(config, message):
+    assert message in VulnerabilityDetectionPlugin().validate({"analyzer": "comprehensive", **config})
+
+
+def test_plugin_accepts_the_config_the_platform_sends():
+    assert VulnerabilityDetectionPlugin().validate({
+        "scan_scope": "targets", "analyzer": "comprehensive", "auto_fix": False, "incremental": False,
+        "severity_threshold": "low", "max_findings": "1000", "analysis_timeout_seconds": "540",
+        "ground_truth_file": "ground_truth.json", "rule_profile": "c_cpp", "scan_type": "high_risk",
+        "include_dirs": ["include", "components/dfs/dfs_v2/include"], "defines": ["RT_USING_DFS"],
+        "compile_commands": "compile_commands.json"}) is None
+
+
+def test_plugin_refuses_an_include_dir_outside_the_project(tmp_path):
+    (tmp_path / "main.c").write_text("int main(void) { return 0; }\n")
+    (tmp_path.parent / "outside").mkdir(exist_ok=True)
+    result = run_plugin(tmp_path, analyzer="cppcheck", include_dirs=["../outside"])
+    assert not result.success and "outside the project directory" in result.message
+
+
+@pytest.mark.skipif(shutil.which("clang") is None, reason="clang not installed")
+def test_comprehensive_scan_succeeds_with_a_project_database(tmp_path, monkeypatch):
+    """The platform's failure: Clang saw only -I <root>; a project database fixes it."""
+    monkeypatch.setattr(security_analysis, "cppcheck_scan",
+                        lambda *args, **kwargs: ([], {"engine": "cppcheck", "status": "completed"}))
+    root = make_layered_project(tmp_path)
+    (root / "compile_commands.json").write_text(json.dumps([
+        {"directory": ".", "file": "src/main.c", "arguments": ["cc", "-Iinclude", "-DREQUIRED", "-c", "src/main.c"]}]))
+    context = ExecutionContext(str(root), ["src/main.c"], "scan", "unused", None,
+                               {"analyzer": "comprehensive", "analysis_timeout_seconds": "60"})
+    results = list(VulnerabilityDetectionPlugin().execute(context))
+    result = [r for r in results if isinstance(r, PluginResult)][-1]
+    assert result.success
+    clang = next(c for c in result.artifacts["coverage"] if c["engine"] == "clang")
+    assert clang["status"] == "completed" and clang["build_context"]["source"] == "compile_commands"
+    assert any("Compile context: compile_commands" in r for r in results if isinstance(r, str))
+
+
+def test_rtos_rule_findings_count_toward_contract_statistics(tmp_path):
+    from code_agent.security_contracts import classify_findings
+    findings = [{"analyzer": "c-source", "analyzer_id": identifier, "file": "a.c", "line": 1}
+                for identifier in ("shellCommandBuild", "lockScopeEscape", "ownershipLeak", "capacityWriteOverflow")]
+    classify_findings(findings, str(tmp_path))
+    assert [f["category"] for f in findings] == ["command_execution", "data_race", "memory_leak", "buffer_overflow"]
+    assert all(f["metric_eligible"] for f in findings)

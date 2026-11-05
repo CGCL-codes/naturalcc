@@ -36,5 +36,40 @@
     "components/drivers/ipc/ringblk_buf.c",
     "components/drivers/ipc/completion_up.c",
     "components/finsh/msh_parse.c"
-  ]
+  ],
+  "build_context": {
+    "_comment": "Compile context shipped with the project so Clang and Cppcheck analyse it as a real build would. Mirrors the CPPPATH/CPPDEFINES the RT-Thread SConscript files declare for a GCC Cortex-M4 board; rtconfig.h (normally generated per board by menuconfig) is copied from overlay/.",
+    "overlay": [
+      "rtconfig.h"
+    ],
+    "include_dirs": [
+      ".",
+      "include",
+      "libcpu/arm/common",
+      "libcpu/arm/cortex-m4",
+      "components/finsh",
+      "components/dfs/dfs_v2/include",
+      "components/dfs/dfs_v2/filesystems/devfs",
+      "components/drivers/include",
+      "components/utilities/ulog"
+    ],
+    "after_dirs": [
+      "components/libc/compilers/common/include"
+    ],
+    "after_dirs_comment": "RT-Thread's libc compatibility headers fill gaps in the host C library the analysers parse against; searching them after the system directories keeps the host libc authoritative.",
+    "defines": [
+      "__RTTHREAD__",
+      "_GNU_SOURCE",
+      "O_EXEC=O_PATH"
+    ],
+    "defines_comment": "__RTTHREAD__ comes from src/SConscript. _GNU_SOURCE is what RT-Thread's Linux simulator build defines; O_EXEC=O_PATH is RT-Thread's own definition (extension/fcntl/octal/fcntl.h) for C libraries without O_EXEC, which glibc lacks.",
+    "local_defines": {
+      "src/": [
+        "__RT_KERNEL_SOURCE__"
+      ],
+      "components/drivers/ipc/": [
+        "__RT_IPC_SOURCE__"
+      ]
+    }
+  }
 }
