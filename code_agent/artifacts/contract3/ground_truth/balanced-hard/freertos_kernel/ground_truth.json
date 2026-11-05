@@ -1580,7 +1580,8 @@
     "commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0",
     "scan_roots": [
       "."
-    ]
+    ],
+    "repo_dir": "artifacts/contract3/projects/freertos_kernel"
   },
   "line_totals": {
     "upstream_detection_files": 186067,

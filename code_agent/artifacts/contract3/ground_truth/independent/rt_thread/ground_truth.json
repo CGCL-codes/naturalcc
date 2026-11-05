@@ -1580,7 +1580,8 @@
     "commit": "97893c004c65760c638fd7eb571a08fc987a55e5",
     "scan_roots": [
       "src"
-    ]
+    ],
+    "repo_dir": "artifacts/contract3/projects/rt_thread"
   },
   "line_totals": {
     "upstream_detection_files": 20545,

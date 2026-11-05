@@ -1,6 +1,6 @@
 # 合同指标 3：高频缺陷检测总报告
 
-更新时间（UTC）：2026-11-05T11:26:33.305770+00:00
+更新时间（UTC）：2026-11-05T12:09:30.275351+00:00
 
 本报告是唯一的指标 3 Markdown 入口。各测试集的真值、原始结果、模型 Run 和覆盖状态保留在各自工件目录；不得择优挑选或平均不同测试集的分数。
 
@@ -59,6 +59,8 @@
 - `schema_version`、`scan_type`、`source_sha256`（参与计分的注入测试文件及 SHA-256）、`cases`（逐函数标签：`case_id`、`category`、`file`、`function`、`line_start`、`line_end`、`expected`、`variant`，另附 `defect_line`、`defect_code`）。只有这些函数参与计分。
 - `detection_files`：该工程要检测的上游源码文件及每个文件的行数、SHA-256；`line_totals.upstream_detection_files` 是合计行数，不少于 10,000 行。
 - `fixtures`：注入的测试文件（每类一个）及其行数和 SHA-256。
+
+三个工程的检测文件、注入测试文件和上游 LICENSE 已随仓库提供，在 [artifacts/contract3/projects/](artifacts/contract3/projects/)，每个工程一个目录，目录结构与上游一致；`scan_roots` 相对这些目录（如 Zephyr 扫描 `artifacts/contract3/projects/zephyr/kernel/`）。
 
 | 工程（扫描范围） | 检测文件数 | 检测文件合计行数 |
 |---|---:|---:|

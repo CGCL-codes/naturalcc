@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -29,6 +30,10 @@ from code_agent.scripts import benchmark_contract3_independent as independent
 
 DATA = ROOT / "artifacts" / "contract3"
 OUT = DATA / "ground_truth"
+# In-repo copy of every project's detection files, fixtures and upstream licence,
+# so the files the ground truth names can be inspected without fetching upstream.
+PROJECTS = DATA / "projects"
+LICENSE_NAMES = ("LICENSE", "LICENSE.md", "LICENSE.txt")
 LISTING = ROOT / "合同-3-测试集与GT清单.md"
 SUITES = ["balanced", "independent", "balanced-hard", "independent-hard"]
 MIN_LINES = 10_000
@@ -124,14 +129,32 @@ def render_listing(results: list[dict[str, Any]]) -> str:
                 lines.append(f"| `{kind}-{variant}` | {FORMS[(category, kind, variant)]} | "
                              f"{cell(form_code(category, kind, variant, True))} | {cell(form_code(category, kind, variant, False))} |")
         lines.append("")
+    suffixes = "、".join(f"`{suffix}`" for suffix in sorted(base.SOURCE_SUFFIXES))
+    ignored = "、".join(f"`{name}`" for name in sorted(base.IGNORED_DIRS))
     lines += ["## 3. 工程与检测文件", "",
-              "检测文件 = `scan_roots` 下的 C/C++ 源码与头文件（不含注入的测试文件）。完整文件列表与逐文件行数见下方折叠项及 GT JSON 的 `detection_files`。", "",
-              "| 工程 | 版本 | 提交 | 扫描范围 | 检测文件数 | 检测文件合计行数 |", "|---|---|---|---|---:|---:|"]
+              "三个工程的检测文件已随仓库提供，位于 [artifacts/contract3/projects/](artifacts/contract3/projects/)，"
+              "每个工程一个目录，**目录结构与上游仓库一致**，无需另行下载：", "",
+              "| 工程 | 版本 | 提交 | 仓库内目录（= 工程根目录） | `scan_roots` | 实际扫描目录 | 检测文件数 | 检测文件合计行数 |",
+              "|---|---|---|---|---|---|---:|---:|"]
     for project in first["projects"]:
-        lines.append(f"| {project['name']} | {project['ref']} | `{project['commit'][:12]}` | "
-                     f"{', '.join(f'`{root}`' for root in project['scan_roots'])} | {len(project['detection_files'])} | "
+        local = f"artifacts/contract3/projects/{project['id']}"
+        scanned = ", ".join(f"[`{local}/{'' if root == '.' else root + '/'}`]({local}/{'' if root == '.' else root + '/'})"
+                            for root in project["scan_roots"])
+        lines.append(f"| {project['name']} | {project['ref']} | `{project['commit'][:12]}` | [`{local}/`]({local}/) | "
+                     f"{', '.join(f'`{root}`' for root in project['scan_roots'])} | {scanned} | {len(project['detection_files'])} | "
                      f"{project['line_totals']['upstream_detection_files']:,} |")
-    lines.append("")
+    lines += ["",
+              "- **`scan_roots`** 是相对工程根目录的扫描范围，定义在 [artifacts/contract3/manifest.json](artifacts/contract3/manifest.json)："
+              "`.` 表示整个工程，`kernel` 表示工程根目录下的 `kernel/`。仓库内目录就是工程根目录，所以 Zephyr 的扫描范围是 "
+              "`artifacts/contract3/projects/zephyr/kernel/`。",
+              f"- **检测文件** = `scan_roots` 下扩展名为 {suffixes} 的源文件，不含头文件，不含注入的 `contract3_*` 测试文件，"
+              f"并跳过隐藏目录与 {ignored} 目录。规则见 `scripts/benchmark_contract3_cppcheck.py` 的 `source_files`。",
+              "- 仓库内只放检测文件、注入的测试文件和上游 LICENSE，其余上游文件（头文件、构建脚本、文档等）不放。"
+              "GT 的 `detection_files[].path` 与 `fixtures[].path` 都相对工程根目录，与仓库内文件一一对应，可按 `sha256` 逐个核对未被改动；"
+              "完整上游仓库可按上表版本与提交号从 `manifest.json` 中的地址取得。",
+              "- 注入的测试文件放在工程根目录，4 套测试集各 3 个（每类缺陷一个），文件名为 `contract3_<测试集>_web_<类别>.c`（测试集名中的 `-` 写作 `_`，如 `contract3_balanced_hard_web_array_oob.c`）。",
+              "- **用 GT 评分**：把对应测试集的 `ground_truth.json` 复制到工程目录根下，以该目录为 `project_dir`、"
+              "`ground_truth_file=ground_truth.json`、`scan_type=frequent_defects` 运行漏洞检测；扫描目标为 GT 中 `detection_files` 与 `fixtures` 列出的文件。", ""]
     for project in first["projects"]:
         lines += [f"<details><summary>{project['name']} 检测文件（{len(project['detection_files'])} 个）</summary>", "",
                   "| 文件 | 行数 |", "|---|---:|", *[f"| `{item['path']}` | {item['lines']:,} |" for item in project["detection_files"]],
@@ -230,11 +253,27 @@ def loader_document(result: dict[str, Any], project: dict[str, Any]) -> dict[str
         "title": f"{result['title']}（{SUITE_NAMES[suite]} · {project['name']}）",
         "line_rule": result["line_rule"],
         "scoring_rule": result["scoring_rule"],
-        "project": {key: project[key] for key in ("id", "name", "url", "ref", "commit", "scan_roots")},
+        "project": {**{key: project[key] for key in ("id", "name", "url", "ref", "commit", "scan_roots")},
+                    "repo_dir": f"artifacts/contract3/projects/{project['id']}"},
         "line_totals": project["line_totals"],
         "fixtures": project["fixtures"],
         "detection_files": project["detection_files"],
     }
+
+
+def mirror_projects(manifest: dict[str, Any], workspace: Path, results: list[dict[str, Any]]) -> None:
+    """Copy each project's detection files, every suite's fixtures and the upstream licence into the repo."""
+    for spec in manifest["sources"]:
+        source, target = workspace / spec["id"], PROJECTS / spec["id"]
+        if target.exists():
+            shutil.rmtree(target)
+        paths = {item["path"] for result in results for project in result["projects"] if project["id"] == spec["id"]
+                 for item in [*project["detection_files"], *project["fixtures"]]}
+        paths.update(name for name in LICENSE_NAMES if (source / name).is_file())
+        for relative in sorted(paths):
+            (target / relative).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source / relative, target / relative)
+        print(f"projects: {target.relative_to(ROOT)} ({len(paths)} 文件)")
 
 
 def main() -> None:
@@ -258,6 +297,7 @@ def main() -> None:
             print(f"{suite}: {target.relative_to(ROOT)} ({project['line_totals']['upstream_detection_files']} 行/"
                   f"{len(project['detection_files'])} 文件, {len(project['cases'])} 例)")
     if suites == SUITES:
+        mirror_projects(manifest, args.workspace.resolve(), results)
         LISTING.write_text(render_listing(results) + "\n", encoding="utf-8")
         print(f"listing: {LISTING.relative_to(ROOT)}")
 

@@ -68,13 +68,19 @@
 
 ## 3. 工程与检测文件
 
-检测文件 = `scan_roots` 下的 C/C++ 源码与头文件（不含注入的测试文件）。完整文件列表与逐文件行数见下方折叠项及 GT JSON 的 `detection_files`。
+三个工程的检测文件已随仓库提供，位于 [artifacts/contract3/projects/](artifacts/contract3/projects/)，每个工程一个目录，**目录结构与上游仓库一致**，无需另行下载：
 
-| 工程 | 版本 | 提交 | 扫描范围 | 检测文件数 | 检测文件合计行数 |
-|---|---|---|---|---:|---:|
-| FreeRTOS Kernel | V11.1.0 | `dbf70559b27d` | `.` | 255 | 186,067 |
-| Zephyr RTOS | v3.7.0 | `36940db938a8` | `kernel` | 52 | 17,050 |
-| RT-Thread | v5.2.1 | `97893c004c65` | `src` | 32 | 20,545 |
+| 工程 | 版本 | 提交 | 仓库内目录（= 工程根目录） | `scan_roots` | 实际扫描目录 | 检测文件数 | 检测文件合计行数 |
+|---|---|---|---|---|---|---:|---:|
+| FreeRTOS Kernel | V11.1.0 | `dbf70559b27d` | [`artifacts/contract3/projects/freertos_kernel/`](artifacts/contract3/projects/freertos_kernel/) | `.` | [`artifacts/contract3/projects/freertos_kernel/`](artifacts/contract3/projects/freertos_kernel/) | 255 | 186,067 |
+| Zephyr RTOS | v3.7.0 | `36940db938a8` | [`artifacts/contract3/projects/zephyr/`](artifacts/contract3/projects/zephyr/) | `kernel` | [`artifacts/contract3/projects/zephyr/kernel/`](artifacts/contract3/projects/zephyr/kernel/) | 52 | 17,050 |
+| RT-Thread | v5.2.1 | `97893c004c65` | [`artifacts/contract3/projects/rt_thread/`](artifacts/contract3/projects/rt_thread/) | `src` | [`artifacts/contract3/projects/rt_thread/src/`](artifacts/contract3/projects/rt_thread/src/) | 32 | 20,545 |
+
+- **`scan_roots`** 是相对工程根目录的扫描范围，定义在 [artifacts/contract3/manifest.json](artifacts/contract3/manifest.json)：`.` 表示整个工程，`kernel` 表示工程根目录下的 `kernel/`。仓库内目录就是工程根目录，所以 Zephyr 的扫描范围是 `artifacts/contract3/projects/zephyr/kernel/`。
+- **检测文件** = `scan_roots` 下扩展名为 `.c`、`.cc`、`.cpp`、`.cxx` 的源文件，不含头文件，不含注入的 `contract3_*` 测试文件，并跳过隐藏目录与 `.git`、`.github`、`boards`、`build`、`doc`、`docs`、`example`、`examples`、`out`、`sample`、`samples`、`test`、`tests` 目录。规则见 `scripts/benchmark_contract3_cppcheck.py` 的 `source_files`。
+- 仓库内只放检测文件、注入的测试文件和上游 LICENSE，其余上游文件（头文件、构建脚本、文档等）不放。GT 的 `detection_files[].path` 与 `fixtures[].path` 都相对工程根目录，与仓库内文件一一对应，可按 `sha256` 逐个核对未被改动；完整上游仓库可按上表版本与提交号从 `manifest.json` 中的地址取得。
+- 注入的测试文件放在工程根目录，4 套测试集各 3 个（每类缺陷一个），文件名为 `contract3_<测试集>_web_<类别>.c`（测试集名中的 `-` 写作 `_`，如 `contract3_balanced_hard_web_array_oob.c`）。
+- **用 GT 评分**：把对应测试集的 `ground_truth.json` 复制到工程目录根下，以该目录为 `project_dir`、`ground_truth_file=ground_truth.json`、`scan_type=frequent_defects` 运行漏洞检测；扫描目标为 GT 中 `detection_files` 与 `fixtures` 列出的文件。
 
 <details><summary>FreeRTOS Kernel 检测文件（255 个）</summary>
 

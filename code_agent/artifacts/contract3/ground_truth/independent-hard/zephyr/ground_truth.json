@@ -1580,7 +1580,8 @@
     "commit": "36940db938a8f4a1e919496793ed439850a221c2",
     "scan_roots": [
       "kernel"
-    ]
+    ],
+    "repo_dir": "artifacts/contract3/projects/zephyr"
   },
   "line_totals": {
     "upstream_detection_files": 17050,

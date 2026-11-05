@@ -33,3 +33,15 @@ def test_ground_truth_loads_with_product_loader(tmp_path, suite, project):
     assert {case["file"] for case in cases} == set(data["source_sha256"])
     assert data["line_totals"]["upstream_detection_files"] >= 10_000
     assert len(data["detection_files"]) == len({item["path"] for item in data["detection_files"]})
+
+
+@pytest.mark.parametrize("suite", SUITES)
+@pytest.mark.parametrize("project", PROJECTS)
+def test_in_repo_project_holds_every_listed_file(suite, project):
+    import hashlib
+    data = json.loads((GT / suite / project / "ground_truth.json").read_text(encoding="utf-8"))
+    root = ROOT / data["project"]["repo_dir"]
+    for item in [*data["detection_files"], *data["fixtures"]]:
+        assert hashlib.sha256((root / item["path"]).read_bytes()).hexdigest() == item["sha256"], item["path"]
+    for root_dir in data["project"]["scan_roots"]:
+        assert (root / root_dir).is_dir()
