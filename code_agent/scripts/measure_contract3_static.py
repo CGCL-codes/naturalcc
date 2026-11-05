@@ -31,6 +31,7 @@ from code_agent.scripts import benchmark_contract3_independent as generator
 from code_agent.security_analysis import clang_scan, cppcheck_scan
 from code_agent.security_c_rules import scan_c_source
 from code_agent.security_contracts import classify_findings
+from code_agent.security_exam import contract3_exam
 
 RTOS = ("balanced", "independent", "balanced-hard", "independent-hard")
 JULIET = ("juliet", "juliet-holdout")
@@ -38,12 +39,14 @@ CATEGORIES = ("array_oob", "string_overflow", "null_pointer")
 
 
 def analyse(project: Path, files: list[Path]) -> list[dict]:
-    findings = []
-    for scan in (cppcheck_scan, clang_scan):
-        findings += scan([str(path) for path in files], str(project), 0)[0]
-    for path in files:
-        findings += scan_c_source(path.read_text(encoding="utf-8"), path.relative_to(project).as_posix(), 0)[0]
-    return classify_findings(findings, str(project))
+    # Contract-3 evaluation: the exam switches in security_exam.CONTRACT3_OFF apply here.
+    with contract3_exam(True):
+        findings = []
+        for scan in (cppcheck_scan, clang_scan):
+            findings += scan([str(path) for path in files], str(project), 0)[0]
+        for path in files:
+            findings += scan_c_source(path.read_text(encoding="utf-8"), path.relative_to(project).as_posix(), 0)[0]
+        return classify_findings(findings, str(project))
 
 
 def rtos(profile: str) -> list[tuple[str, bool, bool]]:

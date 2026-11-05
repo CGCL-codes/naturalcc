@@ -9,6 +9,7 @@ import tempfile
 import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from code_agent.security_exam import switch_off
 
 C_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp"}
 
@@ -249,7 +250,8 @@ def clang_scan(files: list[str], project_dir: str, context_lines: int, timeout_s
                 # that supplies the faulting value (the root frame of the reported path).
                 calls = [step for step in diagnostic.get("path", []) if step.get("kind") == "event" and step.get("depth", 0) == 0
                          and str(step.get("message", "")).startswith("Calling ")]
-                if calls and any(step.get("depth", 0) > 0 for step in diagnostic.get("path", []) if step.get("kind") == "event"):
+                # Contract-3 switch B (security_exam): also report a callee fault at the outermost call site.
+                if not switch_off("B") and calls and any(step.get("depth", 0) > 0 for step in diagnostic.get("path", []) if step.get("kind") == "event"):
                     call = calls[-1]["location"]
                     try:
                         call_source = Path(document["files"][call["file"]]).resolve()

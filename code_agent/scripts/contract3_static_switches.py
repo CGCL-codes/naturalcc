@@ -1,15 +1,17 @@
 """Toggle the six Contract-3 static-analysis switches (A-F) for exercise design.
 
-Each switch is an exact source replacement marked with "# [contract3-switch X off]",
-so the product stays unchanged until a switch is turned off and `reset` restores it
-byte for byte. See 合同-3-静态分析难度调节指南.md for what each switch does and the
-measured detection rates.
+The switches apply only while Contract 3 is evaluated: the vulnerability_detection
+plugin with scan_type="frequent_defects" and scripts/measure_contract3_static.py.
+Every other scan (Contract 5's high_risk, plain scans) always runs the full rules.
+This script edits the one line ``CONTRACT3_OFF = frozenset({...})`` in
+security_exam.py; no rule code is rewritten. See 合同-3-静态分析难度调节指南.md for
+what each switch does and the measured rates.
 
   uv run python scripts/contract3_static_switches.py status
-  uv run python scripts/contract3_static_switches.py only A          # all on except A
-  uv run python scripts/contract3_static_switches.py off A C E       # turn these off, keep the rest
+  uv run python scripts/contract3_static_switches.py only A C E F    # off during Contract 3: A, C, E, F
+  uv run python scripts/contract3_static_switches.py off B           # also turn B off
   uv run python scripts/contract3_static_switches.py on C            # turn C back on
-  uv run python scripts/contract3_static_switches.py reset           # all on (full rules)
+  uv run python scripts/contract3_static_switches.py reset           # all on: full rules for Contract 3 too
   uv run python scripts/contract3_static_switches.py only A --measure
 
 Restart the Web backend after switching; it loads the rules at start-up.
@@ -17,71 +19,51 @@ Restart the Web backend after switching; it loads the rules at start-up.
 from __future__ import annotations
 
 import argparse
-import py_compile
+import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+EXAM = ROOT / "security_exam.py"
+LINE = re.compile(r"^CONTRACT3_OFF = frozenset\((?:\{(?P<names>[^}]*)\})?\)$", re.M)
 
-# name: (file, enabled source, disabled source, description)
+# name: (file holding the switch, description)
 SWITCHES = {
-    "A": ("security_contracts.py",
-          "                string = any(call in STRING_CALLS or (call in BUFFER_CALLS and literal) for call, literal in at_line)\n",
-          "                string = any(call in STRING_CALLS for call, literal in at_line)  # [contract3-switch A off]\n",
-          "memcpy/memmove with a string-literal source counts as string overflow"),
-    "B": ("security_analysis.py",
-          "                if calls and any(step.get(\"depth\", 0) > 0 for step in diagnostic.get(\"path\", []) if step.get(\"kind\") == \"event\"):\n",
-          "                if False and calls and any(step.get(\"depth\", 0) > 0 for step in diagnostic.get(\"path\", []) if step.get(\"kind\") == \"event\"):  # [contract3-switch B off]\n",
-          "Clang: also report a callee fault at the outermost call site"),
-    "C": ("security_c_rules.py",
-          "                        results.append((node, [f\"via call to {name}(): \" + item for item in evidence]))\n",
-          "                        pass  # [contract3-switch C off] results.append((node, [f\"via call to {name}(): \" + item for item in evidence]))\n",
-          "capacity rule: report a callee overflow at the call site"),
-    "D": ("security_c_rules.py",
-          "        for node, evidence in _string_writes(function, functions):\n",
-          "        for node, evidence in []:  # [contract3-switch D off] _string_writes(function, functions)\n",
-          "capacity rule itself (string write longer than destination capacity)"),
-    "E": ("security_c_rules.py",
-          "        for node, evidence in _null_arguments(function, functions):\n",
-          "        for node, evidence in []:  # [contract3-switch E off] _null_arguments(function, functions)\n",
-          "NULL argument reaching an unchecked dereference in a same-file callee"),
-    # F works the other way round: turning it off enables an over-eager rule, so it
-    # raises the false-positive rate instead of lowering detection.
-    "F": ("security_c_rules.py",
-          "NULL_PATH_INSENSITIVE = False\n",
-          "NULL_PATH_INSENSITIVE = True  # [contract3-switch F off]\n",
-          "path-sensitive NULL guard (off: NULL-initialised pointers stay NULL after a conditional reassignment)"),
+    "A": ("security_contracts.py", "memcpy/memmove with a string-literal source counts as string overflow"),
+    "B": ("security_analysis.py", "Clang: also report a callee fault at the outermost call site"),
+    "C": ("security_c_rules.py", "capacity rule: report a callee overflow at the call site"),
+    "D": ("security_c_rules.py", "capacity rule itself (string write longer than destination capacity)"),
+    "E": ("security_c_rules.py", "NULL argument reaching an unchecked dereference in a same-file callee"),
+    "F": ("security_c_rules.py", "path-sensitive NULL guard (off: NULL-initialised pointers stay NULL after a conditional reassignment)"),
 }
 
 
+def read_off() -> set[str]:
+    matches = LINE.findall(EXAM.read_text(encoding="utf-8"))
+    match = LINE.search(EXAM.read_text(encoding="utf-8"))
+    if len(matches) != 1 or match is None:
+        raise SystemExit("security_exam.py: expected exactly one line 'CONTRACT3_OFF = frozenset({...})'")
+    return set(re.findall(r'"([A-F])"', match.group("names") or ""))
+
+
+def write_off(names: set[str]) -> None:
+    source = EXAM.read_text(encoding="utf-8")
+    body = ", ".join(f'"{name}"' for name in sorted(names))
+    EXAM.write_text(LINE.sub(f"CONTRACT3_OFF = frozenset({{{body}}})" if names else "CONTRACT3_OFF = frozenset()", source, count=1),
+                    encoding="utf-8")
+
+
 def state(name: str) -> str:
-    file, enabled, disabled, _ = SWITCHES[name]
-    source = (ROOT / file).read_text(encoding="utf-8")
-    on, off = source.count(enabled), source.count(disabled)
-    if (on, off) == (1, 0):
-        return "on"
-    if (on, off) == (0, 1):
-        return "off"
-    raise SystemExit(f"Switch {name}: expected source not found exactly once in {file} "
-                     f"(on={on}, off={off}); the code changed, update SWITCHES")
-
-
-def set_switch(name: str, enable: bool) -> bool:
-    current = state(name)
-    if current == ("on" if enable else "off"):
-        return False
-    file, enabled, disabled, _ = SWITCHES[name]
-    path = ROOT / file
-    source = path.read_text(encoding="utf-8")
-    path.write_text(source.replace(disabled, enabled) if enable else source.replace(enabled, disabled), encoding="utf-8")
-    return True
+    return "off" if name in read_off() else "on"
 
 
 def print_status() -> None:
-    for name, (file, _, _, description) in SWITCHES.items():
-        print(f"  {name}  {state(name):3}  {file:22} {description}")
+    off = read_off()
+    for name, (file, description) in SWITCHES.items():
+        print(f"  {name}  {'off' if name in off else 'on':3}  {file:22} {description}")
+    print("  (applies only to Contract-3 evaluation; other scans use the full rules)")
 
 
 def main() -> None:
@@ -95,19 +77,20 @@ def main() -> None:
         raise SystemExit(f"Unknown switch: {', '.join(unknown)} (use A-F)")
     if args.command in {"on", "off", "only"} and not args.switches:
         raise SystemExit(f"'{args.command}' needs at least one switch name")
-    for name in SWITCHES:
-        state(name)  # validate every anchor before editing anything
+    before = read_off()
     if args.command == "reset":
-        targets = {name: True for name in SWITCHES}
+        after = set()
     elif args.command == "only":
-        targets = {name: name not in args.switches for name in SWITCHES}
-    elif args.command in {"on", "off"}:
-        targets = {name: args.command == "on" for name in args.switches}
+        after = set(args.switches)
+    elif args.command == "off":
+        after = before | set(args.switches)
+    elif args.command == "on":
+        after = before - set(args.switches)
     else:
-        targets = {}
-    changed = [name for name, enable in targets.items() if set_switch(name, enable)]
-    for file in {SWITCHES[name][0] for name in SWITCHES}:
-        py_compile.compile(str(ROOT / file), doraise=True)
+        after = before
+    if after != before:
+        write_off(after)
+    changed = sorted(before ^ after)
     print(("Changed: " + ", ".join(changed)) if changed else "No change.")
     print_status()
     if changed:

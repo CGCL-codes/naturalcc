@@ -6,6 +6,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from code_agent.security_exam import switch_off
 from code_agent.security_c_rules import call_parts, parse_source, walk
 
 TAXONOMY_VERSION = "contract-categories-v1"
@@ -71,7 +72,9 @@ def classify_findings(findings, project_dir):
                             operations[file].append((n.start_point.row + 1, n.end_point.row + 1, name, literal))
                 at_line = [(call, literal) for start, end, call, literal in operations[file] if start <= finding["line"] <= end]
                 # A raw-memory copy whose source is a string literal moves string data into a char buffer.
-                string = any(call in STRING_CALLS for call, literal in at_line)  # [contract3-switch A off]
+                # Contract-3 switch A (security_exam): memcpy/memmove of a string literal counts as string overflow.
+                string = any(call in STRING_CALLS or (call in BUFFER_CALLS and literal and not switch_off("A"))
+                             for call, literal in at_line)
                 buffer = any(call in BUFFER_CALLS and not literal for call, literal in at_line)
                 if string != buffer:
                     category = "string_overflow" if string else "buffer_overflow"

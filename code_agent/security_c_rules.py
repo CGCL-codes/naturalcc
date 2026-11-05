@@ -13,6 +13,7 @@ import tree_sitter_c
 import tree_sitter_cpp
 
 from code_agent.security_c_macros import neutralize, structural_groups
+from code_agent.security_exam import switch_off
 
 VERSION = "c-source-v3"
 LIMITATIONS = (
@@ -390,7 +391,8 @@ def _string_writes(function, functions, facts=None, depth=0):
                 if inherited["capacity"] or inherited["length"]:
                     # Attribute a callee overflow to this call, which supplies the sizes.
                     for _, evidence in _string_writes(functions[name], functions, inherited, depth + 1):
-                        pass  # [contract3-switch C off] results.append((node, [f"via call to {name}(): " + item for item in evidence]))
+                        if not switch_off("C"):  # Contract-3 switch C (security_exam)
+                            results.append((node, [f"via call to {name}(): " + item for item in evidence]))
                 continue
             if not arguments:
                 continue
@@ -459,18 +461,12 @@ def _null_arguments(function, functions):
     return results
 
 
-# Contract-3 switch F (exercise design, see 合同-3-静态分析难度调节指南.md). When True,
-# _null_init_dereferences runs: a deliberately path-insensitive heuristic that treats a
-# pointer set to NULL as still NULL after a conditional reassignment, so it reports
-# some safe code. Only an early-return NULL check counts as a guard.
-NULL_PATH_INSENSITIVE = True  # [contract3-switch F off]
-
-
 def _null_init_dereferences(function):
     """Pointer (or struct whose members are) initialised to NULL, later dereferenced.
 
     Path-insensitive on purpose: assignments inside if-statements are ignored, and only
-    `if (<pointer mentioned>) ... return` counts as a check. Off unless switch F is off.
+    `if (<pointer mentioned>) ... return` counts as a check, so it reports some safe code.
+    Runs only when Contract-3 switch F is off during Contract-3 evaluation (security_exam).
     """
     body = function.child_by_field_name("body")
     if body is None:
@@ -567,14 +563,14 @@ def scan_c_source(source: str, file: str, context_lines: int, macros=None):
         add(node, "data_race", 362, evidence)
     reported = set()
     for function in functions.values():
-        for node, evidence in _string_writes(function, functions):
+        for node, evidence in ([] if switch_off("D") else _string_writes(function, functions)):  # switch D
             if node.start_point.row not in reported:
                 reported.add(node.start_point.row)
                 add(node, "string_overflow", 120, evidence)
     for function in functions.values():
-        for node, evidence in []:  # [contract3-switch E off] _null_arguments(function, functions)
+        for node, evidence in ([] if switch_off("E") else _null_arguments(function, functions)):  # switch E
             add(node, "null_pointer", 476, evidence)
-    if NULL_PATH_INSENSITIVE:
+    if switch_off("F"):  # Contract-3 switch F (security_exam)
         for function in functions.values():
             for node, evidence in _null_init_dereferences(function):
                 add(node, "null_pointer", "476-init", evidence)
