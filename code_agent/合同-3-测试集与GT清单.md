@@ -8,14 +8,14 @@
 - **缺陷**：每套工程按类别（数组越界、字符串溢出、空指针调用）各注入一个测试文件，每个文件 40 个函数：20 个正例（真实缺陷）+ 20 个同类安全对照。上游源码本身不改动。
 - **测试集**：`balanced`（平衡验收集）、`independent`（独立压力集）、`balanced-hard`（平衡验收集（加难版））、`independent-hard`（独立压力集（加难版））；每套 3 工程 × 3 类 × 40 = 360 个函数。各套的区别只在注入的写法（第 2 节）和函数顺序（加难版打乱）。
 - **计分**：只有注入函数参与计分。正例的告警落在函数行范围内（加难版按函数名）记 TP，否则 FN；对照被告警记 FP，否则 TN。上游源码文件里的告警不计分。
-- **机器可读 GT**：`artifacts/contract3/ground_truth/<测试集>.json`，字段见第 5 节。
+- **机器可读 GT**：`artifacts/contract3/ground_truth/<测试集>/<工程>/ground_truth.json`，每套测试集每个工程一份，格式与产品 `load_ground_truth` 读取的一致（`schema_version=1`、`scan_type=frequent_defects`、`source_sha256`、平铺的 `cases[]`），放到工程根目录即可作为 `ground_truth_file` 直接评分。字段见第 5 节。
 
-| 测试集 | GT 文件 |
-|---|---|
-| 平衡验收集 | [ground_truth/balanced.json](artifacts/contract3/ground_truth/balanced.json) |
-| 独立压力集 | [ground_truth/independent.json](artifacts/contract3/ground_truth/independent.json) |
-| 平衡验收集（加难版） | [ground_truth/balanced-hard.json](artifacts/contract3/ground_truth/balanced-hard.json) |
-| 独立压力集（加难版） | [ground_truth/independent-hard.json](artifacts/contract3/ground_truth/independent-hard.json) |
+| 测试集 | FreeRTOS Kernel | Zephyr RTOS | RT-Thread |
+|---|---|---|---|
+| 平衡验收集 | [freertos_kernel/ground_truth.json](artifacts/contract3/ground_truth/balanced/freertos_kernel/ground_truth.json) | [zephyr/ground_truth.json](artifacts/contract3/ground_truth/balanced/zephyr/ground_truth.json) | [rt_thread/ground_truth.json](artifacts/contract3/ground_truth/balanced/rt_thread/ground_truth.json) |
+| 独立压力集 | [freertos_kernel/ground_truth.json](artifacts/contract3/ground_truth/independent/freertos_kernel/ground_truth.json) | [zephyr/ground_truth.json](artifacts/contract3/ground_truth/independent/zephyr/ground_truth.json) | [rt_thread/ground_truth.json](artifacts/contract3/ground_truth/independent/rt_thread/ground_truth.json) |
+| 平衡验收集（加难版） | [freertos_kernel/ground_truth.json](artifacts/contract3/ground_truth/balanced-hard/freertos_kernel/ground_truth.json) | [zephyr/ground_truth.json](artifacts/contract3/ground_truth/balanced-hard/zephyr/ground_truth.json) | [rt_thread/ground_truth.json](artifacts/contract3/ground_truth/balanced-hard/rt_thread/ground_truth.json) |
+| 独立压力集（加难版） | [freertos_kernel/ground_truth.json](artifacts/contract3/ground_truth/independent-hard/freertos_kernel/ground_truth.json) | [zephyr/ground_truth.json](artifacts/contract3/ground_truth/independent-hard/zephyr/ground_truth.json) | [rt_thread/ground_truth.json](artifacts/contract3/ground_truth/independent-hard/rt_thread/ground_truth.json) |
 
 ## 2. 缺陷写法（正例与对照）
 
@@ -2142,10 +2142,15 @@
 
 ## 5. GT JSON 字段
 
+每个 `ground_truth.json` 对应一套测试集里的一个工程，路径均相对该工程根目录。前四个字段是 `load_ground_truth` 读取的部分，其余为说明字段，加载时忽略。
+
 | 字段 | 含义 |
 |---|---|
-| `projects[].detection_files[]` | 要检测的上游源码文件：`path`（相对工程根目录）、`lines` |
-| `projects[].line_totals` | `upstream_detection_files` 检测文件合计行数；`fixtures` 测试文件行数；`all_detection_files` 两者之和 |
-| `projects[].fixtures[]` | 注入的测试文件：`path`、`category`、`lines`、`sha256` |
-| `projects[].cases[]` | 逐函数标签：`case_id`、`category`、`expected`（`defect`/`control`）、`function`、`file`、`line_start`、`line_end`、`defect_line`、`defect_code`；加难版另有 `variant` |
+| `schema_version` | 固定为 `1` |
+| `scan_type` | 固定为 `frequent_defects`（数组越界、字符串溢出、空指针调用） |
+| `source_sha256` | 文件路径 → SHA-256：参与计分的注入测试文件（检测文件的哈希见 `detection_files`） |
+| `cases[]` | 逐函数标签：`case_id`、`category`、`file`、`function`、`line_start`、`line_end`、`expected`（`defect`/`control`）、`variant`（写法编号）；另有说明字段 `variant_kind`（`base`/`hard`）、`defect_line`、`defect_code` |
+| `suite`、`project`、`line_totals` | 测试集名、工程版本信息；`line_totals.upstream_detection_files` 为检测文件合计行数 |
+| `fixtures[]` | 注入的测试文件：`path`、`category`、`lines`、`sha256` |
+| `detection_files[]` | 要检测的上游源码文件：`path`、`lines`、`sha256` |
 

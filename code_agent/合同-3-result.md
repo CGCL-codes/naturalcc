@@ -1,6 +1,6 @@
 # 合同指标 3：高频缺陷检测总报告
 
-更新时间（UTC）：2026-11-03T09:33:04.776459+00:00
+更新时间（UTC）：2026-11-05T11:26:33.305770+00:00
 
 本报告是唯一的指标 3 Markdown 入口。各测试集的真值、原始结果、模型 Run 和覆盖状态保留在各自工件目录；不得择优挑选或平均不同测试集的分数。
 
@@ -54,11 +54,11 @@
 
 每个注入缺陷的写法、所在文件、函数、行范围、缺陷行代码，以及每个工程的检测文件清单，见 **[合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)**。
 
-机器可读的 ground truth 在 [artifacts/contract3/ground_truth/](artifacts/contract3/ground_truth/)，每套一个文件：`balanced.json`、`independent.json`、`balanced-hard.json`、`independent-hard.json`。每个文件按工程列出：
+机器可读的 ground truth 在 [artifacts/contract3/ground_truth/](artifacts/contract3/ground_truth/)，每套测试集每个工程一份：`<测试集>/<工程>/ground_truth.json`，共 4×3=12 份。格式与产品 `security_contracts.load_ground_truth` 读取的一致，放到工程根目录即可作为漏洞检测的 `ground_truth_file`（`scan_type=frequent_defects`）直接评分：
 
-- `detection_files`：该工程要检测的上游源码文件及每个文件的行数；`line_totals.upstream_detection_files` 是合计行数，不少于 10,000 行。
+- `schema_version`、`scan_type`、`source_sha256`（参与计分的注入测试文件及 SHA-256）、`cases`（逐函数标签：`case_id`、`category`、`file`、`function`、`line_start`、`line_end`、`expected`、`variant`，另附 `defect_line`、`defect_code`）。只有这些函数参与计分。
+- `detection_files`：该工程要检测的上游源码文件及每个文件的行数、SHA-256；`line_totals.upstream_detection_files` 是合计行数，不少于 10,000 行。
 - `fixtures`：注入的测试文件（每类一个）及其行数和 SHA-256。
-- `cases`：逐函数标签，含 `expected`（`defect` 正例 / `control` 对照）、`function`、`file`、`line_start`、`line_end`、`defect_line`、`defect_code`。只有这些函数参与计分。
 
 | 工程（扫描范围） | 检测文件数 | 检测文件合计行数 |
 |---|---:|---:|
@@ -359,7 +359,7 @@ Web 模式与合同 5 一样，固定 OpenRouter/Sonnet 配置，经 `/api/agent
 当前可复现工程由三套固定版本的公开 RTOS 源码加运行时注入 fixture 组成：每套工程的三类各 20 个正例和 20 个同类安全对照，因此 Web 平衡验收集共 3×3=9 个任务、360 个函数。fixture、函数名、文件、行范围及预期标签由脚本固定生成，而不是由模型提供。
 
 - Ground truth 字段：`case_id`、`project`、`category`、`expected`、`function`、`file`、`line_start`、`line_end`、`defect_line`。Web 最新一轮位于 `artifacts/contract3/web-sonnet45-balanced/checkpoint.json` 的 `samples.*.rows[]`；该对象还含 `detected` 和 `matched_findings`，可供前端逐例展示。
-- 四套测试集的冻结 ground truth 已入库：[artifacts/contract3/ground_truth/](artifacts/contract3/ground_truth/)，可读清单见 [合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)。本地 Cppcheck 运行另会生成 `artifacts/contract3/balanced-cppcheck/ground_truth.json` 与 `result.json`（未入库，字段口径相同）。
+- 四套测试集的冻结 ground truth 已入库：[artifacts/contract3/ground_truth/](artifacts/contract3/ground_truth/)，按 `<测试集>/<工程>/ground_truth.json` 每工程一份，采用产品 `load_ground_truth` 格式，可读清单见 [合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)。本地 Cppcheck 运行另会生成 `artifacts/contract3/balanced-cppcheck/ground_truth.json` 与 `result.json`（未入库，字段口径相同）。
 - 这套冻结来源和生成器可用于本项目复现，但**不是** NaturalCC 上游或验收方正式提供的最终验收工程/ground truth 包。若最终验收必须与外部指定样本逐字节一致，仍需要验收方提供或书面确认该工程、版本、注入位置和真值清单。
 
 ## 测试链路与适用边界

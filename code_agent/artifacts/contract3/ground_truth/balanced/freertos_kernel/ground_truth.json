@@ -1,0 +1,2887 @@
+{
+  "schema_version": 1,
+  "scan_type": "frequent_defects",
+  "source_sha256": {
+    "contract3_balanced_web_array_oob.c": "edc08433a765b8b47721282734787c2cbb36ac4234fa53e10ac7e06ccec099ca",
+    "contract3_balanced_web_string_overflow.c": "73fc08be1fd6835e864cadd6cf94820a83c4a8d99fdbe2ae38815177ab5a3d83",
+    "contract3_balanced_web_null_pointer.c": "78b42d27d94f7a3ac741a8114bcdba61a1651d51346d2c28a343f87b37abdb33"
+  },
+  "cases": [
+    {
+      "case_id": "freertos_kernel-array_oob-positive-01",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_01",
+      "line_start": 11,
+      "line_end": 15,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 14,
+      "defect_code": "return values[3];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-02",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_02",
+      "line_start": 17,
+      "line_end": 22,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 21,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-03",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_03",
+      "line_start": 24,
+      "line_end": 30,
+      "expected": "defect",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 29,
+      "defect_code": "return total;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-04",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_04",
+      "line_start": 32,
+      "line_end": 37,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 36,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-05",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_05",
+      "line_start": 39,
+      "line_end": 43,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 42,
+      "defect_code": "return values[3];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-06",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_06",
+      "line_start": 45,
+      "line_end": 50,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 49,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-07",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_07",
+      "line_start": 52,
+      "line_end": 58,
+      "expected": "defect",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 57,
+      "defect_code": "return total;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-08",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_08",
+      "line_start": 60,
+      "line_end": 65,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 64,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-09",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_09",
+      "line_start": 67,
+      "line_end": 71,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 70,
+      "defect_code": "return values[3];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-10",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_10",
+      "line_start": 73,
+      "line_end": 78,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 77,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-11",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_11",
+      "line_start": 80,
+      "line_end": 86,
+      "expected": "defect",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 85,
+      "defect_code": "return total;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-12",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_12",
+      "line_start": 88,
+      "line_end": 93,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 92,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-13",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_13",
+      "line_start": 95,
+      "line_end": 99,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 98,
+      "defect_code": "return values[3];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-14",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_14",
+      "line_start": 101,
+      "line_end": 106,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 105,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-15",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_15",
+      "line_start": 108,
+      "line_end": 114,
+      "expected": "defect",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 113,
+      "defect_code": "return total;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-16",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_16",
+      "line_start": 116,
+      "line_end": 121,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 120,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-17",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_17",
+      "line_start": 123,
+      "line_end": 127,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 126,
+      "defect_code": "return values[3];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-18",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_18",
+      "line_start": 129,
+      "line_end": 134,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 133,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-19",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_19",
+      "line_start": 136,
+      "line_end": 141,
+      "expected": "defect",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 140,
+      "defect_code": "return *cursor;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-positive-20",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_20",
+      "line_start": 143,
+      "line_end": 148,
+      "expected": "defect",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 147,
+      "defect_code": "return *cursor;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-01",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_21",
+      "line_start": 150,
+      "line_end": 154,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 153,
+      "defect_code": "return values[2];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-02",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_22",
+      "line_start": 156,
+      "line_end": 161,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 160,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-03",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_23",
+      "line_start": 163,
+      "line_end": 169,
+      "expected": "control",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 168,
+      "defect_code": "return total;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-04",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_24",
+      "line_start": 171,
+      "line_end": 176,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 175,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-05",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_25",
+      "line_start": 178,
+      "line_end": 182,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 181,
+      "defect_code": "return values[2];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-06",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_26",
+      "line_start": 184,
+      "line_end": 189,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 188,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-07",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_27",
+      "line_start": 191,
+      "line_end": 197,
+      "expected": "control",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 196,
+      "defect_code": "return total;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-08",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_28",
+      "line_start": 199,
+      "line_end": 204,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 203,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-09",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_29",
+      "line_start": 206,
+      "line_end": 210,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 209,
+      "defect_code": "return values[2];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-10",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_30",
+      "line_start": 212,
+      "line_end": 217,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 216,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-11",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_31",
+      "line_start": 219,
+      "line_end": 225,
+      "expected": "control",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 224,
+      "defect_code": "return total;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-12",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_32",
+      "line_start": 227,
+      "line_end": 232,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 231,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-13",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_33",
+      "line_start": 234,
+      "line_end": 238,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 237,
+      "defect_code": "return values[2];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-14",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_34",
+      "line_start": 240,
+      "line_end": 245,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 244,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-15",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_35",
+      "line_start": 247,
+      "line_end": 253,
+      "expected": "control",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 252,
+      "defect_code": "return total;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-16",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_36",
+      "line_start": 255,
+      "line_end": 260,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 259,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-17",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_37",
+      "line_start": 262,
+      "line_end": 266,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 265,
+      "defect_code": "return values[2];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-18",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_38",
+      "line_start": 268,
+      "line_end": 273,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 272,
+      "defect_code": "return values[index];"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-19",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_39",
+      "line_start": 275,
+      "line_end": 280,
+      "expected": "control",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 279,
+      "defect_code": "return *cursor;"
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-control-20",
+      "category": "array_oob",
+      "file": "contract3_balanced_web_array_oob.c",
+      "function": "contract3_independent_array_oob_case_40",
+      "line_start": 282,
+      "line_end": 287,
+      "expected": "control",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 286,
+      "defect_code": "return *cursor;"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-01",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_01",
+      "line_start": 11,
+      "line_end": 16,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 15,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-02",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_02",
+      "line_start": 18,
+      "line_end": 23,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 22,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-03",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_03",
+      "line_start": 25,
+      "line_end": 30,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 29,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-04",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_04",
+      "line_start": 32,
+      "line_end": 37,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 36,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-05",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_05",
+      "line_start": 39,
+      "line_end": 44,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 43,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-06",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_06",
+      "line_start": 46,
+      "line_end": 51,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 50,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-07",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_07",
+      "line_start": 53,
+      "line_end": 58,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 57,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-08",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_08",
+      "line_start": 60,
+      "line_end": 65,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 64,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-09",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_09",
+      "line_start": 67,
+      "line_end": 72,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 71,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-10",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_10",
+      "line_start": 74,
+      "line_end": 79,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 78,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-11",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_11",
+      "line_start": 81,
+      "line_end": 86,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 85,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-12",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_12",
+      "line_start": 88,
+      "line_end": 93,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 92,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-13",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_13",
+      "line_start": 95,
+      "line_end": 100,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 99,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-14",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_14",
+      "line_start": 102,
+      "line_end": 107,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 106,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-15",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_15",
+      "line_start": 109,
+      "line_end": 114,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 113,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-16",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_16",
+      "line_start": 116,
+      "line_end": 121,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 120,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-17",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_17",
+      "line_start": 123,
+      "line_end": 128,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 127,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-18",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_18",
+      "line_start": 130,
+      "line_end": 135,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 134,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-19",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_19",
+      "line_start": 137,
+      "line_end": 142,
+      "expected": "defect",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 141,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-positive-20",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_20",
+      "line_start": 144,
+      "line_end": 149,
+      "expected": "defect",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 148,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-01",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_21",
+      "line_start": 151,
+      "line_end": 156,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 155,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-02",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_22",
+      "line_start": 158,
+      "line_end": 163,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 162,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-03",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_23",
+      "line_start": 165,
+      "line_end": 170,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 169,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-04",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_24",
+      "line_start": 172,
+      "line_end": 177,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 176,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-05",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_25",
+      "line_start": 179,
+      "line_end": 184,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 183,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-06",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_26",
+      "line_start": 186,
+      "line_end": 191,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 190,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-07",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_27",
+      "line_start": 193,
+      "line_end": 198,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 197,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-08",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_28",
+      "line_start": 200,
+      "line_end": 205,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 204,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-09",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_29",
+      "line_start": 207,
+      "line_end": 212,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 211,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-10",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_30",
+      "line_start": 214,
+      "line_end": 219,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 218,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-11",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_31",
+      "line_start": 221,
+      "line_end": 226,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 225,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-12",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_32",
+      "line_start": 228,
+      "line_end": 233,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 232,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-13",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_33",
+      "line_start": 235,
+      "line_end": 240,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 239,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-14",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_34",
+      "line_start": 242,
+      "line_end": 247,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 246,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-15",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_35",
+      "line_start": 249,
+      "line_end": 254,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 253,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-16",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_36",
+      "line_start": 256,
+      "line_end": 261,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 260,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-17",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_37",
+      "line_start": 263,
+      "line_end": 268,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 267,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-18",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_38",
+      "line_start": 270,
+      "line_end": 275,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 274,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-19",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_39",
+      "line_start": 277,
+      "line_end": 282,
+      "expected": "control",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 281,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-control-20",
+      "category": "string_overflow",
+      "file": "contract3_balanced_web_string_overflow.c",
+      "function": "contract3_independent_string_overflow_case_40",
+      "line_start": 284,
+      "line_end": 289,
+      "expected": "control",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 288,
+      "defect_code": "return target[0];"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-01",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_01",
+      "line_start": 11,
+      "line_end": 15,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 14,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-02",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_02",
+      "line_start": 17,
+      "line_end": 22,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 21,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-03",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_03",
+      "line_start": 24,
+      "line_end": 30,
+      "expected": "defect",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 29,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-04",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_04",
+      "line_start": 32,
+      "line_end": 36,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 35,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-05",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_05",
+      "line_start": 38,
+      "line_end": 43,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 42,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-06",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_06",
+      "line_start": 45,
+      "line_end": 51,
+      "expected": "defect",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 50,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-07",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_07",
+      "line_start": 53,
+      "line_end": 57,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 56,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-08",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_08",
+      "line_start": 59,
+      "line_end": 64,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 63,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-09",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_09",
+      "line_start": 66,
+      "line_end": 72,
+      "expected": "defect",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 71,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-10",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_10",
+      "line_start": 74,
+      "line_end": 78,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 77,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-11",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_11",
+      "line_start": 80,
+      "line_end": 85,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 84,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-12",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_12",
+      "line_start": 87,
+      "line_end": 93,
+      "expected": "defect",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 92,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-13",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_13",
+      "line_start": 95,
+      "line_end": 99,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 98,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-14",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_14",
+      "line_start": 101,
+      "line_end": 106,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 105,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-15",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_15",
+      "line_start": 108,
+      "line_end": 114,
+      "expected": "defect",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 113,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-16",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_16",
+      "line_start": 116,
+      "line_end": 120,
+      "expected": "defect",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 119,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-17",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_17",
+      "line_start": 122,
+      "line_end": 127,
+      "expected": "defect",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 126,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-18",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_18",
+      "line_start": 129,
+      "line_end": 135,
+      "expected": "defect",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 134,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-19",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_19",
+      "line_start": 137,
+      "line_end": 141,
+      "expected": "defect",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 140,
+      "defect_code": "return contract3_read(0);"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-positive-20",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_20",
+      "line_start": 143,
+      "line_end": 148,
+      "expected": "defect",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 147,
+      "defect_code": "return *box.pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-01",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_21",
+      "line_start": 150,
+      "line_end": 154,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 153,
+      "defect_code": "return value;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-02",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_22",
+      "line_start": 156,
+      "line_end": 161,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 160,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-03",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_23",
+      "line_start": 163,
+      "line_end": 169,
+      "expected": "control",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 168,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-04",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_24",
+      "line_start": 171,
+      "line_end": 175,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 174,
+      "defect_code": "return value;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-05",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_25",
+      "line_start": 177,
+      "line_end": 182,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 181,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-06",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_26",
+      "line_start": 184,
+      "line_end": 190,
+      "expected": "control",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 189,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-07",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_27",
+      "line_start": 192,
+      "line_end": 196,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 195,
+      "defect_code": "return value;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-08",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_28",
+      "line_start": 198,
+      "line_end": 203,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 202,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-09",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_29",
+      "line_start": 205,
+      "line_end": 211,
+      "expected": "control",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 210,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-10",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_30",
+      "line_start": 213,
+      "line_end": 217,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 216,
+      "defect_code": "return value;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-11",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_31",
+      "line_start": 219,
+      "line_end": 224,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 223,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-12",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_32",
+      "line_start": 226,
+      "line_end": 232,
+      "expected": "control",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 231,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-13",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_33",
+      "line_start": 234,
+      "line_end": 238,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 237,
+      "defect_code": "return value;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-14",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_34",
+      "line_start": 240,
+      "line_end": 245,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 244,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-15",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_35",
+      "line_start": 247,
+      "line_end": 253,
+      "expected": "control",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 252,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-16",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_36",
+      "line_start": 255,
+      "line_end": 259,
+      "expected": "control",
+      "variant": 0,
+      "variant_kind": "base",
+      "defect_line": 258,
+      "defect_code": "return value;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-17",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_37",
+      "line_start": 261,
+      "line_end": 266,
+      "expected": "control",
+      "variant": 1,
+      "variant_kind": "base",
+      "defect_line": 265,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-18",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_38",
+      "line_start": 268,
+      "line_end": 274,
+      "expected": "control",
+      "variant": 4,
+      "variant_kind": "base",
+      "defect_line": 273,
+      "defect_code": "return *pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-19",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_39",
+      "line_start": 276,
+      "line_end": 280,
+      "expected": "control",
+      "variant": 2,
+      "variant_kind": "base",
+      "defect_line": 279,
+      "defect_code": "return contract3_read(&value);"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-20",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_40",
+      "line_start": 282,
+      "line_end": 287,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 286,
+      "defect_code": "return *box.pointer;"
+    }
+  ],
+  "suite": "balanced",
+  "title": "合同指标 3：RTOS 注入测试集 ground truth（平衡验收集 · FreeRTOS Kernel）",
+  "line_rule": "每个工程的上游检测文件（detection_files）合计不少于 10000 行；行数按文件实际行数统计。",
+  "scoring_rule": "只有 fixtures 中的注入函数参与计分：expected=defect 为正例、expected=control 为同类安全对照，告警须落在 [line_start, line_end] 内或给出对应函数名。上游文件的告警不计分。",
+  "project": {
+    "id": "freertos_kernel",
+    "name": "FreeRTOS Kernel",
+    "url": "https://github.com/FreeRTOS/FreeRTOS-Kernel.git",
+    "ref": "V11.1.0",
+    "commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0",
+    "scan_roots": [
+      "."
+    ]
+  },
+  "line_totals": {
+    "upstream_detection_files": 186067,
+    "fixtures": 866,
+    "all_detection_files": 186933
+  },
+  "fixtures": [
+    {
+      "path": "contract3_balanced_web_array_oob.c",
+      "category": "array_oob",
+      "lines": 288,
+      "sha256": "edc08433a765b8b47721282734787c2cbb36ac4234fa53e10ac7e06ccec099ca"
+    },
+    {
+      "path": "contract3_balanced_web_string_overflow.c",
+      "category": "string_overflow",
+      "lines": 290,
+      "sha256": "73fc08be1fd6835e864cadd6cf94820a83c4a8d99fdbe2ae38815177ab5a3d83"
+    },
+    {
+      "path": "contract3_balanced_web_null_pointer.c",
+      "category": "null_pointer",
+      "lines": 288,
+      "sha256": "78b42d27d94f7a3ac741a8114bcdba61a1651d51346d2c28a343f87b37abdb33"
+    }
+  ],
+  "detection_files": [
+    {
+      "path": "croutine.c",
+      "lines": 405,
+      "sha256": "678405d57f2f911c8d91864a068cb88fa842d05788303ec20ae17e7dfe46cac7"
+    },
+    {
+      "path": "event_groups.c",
+      "lines": 884,
+      "sha256": "b163f5ccf86f49a43f684b1dc96b710ae39d39eb40579a936d5c9796b73c8127"
+    },
+    {
+      "path": "list.c",
+      "lines": 246,
+      "sha256": "e0a4d7a061e86ccb8ee4e08b0c1229c51d8c0a7a6f1c51c45083314f2e42b297"
+    },
+    {
+      "path": "portable/ARMv8M/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/ARMv8M/non_secure/portable/GCC/ARM_CM23/mpu_wrappers_v2_asm.c",
+      "lines": 2125,
+      "sha256": "2ce9bcd94fb291f35d9ccd5e037ae405a7f68b73fe1054a511c54d4153e5f3b1"
+    },
+    {
+      "path": "portable/ARMv8M/non_secure/portable/GCC/ARM_CM23/portasm.c",
+      "lines": 604,
+      "sha256": "4d2b563855d32ad065995f5a6523bb89261de7e464ca08fd166e395dda36e6e9"
+    },
+    {
+      "path": "portable/ARMv8M/non_secure/portable/GCC/ARM_CM23_NTZ/mpu_wrappers_v2_asm.c",
+      "lines": 2125,
+      "sha256": "2ce9bcd94fb291f35d9ccd5e037ae405a7f68b73fe1054a511c54d4153e5f3b1"
+    },
+    {
+      "path": "portable/ARMv8M/non_secure/portable/GCC/ARM_CM23_NTZ/portasm.c",
+      "lines": 516,
+      "sha256": "54a6bcb679672ae11faa06cf96a5a0b018da1ce0fe8446665ab95b1d11823b15"
+    },
+    {
+      "path": "portable/ARMv8M/non_secure/portable/GCC/ARM_CM33/mpu_wrappers_v2_asm.c",
+      "lines": 2056,
+      "sha256": "d3015cab6aee2a46921f4cee1065ebaebe48ad0f0d2f0d33b3d77f2bfd60ede1"
+    },
+    {
+      "path": "portable/ARMv8M/non_secure/portable/GCC/ARM_CM33/portasm.c",
+      "lines": 577,
+      "sha256": "ac3244f94c10f83a83dcf469928b149796446d61d61dc35dd5ef40482aa36eff"
+    },
+    {
+      "path": "portable/ARMv8M/non_secure/portable/GCC/ARM_CM33_NTZ/mpu_wrappers_v2_asm.c",
+      "lines": 2055,
+      "sha256": "620a82d247820b4f0ab8b158eb1411b29e21b308155d42176b9ffaaf4f95fd93"
+    },
+    {
+      "path": "portable/ARMv8M/non_secure/portable/GCC/ARM_CM33_NTZ/portasm.c",
+      "lines": 471,
+      "sha256": "524ffdb5144274bd0636431b787a933057e748373e5bcdce217d5a166e2ebbe9"
+    },
+    {
+      "path": "portable/ARMv8M/secure/context/portable/GCC/ARM_CM23/secure_context_port.c",
+      "lines": 99,
+      "sha256": "d7e5ce543601cd2a165c13a4b0e9b4f6166b31197930b746754baaa88e6299fb"
+    },
+    {
+      "path": "portable/ARMv8M/secure/context/portable/GCC/ARM_CM33/secure_context_port.c",
+      "lines": 97,
+      "sha256": "dc6e4a05b7dc2d853e93826f954907e3fd57a2cc7875042c7a4823697a9da305"
+    },
+    {
+      "path": "portable/ARMv8M/secure/context/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/ARMv8M/secure/heap/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/ARMv8M/secure/init/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/BCC/16BitDOS/Flsh186/port.c",
+      "lines": 244,
+      "sha256": "c1ad47f2e0987e48d58968c9dbb643a7fc3cae31451ddbaf4cb6cf221b29b608"
+    },
+    {
+      "path": "portable/BCC/16BitDOS/PC/port.c",
+      "lines": 288,
+      "sha256": "c4b7a5baf202b2da05cb205629c6cc48de08e2732c11b8fdfaaec09ef4370bb1"
+    },
+    {
+      "path": "portable/BCC/16BitDOS/common/portcomn.c",
+      "lines": 120,
+      "sha256": "ab8e177b5e5b384b59eb148650660a8a16c6b05f055d7553ca50fce358e71e75"
+    },
+    {
+      "path": "portable/CCS/ARM_CM3/port.c",
+      "lines": 692,
+      "sha256": "ef9f5264f182906d22628682703d8e77cb9d6fce5e188700aa3d66cbd5c80083"
+    },
+    {
+      "path": "portable/CCS/ARM_CM4F/port.c",
+      "lines": 717,
+      "sha256": "8040c92db83a4d78d3096afd7074d28a77e1877aaca941ad71250f4c45d0af88"
+    },
+    {
+      "path": "portable/CCS/ARM_Cortex-R4/port.c",
+      "lines": 312,
+      "sha256": "53ce7d5bda724b395118d483d20d3f529da06fac0d88da82465b8f5db1f18887"
+    },
+    {
+      "path": "portable/CCS/MSP430X/port.c",
+      "lines": 188,
+      "sha256": "d5efb565b76fe2e624201b2fc96dab14d3a48e6cf4bad9b94e4905c192376aee"
+    },
+    {
+      "path": "portable/CodeWarrior/ColdFire_V1/port.c",
+      "lines": 183,
+      "sha256": "c62bb0051edeb8ee52375135d8832c0c398cda306831193c55e22a0daae4feb5"
+    },
+    {
+      "path": "portable/CodeWarrior/ColdFire_V2/port.c",
+      "lines": 147,
+      "sha256": "b18309a8856804fa8d8b2b375782415ac69812bc83628e18036a0f01bf60c165"
+    },
+    {
+      "path": "portable/CodeWarrior/HCS12/port.c",
+      "lines": 236,
+      "sha256": "3556bd9c67d0da952f1396c5dbc495671162535a2c3209ec348aa057fa2004ca"
+    },
+    {
+      "path": "portable/Common/mpu_wrappers.c",
+      "lines": 2551,
+      "sha256": "a594d2e9d4f6ac715ce8299a373dfea15df7f5a17a65cc9ac7331f0e40560deb"
+    },
+    {
+      "path": "portable/Common/mpu_wrappers_v2.c",
+      "lines": 5267,
+      "sha256": "d6ff06a0cacd206a6ee67c78a2161077699f02586d26386938a566abb41e29dc"
+    },
+    {
+      "path": "portable/GCC/ARM7_AT91FR40008/port.c",
+      "lines": 240,
+      "sha256": "d14e2c904e9e666bded2ac052aafa6e64a4152ca27085692251891bea2751cab"
+    },
+    {
+      "path": "portable/GCC/ARM7_AT91FR40008/portISR.c",
+      "lines": 233,
+      "sha256": "81f3353aae3cd9f9ea365b4575c5dce33c6a95bf89ce4c2768570fa5039ad4fb"
+    },
+    {
+      "path": "portable/GCC/ARM7_AT91SAM7S/lib_AT91SAM7X256.c",
+      "lines": 50,
+      "sha256": "7fb8a4a81ebb7b081295ab181298450c9e8ee1467ccb4be1d1a29fb2e62ab285"
+    },
+    {
+      "path": "portable/GCC/ARM7_AT91SAM7S/port.c",
+      "lines": 209,
+      "sha256": "a8e21dbace85599deafb737cbd2844630d3c45de2e54f387fa73247b59ebc491"
+    },
+    {
+      "path": "portable/GCC/ARM7_AT91SAM7S/portISR.c",
+      "lines": 227,
+      "sha256": "12ebcb13147d217e6e11a9d656ffc1340d77abe0f2bacfe63d59e7ebfbee855b"
+    },
+    {
+      "path": "portable/GCC/ARM7_LPC2000/port.c",
+      "lines": 222,
+      "sha256": "4a4324045ca63b036729afb4d39599125cb3121a8f84d110dc595ada3ea757ed"
+    },
+    {
+      "path": "portable/GCC/ARM7_LPC2000/portISR.c",
+      "lines": 216,
+      "sha256": "78b2da2487e337d685a9d15478003cffff0d85185ca84f9a19ed5e65c737a7f4"
+    },
+    {
+      "path": "portable/GCC/ARM7_LPC23xx/port.c",
+      "lines": 233,
+      "sha256": "1d5db69edd985a4b40b8c1cf04816de611ff2d40132f08c1e015b71d9af91234"
+    },
+    {
+      "path": "portable/GCC/ARM7_LPC23xx/portISR.c",
+      "lines": 219,
+      "sha256": "80dd18ec7f9467737fcce5fd2820077599b155cb268e2ce7255b03e39da3e001"
+    },
+    {
+      "path": "portable/GCC/ARM_AARCH64/port.c",
+      "lines": 524,
+      "sha256": "19c9ea798627ff290cf4f94d5cd51e976df47beea02038610e0fcae7da4b756b"
+    },
+    {
+      "path": "portable/GCC/ARM_AARCH64_SRE/port.c",
+      "lines": 465,
+      "sha256": "7e7ddd304f61c0843c50f727030242b8caaee81b2f3dd39f7aeb5efd68a9651d"
+    },
+    {
+      "path": "portable/GCC/ARM_CA9/port.c",
+      "lines": 577,
+      "sha256": "2114eef009546196af81241f0161b96da4121b66c06867eeda520b8609427053"
+    },
+    {
+      "path": "portable/GCC/ARM_CM0/mpu_wrappers_v2_asm.c",
+      "lines": 2217,
+      "sha256": "4a2084fb279fbe92577c680ac9b1e9747fa8c367023b497f91ab31700e9c7df9"
+    },
+    {
+      "path": "portable/GCC/ARM_CM0/port.c",
+      "lines": 1665,
+      "sha256": "18eb42e3e1e9fda1c3f7ed59ad868360665b6473df426b00b57ee0a7d8ef3e0c"
+    },
+    {
+      "path": "portable/GCC/ARM_CM0/portasm.c",
+      "lines": 523,
+      "sha256": "8c05294bc0e15edda03f2f50a0a88aad2efc1bb4e5097d2e6252bba304c03800"
+    },
+    {
+      "path": "portable/GCC/ARM_CM23/non_secure/mpu_wrappers_v2_asm.c",
+      "lines": 2125,
+      "sha256": "2ce9bcd94fb291f35d9ccd5e037ae405a7f68b73fe1054a511c54d4153e5f3b1"
+    },
+    {
+      "path": "portable/GCC/ARM_CM23/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/GCC/ARM_CM23/non_secure/portasm.c",
+      "lines": 604,
+      "sha256": "4d2b563855d32ad065995f5a6523bb89261de7e464ca08fd166e395dda36e6e9"
+    },
+    {
+      "path": "portable/GCC/ARM_CM23/secure/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/GCC/ARM_CM23/secure/secure_context_port.c",
+      "lines": 99,
+      "sha256": "d7e5ce543601cd2a165c13a4b0e9b4f6166b31197930b746754baaa88e6299fb"
+    },
+    {
+      "path": "portable/GCC/ARM_CM23/secure/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/GCC/ARM_CM23/secure/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/GCC/ARM_CM23_NTZ/non_secure/mpu_wrappers_v2_asm.c",
+      "lines": 2125,
+      "sha256": "2ce9bcd94fb291f35d9ccd5e037ae405a7f68b73fe1054a511c54d4153e5f3b1"
+    },
+    {
+      "path": "portable/GCC/ARM_CM23_NTZ/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/GCC/ARM_CM23_NTZ/non_secure/portasm.c",
+      "lines": 516,
+      "sha256": "54a6bcb679672ae11faa06cf96a5a0b018da1ce0fe8446665ab95b1d11823b15"
+    },
+    {
+      "path": "portable/GCC/ARM_CM3/port.c",
+      "lines": 824,
+      "sha256": "037f78c536c8cf8dff0cc46b5a0f11e997fdbed1828ad6072a18d4848d7a9f3b"
+    },
+    {
+      "path": "portable/GCC/ARM_CM33/non_secure/mpu_wrappers_v2_asm.c",
+      "lines": 2056,
+      "sha256": "d3015cab6aee2a46921f4cee1065ebaebe48ad0f0d2f0d33b3d77f2bfd60ede1"
+    },
+    {
+      "path": "portable/GCC/ARM_CM33/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/GCC/ARM_CM33/non_secure/portasm.c",
+      "lines": 577,
+      "sha256": "ac3244f94c10f83a83dcf469928b149796446d61d61dc35dd5ef40482aa36eff"
+    },
+    {
+      "path": "portable/GCC/ARM_CM33/secure/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/GCC/ARM_CM33/secure/secure_context_port.c",
+      "lines": 97,
+      "sha256": "dc6e4a05b7dc2d853e93826f954907e3fd57a2cc7875042c7a4823697a9da305"
+    },
+    {
+      "path": "portable/GCC/ARM_CM33/secure/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/GCC/ARM_CM33/secure/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/GCC/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.c",
+      "lines": 2055,
+      "sha256": "620a82d247820b4f0ab8b158eb1411b29e21b308155d42176b9ffaaf4f95fd93"
+    },
+    {
+      "path": "portable/GCC/ARM_CM33_NTZ/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/GCC/ARM_CM33_NTZ/non_secure/portasm.c",
+      "lines": 471,
+      "sha256": "524ffdb5144274bd0636431b787a933057e748373e5bcdce217d5a166e2ebbe9"
+    },
+    {
+      "path": "portable/GCC/ARM_CM35P/non_secure/mpu_wrappers_v2_asm.c",
+      "lines": 2056,
+      "sha256": "d3015cab6aee2a46921f4cee1065ebaebe48ad0f0d2f0d33b3d77f2bfd60ede1"
+    },
+    {
+      "path": "portable/GCC/ARM_CM35P/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/GCC/ARM_CM35P/non_secure/portasm.c",
+      "lines": 577,
+      "sha256": "ac3244f94c10f83a83dcf469928b149796446d61d61dc35dd5ef40482aa36eff"
+    },
+    {
+      "path": "portable/GCC/ARM_CM35P/secure/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/GCC/ARM_CM35P/secure/secure_context_port.c",
+      "lines": 97,
+      "sha256": "dc6e4a05b7dc2d853e93826f954907e3fd57a2cc7875042c7a4823697a9da305"
+    },
+    {
+      "path": "portable/GCC/ARM_CM35P/secure/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/GCC/ARM_CM35P/secure/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/GCC/ARM_CM35P_NTZ/non_secure/mpu_wrappers_v2_asm.c",
+      "lines": 2055,
+      "sha256": "620a82d247820b4f0ab8b158eb1411b29e21b308155d42176b9ffaaf4f95fd93"
+    },
+    {
+      "path": "portable/GCC/ARM_CM35P_NTZ/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/GCC/ARM_CM35P_NTZ/non_secure/portasm.c",
+      "lines": 471,
+      "sha256": "524ffdb5144274bd0636431b787a933057e748373e5bcdce217d5a166e2ebbe9"
+    },
+    {
+      "path": "portable/GCC/ARM_CM3_MPU/mpu_wrappers_v2_asm.c",
+      "lines": 2067,
+      "sha256": "58830afa90dc33943e5cd0a5b49aec398a733a7ffaf1c910e623d155466ba449"
+    },
+    {
+      "path": "portable/GCC/ARM_CM3_MPU/port.c",
+      "lines": 1581,
+      "sha256": "db5c79a7e3a28be646fab96729ac6620d5154392c6dd2e9d0debabe8690911e7"
+    },
+    {
+      "path": "portable/GCC/ARM_CM4F/port.c",
+      "lines": 909,
+      "sha256": "cb2ce141eb035a890147da04a03dc390504d770d9d3288282ec277b47e92a482"
+    },
+    {
+      "path": "portable/GCC/ARM_CM4_MPU/mpu_wrappers_v2_asm.c",
+      "lines": 2067,
+      "sha256": "58830afa90dc33943e5cd0a5b49aec398a733a7ffaf1c910e623d155466ba449"
+    },
+    {
+      "path": "portable/GCC/ARM_CM4_MPU/port.c",
+      "lines": 1724,
+      "sha256": "6df67233a5a97a6539c205e73b59507b697142afffed426d2efd0111a7fc9b20"
+    },
+    {
+      "path": "portable/GCC/ARM_CM55/non_secure/mpu_wrappers_v2_asm.c",
+      "lines": 2056,
+      "sha256": "d3015cab6aee2a46921f4cee1065ebaebe48ad0f0d2f0d33b3d77f2bfd60ede1"
+    },
+    {
+      "path": "portable/GCC/ARM_CM55/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/GCC/ARM_CM55/non_secure/portasm.c",
+      "lines": 577,
+      "sha256": "ac3244f94c10f83a83dcf469928b149796446d61d61dc35dd5ef40482aa36eff"
+    },
+    {
+      "path": "portable/GCC/ARM_CM55/secure/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/GCC/ARM_CM55/secure/secure_context_port.c",
+      "lines": 97,
+      "sha256": "dc6e4a05b7dc2d853e93826f954907e3fd57a2cc7875042c7a4823697a9da305"
+    },
+    {
+      "path": "portable/GCC/ARM_CM55/secure/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/GCC/ARM_CM55/secure/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/GCC/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.c",
+      "lines": 2055,
+      "sha256": "620a82d247820b4f0ab8b158eb1411b29e21b308155d42176b9ffaaf4f95fd93"
+    },
+    {
+      "path": "portable/GCC/ARM_CM55_NTZ/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/GCC/ARM_CM55_NTZ/non_secure/portasm.c",
+      "lines": 471,
+      "sha256": "524ffdb5144274bd0636431b787a933057e748373e5bcdce217d5a166e2ebbe9"
+    },
+    {
+      "path": "portable/GCC/ARM_CM7/r0p1/port.c",
+      "lines": 899,
+      "sha256": "00fb0acf49701eec9111abcf9abe505ba8d1c03873252704ae7c167b9744ee5b"
+    },
+    {
+      "path": "portable/GCC/ARM_CM85/non_secure/mpu_wrappers_v2_asm.c",
+      "lines": 2056,
+      "sha256": "d3015cab6aee2a46921f4cee1065ebaebe48ad0f0d2f0d33b3d77f2bfd60ede1"
+    },
+    {
+      "path": "portable/GCC/ARM_CM85/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/GCC/ARM_CM85/non_secure/portasm.c",
+      "lines": 577,
+      "sha256": "ac3244f94c10f83a83dcf469928b149796446d61d61dc35dd5ef40482aa36eff"
+    },
+    {
+      "path": "portable/GCC/ARM_CM85/secure/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/GCC/ARM_CM85/secure/secure_context_port.c",
+      "lines": 97,
+      "sha256": "dc6e4a05b7dc2d853e93826f954907e3fd57a2cc7875042c7a4823697a9da305"
+    },
+    {
+      "path": "portable/GCC/ARM_CM85/secure/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/GCC/ARM_CM85/secure/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/GCC/ARM_CM85_NTZ/non_secure/mpu_wrappers_v2_asm.c",
+      "lines": 2055,
+      "sha256": "620a82d247820b4f0ab8b158eb1411b29e21b308155d42176b9ffaaf4f95fd93"
+    },
+    {
+      "path": "portable/GCC/ARM_CM85_NTZ/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/GCC/ARM_CM85_NTZ/non_secure/portasm.c",
+      "lines": 471,
+      "sha256": "524ffdb5144274bd0636431b787a933057e748373e5bcdce217d5a166e2ebbe9"
+    },
+    {
+      "path": "portable/GCC/ARM_CR5/port.c",
+      "lines": 691,
+      "sha256": "0d61a20287dd04ea54f8ab76021877ee1ae0f30214c1c26499af57c01ac44d80"
+    },
+    {
+      "path": "portable/GCC/ARM_CRx_MPU/port.c",
+      "lines": 845,
+      "sha256": "8a27b1a1d1eb5f7cdce1ff36de2107901bb9ea6362e21a329be88464ec696822"
+    },
+    {
+      "path": "portable/GCC/ARM_CRx_No_GIC/port.c",
+      "lines": 324,
+      "sha256": "b43d84b9c042a3ba2c7eb4b97f5b363a6fa75b4ad9e709a58fe1e3811ab63fd2"
+    },
+    {
+      "path": "portable/GCC/ATMega323/port.c",
+      "lines": 428,
+      "sha256": "df4f9e7a606d970836ac8197588718e11c8bfdce9e3ccf9bf86178bfd13e24c3"
+    },
+    {
+      "path": "portable/GCC/AVR32_UC3/port.c",
+      "lines": 473,
+      "sha256": "b7d1330736ef66f0c2b714cf043e362dbd21e14356c15898b230070db4ec2c36"
+    },
+    {
+      "path": "portable/GCC/CORTUS_APS3/port.c",
+      "lines": 148,
+      "sha256": "394796d5d0822b932972261e320b26b68b68d0f8846c7f50a833e32023094e9e"
+    },
+    {
+      "path": "portable/GCC/ColdFire_V2/port.c",
+      "lines": 133,
+      "sha256": "045f8622546b19889e35420830c441484314fbefaadeea60af60c26c550e26b0"
+    },
+    {
+      "path": "portable/GCC/H8S2329/port.c",
+      "lines": 304,
+      "sha256": "5a724691943076d677c9bbe9402276925ed5bf8329393006aa0920f32940eea3"
+    },
+    {
+      "path": "portable/GCC/HCS12/port.c",
+      "lines": 239,
+      "sha256": "700a6bbdf1c59b47eb5711081529c28fa79c5bba66cd0c97553257ad269355f6"
+    },
+    {
+      "path": "portable/GCC/IA32_flat/port.c",
+      "lines": 686,
+      "sha256": "044f3812a643094693d98ac2a01d894a43d3c8e6505719777949d6c184875d22"
+    },
+    {
+      "path": "portable/GCC/MSP430F449/port.c",
+      "lines": 335,
+      "sha256": "fa7f8d7747c00ca0b9327a5e678cbc808eed27e81385d4a3f187f2f25bf412f3"
+    },
+    {
+      "path": "portable/GCC/MicroBlaze/port.c",
+      "lines": 334,
+      "sha256": "35f898a49645d77a8db8310868bb49db5ccb6ee641c57a2e650af816c48c8c63"
+    },
+    {
+      "path": "portable/GCC/MicroBlazeV8/port.c",
+      "lines": 457,
+      "sha256": "e1af62967b0defc2c2e9cfa417be408c962402e659db949ca9231eda8ad88d41"
+    },
+    {
+      "path": "portable/GCC/MicroBlazeV8/port_exceptions.c",
+      "lines": 278,
+      "sha256": "cc354104534b98bfe2025c1e0d40a5c92d5c7d7885a28fc3c72b24ed7faa4037"
+    },
+    {
+      "path": "portable/GCC/MicroBlazeV9/port.c",
+      "lines": 545,
+      "sha256": "211e761c0e73579898aa3b4b9e95b8d9eb9f717a993465a5e98fa97880e6ba66"
+    },
+    {
+      "path": "portable/GCC/MicroBlazeV9/port_exceptions.c",
+      "lines": 277,
+      "sha256": "236c1cdca634654cdcad5658506f844993faef10aa0e8d35e6c8a3dd5c3d5b3f"
+    },
+    {
+      "path": "portable/GCC/NiosII/port.c",
+      "lines": 216,
+      "sha256": "a7dcb5b3f08b80ef2060b70c190ea6d963d4fbf7e2e60143cb4e129cb6799836"
+    },
+    {
+      "path": "portable/GCC/PPC405_Xilinx/port.c",
+      "lines": 267,
+      "sha256": "fc9c47cae38998cba3e5c1b76a9a7ee1b37d5f4d8384321545aafb0c6ecd4e36"
+    },
+    {
+      "path": "portable/GCC/PPC440_Xilinx/port.c",
+      "lines": 267,
+      "sha256": "3dcad5cd218dd2e1b2677078b90c04c61c2347681873947da3d9483f77fb40b6"
+    },
+    {
+      "path": "portable/GCC/RISC-V/port.c",
+      "lines": 208,
+      "sha256": "29bb1e2a3e3249fbe85b531d8ef7f3b84c8a1bd75e13687b41d1a220d4946190"
+    },
+    {
+      "path": "portable/GCC/RL78/port.c",
+      "lines": 213,
+      "sha256": "dc94bde175cf8ecaa37b3798b95f23af9ae3b2b07605ff270c509a20566b5773"
+    },
+    {
+      "path": "portable/GCC/RX100/port.c",
+      "lines": 714,
+      "sha256": "5dc77e410eea5c485ee1dde9defd61c7efdf9da84cdbc833c0787412e2f1c9b9"
+    },
+    {
+      "path": "portable/GCC/RX200/port.c",
+      "lines": 445,
+      "sha256": "961fb38f8f4992adac1c72421eec6907059e1b239df6591789b9d8761be7a7fc"
+    },
+    {
+      "path": "portable/GCC/RX600/port.c",
+      "lines": 399,
+      "sha256": "9a1a70a6c8703cbbdadba96eff7ef30fc6cdeb1ae30a430b6d0d8809bdf5bc60"
+    },
+    {
+      "path": "portable/GCC/RX600v2/port.c",
+      "lines": 442,
+      "sha256": "a0542590fc35edbc66c70b068dd2855b71e2937ad43dedfe597032e99d255490"
+    },
+    {
+      "path": "portable/GCC/RX700v3_DPFPU/port.c",
+      "lines": 619,
+      "sha256": "d3ac95d2754ad9b5cb86e428cc45f6760904d5441ec3dee60c12a12609fe0419"
+    },
+    {
+      "path": "portable/GCC/STR75x/port.c",
+      "lines": 193,
+      "sha256": "6e01937afbcb502e2081c7c62408c532a7a838e19ca1efcff4f7af32f8b47ae9"
+    },
+    {
+      "path": "portable/GCC/STR75x/portISR.c",
+      "lines": 178,
+      "sha256": "c12b0ec01f5a6813275e0d6dcd2a10c80c1d1ff6ea5e6f8eac407bc6382dc718"
+    },
+    {
+      "path": "portable/GCC/TriCore_1782/port.c",
+      "lines": 547,
+      "sha256": "12f7b70c086d7fbc24805a14b7c91faeb21da39ae13c0defffd70ca6eda3143e"
+    },
+    {
+      "path": "portable/GCC/TriCore_1782/porttrap.c",
+      "lines": 282,
+      "sha256": "d76d0e874534568acd23d4db83b97d4a6b61287b2b81df172858f47ff9568ef2"
+    },
+    {
+      "path": "portable/IAR/78K0R/port.c",
+      "lines": 227,
+      "sha256": "339f103d054fab47a96f6bce54159a94416756ff52535b7de7ed35ace5dcfdb6"
+    },
+    {
+      "path": "portable/IAR/ARM_CA5_No_GIC/port.c",
+      "lines": 304,
+      "sha256": "e48bbc9d3a97a883792b83268f2dc5b41c8eecce2274b5262619f093bba129fb"
+    },
+    {
+      "path": "portable/IAR/ARM_CA9/port.c",
+      "lines": 446,
+      "sha256": "a24ab3c1cf4c0daa848c7423487fce3de6dc52a346ad358c33072e22eef64269"
+    },
+    {
+      "path": "portable/IAR/ARM_CM0/port.c",
+      "lines": 543,
+      "sha256": "2468f435beefb71916c197cb81c8c57ec87e1988e58b493a68d912e3269e39fa"
+    },
+    {
+      "path": "portable/IAR/ARM_CM23/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/IAR/ARM_CM23/secure/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/IAR/ARM_CM23/secure/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/IAR/ARM_CM23/secure/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/IAR/ARM_CM23_NTZ/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/IAR/ARM_CM3/port.c",
+      "lines": 732,
+      "sha256": "e3a30904743f392a173874e46728aca78f244e4b16d7ea634ecb67b6dbed2e49"
+    },
+    {
+      "path": "portable/IAR/ARM_CM33/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/IAR/ARM_CM33/secure/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/IAR/ARM_CM33/secure/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/IAR/ARM_CM33/secure/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/IAR/ARM_CM33_NTZ/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/IAR/ARM_CM35P/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/IAR/ARM_CM35P/secure/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/IAR/ARM_CM35P/secure/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/IAR/ARM_CM35P/secure/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/IAR/ARM_CM35P_NTZ/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/IAR/ARM_CM4F/port.c",
+      "lines": 776,
+      "sha256": "a98288969bfe83f1df7691f36b3dfad501fb98a02073b9854b9b51607fd91b5b"
+    },
+    {
+      "path": "portable/IAR/ARM_CM4F_MPU/port.c",
+      "lines": 1455,
+      "sha256": "3eaaecc35bde72ee8fb2acd92ca553f7df9f6d053db35ab5a08b960a9cb7dde4"
+    },
+    {
+      "path": "portable/IAR/ARM_CM55/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/IAR/ARM_CM55/secure/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/IAR/ARM_CM55/secure/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/IAR/ARM_CM55/secure/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/IAR/ARM_CM55_NTZ/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/IAR/ARM_CM7/r0p1/port.c",
+      "lines": 764,
+      "sha256": "c06143a78f65e000ff2531fce3a7b2d4ddc09003a76a55ba01e030cfc81ccdd9"
+    },
+    {
+      "path": "portable/IAR/ARM_CM85/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/IAR/ARM_CM85/secure/secure_context.c",
+      "lines": 354,
+      "sha256": "41015c3d9ea8bd707d9b1e228dd2c4e16ebad55f3e52b5a75d84b8bce0a746e5"
+    },
+    {
+      "path": "portable/IAR/ARM_CM85/secure/secure_heap.c",
+      "lines": 476,
+      "sha256": "b9ff00633d6c7d381ebafa684d13edef0debb5a91b615a9ff79db74bd5f11483"
+    },
+    {
+      "path": "portable/IAR/ARM_CM85/secure/secure_init.c",
+      "lines": 106,
+      "sha256": "7adb47d87f15e865996b1f0a290ac99b5c5623ffa091b37beb4e435eca098ca8"
+    },
+    {
+      "path": "portable/IAR/ARM_CM85_NTZ/non_secure/port.c",
+      "lines": 2144,
+      "sha256": "0896f3232a773b553d8eb57a6fed8838a0c555386fdbb28bef791161339b6c65"
+    },
+    {
+      "path": "portable/IAR/ARM_CRx_No_GIC/port.c",
+      "lines": 321,
+      "sha256": "509fcb868bac3d9de92facf16e23f343130a22a846300b1a996685019887b621"
+    },
+    {
+      "path": "portable/IAR/ATMega323/port.c",
+      "lines": 340,
+      "sha256": "d7ddb7f3d880417ff15d2aa77b32be11889d8d98c1818c477d53587e703570e1"
+    },
+    {
+      "path": "portable/IAR/AVR32_UC3/port.c",
+      "lines": 446,
+      "sha256": "48a976a485639968607ee44ba4867c7a81304b51ef2ee1602e6ce023223aa715"
+    },
+    {
+      "path": "portable/IAR/AVR32_UC3/read.c",
+      "lines": 129,
+      "sha256": "331c14d09a18053d50fc5a9c5104a74b8a463772e247209e947a1ff59e6e7a28"
+    },
+    {
+      "path": "portable/IAR/AVR32_UC3/write.c",
+      "lines": 136,
+      "sha256": "a1a5eb0ab01c344306e250d0369463023a7ab1af20e5a96e15bc71feb8b4eb9a"
+    },
+    {
+      "path": "portable/IAR/AVR_AVRDx/port.c",
+      "lines": 301,
+      "sha256": "3ae8d775e5dce981f6bfa34c881be47937bf25d701d646e6fb73c687205a8e72"
+    },
+    {
+      "path": "portable/IAR/AVR_Mega0/port.c",
+      "lines": 299,
+      "sha256": "1eb43e71f3756c8412a1264269a7d74b99e5dc7089757025edc03a6a3d41a6f8"
+    },
+    {
+      "path": "portable/IAR/AtmelSAM7S64/port.c",
+      "lines": 252,
+      "sha256": "37dc4daa6e4ea8a743ee90188aeaa49b40a661aeb199c66ae8ff90a0d25fcda1"
+    },
+    {
+      "path": "portable/IAR/AtmelSAM9XE/port.c",
+      "lines": 253,
+      "sha256": "88be817ac7bb35dbc693774c5f7970d7c8f4acdf40f6f8a993c1b17121d65057"
+    },
+    {
+      "path": "portable/IAR/LPC2000/port.c",
+      "lines": 314,
+      "sha256": "d96f3b543415b165283ba803dffe2d038ca1f58324a6a577828412d002344133"
+    },
+    {
+      "path": "portable/IAR/MSP430/port.c",
+      "lines": 173,
+      "sha256": "9d7876fd964d7d420c216027acb90f97bd9e2689c9c54545a4fa8a5fb9745d60"
+    },
+    {
+      "path": "portable/IAR/MSP430X/port.c",
+      "lines": 184,
+      "sha256": "483284c77c8b4a1d749f500a92a660268388bcec5d646870576558b4255158d4"
+    },
+    {
+      "path": "portable/IAR/RISC-V/port.c",
+      "lines": 241,
+      "sha256": "ef7353e7224e218088e409ff85ed6c03fe1cfa03ffc5d5a6a29a31c70a293a95"
+    },
+    {
+      "path": "portable/IAR/RL78/port.c",
+      "lines": 215,
+      "sha256": "3daccc3bc0e25e63ab41681325ed9ae82a49816a7ecfa1f84b9f1266da118d88"
+    },
+    {
+      "path": "portable/IAR/RX100/port.c",
+      "lines": 523,
+      "sha256": "dc328fe97c17b2da1c310e50859138ab15d82b8dc187b71a83c7c96a1bf63b33"
+    },
+    {
+      "path": "portable/IAR/RX600/port.c",
+      "lines": 193,
+      "sha256": "6c1e60d8415d4c8df898257e2c8bfdd49d69b32afa87f4d30f75c5988afd209a"
+    },
+    {
+      "path": "portable/IAR/RX700v3_DPFPU/port.c",
+      "lines": 565,
+      "sha256": "6a54cf4fd98f645cec8a7cef5f8baae5e8952fff5d15025d186113703dd54f9c"
+    },
+    {
+      "path": "portable/IAR/RXv2/port.c",
+      "lines": 201,
+      "sha256": "e5229cdf6aac3d5338637f1762a7022163b2ccc7bf7527d15c83aa2202d46583"
+    },
+    {
+      "path": "portable/IAR/STR71x/port.c",
+      "lines": 255,
+      "sha256": "2e78080cdf8d2c85ce340d59daaf6fb6d31b7c4734423c35447b2dc82304ad48"
+    },
+    {
+      "path": "portable/IAR/STR75x/port.c",
+      "lines": 234,
+      "sha256": "ff760035e08eed8c24b54c31c3b5c8e0b166b638db1e47200b66d92010e4998b"
+    },
+    {
+      "path": "portable/IAR/STR91x/port.c",
+      "lines": 435,
+      "sha256": "177750d8ce64448771b875f58e1bd87052544bdcea1fc7c3ef05e8121c59d451"
+    },
+    {
+      "path": "portable/IAR/V850ES/port.c",
+      "lines": 184,
+      "sha256": "b49ca264d25a40ca6ccb6e44c895d1b9a1fc8a251967f812b252c333af0eea25"
+    },
+    {
+      "path": "portable/MPLAB/PIC18F/port.c",
+      "lines": 615,
+      "sha256": "95b712c8376aa0c420b09cdbb4215338148010ba374344ca815e57f8694b9e2e"
+    },
+    {
+      "path": "portable/MPLAB/PIC24_dsPIC/port.c",
+      "lines": 334,
+      "sha256": "69910958c574b38c031a4387d8111e115bc51bc83cc58e29f9889e79c837d682"
+    },
+    {
+      "path": "portable/MPLAB/PIC32MEC14xx/port.c",
+      "lines": 341,
+      "sha256": "05d1ee9cd53f64fc29e3b35ad5499f31373479e215498d8656a52f9293e00980"
+    },
+    {
+      "path": "portable/MPLAB/PIC32MX/port.c",
+      "lines": 330,
+      "sha256": "3d9fa3df0211ce92e5b84bbcd90e3c9a57594a4177d7d1ec3a69b7e5afe93ff5"
+    },
+    {
+      "path": "portable/MPLAB/PIC32MZ/port.c",
+      "lines": 369,
+      "sha256": "d119d9f6c8e22c3ccd250af8a10865d2b9d5b4704367d02b0b93ad219784a56d"
+    },
+    {
+      "path": "portable/MSVC-MingW/port.c",
+      "lines": 728,
+      "sha256": "c7c3659cc3adb6fc89ff5ac967dd7f948bdafffaf2284a827c24f5e4feb1f93a"
+    },
+    {
+      "path": "portable/MemMang/heap_1.c",
+      "lines": 165,
+      "sha256": "9d06b6a71c197890c53309c6f3554d481af987f61bee0acd5c6d9b6eaa7e0b7e"
+    },
+    {
+      "path": "portable/MemMang/heap_2.c",
+      "lines": 401,
+      "sha256": "4a7c13538eda61bd78a3aca34fb63a2b623044ac63a498df73ff5ba4bff9988c"
+    },
+    {
+      "path": "portable/MemMang/heap_3.c",
+      "lines": 106,
+      "sha256": "a060556aa5b994af2c2598952296500a1f2e46dc403d09d5ffd69840eed0bf8c"
+    },
+    {
+      "path": "portable/MemMang/heap_4.c",
+      "lines": 626,
+      "sha256": "8f7516b63745685937900c41cae21041496e6f4310cbbbb3988500c144f9441a"
+    },
+    {
+      "path": "portable/MemMang/heap_5.c",
+      "lines": 730,
+      "sha256": "37d22522b2744058bfa6ea78042f0d10c57c42f6eed63741f7e2c8a9a440df82"
+    },
+    {
+      "path": "portable/MikroC/ARM_CM4F/port.c",
+      "lines": 915,
+      "sha256": "7c9b2239fd35472b1fa232761c260f203c79228ad3b4557834f0767272c09c61"
+    },
+    {
+      "path": "portable/Paradigm/Tern_EE/large_untested/port.c",
+      "lines": 233,
+      "sha256": "84fbb0ad3194fd132f876a429a79b1f91b95dbe2368aeac9160a0f695041fb4f"
+    },
+    {
+      "path": "portable/Paradigm/Tern_EE/small/port.c",
+      "lines": 213,
+      "sha256": "7aa08c8a688af580d9b5766d0e365831511d7abfb1df6a93bd46b9e92941c94f"
+    },
+    {
+      "path": "portable/RVDS/ARM7_LPC21xx/port.c",
+      "lines": 292,
+      "sha256": "50482ab46e01044cce98218f19b685cd55355f74345a936439b7050446df5afb"
+    },
+    {
+      "path": "portable/RVDS/ARM_CA9/port.c",
+      "lines": 484,
+      "sha256": "bc504904fc184b54ac6078ae4ae809a5dba9bb94673e8f7b9341fd22dbe9d594"
+    },
+    {
+      "path": "portable/RVDS/ARM_CM0/port.c",
+      "lines": 622,
+      "sha256": "23adc9f14a2de668f0ed34708737ada7b2494fea53618d6bedd3bc82f4714b50"
+    },
+    {
+      "path": "portable/RVDS/ARM_CM3/port.c",
+      "lines": 793,
+      "sha256": "6cd031959a82070aa304b60cd545d8030980965b64aae41911b614fb6f1638d1"
+    },
+    {
+      "path": "portable/RVDS/ARM_CM4F/port.c",
+      "lines": 889,
+      "sha256": "3bfdcbc58bfe263994669b1c08d9c2dd62df658ed5ec4f16cb7e6327b956a6a0"
+    },
+    {
+      "path": "portable/RVDS/ARM_CM4_MPU/mpu_wrappers_v2_asm.c",
+      "lines": 1705,
+      "sha256": "c2a9ed048eccdc23f259f0bf9af0c411210fb7509f285cdc3bcdd81642e1360f"
+    },
+    {
+      "path": "portable/RVDS/ARM_CM4_MPU/port.c",
+      "lines": 1721,
+      "sha256": "3f2fd9acb46183155c61eae5c5882de09eb9924419def66f392b3d268865f256"
+    },
+    {
+      "path": "portable/RVDS/ARM_CM7/r0p1/port.c",
+      "lines": 875,
+      "sha256": "f9e6a7d663916868a24f4ed25bf5d36f71d9ef78a1c8d571ca9835af103fa54b"
+    },
+    {
+      "path": "portable/Renesas/RX100/port.c",
+      "lines": 646,
+      "sha256": "e487d0697b140f4b9c45e021be3255a4d899969d446b40760b54dce5885760f8"
+    },
+    {
+      "path": "portable/Renesas/RX200/port.c",
+      "lines": 322,
+      "sha256": "d477fc072cf4ad93be62582cc88dd30c2d1fe7937db2ecf9ffe1058c663f9f1d"
+    },
+    {
+      "path": "portable/Renesas/RX600/port.c",
+      "lines": 327,
+      "sha256": "2cdf148d7fb239aeef4cf83c0b08473f37d84c00733510e62cf7a6054f7ac57b"
+    },
+    {
+      "path": "portable/Renesas/RX600v2/port.c",
+      "lines": 362,
+      "sha256": "996dda55fcad2588b0be5426dbc0f2d9e2f2c18e5ef1bd25443f8d73a658ae44"
+    },
+    {
+      "path": "portable/Renesas/RX700v3_DPFPU/port.c",
+      "lines": 591,
+      "sha256": "6b4116e30449aa941fcaee8bbb0a990d2b5a9c334577c4943a2b8b8e6190aedb"
+    },
+    {
+      "path": "portable/Renesas/SH2A_FPU/port.c",
+      "lines": 272,
+      "sha256": "c61772043c59436528bbe6a78721dabc8aefd14a85c2453e802d45a513bc93df"
+    },
+    {
+      "path": "portable/Rowley/MSP430F449/port.c",
+      "lines": 173,
+      "sha256": "02c3f04f97250ecae189fa709d2ac93f39b810f65e157c8b52062e6cf016ebc2"
+    },
+    {
+      "path": "portable/SDCC/Cygnal/port.c",
+      "lines": 421,
+      "sha256": "e31abd9d17e39ba5d16947c04c13da4b88375e76a65c42dbfbdd95e72a3234f9"
+    },
+    {
+      "path": "portable/Softune/MB91460/__STD_LIB_sbrk.c",
+      "lines": 55,
+      "sha256": "1f0dda79654e0bb0c303bf610db285b16c8ea1befc5ed0e2a02e5f04406fec6c"
+    },
+    {
+      "path": "portable/Softune/MB91460/port.c",
+      "lines": 321,
+      "sha256": "14928e443b630a57fae55762e72b4ab43e86301b060014a5c6e93c73f8906d75"
+    },
+    {
+      "path": "portable/Softune/MB96340/__STD_LIB_sbrk.c",
+      "lines": 55,
+      "sha256": "1f0dda79654e0bb0c303bf610db285b16c8ea1befc5ed0e2a02e5f04406fec6c"
+    },
+    {
+      "path": "portable/Softune/MB96340/port.c",
+      "lines": 509,
+      "sha256": "7d504a8557e2166baead45fb491e9e09950819459872a974a6aafb14d76ad95b"
+    },
+    {
+      "path": "portable/Tasking/ARM_CM4F/port.c",
+      "lines": 275,
+      "sha256": "85ac60451de14885412bfa1f790b70e7f55e78d5fafa6ffac30218f339c09a7d"
+    },
+    {
+      "path": "portable/ThirdParty/CDK/T-HEAD_CK802/port.c",
+      "lines": 168,
+      "sha256": "88b2624dacf1295843bbd670c5b083e15c5961ecb167e5a734996f256f7cdf7b"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/ARC_EM_HS/arc_freertos_exceptions.c",
+      "lines": 52,
+      "sha256": "313d6453c3f6e7d50ef7f272422f32a486643c1f5235a62958d41b7bdc8b06fe"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/ARC_EM_HS/freertos_tls.c",
+      "lines": 240,
+      "sha256": "aa9b053db3ca2eca6a618389947f2de9f52e61394ec5bc78a162a7a4257cb5b7"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/ARC_EM_HS/port.c",
+      "lines": 293,
+      "sha256": "d02205dbc346fcfe4d5fde2476569052bdf68dace6d6f01671acfe4b31d85a89"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/ARC_v1/arc_freertos_exceptions.c",
+      "lines": 52,
+      "sha256": "313d6453c3f6e7d50ef7f272422f32a486643c1f5235a62958d41b7bdc8b06fe"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/ARC_v1/port.c",
+      "lines": 288,
+      "sha256": "7a0db27dffc5c2b2746c5dcbc6232eb899eb5e8a442965efecb6c5a8977b5b42"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c",
+      "lines": 112,
+      "sha256": "7421f54c6861a80d16a670c5469b9d8d970cf659b1b8800dc942b5297f79c0b1"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/ATmega/port.c",
+      "lines": 779,
+      "sha256": "6299e49b3cd048dac604ebb9d64025673eddf09f23a1b488b3d3c42497b4178d"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/Posix/port.c",
+      "lines": 618,
+      "sha256": "e8d7087ff86da2da205d90d8fb06cc732630995276e92b50efe10b7c18cbf133"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/Posix/utils/wait_for_event.c",
+      "lines": 104,
+      "sha256": "659155e0419cc2dd362ba35919c10077a0aaed7b0cfff0d2916e61e302ac4848"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/RP2040/port.c",
+      "lines": 1184,
+      "sha256": "b901d503070ed73442b6116a3e28565bcf020d53cb8ced38641fdb1396e8b938"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/Xtensa_ESP32/FreeRTOS-openocd.c",
+      "lines": 27,
+      "sha256": "23fd0353446e51ec4e7d21600db15a57401e7b9db5672cd346d4d4860eb8d227"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/Xtensa_ESP32/port.c",
+      "lines": 572,
+      "sha256": "43bdc91a9cd155e92a7d18a70ab31922da878ddd12dab89fa9ac2592a1706747"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/Xtensa_ESP32/port_common.c",
+      "lines": 167,
+      "sha256": "38a6901ce9a4c8e175889d694596aecd4a17a12d7e9a1154cd97d978d62c9828"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/Xtensa_ESP32/port_systick.c",
+      "lines": 197,
+      "sha256": "d234e657ad1916f41da45684f1a28eed81b09ebbb4a38befd29a3988840b02a6"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/Xtensa_ESP32/xtensa_init.c",
+      "lines": 76,
+      "sha256": "f250194f49eb0ca93608f5e57380a5196143cf8fcc0e7407372e360b8a2c26cc"
+    },
+    {
+      "path": "portable/ThirdParty/GCC/Xtensa_ESP32/xtensa_overlay_os_hook.c",
+      "lines": 76,
+      "sha256": "2f8dcef4c40437e6b753658006a788c8244d0f67ab65eb532e68c25062829f9a"
+    },
+    {
+      "path": "portable/ThirdParty/XCC/Xtensa/port.c",
+      "lines": 209,
+      "sha256": "a9931fa37063da9ca306b4bc6c8bbe4a6c97dfbbb0d5075e64afb766a085cb5a"
+    },
+    {
+      "path": "portable/ThirdParty/XCC/Xtensa/portclib.c",
+      "lines": 230,
+      "sha256": "7609dcab6a19c5c24e1b347fbf1c68338a9ee437e11db127e6fa7f31a2d06bb2"
+    },
+    {
+      "path": "portable/ThirdParty/XCC/Xtensa/xtensa_init.c",
+      "lines": 70,
+      "sha256": "d960f19167003c3dba0cf9887e12b604ad17f8343c21a451b61fc78bde13651b"
+    },
+    {
+      "path": "portable/ThirdParty/XCC/Xtensa/xtensa_intr.c",
+      "lines": 137,
+      "sha256": "e56093eddaeaa16df537fef25505741344d50112f5737433c26f5776b5180678"
+    },
+    {
+      "path": "portable/ThirdParty/XCC/Xtensa/xtensa_overlay_os_hook.c",
+      "lines": 76,
+      "sha256": "01690dbc5fd5ed77270cdd573aea6fb6b0f343b7ceea6a71b2a97cb52daaaccf"
+    },
+    {
+      "path": "portable/ThirdParty/xClang/XCOREAI/port.c",
+      "lines": 262,
+      "sha256": "c5dfef4ec9d8f624d2ed9ae4ef7e370d792622c997e6a121ceb192869b2bf061"
+    },
+    {
+      "path": "portable/WizC/PIC18/Drivers/Tick/Tick.c",
+      "lines": 139,
+      "sha256": "ba4cfebcd80417d4657e7a2e3e696be0f513307c9522b973457a18a400c38be0"
+    },
+    {
+      "path": "portable/WizC/PIC18/Drivers/Tick/isrTick.c",
+      "lines": 79,
+      "sha256": "08c6f0424eb8d7e94cddc80c5733d7ccd3426eadc5a425c0a2d191262d406ab6"
+    },
+    {
+      "path": "portable/WizC/PIC18/port.c",
+      "lines": 318,
+      "sha256": "e1ae4a984acb41c34b7dbf7e9d3aa3e9c2c9dfc23df5c42c5fe30e735492c8dd"
+    },
+    {
+      "path": "portable/oWatcom/16BitDOS/Flsh186/port.c",
+      "lines": 246,
+      "sha256": "aa4064fc947eceafe3e65c919743ba32a43cd55bfc010a9862249d9a018e6660"
+    },
+    {
+      "path": "portable/oWatcom/16BitDOS/PC/port.c",
+      "lines": 302,
+      "sha256": "2595a1310093022986b45c55e84bc7d908db3a882159f64e55a96aa533bb915c"
+    },
+    {
+      "path": "portable/oWatcom/16BitDOS/common/portcomn.c",
+      "lines": 141,
+      "sha256": "29ba5f020af1fc5b3920b6cfd32bce967df50959fc2830586249b65c3bcc8fff"
+    },
+    {
+      "path": "portable/template/port.c",
+      "lines": 82,
+      "sha256": "dbb81d7f4823416c428b6638e7d664ec2c6b7e6ee4d3b3d724d3d13a571978fb"
+    },
+    {
+      "path": "queue.c",
+      "lines": 3364,
+      "sha256": "e66b73eb6dd7e6b2ccd121ab8d7345ab9698cd655b32171476643284e6dc4f4a"
+    },
+    {
+      "path": "stream_buffer.c",
+      "lines": 1718,
+      "sha256": "f2041618919a475c1438309013149105e5145acac4cdc57f79ee1a6dbe3b98a4"
+    },
+    {
+      "path": "tasks.c",
+      "lines": 8696,
+      "sha256": "6a54883765441f12b45b7f2e36838727e8e0aa872054df30c814c473ee3e4149"
+    },
+    {
+      "path": "timers.c",
+      "lines": 1340,
+      "sha256": "7f91da3b57555aa016c8bc91f90edd348268a8bca42d035d9d53c0e9cbdc40b3"
+    }
+  ]
+}
