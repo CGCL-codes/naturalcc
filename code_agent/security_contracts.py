@@ -38,6 +38,7 @@ def classify_findings(findings, project_dir):
         if engine == "c-source":
             category = {"shellStringFlow": "command_execution", "sharedGlobalRace": "data_race",
                         "capacityStringWrite": "string_overflow", "nullArgumentDeref": "null_pointer",
+                        "nullInitDeref": "null_pointer",
                         # RTOS-aware rules (security_rtos_rules), one per high-risk category.
                         "shellCommandBuild": "command_execution", "lockScopeEscape": "data_race",
                         "ownershipLeak": "memory_leak", "capacityWriteOverflow": "buffer_overflow"}.get(identifier)
@@ -70,7 +71,7 @@ def classify_findings(findings, project_dir):
                             operations[file].append((n.start_point.row + 1, n.end_point.row + 1, name, literal))
                 at_line = [(call, literal) for start, end, call, literal in operations[file] if start <= finding["line"] <= end]
                 # A raw-memory copy whose source is a string literal moves string data into a char buffer.
-                string = any(call in STRING_CALLS or (call in BUFFER_CALLS and literal) for call, literal in at_line)
+                string = any(call in STRING_CALLS for call, literal in at_line)  # [contract3-switch A off]
                 buffer = any(call in BUFFER_CALLS and not literal for call, literal in at_line)
                 if string != buffer:
                     category = "string_overflow" if string else "buffer_overflow"

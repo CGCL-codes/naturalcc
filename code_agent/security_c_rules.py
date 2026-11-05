@@ -390,7 +390,7 @@ def _string_writes(function, functions, facts=None, depth=0):
                 if inherited["capacity"] or inherited["length"]:
                     # Attribute a callee overflow to this call, which supplies the sizes.
                     for _, evidence in _string_writes(functions[name], functions, inherited, depth + 1):
-                        results.append((node, [f"via call to {name}(): " + item for item in evidence]))
+                        pass  # [contract3-switch C off] results.append((node, [f"via call to {name}(): " + item for item in evidence]))
                 continue
             if not arguments:
                 continue
@@ -459,6 +459,77 @@ def _null_arguments(function, functions):
     return results
 
 
+# Contract-3 switch F (exercise design, see 合同-3-静态分析难度调节指南.md). When True,
+# _null_init_dereferences runs: a deliberately path-insensitive heuristic that treats a
+# pointer set to NULL as still NULL after a conditional reassignment, so it reports
+# some safe code. Only an early-return NULL check counts as a guard.
+NULL_PATH_INSENSITIVE = True  # [contract3-switch F off]
+
+
+def _null_init_dereferences(function):
+    """Pointer (or struct whose members are) initialised to NULL, later dereferenced.
+
+    Path-insensitive on purpose: assignments inside if-statements are ignored, and only
+    `if (<pointer mentioned>) ... return` counts as a check. Off unless switch F is off.
+    """
+    body = function.child_by_field_name("body")
+    if body is None:
+        return []
+    nulls, results = {}, []
+    null_tokens = {t.replace(" ", "") for t in _NULL_TOKENS}
+
+    def is_null(node):
+        return node is not None and text(node).replace(" ", "") in null_tokens
+
+    def tracked(node):
+        if node.type == "identifier" and text(node) in nulls:
+            return text(node)
+        if node.type == "field_expression":
+            base = node.child_by_field_name("argument")
+            if base is not None and base.type == "identifier" and text(base) + "." in nulls:
+                return text(base) + "."
+        return None
+
+    for statement in body.named_children:
+        if statement.type == "declaration":
+            for declarator in statement.children_by_field_name("declarator"):
+                if declarator.type != "init_declarator":
+                    continue
+                target, value = declarator.child_by_field_name("declarator"), declarator.child_by_field_name("value")
+                name = declared_name(target)
+                if target.type == "pointer_declarator" and is_null(value):
+                    nulls[name] = statement
+                elif value is not None and value.type == "initializer_list" and \
+                        value.named_children and all(is_null(item) for item in value.named_children):
+                    nulls[name + "."] = statement
+            continue
+        if statement.type == "expression_statement" and statement.named_children and \
+                statement.named_children[0].type == "assignment_expression":
+            assignment = statement.named_children[0]
+            key = tracked(assignment.child_by_field_name("left"))
+            if key:
+                if is_null(assignment.child_by_field_name("right")):
+                    nulls[key] = statement
+                else:
+                    nulls.pop(key, None)
+            continue
+        if statement.type == "if_statement":
+            condition = statement.child_by_field_name("condition")
+            returns = any(n.type == "return_statement" for n in walk(statement.child_by_field_name("consequence")))
+            if returns:
+                for key in list(nulls):
+                    if any(tracked(n) == key for n in walk(condition)):
+                        nulls.pop(key)
+            continue  # assignments inside the branch are ignored (path-insensitive)
+        for node in walk(statement):
+            if node.type == "pointer_expression" and text(node).startswith("*"):
+                key = tracked(node.child_by_field_name("argument"))
+                if key:
+                    results.append((node, [f"'{key.rstrip('.')}' is set to NULL at line "
+                                           f"{nulls[key].start_point.row + 1} and dereferenced here"]))
+    return results
+
+
 def scan_c_source(source: str, file: str, context_lines: int, macros=None):
     root = parse_source(source, Path(file).suffix.lower(), macros)
     functions = {declared_name(n.child_by_field_name("declarator")): n for n in walk(root)
@@ -468,23 +539,25 @@ def scan_c_source(source: str, file: str, context_lines: int, macros=None):
 
     names = {78: ("Untrusted string reaches a shell", "shellStringFlow"), 362: ("Conflicting shared accesses in overlapping threads", "sharedGlobalRace"),
              120: ("String write exceeds the destination capacity", "capacityStringWrite"),
-             476: ("NULL argument reaches an unchecked dereference", "nullArgumentDeref")}
+             476: ("NULL argument reaches an unchecked dereference", "nullArgumentDeref"),
+             "476-init": ("NULL-initialised pointer is dereferenced", "nullInitDeref")}
     advice = {78: "Use a fixed executable and an argument vector without a shell.",
               362: "Protect every conflicting access with the same mutex or an appropriate atomic operation.",
               120: "Bound the write by the remaining destination space, including the terminating NUL.",
-              476: "Pass a valid object or check the parameter for NULL before dereferencing it."}
+              476: "Pass a valid object or check the parameter for NULL before dereferencing it.",
+              "476-init": "Assign a valid object on every path, or check the pointer for NULL before dereferencing it."}
 
     def add(node, category, cwe, evidence):
         line = node.start_point.row + 1
         findings.append({
-            "rule_id": f"cwe-{cwe}", "rule_name": names[cwe][0],
+            "rule_id": f"cwe-{str(cwe).split('-')[0]}", "rule_name": names[cwe][0],
             "analyzer": "c-source", "analyzer_id": names[cwe][1],
             "category": category, "severity": "high", "confidence": "medium",
             "file": file, "line": line, "snippet": lines[line - 1][:300],
             "context": "\n".join(f"{i + 1}: {lines[i]}" for i in range(max(0, line - 1 - context_lines), min(len(lines), line + context_lines))),
             "evidence": evidence, "pattern": VERSION,
             "recommendation": advice[cwe],
-            "references": [f"https://cwe.mitre.org/data/definitions/{cwe}.html"],
+            "references": [f"https://cwe.mitre.org/data/definitions/{str(cwe).split('-')[0]}.html"],
         })
 
     for function in functions.values():
@@ -499,6 +572,10 @@ def scan_c_source(source: str, file: str, context_lines: int, macros=None):
                 reported.add(node.start_point.row)
                 add(node, "string_overflow", 120, evidence)
     for function in functions.values():
-        for node, evidence in _null_arguments(function, functions):
+        for node, evidence in []:  # [contract3-switch E off] _null_arguments(function, functions)
             add(node, "null_pointer", 476, evidence)
+    if NULL_PATH_INSENSITIVE:
+        for function in functions.values():
+            for node, evidence in _null_init_dereferences(function):
+                add(node, "null_pointer", "476-init", evidence)
     return findings, root.has_error

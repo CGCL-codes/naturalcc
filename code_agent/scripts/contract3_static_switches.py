@@ -1,4 +1,4 @@
-"""Toggle the five Contract-3 static-analysis switches (A-E) for exercise design.
+"""Toggle the six Contract-3 static-analysis switches (A-F) for exercise design.
 
 Each switch is an exact source replacement marked with "# [contract3-switch X off]",
 so the product stays unchanged until a switch is turned off and `reset` restores it
@@ -47,6 +47,12 @@ SWITCHES = {
           "        for node, evidence in _null_arguments(function, functions):\n",
           "        for node, evidence in []:  # [contract3-switch E off] _null_arguments(function, functions)\n",
           "NULL argument reaching an unchecked dereference in a same-file callee"),
+    # F works the other way round: turning it off enables an over-eager rule, so it
+    # raises the false-positive rate instead of lowering detection.
+    "F": ("security_c_rules.py",
+          "NULL_PATH_INSENSITIVE = False\n",
+          "NULL_PATH_INSENSITIVE = True  # [contract3-switch F off]\n",
+          "path-sensitive NULL guard (off: NULL-initialised pointers stay NULL after a conditional reassignment)"),
 }
 
 
@@ -81,12 +87,12 @@ def print_status() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command", choices=("status", "on", "off", "only", "reset"))
-    parser.add_argument("switches", nargs="*", type=str.upper, help="Switch names A-E")
+    parser.add_argument("switches", nargs="*", type=str.upper, help="Switch names A-F")
     parser.add_argument("--measure", action="store_true", help="Run scripts/measure_contract3_static.py on the four RTOS suites afterwards")
     args = parser.parse_args()
     unknown = [name for name in args.switches if name not in SWITCHES]
     if unknown:
-        raise SystemExit(f"Unknown switch: {', '.join(unknown)} (use A-E)")
+        raise SystemExit(f"Unknown switch: {', '.join(unknown)} (use A-F)")
     if args.command in {"on", "off", "only"} and not args.switches:
         raise SystemExit(f"'{args.command}' needs at least one switch name")
     for name in SWITCHES:
