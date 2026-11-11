@@ -390,6 +390,9 @@ class OpenAICompatibleGateway(ModelGateway):
             options["extra_body"] = extra_body
         client_options: dict[str, Any] = {"api_key": key, "base_url": self.base_url,
             "default_headers": self.default_headers or None}
+        timeout = request.metadata.get("timeout_seconds")
+        if timeout is not None:
+            client_options.update(timeout=timeout, max_retries=0)
         if not self.use_request_api_key:
             import httpx
             client_options["http_client"] = httpx.Client(trust_env=False)
@@ -409,7 +412,7 @@ class OpenAICompatibleGateway(ModelGateway):
                 **options,
             )
         finally:
-            if not self.use_request_api_key:
+            if not self.use_request_api_key or timeout is not None:
                 client.close()
         message = response.choices[0].message
         prompt, completion, hit, miss = _usage_numbers(response.usage)

@@ -283,6 +283,7 @@ function App() {
   const [agentMemories, setAgentMemories] = useState([]);
   const [memoryProposals, setMemoryProposals] = useState([]);
   const [memoryError, setMemoryError] = useState("");
+  const [memoryExtraction, setMemoryExtraction] = useState(null);
   const [selectedMemoryEvidence, setSelectedMemoryEvidence] = useState([]);
   const [agentThreads, setAgentThreads] = useState([]);
   const [activeThread, setActiveThread] = useState(null);
@@ -497,6 +498,33 @@ function App() {
       document.body.style.overflow = "";
     };
   }, [drawerOpen, runDetailsOpen, threadPendingDelete]);
+
+  useEffect(() => {
+    const runId = agentState.runId;
+    setMemoryExtraction(null);
+    if (!runDetailsOpen || !runId || runtimeMode !== "agent") return;
+    let active = true;
+    let timer;
+    let pendingChecks = 0;
+    async function readExtraction() {
+      try {
+        const outcome = await requestJson(`/api/agent/runs/${runId}/memory-extraction`);
+        if (!active) return;
+        setMemoryExtraction(outcome);
+        if (["queued", "running"].includes(outcome.status) ||
+            (outcome.status === "not_scheduled" && outcome.run_status === "completed" && pendingChecks++ < 2)) {
+          timer = setTimeout(readExtraction, 1500);
+        }
+      } catch {
+        if (active) setMemoryExtraction({ run_id: runId, status: "unavailable" });
+      }
+    }
+    readExtraction();
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [agentState.runId, agentState.status, runDetailsOpen, runtimeMode]);
 
   useEffect(() => {
     if (runtimeMode !== "agent" || !bootstrapReady) return;
@@ -2289,6 +2317,24 @@ function App() {
               </section>
 
               <section className="run-detail-section memory-governance-section">
+                {memoryExtraction?.run_id === agentState.runId && (
+                  <p role="status">
+                    Memory extraction: {memoryExtraction.status.replaceAll("_", " ")}
+                    {memoryExtraction.reason && ` · ${memoryExtraction.reason.replaceAll("_", " ")}`}
+                    {memoryExtraction.status === "completed" &&
+                      ` · ${memoryExtraction.proposal_count} proposed, ${memoryExtraction.applied_count} applied`}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => {
+                    setMemoryError("");
+                    refreshMemoryGovernance().catch((error) => setMemoryError(error.message));
+                  }}
+                >
+                  Refresh memories
+                </button>
                 <MemoryReviewPanel
                   proposals={memoryProposals}
                   busy={busy}

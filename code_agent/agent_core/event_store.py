@@ -107,6 +107,15 @@ class EventStore:
                     updated_at TEXT NOT NULL,
                     FOREIGN KEY (run_id) REFERENCES runs(id) ON DELETE CASCADE
                 );
+                CREATE TABLE IF NOT EXISTS memory_extractions (
+                    run_id TEXT PRIMARY KEY REFERENCES runs(id) ON DELETE CASCADE,
+                    worker_pid INTEGER NOT NULL,
+                    status TEXT NOT NULL,
+                    reason TEXT,
+                    proposal_count INTEGER NOT NULL DEFAULT 0,
+                    applied_count INTEGER NOT NULL DEFAULT 0,
+                    updated_at TEXT NOT NULL
+                );
                 CREATE TABLE IF NOT EXISTS workspace_leases (
                     workspace TEXT PRIMARY KEY,
                     run_id TEXT NOT NULL,
@@ -536,6 +545,7 @@ class EventStore:
         limit: int | None = 500,
         after_sequence: int = 0,
         through_sequence: int | None = None,
+        run_id: str | None = None,
     ) -> list[dict[str, Any]]:
         with self._connect() as connection:
             if connection.execute("SELECT 1 FROM threads WHERE id=?", (thread_id,)).fetchone() is None:
@@ -544,7 +554,6 @@ class EventStore:
                 SELECT * FROM conversation_messages
                 WHERE thread_id=? AND sequence>?
                     AND (? IS NULL OR sequence<=?)
-                ORDER BY sequence DESC
             """
             parameters: list[Any] = [
                 thread_id,
@@ -552,6 +561,10 @@ class EventStore:
                 through_sequence,
                 through_sequence,
             ]
+            if run_id is not None:
+                query += " AND run_id=?"
+                parameters.append(run_id)
+            query += " ORDER BY sequence DESC"
             if limit is not None:
                 if limit <= 0:
                     raise ValueError("conversation message limit must be positive")
@@ -671,6 +684,37 @@ class EventStore:
         )
         return result
 
+    def queue_memory_extraction(self, run_id: str, worker_pid: int) -> bool:
+        with self._connect() as connection:
+            inserted = connection.execute(
+                """INSERT OR IGNORE INTO memory_extractions(run_id, worker_pid, status, updated_at)
+                   SELECT id, ?, 'queued', ? FROM runs WHERE id=? AND status='completed'""",
+                (worker_pid, now_iso(), run_id),
+            )
+            connection.commit()
+            return inserted.rowcount == 1
+
+    def update_memory_extraction(
+        self, run_id: str, status: str, *, reason: str | None = None,
+        proposal_count: int = 0, applied_count: int = 0,
+    ) -> None:
+        with self._connect() as connection:
+            connection.execute(
+                """UPDATE memory_extractions
+                   SET status=?, reason=?, proposal_count=?, applied_count=?, updated_at=?
+                   WHERE run_id=?""",
+                (status, reason, proposal_count, applied_count, now_iso(), run_id),
+            )
+            connection.commit()
+
+    def get_memory_extraction(self, run_id: str) -> dict[str, Any] | None:
+        with self._connect() as connection:
+            row = connection.execute(
+                """SELECT worker_pid, status, reason, proposal_count, applied_count, updated_at
+                   FROM memory_extractions WHERE run_id=?""", (run_id,)
+            ).fetchone()
+        return dict(row) if row else None
+
     def list_runs(self, limit: int = 100) -> list[dict[str, Any]]:
         with self._connect() as connection:
             rows = connection.execute("SELECT * FROM runs ORDER BY updated_at DESC LIMIT ?", (limit,)).fetchall()
@@ -749,11 +793,14 @@ class EventStore:
             row["idempotency_key"],
         )
 
-    def list_events(self, run_id: str, after_sequence: int = 0) -> list[AgentEvent]:
+    def list_events(
+        self, run_id: str, after_sequence: int = 0, *, event_type: str | None = None
+    ) -> list[AgentEvent]:
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT * FROM events WHERE run_id=? AND sequence>? ORDER BY sequence",
-                (run_id, after_sequence),
+                """SELECT * FROM events WHERE run_id=? AND sequence>?
+                   AND (? IS NULL OR type=?) ORDER BY sequence""",
+                (run_id, after_sequence, event_type, event_type),
             ).fetchall()
         return [self._row_to_event(row) for row in rows]
 

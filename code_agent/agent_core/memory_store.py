@@ -4,10 +4,13 @@ import hashlib
 import json
 import sqlite3
 import uuid
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 from .contracts import now_iso
+from .memory_tool_recovery import TOOL_RECOVERY_VERSION
 from .sqlite_migrations import backup_before_schema_v6
 
 
@@ -22,6 +25,17 @@ PINNED_MEMORY_KINDS = frozenset(
         "decision",
     }
 )
+
+RECALL_VISIBILITY = """
+    m.status='active'
+    AND (m.expires_at IS NULL OR julianday(m.expires_at) > julianday('now'))
+    AND (
+        m.scope='user'
+        OR (m.scope='project' AND m.project_id=?)
+        OR (m.scope='thread' AND m.thread_id=?)
+        OR (m.scope='run' AND m.source_run_id=?)
+    )
+"""
 
 
 class MemoryProposalConflict(RuntimeError):
@@ -139,12 +153,17 @@ class MemoryStore:
             connection.commit()
         self._migrate_legacy_candidates()
 
-    def _connect(self) -> sqlite3.Connection:
+    @contextmanager
+    def _connect(self) -> Iterator[sqlite3.Connection]:
         connection = sqlite3.connect(self.db_path, timeout=30)
-        connection.row_factory = sqlite3.Row
-        connection.execute("PRAGMA foreign_keys=ON")
-        connection.execute("PRAGMA journal_mode=WAL")
-        return connection
+        try:
+            connection.row_factory = sqlite3.Row
+            connection.execute("PRAGMA foreign_keys=ON")
+            connection.execute("PRAGMA journal_mode=WAL")
+            with connection:
+                yield connection
+        finally:
+            connection.close()
 
     @staticmethod
     def _decode_proposal_row(row: sqlite3.Row) -> dict[str, Any]:
@@ -401,13 +420,7 @@ class MemoryStore:
                 SELECT m.*, bm25(memory_fts) AS rank
                 FROM memory_fts JOIN memories m ON m.id=memory_fts.id
                 WHERE memory_fts MATCH ?
-                  AND m.status='active'
-                  AND (
-                    m.scope='user'
-                    OR (m.scope='project' AND m.project_id=?)
-                    OR (m.scope='thread' AND m.thread_id=?)
-                    OR (m.scope='run' AND m.source_run_id=?)
-                  )
+                  AND {RECALL_VISIBILITY}
                   {exclusion_sql}
                 ORDER BY rank, m.confidence DESC, m.updated_at DESC
                 LIMIT ?
@@ -415,6 +428,36 @@ class MemoryStore:
                 params,
             ).fetchall()
         return [dict(row) for row in rows]
+
+    def semantic_recall_candidates(
+        self,
+        *,
+        project_id: str,
+        thread_id: str | None,
+        run_id: str,
+        selected_ids: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Bound a semantic scan and revalidate cached IDs before each use."""
+        if selected_ids == []:
+            return []
+        pinned = sorted(PINNED_MEMORY_KINDS)
+        placeholders = ",".join("?" for _ in pinned)
+        params: list[Any] = [project_id, thread_id, run_id, *pinned]
+        id_filter = ""
+        if selected_ids is not None:
+            id_filter = f"AND m.id IN ({','.join('?' for _ in selected_ids)})"
+            params.extend(selected_ids)
+        with self._connect() as connection:
+            rows = connection.execute(
+                f"""SELECT m.* FROM memories m WHERE {RECALL_VISIBILITY}
+                    AND m.kind NOT IN ({placeholders}) {id_filter}
+                    ORDER BY m.updated_at DESC, m.id LIMIT 16""",
+                params,
+            ).fetchall()
+        if selected_ids is None:
+            return [dict(row) for row in rows]
+        by_id = {row["id"]: dict(row) for row in rows}
+        return [by_id[item] for item in selected_ids if item in by_id]
 
     def list_pinned_for_context(
         self,
@@ -432,6 +475,7 @@ class MemoryStore:
                 SELECT m.*
                 FROM memories m
                 WHERE m.status='active'
+                  AND (m.expires_at IS NULL OR julianday(m.expires_at) > julianday('now'))
                   AND m.kind IN ({placeholders})
                   AND (
                     m.scope='user'
@@ -479,10 +523,14 @@ class MemoryStore:
         project_id: str | None = None,
         thread_id: str | None = None,
     ) -> list[dict[str, Any]]:
+        effective_status = """CASE
+            WHEN status='active' AND expires_at IS NOT NULL
+                AND COALESCE(julianday(expires_at) > julianday('now'), 0)=0
+            THEN 'expired' ELSE status END"""
         clauses = []
         params: list[Any] = []
         if status:
-            clauses.append("status=?")
+            clauses.append(f"{effective_status}=?")
             params.append(status)
         if project_id:
             clauses.append("(project_id=? OR scope='user')")
@@ -492,7 +540,27 @@ class MemoryStore:
             params.append(thread_id)
         where = " WHERE " + " AND ".join(clauses) if clauses else ""
         with self._connect() as connection:
-            rows = connection.execute(f"SELECT * FROM memories{where} ORDER BY updated_at DESC", params).fetchall()
+            rows = connection.execute(
+                f"SELECT *, {effective_status} AS effective_status FROM memories{where} ORDER BY updated_at DESC",
+                params,
+            ).fetchall()
+        items = [dict(row) for row in rows]
+        for item in items:
+            item["status"] = item.pop("effective_status")
+        return items
+
+    def automatic_memory_manifest(self, project_id: str) -> list[dict[str, Any]]:
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT id, scope, kind, subject, substr(content, 1, 180) AS summary, updated_at
+                FROM memories
+                WHERE status='active' AND (scope='user' OR (scope='project' AND project_id=?))
+                  AND (expires_at IS NULL OR julianday(expires_at) > julianday('now'))
+                ORDER BY updated_at DESC, id LIMIT 20
+                """,
+                (project_id,),
+            ).fetchall()
         return [dict(row) for row in rows]
 
     def create_proposal(
@@ -521,20 +589,42 @@ class MemoryStore:
         analyzer_prompt_version: str,
         composer_prompt_version: str,
         evidence: list[dict[str, Any]],
-    ) -> str:
+    ) -> str | None:
         proposal_id = str(uuid.uuid4())
         timestamp = now_iso()
         with self._connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
+            if source_mode == "automatic_run":
+                self._check_completed_source(connection, run_id, thread_id, project_id)
+                duplicate_memory = connection.execute(
+                    """
+                    SELECT 1 FROM memories
+                    WHERE scope=? AND (scope='user' OR project_id=?) AND kind=?
+                      AND lower(trim(subject))=lower(trim(?)) AND content=? AND ?<>'expire'
+                      AND status='active'
+                      AND (expires_at IS NULL OR julianday(expires_at) > julianday('now'))
+                    UNION ALL
+                    SELECT 1 FROM memory_proposals
+                    WHERE scope=? AND (scope='user' OR project_id=?) AND kind=?
+                      AND lower(trim(subject))=lower(trim(?)) AND canonical_content=?
+                      AND operation=? AND target_memory_id IS ?
+                      AND status IN ('review_ready','deferred')
+                    LIMIT 1
+                    """,
+                    (scope, project_id, kind, subject, canonical_content, operation,
+                     scope, project_id, kind, subject, canonical_content, operation, target_memory_id),
+                ).fetchone()
+                if duplicate_memory:
+                    return None
             duplicate = connection.execute(
                 """
                 SELECT id FROM memory_proposals
-                WHERE source_hash=? AND scope=? AND kind=? AND subject=?
+                WHERE source_hash=? AND source_mode=? AND scope=? AND kind=? AND subject=?
                   AND canonical_content=?
                   AND status IN ('review_ready','deferred','applied')
                 ORDER BY created_at DESC LIMIT 1
                 """,
-                (source_hash, scope, kind, subject, canonical_content),
+                (source_hash, source_mode, scope, kind, subject, canonical_content),
             ).fetchone()
             if duplicate:
                 connection.rollback()
@@ -864,6 +954,26 @@ class MemoryStore:
             if row["status"] not in {"review_ready", "deferred"}:
                 connection.rollback()
                 raise MemoryProposalConflict("proposal has already been finalized")
+            if row["source_mode"] == "automatic_run":
+                self._check_completed_source(
+                    connection, row["run_id"], row["thread_id"], row["project_id"]
+                )
+            if row["source_mode"] == "automatic_run" and row["operation"] != "create":
+                target = connection.execute(
+                    "SELECT * FROM memories WHERE id=? AND status='active'",
+                    (row["target_memory_id"],),
+                ).fetchone()
+                expected_target = json.loads(row["proposal_json"]).get("_auto_target_updated_at")
+                if (
+                    target is None or target["updated_at"] != expected_target
+                    or target["scope"] != row["scope"] or target["kind"] != row["kind"]
+                    or (row["scope"] == "project" and target["project_id"] != row["project_id"])
+                ):
+                    raise MemoryProposalConflict("memory target changed after analysis")
+                if actor == "auto_memory" and target["subject"].casefold() != row["subject"].casefold():
+                    raise MemoryProposalConflict("a subject change requires human review")
+            if actor == "auto_memory":
+                self._check_automatic_approval(connection, row)
             before = self._proposal_snapshot(row)
             timestamp = now_iso()
             evidence_count = int(
@@ -973,6 +1083,67 @@ class MemoryStore:
             )
             connection.commit()
         return applied_memory_id
+
+    @staticmethod
+    def _check_completed_source(
+        connection: sqlite3.Connection, run_id: str | None,
+        thread_id: str | None, project_id: str | None,
+    ) -> None:
+        if connection.execute(
+            """SELECT 1 FROM runs
+               WHERE id=? AND thread_id=? AND workspace=? AND status='completed'""",
+            (run_id, thread_id, project_id),
+        ).fetchone() is None:
+            raise MemoryProposalConflict("source run is no longer available")
+
+    @staticmethod
+    def _check_automatic_approval(
+        connection: sqlite3.Connection, proposal: sqlite3.Row
+    ) -> None:
+        verified_recovery = (
+            proposal["verification"] == "tool_observed"
+            and proposal["analyzer_prompt_version"] == TOOL_RECOVERY_VERSION
+            and proposal["operation"] == "create"
+            and proposal["scope"] == "project"
+            and proposal["kind"] == "successful_approach"
+        )
+        if (
+            proposal["source_mode"] != "automatic_run"
+            or proposal["operation"] == "expire"
+            or (proposal["verification"] not in {"user_asserted", "test_verified"} and not verified_recovery)
+            or proposal["confidence"] < 0.6
+            or json.loads(proposal["conflicts_json"])
+            or json.loads(proposal["warnings_json"])
+        ):
+            raise MemoryProposalConflict("proposal requires human review")
+        analysis = json.loads(proposal["analysis_json"])
+        if analysis["contradictions"] or analysis["sensitive_findings"]:
+            raise MemoryProposalConflict("evidence analysis requires human review")
+        evidence = json.loads(proposal["proposal_json"])["evidence_refs"]
+        matching = connection.execute(
+            """
+            SELECT evidence_ref FROM memory_proposal_evidence
+            WHERE proposal_id=? AND verification=?
+            """,
+            (proposal["id"], proposal["verification"]),
+        ).fetchall()
+        cited = {row["evidence_ref"] for row in matching if row["evidence_ref"] in evidence}
+        if len(cited) < (3 if verified_recovery else 1):
+            raise MemoryProposalConflict("proposal lacks matching direct evidence")
+        duplicate_subject = connection.execute(
+            """
+            SELECT 1 FROM memories
+            WHERE scope=? AND (scope='user' OR project_id=?) AND kind=?
+              AND lower(trim(subject))=lower(trim(?)) AND id IS NOT ?
+              AND status='active'
+              AND (expires_at IS NULL OR julianday(expires_at) > julianday('now'))
+            LIMIT 1
+            """,
+            (proposal["scope"], proposal["project_id"], proposal["kind"],
+             proposal["subject"], proposal["target_memory_id"]),
+        ).fetchone()
+        if duplicate_subject:
+            raise MemoryProposalConflict("another active memory already uses this subject")
 
     def list_review_actions(self, proposal_id: str) -> list[dict[str, Any]]:
         with self._connect() as connection:

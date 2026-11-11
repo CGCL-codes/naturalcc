@@ -9,6 +9,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any, AsyncIterator
 
+import psutil
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
@@ -18,6 +19,7 @@ from code_agent.agent_core.compaction import CompactionService
 from code_agent.agent_core.context_builder import ContextPlanner
 from code_agent.agent_core.event_store import EventStore, ThreadActiveConflict, VersionConflict
 from code_agent.agent_core.memory_proposals import (
+    AutoMemoryWorker,
     MemoryProposalGenerationError,
     MemoryProposalService,
     ProposalValidationError,
@@ -252,7 +254,14 @@ class MemoryProposalActionRequest(BaseModel):
     reason: str = Field(default="", max_length=2_000)
 
 
-def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = None) -> APIRouter:
+def create_agent_router(
+    engine: RunEngine,
+    memory_store: MemoryStore | None = None,
+    *,
+    auto_memory_mode: str = "off",
+) -> APIRouter:
+    if auto_memory_mode not in {"off", "review", "auto"}:
+        raise ValueError("CODE_AGENT_AUTO_MEMORY_MODE must be off, review, or auto")
     router = APIRouter(prefix="/api/agent", tags=["agent"])
     engine.store.migrate_legacy_runs()
     proposal_service = (
@@ -265,6 +274,10 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
         if memory_store is not None
         else None
     )
+    if proposal_service is not None and auto_memory_mode != "off":
+        engine.auto_memory = AutoMemoryWorker(
+            proposal_service, auto_apply=auto_memory_mode == "auto"
+        )
 
     @router.post("/threads")
     async def create_thread(request: CreateThreadRequest) -> dict[str, Any]:
@@ -695,6 +708,21 @@ def create_agent_router(engine: RunEngine, memory_store: MemoryStore | None = No
         events = await asyncio.to_thread(engine.store.list_events, run_id, after)
         return {"events": [event.to_dict() for event in events]}
 
+    @router.get("/runs/{run_id}/memory-extraction")
+    async def get_memory_extraction(run_id: str) -> dict[str, Any]:
+        try:
+            run = await asyncio.to_thread(engine.store.get_run, run_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        outcome = await asyncio.to_thread(engine.store.get_memory_extraction, run_id)
+        if outcome is None:
+            status = "disabled" if engine.auto_memory is None else "not_scheduled"
+            return {"run_id": run_id, "run_status": run["status"], "status": status}
+        worker_pid = outcome.pop("worker_pid")
+        if outcome["status"] in {"queued", "running"} and not psutil.pid_exists(worker_pid):
+            outcome.update(status="interrupted", reason="worker_stopped")
+        return {"run_id": run_id, "run_status": run["status"], **outcome}
+
     @router.get("/runs/{run_id}/events.ndjson")
     async def stream_events(request: Request, run_id: str, after: int = Query(default=0, ge=0)) -> StreamingResponse:
         try:
@@ -939,4 +967,7 @@ def build_default_agent_router() -> APIRouter:
         compaction_service=compaction_service,
         default_runtime_model_config=context_runtime.default_model_config,
     )
-    return create_agent_router(engine, memory)
+    return create_agent_router(
+        engine, memory,
+        auto_memory_mode=os.environ.get("CODE_AGENT_AUTO_MEMORY_MODE", "auto").strip().lower(),
+    )

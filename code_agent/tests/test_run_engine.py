@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import sqlite3
 
 import pytest
 
@@ -254,6 +255,88 @@ def test_run_splits_pinned_and_retrieved_memory_for_cache_friendly_prompt(
     assert runtime_context.count(retrieved_id) == 1
     assert system_prompt.index(pinned_id) < system_prompt.index("[USER_GOAL]")
     assert "[ACTIVE_STATE]" in runtime_context
+
+
+def test_chinese_paraphrase_semantic_recall_is_scoped_and_rechecked(tmp_path: Path):
+    store = EventStore(tmp_path / "agent.db")
+    memory = MemoryStore(store.db_path)
+    project = str(tmp_path.resolve())
+
+    def seed(subject, content, *, workspace=project, kind="successful_approach"):
+        memory_id = memory.create_candidate(
+            scope="project", kind=kind, project_id=workspace, subject=subject, content=content,
+            source_run_id=None, source_revision=None, confidence=0.95,
+        )
+        memory.activate(memory_id)
+        return memory_id
+
+    expected = seed("CACHE-BRIDGE-R7T", "After updating build images, clear .ncc-mem-t8zc before rebuilding.")
+    foreign = seed("Private note", "Cross-project-only", workspace=str(tmp_path / "other"))
+    expired = seed("Expired note", "Expired-only")
+    pinned = seed("Release policy", "Check signature first.", kind="project_constraint")
+    with sqlite3.connect(memory.db_path) as connection:
+        connection.execute("UPDATE memories SET expires_at='2000-01-01' WHERE id=?", (expired,))
+    goal = "更换编译环境后，成品仍然用了旧版本依赖。重试之前要先处理哪个内部目录？"
+    assert memory.search(goal, project_id=project) == []
+    (tmp_path / "README.md").write_text("Some current evidence", encoding="utf-8")
+    model = ScriptedModelGateway([
+        ModelResponse(content=json.dumps({"ids": [foreign, expected, expired, expected, pinned]}), input_tokens=50, output_tokens=10),
+        ModelResponse(tool_calls=[ToolCall("read", "workspace.read", {"path": "README.md"})]),
+        ModelResponse(content="done"),
+    ])
+    tokenizer_root = Path(__file__).resolve().parents[1] / "resources" / "deepseek_v3_tokenizer"
+    planner = ContextPlanner(
+        DeepSeekTokenCounter.from_directory(tokenizer_root),
+        DeepSeekRequestSerializer(), DeepSeekModelProfile(context_window_tokens=16_384),
+    )
+    engine = RunEngine(
+        store, build_default_registry(include_mutating=False), model,
+        memory_store=memory, context_planner=planner,
+    )
+    run_id = engine.create_run(tmp_path, goal)
+    assert engine.step(run_id)["status"] == "running"
+    selector = model.requests[0]
+    assert selector.purpose == "memory_recall"
+    assert selector.tools == []
+    assert [row["id"] for row in json.loads(selector.messages[1]["content"])["candidates"]] == [expected]
+    assert expected in model.requests[1].messages[-1]["content"]
+    assert pinned in model.requests[1].messages[0]["content"]
+    assert foreign not in model.requests[1].messages[-1]["content"]
+    assert memory.delete(expected)
+    state = engine.run(run_id)
+    assert state["status"] == "completed"
+    assert state["llm_calls"] == 3
+    assert state["input_tokens"] == 50 and state["output_tokens"] == 10
+    assert [request.purpose for request in model.requests] == ["memory_recall", "agent", "agent"]
+    assert expected not in model.requests[-1].messages[-1]["content"]
+    requests = [event.payload for event in store.list_events(run_id) if event.type == "model.requested"]
+    assert requests[1]["retrieved_memory_ids"] == [expected]
+    assert requests[2]["retrieved_memory_ids"] == []
+
+
+def test_bad_semantic_selector_falls_back_to_normal_answer(tmp_path: Path):
+    store = EventStore(tmp_path / "agent.db")
+    memory = MemoryStore(store.db_path)
+    memory.activate(memory.create_candidate(
+        scope="project", kind="workflow", project_id=str(tmp_path.resolve()),
+        subject="Formatter workflow", content="Run formatter after editing.",
+        source_run_id=None, source_revision=None, confidence=0.95,
+    ))
+    tokenizer_root = Path(__file__).resolve().parents[1] / "resources" / "deepseek_v3_tokenizer"
+    planner = ContextPlanner(
+        DeepSeekTokenCounter.from_directory(tokenizer_root),
+        DeepSeekRequestSerializer(), DeepSeekModelProfile(context_window_tokens=16_384),
+    )
+    model = ScriptedModelGateway([ModelResponse(content="bad json"), ModelResponse(content="normal answer")])
+    engine = RunEngine(
+        store, build_default_registry(include_mutating=False), model,
+        memory_store=memory, context_planner=planner,
+    )
+    run_id = engine.create_run(tmp_path, "二分查找为什么要求有序？")
+    assert engine.run(run_id)["final_answer"] == "normal answer"
+    trace = next(event for event in store.list_events(run_id) if event.type == "memory.recall_evaluated")
+    assert trace.payload["selected_ids"] == []
+    assert trace.payload["outcome"] == "JSONDecodeError"
 
 
 def test_target_files_are_persisted_and_visible_to_model(tmp_path: Path):

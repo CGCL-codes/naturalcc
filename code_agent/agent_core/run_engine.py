@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import re
 import threading
 import time
 import uuid
 from dataclasses import replace
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +26,8 @@ from .contracts import (
 )
 from .context_builder import ContextBuilder, ContextPlanner
 from .event_store import EventStore, VersionConflict
+from .memory_prompts import build_recall_messages
+from .memory_proposals import AutoMemoryWorker
 from .memory_store import PINNED_MEMORY_KINDS, MemoryStore
 from .model_gateway import ModelGateway, RuntimeModelConfig
 from .policy import PolicyDecision, PolicyEngine
@@ -137,6 +141,7 @@ class RunEngine:
         self.policy = policy or PolicyEngine()
         self.context_builder = context_builder or ContextBuilder()
         self.memory_store = memory_store
+        self.auto_memory: AutoMemoryWorker | None = None
         self.context_planner = context_planner
         self.compaction_service = compaction_service
         if isinstance(default_runtime_model_config, RuntimeModelConfig):
@@ -732,6 +737,9 @@ class RunEngine:
                     exclude_kinds=PINNED_MEMORY_KINDS,
                 )
             )
+            if not memories and re.search(r"[\u3400-\u9fff]", state["goal"]):
+                memories = self._semantic_memory_recall(state, budget, pinned_memories)
+        retrieved_memory_ids = [item["id"] for item in memories]
         if state.get("thread_summary"):
             # The legacy summary changes after each completed Run. Keep it in
             # the dynamic tier so it cannot invalidate the pinned prefix.
@@ -830,7 +838,20 @@ class RunEngine:
             self.store.release_workspace_lease(state["workspace"], run_id)
             return state
         call_index = state["llm_calls"] + 1
-        self._record(state, "model.requested", {"message_count": len(model_messages), "call_index": call_index})
+        system_content = str(model_messages[0]["content"])
+        dynamic_content = str(model_messages[-1]["content"])
+        self._record(state, "model.requested", {
+            "message_count": len(model_messages),
+            "call_index": call_index,
+            "pinned_memory_ids": [
+                item["id"] for item in pinned_memories
+                if f'<memory id="{escape(item["id"])}"' in system_content
+            ],
+            "retrieved_memory_ids": [
+                item for item in retrieved_memory_ids
+                if f'<memory id="{escape(item)}"' in dynamic_content
+            ],
+        })
         try:
             pending: dict[str, str] = {"reasoning": "", "content": ""}
             last_flush: dict[str, float] = {"reasoning": 0.0, "content": 0.0}
@@ -1001,6 +1022,8 @@ class RunEngine:
                 RunStatus.COMPLETED.value,
             )
             self.store.release_workspace_lease(state["workspace"], run_id)
+            if self.auto_memory is not None and state.get("thread_id"):
+                self.auto_memory.submit(run_id, self._request_metadata(state))
             return state
 
         exhausted = self._budget_exhausted(state, budget)
@@ -1037,6 +1060,12 @@ class RunEngine:
             "memory-leak checks, and vulnerability_detection_fix for approved remediation. Read each scanner's "
             "coverage and limitations; no findings is not proof of safety. Re-scan and verify after repairs."
         )
+        if self.memory_store is not None:
+            rules += (
+                " Acknowledge requests to remember durable guidance. The runtime handles memory "
+                "proposals after your response. Do not claim the guidance was saved or activated "
+                "without confirmation from the runtime."
+            )
         settings = normalize_codegraph_capabilities(state.get("capabilities"))["codegraph"]
         status = state.get("codegraph_status") or {}
         if not settings["enabled"]:
@@ -1474,6 +1503,127 @@ class RunEngine:
             reserved_output_tokens=request.max_output_tokens,
         )
         return request
+
+    def _semantic_memory_recall(
+        self, state: dict[str, Any], budget: RunBudget, pinned_memories: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
+        assert self.memory_store is not None
+        scope = {
+            "project_id": state["workspace"],
+            "thread_id": state.get("thread_id"),
+            "run_id": state["run_id"],
+        }
+        if "semantic_memory_ids" in state:
+            return self.memory_store.semantic_recall_candidates(
+                **scope, selected_ids=state["semantic_memory_ids"]
+            )
+        planner = self.context_planner
+        timeout = 18
+        if (
+            planner is None or state["llm_calls"]
+            or budget.max_llm_calls < 2
+            or budget.max_output_tokens - state["output_tokens"] <= 1280
+            or time.time() - state["started_at_epoch"] + timeout >= budget.max_seconds
+        ):
+            return []
+        candidates = self.memory_store.semantic_recall_candidates(**scope)
+        if not candidates:
+            return []
+        metadata = self._request_metadata(state)
+        private_key = metadata.get("api_key")
+
+        def snippet(value: str, limit: int) -> str:
+            safe = redact_sensitive_text(value)
+            return (safe.replace(private_key, "[REDACTED]") if private_key else safe)[:limit]
+
+        messages = build_recall_messages(snippet(state["goal"], 2_000), [
+            {
+                "id": item["id"],
+                "subject": snippet(item["subject"], 160),
+                "content": snippet(item["content"], 360),
+            }
+            for item in candidates
+        ])
+        profile = self._context_profile_for_state(state)
+        largest_candidates = sorted(
+            candidates,
+            key=lambda item: planner.counter.count_text(escape(item["subject"] + item["content"])),
+            reverse=True,
+        )[:3]
+        if state.get("thread_summary"):
+            largest_candidates.append({"content": state["thread_summary"]})
+        try:
+            overhead = planner.counter.assert_fits(
+                messages, [], planner.serializer, profile, reserved_output_tokens=256
+            )
+            foreground = planner.plan(
+                system_rules=self._system_rules(state),
+                goal=state["goal"],
+                messages=state["messages"],
+                active_state=self._active_state(state),
+                pinned_memories=pinned_memories,
+                memories=largest_candidates,
+                tools=self._model_tool_definitions(state),
+                checkpoint=state.get("thread_checkpoint"),
+                runtime_authorization=self._runtime_authorization(state),
+                profile=profile,
+            )
+        except ContextHardLimitExceeded:
+            return []
+        if (
+            foreground.requires_compaction
+            or state["input_tokens"] + overhead.input_tokens + foreground.breakdown.input_tokens
+            > budget.max_input_tokens
+        ):
+            return []
+
+        state["semantic_memory_ids"] = []
+        state["llm_calls"] += 1
+        self._record(state, "model.requested", {
+            "purpose": "memory_recall", "call_index": state["llm_calls"], "message_count": len(messages),
+        })
+        outcome = "no_match"
+        try:
+            response = self.model.generate(ModelRequest(
+                messages=messages, purpose="memory_recall", max_output_tokens=256,
+                response_format={"type": "json_object"},
+                metadata={**metadata, "timeout_seconds": timeout},
+            ))
+            state["input_tokens"] += response.input_tokens
+            state["output_tokens"] += response.output_tokens
+            state["prompt_cache_hit_tokens"] = (
+                state.get("prompt_cache_hit_tokens", 0) + response.prompt_cache_hit_tokens
+            )
+            state["prompt_cache_miss_tokens"] = (
+                state.get("prompt_cache_miss_tokens", 0) + response.prompt_cache_miss_tokens
+            )
+            state["cost_usd"] = state.get("cost_usd", 0.0) + response.cost_usd
+            self._record(state, "model.usage_recorded", {
+                "purpose": "memory_recall",
+                "input_tokens": response.input_tokens,
+                "output_tokens": response.output_tokens,
+                "prompt_cache_hit_tokens": response.prompt_cache_hit_tokens,
+                "prompt_cache_miss_tokens": response.prompt_cache_miss_tokens,
+            })
+            decoded = json.loads(response.content)
+            ids = decoded.get("ids") if isinstance(decoded, dict) else None
+            if not isinstance(ids, list) or not all(isinstance(item, str) for item in ids):
+                raise ValueError("invalid memory selector output")
+            allowed_ids = {item["id"] for item in candidates}
+            state["semantic_memory_ids"] = list(dict.fromkeys(
+                item for item in ids if item in allowed_ids
+            ))[:3]
+            outcome = "selected" if state["semantic_memory_ids"] else "no_match"
+        except Exception as exc:
+            outcome = type(exc).__name__
+        selected = self.memory_store.semantic_recall_candidates(
+            **scope, selected_ids=state["semantic_memory_ids"]
+        )
+        self._record(state, "memory.recall_evaluated", {
+            "outcome": outcome, "candidate_count": len(candidates),
+            "selected_ids": [item["id"] for item in selected],
+        })
+        return selected
 
     def _request_metadata(self, state: dict[str, Any]) -> dict[str, Any]:
         key = self._run_api_keys.get(state["run_id"])
