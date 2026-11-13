@@ -9,6 +9,103 @@ from .editing import _local_aider_runtime, _unified_diff, _write_snapshot_once
 from .workspace import resolve_workspace_path
 
 
+# [maint-note:f28c525d32bd]
+# 维护导航：_execute；下列为本函数源码中的接口与路径索引。
+# 输入 context：ToolContext。
+# 输入 args：dict。
+# 输入 feature：str。
+# 输入 fix：类型由调用方与函数体约束；缺省表达式 False。
+# 输入 deep：类型由调用方与函数体约束；缺省表达式 False。
+# 返回契约：ToolResult。
+# 分支条件：not path.is_file()。
+# 分支条件：relative not in targets。
+# 分支条件：mutating and (not targets)。
+# 分支条件：mutating and allowed。
+# 分支条件：any((context.workspace / value not in permitted for value in targets))。
+# 分支条件：feature == 'vulnerability_detection'。
+# 分支条件：fix。
+# 分支条件：config.get(field)。
+# 分支条件：error。
+# 分支条件：local_runtime。
+# 分支条件：model in {'deepseek-chat', 'deepseek-reasoner'}。
+# 分支条件：mutating。
+# 分支条件：context.cancellation.is_set()。
+# 分支条件：isinstance(item, PluginResult)。
+# 分支条件：isinstance(item, str)。
+# 分支条件：logs and item.startswith(logs[-1])。
+# 分支条件：failure。
+# 分支条件：current != original or not path.exists()。
+# 遍历边界：value ← args.get('target_files', [])。
+# 遍历边界：field ← ('sanitizer_report', 'ground_truth_file')。
+# 遍历边界：relative ← targets。
+# 遍历边界：item ← plugin.execute(execution)。
+# 遍历边界：(relative, original) ← before.items()。
+# 返回路径：ToolResult('success' if success else 'error', message, data=data, artifacts=[*snapshots, str(artifact)], changed_files=changed, error=None if success else {'type': 'PipelinePluginFailed', 'message': message})。
+# 显式抛出：ValueError(f'target must be a file: {value}')。
+# 显式抛出：ValueError('target_files must contain at least one existing file')。
+# 显式抛出：ValueError("plugin targets exceed the run's target_files")。
+# 显式抛出：ValueError(error)。
+# 捕获异常：Exception。
+# 写入目标：config['scan_scope']。
+# 写入目标：config[field]。
+# 写入目标：before[relative]。
+# 写入目标：logs[-1]。
+# 写入目标：data['diff']。
+# 直接调用：CodeCompletionPlugin。
+# 直接调用：VulnerabilityDetectionPlugin。
+# 直接调用：args.get。
+# 直接调用：resolve_workspace_path。
+# 直接调用：path.relative_to(context.workspace).as_posix。
+# 直接调用：path.relative_to。
+# 直接调用：path.is_file。
+# 直接调用：ValueError。
+# 直接调用：targets.append。
+# 直接调用：context.metadata.get。
+# 直接调用：any。
+# 直接调用：args.items。
+# 直接调用：config.update。
+# 直接调用：config.setdefault。
+# 直接调用：config.get。
+# 直接调用：report.relative_to(context.workspace).as_posix。
+# 直接调用：report.relative_to。
+# 直接调用：plugin.validate。
+# 直接调用：_local_aider_runtime。
+# 直接调用：ExecutionContext。
+# 直接调用：str。
+# 直接调用：(context.workspace / relative).read_text。
+# 直接调用：snapshots.append。
+# 直接调用：_write_snapshot_once。
+# 直接调用：plugin.execute。
+# 直接调用：context.cancellation.is_set。
+# 直接调用：isinstance。
+# 直接调用：item.startswith。
+# 直接调用：logs.append。
+# 直接调用：'\n'.join。
+# 直接调用：before.items。
+# 直接调用：path.read_text。
+# 直接调用：path.exists。
+# 直接调用：changed.append。
+# 直接调用：diffs.append。
+# 直接调用：_unified_diff。
+# 直接调用：uuid4。
+# 直接调用：artifact.write_text。
+# 直接调用：redact_sensitive_text。
+# 直接调用：json.dumps。
+# 直接调用：ToolResult。
+# 表达式分流：feature == 'code_completion'；真值与假值分支分别计算，不同时执行。
+# 集合派生：value 来自 allowed。
+# 集合派生：value 来自 targets。
+# 集合派生：(key, value) 来自 args.items()；过滤 key not in {'instruction', 'target_files'}。
+# 表达式分流：deep；真值与假值分支分别计算，不同时执行。
+# 表达式分流：fix；真值与假值分支分别计算，不同时执行。
+# 表达式分流：targets；真值与假值分支分别计算，不同时执行。
+# 表达式分流：local_runtime；真值与假值分支分别计算，不同时执行。
+# 表达式分流：base_url is not None；真值与假值分支分别计算，不同时执行。
+# 表达式分流：final is not None；真值与假值分支分别计算，不同时执行。
+# 表达式分流：path.is_file()；真值与假值分支分别计算，不同时执行。
+# 表达式分流：final；真值与假值分支分别计算，不同时执行。
+# 表达式分流：success；真值与假值分支分别计算，不同时执行。
+# [/maint-note:f28c525d32bd]
 def _execute(context: ToolContext, args: dict, feature: str, *, fix=False, deep=False) -> ToolResult:
     from code_agent.plugins.base import ExecutionContext, PluginResult
     from code_agent.plugins.code_completion import CodeCompletionPlugin
@@ -105,6 +202,17 @@ def _execute(context: ToolContext, args: dict, feature: str, *, fix=False, deep=
     )
 
 
+# [maint-note:713be7f4094e]
+# 维护导航：pipeline_tool_specs；下列为本函数源码中的接口与路径索引。
+# 输入 include_mutating：类型由调用方与函数体约束；缺省表达式 True。
+# 分支条件：include_mutating。
+# 返回路径：{'type': 'object', 'properties': properties, 'required': list(required), 'additionalProperties': False}。
+# 返回路径：specs。
+# 直接调用：list。
+# 直接调用：ToolSpec。
+# 直接调用：schema。
+# 直接调用：specs.extend。
+# [/maint-note:713be7f4094e]
 def pipeline_tool_specs(include_mutating=True):
     targets = {"type": "array", "items": {"type": "string"}, "minItems": 1}
     scan = {
@@ -118,6 +226,13 @@ def pipeline_tool_specs(include_mutating=True):
         "sanitizer_report": {"type": "string"},
         "ground_truth_file": {"type": "string", "description": "Workspace-relative labeled test manifest; requires scan_type. Detection never reads labels."},
     }
+    # [maint-note:a117cdb34142]
+    # 维护导航：schema；下列为本函数源码中的接口与路径索引。
+    # 输入 properties：类型由调用方与函数体约束。
+    # 输入 required：类型由调用方与函数体约束；缺省表达式 ()。
+    # 返回路径：{'type': 'object', 'properties': properties, 'required': list(required), 'additionalProperties': False}。
+    # 直接调用：list。
+    # [/maint-note:a117cdb34142]
     def schema(properties, required=()):
         return {"type": "object", "properties": properties, "required": list(required), "additionalProperties": False}
     specs = [ToolSpec(

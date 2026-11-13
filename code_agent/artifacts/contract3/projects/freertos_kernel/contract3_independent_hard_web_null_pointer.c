@@ -221,8 +221,7 @@ static int contract3_independent_null_pointer_case_28(void)
 static int contract3_independent_null_pointer_case_29(void)
 {
     int value = 7;
-    struct contract3_box box = {0};
-    return *box.pointer;
+    return contract3_read(0);
 }
 
 static int contract3_independent_null_pointer_case_30(void)
@@ -288,8 +287,7 @@ static int contract3_independent_null_pointer_case_37(void)
 static int contract3_independent_null_pointer_case_38(void)
 {
     int value = 7;
-    struct contract3_box box = {&value};
-    return *box.pointer;
+    return contract3_read(&value);
 }
 
 static int contract3_independent_null_pointer_case_39(void)

@@ -6,6 +6,12 @@ import {
   messageReducer,
 } from '../state/messageReducer.js'
 
+// [maint-note:c35efec353e2]
+// 维护导航：useMessages；下列为本函数源码中的接口与路径索引。
+// 返回路径：{ messages: state.messages, addMsg, addRunError, beginRun, handleAgentEvent, finishRun, clearMessages, }。
+// 直接调用：useReducer。
+// 直接调用：useCallback。
+// [/maint-note:c35efec353e2]
 export function useMessages() {
     const [state, dispatch] = useReducer(messageReducer, initialMessageState)
 

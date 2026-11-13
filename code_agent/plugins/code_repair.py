@@ -20,8 +20,18 @@ REPAIR_TYPES = {
 }
 
 
+# [maint-note:a5e9c307353b]
+# 数据与行为导航：CodeRepairPlugin。
+# 继承接口：FeaturePlugin。
+# [/maint-note:a5e9c307353b]
 @register_plugin
 class CodeRepairPlugin(FeaturePlugin):
+    # [maint-note:d941cca23e72]
+    # 维护导航：metadata；下列为本函数源码中的接口与路径索引。
+    # 返回契约：FeatureMetadata。
+    # 返回路径：FeatureMetadata(name='code_repair', label='Code Repair', description='Build a focused repair prompt and delegate minimal code fixes to Aider', execution_mode=ExecutionMode.AIDER)。
+    # 直接调用：FeatureMetadata。
+    # [/maint-note:d941cca23e72]
     @property
     def metadata(self) -> FeatureMetadata:
         return FeatureMetadata(
@@ -31,6 +41,12 @@ class CodeRepairPlugin(FeaturePlugin):
             execution_mode=ExecutionMode.AIDER,
         )
 
+    # [maint-note:c47df86eba2b]
+    # 维护导航：config_schema；下列为本函数源码中的接口与路径索引。
+    # 返回契约：List[ConfigField]。
+    # 返回路径：[ConfigField(name='repair_type', label='Repair Type / 修复类型', type=ConfigFieldType.SELECT, required=False, default='bug_fix', options=[{'value': 'bug_fix', 'label': 'bug_fix / 逻辑或运行时错误'}, {'value': 'compile_error', 'label': 'compile_error / 。
+    # 直接调用：ConfigField。
+    # [/maint-note:c47df86eba2b]
     @property
     def config_schema(self) -> List[ConfigField]:
         return [
@@ -76,12 +92,34 @@ class CodeRepairPlugin(FeaturePlugin):
             ),
         ]
 
+    # [maint-note:c237ee07fc39]
+    # 维护导航：validate；下列为本函数源码中的接口与路径索引。
+    # 输入 config：Dict[str, Any]。
+    # 输入 files：类型由调用方与函数体约束；缺省表达式 None。
+    # 返回契约：Optional[str]。
+    # 分支条件：repair_type not in REPAIR_TYPES。
+    # 返回路径：'repair_type must be one of: bug_fix, compile_error, test_failure, safe_refactor'。
+    # 返回路径：None。
+    # 直接调用：str(config.get('repair_type', 'bug_fix')).strip。
+    # 直接调用：str。
+    # 直接调用：config.get。
+    # [/maint-note:c237ee07fc39]
     def validate(self, config: Dict[str, Any], files=None) -> Optional[str]:
         repair_type = str(config.get("repair_type", "bug_fix")).strip()
         if repair_type not in REPAIR_TYPES:
             return "repair_type must be one of: bug_fix, compile_error, test_failure, safe_refactor"
         return None
 
+    # [maint-note:911c596dac2f]
+    # 维护导航：preview；下列为本函数源码中的接口与路径索引。
+    # 输入 context：ExecutionContext。
+    # 返回契约：str。
+    # 分支条件：not context.target_files。
+    # 返回路径：'❌ Code Repair requires at least one target file.'。
+    # 返回路径：preview_prompt(target_files=context.target_files, user_instruction=self._build_repair_instruction(context), model=context.model, api_key=context.api_key, project_dir=context.project_dir, symbol=None, completion_type=None, prefix='')。
+    # 直接调用：preview_prompt。
+    # 直接调用：self._build_repair_instruction。
+    # [/maint-note:911c596dac2f]
     def preview(self, context: ExecutionContext) -> str:
         if not context.target_files:
             return "❌ Code Repair requires at least one target file."
@@ -97,6 +135,18 @@ class CodeRepairPlugin(FeaturePlugin):
             prefix="",
         )
 
+    # [maint-note:66986fad3ec8]
+    # 维护导航：execute；下列为本函数源码中的接口与路径索引。
+    # 输入 context：ExecutionContext。
+    # 返回契约：Generator[str, None, None]。
+    # 分支条件：not context.target_files。
+    # 遍历边界：log ← run_aider_stream(target_files=context.target_files, user_instruction=repair_instruction, model=context.model, api_key=context.api_key, base_url=context.base_url, project_dir=context.project_dir, symbol=None, completion_type=None, prefix='')。
+    # 返回路径：无返回值。
+    # 直接调用：self._build_repair_instruction。
+    # 直接调用：run_aider_stream。
+    # 生成器交付：'⚠️ [错误]: Code Repair requires at least one target file.\n'。
+    # 生成器交付：log。
+    # [/maint-note:66986fad3ec8]
     def execute(self, context: ExecutionContext) -> Generator[str, None, None]:
         if not context.target_files:
             yield "⚠️ [错误]: Code Repair requires at least one target file.\n"
@@ -116,6 +166,27 @@ class CodeRepairPlugin(FeaturePlugin):
         ):
             yield log
 
+    # [maint-note:da8abdb11c00]
+    # 维护导航：_build_repair_instruction；下列为本函数源码中的接口与路径索引。
+    # 输入 context：ExecutionContext。
+    # 返回契约：str。
+    # 分支条件：allow_refactor。
+    # 分支条件：user_instruction。
+    # 分支条件：failure_log。
+    # 分支条件：extra_context。
+    # 返回路径：'\n'.join(parts)。
+    # 直接调用：str(config.get('repair_type', 'bug_fix')).strip。
+    # 直接调用：str。
+    # 直接调用：config.get。
+    # 直接调用：str(config.get('failure_log', '')).strip。
+    # 直接调用：str(config.get('extra_context', '')).strip。
+    # 直接调用：self._bool_config。
+    # 直接调用：context.instruction.strip。
+    # 直接调用：REPAIR_TYPES.get。
+    # 直接调用：parts.append。
+    # 直接调用：parts.extend。
+    # 直接调用：'\n'.join。
+    # [/maint-note:da8abdb11c00]
     def _build_repair_instruction(self, context: ExecutionContext) -> str:
         config = context.feature_config or {}
         repair_type = str(config.get("repair_type", "bug_fix")).strip()
@@ -161,6 +232,20 @@ class CodeRepairPlugin(FeaturePlugin):
         )
         return "\n".join(parts)
 
+    # [maint-note:3a1e3cc00bd5]
+    # 维护导航：_bool_config；下列为本函数源码中的接口与路径索引。
+    # 输入 config：Dict[str, Any]。
+    # 输入 name：str。
+    # 输入 default：bool。
+    # 返回契约：bool。
+    # 分支条件：isinstance(value, str)。
+    # 返回路径：value.lower() in {'1', 'true', 'yes', 'on'}。
+    # 返回路径：bool(value)。
+    # 直接调用：config.get。
+    # 直接调用：isinstance。
+    # 直接调用：value.lower。
+    # 直接调用：bool。
+    # [/maint-note:3a1e3cc00bd5]
     def _bool_config(self, config: Dict[str, Any], name: str, default: bool) -> bool:
         value = config.get(name, default)
         if isinstance(value, str):

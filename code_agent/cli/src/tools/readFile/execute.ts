@@ -18,6 +18,14 @@ import {
 } from './schema.js'
 
 const MAX_READ_BYTES = 2_000_000
+// [maint-note:739d27bc7cd9]
+// 维护导航：executeReadFile；下列为本函数源码中的接口与路径索引。
+// 输入 input：Record<string, unknown>。
+// 输入 context：ToolExecutionContext。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 返回路径：withFileDiagnostics(() => readWorkspaceFile(input, context))。
+// 直接调用：withFileDiagnostics。
+// [/maint-note:739d27bc7cd9]
 export async function executeReadFile(
   input: Record<string, unknown>,
   context: ToolExecutionContext,
@@ -25,6 +33,63 @@ export async function executeReadFile(
   return withFileDiagnostics(() => readWorkspaceFile(input, context))
 }
 
+// [maint-note:416174ee7d47]
+// 维护导航：readWorkspaceFile；下列为本函数源码中的接口与路径索引。
+// 输入 input：Record<string, unknown>。
+// 输入 context：ToolExecutionContext。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：!info.isFile()。
+// 分支条件：fileInfo.size > MAX_READ_BYTES。
+// 分支条件：raw.includes('\0')。
+// 分支条件：totalLines === 0 && options.startLine === 1。
+// 分支条件：options.startLine > totalLines。
+// 分支条件：options.includePagePlan === true。
+// 分支条件：requestedEnd === totalLines。
+// 分支条件：!pageIsComplete。
+// 分支条件：planned !== undefined。
+// 分支条件：complete。
+// 分支条件：candidate。
+// 分支条件：best === undefined || bestCount === 0。
+// 遍历边界：low <= high。
+// 返回路径：{ content: serializePage({ path: options.path, startLine: 1, endLine: 0, totalLines: 0, content: '', complete: true, truncated: false, }, budget) }。
+// 返回路径：{ content: planned }。
+// 返回路径：{ content: complete }。
+// 返回路径：{ content: best }。
+// 显式抛出：operationError(`Not a regular file: ${options.path}`, 'not_regular_file', { field: 'path' })。
+// 显式抛出：operationError(`File is larger than ${MAX_READ_BYTES} bytes`, 'output_limit', { field: 'path' })。
+// 显式抛出：operationError(`File is not valid UTF-8: ${options.path}`, 'invalid_encoding', { field: 'path' })。
+// 显式抛出：operationError(`File is not a text file: ${options.path}`, 'invalid_encoding', { field: 'path' })。
+// 显式抛出：new ToolInputError( `startLine ${options.startLine} is past EOF (totalLines=${totalLines})`, toolDiagnostic('page_out_of_range', { field: 'startLine', message: `startLine ${options.startLine} is past EOF (totalLines=${totalLines}).` }), )。
+// 显式抛出：new ToolInputError( `read_file page at ${options.path}:${options.startLine} cannot fit maxOutputChars=${budget} without splitting a line; increase the output budget`, toolDiagnostic('output_limit', { field: 'maxOutputChars', hint: 'Request 。
+// 写入目标：raw。
+// 写入目标：pageIsComplete。
+// 写入目标：best。
+// 写入目标：bestCount。
+// 写入目标：low。
+// 写入目标：high。
+// 直接调用：parseReadFileInput。
+// 直接调用：assertOutputBudget。
+// 直接调用：resolveWorkspacePath。
+// 直接调用：lstat。
+// 直接调用：info.isFile。
+// 直接调用：operationError。
+// 直接调用：stat。
+// 直接调用：throwIfAborted。
+// 直接调用：readFile。
+// 直接调用：new TextDecoder('utf-8', { fatal: true }).decode。
+// 直接调用：raw.includes。
+// 直接调用：splitLines。
+// 直接调用：serializePage。
+// 直接调用：toolDiagnostic。
+// 直接调用：Math.min。
+// 直接调用：lines .slice(options.startLine - 1, requestedEnd) .map。
+// 直接调用：lines .slice。
+// 直接调用：lineParts.join。
+// 直接调用：planPage。
+// 直接调用：Math.floor。
+// 直接调用：lineParts.slice(0, count).join。
+// 直接调用：lineParts.slice。
+// [/maint-note:416174ee7d47]
 async function readWorkspaceFile(input: Record<string, unknown>, context: ToolExecutionContext) {
   const options = parseReadFileInput(input)
   const budget = assertOutputBudget(context.maxOutputChars)
@@ -164,6 +229,17 @@ async function readWorkspaceFile(input: Record<string, unknown>, context: ToolEx
   return { content: best }
 }
 
+// [maint-note:2368e16afda4]
+// 数据契约导航：PlanPageInput；字段含义以消费端校验为准。
+// 成员 path：string。
+// 成员 lines：readonly string[]。
+// 成员 endsWithNewline：boolean。
+// 成员 totalLines：number。
+// 成员 startLine：number。
+// 成员 requestedEnd：number。
+// 成员 budget：number。
+// 成员 signal（可省略）：AbortSignal。
+// [/maint-note:2368e16afda4]
 interface PlanPageInput {
   path: string
   lines: readonly string[]
@@ -183,6 +259,11 @@ interface PlanPageInput {
  */
 export const PLAN_HORIZON_LINES = MAX_READ_PAGE_LINES * (1 + MAX_SUGGESTED_CONTINUATION_RANGES)
 let lastPlanMeasuredSegments = 0
+// [maint-note:94eb95fcba9d]
+// 维护导航：getLastPlanMeasuredSegments；下列为本函数源码中的接口与路径索引。
+// 返回契约：number。
+// 返回路径：lastPlanMeasuredSegments。
+// [/maint-note:94eb95fcba9d]
 export function getLastPlanMeasuredSegments(): number {
   return lastPlanMeasuredSegments
 }
@@ -200,6 +281,29 @@ export function getLastPlanMeasuredSegments(): number {
  * fit, planning is abandoned rather than returning an empty content page, an
  * empty array, or a fabricated fallback.
  */
+// [maint-note:ec44a2c20317]
+// 维护导航：planPage；下列为本函数源码中的接口与路径索引。
+// 输入 input：PlanPageInput。
+// 返回契约：string | undefined。
+// 分支条件：currentEnd === undefined。
+// 分支条件：end === undefined。
+// 分支条件：ranges.length === 0。
+// 分支条件：serialized !== undefined。
+// 遍历边界：const maxRanges ← [MAX_SUGGESTED_CONTINUATION_RANGES, 1]。
+// 遍历边界：ranges.length < maxRanges && next <= totalLines。
+// 返回路径：serialized。
+// 返回路径：undefined。
+// 写入目标：next。
+// 直接调用：measureLines。
+// 直接调用：throwIfAborted。
+// 直接调用：planMetadataReserve。
+// 直接调用：maxTruncatedPageEnd。
+// 直接调用：maxStandalonePageEnd。
+// 直接调用：ranges.push。
+// 直接调用：ranges.at。
+// 直接调用：serializePage。
+// 直接调用：measurement.content。
+// [/maint-note:ec44a2c20317]
 function planPage(input: PlanPageInput): string | undefined {
   const { path, lines, endsWithNewline, totalLines, startLine, requestedEnd, budget, signal } = input
   const measurement = measureLines({
@@ -265,6 +369,11 @@ function planPage(input: PlanPageInput): string | undefined {
   return undefined
 }
 
+// [maint-note:e0ae2417b5f1]
+// 数据契约导航：LineMeasurement；字段含义以消费端校验为准。
+// 成员 content：(startLine: number, endLine: number) => string。
+// 成员 escapedLength：(startLine: number, endLine: number) => number。
+// [/maint-note:e0ae2417b5f1]
 interface LineMeasurement {
   content: (startLine: number, endLine: number) => string
   /** Exact JSON-escaped length (without surrounding quotes) of a page body. */
@@ -277,6 +386,19 @@ interface LineMeasurement {
  * the binary searches. The final chosen candidates are always re-serialized
  * with the real JSON.stringify before being returned.
  */
+// [maint-note:7c2abf0debfc]
+// 维护导航：measureLines；下列为本函数源码中的接口与路径索引。
+// 输入 options：{ lines: readonly string[] endsWithNewline: boolean totalLines: number startLine: number maxLines: number }。
+// 返回契约：LineMeasurement。
+// 遍历边界：let absoluteLine = firstLine; absoluteLine <= lastLine; absoluteLine += 1。
+// 返回路径：{ content: (start, end) => segments.slice(start - offset - 1, end - offset).join(''), escapedLength: (start, end) => prefix[end - offset] - prefix[start - offset - 1], }。
+// 写入目标：absoluteLine。
+// 写入目标：lastPlanMeasuredSegments。
+// 直接调用：Math.min。
+// 直接调用：segments.push。
+// 直接调用：prefix.push。
+// 直接调用：JSON.stringify。
+// [/maint-note:7c2abf0debfc]
 function measureLines(options: {
   lines: readonly string[]
   endsWithNewline: boolean
@@ -305,6 +427,15 @@ function measureLines(options: {
 }
 
 /** Length of the exact serialized envelope with an empty content body. */
+// [maint-note:9b891ec1fd77]
+// 维护导航：envelopeLength；下列为本函数源码中的接口与路径索引。
+// 输入 page：{ path: string startLine: number endLine: number totalLines: number complete: boolean nextStartLine?: number plan?: PagePlan }。
+// 返回契约：number。
+// 返回路径：JSON.stringify(value).length。
+// 直接调用：Object.fromEntries。
+// 直接调用：planEntries。
+// 直接调用：JSON.stringify。
+// [/maint-note:9b891ec1fd77]
 function envelopeLength(page: {
   path: string
   startLine: number
@@ -328,6 +459,16 @@ function envelopeLength(page: {
   return JSON.stringify(value).length
 }
 
+// [maint-note:a8fbbae183ba]
+// 维护导航：planEntries；下列为本函数源码中的接口与路径索引。
+// 输入 plan：PagePlan | undefined。
+// 返回契约：[string, unknown][]。
+// 分支条件：plan === undefined。
+// 分支条件：plan.nextPlanStartLine !== undefined。
+// 返回路径：[]。
+// 返回路径：entries。
+// 直接调用：entries.push。
+// [/maint-note:a8fbbae183ba]
 function planEntries(plan: PagePlan | undefined): [string, unknown][] {
   if (plan === undefined) return []
   const entries: [string, unknown][] = [
@@ -341,6 +482,19 @@ function planEntries(plan: PagePlan | undefined): [string, unknown][] {
 }
 
 /** Worst-case serialized plan metadata overhead for up to `maxRanges` ranges. */
+// [maint-note:74386258d6d8]
+// 维护导航：planMetadataReserve；下列为本函数源码中的接口与路径索引。
+// 输入 path：string。
+// 输入 totalLines：number。
+// 输入 maxRanges：number。
+// 返回契约：number。
+// 返回路径：JSON.stringify({ ...base, ...Object.fromEntries(planEntries(plan)) }).length - JSON.stringify(base).length。
+// 直接调用：Array.from。
+// 直接调用：Math.max。
+// 直接调用：JSON.stringify。
+// 直接调用：Object.fromEntries。
+// 直接调用：planEntries。
+// [/maint-note:74386258d6d8]
 function planMetadataReserve(path: string, totalLines: number, maxRanges: number): number {
   const worstNumber = 1_000_000_000
   const ranges = Array.from({ length: maxRanges }, () => ({
@@ -371,6 +525,20 @@ function planMetadataReserve(path: string, totalLines: number, maxRanges: number
  * serialization fits `budget`, or undefined when not even one whole line
  * fits. Monotone in the line count, so a binary search is exact.
  */
+// [maint-note:3c4ebcca246e]
+// 维护导航：maxTruncatedPageEnd；下列为本函数源码中的接口与路径索引。
+// 输入 options：{ path: string measurement: LineMeasurement totalLines: number startLine: number requestedEnd: number budget: number }。
+// 返回契约：number | undefined。
+// 分支条件：fits(endLine)。
+// 遍历边界：low <= high。
+// 返回路径：best。
+// 写入目标：best。
+// 写入目标：low。
+// 写入目标：high。
+// 直接调用：Math.min。
+// 直接调用：Math.floor。
+// 直接调用：fits。
+// [/maint-note:3c4ebcca246e]
 function maxTruncatedPageEnd(options: {
   path: string
   measurement: LineMeasurement
@@ -380,6 +548,14 @@ function maxTruncatedPageEnd(options: {
   budget: number
 }): number | undefined {
   const { path, measurement, totalLines, startLine, requestedEnd, budget } = options
+  // [maint-note:4add0e600f46]
+  // 维护导航：fits；下列为本函数源码中的接口与路径索引。
+  // 输入 endLine：number。
+  // 返回契约：boolean。
+  // 返回路径：envelope + measurement.escapedLength(startLine, endLine) <= budget。
+  // 直接调用：envelopeLength。
+  // 直接调用：measurement.escapedLength。
+  // [/maint-note:4add0e600f46]
   const fits = (endLine: number): boolean => {
     const envelope = envelopeLength({ path, startLine, endLine, totalLines, complete: false, nextStartLine: endLine + 1 })
     return envelope + measurement.escapedLength(startLine, endLine) <= budget
@@ -406,6 +582,25 @@ function maxTruncatedPageEnd(options: {
  * of the current page; this function's candidates use the same exact length
  * math, so both agree.
  */
+// [maint-note:d4b374301df0]
+// 维护导航：maxStandalonePageEnd；下列为本函数源码中的接口与路径索引。
+// 输入 options：{ path: string measurement: LineMeasurement totalLines: number startLine: number budget: number }。
+// 返回契约：number | undefined。
+// 分支条件：fits(endLine)。
+// 分支条件：best !== undefined。
+// 分支条件：serialized === undefined。
+// 遍历边界：low <= high。
+// 返回路径：undefined。
+// 返回路径：best。
+// 写入目标：best。
+// 写入目标：low。
+// 写入目标：high。
+// 直接调用：Math.min。
+// 直接调用：Math.floor。
+// 直接调用：fits。
+// 直接调用：serializePage。
+// 直接调用：measurement.content。
+// [/maint-note:d4b374301df0]
 function maxStandalonePageEnd(options: {
   path: string
   measurement: LineMeasurement
@@ -414,6 +609,14 @@ function maxStandalonePageEnd(options: {
   budget: number
 }): number | undefined {
   const { path, measurement, totalLines, startLine, budget } = options
+  // [maint-note:09094823b31f]
+  // 维护导航：fits；下列为本函数源码中的接口与路径索引。
+  // 输入 endLine：number。
+  // 返回契约：boolean。
+  // 返回路径：envelope + measurement.escapedLength(startLine, endLine) <= budget。
+  // 直接调用：envelopeLength。
+  // 直接调用：measurement.escapedLength。
+  // [/maint-note:09094823b31f]
   const fits = (endLine: number): boolean => {
     const complete = endLine === totalLines
     const envelope = envelopeLength({
@@ -457,6 +660,19 @@ function maxStandalonePageEnd(options: {
   return best
 }
 
+// [maint-note:af1296438d97]
+// 维护导航：splitLines；下列为本函数源码中的接口与路径索引。
+// 输入 raw：string。
+// 返回契约：{ lines: string[]; endsWithNewline: boolean }。
+// 分支条件：!normalized。
+// 分支条件：endsWithNewline。
+// 返回路径：{ lines: [], endsWithNewline: false }。
+// 返回路径：{ lines, endsWithNewline }。
+// 直接调用：raw.replace。
+// 直接调用：normalized.endsWith。
+// 直接调用：normalized.split。
+// 直接调用：lines.pop。
+// [/maint-note:af1296438d97]
 function splitLines(raw: string): { lines: string[]; endsWithNewline: boolean } {
   const normalized = raw.replace(/\r\n?/g, '\n')
   const endsWithNewline = normalized.endsWith('\n')
@@ -466,6 +682,18 @@ function splitLines(raw: string): { lines: string[]; endsWithNewline: boolean } 
   return { lines, endsWithNewline }
 }
 
+// [maint-note:536353f9a34b]
+// 数据契约导航：ReadFilePage；字段含义以消费端校验为准。
+// 成员 path：string。
+// 成员 startLine：number。
+// 成员 endLine：number。
+// 成员 totalLines：number。
+// 成员 content：string。
+// 成员 complete：boolean。
+// 成员 truncated：boolean。
+// 成员 nextStartLine（可省略）：number。
+// 成员 plan（可省略）：PagePlan。
+// [/maint-note:536353f9a34b]
 interface ReadFilePage {
   path: string
   startLine: number
@@ -478,12 +706,35 @@ interface ReadFilePage {
   plan?: PagePlan
 }
 
+// [maint-note:45b9c8fd123e]
+// 维护导航：serializeReadFilePage；下列为本函数源码中的接口与路径索引。
+// 输入 page：ReadFilePage。
+// 返回契约：string。
+// 返回路径：serializePage(page, Number.MAX_SAFE_INTEGER)。
+// 直接调用：serializePage。
+// [/maint-note:45b9c8fd123e]
 export function serializeReadFilePage(page: ReadFilePage): string {
   return serializePage(page, Number.MAX_SAFE_INTEGER)
 }
 
 function serializePage(page: ReadFilePage, budget: number): string
 function serializePage(page: ReadFilePage, budget: number, throwOnOverflow: false): string | undefined
+// [maint-note:08e5448fb23f]
+// 维护导航：serializePage；下列为本函数源码中的接口与路径索引。
+// 输入 page：ReadFilePage。
+// 输入 budget：number。
+// 输入 throwOnOverflow：类型由调用方与函数体约束；缺省表达式 true。
+// 返回契约：string | undefined。
+// 分支条件：serialized.length <= budget。
+// 分支条件：throwOnOverflow。
+// 返回路径：serialized。
+// 返回路径：undefined。
+// 显式抛出：new ToolInputError( `read_file result envelope exceeds maxOutputChars=${budget}; increase the output budget`, toolDiagnostic('output_limit', { field: 'maxOutputChars' }), )。
+// 直接调用：Object.fromEntries。
+// 直接调用：planEntries。
+// 直接调用：JSON.stringify。
+// 直接调用：toolDiagnostic。
+// [/maint-note:08e5448fb23f]
 function serializePage(
   page: ReadFilePage,
   budget: number,

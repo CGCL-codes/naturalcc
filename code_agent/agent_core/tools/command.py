@@ -38,6 +38,18 @@ _CANCELLED_RUNS: set[str] = set()
 _PROCESS_LOCK = threading.Lock()
 
 
+# [maint-note:b5d051ae53af]
+# 维护导航：_terminate_process；下列为本函数源码中的接口与路径索引。
+# 输入 process：subprocess.Popen。
+# 返回契约：None。
+# 分支条件：process.poll() is not None。
+# 分支条件：os.name != 'nt'。
+# 返回路径：无返回值。
+# 捕获异常：(OSError, ProcessLookupError)。
+# 直接调用：process.poll。
+# 直接调用：os.killpg。
+# 直接调用：process.terminate。
+# [/maint-note:b5d051ae53af]
 def _terminate_process(process: subprocess.Popen) -> None:
     if process.poll() is not None:
         return
@@ -50,6 +62,16 @@ def _terminate_process(process: subprocess.Popen) -> None:
         process.terminate()
 
 
+# [maint-note:5e2c1d434660]
+# 维护导航：cancel_run_commands；下列为本函数源码中的接口与路径索引。
+# 输入 run_id：str。
+# 返回契约：None。
+# 分支条件：process is not None。
+# 直接调用：_CANCELLED_RUNS.add。
+# 直接调用：_ACTIVE_PROCESSES.get。
+# 直接调用：_terminate_process。
+# 资源作用域：_PROCESS_LOCK；退出该 with 时调用对应上下文清理。
+# [/maint-note:5e2c1d434660]
 def cancel_run_commands(run_id: str) -> None:
     with _PROCESS_LOCK:
         _CANCELLED_RUNS.add(run_id)
@@ -58,6 +80,58 @@ def cancel_run_commands(run_id: str) -> None:
         _terminate_process(process)
 
 
+# [maint-note:cf5a92c95b4c]
+# 维护导航：_run；下列为本函数源码中的接口与路径索引。
+# 输入 context：ToolContext。
+# 输入 args：dict。
+# 返回契约：ToolResult。
+# 分支条件：not argv。
+# 分支条件：argv[0] != executable。
+# 分支条件：executable not in ALLOWED_EXECUTABLES。
+# 分支条件：executable == 'git' and len(argv) > 1 and (argv[1] in DENIED_GIT_SUBCOMMANDS)。
+# 分支条件：not cwd.is_dir()。
+# 分支条件：os.name == 'nt'。
+# 分支条件：value。
+# 分支条件：executable in {'python', 'python3'}。
+# 分支条件：cancelled。
+# 遍历边界：key ← ('COMSPEC', 'SystemRoot', 'WINDIR', 'PATHEXT', 'TEMP', 'TMP', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA')。
+# 返回路径：ToolResult('timeout', f'command timed out after {timeout_seconds}s', data={'stdout': (stdout or '')[:max_output_chars], 'stderr': (stderr or '')[:max_output_chars]})。
+# 返回路径：ToolResult('cancelled', 'command cancelled with run', data={'stdout': stdout[:max_output_chars], 'stderr': stderr[:max_output_chars]}, exit_code=process.returncode)。
+# 返回路径：ToolResult(status, combined or f'command exited with {process.returncode}', data={'argv': argv, 'launch_argv': launch_argv, 'cwd': cwd.relative_to(context.workspace).as_posix() or '.', 'stdout': stdout[:max_output_chars], 'stderr': stderr[:。
+# 显式抛出：ValueError('argv must not be empty')。
+# 显式抛出：ValueError('command executable must be a bare executable name')。
+# 显式抛出：ValueError(f'executable is not allowed: {executable}')。
+# 显式抛出：ValueError(f'git subcommand is not allowed: {argv[1]}')。
+# 显式抛出：ValueError('command cwd must be a directory')。
+# 捕获异常：subprocess.TimeoutExpired。
+# 写入目标：env[key]。
+# 写入目标：_ACTIVE_PROCESSES[context.run_id]。
+# 直接调用：ValueError。
+# 直接调用：Path。
+# 直接调用：len。
+# 直接调用：resolve_workspace_path。
+# 直接调用：args.get。
+# 直接调用：cwd.is_dir。
+# 直接调用：min。
+# 直接调用：str。
+# 直接调用：os.environ.get。
+# 直接调用：os.pathsep.join。
+# 直接调用：shutil.which。
+# 直接调用：subprocess.Popen。
+# 直接调用：_CANCELLED_RUNS.discard。
+# 直接调用：process.communicate。
+# 直接调用：_terminate_process。
+# 直接调用：ToolResult。
+# 直接调用：_ACTIVE_PROCESSES.pop。
+# 直接调用：cwd.relative_to(context.workspace).as_posix。
+# 直接调用：cwd.relative_to。
+# 集合派生：part 来自 (runtime_bin, inherited_path)；过滤 part。
+# 资源作用域：_PROCESS_LOCK；退出该 with 时调用对应上下文清理。
+# 清理边界：本函数含 finally；正常返回和异常展开都经过清理块。
+# 表达式分流：stdout and stderr；真值与假值分支分别计算，不同时执行。
+# 表达式分流：process.returncode == 0；真值与假值分支分别计算，不同时执行。
+# 表达式分流：status == 'success'；真值与假值分支分别计算，不同时执行。
+# [/maint-note:cf5a92c95b4c]
 def _run(context: ToolContext, args: dict) -> ToolResult:
     argv = args["argv"]
     if not argv:
@@ -152,6 +226,12 @@ def _run(context: ToolContext, args: dict) -> ToolResult:
     )
 
 
+# [maint-note:87f19fe60d2a]
+# 维护导航：command_tool_spec；下列为本函数源码中的接口与路径索引。
+# 返回契约：ToolSpec。
+# 返回路径：ToolSpec('command.run', 'Run an approved argv-only build or test command in the locked workspace.', {'type': 'object', 'properties': {'argv': {'type': 'array', 'items': {'type': 'string'}}, 'cwd': {'type': 'string'}, 'timeout_seconds': {'ty。
+# 直接调用：ToolSpec。
+# [/maint-note:87f19fe60d2a]
 def command_tool_spec() -> ToolSpec:
     return ToolSpec(
         "command.run",

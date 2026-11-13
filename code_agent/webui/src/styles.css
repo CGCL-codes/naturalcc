@@ -1,3 +1,28 @@
+/* [maint-note:59480e2c8845]
+ * 样式作用域：:root。
+ * 文字呈现：font-family=Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif；font-size=15px。
+ * 色彩与边界：color-scheme=dark；background=#1a1a1a；color=#ececec。
+ * 主题变量：--bg=#1a1a1a。
+ * 主题变量：--bg-elevated=#1f1f1f。
+ * 主题变量：--panel=#242424。
+ * 主题变量：--panel-strong=#2a2a2a。
+ * 主题变量：--panel-hover=#2f2f2f。
+ * 主题变量：--line=#2a2a2a。
+ * 主题变量：--line-strong=#3a3a3a。
+ * 主题变量：--text=#ececec。
+ * 主题变量：--text-secondary=#b4b4b4。
+ * 主题变量：--muted=#9ca3af。
+ * 主题变量：--faint=#6b7280。
+ * 主题变量：--accent=#d97757。
+ * 主题变量：--accent-strong=#e8996e。
+ * 主题变量：--accent-glow=rgba(217, 119, 87, 0.25)。
+ * 主题变量：--amber=#d4a84f。
+ * 主题变量：--danger=#e06c75。
+ * 主题变量：--blue=#72a7d7。
+ * 主题变量：--shadow-sm=0 1px 3px rgba(0, 0, 0, 0.3)。
+ * 主题变量：--shadow-md=0 2px 8px rgba(0, 0, 0, 0.35)。
+ * 主题变量：--shadow-lg=0 4px 16px rgba(0, 0, 0, 0.4)。
+ * [/maint-note:59480e2c8845] */
 :root {
   color-scheme: dark;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -26,10 +51,19 @@
   --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
+/* [maint-note:d1857420ffe0]
+ * 样式作用域：*。
+ * 空间尺寸：box-sizing=border-box。
+ * [/maint-note:d1857420ffe0] */
 * {
   box-sizing: border-box;
 }
 
+/* [maint-note:26f4ee2a99ce]
+ * 样式作用域：body。
+ * 空间尺寸：margin=0；min-width=320px；height=100vh；overflow=hidden。
+ * 色彩与边界：background=var(--bg)。
+ * [/maint-note:26f4ee2a99ce] */
 body {
   margin: 0;
   min-width: 320px;
@@ -38,11 +72,19 @@ body {
   overflow: hidden;
 }
 
+/* [maint-note:88d47776bdfe]
+ * 样式作用域：#root。
+ * 空间尺寸：height=100vh；min-height=0。
+ * [/maint-note:88d47776bdfe] */
 #root {
   height: 100vh;
   min-height: 0;
 }
 
+/* [maint-note:b8595a4b19f6]
+ * 样式作用域：button, input, select, textarea。
+ * 文字呈现：font=inherit。
+ * [/maint-note:b8595a4b19f6] */
 button,
 input,
 select,
@@ -50,12 +92,26 @@ textarea {
   font: inherit;
 }
 
+/* [maint-note:0bed89eec9e7]
+ * 样式作用域：button。
+ * 色彩与边界：border=0。
+ * 交互与动效：cursor=pointer。
+ * [/maint-note:0bed89eec9e7] */
 button {
   border: 0;
   cursor: pointer;
 }
 
 /* ── Root Layout ── */
+/* [maint-note:530e02f78247]
+ * 样式作用域：.app-root。
+ * 布局位置：display=grid；grid-template-columns=var(--sidebar-width) minmax(0, 1fr)；position=relative。
+ * 空间尺寸：height=100vh；min-height=0；overflow=hidden。
+ * 色彩与边界：background=var(--bg)。
+ * 主题变量：--sidebar-width=260px。
+ * 主题变量：--agent-stack-height=320px。
+ * 主题变量：--drawer-width=320px。
+ * [/maint-note:530e02f78247] */
 .app-root {
   --sidebar-width: 260px;
   --agent-stack-height: 320px;
@@ -69,6 +125,30 @@ button {
   overflow: hidden;
 }
 
+/* [maint-note:413bc252cd36]
+ * 样式作用域：.app-root[data-theme="light"]。
+ * 色彩与边界：color-scheme=light；color=#18212f。
+ * 主题变量：--bg=#f6f7fb。
+ * 主题变量：--bg-elevated=#ffffff。
+ * 主题变量：--panel=#f0f3f8。
+ * 主题变量：--panel-strong=#e7ebf2。
+ * 主题变量：--panel-hover=#dde4ee。
+ * 主题变量：--line=#d8dee8。
+ * 主题变量：--line-strong=#c5cedb。
+ * 主题变量：--text=#18212f。
+ * 主题变量：--text-secondary=#415166。
+ * 主题变量：--muted=#66758a。
+ * 主题变量：--faint=#9aa7b8。
+ * 主题变量：--accent=#cf6f4c。
+ * 主题变量：--accent-strong=#b95f3f。
+ * 主题变量：--accent-glow=rgba(207, 111, 76, 0.22)。
+ * 主题变量：--amber=#a97916。
+ * 主题变量：--danger=#c2414b。
+ * 主题变量：--blue=#2f6da3。
+ * 主题变量：--shadow-sm=0 1px 3px rgba(15, 23, 42, 0.12)。
+ * 主题变量：--shadow-md=0 2px 8px rgba(15, 23, 42, 0.15)。
+ * 主题变量：--shadow-lg=0 4px 16px rgba(15, 23, 42, 0.18)。
+ * [/maint-note:413bc252cd36] */
 .app-root[data-theme="light"] {
   color-scheme: light;
   color: #18212f;
@@ -95,6 +175,12 @@ button {
 }
 
 /* ── Left Sidebar ── */
+/* [maint-note:8ce4fc343fe7]
+ * 样式作用域：.sidebar-left。
+ * 布局位置：display=flex；flex-direction=column。
+ * 空间尺寸：width=var(--sidebar-width)；min-height=100vh；overflow=hidden。
+ * 色彩与边界：background=var(--bg-elevated)；border-right=1px solid var(--line)。
+ * [/maint-note:8ce4fc343fe7] */
 .sidebar-left {
   display: flex;
   flex-direction: column;
@@ -105,6 +191,12 @@ button {
   overflow: hidden;
 }
 
+/* [maint-note:16b973dc4a67]
+ * 样式作用域：.resize-handle。
+ * 布局位置：position=absolute；z-index=20。
+ * 色彩与边界：border=0；border-radius=0；background=transparent。
+ * 交互与动效：transition=background 0.12s ease, box-shadow 0.12s ease。
+ * [/maint-note:16b973dc4a67] */
 .resize-handle {
   position: absolute;
   z-index: 20;
@@ -114,6 +206,10 @@ button {
   transition: background 0.12s ease, box-shadow 0.12s ease;
 }
 
+/* [maint-note:04ff30a5181c]
+ * 样式作用域：.resize-handle:hover, .resize-handle:focus-visible。
+ * 色彩与边界：outline=none；background=color-mix(in srgb, var(--accent) 45%, transparent)；box-shadow=0 0 0 1px var(--accent-glow)。
+ * [/maint-note:04ff30a5181c] */
 .resize-handle:hover,
 .resize-handle:focus-visible {
   outline: none;
@@ -121,6 +217,12 @@ button {
   box-shadow: 0 0 0 1px var(--accent-glow);
 }
 
+/* [maint-note:a49760a63490]
+ * 样式作用域：.resize-handle-sidebar。
+ * 布局位置：top=0；left=calc(var(--sidebar-width) - 4px)。
+ * 空间尺寸：width=8px；height=100vh。
+ * 交互与动效：cursor=col-resize。
+ * [/maint-note:a49760a63490] */
 .resize-handle-sidebar {
   top: 0;
   left: calc(var(--sidebar-width) - 4px);
@@ -129,6 +231,12 @@ button {
   cursor: col-resize;
 }
 
+/* [maint-note:1fb058b84375]
+ * 样式作用域：.resize-handle-drawer。
+ * 布局位置：left=-4px；top=0。
+ * 空间尺寸：width=8px；height=100vh。
+ * 交互与动效：cursor=col-resize。
+ * [/maint-note:1fb058b84375] */
 .resize-handle-drawer {
   left: -4px;
   top: 0;
@@ -137,6 +245,12 @@ button {
   cursor: col-resize;
 }
 
+/* [maint-note:6110603800ea]
+ * 样式作用域：.resize-handle-agent。
+ * 布局位置：left=0；right=0；bottom=0。
+ * 空间尺寸：width=100%；height=8px。
+ * 交互与动效：cursor=row-resize。
+ * [/maint-note:6110603800ea] */
 .resize-handle-agent {
   left: 0;
   right: 0;
@@ -146,12 +260,22 @@ button {
   cursor: row-resize;
 }
 
+/* [maint-note:bc0bd97d55f2]
+ * 样式作用域：.is-resizing-layout, .is-resizing-layout *。
+ * 交互与动效：cursor=grabbing；user-select=none。
+ * [/maint-note:bc0bd97d55f2] */
 .is-resizing-layout,
 .is-resizing-layout * {
   cursor: grabbing !important;
   user-select: none !important;
 }
 
+/* [maint-note:6149074c9be7]
+ * 样式作用域：.sidebar-header。
+ * 布局位置：display=flex；align-items=center；gap=10px。
+ * 空间尺寸：padding=16px 14px。
+ * 色彩与边界：border-bottom=1px solid var(--line)。
+ * [/maint-note:6149074c9be7] */
 .sidebar-header {
   display: flex;
   align-items: center;
@@ -160,6 +284,13 @@ button {
   border-bottom: 1px solid var(--line);
 }
 
+/* [maint-note:372cd98c483f]
+ * 样式作用域：.sidebar-header .mark。
+ * 布局位置：display=grid。
+ * 空间尺寸：width=32px；height=32px。
+ * 色彩与边界：border-radius=10px；color=var(--accent-strong)；background=var(--panel)。
+ * 其他样式：place-items=center。
+ * [/maint-note:372cd98c483f] */
 .sidebar-header .mark {
   width: 32px;
   height: 32px;
@@ -170,6 +301,12 @@ button {
   background: var(--panel);
 }
 
+/* [maint-note:bee0b706f0f7]
+ * 样式作用域：.sidebar-header h1。
+ * 空间尺寸：margin=0。
+ * 文字呈现：font-size=0.95rem；font-weight=700。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:bee0b706f0f7] */
 .sidebar-header h1 {
   font-size: 0.95rem;
   font-weight: 700;
@@ -177,6 +314,11 @@ button {
   margin: 0;
 }
 
+/* [maint-note:71ba684f4fcc]
+ * 样式作用域：.conversation-sidebar-body。
+ * 布局位置：flex=1；display=flex；flex-direction=column。
+ * 空间尺寸：min-height=0；padding=12px 10px。
+ * [/maint-note:71ba684f4fcc] */
 .conversation-sidebar-body {
   flex: 1;
   min-height: 0;
@@ -185,6 +327,14 @@ button {
   padding: 12px 10px;
 }
 
+/* [maint-note:654368dcb275]
+ * 样式作用域：.new-conversation-button。
+ * 布局位置：display=flex；align-items=center；justify-content=flex-start；gap=9px。
+ * 空间尺寸：min-height=38px；padding=0 11px。
+ * 文字呈现：font-size=0.82rem；font-weight=650。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=10px；color=var(--text)；background=var(--panel)。
+ * 交互与动效：transition=background 0.15s ease, border-color 0.15s ease。
+ * [/maint-note:654368dcb275] */
 .new-conversation-button {
   min-height: 38px;
   display: flex;
@@ -201,11 +351,21 @@ button {
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
+/* [maint-note:020ece3f0482]
+ * 样式作用域：.new-conversation-button:hover。
+ * 色彩与边界：border-color=var(--accent)；background=var(--panel-hover)。
+ * [/maint-note:020ece3f0482] */
 .new-conversation-button:hover {
   border-color: var(--accent);
   background: var(--panel-hover);
 }
 
+/* [maint-note:03e2f66da53d]
+ * 样式作用域：.conversation-search。
+ * 布局位置：display=flex；align-items=center；gap=7px。
+ * 空间尺寸：min-height=34px；margin-top=10px；padding=0 9px。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=9px；color=var(--faint)；background=color-mix(in srgb, var(--panel) 72%, transparent)。
+ * [/maint-note:03e2f66da53d] */
 .conversation-search {
   min-height: 34px;
   display: flex;
@@ -219,6 +379,13 @@ button {
   background: color-mix(in srgb, var(--panel) 72%, transparent);
 }
 
+/* [maint-note:0ab16aabf1a5]
+ * 样式作用域：.conversation-search input。
+ * 布局位置：flex=1。
+ * 空间尺寸：min-width=0。
+ * 文字呈现：font-size=0.78rem。
+ * 色彩与边界：border=0；outline=0；color=var(--text)；background=transparent。
+ * [/maint-note:0ab16aabf1a5] */
 .conversation-search input {
   min-width: 0;
   flex: 1;
@@ -229,6 +396,13 @@ button {
   font-size: 0.78rem;
 }
 
+/* [maint-note:06bd08d0da64]
+ * 样式作用域：.conversation-search button。
+ * 布局位置：display=grid。
+ * 空间尺寸：width=22px；height=22px。
+ * 色彩与边界：border-radius=6px；color=var(--muted)；background=transparent。
+ * 其他样式：place-items=center。
+ * [/maint-note:06bd08d0da64] */
 .conversation-search button {
   width: 22px;
   height: 22px;
@@ -239,6 +413,11 @@ button {
   background: transparent;
 }
 
+/* [maint-note:ef533d1a1933]
+ * 样式作用域：.conversation-history。
+ * 布局位置：flex=1。
+ * 空间尺寸：min-height=0；overflow-y=auto；margin-top=10px。
+ * [/maint-note:ef533d1a1933] */
 .conversation-history {
   flex: 1;
   min-height: 0;
@@ -246,10 +425,20 @@ button {
   margin-top: 10px;
 }
 
+/* [maint-note:0ea0e6190c08]
+ * 样式作用域：.conversation-group。
+ * 空间尺寸：margin-bottom=14px。
+ * [/maint-note:0ea0e6190c08] */
 .conversation-group {
   margin-bottom: 14px;
 }
 
+/* [maint-note:5a56a23f18e9]
+ * 样式作用域：.conversation-group h3。
+ * 空间尺寸：margin=0 8px 5px。
+ * 文字呈现：font-size=0.68rem；font-weight=700；letter-spacing=0.06em；text-transform=uppercase。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:5a56a23f18e9] */
 .conversation-group h3 {
   margin: 0 8px 5px;
   color: var(--faint);
@@ -259,12 +448,26 @@ button {
   text-transform: uppercase;
 }
 
+/* [maint-note:4d96eb4f7539]
+ * 样式作用域：.conversation-row-shell。
+ * 布局位置：position=relative。
+ * 空间尺寸：margin-bottom=2px。
+ * 色彩与边界：border-radius=9px。
+ * [/maint-note:4d96eb4f7539] */
 .conversation-row-shell {
   position: relative;
   margin-bottom: 2px;
   border-radius: 9px;
 }
 
+/* [maint-note:f3340c77192c]
+ * 样式作用域：.conversation-row。
+ * 布局位置：display=flex；flex-direction=column；justify-content=center；gap=4px。
+ * 空间尺寸：width=100%；min-height=49px；padding=7px 34px 7px 9px。
+ * 文字呈现：text-align=left。
+ * 色彩与边界：border=1px solid transparent；border-radius=9px；color=var(--text-secondary)；background=transparent。
+ * 交互与动效：transition=background 0.14s ease, border-color 0.14s ease。
+ * [/maint-note:f3340c77192c] */
 .conversation-row {
   width: 100%;
   min-height: 49px;
@@ -281,16 +484,32 @@ button {
   transition: background 0.14s ease, border-color 0.14s ease;
 }
 
+/* [maint-note:2d6d240d3164]
+ * 样式作用域：.conversation-row-shell:hover .conversation-row。
+ * 色彩与边界：background=var(--panel)。
+ * [/maint-note:2d6d240d3164] */
 .conversation-row-shell:hover .conversation-row {
   background: var(--panel);
 }
 
+/* [maint-note:881934b80220]
+ * 样式作用域：.conversation-row-shell.active .conversation-row。
+ * 色彩与边界：border-color=var(--line)；color=var(--text)；background=var(--panel-strong)。
+ * [/maint-note:881934b80220] */
 .conversation-row-shell.active .conversation-row {
   border-color: var(--line);
   color: var(--text);
   background: var(--panel-strong);
 }
 
+/* [maint-note:e741ebd17d78]
+ * 样式作用域：.conversation-delete-button。
+ * 布局位置：position=absolute；top=50%；right=6px；display=grid。
+ * 空间尺寸：width=26px；height=26px。
+ * 色彩与边界：border=0；border-radius=7px；color=var(--faint)；background=transparent；opacity=0。
+ * 交互与动效：transform=translateY(-50%)；transition=opacity 0.14s ease, color 0.14s ease, background 0.14s ease。
+ * 其他样式：place-items=center。
+ * [/maint-note:e741ebd17d78] */
 .conversation-delete-button {
   position: absolute;
   top: 50%;
@@ -308,23 +527,41 @@ button {
   transition: opacity 0.14s ease, color 0.14s ease, background 0.14s ease;
 }
 
+/* [maint-note:0f73b2eda970]
+ * 样式作用域：.conversation-row-shell:hover .conversation-delete-button, .conversation-row-shell:focus-within .conversation-delete-button, .conversation-row-shell.active .conversation-delete-button。
+ * 色彩与边界：opacity=1。
+ * [/maint-note:0f73b2eda970] */
 .conversation-row-shell:hover .conversation-delete-button,
 .conversation-row-shell:focus-within .conversation-delete-button,
 .conversation-row-shell.active .conversation-delete-button {
   opacity: 1;
 }
 
+/* [maint-note:4a37c1718f42]
+ * 样式作用域：.conversation-delete-button:hover, .conversation-delete-button:focus-visible。
+ * 色彩与边界：color=var(--danger)；background=color-mix(in srgb, var(--danger) 14%, transparent)。
+ * [/maint-note:4a37c1718f42] */
 .conversation-delete-button:hover,
 .conversation-delete-button:focus-visible {
   color: var(--danger);
   background: color-mix(in srgb, var(--danger) 14%, transparent);
 }
 
+/* [maint-note:d7707d251024]
+ * 样式作用域：.conversation-delete-button:disabled。
+ * 色彩与边界：opacity=0.45。
+ * 交互与动效：cursor=wait。
+ * [/maint-note:d7707d251024] */
 .conversation-delete-button:disabled {
   cursor: wait;
   opacity: 0.45;
 }
 
+/* [maint-note:d8f6e58b92d1]
+ * 样式作用域：.conversation-row span, .conversation-row small。
+ * 空间尺寸：overflow=hidden。
+ * 文字呈现：text-overflow=ellipsis；white-space=nowrap。
+ * [/maint-note:d8f6e58b92d1] */
 .conversation-row span,
 .conversation-row small {
   overflow: hidden;
@@ -332,16 +569,33 @@ button {
   white-space: nowrap;
 }
 
+/* [maint-note:378ca55e72d4]
+ * 样式作用域：.conversation-row span。
+ * 文字呈现：font-size=0.79rem；font-weight=600。
+ * [/maint-note:378ca55e72d4] */
 .conversation-row span {
   font-size: 0.79rem;
   font-weight: 600;
 }
 
+/* [maint-note:644cf09052ab]
+ * 样式作用域：.conversation-row small。
+ * 文字呈现：font-size=0.68rem。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:644cf09052ab] */
 .conversation-row small {
   color: var(--faint);
   font-size: 0.68rem;
 }
 
+/* [maint-note:9d2e3a922c8b]
+ * 样式作用域：.conversation-rename-button。
+ * 布局位置：position=absolute；top=50%；right=34px；display=grid。
+ * 空间尺寸：width=26px；height=26px。
+ * 色彩与边界：border=0；border-radius=7px；color=var(--faint)；background=transparent；opacity=0。
+ * 交互与动效：transform=translateY(-50%)；transition=opacity 0.14s ease, color 0.14s ease, background 0.14s ease。
+ * 其他样式：place-items=center。
+ * [/maint-note:9d2e3a922c8b] */
 .conversation-rename-button {
   position: absolute;
   top: 50%;
@@ -359,27 +613,50 @@ button {
   transition: opacity 0.14s ease, color 0.14s ease, background 0.14s ease;
 }
 
+/* [maint-note:51ef9515ad57]
+ * 样式作用域：.conversation-row-shell:hover .conversation-rename-button, .conversation-row-shell:focus-within .conversation-rename-button, .conversation-row-shell.active .conversation-rename-button。
+ * 色彩与边界：opacity=1。
+ * [/maint-note:51ef9515ad57] */
 .conversation-row-shell:hover .conversation-rename-button,
 .conversation-row-shell:focus-within .conversation-rename-button,
 .conversation-row-shell.active .conversation-rename-button {
   opacity: 1;
 }
 
+/* [maint-note:16919189689c]
+ * 样式作用域：.conversation-rename-button:hover, .conversation-rename-button:focus-visible。
+ * 色彩与边界：color=var(--accent, #4f46e5)；background=color-mix(in srgb, var(--accent, #4f46e5) 14%, transparent)。
+ * [/maint-note:16919189689c] */
 .conversation-rename-button:hover,
 .conversation-rename-button:focus-visible {
   color: var(--accent, #4f46e5);
   background: color-mix(in srgb, var(--accent, #4f46e5) 14%, transparent);
 }
 
+/* [maint-note:98dc5738ead3]
+ * 样式作用域：.conversation-rename-button:disabled。
+ * 色彩与边界：opacity=0.45。
+ * 交互与动效：cursor=wait。
+ * [/maint-note:98dc5738ead3] */
 .conversation-rename-button:disabled {
   cursor: wait;
   opacity: 0.45;
 }
 
+/* [maint-note:1095fab1c252]
+ * 样式作用域：.conversation-row-shell.renaming。
+ * 色彩与边界：background=color-mix(in srgb, var(--accent, #4f46e5) 8%, transparent)。
+ * [/maint-note:1095fab1c252] */
 .conversation-row-shell.renaming {
   background: color-mix(in srgb, var(--accent, #4f46e5) 8%, transparent);
 }
 
+/* [maint-note:964f0b4d921b]
+ * 样式作用域：.conversation-rename-form。
+ * 布局位置：display=flex；align-items=center；gap=4px。
+ * 空间尺寸：min-height=49px；padding=7px 6px。
+ * 色彩与边界：border=1px solid var(--accent, #4f46e5)；border-radius=9px；background=var(--panel-strong)。
+ * [/maint-note:964f0b4d921b] */
 .conversation-rename-form {
   display: flex;
   align-items: center;
@@ -391,6 +668,13 @@ button {
   background: var(--panel-strong);
 }
 
+/* [maint-note:04a2890b720f]
+ * 样式作用域：.conversation-rename-input。
+ * 布局位置：flex=1。
+ * 空间尺寸：min-width=0；padding=4px 8px。
+ * 文字呈现：font-size=0.79rem；font-weight=600。
+ * 色彩与边界：border=0；background=transparent；color=var(--text)；outline=none。
+ * [/maint-note:04a2890b720f] */
 .conversation-rename-input {
   flex: 1;
   min-width: 0;
@@ -403,16 +687,34 @@ button {
   outline: none;
 }
 
+/* [maint-note:e55245ade324]
+ * 样式作用域：.conversation-rename-input::placeholder。
+ * 文字呈现：font-weight=400。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:e55245ade324] */
 .conversation-rename-input::placeholder {
   color: var(--faint);
   font-weight: 400;
 }
 
+/* [maint-note:eda9fac26c67]
+ * 样式作用域：.conversation-rename-input:disabled。
+ * 色彩与边界：opacity=0.6。
+ * 交互与动效：cursor=wait。
+ * [/maint-note:eda9fac26c67] */
 .conversation-rename-input:disabled {
   cursor: wait;
   opacity: 0.6;
 }
 
+/* [maint-note:006f9a03684d]
+ * 样式作用域：.conversation-rename-confirm, .conversation-rename-cancel。
+ * 布局位置：display=grid；flex-shrink=0。
+ * 空间尺寸：width=24px；height=24px。
+ * 色彩与边界：border=0；border-radius=6px；background=transparent。
+ * 交互与动效：cursor=pointer。
+ * 其他样式：place-items=center。
+ * [/maint-note:006f9a03684d] */
 .conversation-rename-confirm,
 .conversation-rename-cancel {
   width: 24px;
@@ -426,31 +728,58 @@ button {
   flex-shrink: 0;
 }
 
+/* [maint-note:b7aee999df62]
+ * 样式作用域：.conversation-rename-confirm。
+ * 色彩与边界：color=var(--success, #16a34a)。
+ * [/maint-note:b7aee999df62] */
 .conversation-rename-confirm {
   color: var(--success, #16a34a);
 }
 
+/* [maint-note:599eccbceb71]
+ * 样式作用域：.conversation-rename-confirm:hover:not(:disabled), .conversation-rename-confirm:focus-visible:not(:disabled)。
+ * 色彩与边界：background=color-mix(in srgb, var(--success, #16a34a) 18%, transparent)。
+ * [/maint-note:599eccbceb71] */
 .conversation-rename-confirm:hover:not(:disabled),
 .conversation-rename-confirm:focus-visible:not(:disabled) {
   background: color-mix(in srgb, var(--success, #16a34a) 18%, transparent);
 }
 
+/* [maint-note:9f2380ae0353]
+ * 样式作用域：.conversation-rename-cancel。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:9f2380ae0353] */
 .conversation-rename-cancel {
   color: var(--faint);
 }
 
+/* [maint-note:6999626a0ecd]
+ * 样式作用域：.conversation-rename-cancel:hover:not(:disabled), .conversation-rename-cancel:focus-visible:not(:disabled)。
+ * 色彩与边界：color=var(--danger, #ef4444)；background=color-mix(in srgb, var(--danger, #ef4444) 14%, transparent)。
+ * [/maint-note:6999626a0ecd] */
 .conversation-rename-cancel:hover:not(:disabled),
 .conversation-rename-cancel:focus-visible:not(:disabled) {
   color: var(--danger, #ef4444);
   background: color-mix(in srgb, var(--danger, #ef4444) 14%, transparent);
 }
 
+/* [maint-note:567aee3c6702]
+ * 样式作用域：.conversation-rename-confirm:disabled, .conversation-rename-cancel:disabled。
+ * 色彩与边界：opacity=0.45。
+ * 交互与动效：cursor=wait。
+ * [/maint-note:567aee3c6702] */
 .conversation-rename-confirm:disabled,
 .conversation-rename-cancel:disabled {
   cursor: wait;
   opacity: 0.45;
 }
 
+/* [maint-note:c787f09e1f6e]
+ * 样式作用域：.conversation-rename-error。
+ * 空间尺寸：margin-top=4px；padding=4px 8px。
+ * 文字呈现：font-size=0.68rem。
+ * 色彩与边界：color=var(--danger, #ef4444)；background=color-mix(in srgb, var(--danger, #ef4444) 10%, transparent)；border-radius=6px。
+ * [/maint-note:c787f09e1f6e] */
 .conversation-rename-error {
   margin-top: 4px;
   padding: 4px 8px;
@@ -460,6 +789,12 @@ button {
   border-radius: 6px;
 }
 
+/* [maint-note:a0cb0c67e0b0]
+ * 样式作用域：.conversation-empty。
+ * 空间尺寸：padding=20px 8px。
+ * 文字呈现：font-size=0.76rem；text-align=center。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:a0cb0c67e0b0] */
 .conversation-empty {
   padding: 20px 8px;
   color: var(--faint);
@@ -467,6 +802,12 @@ button {
   text-align: center;
 }
 
+/* [maint-note:69eab7a179e0]
+ * 样式作用域：.sidebar-footer。
+ * 布局位置：display=grid；grid-template-columns=1fr 1fr；gap=6px。
+ * 空间尺寸：padding=10px。
+ * 色彩与边界：border-top=1px solid var(--line)。
+ * [/maint-note:69eab7a179e0] */
 .sidebar-footer {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -475,6 +816,13 @@ button {
   border-top: 1px solid var(--line);
 }
 
+/* [maint-note:4f8afdd19ad2]
+ * 样式作用域：.sidebar-footer button。
+ * 布局位置：display=inline-flex；align-items=center；justify-content=center；gap=6px。
+ * 空间尺寸：min-height=34px。
+ * 文字呈现：font-size=0.72rem。
+ * 色彩与边界：border-radius=8px；color=var(--muted)；background=transparent。
+ * [/maint-note:4f8afdd19ad2] */
 .sidebar-footer button {
   min-height: 34px;
   display: inline-flex;
@@ -487,20 +835,38 @@ button {
   font-size: 0.72rem;
 }
 
+/* [maint-note:be28a61efafa]
+ * 样式作用域：.sidebar-footer button:hover。
+ * 色彩与边界：color=var(--text)；background=var(--panel)。
+ * [/maint-note:be28a61efafa] */
 .sidebar-footer button:hover {
   color: var(--text);
   background: var(--panel);
 }
 
+/* [maint-note:02f86ec253de]
+ * 样式作用域：.sidebar-section。
+ * 空间尺寸：padding=14px。
+ * 色彩与边界：border-bottom=1px solid var(--line)。
+ * [/maint-note:02f86ec253de] */
 .sidebar-section {
   padding: 14px;
   border-bottom: 1px solid var(--line);
 }
 
+/* [maint-note:6e3b20ed95cf]
+ * 样式作用域：.sidebar-section:last-child。
+ * 色彩与边界：border-bottom=0。
+ * [/maint-note:6e3b20ed95cf] */
 .sidebar-section:last-child {
   border-bottom: 0;
 }
 
+/* [maint-note:3e39bc37f041]
+ * 样式作用域：.sidebar-section.flex-1。
+ * 布局位置：flex=1；display=flex；flex-direction=column。
+ * 空间尺寸：min-height=0；overflow=hidden。
+ * [/maint-note:3e39bc37f041] */
 .sidebar-section.flex-1 {
   flex: 1;
   min-height: 0;
@@ -510,6 +876,13 @@ button {
 }
 
 /* ── Section Heading ── */
+/* [maint-note:4b3a20664abf]
+ * 样式作用域：.section-heading。
+ * 布局位置：display=flex；align-items=center；gap=8px。
+ * 空间尺寸：min-height=22px；margin-bottom=10px。
+ * 文字呈现：font-size=0.82rem；font-weight=650。
+ * 色彩与边界：color=var(--text-secondary)。
+ * [/maint-note:4b3a20664abf] */
 .section-heading {
   display: flex;
   align-items: center;
@@ -521,6 +894,12 @@ button {
   font-weight: 650;
 }
 
+/* [maint-note:95f8a1666151]
+ * 样式作用域：.section-heading strong。
+ * 空间尺寸：margin-left=auto。
+ * 文字呈现：font-size=0.78rem。
+ * 色彩与边界：color=var(--accent-strong)。
+ * [/maint-note:95f8a1666151] */
 .section-heading strong {
   margin-left: auto;
   color: var(--accent-strong);
@@ -528,6 +907,13 @@ button {
 }
 
 /* ── Field Label ── */
+/* [maint-note:ba4357fa0dea]
+ * 样式作用域：.field-label。
+ * 布局位置：display=block。
+ * 空间尺寸：margin=10px 0 6px。
+ * 文字呈现：font-size=0.78rem。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:ba4357fa0dea] */
 .field-label {
   display: block;
   margin: 10px 0 6px;
@@ -536,6 +922,12 @@ button {
 }
 
 /* ── Inputs ── */
+/* [maint-note:7831d888854a]
+ * 样式作用域：.text-input, textarea, .search-row input。
+ * 空间尺寸：width=100%；min-width=0。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=10px；outline=none；color=var(--text)；background=var(--panel)。
+ * 交互与动效：transition=border-color 0.15s ease, box-shadow 0.15s ease。
+ * [/maint-note:7831d888854a] */
 .text-input,
 textarea,
 .search-row input {
@@ -549,12 +941,22 @@ textarea,
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+/* [maint-note:ec04f6cdeb3c]
+ * 样式作用域：.text-input, .search-row input。
+ * 空间尺寸：height=36px；padding=0 12px。
+ * [/maint-note:ec04f6cdeb3c] */
 .text-input,
 .search-row input {
   height: 36px;
   padding: 0 12px;
 }
 
+/* [maint-note:bd1e7a1f0f42]
+ * 样式作用域：textarea。
+ * 空间尺寸：min-height=80px；padding=12px。
+ * 文字呈现：line-height=1.5。
+ * 交互与动效：resize=vertical。
+ * [/maint-note:bd1e7a1f0f42] */
 textarea {
   min-height: 80px;
   resize: vertical;
@@ -562,6 +964,10 @@ textarea {
   line-height: 1.5;
 }
 
+/* [maint-note:72863e2dfea3]
+ * 样式作用域：.text-input:focus, textarea:focus, .search-row:focus-within。
+ * 色彩与边界：border-color=var(--accent)；box-shadow=0 0 0 2px var(--accent-glow)。
+ * [/maint-note:72863e2dfea3] */
 .text-input:focus,
 textarea:focus,
 .search-row:focus-within {
@@ -570,6 +976,14 @@ textarea:focus,
 }
 
 /* ── Buttons ── */
+/* [maint-note:9d85b2987eb7]
+ * 样式作用域：.icon-button, .primary-button, .secondary-button, .ghost-button, .mini-button, .mini-icon。
+ * 布局位置：display=inline-flex；align-items=center；justify-content=center；gap=7px。
+ * 空间尺寸：min-height=36px。
+ * 文字呈现：white-space=nowrap。
+ * 色彩与边界：border-radius=10px；color=var(--text)。
+ * 交互与动效：transition=background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease。
+ * [/maint-note:9d85b2987eb7] */
 .icon-button,
 .primary-button,
 .secondary-button,
@@ -587,6 +1001,12 @@ textarea:focus,
   transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
 
+/* [maint-note:3c03bed3e22e]
+ * 样式作用域：.icon-button。
+ * 布局位置：flex=0 0 36px。
+ * 空间尺寸：width=36px。
+ * 色彩与边界：border=1px solid var(--line)；background=var(--panel)。
+ * [/maint-note:3c03bed3e22e] */
 .icon-button {
   width: 36px;
   flex: 0 0 36px;
@@ -594,17 +1014,31 @@ textarea:focus,
   background: var(--panel);
 }
 
+/* [maint-note:4e03fc880730]
+ * 样式作用域：.icon-button:hover。
+ * 色彩与边界：background=var(--panel-hover)。
+ * 交互与动效：transform=scale(1.03)。
+ * [/maint-note:4e03fc880730] */
 .icon-button:hover {
   background: var(--panel-hover);
   transform: scale(1.03);
 }
 
+/* [maint-note:059c5b160a3f]
+ * 样式作用域：.primary-button, .secondary-button, .ghost-button。
+ * 空间尺寸：padding=0 14px。
+ * [/maint-note:059c5b160a3f] */
 .primary-button,
 .secondary-button,
 .ghost-button {
   padding: 0 14px;
 }
 
+/* [maint-note:5738ca355732]
+ * 样式作用域：.primary-button。
+ * 文字呈现：font-weight=700。
+ * 色彩与边界：background=var(--accent)；color=#1a0f0a；border=0。
+ * [/maint-note:5738ca355732] */
 .primary-button {
   background: var(--accent);
   color: #1a0f0a;
@@ -612,22 +1046,44 @@ textarea:focus,
   border: 0;
 }
 
+/* [maint-note:99c7be479228]
+ * 样式作用域：.primary-button:hover。
+ * 色彩与边界：background=var(--accent-strong)；box-shadow=0 2px 8px rgba(217, 119, 87, 0.3)。
+ * 交互与动效：transform=scale(1.02)。
+ * [/maint-note:99c7be479228] */
 .primary-button:hover {
   background: var(--accent-strong);
   transform: scale(1.02);
   box-shadow: 0 2px 8px rgba(217, 119, 87, 0.3);
 }
 
+/* [maint-note:f4cc3f603c8e]
+ * 样式作用域：.secondary-button。
+ * 色彩与边界：border=1px solid var(--line-strong)；background=var(--panel)。
+ * [/maint-note:f4cc3f603c8e] */
 .secondary-button {
   border: 1px solid var(--line-strong);
   background: var(--panel);
 }
 
+/* [maint-note:a192b6a71b10]
+ * 样式作用域：.secondary-button:hover。
+ * 色彩与边界：background=var(--panel-hover)。
+ * 交互与动效：transform=scale(1.02)。
+ * [/maint-note:a192b6a71b10] */
 .secondary-button:hover {
   background: var(--panel-hover);
   transform: scale(1.02);
 }
 
+/* [maint-note:8a46aaf91f20]
+ * 样式作用域：.theme-toggle-button。
+ * 布局位置：display=inline-flex；align-items=center；justify-content=center；gap=7px。
+ * 空间尺寸：min-height=36px；padding=0 12px。
+ * 文字呈现：white-space=nowrap。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=10px；color=var(--text)；background=var(--panel)。
+ * 交互与动效：transition=background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease。
+ * [/maint-note:8a46aaf91f20] */
 .theme-toggle-button {
   display: inline-flex;
   align-items: center;
@@ -643,11 +1099,21 @@ textarea:focus,
   transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
 
+/* [maint-note:27fb9091c54b]
+ * 样式作用域：.theme-toggle-button:hover。
+ * 色彩与边界：background=var(--panel-hover)。
+ * 交互与动效：transform=scale(1.02)。
+ * [/maint-note:27fb9091c54b] */
 .theme-toggle-button:hover {
   background: var(--panel-hover);
   transform: scale(1.02);
 }
 
+/* [maint-note:e38672f36e90]
+ * 样式作用域：.ghost-button。
+ * 空间尺寸：min-height=32px。
+ * 色彩与边界：border=1px solid transparent；color=var(--muted)；background=transparent。
+ * [/maint-note:e38672f36e90] */
 .ghost-button {
   min-height: 32px;
   border: 1px solid transparent;
@@ -655,17 +1121,30 @@ textarea:focus,
   background: transparent;
 }
 
+/* [maint-note:6530e3cb1e73]
+ * 样式作用域：.ghost-button:hover。
+ * 色彩与边界：background=var(--panel)；color=var(--text)。
+ * [/maint-note:6530e3cb1e73] */
 .ghost-button:hover {
   background: var(--panel);
   color: var(--text);
 }
 
+/* [maint-note:7e8a57f78131]
+ * 样式作用域：button:disabled。
+ * 色彩与边界：opacity=0.5。
+ * 交互与动效：cursor=not-allowed。
+ * [/maint-note:7e8a57f78131] */
 button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
 /* ── Path Row ── */
+/* [maint-note:86c67cfeb3d3]
+ * 样式作用域：.path-row, .custom-target-row, .stage-actions, .browser-bar。
+ * 布局位置：display=flex；align-items=center；gap=8px。
+ * [/maint-note:86c67cfeb3d3] */
 .path-row,
 .custom-target-row,
 .stage-actions,
@@ -675,12 +1154,21 @@ button:disabled {
   gap: 8px;
 }
 
+/* [maint-note:4b88ac866d83]
+ * 样式作用域：.path-row .text-input, .custom-target-row .text-input。
+ * 布局位置：flex=1。
+ * [/maint-note:4b88ac866d83] */
 .path-row .text-input,
 .custom-target-row .text-input {
   flex: 1;
 }
 
 /* ── Directory Browser ── */
+/* [maint-note:d9e65e10bdb1]
+ * 样式作用域：.directory-browser。
+ * 空间尺寸：margin-top=10px；overflow=hidden。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=10px；background=var(--panel)。
+ * [/maint-note:d9e65e10bdb1] */
 .directory-browser {
   margin-top: 10px;
   border: 1px solid var(--line);
@@ -689,12 +1177,24 @@ button:disabled {
   overflow: hidden;
 }
 
+/* [maint-note:8ea172ba0fe4]
+ * 样式作用域：.browser-bar。
+ * 布局位置：justify-content=space-between。
+ * 空间尺寸：padding=8px 10px。
+ * 色彩与边界：border-bottom=1px solid var(--line)。
+ * [/maint-note:8ea172ba0fe4] */
 .browser-bar {
   justify-content: space-between;
   padding: 8px 10px;
   border-bottom: 1px solid var(--line);
 }
 
+/* [maint-note:f9fa9853a0e9]
+ * 样式作用域：.browser-path。
+ * 空间尺寸：padding=8px 10px；overflow=hidden。
+ * 文字呈现：text-overflow=ellipsis；white-space=nowrap；font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace；font-size=0.76rem。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:f9fa9853a0e9] */
 .browser-path {
   padding: 8px 10px;
   color: var(--faint);
@@ -705,12 +1205,24 @@ button:disabled {
   font-size: 0.76rem;
 }
 
+/* [maint-note:a91e3b00e09d]
+ * 样式作用域：.directory-list。
+ * 空间尺寸：max-height=160px；overflow=auto；padding=6px。
+ * [/maint-note:a91e3b00e09d] */
 .directory-list {
   max-height: 160px;
   overflow: auto;
   padding: 6px;
 }
 
+/* [maint-note:6f5ebb8e4d43]
+ * 样式作用域：.directory-item。
+ * 布局位置：display=flex；align-items=center；gap=8px。
+ * 空间尺寸：width=100%；min-height=28px；padding=0 8px。
+ * 文字呈现：text-align=left。
+ * 色彩与边界：border-radius=6px；color=var(--muted)；background=transparent。
+ * 交互与动效：cursor=pointer；transition=background 0.12s ease。
+ * [/maint-note:6f5ebb8e4d43] */
 .directory-item {
   width: 100%;
   min-height: 28px;
@@ -726,10 +1238,19 @@ button:disabled {
   transition: background 0.12s ease;
 }
 
+/* [maint-note:99e961d5584d]
+ * 样式作用域：.directory-item:hover。
+ * 色彩与边界：background=var(--panel-hover)。
+ * [/maint-note:99e961d5584d] */
 .directory-item:hover {
   background: var(--panel-hover);
 }
 
+/* [maint-note:64567b9139fc]
+ * 样式作用域：.directory-item span, .file-row span, .selected-path。
+ * 空间尺寸：min-width=0；overflow=hidden。
+ * 文字呈现：text-overflow=ellipsis；white-space=nowrap。
+ * [/maint-note:64567b9139fc] */
 .directory-item span,
 .file-row span,
 .selected-path {
@@ -740,6 +1261,13 @@ button:disabled {
 }
 
 /* ── Search Row ── */
+/* [maint-note:ec6d302cbe1c]
+ * 样式作用域：.search-row。
+ * 布局位置：display=flex；align-items=center；gap=8px。
+ * 空间尺寸：height=36px；padding=0 10px。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=10px；background=var(--panel)；color=var(--faint)。
+ * 交互与动效：transition=border-color 0.15s ease, box-shadow 0.15s ease。
+ * [/maint-note:ec6d302cbe1c] */
 .search-row {
   height: 36px;
   display: flex;
@@ -753,6 +1281,11 @@ button:disabled {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+/* [maint-note:94e3aa87da78]
+ * 样式作用域：.search-row input。
+ * 空间尺寸：height=32px；padding=0。
+ * 色彩与边界：border=0；background=transparent。
+ * [/maint-note:94e3aa87da78] */
 .search-row input {
   height: 32px;
   padding: 0;
@@ -760,6 +1293,13 @@ button:disabled {
   background: transparent;
 }
 
+/* [maint-note:99353202962f]
+ * 样式作用域：.search-clear-button。
+ * 布局位置：flex=0 0 22px；display=inline-flex；align-items=center；justify-content=center。
+ * 空间尺寸：width=22px；height=22px。
+ * 色彩与边界：border-radius=5px；color=var(--faint)；background=transparent。
+ * 交互与动效：cursor=pointer；transition=background 0.12s ease, color 0.12s ease。
+ * [/maint-note:99353202962f] */
 .search-clear-button {
   width: 22px;
   height: 22px;
@@ -774,12 +1314,22 @@ button:disabled {
   transition: background 0.12s ease, color 0.12s ease;
 }
 
+/* [maint-note:21e3e1a16bce]
+ * 样式作用域：.search-clear-button:hover。
+ * 色彩与边界：background=var(--panel-hover)；color=var(--text)。
+ * [/maint-note:21e3e1a16bce] */
 .search-clear-button:hover {
   background: var(--panel-hover);
   color: var(--text);
 }
 
 /* ── File List ── */
+/* [maint-note:c55aef648124]
+ * 样式作用域：.file-list。
+ * 布局位置：flex=0 0 auto。
+ * 空间尺寸：max-height=calc(32px * 8)；overflow=auto；margin=8px 0。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=10px；background=var(--panel)。
+ * [/maint-note:c55aef648124] */
 .file-list {
   flex: 0 0 auto;
   max-height: calc(32px * 8);
@@ -790,6 +1340,13 @@ button:disabled {
   background: var(--panel);
 }
 
+/* [maint-note:c7ab10d08f23]
+ * 样式作用域：.file-row。
+ * 布局位置：display=flex；align-items=center；gap=8px。
+ * 空间尺寸：min-height=32px；padding=0 10px。
+ * 色彩与边界：border-bottom=1px solid rgba(42, 42, 42, 0.8)；color=var(--muted)。
+ * 交互与动效：cursor=pointer；transition=background 0.12s ease。
+ * [/maint-note:c7ab10d08f23] */
 .file-row {
   min-height: 32px;
   display: flex;
@@ -802,14 +1359,28 @@ button:disabled {
   transition: background 0.12s ease;
 }
 
+/* [maint-note:624076e6ea29]
+ * 样式作用域：.file-row:last-child。
+ * 色彩与边界：border-bottom=0。
+ * [/maint-note:624076e6ea29] */
 .file-row:last-child {
   border-bottom: 0;
 }
 
+/* [maint-note:7debe2af80d9]
+ * 样式作用域：.file-row:hover。
+ * 色彩与边界：background=var(--panel-hover)。
+ * [/maint-note:7debe2af80d9] */
 .file-row:hover {
   background: var(--panel-hover);
 }
 
+/* [maint-note:9372243e2059]
+ * 样式作用域：.file-row input。
+ * 布局位置：flex=0 0 14px。
+ * 空间尺寸：width=14px；height=14px。
+ * 其他样式：accent-color=var(--accent)。
+ * [/maint-note:9372243e2059] */
 .file-row input {
   width: 14px;
   height: 14px;
@@ -818,6 +1389,12 @@ button:disabled {
 }
 
 /* ── Chat Stage ── */
+/* [maint-note:6dad6118e036]
+ * 样式作用域：.chat-stage。
+ * 布局位置：display=flex；flex-direction=column。
+ * 空间尺寸：height=100vh；min-height=0；overflow=hidden。
+ * 色彩与边界：background=var(--bg)。
+ * [/maint-note:6dad6118e036] */
 .chat-stage {
   display: flex;
   flex-direction: column;
@@ -828,6 +1405,12 @@ button:disabled {
 }
 
 /* ── Stage Header ── */
+/* [maint-note:2e1df059c39c]
+ * 样式作用域：.stage-header。
+ * 布局位置：position=sticky；top=0；z-index=12；display=flex；align-items=center；justify-content=space-between；gap=14px。
+ * 空间尺寸：padding=14px 20px。
+ * 色彩与边界：border-bottom=1px solid var(--line)；background=var(--bg-elevated)。
+ * [/maint-note:2e1df059c39c] */
 .stage-header {
   position: sticky;
   top: 0;
@@ -841,6 +1424,11 @@ button:disabled {
   background: var(--bg-elevated);
 }
 
+/* [maint-note:be335e53aa48]
+ * 样式作用域：.stage-title-row。
+ * 布局位置：display=flex；align-items=center；gap=12px。
+ * 空间尺寸：min-width=0。
+ * [/maint-note:be335e53aa48] */
 .stage-title-row {
   min-width: 0;
   display: flex;
@@ -848,11 +1436,22 @@ button:disabled {
   gap: 12px;
 }
 
+/* [maint-note:79758e73b71e]
+ * 样式作用域：.stage-actions。
+ * 布局位置：justify-content=flex-end。
+ * 空间尺寸：min-width=0。
+ * [/maint-note:79758e73b71e] */
 .stage-actions {
   min-width: 0;
   justify-content: flex-end;
 }
 
+/* [maint-note:07325115c94e]
+ * 样式作用域：.header-workspace-input, .header-select。
+ * 空间尺寸：height=34px；min-width=0。
+ * 文字呈现：font-size=0.75rem。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=8px；outline=0；color=var(--text-secondary)；background=var(--panel)。
+ * [/maint-note:07325115c94e] */
 .header-workspace-input,
 .header-select {
   height: 34px;
@@ -865,21 +1464,40 @@ button:disabled {
   font-size: 0.75rem;
 }
 
+/* [maint-note:8ea17c98f945]
+ * 样式作用域：.header-workspace-input。
+ * 空间尺寸：width=min(28vw, 300px)；padding=0 10px。
+ * 文字呈现：font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace。
+ * [/maint-note:8ea17c98f945] */
 .header-workspace-input {
   width: min(28vw, 300px);
   padding: 0 10px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
+/* [maint-note:e8432a5e9140]
+ * 样式作用域：.header-select。
+ * 空间尺寸：max-width=180px；padding=0 26px 0 9px。
+ * [/maint-note:e8432a5e9140] */
 .header-select {
   max-width: 180px;
   padding: 0 26px 0 9px;
 }
 
+/* [maint-note:e7ab6d0f4be6]
+ * 样式作用域：.runtime-select。
+ * 空间尺寸：width=88px。
+ * [/maint-note:e7ab6d0f4be6] */
 .runtime-select {
   width: 88px;
 }
 
+/* [maint-note:c8ce8bb7a89d]
+ * 样式作用域：.stage-header h2。
+ * 空间尺寸：margin=4px 0 0；max-width=40vw；overflow=hidden。
+ * 文字呈现：text-overflow=ellipsis；white-space=nowrap；font-size=1rem；font-weight=650。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:c8ce8bb7a89d] */
 .stage-header h2 {
   margin: 4px 0 0;
   max-width: 40vw;
@@ -891,6 +1509,11 @@ button:disabled {
   color: var(--text);
 }
 
+/* [maint-note:28b6dbcd470c]
+ * 样式作用域：.eyebrow。
+ * 文字呈现：font-size=0.76rem；text-transform=uppercase；letter-spacing=0.03em。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:28b6dbcd470c] */
 .eyebrow {
   font-size: 0.76rem;
   text-transform: uppercase;
@@ -898,6 +1521,13 @@ button:disabled {
   letter-spacing: 0.03em;
 }
 
+/* [maint-note:36fc4c516976]
+ * 样式作用域：.status-dot。
+ * 布局位置：display=inline-block。
+ * 空间尺寸：width=8px；height=8px；margin-right=8px。
+ * 色彩与边界：border-radius=99px；background=var(--faint)。
+ * 交互与动效：transition=background 0.3s ease。
+ * [/maint-note:36fc4c516976] */
 .status-dot {
   width: 8px;
   height: 8px;
@@ -908,24 +1538,46 @@ button:disabled {
   transition: background 0.3s ease;
 }
 
+/* [maint-note:870e6485fdff]
+ * 样式作用域：.status-dot.preview, .status-dot.success。
+ * 色彩与边界：background=var(--accent)。
+ * [/maint-note:870e6485fdff] */
 .status-dot.preview,
 .status-dot.success {
   background: var(--accent);
 }
 
+/* [maint-note:7deda6dd79c0]
+ * 样式作用域：.status-dot.running。
+ * 色彩与边界：background=var(--amber)。
+ * [/maint-note:7deda6dd79c0] */
 .status-dot.running {
   background: var(--amber);
 }
 
+/* [maint-note:3a43524c6860]
+ * 样式作用域：.status-dot.attention。
+ * 色彩与边界：background=var(--amber)。
+ * [/maint-note:3a43524c6860] */
 .status-dot.attention {
   background: var(--amber);
 }
 
+/* [maint-note:927cc0e94ef7]
+ * 样式作用域：.status-dot.error。
+ * 色彩与边界：background=var(--danger)。
+ * [/maint-note:927cc0e94ef7] */
 .status-dot.error {
   background: var(--danger);
 }
 
 /* ── Messages Area ── */
+/* [maint-note:9f1d8078e4dc]
+ * 样式作用域：.messages-area。
+ * 布局位置：flex=1；display=flex；flex-direction=column；gap=16px。
+ * 空间尺寸：min-height=0；overflow-y=auto；padding=20px。
+ * 其他样式：overscroll-behavior=contain。
+ * [/maint-note:9f1d8078e4dc] */
 .messages-area {
   flex: 1;
   min-height: 0;
@@ -937,12 +1589,22 @@ button:disabled {
   gap: 16px;
 }
 
+/* [maint-note:25512e035bdd]
+ * 样式作用域：.messages-area > .message-card。
+ * 空间尺寸：width=min(100%, 900px)；margin-left=auto；margin-right=auto。
+ * [/maint-note:25512e035bdd] */
 .messages-area > .message-card {
   width: min(100%, 900px);
   margin-left: auto;
   margin-right: auto;
 }
 
+/* [maint-note:bec5877f0d3a]
+ * 样式作用域：.messages-empty。
+ * 布局位置：flex=1；display=flex；flex-direction=column；align-items=center；justify-content=center；gap=10px。
+ * 文字呈现：font-size=0.9rem；text-align=center。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:bec5877f0d3a] */
 .messages-empty {
   flex: 1;
   display: flex;
@@ -955,10 +1617,20 @@ button:disabled {
   text-align: center;
 }
 
+/* [maint-note:44e40261c3b7]
+ * 样式作用域：.messages-empty svg。
+ * 色彩与边界：opacity=0.45。
+ * [/maint-note:44e40261c3b7] */
 .messages-empty svg {
   opacity: 0.45;
 }
 
+/* [maint-note:b636f5ff28ad]
+ * 样式作用域：.messages-empty-hint。
+ * 空间尺寸：margin=0。
+ * 文字呈现：font-size=0.78rem。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:b636f5ff28ad] */
 .messages-empty-hint {
   font-size: 0.78rem;
   margin: 0;
@@ -966,6 +1638,12 @@ button:disabled {
 }
 
 /* ── Message Card ── */
+/* [maint-note:17d3467b1c83]
+ * 样式作用域：.message-card。
+ * 布局位置：display=flex；align-items=flex-start；gap=8px。
+ * 空间尺寸：max-width=100%。
+ * 交互与动效：animation=messageIn 0.2s ease-out。
+ * [/maint-note:17d3467b1c83] */
 .message-card {
   display: flex;
   align-items: flex-start;
@@ -974,22 +1652,42 @@ button:disabled {
   animation: messageIn 0.2s ease-out;
 }
 
+/* [maint-note:6ceeabd8d011]
+ * 样式作用域：.message-user。
+ * 布局位置：flex-direction=row-reverse；gap=4px。
+ * [/maint-note:6ceeabd8d011] */
 .message-user {
   flex-direction: row-reverse;
   gap: 4px;
 }
 
 @keyframes messageIn {
+  /* [maint-note:b7365d3b014a]
+   * 样式作用域：from。
+   * 生效条件：@keyframes messageIn。
+   * 色彩与边界：opacity=0。
+   * 交互与动效：transform=translateY(4px)。
+   * [/maint-note:b7365d3b014a] */
   from {
     opacity: 0;
     transform: translateY(4px);
   }
+  /* [maint-note:807003c161e8]
+   * 样式作用域：to。
+   * 生效条件：@keyframes messageIn。
+   * 色彩与边界：opacity=1。
+   * 交互与动效：transform=translateY(0)。
+   * [/maint-note:807003c161e8] */
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
+/* [maint-note:2e41f4c1b776]
+ * 样式作用域：.message-avatar-column。
+ * 布局位置：display=flex；flex-direction=column；align-items=center；gap=2px；flex-shrink=0。
+ * [/maint-note:2e41f4c1b776] */
 .message-avatar-column {
   display: flex;
   flex-direction: column;
@@ -998,6 +1696,14 @@ button:disabled {
   flex-shrink: 0;
 }
 
+/* [maint-note:0e9b6daf0741]
+ * 样式作用域：.message-avatar。
+ * 布局位置：display=grid。
+ * 空间尺寸：width=26px；height=26px。
+ * 文字呈现：font-size=0.7rem。
+ * 色彩与边界：border-radius=7px。
+ * 其他样式：place-items=center。
+ * [/maint-note:0e9b6daf0741] */
 .message-avatar {
   width: 26px;
   height: 26px;
@@ -1007,23 +1713,42 @@ button:disabled {
   font-size: 0.7rem;
 }
 
+/* [maint-note:fb61db42d471]
+ * 样式作用域：.message-user .message-avatar。
+ * 色彩与边界：background=var(--accent)；color=#1a0f0a。
+ * [/maint-note:fb61db42d471] */
 .message-user .message-avatar {
   background: var(--accent);
   color: #1a0f0a;
 }
 
+/* [maint-note:70ee12f5153e]
+ * 样式作用域：.message-assistant .message-avatar。
+ * 色彩与边界：background=var(--panel)；color=var(--accent-strong)；border=1px solid var(--line)。
+ * [/maint-note:70ee12f5153e] */
 .message-assistant .message-avatar {
   background: var(--panel);
   color: var(--accent-strong);
   border: 1px solid var(--line);
 }
 
+/* [maint-note:540959ae02d9]
+ * 样式作用域：.message-meta。
+ * 文字呈现：font-size=0.68rem；line-height=1。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:540959ae02d9] */
 .message-meta {
   font-size: 0.68rem;
   color: var(--faint);
   line-height: 1;
 }
 
+/* [maint-note:0174fa33ec46]
+ * 样式作用域：.message-bubble。
+ * 空间尺寸：max-width=82%；padding=8px 12px。
+ * 文字呈现：line-height=1.5；word-break=break-word。
+ * 色彩与边界：border-radius=12px。
+ * [/maint-note:0174fa33ec46] */
 .message-bubble {
   max-width: 82%;
   padding: 8px 12px;
@@ -1032,12 +1757,20 @@ button:disabled {
   word-break: break-word;
 }
 
+/* [maint-note:fc364bdd608a]
+ * 样式作用域：.message-user .message-bubble。
+ * 色彩与边界：background=var(--accent)；color=#1a0f0a；border-bottom-right-radius=3px。
+ * [/maint-note:fc364bdd608a] */
 .message-user .message-bubble {
   background: var(--accent);
   color: #1a0f0a;
   border-bottom-right-radius: 3px;
 }
 
+/* [maint-note:14aa0e26f3bc]
+ * 样式作用域：.message-assistant .message-bubble。
+ * 色彩与边界：background=var(--panel)；color=var(--text)；border=1px solid var(--line)；border-bottom-left-radius=3px。
+ * [/maint-note:14aa0e26f3bc] */
 .message-assistant .message-bubble {
   background: var(--panel);
   color: var(--text);
@@ -1045,6 +1778,12 @@ button:disabled {
   border-bottom-left-radius: 3px;
 }
 
+/* [maint-note:4f444392318e]
+ * 样式作用域：.message-status-row。
+ * 布局位置：display=flex；align-items=center；gap=6px。
+ * 空间尺寸：margin-bottom=6px。
+ * 文字呈现：font-size=0.82rem。
+ * [/maint-note:4f444392318e] */
 .message-status-row {
   display: flex;
   align-items: center;
@@ -1053,6 +1792,11 @@ button:disabled {
   font-size: 0.82rem;
 }
 
+/* [maint-note:e653f325d042]
+ * 样式作用域：.thinking-panel。
+ * 空间尺寸：margin-bottom=10px。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=8px；background=var(--panel-hover)。
+ * [/maint-note:e653f325d042] */
 .thinking-panel {
   margin-bottom: 10px;
   border: 1px solid var(--line);
@@ -1060,6 +1804,13 @@ button:disabled {
   background: var(--panel-hover);
 }
 
+/* [maint-note:860d240017c7]
+ * 样式作用域：.thinking-panel summary。
+ * 空间尺寸：padding=7px 10px。
+ * 文字呈现：font-size=0.76rem；font-weight=600。
+ * 色彩与边界：color=var(--muted)。
+ * 交互与动效：cursor=pointer。
+ * [/maint-note:860d240017c7] */
 .thinking-panel summary {
   cursor: pointer;
   padding: 7px 10px;
@@ -1068,29 +1819,54 @@ button:disabled {
   font-weight: 600;
 }
 
+/* [maint-note:0289ca83b72e]
+ * 样式作用域：.thinking-live。
+ * 空间尺寸：margin-left=8px。
+ * 文字呈现：font-weight=400。
+ * 色彩与边界：color=var(--amber)。
+ * [/maint-note:0289ca83b72e] */
 .thinking-live {
   margin-left: 8px;
   color: var(--amber);
   font-weight: 400;
 }
 
+/* [maint-note:ec77fddd18da]
+ * 样式作用域：.thinking-panel-body。
+ * 空间尺寸：max-height=300px；overflow=auto；padding=0 10px 8px。
+ * [/maint-note:ec77fddd18da] */
 .thinking-panel-body {
   max-height: 300px;
   overflow: auto;
   padding: 0 10px 8px;
 }
 
+/* [maint-note:39d791512094]
+ * 样式作用域：.thinking-step + .thinking-step。
+ * 空间尺寸：margin-top=8px；padding-top=8px。
+ * 色彩与边界：border-top=1px solid var(--line)。
+ * [/maint-note:39d791512094] */
 .thinking-step + .thinking-step {
   border-top: 1px solid var(--line);
   margin-top: 8px;
   padding-top: 8px;
 }
 
+/* [maint-note:8308137c13af]
+ * 样式作用域：.thinking-step span。
+ * 文字呈现：font-size=0.7rem。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:8308137c13af] */
 .thinking-step span {
   color: var(--muted);
   font-size: 0.7rem;
 }
 
+/* [maint-note:398dac28e437]
+ * 样式作用域：.thinking-step pre。
+ * 空间尺寸：margin=4px 0 0；overflow-wrap=anywhere。
+ * 文字呈现：white-space=pre-wrap；font-size=0.76rem；line-height=1.5；font-family=inherit。
+ * [/maint-note:398dac28e437] */
 .thinking-step pre {
   margin: 4px 0 0;
   white-space: pre-wrap;
@@ -1100,6 +1876,14 @@ button:disabled {
   font-family: inherit;
 }
 
+/* [maint-note:213bfca6e59a]
+ * 样式作用域：.message-action-btn。
+ * 布局位置：display=inline-flex；align-items=center；gap=5px。
+ * 空间尺寸：margin-top=8px；padding=3px 8px。
+ * 文字呈现：font-size=0.7rem。
+ * 色彩与边界：border-radius=5px；color=var(--muted)；background=transparent；border=1px solid var(--line)。
+ * 交互与动效：cursor=pointer；transition=background 0.12s ease, color 0.12s ease。
+ * [/maint-note:213bfca6e59a] */
 .message-action-btn {
   display: inline-flex;
   align-items: center;
@@ -1115,11 +1899,20 @@ button:disabled {
   transition: background 0.12s ease, color 0.12s ease;
 }
 
+/* [maint-note:42e8e744e5c8]
+ * 样式作用域：.message-action-btn:hover。
+ * 色彩与边界：background=var(--panel-hover)；color=var(--text)。
+ * [/maint-note:42e8e744e5c8] */
 .message-action-btn:hover {
   background: var(--panel-hover);
   color: var(--text);
 }
 
+/* [maint-note:f912c3b0f32b]
+ * 样式作用域：.message-action-row。
+ * 布局位置：display=flex；flex-wrap=wrap；align-items=center；gap=8px。
+ * 空间尺寸：margin-top=8px。
+ * [/maint-note:f912c3b0f32b] */
 .message-action-row {
   display: flex;
   flex-wrap: wrap;
@@ -1128,6 +1921,14 @@ button:disabled {
   margin-top: 8px;
 }
 
+/* [maint-note:b241e6d0a12f]
+ * 样式作用域：.message-primary-action。
+ * 布局位置：display=inline-flex；align-items=center；gap=5px。
+ * 空间尺寸：margin-top=8px；padding=4px 9px。
+ * 文字呈现：font-size=0.72rem；font-weight=650。
+ * 色彩与边界：border=0；border-radius=5px；color=#1a0f0a；background=var(--accent)。
+ * 交互与动效：cursor=pointer；transition=background 0.12s ease, transform 0.1s ease。
+ * [/maint-note:b241e6d0a12f] */
 .message-primary-action {
   display: inline-flex;
   align-items: center;
@@ -1144,11 +1945,21 @@ button:disabled {
   transition: background 0.12s ease, transform 0.1s ease;
 }
 
+/* [maint-note:ff5bb1089ac7]
+ * 样式作用域：.message-primary-action:hover:not(:disabled)。
+ * 色彩与边界：background=var(--accent-strong)。
+ * 交互与动效：transform=translateY(-1px)。
+ * [/maint-note:ff5bb1089ac7] */
 .message-primary-action:hover:not(:disabled) {
   background: var(--accent-strong);
   transform: translateY(-1px);
 }
 
+/* [maint-note:f2346b50de36]
+ * 样式作用域：.message-primary-action:disabled, .message-action-btn:disabled。
+ * 色彩与边界：opacity=0.5。
+ * 交互与动效：cursor=not-allowed。
+ * [/maint-note:f2346b50de36] */
 .message-primary-action:disabled,
 .message-action-btn:disabled {
   opacity: 0.5;
@@ -1156,6 +1967,12 @@ button:disabled {
 }
 
 /* ── Terminal Block inside Message ── */
+/* [maint-note:02a2422b6aea]
+ * 样式作用域：.terminal-body。
+ * 空间尺寸：padding=6px 8px；overflow=visible；max-height=none；margin=0。
+ * 文字呈现：white-space=pre-wrap；word-break=break-word；font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace；font-size=0.78rem；line-height=1.5。
+ * 色彩与边界：color=#d4d4d4；background=#0d0f11；border-radius=6px。
+ * [/maint-note:02a2422b6aea] */
 .terminal-body {
   padding: 6px 8px;
   overflow: visible;
@@ -1172,12 +1989,24 @@ button:disabled {
 }
 
 /* ── Chat Input Area ── */
+/* [maint-note:2a184f93fb90]
+ * 样式作用域：.chat-input-area。
+ * 空间尺寸：padding=12px 20px 18px。
+ * 色彩与边界：border-top=1px solid var(--line)；background=var(--bg-elevated)。
+ * [/maint-note:2a184f93fb90] */
 .chat-input-area {
   padding: 12px 20px 18px;
   border-top: 1px solid var(--line);
   background: var(--bg-elevated);
 }
 
+/* [maint-note:9b462fcf529a]
+ * 样式作用域：.chat-composer。
+ * 布局位置：position=relative。
+ * 空间尺寸：max-width=900px；margin=0 auto；padding=10px。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=16px；background=var(--panel)；box-shadow=var(--shadow-md)。
+ * 交互与动效：transition=border-color 0.15s ease, box-shadow 0.15s ease。
+ * [/maint-note:9b462fcf529a] */
 .chat-composer {
   position: relative;
   max-width: 900px;
@@ -1190,11 +2019,22 @@ button:disabled {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+/* [maint-note:bdb8a536377f]
+ * 样式作用域：.chat-composer:focus-within。
+ * 色彩与边界：border-color=var(--accent)；box-shadow=0 0 0 2px var(--accent-glow), var(--shadow-md)。
+ * [/maint-note:bdb8a536377f] */
 .chat-composer:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent-glow), var(--shadow-md);
 }
 
+/* [maint-note:0a893d6465e9]
+ * 样式作用域：.chat-input。
+ * 空间尺寸：width=100%；min-height=48px；max-height=200px；padding=7px 7px 10px。
+ * 文字呈现：font-size=0.95rem；line-height=1.5。
+ * 色彩与边界：border=0；border-radius=0；outline=none；color=var(--text)；background=transparent。
+ * 交互与动效：resize=vertical。
+ * [/maint-note:0a893d6465e9] */
 .chat-input {
   width: 100%;
   min-height: 48px;
@@ -1210,15 +2050,31 @@ button:disabled {
   resize: vertical;
 }
 
+/* [maint-note:e0756d59f706]
+ * 样式作用域：.chat-input:focus。
+ * 色彩与边界：border-color=transparent；box-shadow=none。
+ * [/maint-note:e0756d59f706] */
 .chat-input:focus {
   border-color: transparent;
   box-shadow: none;
 }
 
+/* [maint-note:851a4084be61]
+ * 样式作用域：.chat-input::placeholder。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:851a4084be61] */
 .chat-input::placeholder {
   color: var(--faint);
 }
 
+/* [maint-note:584c168cca0a]
+ * 样式作用域：.chat-send-btn。
+ * 布局位置：flex=0 0 40px；display=grid。
+ * 空间尺寸：width=40px；height=40px。
+ * 色彩与边界：border-radius=12px；background=var(--accent)；color=#1a0f0a；border=0。
+ * 交互与动效：transition=background 0.15s ease, transform 0.1s ease。
+ * 其他样式：place-items=center。
+ * [/maint-note:584c168cca0a] */
 .chat-send-btn {
   width: 40px;
   height: 40px;
@@ -1232,6 +2088,11 @@ button:disabled {
   transition: background 0.15s ease, transform 0.1s ease;
 }
 
+/* [maint-note:4db36ede337e]
+ * 样式作用域：.context-tag-row。
+ * 布局位置：display=flex；flex-wrap=wrap；gap=6px。
+ * 空间尺寸：padding=0 2px 5px。
+ * [/maint-note:4db36ede337e] */
 .context-tag-row {
   display: flex;
   flex-wrap: wrap;
@@ -1239,6 +2100,13 @@ button:disabled {
   padding: 0 2px 5px;
 }
 
+/* [maint-note:d6c85b1c2876]
+ * 样式作用域：.context-tag。
+ * 布局位置：display=inline-flex；align-items=center；gap=5px。
+ * 空间尺寸：max-width=100%；padding=4px 7px。
+ * 文字呈现：font-size=0.72rem。
+ * 色彩与边界：border=1px solid color-mix(in srgb, var(--accent) 34%, var(--line))；border-radius=7px；color=var(--accent-strong)；background=color-mix(in srgb, var(--accent) 10%, var(--panel-strong))。
+ * [/maint-note:d6c85b1c2876] */
 .context-tag {
   max-width: 100%;
   display: inline-flex;
@@ -1252,12 +2120,23 @@ button:disabled {
   font-size: 0.72rem;
 }
 
+/* [maint-note:026835e51a6a]
+ * 样式作用域：.context-tag.external。
+ * 色彩与边界：border-color=color-mix(in srgb, var(--amber) 45%, var(--line))；color=var(--amber)；background=color-mix(in srgb, var(--amber) 10%, var(--panel-strong))。
+ * [/maint-note:026835e51a6a] */
 .context-tag.external {
   border-color: color-mix(in srgb, var(--amber) 45%, var(--line));
   color: var(--amber);
   background: color-mix(in srgb, var(--amber) 10%, var(--panel-strong));
 }
 
+/* [maint-note:54f87e8aad96]
+ * 样式作用域：.context-tag button。
+ * 布局位置：flex=0 0 17px；display=grid。
+ * 空间尺寸：width=17px；height=17px。
+ * 色彩与边界：border-radius=5px；color=currentColor；background=transparent。
+ * 其他样式：place-items=center。
+ * [/maint-note:54f87e8aad96] */
 .context-tag button {
   width: 17px;
   height: 17px;
@@ -1269,10 +2148,20 @@ button:disabled {
   background: transparent;
 }
 
+/* [maint-note:7b621011ac11]
+ * 样式作用域：.context-tag button:hover。
+ * 色彩与边界：background=color-mix(in srgb, currentColor 15%, transparent)。
+ * [/maint-note:7b621011ac11] */
 .context-tag button:hover {
   background: color-mix(in srgb, currentColor 15%, transparent);
 }
 
+/* [maint-note:6bdf3d05df14]
+ * 样式作用域：.context-suggestions。
+ * 布局位置：position=absolute；left=10px；right=10px；bottom=calc(100% + 8px)；z-index=18。
+ * 空间尺寸：max-height=260px；overflow-y=auto；padding=6px。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=11px；background=var(--bg-elevated)；box-shadow=var(--shadow-lg)。
+ * [/maint-note:6bdf3d05df14] */
 .context-suggestions {
   position: absolute;
   left: 10px;
@@ -1288,6 +2177,13 @@ button:disabled {
   box-shadow: var(--shadow-lg);
 }
 
+/* [maint-note:e048b4fa10ab]
+ * 样式作用域：.context-suggestions button。
+ * 布局位置：display=flex；align-items=center；gap=8px。
+ * 空间尺寸：width=100%；min-height=34px；padding=0 8px。
+ * 文字呈现：text-align=left。
+ * 色彩与边界：border-radius=7px；color=var(--text-secondary)；background=transparent。
+ * [/maint-note:e048b4fa10ab] */
 .context-suggestions button {
   width: 100%;
   min-height: 34px;
@@ -1301,11 +2197,21 @@ button:disabled {
   text-align: left;
 }
 
+/* [maint-note:370418bde049]
+ * 样式作用域：.context-suggestions button:hover。
+ * 色彩与边界：color=var(--text)；background=var(--panel-hover)。
+ * [/maint-note:370418bde049] */
 .context-suggestions button:hover {
   color: var(--text);
   background: var(--panel-hover);
 }
 
+/* [maint-note:bec7a2f279a9]
+ * 样式作用域：.context-suggestions span。
+ * 布局位置：flex=1。
+ * 空间尺寸：min-width=0；overflow=hidden。
+ * 文字呈现：text-overflow=ellipsis；white-space=nowrap。
+ * [/maint-note:bec7a2f279a9] */
 .context-suggestions span {
   min-width: 0;
   flex: 1;
@@ -1314,11 +2220,20 @@ button:disabled {
   white-space: nowrap;
 }
 
+/* [maint-note:821af1ff0a28]
+ * 样式作用域：.context-suggestions small。
+ * 文字呈现：font-size=0.67rem。
+ * 色彩与边界：color=var(--amber)。
+ * [/maint-note:821af1ff0a28] */
 .context-suggestions small {
   color: var(--amber);
   font-size: 0.67rem;
 }
 
+/* [maint-note:2bf66b2fae19]
+ * 样式作用域：.composer-actions。
+ * 布局位置：display=flex；align-items=center；justify-content=space-between；gap=10px。
+ * [/maint-note:2bf66b2fae19] */
 .composer-actions {
   display: flex;
   align-items: center;
@@ -1326,6 +2241,11 @@ button:disabled {
   gap: 10px;
 }
 
+/* [maint-note:7302496d06e4]
+ * 样式作用域：.composer-action-group。
+ * 布局位置：display=flex；align-items=center；gap=6px。
+ * 空间尺寸：min-width=0。
+ * [/maint-note:7302496d06e4] */
 .composer-action-group {
   min-width: 0;
   display: flex;
@@ -1333,6 +2253,13 @@ button:disabled {
   gap: 6px;
 }
 
+/* [maint-note:2c5096b78818]
+ * 样式作用域：.composer-tool-button。
+ * 布局位置：display=inline-flex；align-items=center；gap=6px。
+ * 空间尺寸：min-height=30px；padding=0 8px。
+ * 文字呈现：font-size=0.72rem。
+ * 色彩与边界：border-radius=7px；color=var(--muted)；background=transparent。
+ * [/maint-note:2c5096b78818] */
 .composer-tool-button {
   min-height: 30px;
   display: inline-flex;
@@ -1345,18 +2272,34 @@ button:disabled {
   font-size: 0.72rem;
 }
 
+/* [maint-note:18164fa65845]
+ * 样式作用域：.composer-tool-button:hover, .composer-tool-button.active。
+ * 色彩与边界：color=var(--text)；background=var(--panel-strong)。
+ * [/maint-note:18164fa65845] */
 .composer-tool-button:hover,
 .composer-tool-button.active {
   color: var(--text);
   background: var(--panel-strong);
 }
 
+/* [maint-note:05df456168c7]
+ * 样式作用域：.composer-runtime-label。
+ * 空间尺寸：padding-left=4px。
+ * 文字呈现：font-size=0.7rem。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:05df456168c7] */
 .composer-runtime-label {
   padding-left: 4px;
   color: var(--faint);
   font-size: 0.7rem;
 }
 
+/* [maint-note:de4c529bd252]
+ * 样式作用域：.budget-popover。
+ * 布局位置：position=absolute；left=72px；bottom=48px；z-index=19；display=grid；gap=10px。
+ * 空间尺寸：width=min(330px, calc(100vw - 40px))；padding=12px。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=11px；background=var(--bg-elevated)；box-shadow=var(--shadow-lg)。
+ * [/maint-note:de4c529bd252] */
 .budget-popover {
   position: absolute;
   left: 72px;
@@ -1372,6 +2315,10 @@ button:disabled {
   box-shadow: var(--shadow-lg);
 }
 
+/* [maint-note:279daf496415]
+ * 样式作用域：.budget-popover > div。
+ * 布局位置：display=grid；grid-template-columns=1fr 110px；align-items=center；gap=10px。
+ * [/maint-note:279daf496415] */
 .budget-popover > div {
   display: grid;
   grid-template-columns: 1fr 110px;
@@ -1379,11 +2326,21 @@ button:disabled {
   gap: 10px;
 }
 
+/* [maint-note:3364086d25fb]
+ * 样式作用域：.budget-popover label。
+ * 文字呈现：font-size=0.75rem。
+ * 色彩与边界：color=var(--text-secondary)。
+ * [/maint-note:3364086d25fb] */
 .budget-popover label {
   color: var(--text-secondary);
   font-size: 0.75rem;
 }
 
+/* [maint-note:c19103ba44cd]
+ * 样式作用域：.budget-popover input。
+ * 空间尺寸：width=100%；height=32px；padding=0 8px。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=7px；outline=0；color=var(--text)；background=var(--panel)。
+ * [/maint-note:c19103ba44cd] */
 .budget-popover input {
   width: 100%;
   height: 32px;
@@ -1395,6 +2352,12 @@ button:disabled {
   background: var(--panel);
 }
 
+/* [maint-note:1da4c9780484]
+ * 样式作用域：.budget-popover .budget-hint。
+ * 空间尺寸：margin=0。
+ * 文字呈现：font-size=0.66rem；line-height=1.4。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:1da4c9780484] */
 .budget-popover .budget-hint {
   margin: 0;
   color: var(--faint);
@@ -1402,6 +2365,12 @@ button:disabled {
   line-height: 1.4;
 }
 
+/* [maint-note:e7118ca6bf05]
+ * 样式作用域：.budget-toolbar。
+ * 布局位置：display=grid；grid-template-columns=repeat(3, minmax(130px, 1fr)) auto；align-items=center；gap=16px。
+ * 空间尺寸：min-height=54px；padding=8px 20px。
+ * 色彩与边界：border-bottom=1px solid var(--line)；background=color-mix(in srgb, var(--bg-elevated) 92%, var(--accent) 8%)。
+ * [/maint-note:e7118ca6bf05] */
 .budget-toolbar {
   min-height: 54px;
   display: grid;
@@ -1413,10 +2382,21 @@ button:disabled {
   background: color-mix(in srgb, var(--bg-elevated) 92%, var(--accent) 8%);
 }
 
+/* [maint-note:8182708bc44d]
+ * 样式作用域：.budget-meter。
+ * 空间尺寸：min-width=0。
+ * [/maint-note:8182708bc44d] */
 .budget-meter {
   min-width: 0;
 }
 
+/* [maint-note:90010c86b068]
+ * 样式作用域：.budget-meter-label。
+ * 布局位置：display=flex；align-items=center；justify-content=space-between；gap=8px。
+ * 空间尺寸：margin-bottom=5px。
+ * 文字呈现：font-size=0.7rem。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:90010c86b068] */
 .budget-meter-label {
   display: flex;
   align-items: center;
@@ -1427,11 +2407,21 @@ button:disabled {
   font-size: 0.7rem;
 }
 
+/* [maint-note:5141b1ff113d]
+ * 样式作用域：.budget-meter-label strong。
+ * 文字呈现：font-weight=650。
+ * 色彩与边界：color=var(--text-secondary)。
+ * [/maint-note:5141b1ff113d] */
 .budget-meter-label strong {
   color: var(--text-secondary);
   font-weight: 650;
 }
 
+/* [maint-note:c33373cf43f0]
+ * 样式作用域：.budget-meter-track。
+ * 空间尺寸：height=5px；overflow=hidden。
+ * 色彩与边界：border-radius=99px；background=var(--panel-strong)。
+ * [/maint-note:c33373cf43f0] */
 .budget-meter-track {
   height: 5px;
   overflow: hidden;
@@ -1439,6 +2429,13 @@ button:disabled {
   background: var(--panel-strong);
 }
 
+/* [maint-note:cbb755d9279d]
+ * 样式作用域：.budget-meter-track span。
+ * 布局位置：display=block。
+ * 空间尺寸：height=100%。
+ * 色彩与边界：border-radius=inherit；background=var(--accent)。
+ * 交互与动效：transition=width 0.25s ease, background 0.2s ease。
+ * [/maint-note:cbb755d9279d] */
 .budget-meter-track span {
   display: block;
   height: 100%;
@@ -1447,15 +2444,30 @@ button:disabled {
   transition: width 0.25s ease, background 0.2s ease;
 }
 
+/* [maint-note:c6d838f83b33]
+ * 样式作用域：.budget-meter.warning .budget-meter-track span。
+ * 色彩与边界：background=var(--amber)。
+ * [/maint-note:c6d838f83b33] */
 .budget-meter.warning .budget-meter-track span {
   background: var(--amber);
 }
 
+/* [maint-note:780341471d46]
+ * 样式作用域：.budget-meter.danger .budget-meter-track span, .budget-meter.exhausted .budget-meter-track span。
+ * 色彩与边界：background=var(--danger)。
+ * [/maint-note:780341471d46] */
 .budget-meter.danger .budget-meter-track span,
 .budget-meter.exhausted .budget-meter-track span {
   background: var(--danger);
 }
 
+/* [maint-note:666db580cfa7]
+ * 样式作用域：.run-details-button。
+ * 布局位置：display=inline-flex；align-items=center；gap=7px。
+ * 空间尺寸：min-height=34px；padding=0 10px。
+ * 文字呈现：font-size=0.74rem。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=8px；color=var(--text-secondary)；background=var(--panel)。
+ * [/maint-note:666db580cfa7] */
 .run-details-button {
   min-height: 34px;
   display: inline-flex;
@@ -1469,11 +2481,22 @@ button:disabled {
   font-size: 0.74rem;
 }
 
+/* [maint-note:e18f58d8bbe2]
+ * 样式作用域：.run-details-button:hover。
+ * 色彩与边界：color=var(--text)；background=var(--panel-hover)。
+ * [/maint-note:e18f58d8bbe2] */
 .run-details-button:hover {
   color: var(--text);
   background: var(--panel-hover);
 }
 
+/* [maint-note:3875f05488a0]
+ * 样式作用域：.run-status-pill。
+ * 布局位置：display=inline-flex；align-items=center。
+ * 空间尺寸：min-height=20px；padding=0 7px。
+ * 文字呈现：font-size=0.65rem；font-weight=700。
+ * 色彩与边界：border-radius=99px；color=var(--text-secondary)；background=var(--panel-strong)。
+ * [/maint-note:3875f05488a0] */
 .run-status-pill {
   display: inline-flex;
   align-items: center;
@@ -1486,11 +2509,19 @@ button:disabled {
   font-weight: 700;
 }
 
+/* [maint-note:d5c735998d54]
+ * 样式作用域：.run-status-pill.completed。
+ * 色彩与边界：color=var(--accent-strong)；background=var(--accent-glow)。
+ * [/maint-note:d5c735998d54] */
 .run-status-pill.completed {
   color: var(--accent-strong);
   background: var(--accent-glow);
 }
 
+/* [maint-note:5ff42074e7af]
+ * 样式作用域：.run-status-pill.failed, .run-status-pill.cancelled, .run-status-pill.budget_exhausted。
+ * 色彩与边界：color=var(--danger)；background=color-mix(in srgb, var(--danger) 14%, transparent)。
+ * [/maint-note:5ff42074e7af] */
 .run-status-pill.failed,
 .run-status-pill.cancelled,
 .run-status-pill.budget_exhausted {
@@ -1498,17 +2529,33 @@ button:disabled {
   background: color-mix(in srgb, var(--danger) 14%, transparent);
 }
 
+/* [maint-note:16373f89304b]
+ * 样式作用域：.chat-send-btn:hover:not(:disabled)。
+ * 色彩与边界：background=var(--accent-strong)。
+ * 交互与动效：transform=scale(1.05)。
+ * [/maint-note:16373f89304b] */
 .chat-send-btn:hover:not(:disabled) {
   background: var(--accent-strong);
   transform: scale(1.05);
 }
 
+/* [maint-note:6be13248b6e9]
+ * 样式作用域：.chat-send-btn:disabled。
+ * 色彩与边界：opacity=0.45。
+ * 交互与动效：cursor=not-allowed。
+ * [/maint-note:6be13248b6e9] */
 .chat-send-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
 /* ── Drawer ── */
+/* [maint-note:b57b16e2d4ef]
+ * 样式作用域：.drawer-overlay。
+ * 布局位置：position=fixed；inset=0；z-index=40。
+ * 色彩与边界：background=rgba(0, 0, 0, 0.5)。
+ * 交互与动效：animation=fadeIn 0.2s ease。
+ * [/maint-note:b57b16e2d4ef] */
 .drawer-overlay {
   position: fixed;
   inset: 0;
@@ -1518,14 +2565,32 @@ button:disabled {
 }
 
 @keyframes fadeIn {
+  /* [maint-note:00f8a7da9ae2]
+   * 样式作用域：from。
+   * 生效条件：@keyframes fadeIn。
+   * 色彩与边界：opacity=0。
+   * [/maint-note:00f8a7da9ae2] */
   from {
     opacity: 0;
   }
+  /* [maint-note:660920c4f9ef]
+   * 样式作用域：to。
+   * 生效条件：@keyframes fadeIn。
+   * 色彩与边界：opacity=1。
+   * [/maint-note:660920c4f9ef] */
   to {
     opacity: 1;
   }
 }
 
+/* [maint-note:7b424684f0f2]
+ * 样式作用域：.confirmation-backdrop。
+ * 布局位置：position=fixed；inset=0；z-index=80；display=grid。
+ * 空间尺寸：padding=20px。
+ * 色彩与边界：background=rgb(0 0 0 / 62%)。
+ * 交互与动效：animation=fadeIn 0.16s ease。
+ * 其他样式：place-items=center。
+ * [/maint-note:7b424684f0f2] */
 .confirmation-backdrop {
   position: fixed;
   inset: 0;
@@ -1537,6 +2602,12 @@ button:disabled {
   animation: fadeIn 0.16s ease;
 }
 
+/* [maint-note:fbc9d5fb0124]
+ * 样式作用域：.confirmation-dialog。
+ * 布局位置：display=grid；grid-template-columns=auto minmax(0, 1fr)；gap=14px。
+ * 空间尺寸：width=min(460px, 100%)；padding=20px。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=14px；color=var(--text-secondary)；background=var(--bg-elevated)；box-shadow=0 24px 70px rgb(0 0 0 / 38%)。
+ * [/maint-note:fbc9d5fb0124] */
 .confirmation-dialog {
   width: min(460px, 100%);
   display: grid;
@@ -1550,6 +2621,13 @@ button:disabled {
   box-shadow: 0 24px 70px rgb(0 0 0 / 38%);
 }
 
+/* [maint-note:3032594a96ee]
+ * 样式作用域：.confirmation-icon。
+ * 布局位置：display=grid。
+ * 空间尺寸：width=38px；height=38px。
+ * 色彩与边界：border-radius=10px；color=var(--danger)；background=color-mix(in srgb, var(--danger) 14%, transparent)。
+ * 其他样式：place-items=center。
+ * [/maint-note:3032594a96ee] */
 .confirmation-icon {
   width: 38px;
   height: 38px;
@@ -1560,17 +2638,33 @@ button:disabled {
   background: color-mix(in srgb, var(--danger) 14%, transparent);
 }
 
+/* [maint-note:d574986fa260]
+ * 样式作用域：.confirmation-dialog h3。
+ * 空间尺寸：margin-bottom=8px。
+ * 文字呈现：font-size=1rem。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:d574986fa260] */
 .confirmation-dialog h3 {
   margin-bottom: 8px;
   color: var(--text);
   font-size: 1rem;
 }
 
+/* [maint-note:b9f19ae4fae3]
+ * 样式作用域：.confirmation-dialog p。
+ * 文字呈现：font-size=0.78rem；line-height=1.55。
+ * [/maint-note:b9f19ae4fae3] */
 .confirmation-dialog p {
   font-size: 0.78rem;
   line-height: 1.55;
 }
 
+/* [maint-note:1a199ac755bb]
+ * 样式作用域：.confirmation-thread-title。
+ * 空间尺寸：overflow=hidden；margin-bottom=8px。
+ * 文字呈现：font-weight=700；text-overflow=ellipsis；white-space=nowrap。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:1a199ac755bb] */
 .confirmation-thread-title {
   overflow: hidden;
   margin-bottom: 8px !important;
@@ -1580,11 +2674,22 @@ button:disabled {
   white-space: nowrap;
 }
 
+/* [maint-note:2706d1bdd11e]
+ * 样式作用域：.confirmation-hint。
+ * 空间尺寸：margin-top=9px。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:2706d1bdd11e] */
 .confirmation-hint {
   margin-top: 9px !important;
   color: var(--faint);
 }
 
+/* [maint-note:c2fc4ee12377]
+ * 样式作用域：.confirmation-error。
+ * 空间尺寸：margin-top=10px；padding=9px 10px。
+ * 文字呈现：font-size=0.74rem；line-height=1.45。
+ * 色彩与边界：border=1px solid color-mix(in srgb, var(--danger) 42%, transparent)；border-radius=8px；color=var(--danger)；background=color-mix(in srgb, var(--danger) 10%, transparent)。
+ * [/maint-note:c2fc4ee12377] */
 .confirmation-error {
   margin-top: 10px;
   padding: 9px 10px;
@@ -1596,6 +2701,11 @@ button:disabled {
   line-height: 1.45;
 }
 
+/* [maint-note:dcab18844bfd]
+ * 样式作用域：.confirmation-actions。
+ * 布局位置：grid-column=1 / -1；display=flex；justify-content=flex-end；gap=8px。
+ * 空间尺寸：margin-top=4px。
+ * [/maint-note:dcab18844bfd] */
 .confirmation-actions {
   grid-column: 1 / -1;
   display: flex;
@@ -1604,6 +2714,12 @@ button:disabled {
   margin-top: 4px;
 }
 
+/* [maint-note:2938fec93aea]
+ * 样式作用域：.danger-button。
+ * 空间尺寸：min-height=34px；padding=0 13px。
+ * 文字呈现：font-size=0.76rem；font-weight=700。
+ * 色彩与边界：border=1px solid color-mix(in srgb, var(--danger) 75%, black)；border-radius=8px；color=white；background=var(--danger)。
+ * [/maint-note:2938fec93aea] */
 .danger-button {
   min-height: 34px;
   padding: 0 13px;
@@ -1615,15 +2731,31 @@ button:disabled {
   font-weight: 700;
 }
 
+/* [maint-note:101e7152d5fa]
+ * 样式作用域：.danger-button:hover:not(:disabled)。
+ * 其他样式：filter=brightness(1.08)。
+ * [/maint-note:101e7152d5fa] */
 .danger-button:hover:not(:disabled) {
   filter: brightness(1.08);
 }
 
+/* [maint-note:52e95a5043d7]
+ * 样式作用域：.danger-button:disabled。
+ * 色彩与边界：opacity=0.58。
+ * 交互与动效：cursor=wait。
+ * [/maint-note:52e95a5043d7] */
 .danger-button:disabled {
   cursor: wait;
   opacity: 0.58;
 }
 
+/* [maint-note:58298f333dbb]
+ * 样式作用域：.drawer。
+ * 布局位置：position=fixed；top=0；right=0；z-index=50；display=flex；flex-direction=column。
+ * 空间尺寸：width=var(--drawer-width)；height=100vh；overflow=hidden。
+ * 色彩与边界：background=var(--bg-elevated)；border-left=1px solid var(--line)；box-shadow=var(--shadow-lg)。
+ * 交互与动效：animation=slideIn 0.25s ease。
+ * [/maint-note:58298f333dbb] */
 .drawer {
   position: fixed;
   top: 0;
@@ -1641,14 +2773,30 @@ button:disabled {
 }
 
 @keyframes slideIn {
+  /* [maint-note:d5d67624f798]
+   * 样式作用域：from。
+   * 生效条件：@keyframes slideIn。
+   * 交互与动效：transform=translateX(100%)。
+   * [/maint-note:d5d67624f798] */
   from {
     transform: translateX(100%);
   }
+  /* [maint-note:0e48a7860f0d]
+   * 样式作用域：to。
+   * 生效条件：@keyframes slideIn。
+   * 交互与动效：transform=translateX(0)。
+   * [/maint-note:0e48a7860f0d] */
   to {
     transform: translateX(0);
   }
 }
 
+/* [maint-note:cd3c8cb5fd6c]
+ * 样式作用域：.drawer-header。
+ * 布局位置：display=flex；align-items=center；justify-content=space-between。
+ * 空间尺寸：padding=14px 16px。
+ * 色彩与边界：border-bottom=1px solid var(--line)。
+ * [/maint-note:cd3c8cb5fd6c] */
 .drawer-header {
   display: flex;
   align-items: center;
@@ -1657,6 +2805,12 @@ button:disabled {
   border-bottom: 1px solid var(--line);
 }
 
+/* [maint-note:8bbb5388b70d]
+ * 样式作用域：.drawer-header h3。
+ * 空间尺寸：margin=0。
+ * 文字呈现：font-size=0.9rem；font-weight=650。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:8bbb5388b70d] */
 .drawer-header h3 {
   margin: 0;
   font-size: 0.9rem;
@@ -1664,16 +2818,32 @@ button:disabled {
   color: var(--text);
 }
 
+/* [maint-note:6f1f335e3298]
+ * 样式作用域：.drawer-body。
+ * 布局位置：flex=1。
+ * 空间尺寸：overflow-y=auto；padding=12px 16px。
+ * [/maint-note:6f1f335e3298] */
 .drawer-body {
   flex: 1;
   overflow-y: auto;
   padding: 12px 16px;
 }
 
+/* [maint-note:8be5bc54fb83]
+ * 样式作用域：.run-details-drawer。
+ * 空间尺寸：width=min(430px, var(--drawer-width))。
+ * [/maint-note:8be5bc54fb83] */
 .run-details-drawer {
   width: min(430px, var(--drawer-width));
 }
 
+/* [maint-note:ab70706970f4]
+ * 样式作用域：.drawer-header small。
+ * 布局位置：display=block。
+ * 空间尺寸：margin-top=3px。
+ * 文字呈现：font-size=0.68rem。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:ab70706970f4] */
 .drawer-header small {
   display: block;
   margin-top: 3px;
@@ -1681,29 +2851,56 @@ button:disabled {
   font-size: 0.68rem;
 }
 
+/* [maint-note:96daf830e737]
+ * 样式作用域：.run-detail-section。
+ * 空间尺寸：padding=12px 0。
+ * 色彩与边界：border-bottom=1px solid var(--line)。
+ * [/maint-note:96daf830e737] */
 .run-detail-section {
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
 }
 
+/* [maint-note:c4ee153396c6]
+ * 样式作用域：.run-detail-section:first-child。
+ * 空间尺寸：padding-top=0。
+ * [/maint-note:c4ee153396c6] */
 .run-detail-section:first-child {
   padding-top: 0;
 }
 
+/* [maint-note:b654a6527191]
+ * 样式作用域：.run-detail-section:last-child。
+ * 色彩与边界：border-bottom=0。
+ * [/maint-note:b654a6527191] */
 .run-detail-section:last-child {
   border-bottom: 0;
 }
 
+/* [maint-note:c243faa2a2a0]
+ * 样式作用域：.run-detail-section h4。
+ * 空间尺寸：margin=0 0 10px。
+ * 文字呈现：font-size=0.78rem。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:c243faa2a2a0] */
 .run-detail-section h4 {
   margin: 0 0 10px;
   color: var(--text);
   font-size: 0.78rem;
 }
 
+/* [maint-note:aa0607234b10]
+ * 样式作用域：.run-detail-section > .budget-meter + .budget-meter。
+ * 空间尺寸：margin-top=10px。
+ * [/maint-note:aa0607234b10] */
 .run-detail-section > .budget-meter + .budget-meter {
   margin-top: 10px;
 }
 
+/* [maint-note:436b01ee6d71]
+ * 样式作用域：.run-detail-heading, .run-control-actions。
+ * 布局位置：display=flex；align-items=center；flex-wrap=wrap；gap=7px。
+ * [/maint-note:436b01ee6d71] */
 .run-detail-heading,
 .run-control-actions {
   display: flex;
@@ -1712,16 +2909,31 @@ button:disabled {
   gap: 7px;
 }
 
+/* [maint-note:eac6621917d5]
+ * 样式作用域：.run-detail-heading。
+ * 布局位置：justify-content=space-between。
+ * 文字呈现：font-size=0.72rem。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:eac6621917d5] */
 .run-detail-heading {
   justify-content: space-between;
   color: var(--muted);
   font-size: 0.72rem;
 }
 
+/* [maint-note:e23ce55d2fb6]
+ * 样式作用域：.run-control-actions。
+ * 空间尺寸：margin-top=10px。
+ * [/maint-note:e23ce55d2fb6] */
 .run-control-actions {
   margin-top: 10px;
 }
 
+/* [maint-note:c71f4d3f855a]
+ * 样式作用域：.run-control-actions .primary-button, .run-control-actions .secondary-button。
+ * 空间尺寸：min-height=32px；padding=0 10px。
+ * 文字呈现：font-size=0.72rem。
+ * [/maint-note:c71f4d3f855a] */
 .run-control-actions .primary-button,
 .run-control-actions .secondary-button {
   min-height: 32px;
@@ -1729,11 +2941,21 @@ button:disabled {
   font-size: 0.72rem;
 }
 
+/* [maint-note:34864da3c526]
+ * 样式作用域：.detail-file-list。
+ * 布局位置：display=grid；gap=5px。
+ * [/maint-note:34864da3c526] */
 .detail-file-list {
   display: grid;
   gap: 5px;
 }
 
+/* [maint-note:2dd3ca81de92]
+ * 样式作用域：.detail-file-list span。
+ * 空间尺寸：padding=6px 8px。
+ * 文字呈现：font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace；font-size=0.7rem；word-break=break-all。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=7px；color=var(--text-secondary)；background=var(--panel)。
+ * [/maint-note:2dd3ca81de92] */
 .detail-file-list span {
   padding: 6px 8px;
   border: 1px solid var(--line);
@@ -1745,6 +2967,11 @@ button:disabled {
   word-break: break-all;
 }
 
+/* [maint-note:1a664d065721]
+ * 样式作用域：.detail-file-list p, .detail-summary。
+ * 文字呈现：font-size=0.72rem；line-height=1.5。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:1a664d065721] */
 .detail-file-list p,
 .detail-summary {
   color: var(--muted);
@@ -1752,10 +2979,18 @@ button:disabled {
   line-height: 1.5;
 }
 
+/* [maint-note:e7a3203226fd]
+ * 样式作用域：.detail-summary。
+ * 空间尺寸：margin-top=8px。
+ * [/maint-note:e7a3203226fd] */
 .detail-summary {
   margin-top: 8px;
 }
 
+/* [maint-note:294834e9673a]
+ * 样式作用域：.detail-timeline。
+ * 空间尺寸：max-height=280px；margin=0；padding-left=22px；overflow-y=auto。
+ * [/maint-note:294834e9673a] */
 .detail-timeline {
   max-height: 280px;
   margin: 0;
@@ -1763,21 +2998,43 @@ button:disabled {
   overflow-y: auto;
 }
 
+/* [maint-note:9b25f61987ce]
+ * 样式作用域：.detail-timeline li。
+ * 空间尺寸：margin-bottom=8px。
+ * 文字呈现：font-size=0.7rem。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:9b25f61987ce] */
 .detail-timeline li {
   margin-bottom: 8px;
   color: var(--muted);
   font-size: 0.7rem;
 }
 
+/* [maint-note:8f39f3b75d79]
+ * 样式作用域：.detail-timeline strong, .detail-timeline span。
+ * 布局位置：display=block。
+ * [/maint-note:8f39f3b75d79] */
 .detail-timeline strong,
 .detail-timeline span {
   display: block;
 }
 
+/* [maint-note:f0a8e3a9e65e]
+ * 样式作用域：.detail-timeline strong。
+ * 色彩与边界：color=var(--text-secondary)。
+ * [/maint-note:f0a8e3a9e65e] */
 .detail-timeline strong {
   color: var(--text-secondary);
 }
 
+/* [maint-note:259112d81007]
+ * 样式作用域：.drawer-close。
+ * 布局位置：display=grid。
+ * 空间尺寸：width=32px；height=32px。
+ * 色彩与边界：border-radius=8px；color=var(--muted)；background=transparent。
+ * 交互与动效：transition=background 0.12s ease。
+ * 其他样式：place-items=center。
+ * [/maint-note:259112d81007] */
 .drawer-close {
   width: 32px;
   height: 32px;
@@ -1789,18 +3046,31 @@ button:disabled {
   transition: background 0.12s ease;
 }
 
+/* [maint-note:6994f3cc26b4]
+ * 样式作用域：.drawer-close:hover。
+ * 色彩与边界：background=var(--panel)；color=var(--text)。
+ * [/maint-note:6994f3cc26b4] */
 .drawer-close:hover {
   background: var(--panel);
   color: var(--text);
 }
 
 /* ── Metrics Grid ── */
+/* [maint-note:1b93e3b80a40]
+ * 样式作用域：.metrics-grid。
+ * 布局位置：display=grid；grid-template-columns=repeat(2, minmax(0, 1fr))；gap=8px。
+ * [/maint-note:1b93e3b80a40] */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
+/* [maint-note:5cfda6187ebb]
+ * 样式作用域：.metric。
+ * 空间尺寸：min-width=0；min-height=56px；padding=10px。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=10px；background=var(--panel)。
+ * [/maint-note:5cfda6187ebb] */
 .metric {
   min-width: 0;
   min-height: 56px;
@@ -1810,11 +3080,23 @@ button:disabled {
   background: var(--panel);
 }
 
+/* [maint-note:a819c1c6238d]
+ * 样式作用域：.metric span。
+ * 文字呈现：font-size=0.72rem。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:a819c1c6238d] */
 .metric span {
   color: var(--muted);
   font-size: 0.72rem;
 }
 
+/* [maint-note:1f1f53055f5b]
+ * 样式作用域：.metric strong。
+ * 布局位置：display=block。
+ * 空间尺寸：margin-top=4px；overflow=hidden。
+ * 文字呈现：text-overflow=ellipsis；white-space=nowrap；font-size=1rem。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:1f1f53055f5b] */
 .metric strong {
   display: block;
   margin-top: 4px;
@@ -1826,6 +3108,11 @@ button:disabled {
 }
 
 /* ── Info List ── */
+/* [maint-note:5caa910b5f2a]
+ * 样式作用域：.info-list。
+ * 布局位置：display=grid；grid-template-columns=72px minmax(0, 1fr)；gap=8px 10px。
+ * 空间尺寸：margin=12px 0 0。
+ * [/maint-note:5caa910b5f2a] */
 .info-list {
   display: grid;
   grid-template-columns: 72px minmax(0, 1fr);
@@ -1833,11 +3120,22 @@ button:disabled {
   margin: 12px 0 0;
 }
 
+/* [maint-note:284dd610cbe9]
+ * 样式作用域：.info-list dt。
+ * 文字呈现：font-size=0.74rem。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:284dd610cbe9] */
 .info-list dt {
   color: var(--muted);
   font-size: 0.74rem;
 }
 
+/* [maint-note:daf78efaf4fa]
+ * 样式作用域：.info-list dd。
+ * 空间尺寸：margin=0；min-width=0；overflow=hidden。
+ * 文字呈现：text-overflow=ellipsis；white-space=nowrap；font-size=0.82rem。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:daf78efaf4fa] */
 .info-list dd {
   margin: 0;
   min-width: 0;
@@ -1849,11 +3147,21 @@ button:disabled {
 }
 
 /* ── Selected List ── */
+/* [maint-note:68e153f90988]
+ * 样式作用域：.selected-list。
+ * 布局位置：display=grid；gap=6px。
+ * [/maint-note:68e153f90988] */
 .selected-list {
   display: grid;
   gap: 6px;
 }
 
+/* [maint-note:ebea42213c69]
+ * 样式作用域：.selected-row。
+ * 布局位置：display=grid；grid-template-columns=24px minmax(0, 1fr) auto 28px；align-items=center；gap=7px。
+ * 空间尺寸：min-width=0；min-height=34px；padding=5px 6px。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=8px；background=var(--panel)。
+ * [/maint-note:ebea42213c69] */
 .selected-row {
   min-width: 0;
   min-height: 34px;
@@ -1867,6 +3175,10 @@ button:disabled {
   background: var(--panel);
 }
 
+/* [maint-note:16d273a3c793]
+ * 样式作用域：.rank, .primary-pill。
+ * 布局位置：display=inline-flex；align-items=center；justify-content=center。
+ * [/maint-note:16d273a3c793] */
 .rank,
 .primary-pill {
   display: inline-flex;
@@ -1874,6 +3186,12 @@ button:disabled {
   justify-content: center;
 }
 
+/* [maint-note:a7928d121e59]
+ * 样式作用域：.rank。
+ * 空间尺寸：width=22px；height=22px。
+ * 文字呈现：font-size=0.75rem。
+ * 色彩与边界：border-radius=6px；color=var(--muted)；background=var(--bg)。
+ * [/maint-note:a7928d121e59] */
 .rank {
   width: 22px;
   height: 22px;
@@ -1883,6 +3201,12 @@ button:disabled {
   font-size: 0.75rem;
 }
 
+/* [maint-note:eb9ed9dc42b6]
+ * 样式作用域：.primary-pill, .mini-button。
+ * 空间尺寸：min-height=24px；padding=0 7px。
+ * 文字呈现：font-size=0.72rem。
+ * 色彩与边界：border-radius=6px。
+ * [/maint-note:eb9ed9dc42b6] */
 .primary-pill,
 .mini-button {
   min-height: 24px;
@@ -1891,12 +3215,22 @@ button:disabled {
   font-size: 0.72rem;
 }
 
+/* [maint-note:84d9ed19e4d9]
+ * 样式作用域：.primary-pill。
+ * 文字呈现：font-weight=600。
+ * 色彩与边界：color=#1a0f0a；background=var(--accent-strong)。
+ * [/maint-note:84d9ed19e4d9] */
 .primary-pill {
   color: #1a0f0a;
   background: var(--accent-strong);
   font-weight: 600;
 }
 
+/* [maint-note:f2f83d49694f]
+ * 样式作用域：.mini-button, .mini-icon。
+ * 色彩与边界：border=1px solid var(--line)；color=var(--muted)；background=var(--bg)。
+ * 交互与动效：cursor=pointer；transition=background 0.12s ease, color 0.12s ease。
+ * [/maint-note:f2f83d49694f] */
 .mini-button,
 .mini-icon {
   border: 1px solid var(--line);
@@ -1906,12 +3240,22 @@ button:disabled {
   transition: background 0.12s ease, color 0.12s ease;
 }
 
+/* [maint-note:80acb8beeb73]
+ * 样式作用域：.mini-button:hover, .mini-icon:hover。
+ * 色彩与边界：background=var(--panel-hover)；color=var(--text)。
+ * [/maint-note:80acb8beeb73] */
 .mini-button:hover,
 .mini-icon:hover {
   background: var(--panel-hover);
   color: var(--text);
 }
 
+/* [maint-note:4a750fa96a17]
+ * 样式作用域：.mini-icon。
+ * 布局位置：display=inline-flex；align-items=center；justify-content=center。
+ * 空间尺寸：width=26px；min-height=26px。
+ * 色彩与边界：border-radius=6px。
+ * [/maint-note:4a750fa96a17] */
 .mini-icon {
   width: 26px;
   min-height: 26px;
@@ -1922,6 +3266,12 @@ button:disabled {
 }
 
 /* ── Command Preview ── */
+/* [maint-note:8ad4722607fc]
+ * 样式作用域：.command-preview。
+ * 空间尺寸：margin=0；overflow=auto；padding=10px。
+ * 文字呈现：white-space=pre-wrap；word-break=break-word；font-family=ui-monospace, SFMono-Regular, Menlo, Consolas, monospace；font-size=0.78rem；line-height=1.5。
+ * 色彩与边界：color=#cad2d8；background=#0f1114；border=1px solid var(--line)；border-radius=10px。
+ * [/maint-note:8ad4722607fc] */
 .command-preview {
   margin: 0;
   overflow: auto;
@@ -1938,6 +3288,11 @@ button:disabled {
 }
 
 /* ── Error Box ── */
+/* [maint-note:3c2907422e22]
+ * 样式作用域：.error-box。
+ * 空间尺寸：margin-top=12px；padding=10px。
+ * 色彩与边界：border=1px solid rgba(224, 108, 117, 0.4)；border-radius=10px；color=#ffd7d9；background=rgba(224, 108, 117, 0.1)。
+ * [/maint-note:3c2907422e22] */
 .error-box {
   margin-top: 12px;
   padding: 10px;
@@ -1948,28 +3303,55 @@ button:disabled {
 }
 
 /* ── Dynamic Form ── */
+/* [maint-note:e7fc21d90554]
+ * 样式作用域：.dynamic-form。
+ * 布局位置：display=grid；gap=8px。
+ * 空间尺寸：margin-top=8px。
+ * [/maint-note:e7fc21d90554] */
 .dynamic-form {
   display: grid;
   gap: 8px;
   margin-top: 8px;
 }
 
+/* [maint-note:08163d58ca00]
+ * 样式作用域：.form-field。
+ * 布局位置：display=flex；flex-direction=column。
+ * [/maint-note:08163d58ca00] */
 .form-field {
   display: flex;
   flex-direction: column;
 }
 
+/* [maint-note:b89f1b51338e]
+ * 样式作用域：.required。
+ * 空间尺寸：margin-left=4px。
+ * 色彩与边界：color=var(--danger)。
+ * [/maint-note:b89f1b51338e] */
 .required {
   color: var(--danger);
   margin-left: 4px;
 }
 
+/* [maint-note:3180a49b4baa]
+ * 样式作用域：.field-help。
+ * 空间尺寸：margin=4px 0 0。
+ * 文字呈现：font-size=0.72rem。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:3180a49b4baa] */
 .field-help {
   margin: 4px 0 0;
   color: var(--faint);
   font-size: 0.72rem;
 }
 
+/* [maint-note:0cc56b7557e9]
+ * 样式作用域：.switch-row。
+ * 布局位置：display=flex；align-items=center；gap=10px。
+ * 空间尺寸：min-height=36px；padding=0 12px。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=10px；background=var(--panel)。
+ * 交互与动效：cursor=pointer。
+ * [/maint-note:0cc56b7557e9] */
 .switch-row {
   display: flex;
   align-items: center;
@@ -1982,21 +3364,42 @@ button:disabled {
   cursor: pointer;
 }
 
+/* [maint-note:d16b621d8dd1]
+ * 样式作用域：.switch-row input[type="checkbox"]。
+ * 空间尺寸：width=18px；height=18px。
+ * 其他样式：accent-color=var(--accent)。
+ * [/maint-note:d16b621d8dd1] */
 .switch-row input[type="checkbox"] {
   width: 18px;
   height: 18px;
   accent-color: var(--accent);
 }
 
+/* [maint-note:f22c5bb107df]
+ * 样式作用域：.codegraph-settings。
+ * 空间尺寸：margin-bottom=16px。
+ * [/maint-note:f22c5bb107df] */
 .codegraph-settings {
   margin-bottom: 16px;
 }
 
+/* [maint-note:469e61e5d48f]
+ * 样式作用域：.codegraph-switch > span:nth-child(2)。
+ * 布局位置：flex=1。
+ * 空间尺寸：min-width=0。
+ * [/maint-note:469e61e5d48f] */
 .codegraph-switch > span:nth-child(2) {
   min-width: 0;
   flex: 1;
 }
 
+/* [maint-note:69370bc3e45a]
+ * 样式作用域：.codegraph-status。
+ * 布局位置：flex=0 0 auto。
+ * 空间尺寸：padding=2px 7px。
+ * 文字呈现：font-size=0.68rem；line-height=1.45。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=999px；color=var(--muted)。
+ * [/maint-note:69370bc3e45a] */
 .codegraph-status {
   flex: 0 0 auto;
   padding: 2px 7px;
@@ -2007,16 +3410,29 @@ button:disabled {
   line-height: 1.45;
 }
 
+/* [maint-note:3239135d7801]
+ * 样式作用域：.codegraph-status.ready。
+ * 色彩与边界：border-color=color-mix(in srgb, #72b88c 55%, var(--line))；color=#82c99d。
+ * [/maint-note:3239135d7801] */
 .codegraph-status.ready {
   border-color: color-mix(in srgb, #72b88c 55%, var(--line));
   color: #82c99d;
 }
 
+/* [maint-note:1cf14c6f2899]
+ * 样式作用域：.codegraph-status.attention。
+ * 色彩与边界：border-color=color-mix(in srgb, var(--amber) 55%, var(--line))；color=var(--amber)。
+ * [/maint-note:1cf14c6f2899] */
 .codegraph-status.attention {
   border-color: color-mix(in srgb, var(--amber) 55%, var(--line));
   color: var(--amber);
 }
 
+/* [maint-note:fc2da4a2d26a]
+ * 样式作用域：.codegraph-actions。
+ * 布局位置：display=flex；align-items=center；flex-wrap=wrap；gap=7px。
+ * 空间尺寸：margin-top=8px。
+ * [/maint-note:fc2da4a2d26a] */
 .codegraph-actions {
   display: flex;
   align-items: center;
@@ -2025,6 +3441,12 @@ button:disabled {
   margin-top: 8px;
 }
 
+/* [maint-note:643ac18640b6]
+ * 样式作用域：.compact-button。
+ * 布局位置：display=inline-flex；align-items=center；gap=6px。
+ * 空间尺寸：min-height=32px；padding=0 10px。
+ * 文字呈现：font-size=0.76rem。
+ * [/maint-note:643ac18640b6] */
 .compact-button {
   display: inline-flex;
   align-items: center;
@@ -2034,12 +3456,22 @@ button:disabled {
   font-size: 0.76rem;
 }
 
+/* [maint-note:c3eec255e32f]
+ * 样式作用域：.file-upload-row。
+ * 布局位置：display=flex；flex-direction=column；gap=6px。
+ * [/maint-note:c3eec255e32f] */
 .file-upload-row {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
+/* [maint-note:7a4a13a6a2a4]
+ * 样式作用域：.file-upload-row input[type="file"]。
+ * 空间尺寸：padding=6px 10px。
+ * 文字呈现：font-size=0.82rem。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=10px；background=var(--panel)；color=var(--muted)。
+ * [/maint-note:7a4a13a6a2a4] */
 .file-upload-row input[type="file"] {
   padding: 6px 10px;
   border: 1px solid var(--line);
@@ -2049,12 +3481,23 @@ button:disabled {
   font-size: 0.82rem;
 }
 
+/* [maint-note:08b3021e860d]
+ * 样式作用域：.file-name。
+ * 文字呈现：font-size=0.78rem。
+ * 色彩与边界：color=var(--accent-strong)。
+ * [/maint-note:08b3021e860d] */
 .file-name {
   color: var(--accent-strong);
   font-size: 0.78rem;
 }
 
 /* ── Report Panel ── */
+/* [maint-note:072548b29756]
+ * 样式作用域：.report-panel。
+ * 布局位置：flex=1。
+ * 空间尺寸：overflow=auto。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=0 0 10px 10px；background=var(--panel)。
+ * [/maint-note:072548b29756] */
 .report-panel {
   flex: 1;
   overflow: auto;
@@ -2063,6 +3506,11 @@ button:disabled {
   background: var(--panel);
 }
 
+/* [maint-note:d7c824eeff17]
+ * 样式作用域：.report-iframe。
+ * 空间尺寸：width=100%；height=100%。
+ * 色彩与边界：border=0；background=white。
+ * [/maint-note:d7c824eeff17] */
 .report-iframe {
   width: 100%;
   height: 100%;
@@ -2070,6 +3518,12 @@ button:disabled {
   background: white;
 }
 
+/* [maint-note:de9c9eff6955]
+ * 样式作用域：.report-markdown。
+ * 空间尺寸：padding=14px；margin=0。
+ * 文字呈现：font-family=ui-monospace, monospace；font-size=0.82rem；line-height=1.6。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:de9c9eff6955] */
 .report-markdown {
   padding: 14px;
   margin: 0;
@@ -2080,10 +3534,18 @@ button:disabled {
 }
 
 /* ── Muted text ── */
+/* [maint-note:6ef41ffa9238]
+ * 样式作用域：.muted。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:6ef41ffa9238] */
 .muted {
   color: var(--muted);
 }
 
+/* [maint-note:4b406dc98e3e]
+ * 样式作用域：h1, h2, h3, p。
+ * 空间尺寸：margin=0。
+ * [/maint-note:4b406dc98e3e] */
 h1,
 h2,
 h3,
@@ -2093,14 +3555,31 @@ p {
 
 /* ── Responsive ── */
 @media (max-width: 780px) {
+  /* [maint-note:2d343c5ca8eb]
+   * 样式作用域：.app-root。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：grid-template-columns=1fr。
+   * [/maint-note:2d343c5ca8eb] */
   .app-root {
     grid-template-columns: 1fr;
   }
 
+  /* [maint-note:61bccc443851]
+   * 样式作用域：.resize-handle。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：display=none。
+   * [/maint-note:61bccc443851] */
   .resize-handle {
     display: none;
   }
 
+  /* [maint-note:6b152eb73795]
+   * 样式作用域：.sidebar-left。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：position=fixed；left=0；top=0；z-index=30。
+   * 空间尺寸：width=260px；height=100vh。
+   * 交互与动效：transform=translateX(-100%)；transition=transform 0.25s ease。
+   * [/maint-note:6b152eb73795] */
   .sidebar-left {
     position: fixed;
     left: 0;
@@ -2112,15 +3591,33 @@ p {
     transition: transform 0.25s ease;
   }
 
+  /* [maint-note:042115bde915]
+   * 样式作用域：.sidebar-left.open。
+   * 生效条件：@media (max-width: 780px)。
+   * 交互与动效：transform=translateX(0)。
+   * [/maint-note:042115bde915] */
   .sidebar-left.open {
     transform: translateX(0);
   }
 
+  /* [maint-note:a093cbca1d2d]
+   * 样式作用域：.conversation-delete-button, .conversation-rename-button。
+   * 生效条件：@media (max-width: 780px)。
+   * 色彩与边界：opacity=1。
+   * [/maint-note:a093cbca1d2d] */
   .conversation-delete-button,
   .conversation-rename-button {
     opacity: 1;
   }
 
+  /* [maint-note:1af5b7cb34d4]
+   * 样式作用域：.mobile-menu-btn。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：display=grid。
+   * 空间尺寸：width=36px；height=36px。
+   * 色彩与边界：border-radius=10px；background=var(--panel)；color=var(--text)；border=1px solid var(--line)。
+   * 其他样式：place-items=center。
+   * [/maint-note:1af5b7cb34d4] */
   .mobile-menu-btn {
     display: grid;
     place-items: center;
@@ -2132,63 +3629,134 @@ p {
     border: 1px solid var(--line);
   }
 
+  /* [maint-note:cbdce3d663b8]
+   * 样式作用域：.stage-header。
+   * 生效条件：@media (max-width: 780px)。
+   * 空间尺寸：padding=12px 14px。
+   * [/maint-note:cbdce3d663b8] */
   .stage-header {
     padding: 12px 14px;
   }
 
+  /* [maint-note:c809a424f216]
+   * 样式作用域：.stage-actions。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：gap=5px。
+   * [/maint-note:c809a424f216] */
   .stage-actions {
     gap: 5px;
   }
 
+  /* [maint-note:411b3944c110]
+   * 样式作用域：.header-workspace-input, .header-select:not(.runtime-select)。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：display=none。
+   * [/maint-note:411b3944c110] */
   .header-workspace-input,
   .header-select:not(.runtime-select) {
     display: none;
   }
 
+  /* [maint-note:5a8c0204862f]
+   * 样式作用域：.budget-toolbar。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：grid-template-columns=1fr 1fr；gap=10px。
+   * 空间尺寸：padding=8px 14px。
+   * [/maint-note:5a8c0204862f] */
   .budget-toolbar {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     padding: 8px 14px;
   }
 
+  /* [maint-note:f790527f7c69]
+   * 样式作用域：.run-details-button。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：grid-column=1 / -1；justify-content=center。
+   * [/maint-note:f790527f7c69] */
   .run-details-button {
     grid-column: 1 / -1;
     justify-content: center;
   }
 
+  /* [maint-note:0c1e93c9d8e3]
+   * 样式作用域：.messages-area。
+   * 生效条件：@media (max-width: 780px)。
+   * 空间尺寸：padding=14px。
+   * [/maint-note:0c1e93c9d8e3] */
   .messages-area {
     padding: 14px;
   }
 
+  /* [maint-note:918eb8050b32]
+   * 样式作用域：.chat-input-area。
+   * 生效条件：@media (max-width: 780px)。
+   * 空间尺寸：padding=12px 14px 16px。
+   * [/maint-note:918eb8050b32] */
   .chat-input-area {
     padding: 12px 14px 16px;
   }
 
+  /* [maint-note:c400fd024322]
+   * 样式作用域：.chat-composer。
+   * 生效条件：@media (max-width: 780px)。
+   * 空间尺寸：max-width=100%。
+   * [/maint-note:c400fd024322] */
   .chat-composer {
     max-width: 100%;
   }
 
+  /* [maint-note:51fbcf72cbe6]
+   * 样式作用域：.drawer。
+   * 生效条件：@media (max-width: 780px)。
+   * 空间尺寸：width=min(var(--drawer-width), 92vw)。
+   * [/maint-note:51fbcf72cbe6] */
   .drawer {
     width: min(var(--drawer-width), 92vw);
   }
 
+  /* [maint-note:a9eef867ddbe]
+   * 样式作用域：.agent-runtime-stack。
+   * 生效条件：@media (max-width: 780px)。
+   * 空间尺寸：height=auto；max-height=45vh。
+   * [/maint-note:a9eef867ddbe] */
   .agent-runtime-stack {
     height: auto;
     max-height: 45vh;
   }
 
+  /* [maint-note:778117e58759]
+   * 样式作用域：.composer-runtime-label。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：display=none。
+   * [/maint-note:778117e58759] */
   .composer-runtime-label {
     display: none;
   }
 
+  /* [maint-note:b11f01c48562]
+   * 样式作用域：.confirmation-dialog。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：grid-template-columns=1fr。
+   * [/maint-note:b11f01c48562] */
   .confirmation-dialog {
     grid-template-columns: 1fr;
   }
 
+  /* [maint-note:40f99327b52a]
+   * 样式作用域：.confirmation-icon。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：display=none。
+   * [/maint-note:40f99327b52a] */
   .confirmation-icon {
     display: none;
   }
 
+  /* [maint-note:ab528a447d81]
+   * 样式作用域：.confirmation-actions。
+   * 生效条件：@media (max-width: 780px)。
+   * 布局位置：grid-column=1。
+   * [/maint-note:ab528a447d81] */
   .confirmation-actions {
     grid-column: 1;
   }
@@ -2196,12 +3764,22 @@ p {
 
 /* Mobile menu button hidden on desktop */
 @media (min-width: 781px) {
+  /* [maint-note:5545dd8dab97]
+   * 样式作用域：.mobile-menu-btn。
+   * 生效条件：@media (min-width: 781px)。
+   * 布局位置：display=none。
+   * [/maint-note:5545dd8dab97] */
   .mobile-menu-btn {
     display: none;
   }
 }
 
 /* ── Artifact viewer (knowledge graph) ── */
+/* [maint-note:bce3ccb679ae]
+ * 样式作用域：.artifact-viewer。
+ * 空间尺寸：margin-top=12px；overflow=hidden。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=10px；background=var(--panel)。
+ * [/maint-note:bce3ccb679ae] */
 .artifact-viewer {
   margin-top: 12px;
   border: 1px solid var(--line);
@@ -2210,6 +3788,13 @@ p {
   background: var(--panel);
 }
 
+/* [maint-note:f890b16713d8]
+ * 样式作用域：.artifact-header。
+ * 布局位置：display=flex；align-items=center；justify-content=space-between；gap=12px。
+ * 空间尺寸：padding=10px 12px。
+ * 文字呈现：font-size=13px。
+ * 色彩与边界：border-bottom=1px solid var(--line)；color=var(--text)。
+ * [/maint-note:f890b16713d8] */
 .artifact-header {
   display: flex;
   align-items: center;
@@ -2221,10 +3806,20 @@ p {
   color: var(--text);
 }
 
+/* [maint-note:26a50777b5e1]
+ * 样式作用域：.artifact-header .message-action-btn。
+ * 布局位置：flex-shrink=0。
+ * [/maint-note:26a50777b5e1] */
 .artifact-header .message-action-btn {
   flex-shrink: 0;
 }
 
+/* [maint-note:41ed0828e0b3]
+ * 样式作用域：.artifact-iframe。
+ * 布局位置：display=block。
+ * 空间尺寸：width=100%；height=420px。
+ * 色彩与边界：border=0。
+ * [/maint-note:41ed0828e0b3] */
 .artifact-iframe {
   width: 100%;
   height: 420px;
@@ -2233,27 +3828,53 @@ p {
 }
 
 /* ── Custom Scrollbar ── */
+/* [maint-note:0b5157cc15f1]
+ * 样式作用域：::-webkit-scrollbar。
+ * 空间尺寸：width=6px；height=6px。
+ * [/maint-note:0b5157cc15f1] */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
+/* [maint-note:3ee4a40640aa]
+ * 样式作用域：::-webkit-scrollbar-track。
+ * 色彩与边界：background=transparent。
+ * [/maint-note:3ee4a40640aa] */
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
+/* [maint-note:053950b60b24]
+ * 样式作用域：::-webkit-scrollbar-thumb。
+ * 色彩与边界：background=var(--line-strong)；border-radius=3px。
+ * [/maint-note:053950b60b24] */
 ::-webkit-scrollbar-thumb {
   background: var(--line-strong);
   border-radius: 3px;
 }
 
+/* [maint-note:43bce8503b0c]
+ * 样式作用域：::-webkit-scrollbar-thumb:hover。
+ * 色彩与边界：background=var(--muted)。
+ * [/maint-note:43bce8503b0c] */
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted);
 }
 
+/* [maint-note:2b13d4402801]
+ * 样式作用域：::-webkit-scrollbar-corner。
+ * 色彩与边界：background=transparent。
+ * [/maint-note:2b13d4402801] */
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
+/* [maint-note:e5148fcc9bc1]
+ * 样式作用域：.runtime-toggle。
+ * 布局位置：display=inline-flex。
+ * 空间尺寸：padding=2px。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=8px；background=var(--panel)。
+ * [/maint-note:e5148fcc9bc1] */
 .runtime-toggle {
   display: inline-flex;
   padding: 2px;
@@ -2262,6 +3883,12 @@ p {
   background: var(--panel);
 }
 
+/* [maint-note:b8d6cf7a055a]
+ * 样式作用域：.runtime-toggle button。
+ * 空间尺寸：padding=6px 9px。
+ * 色彩与边界：border=0；border-radius=6px；color=var(--muted)；background=transparent。
+ * 交互与动效：cursor=pointer。
+ * [/maint-note:b8d6cf7a055a] */
 .runtime-toggle button {
   border: 0;
   border-radius: 6px;
@@ -2271,12 +3898,23 @@ p {
   cursor: pointer;
 }
 
+/* [maint-note:8b8f56cccf2d]
+ * 样式作用域：.runtime-toggle button.active。
+ * 色彩与边界：color=var(--text)；background=var(--panel-strong)；box-shadow=0 1px 2px rgb(0 0 0 / 12%)。
+ * [/maint-note:8b8f56cccf2d] */
 .runtime-toggle button.active {
   color: var(--text);
   background: var(--panel-strong);
   box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
 }
 
+/* [maint-note:afcbf5790997]
+ * 样式作用域：.agent-control-bar。
+ * 布局位置：display=flex；align-items=center；gap=10px。
+ * 空间尺寸：min-height=44px；padding=8px 18px。
+ * 文字呈现：font-size=12px。
+ * 色彩与边界：border-bottom=1px solid var(--line)；background=color-mix(in srgb, var(--panel) 88%, var(--amber) 12%)。
+ * [/maint-note:afcbf5790997] */
 .agent-control-bar {
   display: flex;
   align-items: center;
@@ -2288,10 +3926,20 @@ p {
   font-size: 12px;
 }
 
+/* [maint-note:e1f5f6421a7c]
+ * 样式作用域：.agent-runtime-stack:empty。
+ * 布局位置：display=none。
+ * [/maint-note:e1f5f6421a7c] */
 .agent-runtime-stack:empty {
   display: none;
 }
 
+/* [maint-note:e25765a47f82]
+ * 样式作用域：.agent-runtime-stack。
+ * 布局位置：position=relative。
+ * 空间尺寸：height=min(var(--agent-stack-height), 55vh)；min-height=140px；max-height=55vh；overflow=auto。
+ * 色彩与边界：border-bottom=1px solid var(--line)。
+ * [/maint-note:e25765a47f82] */
 .agent-runtime-stack {
   position: relative;
   height: min(var(--agent-stack-height), 55vh);
@@ -2301,6 +3949,12 @@ p {
   border-bottom: 1px solid var(--line);
 }
 
+/* [maint-note:4d3526e90194]
+ * 样式作用域：.agent-observability。
+ * 布局位置：display=grid；grid-template-columns=repeat(3, minmax(220px, 1fr))；gap=10px。
+ * 空间尺寸：padding=10px 18px。
+ * 色彩与边界：background=var(--bg-elevated)。
+ * [/maint-note:4d3526e90194] */
 .agent-observability {
   display: grid;
   grid-template-columns: repeat(3, minmax(220px, 1fr));
@@ -2309,6 +3963,12 @@ p {
   background: var(--bg-elevated);
 }
 
+/* [maint-note:072be1817e00]
+ * 样式作用域：.agent-panel。
+ * 空间尺寸：min-width=0；padding=10px。
+ * 文字呈现：font-size=12px。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=10px；background=var(--panel)；color=var(--text-secondary)。
+ * [/maint-note:072be1817e00] */
 .agent-panel {
   min-width: 0;
   padding: 10px;
@@ -2319,22 +3979,40 @@ p {
   font-size: 12px;
 }
 
+/* [maint-note:b0651cebdd59]
+ * 样式作用域：.agent-panel h3。
+ * 空间尺寸：margin-bottom=8px。
+ * 文字呈现：font-size=12px。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:b0651cebdd59] */
 .agent-panel h3 {
   margin-bottom: 8px;
   color: var(--text);
   font-size: 12px;
 }
 
+/* [maint-note:9a8b2acf11b3]
+ * 样式作用域：.agent-panel h3:not(:first-child)。
+ * 空间尺寸：margin-top=12px。
+ * [/maint-note:9a8b2acf11b3] */
 .agent-panel h3:not(:first-child) {
   margin-top: 12px;
 }
 
+/* [maint-note:2d772e58a04c]
+ * 样式作用域：.agent-metrics。
+ * 布局位置：display=grid；grid-template-columns=1fr 1fr；gap=6px。
+ * [/maint-note:2d772e58a04c] */
 .agent-metrics {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
 }
 
+/* [maint-note:1c1303ea7877]
+ * 样式作用域：.agent-timeline ol。
+ * 空间尺寸：max-height=180px；margin=0；padding-left=22px；overflow=auto。
+ * [/maint-note:1c1303ea7877] */
 .agent-timeline ol {
   max-height: 180px;
   margin: 0;
@@ -2342,15 +4020,29 @@ p {
   overflow: auto;
 }
 
+/* [maint-note:3cf5c1089987]
+ * 样式作用域：.agent-timeline li。
+ * 空间尺寸：margin-bottom=6px。
+ * [/maint-note:3cf5c1089987] */
 .agent-timeline li {
   margin-bottom: 6px;
 }
 
+/* [maint-note:fdcd5ae40d93]
+ * 样式作用域：.agent-timeline li span。
+ * 布局位置：display=block。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:fdcd5ae40d93] */
 .agent-timeline li span {
   display: block;
   color: var(--muted);
 }
 
+/* [maint-note:3695c6d474f0]
+ * 样式作用域：.agent-list。
+ * 布局位置：display=grid；gap=6px。
+ * 空间尺寸：max-height=170px；overflow=auto。
+ * [/maint-note:3695c6d474f0] */
 .agent-list {
   display: grid;
   gap: 6px;
@@ -2358,6 +4050,13 @@ p {
   overflow: auto;
 }
 
+/* [maint-note:3120b853c7df]
+ * 样式作用域：.agent-list > button, .agent-memory。
+ * 布局位置：display=grid；gap=3px。
+ * 空间尺寸：padding=7px。
+ * 文字呈现：text-align=left。
+ * 色彩与边界：border-radius=7px；background=var(--panel-strong)；color=var(--text)。
+ * [/maint-note:3120b853c7df] */
 .agent-list > button,
 .agent-memory {
   display: grid;
@@ -2369,15 +4068,28 @@ p {
   text-align: left;
 }
 
+/* [maint-note:5e5d132fc3f3]
+ * 样式作用域：.agent-list small。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:5e5d132fc3f3] */
 .agent-list small {
   color: var(--muted);
 }
 
+/* [maint-note:706d8e46fd37]
+ * 样式作用域：.agent-memory div。
+ * 布局位置：display=flex；gap=5px。
+ * [/maint-note:706d8e46fd37] */
 .agent-memory div {
   display: flex;
   gap: 5px;
 }
 
+/* [maint-note:2d65471e85d2]
+ * 样式作用域：.agent-memory button。
+ * 空间尺寸：padding=3px 6px。
+ * 色彩与边界：border-radius=5px；background=var(--panel-hover)；color=var(--text-secondary)。
+ * [/maint-note:2d65471e85d2] */
 .agent-memory button {
   padding: 3px 6px;
   border-radius: 5px;
@@ -2386,6 +4098,13 @@ p {
 }
 
 /* ── Governed memory review ── */
+/* [maint-note:523ba5fd59f3]
+ * 样式作用域：.memory-evidence-toggle。
+ * 布局位置：display=flex；align-items=center；gap=5px。
+ * 空间尺寸：margin-top=8px；padding=4px 7px。
+ * 文字呈现：font-size=0.7rem。
+ * 色彩与边界：border=1px solid transparent；border-radius=6px；color=var(--muted)；background=transparent。
+ * [/maint-note:523ba5fd59f3] */
 .memory-evidence-toggle {
   display: flex;
   align-items: center;
@@ -2399,10 +4118,18 @@ p {
   font-size: 0.7rem;
 }
 
+/* [maint-note:66f950f0adec]
+ * 样式作用域：.message-user .memory-evidence-toggle。
+ * 色彩与边界：color=#2c1710。
+ * [/maint-note:66f950f0adec] */
 .message-user .memory-evidence-toggle {
   color: #2c1710;
 }
 
+/* [maint-note:3f7111990776]
+ * 样式作用域：.memory-evidence-toggle:hover, .memory-evidence-toggle.selected。
+ * 色彩与边界：border-color=var(--accent)；color=var(--accent-strong)；background=color-mix(in srgb, var(--accent) 12%, transparent)。
+ * [/maint-note:3f7111990776] */
 .memory-evidence-toggle:hover,
 .memory-evidence-toggle.selected {
   border-color: var(--accent);
@@ -2410,11 +4137,21 @@ p {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
+/* [maint-note:c8f148f8f6f5]
+ * 样式作用域：.message-user .memory-evidence-toggle.selected。
+ * 色彩与边界：color=#1a0f0a；border-color=#1a0f0a。
+ * [/maint-note:c8f148f8f6f5] */
 .message-user .memory-evidence-toggle.selected {
   color: #1a0f0a;
   border-color: #1a0f0a;
 }
 
+/* [maint-note:fdd18de965f6]
+ * 样式作用域：.memory-evidence-basket。
+ * 布局位置：display=flex；align-items=center；gap=7px。
+ * 空间尺寸：padding=8px。
+ * 色彩与边界：border=1px solid color-mix(in srgb, var(--accent) 55%, var(--line))；border-radius=9px；background=color-mix(in srgb, var(--accent) 8%, var(--panel))。
+ * [/maint-note:fdd18de965f6] */
 .memory-evidence-basket {
   display: flex;
   align-items: center;
@@ -2425,6 +4162,13 @@ p {
   background: color-mix(in srgb, var(--accent) 8%, var(--panel));
 }
 
+/* [maint-note:69ea93f9c7b3]
+ * 样式作用域：.memory-evidence-basket > div。
+ * 布局位置：display=flex；align-items=center；gap=6px。
+ * 空间尺寸：margin-right=auto。
+ * 文字呈现：font-size=0.75rem。
+ * 色彩与边界：color=var(--text-secondary)。
+ * [/maint-note:69ea93f9c7b3] */
 .memory-evidence-basket > div {
   display: flex;
   align-items: center;
@@ -2434,6 +4178,13 @@ p {
   font-size: 0.75rem;
 }
 
+/* [maint-note:b188f2aac860]
+ * 样式作用域：.memory-evidence-basket button, .memory-proposal-card button。
+ * 布局位置：display=inline-flex；align-items=center；justify-content=center；gap=4px。
+ * 空间尺寸：padding=5px 8px。
+ * 文字呈现：font-size=0.7rem。
+ * 色彩与边界：border-radius=6px；color=var(--text-secondary)；background=var(--panel-hover)。
+ * [/maint-note:b188f2aac860] */
 .memory-evidence-basket button,
 .memory-proposal-card button {
   display: inline-flex;
@@ -2447,26 +4198,48 @@ p {
   font-size: 0.7rem;
 }
 
+/* [maint-note:fdeb0212c1f6]
+ * 样式作用域：.memory-evidence-basket button:first-of-type。
+ * 色彩与边界：color=#1a0f0a；background=var(--accent-strong)。
+ * [/maint-note:fdeb0212c1f6] */
 .memory-evidence-basket button:first-of-type {
   color: #1a0f0a;
   background: var(--accent-strong);
 }
 
+/* [maint-note:628be300e713]
+ * 样式作用域：.memory-evidence-basket button:disabled, .memory-proposal-card button:disabled。
+ * 色彩与边界：opacity=0.55。
+ * 交互与动效：cursor=not-allowed。
+ * [/maint-note:628be300e713] */
 .memory-evidence-basket button:disabled,
 .memory-proposal-card button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
 
+/* [maint-note:bc892b7cf2cf]
+ * 样式作用域：.memory-governance-section。
+ * 空间尺寸：padding-top=0。
+ * [/maint-note:bc892b7cf2cf] */
 .memory-governance-section {
   padding-top: 0;
 }
 
+/* [maint-note:519cb9c84dd6]
+ * 样式作用域：.memory-review-panel。
+ * 布局位置：display=grid；gap=10px。
+ * [/maint-note:519cb9c84dd6] */
 .memory-review-panel {
   display: grid;
   gap: 10px;
 }
 
+/* [maint-note:e745cc8169b9]
+ * 样式作用域：.memory-review-error。
+ * 空间尺寸：margin-top=0；overflow-wrap=anywhere。
+ * 文字呈现：font-size=0.72rem；line-height=1.45。
+ * [/maint-note:e745cc8169b9] */
 .memory-review-error {
   margin-top: 0;
   overflow-wrap: anywhere;
@@ -2474,6 +4247,10 @@ p {
   line-height: 1.45;
 }
 
+/* [maint-note:03e6d2ebc4fb]
+ * 样式作用域：.memory-review-heading。
+ * 布局位置：display=flex；align-items=flex-start；justify-content=space-between；gap=10px。
+ * [/maint-note:03e6d2ebc4fb] */
 .memory-review-heading {
   display: flex;
   align-items: flex-start;
@@ -2481,10 +4258,20 @@ p {
   gap: 10px;
 }
 
+/* [maint-note:af52b06cb7a7]
+ * 样式作用域：.memory-review-heading h4。
+ * 空间尺寸：margin-bottom=3px。
+ * [/maint-note:af52b06cb7a7] */
 .memory-review-heading h4 {
   margin-bottom: 3px;
 }
 
+/* [maint-note:421bb9e66324]
+ * 样式作用域：.memory-review-heading p, .memory-empty-copy。
+ * 空间尺寸：margin=0。
+ * 文字呈现：font-size=0.7rem；line-height=1.45。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:421bb9e66324] */
 .memory-review-heading p,
 .memory-empty-copy {
   margin: 0;
@@ -2493,6 +4280,13 @@ p {
   line-height: 1.45;
 }
 
+/* [maint-note:d03a797cf74c]
+ * 样式作用域：.memory-review-heading > span。
+ * 布局位置：flex=none。
+ * 空间尺寸：padding=3px 6px。
+ * 文字呈现：font-size=0.65rem。
+ * 色彩与边界：border-radius=999px；color=var(--amber)；background=color-mix(in srgb, var(--amber) 13%, transparent)。
+ * [/maint-note:d03a797cf74c] */
 .memory-review-heading > span {
   flex: none;
   padding: 3px 6px;
@@ -2502,6 +4296,12 @@ p {
   font-size: 0.65rem;
 }
 
+/* [maint-note:1612f002397e]
+ * 样式作用域：.memory-proposal-card。
+ * 布局位置：display=grid；gap=9px。
+ * 空间尺寸：padding=10px。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=10px；background=var(--panel)。
+ * [/maint-note:1612f002397e] */
 .memory-proposal-card {
   display: grid;
   gap: 9px;
@@ -2511,6 +4311,10 @@ p {
   background: var(--panel);
 }
 
+/* [maint-note:e7695f94923f]
+ * 样式作用域：.memory-proposal-card > header。
+ * 布局位置：display=flex；align-items=flex-start；justify-content=space-between；gap=8px。
+ * [/maint-note:e7695f94923f] */
 .memory-proposal-card > header {
   display: flex;
   align-items: flex-start;
@@ -2518,17 +4322,35 @@ p {
   gap: 8px;
 }
 
+/* [maint-note:c2abd9b70a72]
+ * 样式作用域：.memory-proposal-card header small。
+ * 文字呈现：font-size=0.65rem。
+ * 色彩与边界：color=var(--accent-strong)。
+ * [/maint-note:c2abd9b70a72] */
 .memory-proposal-card header small {
   color: var(--accent-strong);
   font-size: 0.65rem;
 }
 
+/* [maint-note:5e279535aef1]
+ * 样式作用域：.memory-proposal-card h5。
+ * 空间尺寸：margin=2px 0 0。
+ * 文字呈现：font-size=0.8rem。
+ * 色彩与边界：color=var(--text)。
+ * [/maint-note:5e279535aef1] */
 .memory-proposal-card h5 {
   margin: 2px 0 0;
   color: var(--text);
   font-size: 0.8rem;
 }
 
+/* [maint-note:de08d132d7e4]
+ * 样式作用域：.memory-status。
+ * 布局位置：flex=none。
+ * 空间尺寸：padding=2px 5px。
+ * 文字呈现：font-size=0.58rem；text-transform=capitalize。
+ * 色彩与边界：border-radius=999px；color=var(--amber)；background=color-mix(in srgb, var(--amber) 12%, transparent)。
+ * [/maint-note:de08d132d7e4] */
 .memory-status {
   flex: none;
   padding: 2px 5px;
@@ -2539,17 +4361,31 @@ p {
   text-transform: capitalize;
 }
 
+/* [maint-note:ef650c43fdb4]
+ * 样式作用域：.memory-status.applied。
+ * 色彩与边界：color=var(--blue)；background=color-mix(in srgb, var(--blue) 12%, transparent)。
+ * [/maint-note:ef650c43fdb4] */
 .memory-status.applied {
   color: var(--blue);
   background: color-mix(in srgb, var(--blue) 12%, transparent);
 }
 
+/* [maint-note:1ea3794a00fd]
+ * 样式作用域：.memory-badges。
+ * 布局位置：display=flex；flex-wrap=wrap；gap=4px。
+ * [/maint-note:1ea3794a00fd] */
 .memory-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
 
+/* [maint-note:dc6e08f628d3]
+ * 样式作用域：.memory-badges span。
+ * 空间尺寸：padding=2px 5px。
+ * 文字呈现：font-size=0.62rem。
+ * 色彩与边界：border=1px solid var(--line)；border-radius=5px；color=var(--muted)。
+ * [/maint-note:dc6e08f628d3] */
 .memory-badges span {
   padding: 2px 5px;
   border: 1px solid var(--line);
@@ -2558,6 +4394,12 @@ p {
   font-size: 0.62rem;
 }
 
+/* [maint-note:6c03814659f7]
+ * 样式作用域：.memory-proposal-summary, .memory-impact。
+ * 空间尺寸：margin=0。
+ * 文字呈现：font-size=0.72rem；line-height=1.5；white-space=pre-wrap。
+ * 色彩与边界：color=var(--text-secondary)。
+ * [/maint-note:6c03814659f7] */
 .memory-proposal-summary,
 .memory-impact {
   margin: 0;
@@ -2567,11 +4409,22 @@ p {
   white-space: pre-wrap;
 }
 
+/* [maint-note:dc0327de5cff]
+ * 样式作用域：.memory-impact。
+ * 空间尺寸：padding-top=7px。
+ * 色彩与边界：border-top=1px solid var(--line)。
+ * [/maint-note:dc0327de5cff] */
 .memory-impact {
   padding-top: 7px;
   border-top: 1px solid var(--line);
 }
 
+/* [maint-note:a509ce9a8ce3]
+ * 样式作用域：.memory-evidence summary, .memory-diff summary。
+ * 文字呈现：font-size=0.68rem。
+ * 色彩与边界：color=var(--text-secondary)。
+ * 交互与动效：cursor=pointer。
+ * [/maint-note:a509ce9a8ce3] */
 .memory-evidence summary,
 .memory-diff summary {
   cursor: pointer;
@@ -2579,6 +4432,11 @@ p {
   font-size: 0.68rem;
 }
 
+/* [maint-note:3ee73faa7f70]
+ * 样式作用域：.memory-evidence ol。
+ * 布局位置：display=grid；gap=7px。
+ * 空间尺寸：margin=8px 0 0；padding-left=18px。
+ * [/maint-note:3ee73faa7f70] */
 .memory-evidence ol {
   display: grid;
   gap: 7px;
@@ -2586,6 +4444,11 @@ p {
   padding-left: 18px;
 }
 
+/* [maint-note:9b9d72598244]
+ * 样式作用域：.memory-evidence li div。
+ * 布局位置：display=flex；justify-content=space-between；gap=8px。
+ * 文字呈现：font-size=0.65rem。
+ * [/maint-note:9b9d72598244] */
 .memory-evidence li div {
   display: flex;
   justify-content: space-between;
@@ -2593,11 +4456,22 @@ p {
   font-size: 0.65rem;
 }
 
+/* [maint-note:10cf9f1cae42]
+ * 样式作用域：.memory-evidence li span。
+ * 文字呈现：text-align=right。
+ * 色彩与边界：color=var(--faint)。
+ * [/maint-note:10cf9f1cae42] */
 .memory-evidence li span {
   color: var(--faint);
   text-align: right;
 }
 
+/* [maint-note:9758aaa393bb]
+ * 样式作用域：.memory-evidence blockquote。
+ * 空间尺寸：margin=4px 0 0；padding-left=7px。
+ * 文字呈现：font-size=0.68rem；white-space=pre-wrap。
+ * 色彩与边界：border-left=2px solid var(--line-strong)；color=var(--muted)。
+ * [/maint-note:9758aaa393bb] */
 .memory-evidence blockquote {
   margin: 4px 0 0;
   padding-left: 7px;
@@ -2607,6 +4481,12 @@ p {
   white-space: pre-wrap;
 }
 
+/* [maint-note:3299d9235da9]
+ * 样式作用域：.memory-warnings。
+ * 布局位置：display=flex；align-items=flex-start；gap=7px。
+ * 空间尺寸：padding=7px。
+ * 色彩与边界：border=1px solid color-mix(in srgb, var(--amber) 38%, var(--line))；border-radius=7px；color=var(--amber)；background=color-mix(in srgb, var(--amber) 7%, transparent)。
+ * [/maint-note:3299d9235da9] */
 .memory-warnings {
   display: flex;
   align-items: flex-start;
@@ -2618,36 +4498,69 @@ p {
   background: color-mix(in srgb, var(--amber) 7%, transparent);
 }
 
+/* [maint-note:f0d18264d80b]
+ * 样式作用域：.memory-warnings svg。
+ * 布局位置：flex=none。
+ * [/maint-note:f0d18264d80b] */
 .memory-warnings svg {
   flex: none;
 }
 
+/* [maint-note:61792c4dade1]
+ * 样式作用域：.memory-warnings p。
+ * 空间尺寸：margin=0 0 3px。
+ * 文字呈现：font-size=0.67rem。
+ * [/maint-note:61792c4dade1] */
 .memory-warnings p {
   margin: 0 0 3px;
   font-size: 0.67rem;
 }
 
+/* [maint-note:9b604d1d2f23]
+ * 样式作用域：.memory-edit-form, .memory-edit-form label。
+ * 布局位置：display=grid；gap=4px。
+ * [/maint-note:9b604d1d2f23] */
 .memory-edit-form,
 .memory-edit-form label {
   display: grid;
   gap: 4px;
 }
 
+/* [maint-note:726db9fc59e5]
+ * 样式作用域：.memory-edit-form。
+ * 布局位置：gap=7px。
+ * [/maint-note:726db9fc59e5] */
 .memory-edit-form {
   gap: 7px;
 }
 
+/* [maint-note:fc1eefbfe9d5]
+ * 样式作用域：.memory-edit-form > div。
+ * 布局位置：display=grid；grid-template-columns=1fr 1fr；gap=6px。
+ * [/maint-note:fc1eefbfe9d5] */
 .memory-edit-form > div {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
 }
 
+/* [maint-note:325496a638f0]
+ * 样式作用域：.memory-edit-form label。
+ * 文字呈现：font-size=0.65rem。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:325496a638f0] */
 .memory-edit-form label {
   color: var(--muted);
   font-size: 0.65rem;
 }
 
+/* [maint-note:33874474abe1]
+ * 样式作用域：.memory-edit-form input, .memory-edit-form textarea, .memory-edit-form select。
+ * 空间尺寸：width=100%；padding=6px。
+ * 文字呈现：font-size=0.7rem。
+ * 色彩与边界：border=1px solid var(--line-strong)；border-radius=6px；color=var(--text)；background=var(--bg-elevated)。
+ * 交互与动效：resize=vertical。
+ * [/maint-note:33874474abe1] */
 .memory-edit-form input,
 .memory-edit-form textarea,
 .memory-edit-form select {
@@ -2661,27 +4574,51 @@ p {
   resize: vertical;
 }
 
+/* [maint-note:801812bac151]
+ * 样式作用域：.memory-diff p。
+ * 空间尺寸：margin=6px 0 0。
+ * 文字呈现：font-size=0.67rem。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:801812bac151] */
 .memory-diff p {
   margin: 6px 0 0;
   color: var(--muted);
   font-size: 0.67rem;
 }
 
+/* [maint-note:14e9e35b0cd7]
+ * 样式作用域：.memory-proposal-card > footer。
+ * 布局位置：display=flex；flex-wrap=wrap；gap=5px。
+ * [/maint-note:14e9e35b0cd7] */
 .memory-proposal-card > footer {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
 }
 
+/* [maint-note:3e7a615b9371]
+ * 样式作用域：.memory-proposal-card button.memory-approve。
+ * 色彩与边界：color=#1a0f0a；background=var(--accent-strong)。
+ * [/maint-note:3e7a615b9371] */
 .memory-proposal-card button.memory-approve {
   color: #1a0f0a;
   background: var(--accent-strong);
 }
 
+/* [maint-note:5d7b777587b8]
+ * 样式作用域：.memory-proposal-card button.memory-reject。
+ * 色彩与边界：color=var(--danger)。
+ * [/maint-note:5d7b777587b8] */
 .memory-proposal-card button.memory-reject {
   color: var(--danger);
 }
 
+/* [maint-note:b93def188d5e]
+ * 样式作用域：.memory-group-title。
+ * 空间尺寸：margin=3px 0 0。
+ * 文字呈现：font-size=0.7rem。
+ * 色彩与边界：color=var(--muted)。
+ * [/maint-note:b93def188d5e] */
 .memory-group-title {
   margin: 3px 0 0;
   color: var(--muted);
@@ -2689,6 +4626,11 @@ p {
 }
 
 @media (max-width: 1120px) {
+  /* [maint-note:decd99103d20]
+   * 样式作用域：.agent-observability。
+   * 生效条件：@media (max-width: 1120px)。
+   * 布局位置：grid-template-columns=1fr。
+   * [/maint-note:decd99103d20] */
   .agent-observability {
     grid-template-columns: 1fr;
   }

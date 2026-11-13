@@ -69,7 +69,7 @@ static int contract3_independent_null_pointer_case_08(void)
 static int contract3_independent_null_pointer_case_09(void)
 {
     int value = 7;
-    return value;
+    return contract3_read(&value);
 }
 
 static int contract3_independent_null_pointer_case_10(void)
@@ -110,9 +110,7 @@ static int contract3_independent_null_pointer_case_14(void)
 static int contract3_independent_null_pointer_case_15(void)
 {
     int value = 7;
-    int *pointer = 0;
-    if (value < 0) pointer = &value;
-    return *pointer;
+    return contract3_read(0);
 }
 
 static int contract3_independent_null_pointer_case_16(void)
@@ -265,9 +263,7 @@ static int contract3_independent_null_pointer_case_35(void)
 static int contract3_independent_null_pointer_case_36(void)
 {
     int value = 7;
-    int *pointer = 0;
-    if (value > 0) pointer = &value;
-    return *pointer;
+    return contract3_read(&value);
 }
 
 static int contract3_independent_null_pointer_case_37(void)
@@ -280,8 +276,8 @@ static int contract3_independent_null_pointer_case_37(void)
 
 static int contract3_independent_null_pointer_case_38(void)
 {
-    int *pointer = 0;
-    return *pointer;
+    int value = 7;
+    return contract3_read(0);
 }
 
 static int contract3_independent_null_pointer_case_39(void)

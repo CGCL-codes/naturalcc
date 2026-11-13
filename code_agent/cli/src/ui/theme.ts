@@ -18,4 +18,8 @@ export const UI_PALETTE = Object.freeze({
   userSurfaceForeground: '#D8DEE9',
 } as const)
 
+// [maint-note:2ccb2244c7f3]
+// 数据契约导航：UiPaletteColor；字段含义以消费端校验为准。
+// 类型组合：typeof UI_PALETTE[keyof typeof UI_PALETTE]。
+// [/maint-note:2ccb2244c7f3]
 export type UiPaletteColor = typeof UI_PALETTE[keyof typeof UI_PALETTE]

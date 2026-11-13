@@ -27,6 +27,15 @@ import type {
 const MAX_DISPLAY_RECORDS_PER_FILE = 4_000
 const MAX_DISPLAY_CHARS_PER_FILE = 100_000
 
+// [maint-note:42a6e8cdf9fc]
+// 维护导航：executeApplyPatch；下列为本函数源码中的接口与路径索引。
+// 输入 input：Record<string, unknown>。
+// 输入 context：ToolExecutionContext。
+// 输入 dependencies：ApplyPatchDependencies。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 返回路径：withFileDiagnostics(() => applyWorkspacePatch(input, context, dependencies))。
+// 直接调用：withFileDiagnostics。
+// [/maint-note:42a6e8cdf9fc]
 export async function executeApplyPatch(
   input: Record<string, unknown>,
   context: ToolExecutionContext,
@@ -35,6 +44,90 @@ export async function executeApplyPatch(
   return withFileDiagnostics(() => applyWorkspacePatch(input, context, dependencies))
 }
 
+// [maint-note:d26b59ccfaa8]
+// 维护导航：applyWorkspacePatch；下列为本函数源码中的接口与路径索引。
+// 输入 input：Record<string, unknown>。
+// 输入 context：ToolExecutionContext。
+// 输入 dependencies：ApplyPatchDependencies。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：seen.has(path)。
+// 分支条件：operation.kind === 'add'。
+// 分支条件：exists。
+// 分支条件：!exists。
+// 分支条件：!info。
+// 分支条件：!info.isFile()。
+// 分支条件：info.size > MAX_PATCH_TARGET_BYTES。
+// 分支条件：operation.kind === 'delete'。
+// 分支条件：removedLines.at(-1) === ''。
+// 分支条件：sourceBuffer.length > MAX_PATCH_TARGET_BYTES。
+// 分支条件：sourceBuffer.includes(0)。
+// 分支条件：!snapshotsEqual(current, change.before)。
+// 分支条件：change.operation.kind === 'delete'。
+// 分支条件：change.operation.kind === 'add'。
+// 分支条件：!restored || operationInProgress。
+// 分支条件：canonical.includes('"truncated":true')。
+// 遍历边界：const operation ← operations。
+// 遍历边界：const change ← changes。
+// 返回路径：{ content: canonical }。
+// 返回路径：{ content: canonical, display: { kind: 'apply_patch_diff', facts: buildApplyPatchDisplayPayload(changes) as unknown as Record<string, unknown>, }, }。
+// 显式抛出：new Error(`Patch contains duplicate file: ${operation.path}`)。
+// 显式抛出：operationError(`File already exists: ${operation.path}`, 'file_exists', { field: 'path' })。
+// 显式抛出：operationError(`File does not exist: ${operation.path}`, 'file_not_found', { field: 'path' })。
+// 显式抛出：operationError(`Not a regular file: ${operation.path}`, 'not_regular_file', { field: 'path' })。
+// 显式抛出：new Error(`File is larger than ${MAX_PATCH_TARGET_BYTES} bytes: ${operation.path}`)。
+// 显式抛出：operationError(`File is not a text file: ${operation.path}`, 'invalid_encoding', { field: 'path' })。
+// 显式抛出：operationError(`File is not valid UTF-8: ${operation.path}`, 'invalid_encoding', { field: 'path' })。
+// 显式抛出：operationError(`Patch target changed during preflight: ${change.operation.path}; re-check the workspace`, 'patch_target_changed', { field: 'patch' })。
+// 显式抛出：operationError(`${detail}; workspace restoration was incomplete, re-check the workspace`, 'patch_restoration_incomplete', { field: 'patch' })。
+// 显式抛出：error。
+// 写入目标：totalChangeBytes。
+// 写入目标：totalTargetBytes。
+// 写入目标：source。
+// 写入目标：operationInProgress。
+// 写入目标：change.after。
+// 直接调用：parseApplyPatchInput。
+// 直接调用：assertOutputBudget。
+// 直接调用：parsePatch。
+// 直接调用：throwIfAborted。
+// 直接调用：resolveWorkspacePath。
+// 直接调用：seen.has。
+// 直接调用：seen.add。
+// 直接调用：lstatIfExists。
+// 直接调用：operationError。
+// 直接调用：operation.lines.join。
+// 直接调用：changes.push。
+// 直接调用：operation.lines.map。
+// 直接调用：Buffer.byteLength。
+// 直接调用：assertPatchBudgets。
+// 直接调用：info.isFile。
+// 直接调用：readFile。
+// 直接调用：beforeContent .toString('utf8') .replace(/\r\n/g, '\n') .split。
+// 直接调用：beforeContent .toString('utf8') .replace。
+// 直接调用：beforeContent .toString。
+// 直接调用：removedLines.at。
+// 直接调用：removedLines.pop。
+// 直接调用：removedLines.map。
+// 直接调用：sourceBuffer.includes。
+// 直接调用：new TextDecoder('utf-8', { fatal: true }).decode。
+// 直接调用：applyHunks。
+// 直接调用：patchChangeBytes。
+// 直接调用：snapshotFile。
+// 直接调用：snapshotsEqual。
+// 直接调用：unlink。
+// 直接调用：findMissingParentDirectories。
+// 直接调用：dirname。
+// 直接调用：createdDirectories.push。
+// 直接调用：mkdir。
+// 直接调用：writeFile。
+// 直接调用：appliedChanges.push。
+// 直接调用：dependencies.onChangeApplied。
+// 直接调用：restoreChanges。
+// 直接调用：String。
+// 直接调用：boundedJsonResult。
+// 直接调用：changes.map。
+// 直接调用：canonical.includes。
+// 直接调用：buildApplyPatchDisplayPayload。
+// [/maint-note:d26b59ccfaa8]
 async function applyWorkspacePatch(
   input: Record<string, unknown>,
   context: ToolExecutionContext,
@@ -208,6 +301,23 @@ async function applyWorkspacePatch(
  * Bounded neutral payload assembled ONLY from successfully applied changes.
  * Records/characters beyond the caps are dropped with `displayTruncated`.
  */
+// [maint-note:4953ff34cac8]
+// 维护导航：buildApplyPatchDisplayPayload；下列为本函数源码中的接口与路径索引。
+// 输入 changes：readonly PatchChange[]。
+// 返回契约：ApplyPatchDisplayPayload。
+// 分支条件：raw.length > records.length。
+// 分支条件：usedChars + cost > MAX_DISPLAY_CHARS_PER_FILE。
+// 遍历边界：const change ← changes。
+// 遍历边界：const record ← records。
+// 返回路径：{ files, displayTruncated }。
+// 写入目标：displayTruncated。
+// 写入目标：usedChars。
+// 直接调用：raw.slice。
+// 直接调用：boundedRecords.push。
+// 直接调用：boundedRecords.filter。
+// 直接调用：files.push。
+// 直接调用：Math.max。
+// [/maint-note:4953ff34cac8]
 function buildApplyPatchDisplayPayload(changes: readonly PatchChange[]): ApplyPatchDisplayPayload {
   let displayTruncated = false
   const files: ApplyPatchDisplayFile[] = []
@@ -244,6 +354,16 @@ function buildApplyPatchDisplayPayload(changes: readonly PatchChange[]): ApplyPa
   return { files, displayTruncated }
 }
 
+// [maint-note:b94840276206]
+// 维护导航：assertPatchBudgets；下列为本函数源码中的接口与路径索引。
+// 输入 totalChangeBytes：number。
+// 输入 totalTargetBytes：number。
+// 返回契约：void。
+// 分支条件：totalChangeBytes > MAX_PATCH_CHANGE_BYTES。
+// 分支条件：totalTargetBytes > MAX_PATCH_TOTAL_TARGET_BYTES。
+// 显式抛出：new Error(`Patch changes exceed ${MAX_PATCH_CHANGE_BYTES} bytes`)。
+// 显式抛出：new Error(`Patch targets exceed ${MAX_PATCH_TOTAL_TARGET_BYTES} bytes`)。
+// [/maint-note:b94840276206]
 function assertPatchBudgets(totalChangeBytes: number, totalTargetBytes: number): void {
   if (totalChangeBytes > MAX_PATCH_CHANGE_BYTES) {
     throw new Error(`Patch changes exceed ${MAX_PATCH_CHANGE_BYTES} bytes`)
@@ -253,6 +373,13 @@ function assertPatchBudgets(totalChangeBytes: number, totalTargetBytes: number):
   }
 }
 
+// [maint-note:ed4caae0b6e0]
+// 维护导航：patchChangeBytes；下列为本函数源码中的接口与路径索引。
+// 输入 hunks：PatchHunk[]。
+// 返回契约：number。
+// 返回路径：hunks.reduce((total, hunk) => total + hunk.lines.reduce((bytes, line) => { if (line === '\\ No newline at end of file' || line.startsWith(' ')) return bytes return bytes + Buffer.byteLength(line.slice(1), 'utf8') + 1 }, 0), 0)。
+// 直接调用：hunks.reduce。
+// [/maint-note:ed4caae0b6e0]
 function patchChangeBytes(hunks: PatchHunk[]): number {
   return hunks.reduce((total, hunk) => total + hunk.lines.reduce((bytes, line) => {
     if (line === '\\ No newline at end of file' || line.startsWith(' ')) return bytes
@@ -260,6 +387,30 @@ function patchChangeBytes(hunks: PatchHunk[]): number {
   }, 0), 0)
 }
 
+// [maint-note:9be5032bd98c]
+// 维护导航：restoreChanges；下列为本函数源码中的接口与路径索引。
+// 输入 changes：PatchChange[]。
+// 输入 createdDirectories：string[]。
+// 返回契约：Promise<boolean>。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：!change.after || !snapshotsEqual(current, change.after)。
+// 分支条件：change.before.exists。
+// 分支条件：!change.before.content。
+// 分支条件：change.before.mode !== undefined。
+// 分支条件：current.exists。
+// 分支条件：code !== 'ENOENT'。
+// 遍历边界：const change ← changes.reverse()。
+// 遍历边界：const directory ← createdDirectories。
+// 返回路径：restored。
+// 写入目标：restored。
+// 直接调用：changes.reverse。
+// 直接调用：snapshotFile。
+// 直接调用：snapshotsEqual。
+// 直接调用：writeFile。
+// 直接调用：chmod。
+// 直接调用：unlink。
+// 直接调用：rmdir。
+// [/maint-note:9be5032bd98c]
 async function restoreChanges(
   changes: PatchChange[],
   createdDirectories: string[],
@@ -297,6 +448,20 @@ async function restoreChanges(
   return restored
 }
 
+// [maint-note:9ee87962fc7b]
+// 维护导航：snapshotFile；下列为本函数源码中的接口与路径索引。
+// 输入 path：string。
+// 返回契约：Promise<FileSnapshot>。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：!info。
+// 分支条件：!info.isFile()。
+// 返回路径：{ exists: false }。
+// 返回路径：{ exists: true, mode: info.mode }。
+// 返回路径：{ exists: true, content: await readFile(path), mode: info.mode }。
+// 直接调用：lstatIfExists。
+// 直接调用：info.isFile。
+// 直接调用：readFile。
+// [/maint-note:9ee87962fc7b]
 async function snapshotFile(path: string): Promise<FileSnapshot> {
   const info = await lstatIfExists(path)
   if (!info) return { exists: false }
@@ -308,6 +473,21 @@ async function snapshotFile(path: string): Promise<FileSnapshot> {
   }
 }
 
+// [maint-note:239e9dc543a5]
+// 维护导航：snapshotsEqual；下列为本函数源码中的接口与路径索引。
+// 输入 left：FileSnapshot。
+// 输入 right：FileSnapshot。
+// 返回契约：boolean。
+// 分支条件：left.exists !== right.exists。
+// 分支条件：!left.exists && !right.exists。
+// 分支条件：left.mode !== right.mode。
+// 分支条件：!left.content && !right.content。
+// 返回路径：false。
+// 返回路径：true。
+// 返回路径：Boolean(left.content && right.content && left.content.equals(right.content))。
+// 直接调用：Boolean。
+// 直接调用：left.content.equals。
+// [/maint-note:239e9dc543a5]
 function snapshotsEqual(left: FileSnapshot, right: FileSnapshot): boolean {
   if (left.exists !== right.exists) return false
   if (!left.exists && !right.exists) return true
@@ -316,6 +496,26 @@ function snapshotsEqual(left: FileSnapshot, right: FileSnapshot): boolean {
   return Boolean(left.content && right.content && left.content.equals(right.content))
 }
 
+// [maint-note:c4360880e8d2]
+// 维护导航：findMissingParentDirectories；下列为本函数源码中的接口与路径索引。
+// 输入 projectDir：string。
+// 输入 directory：string。
+// 返回契约：Promise<string[]>。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：info。
+// 分支条件：!info.isDirectory()。
+// 分支条件：parent === current || !isInside(root, parent)。
+// 遍历边界：current !== root。
+// 返回路径：missing。
+// 显式抛出：new Error(`Patch parent is not a directory: ${directory}`)。
+// 显式抛出：new Error(`Patch parent is outside the project workspace: ${directory}`)。
+// 写入目标：current。
+// 直接调用：resolve。
+// 直接调用：lstatIfExists。
+// 直接调用：info.isDirectory。
+// 直接调用：missing.push。
+// 直接调用：isInside。
+// [/maint-note:c4360880e8d2]
 async function findMissingParentDirectories(projectDir: string, directory: string): Promise<string[]> {
   const root = resolve(projectDir)
   const missing: string[] = []
@@ -336,11 +536,31 @@ async function findMissingParentDirectories(projectDir: string, directory: strin
   return missing
 }
 
+// [maint-note:1ac44337e418]
+// 维护导航：isInside；下列为本函数源码中的接口与路径索引。
+// 输入 root：string。
+// 输入 candidate：string。
+// 返回契约：boolean。
+// 返回路径：boundary === '' || (boundary !== '..' && !boundary.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`) && !isAbsolute(boundary))。
+// 直接调用：relative。
+// 直接调用：boundary.startsWith。
+// 直接调用：isAbsolute。
+// [/maint-note:1ac44337e418]
 function isInside(root: string, candidate: string): boolean {
   const boundary = relative(root, candidate)
   return boundary === '' || (boundary !== '..' && !boundary.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`) && !isAbsolute(boundary))
 }
 
+// [maint-note:5bd8e78d525e]
+// 维护导航：lstatIfExists；下列为本函数源码中的接口与路径索引。
+// 输入 path：string。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：(error as NodeJS.ErrnoException).code === 'ENOENT'。
+// 返回路径：await lstat(path)。
+// 返回路径：undefined。
+// 显式抛出：error。
+// 直接调用：lstat。
+// [/maint-note:5bd8e78d525e]
 async function lstatIfExists(path: string) {
   try {
     return await lstat(path)

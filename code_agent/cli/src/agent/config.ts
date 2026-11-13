@@ -12,6 +12,19 @@ const DEFAULT_MAX_PROJECT_MEMORY_CHARS = 12_000
 const DEFAULT_MAX_DYNAMIC_CONTEXT_CHARS = 4_000
 const DEFAULT_MAX_SYSTEM_PROMPT_CHARS = 20_000
 
+// [maint-note:d8bfe0db32ba]
+// 数据契约导航：CreateRuntimeConfigOptions；字段含义以消费端校验为准。
+// 成员 model：string。
+// 成员 projectDir：string。
+// 成员 baseURL（可省略）：string | null。
+// 成员 maxTurns（可省略）：number。
+// 成员 toolTimeoutMs（可省略）：number。
+// 成员 maxToolOutputChars（可省略）：number。
+// 成员 maxProjectMemoryChars（可省略）：number。
+// 成员 maxDynamicContextChars（可省略）：number。
+// 成员 maxSystemPromptChars（可省略）：number。
+// 成员 showToolResults（可省略）：boolean。
+// [/maint-note:d8bfe0db32ba]
 export interface CreateRuntimeConfigOptions {
   model: string
   projectDir: string
@@ -25,6 +38,16 @@ export interface CreateRuntimeConfigOptions {
   showToolResults?: boolean
 }
 
+// [maint-note:2ca24c9d0137]
+// 维护导航：createRuntimeConfig；下列为本函数源码中的接口与路径索引。
+// 输入 options：CreateRuntimeConfigOptions。
+// 返回契约：RuntimeConfig。
+// 返回路径：{ model: options.model, baseURL: normalizeOptionalString(options.baseURL), maxTurns: normalizeMaxTurns(options.maxTurns), projectDir: options.projectDir, toolTimeoutMs: normalizePositiveInteger( options.toolTimeoutMs, DEFAULT_TOOL_TIMEOUT_M。
+// 直接调用：normalizeOptionalString。
+// 直接调用：normalizeMaxTurns。
+// 直接调用：normalizePositiveInteger。
+// 直接调用：normalizeOutputBudget。
+// [/maint-note:2ca24c9d0137]
 export function createRuntimeConfig(
   options: CreateRuntimeConfigOptions,
 ): RuntimeConfig {
@@ -54,11 +77,30 @@ export function createRuntimeConfig(
   }
 }
 
+// [maint-note:4ad67cbd852a]
+// 维护导航：normalizeOptionalString；下列为本函数源码中的接口与路径索引。
+// 输入 value：string | null（可省略）。
+// 返回契约：string | undefined。
+// 返回路径：trimmed ? trimmed : undefined。
+// 直接调用：value?.trim。
+// [/maint-note:4ad67cbd852a]
 function normalizeOptionalString(value?: string | null): string | undefined {
   const trimmed = value?.trim()
   return trimmed ? trimmed : undefined
 }
 
+// [maint-note:8682ab89b162]
+// 维护导航：normalizePositiveInteger；下列为本函数源码中的接口与路径索引。
+// 输入 value：number | undefined。
+// 输入 fallback：number。
+// 输入 minimum：类型由调用方与函数体约束；缺省表达式 1。
+// 返回契约：number。
+// 分支条件：value === undefined || !Number.isFinite(value) || value <= 0。
+// 返回路径：fallback。
+// 返回路径：normalized < minimum ? fallback : normalized。
+// 直接调用：Number.isFinite。
+// 直接调用：Math.floor。
+// [/maint-note:8682ab89b162]
 function normalizePositiveInteger(
   value: number | undefined,
   fallback: number,
@@ -71,10 +113,30 @@ function normalizePositiveInteger(
   return normalized < minimum ? fallback : normalized
 }
 
+// [maint-note:003970ca06b2]
+// 维护导航：normalizeMaxTurns；下列为本函数源码中的接口与路径索引。
+// 输入 value：number | undefined。
+// 返回契约：number。
+// 返回路径：boundedInteger(value, DEFAULT_MAX_TURNS, 1, 256, 'maxTurns')。
+// 直接调用：boundedInteger。
+// [/maint-note:003970ca06b2]
 function normalizeMaxTurns(value: number | undefined): number {
   return boundedInteger(value, DEFAULT_MAX_TURNS, 1, 256, 'maxTurns')
 }
 
+// [maint-note:24b6a24dbdd9]
+// 维护导航：normalizeOutputBudget；下列为本函数源码中的接口与路径索引。
+// 输入 value：number | undefined。
+// 返回契约：number。
+// 分支条件：value === undefined || !Number.isFinite(value) || value <= 0。
+// 分支条件：normalized < minimum。
+// 返回路径：DEFAULT_MAX_TOOL_OUTPUT_CHARS。
+// 返回路径：normalized。
+// 显式抛出：new RangeError(`maxToolOutputChars must be at least ${minimum}`)。
+// 直接调用：Number.isFinite。
+// 直接调用：Math.floor。
+// 直接调用：Math.max。
+// [/maint-note:24b6a24dbdd9]
 function normalizeOutputBudget(value: number | undefined): number {
   if (value === undefined || !Number.isFinite(value) || value <= 0) {
     return DEFAULT_MAX_TOOL_OUTPUT_CHARS

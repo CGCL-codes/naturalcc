@@ -3,10 +3,18 @@ import { assertNeverAgentEvent, isTerminalEvent } from '../agent/terminal.js'
 import { formatToolOutput } from './state/messageReducer.js'
 import { buildApprovalPresentation } from '../tools/approval.js'
 
+// [maint-note:683292c669e9]
+// 数据契约导航：EventWriter；字段含义以消费端校验为准。
+// 成员 write：void。
+// [/maint-note:683292c669e9]
 export interface EventWriter {
   write(chunk: string): void
 }
 
+// [maint-note:3524ac95c3be]
+// 数据契约导航：OneShotEventRendererOptions；字段含义以消费端校验为准。
+// 成员 approvalPresentationOwner（可省略）：'provider' | 'renderer' | 'none'。
+// [/maint-note:3524ac95c3be]
 export interface OneShotEventRendererOptions {
   approvalPresentationOwner?: 'provider' | 'renderer' | 'none'
 }
@@ -25,16 +33,78 @@ export class OneShotEventRenderer {
   }>()
   private readonly approvalDecisions = new Map<string, 'approved' | 'denied'>()
 
+  // [maint-note:912d502c5691]
+  // 维护导航：constructor；下列为本函数源码中的接口与路径索引。
+  // 输入 stdout：EventWriter。
+  // 输入 stderr：EventWriter。
+  // 输入 options：OneShotEventRendererOptions；缺省表达式 {}。
+  // [/maint-note:912d502c5691]
   constructor(
     private readonly stdout: EventWriter,
     private readonly stderr: EventWriter,
     private readonly options: OneShotEventRendererOptions = {},
   ) {}
 
+  // [maint-note:0e83cab88f4d]
+  // 维护导航：exitCode；下列为本函数源码中的接口与路径索引。
+  // 返回契约：number。
+  // 返回路径：this.code。
+  // [/maint-note:0e83cab88f4d]
   get exitCode(): number {
     return this.code
   }
 
+  // [maint-note:8883a10bd5bc]
+  // 维护导航：handle；下列为本函数源码中的接口与路径索引。
+  // 输入 event：AgentEvent。
+  // 返回契约：void。
+  // 分支条件：this.closed。
+  // 分支条件：isTerminalEvent(event)。
+  // 分支条件：switch event.type。
+  // 分支条件：case 'assistant_delta'。
+  // 分支条件：case 'assistant_segment'。
+  // 分支条件：case 'assistant_message'。
+  // 分支条件：case 'tool_start'。
+  // 分支条件：!this.toolPhases.has(event.callId)。
+  // 分支条件：case 'tool_result'。
+  // 分支条件：this.toolPhases.get(event.callId) === 'rendered' || this.toolPhases.get(event.callId) === 'denied'。
+  // 分支条件：case 'approval_required'。
+  // 分支条件：this.toolPhases.get(event.callId) === 'rendered' || this.toolPhases.get(event.callId) === 'denied' || this.approvalDecisions.has(event.callId) || [...this.approvalRequests.values()].some((request) => request.callId === event.callId)。
+  // 分支条件：this.options.approvalPresentationOwner === 'provider' || this.options.approvalPresentationOwner === 'none'。
+  // 分支条件：!this.approvalNotices.has(event.callId)。
+  // 分支条件：case 'approval_resolved'。
+  // 分支条件：!request || this.approvalDecisions.has(request.callId)。
+  // 分支条件：!event.approved && this.toolPhases.get(callId) !== 'rendered' && this.toolPhases.get(callId) !== 'denied'。
+  // 分支条件：case 'error'。
+  // 分支条件：case 'interrupted'。
+  // 分支条件：case 'paused'。
+  // 分支条件：case 'done'。
+  // 分支条件：case 'user_message'。
+  // 返回路径：无返回值。
+  // 写入目标：this.closed。
+  // 写入目标：this.pendingAssistantMessage。
+  // 写入目标：this.code。
+  // 直接调用：isTerminalEvent。
+  // 直接调用：this.toolPhases.has。
+  // 直接调用：this.toolPhases.set。
+  // 直接调用：this.toolPhases.get。
+  // 直接调用：this.stderr.write。
+  // 直接调用：formatToolOutput。
+  // 直接调用：this.approvalDecisions.has。
+  // 直接调用：[...this.approvalRequests.values()].some。
+  // 直接调用：this.approvalRequests.values。
+  // 直接调用：this.approvalRequests.set。
+  // 直接调用：isRecord。
+  // 直接调用：this.approvalNotices.has。
+  // 直接调用：this.approvalNotices.add。
+  // 直接调用：buildApprovalPresentation。
+  // 直接调用：this.approvalRequests.get。
+  // 直接调用：this.approvalDecisions.set。
+  // 直接调用：deniedInstructionLabel。
+  // 直接调用：Math.max。
+  // 直接调用：this.stdout.write。
+  // 直接调用：assertNeverAgentEvent。
+  // [/maint-note:8883a10bd5bc]
   handle(event: AgentEvent): void {
     if (this.closed) return
     if (isTerminalEvent(event)) this.closed = true
@@ -146,10 +216,25 @@ export class OneShotEventRenderer {
   }
 }
 
+// [maint-note:fa27639b957e]
+// 维护导航：deniedInstructionLabel；下列为本函数源码中的接口与路径索引。
+// 输入 toolName：string。
+// 输入 label：string。
+// 返回契约：string。
+// 返回路径：toolName === 'apply_patch' && label === 'Patch' ? 'Patch (not executed)' : label。
+// [/maint-note:fa27639b957e]
 function deniedInstructionLabel(toolName: string, label: string): string {
   return toolName === 'apply_patch' && label === 'Patch' ? 'Patch (not executed)' : label
 }
 
+// [maint-note:66cf0961af41]
+// 维护导航：isRecord；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is Record<string, unknown>。
+// 返回路径：Boolean(value) && typeof value === 'object' && !Array.isArray(value)。
+// 直接调用：Boolean。
+// 直接调用：Array.isArray。
+// [/maint-note:66cf0961af41]
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 }

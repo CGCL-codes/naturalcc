@@ -43,6 +43,17 @@ import {
 } from './render/startupReservation.js'
 import { useFrameLayoutObservation } from './render/frameLayoutObservation.js'
 
+// [maint-note:ce599c5786cc]
+// 数据契约导航：ReplProps；字段含义以消费端校验为准。
+// 成员 sessionManager：SessionManager。
+// 成员 approvalProvider（可省略）：ApprovalController。
+// 成员 initialPrompt（可省略）：string。
+// 成员 onKeyboardReady（可省略）：() => void。
+// 成员 onInputChange（可省略）：(value: string) => void。
+// 成员 onMessagesChange（可省略）：(messages: readonly Message[]) => void。
+// 成员 onTimingChange（可省略）：(snapshot: SessionTimingSnapshot) => void。
+// 成员 statusMetadata（可省略）：SessionStatusMetadata。
+// [/maint-note:ce599c5786cc]
 interface ReplProps {
   sessionManager: SessionManager
   approvalProvider?: ApprovalController
@@ -57,6 +68,43 @@ interface ReplProps {
   statusMetadata?: SessionStatusMetadata
 }
 
+// [maint-note:2dd068cb3631]
+// 维护导航：Repl；下列为本函数源码中的接口与路径索引。
+// 输入 { sessionManager, approvalProvider, initialPrompt, onMessagesChange, onTimingChange, onKeyboardReady, onInputChange, statusMetadata }：ReplProps。
+// 分支条件：headerOwnerRef.current === null。
+// 分支条件：startupReservationProjectorRef.current === null。
+// 分支条件：!viewer.open。
+// 返回路径：( <Box flexDirection="column"> <StableHistory batches={msgs.batches} width={layout.terminalWidth} generation={msgs.stableGeneration} headerWidth={headerWidth} onBatchCommit={handleStableBatchCommit} /> <ActiveTurn messages={msgs.activeMessa。
+// 写入目标：headerOwnerRef.current。
+// 写入目标：startupReservationProjectorRef.current。
+// 写入目标：viewerOpenRef.current。
+// 写入目标：viewerRecordsRef.current。
+// 写入目标：openViewerRef.current。
+// 写入目标：closeViewerRef.current。
+// 直接调用：useApp。
+// 直接调用：useTerminalWidth。
+// 直接调用：calculateContentWidth。
+// 直接调用：useState。
+// 直接调用：useRef。
+// 直接调用：useCallback。
+// 直接调用：useEffect。
+// 直接调用：useMessageController。
+// 直接调用：buildHeaderProjection。
+// 直接调用：useReducer。
+// 直接调用：createStartupReservationProjector。
+// 直接调用：startupReservationProjectorRef.current。
+// 直接调用：useSessionTiming。
+// 直接调用：sessionManager.current。
+// 直接调用：useExecutor。
+// 直接调用：detailViewerGeometry。
+// 直接调用：useMemo。
+// 直接调用：useKeyboardOwner。
+// 直接调用：calculateFrameLayout。
+// 直接调用：detailStoreGet。
+// 直接调用：detailViewerPage。
+// 直接调用：useFrameLayoutObservation。
+// 直接调用：viewerVisualLines.slice。
+// [/maint-note:2dd068cb3631]
 export function Repl({ sessionManager, approvalProvider, initialPrompt, onMessagesChange, onTimingChange, onKeyboardReady, onInputChange, statusMetadata }: ReplProps) {
   const { exit } = useApp()
   const terminal = useTerminalWidth()
@@ -389,6 +437,54 @@ export function Repl({ sessionManager, approvalProvider, initialPrompt, onMessag
   }, [])
 
   const handleKeyboardInput: KeyboardInputBatchHandler = useCallback((events) => {
+    // [maint-note:9ff170e794ee]
+    // 维护导航：handleOne；下列为本函数源码中的接口与路径索引。
+    // 输入 event：DecodedKeyboardInput。
+    // 返回契约：void。
+    // 分支条件：viewerOpenRef.current。
+    // 分支条件：key.ctrl && (keyInput === 'c' || keyInput === 'o')。
+    // 分支条件：key.escape || keyInput === '\x1b'。
+    // 分支条件：key.pageUp。
+    // 分支条件：key.pageDown。
+    // 分支条件：key.home。
+    // 分支条件：key.end。
+    // 分支条件：key.tab && key.shift。
+    // 分支条件：key.tab。
+    // 分支条件：!inputOwnerActive。
+    // 分支条件：event.paste。
+    // 分支条件：executor.loading && !executor.approvalPending && !clearing && !clearingRef.current。
+    // 分支条件：text。
+    // 分支条件：hasCtrlC。
+    // 分支条件：executor.approvalPending。
+    // 分支条件：(key.escape || keyInput === '\x1b') && approvalKeyboardRef.current === null。
+    // 分支条件：executor.loading && key.escape。
+    // 分支条件：action.type === 'ctrlC'。
+    // 分支条件：action.type === 'text' && typeaheadEligible。
+    // 分支条件：key.ctrl && keyInput === 'o'。
+    // 分支条件：key.escape。
+    // 分支条件：dropdownOpen。
+    // 分支条件：!inputLineSubscribedRef.current || inputLineRef.current === null。
+    // 分支条件：action.type === 'text'。
+    // 分支条件：actions.some((action) => action.type === 'ctrlC')。
+    // 遍历边界：const action ← actions。
+    // 遍历边界：const action ← reduceReplInputChunk(keyInput, key.ctrl)。
+    // 返回路径：无返回值。
+    // 写入目标：typeaheadRef.current。
+    // 直接调用：closeViewerRef.current。
+    // 直接调用：dispatchViewer。
+    // 直接调用：extractTypeaheadText。
+    // 直接调用：sanitizeTerminalText。
+    // 直接调用：appendTypeahead。
+    // 直接调用：reduceReplInputChunk。
+    // 直接调用：actions.some。
+    // 直接调用：handleControlC。
+    // 直接调用：executor.interrupt。
+    // 直接调用：approvalKeyboardRef.current。
+    // 直接调用：openViewerRef.current。
+    // 直接调用：inputLineRef.current?.handleInput。
+    // 直接调用：inputLineRef.current.handleInputBatch。
+    // 直接调用：inputLineRef.current.handleInput。
+    // [/maint-note:9ff170e794ee]
     const handleOne = (event: DecodedKeyboardInput): void => {
       const { input: keyInput, key } = event
       if (viewerOpenRef.current) {
@@ -519,6 +615,13 @@ export function Repl({ sessionManager, approvalProvider, initialPrompt, onMessag
     // it. This prevents React render timing from becoming cursor state.
     // Ctrl+O (detail viewer) is parent-owned exactly like Ctrl-C: it must
     // reach the owner loop, not the input line.
+    // [maint-note:dd3d3697df3a]
+    // 维护导航：parentOwnedControl；下列为本函数源码中的接口与路径索引。
+    // 输入 event：DecodedKeyboardInput。
+    // 返回契约：boolean。
+    // 直接调用：reduceReplInputChunk(event.input, event.key.ctrl).some。
+    // 直接调用：reduceReplInputChunk。
+    // [/maint-note:dd3d3697df3a]
     const parentOwnedControl = (event: DecodedKeyboardInput): boolean =>
       !event.paste && (reduceReplInputChunk(event.input, event.key.ctrl).some(action => action.type === 'ctrlC')
         || (event.key.ctrl && event.input === 'o'))
@@ -539,6 +642,16 @@ export function Repl({ sessionManager, approvalProvider, initialPrompt, onMessag
     return () => clearTimeout(readyTimer)
   }, [onKeyboardReady])
 
+  // [maint-note:5a7e26e50bff]
+  // 维护导航：handleSubmit；下列为本函数源码中的接口与路径索引。
+  // 输入 value：string。
+  // 分支条件：!trimmed || executor.loading || clearingRef.current。
+  // 返回路径：无返回值。
+  // 直接调用：value.trim。
+  // 直接调用：dispatch(trimmed, ctx).then((accepted) => { if (accepted) clearInput() }).catch。
+  // 直接调用：dispatch(trimmed, ctx).then。
+  // 直接调用：dispatch。
+  // [/maint-note:5a7e26e50bff]
   const handleSubmit = (value: string) => {
     const trimmed = value.trim()
     if (!trimmed || executor.loading || clearingRef.current) return
@@ -664,6 +777,13 @@ export function Repl({ sessionManager, approvalProvider, initialPrompt, onMessag
   )
 }
 
+// [maint-note:aedb36f14432]
+// 维护导航：formatError；下列为本函数源码中的接口与路径索引。
+// 输入 error：unknown。
+// 返回契约：string。
+// 返回路径：error instanceof Error ? error.message : String(error)。
+// 直接调用：String。
+// [/maint-note:aedb36f14432]
 function formatError(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }

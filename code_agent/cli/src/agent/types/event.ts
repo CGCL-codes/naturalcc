@@ -1,3 +1,7 @@
+// [maint-note:8e12954bf65a]
+// 数据契约导航：AgentErrorCode；字段含义以消费端校验为准。
+// 类型组合：| 'config_error' | 'session_busy' | 'model_protocol_error' | 'model_request_error' | 'model_incomplete' | 'tool_not_found' | 'tool_validation_error' | 'tool_denied' | 'approval_provider_error' | 'tool_timeout' | 'tool_execution_error' | 'ma。
+// [/maint-note:8e12954bf65a]
 export type AgentErrorCode =
   | 'config_error'
   | 'session_busy'
@@ -14,6 +18,10 @@ export type AgentErrorCode =
   | 'request_budget_exhausted'
   | 'interrupted'
 
+// [maint-note:44ac46e08f04]
+// 数据契约导航：AgentEvent；字段含义以消费端校验为准。
+// 类型组合：| { type: 'user_message'; content: string } | { type: 'assistant_delta'; content: string } /** Completed model text that precedes a tool-call batch. Not terminal. */ | { type: 'assistant_segment'; content: string } | { type: 'assistant_mess。
+// [/maint-note:44ac46e08f04]
 export type AgentEvent =
   | { type: 'user_message'; content: string }
   | { type: 'assistant_delta'; content: string }

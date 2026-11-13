@@ -1,6 +1,6 @@
 # 合同指标 3：高频缺陷检测总报告
 
-更新时间（UTC）：2026-11-05T12:09:30.275351+00:00
+更新时间（UTC）：2026-11-13T05:25:36.689631+00:00
 
 本报告是唯一的指标 3 Markdown 入口。各测试集的真值、原始结果、模型 Run 和覆盖状态保留在各自工件目录；不得择优挑选或平均不同测试集的分数。
 
@@ -27,7 +27,35 @@
 - Web：每个任务调用 `vulnerability_detection` 时固定传入 `scan_type:"frequent_defects"`；不传 ground truth，真值始终留在评分脚本侧。工具的 `contract_statistics.status=not_evaluated` 不影响脚本按模型最终返回的 `prediction.findings` 评分。每个任务只接受与该任务类别相同的 `prediction.findings[].category`。Finding 的 `line` 必须落在对应真值函数的 `[line_start, line_end]` 内。类别不符的项写入 `out_of_scope_findings`，不评分；每个函数最终的匹配证据写入 `rows[].matched_findings`。
 - 本地 Cppcheck：此历史基准按 `manifest.json` 中该类别的 `cppcheck_ids` 或 `cwes` 匹配，再限定文件与函数行范围；原始扫描产生的其他诊断不进入 `matched_findings`。新增单次扫描使用 `security_contracts.py` 的规则及源操作分类，两套映射不互换。
 
-## 当前结果总览
+## 当前教学题集：逐类静态实测
+
+题集版本：`teaching-v2-20261113`；关闭开关：`A, B, C, E, F, G`。
+三个工程分别扫描其实际交付 fixture 并通过 GT 哈希验证；每类每工程 20 正例 + 20 安全对照。以下是静态教学基线，不是 Web 模型成绩或整个上游工程的检测率。
+
+| 测试集 | 工程 | 数组越界 | 字符串溢出 | 空指针调用 | 总体检出率 | 总体误报率 |
+|---|---|---:|---:|---:|---:|---:|
+| balanced | freertos_kernel | 18/20（90.00%） | 18/20（90.00%） | 19/20（95.00%） | 91.67% | 8.33% |
+| balanced | zephyr | 18/20（90.00%） | 18/20（90.00%） | 19/20（95.00%） | 91.67% | 8.33% |
+| balanced | rt_thread | 18/20（90.00%） | 18/20（90.00%） | 19/20（95.00%） | 91.67% | 8.33% |
+| independent | freertos_kernel | 17/20（85.00%） | 17/20（85.00%） | 18/20（90.00%） | 86.67% | 6.67% |
+| independent | zephyr | 17/20（85.00%） | 17/20（85.00%） | 18/20（90.00%） | 86.67% | 6.67% |
+| independent | rt_thread | 17/20（85.00%） | 17/20（85.00%） | 18/20（90.00%） | 86.67% | 6.67% |
+| balanced-hard | freertos_kernel | 19/20（95.00%） | 18/20（90.00%） | 18/20（90.00%） | 91.67% | 6.67% |
+| balanced-hard | zephyr | 19/20（95.00%） | 18/20（90.00%） | 18/20（90.00%） | 91.67% | 6.67% |
+| balanced-hard | rt_thread | 19/20（95.00%） | 18/20（90.00%） | 18/20（90.00%） | 91.67% | 6.67% |
+| independent-hard | freertos_kernel | 18/20（90.00%） | 17/20（85.00%） | 18/20（90.00%） | 88.33% | 6.67% |
+| independent-hard | zephyr | 18/20（90.00%） | 17/20（85.00%） | 18/20（90.00%） | 88.33% | 6.67% |
+| independent-hard | rt_thread | 18/20（90.00%） | 17/20（85.00%） | 18/20（90.00%） | 88.33% | 6.67% |
+
+完整参考实现：12 个工程×题集组合，逐类检出率范围 100.00%–100.00%；误报率范围 0.00%–0.00%。
+
+教师配置、学习任务和复现命令见 [静态分析难度指南](合同-3-静态分析难度调节指南.md)。
+原始逐例证据：`artifacts/contract3/teaching-v2/static-teaching.json` 与 `static-reference.json`。
+旧版 RTOS Web 数值保留在下面的历史区；新题集的 Web 模型成绩尚未测量。
+
+## 历史结果总览（RTOS 数据对应旧版题集）
+
+下列 RTOS Web 成绩使用调整前的形态配比，不能代表当前 teaching-v2；Juliet 保留原独立记录。
 
 | 测试集 / 运行方式 | 完成状态 | 检出率 / 误报率 | 定位 |
 |---|---|---|---|
@@ -68,7 +96,7 @@
 | Zephyr RTOS（`kernel`） | 52 | 17,050 |
 | RT-Thread（`src`） | 32 | 20,545 |
 
-JSON 和清单都由 [export_contract3_ground_truth.py](scripts/export_contract3_ground_truth.py) 生成（`uv run python scripts/export_contract3_ground_truth.py`），测试文件与 Web 评测时逐字节一致；平衡集、压力集、平衡加难三套的标签已与对应 Web checkpoint 逐条核对一致。
+JSON 和清单都由 [export_contract3_ground_truth.py](scripts/export_contract3_ground_truth.py) 生成（`uv run python scripts/export_contract3_ground_truth.py`），当前为 teaching-v2 配比，不能与旧版 Web checkpoint 的函数标签或分数混用；新版静态结果见报告首节。
 
 ## 平衡验收集（推荐验收口径）
 

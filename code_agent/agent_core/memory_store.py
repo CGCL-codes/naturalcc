@@ -38,6 +38,10 @@ RECALL_VISIBILITY = """
 """
 
 
+# [maint-note:275ec3447b35]
+# 数据与行为导航：MemoryProposalConflict。
+# 继承接口：RuntimeError。
+# [/maint-note:275ec3447b35]
 class MemoryProposalConflict(RuntimeError):
     pass
 
@@ -45,6 +49,29 @@ class MemoryProposalConflict(RuntimeError):
 class MemoryStore:
     VALID_STATUSES = {"candidate", "active", "rejected", "superseded", "expired"}
 
+    # [maint-note:19ef5049995f]
+    # 维护导航：__init__；下列为本函数源码中的接口与路径索引。
+    # 输入 db_path：str | Path。
+    # 返回契约：None。
+    # 分支条件：'thread_id' not in columns。
+    # 分支条件：name not in columns。
+    # 遍历边界：(name, definition) ← memory_additions.items()。
+    # 写入目标：self.db_path。
+    # 直接调用：Path(db_path).expanduser().resolve。
+    # 直接调用：Path(db_path).expanduser。
+    # 直接调用：Path。
+    # 直接调用：self.db_path.parent.mkdir。
+    # 直接调用：backup_before_schema_v6。
+    # 直接调用：self._connect。
+    # 直接调用：connection.executescript。
+    # 直接调用：connection.execute('PRAGMA table_info(memories)').fetchall。
+    # 直接调用：connection.execute。
+    # 直接调用：memory_additions.items。
+    # 直接调用：connection.commit。
+    # 直接调用：self._migrate_legacy_candidates。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 集合派生：row 来自 connection.execute('PRAGMA table_info(memories)').fetchall()。
+    # [/maint-note:19ef5049995f]
     def __init__(self, db_path: str | Path) -> None:
         self.db_path = Path(db_path).expanduser().resolve()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -153,6 +180,17 @@ class MemoryStore:
             connection.commit()
         self._migrate_legacy_candidates()
 
+    # [maint-note:dfb68c0623b7]
+    # 维护导航：_connect；下列为本函数源码中的接口与路径索引。
+    # 返回契约：Iterator[sqlite3.Connection]。
+    # 写入目标：connection.row_factory。
+    # 直接调用：sqlite3.connect。
+    # 直接调用：connection.execute。
+    # 直接调用：connection.close。
+    # 清理边界：本函数含 finally；正常返回和异常展开都经过清理块。
+    # 资源作用域：connection；退出该 with 时调用对应上下文清理。
+    # 生成器交付：connection。
+    # [/maint-note:dfb68c0623b7]
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
         connection = sqlite3.connect(self.db_path, timeout=30)
@@ -165,6 +203,17 @@ class MemoryStore:
         finally:
             connection.close()
 
+    # [maint-note:06278c900f55]
+    # 维护导航：_decode_proposal_row；下列为本函数源码中的接口与路径索引。
+    # 输入 row：sqlite3.Row。
+    # 返回契约：dict[str, Any]。
+    # 返回路径：value。
+    # 写入目标：value['warnings']。
+    # 写入目标：value['conflicts']。
+    # 直接调用：dict。
+    # 直接调用：json.loads。
+    # 直接调用：value.pop。
+    # [/maint-note:06278c900f55]
     @staticmethod
     def _decode_proposal_row(row: sqlite3.Row) -> dict[str, Any]:
         value = dict(row)
@@ -175,6 +224,25 @@ class MemoryStore:
         value.pop("error_json", None)
         return value
 
+    # [maint-note:70d07edf5036]
+    # 维护导航：_migrate_legacy_candidates；下列为本函数源码中的接口与路径索引。
+    # 返回契约：None。
+    # 分支条件：existing。
+    # 遍历边界：row ← rows。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute("SELECT * FROM memories WHERE status='candidate' ORDER BY created_at").fetchall。
+    # 直接调用：connection.execute。
+    # 直接调用：connection.execute("\n SELECT 1 FROM memory_proposals\n WHERE source_mode='legacy_migration' AND target_memory_id=?\n ", (row['id'],)).fetchone。
+    # 直接调用：str。
+    # 直接调用：uuid.uuid4。
+    # 直接调用：now_iso。
+    # 直接调用：hashlib.sha256(row['content'].encode('utf-8')).hexdigest。
+    # 直接调用：hashlib.sha256。
+    # 直接调用：row['content'].encode。
+    # 直接调用：json.dumps。
+    # 直接调用：connection.commit。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # [/maint-note:70d07edf5036]
     def _migrate_legacy_candidates(self) -> None:
         """Expose pre-v6 candidates through the governed review queue without data loss."""
         with self._connect() as connection:
@@ -269,6 +337,35 @@ class MemoryStore:
                 )
             connection.commit()
 
+    # [maint-note:bcacb76013ba]
+    # 维护导航：create_candidate；下列为本函数源码中的接口与路径索引。
+    # 输入 scope：str。
+    # 输入 kind：str。
+    # 输入 project_id：str | None。
+    # 输入 subject：str。
+    # 输入 content：str。
+    # 输入 source_run_id：str | None。
+    # 输入 source_revision：str | None。
+    # 输入 confidence：float。
+    # 输入 thread_id：str | None；缺省表达式 None。
+    # 返回契约：str。
+    # 分支条件：scope not in {'run', 'thread', 'project', 'user'}。
+    # 分支条件：not 0 <= confidence <= 1。
+    # 分支条件：duplicate。
+    # 返回路径：duplicate['id']。
+    # 返回路径：memory_id。
+    # 显式抛出：ValueError('invalid memory scope')。
+    # 显式抛出：ValueError('confidence must be between 0 and 1')。
+    # 直接调用：ValueError。
+    # 直接调用：str。
+    # 直接调用：uuid.uuid4。
+    # 直接调用：now_iso。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute("\n SELECT id FROM memories\n WHERE scope=?\n AND COALESCE(project_id,'')=COALESCE(?, '')\n AND COALESCE(thread_id,'')=COALESCE(?, '')\n AND subject=? AND content=?\n AND status IN ('candidate','active')\n ", (scope, proj。
+    # 直接调用：connection.execute。
+    # 直接调用：connection.commit。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # [/maint-note:bcacb76013ba]
     def create_candidate(
         self,
         *,
@@ -329,6 +426,25 @@ class MemoryStore:
             connection.commit()
         return memory_id
 
+    # [maint-note:e0faf2ddc08f]
+    # 维护导航：_set_status；下列为本函数源码中的接口与路径索引。
+    # 输入 memory_id：str。
+    # 输入 status：str。
+    # 返回契约：None。
+    # 分支条件：status not in self.VALID_STATUSES。
+    # 分支条件：row is None。
+    # 分支条件：status == 'active'。
+    # 显式抛出：ValueError('invalid memory status')。
+    # 显式抛出：KeyError(memory_id)。
+    # 直接调用：ValueError。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute('SELECT subject, content FROM memories WHERE id=?', (memory_id,)).fetchone。
+    # 直接调用：connection.execute。
+    # 直接调用：KeyError。
+    # 直接调用：now_iso。
+    # 直接调用：connection.commit。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # [/maint-note:e0faf2ddc08f]
     def _set_status(self, memory_id: str, status: str) -> None:
         if status not in self.VALID_STATUSES:
             raise ValueError("invalid memory status")
@@ -345,12 +461,36 @@ class MemoryStore:
                 )
             connection.commit()
 
+    # [maint-note:76861372b3c4]
+    # 维护导航：activate；下列为本函数源码中的接口与路径索引。
+    # 输入 memory_id：str。
+    # 返回契约：None。
+    # 直接调用：self._set_status。
+    # [/maint-note:76861372b3c4]
     def activate(self, memory_id: str) -> None:
         self._set_status(memory_id, "active")
 
+    # [maint-note:a9a764dfa8fa]
+    # 维护导航：reject；下列为本函数源码中的接口与路径索引。
+    # 输入 memory_id：str。
+    # 返回契约：None。
+    # 直接调用：self._set_status。
+    # [/maint-note:a9a764dfa8fa]
     def reject(self, memory_id: str) -> None:
         self._set_status(memory_id, "rejected")
 
+    # [maint-note:3a4f882d520b]
+    # 维护导航：supersede；下列为本函数源码中的接口与路径索引。
+    # 输入 old_id：str。
+    # 输入 new_id：str。
+    # 返回契约：None。
+    # 直接调用：self.activate。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute。
+    # 直接调用：now_iso。
+    # 直接调用：connection.commit。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # [/maint-note:3a4f882d520b]
     def supersede(self, old_id: str, new_id: str) -> None:
         self.activate(new_id)
         with self._connect() as connection:
@@ -361,11 +501,44 @@ class MemoryStore:
             connection.execute("DELETE FROM memory_fts WHERE id=?", (old_id,))
             connection.commit()
 
+    # [maint-note:36bd77d1a982]
+    # 维护导航：get；下列为本函数源码中的接口与路径索引。
+    # 输入 memory_id：str。
+    # 返回契约：dict[str, Any] | None。
+    # 返回路径：dict(row) if row else None。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute('SELECT * FROM memories WHERE id=?', (memory_id,)).fetchone。
+    # 直接调用：connection.execute。
+    # 直接调用：dict。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 表达式分流：row；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:36bd77d1a982]
     def get(self, memory_id: str) -> dict[str, Any] | None:
         with self._connect() as connection:
             row = connection.execute("SELECT * FROM memories WHERE id=?", (memory_id,)).fetchone()
         return dict(row) if row else None
 
+    # [maint-note:f6c24d5af2c6]
+    # 维护导航：update；下列为本函数源码中的接口与路径索引。
+    # 输入 memory_id：str。
+    # 输入 subject：str。
+    # 输入 content：str。
+    # 输入 confidence：float。
+    # 返回契约：None。
+    # 分支条件：not 0 <= confidence <= 1。
+    # 分支条件：row is None。
+    # 分支条件：row['status'] == 'active'。
+    # 显式抛出：ValueError('confidence must be between 0 and 1')。
+    # 显式抛出：KeyError(memory_id)。
+    # 直接调用：ValueError。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute('SELECT status FROM memories WHERE id=?', (memory_id,)).fetchone。
+    # 直接调用：connection.execute。
+    # 直接调用：KeyError。
+    # 直接调用：now_iso。
+    # 直接调用：connection.commit。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # [/maint-note:f6c24d5af2c6]
     def update(
         self,
         memory_id: str,
@@ -392,6 +565,38 @@ class MemoryStore:
                 )
             connection.commit()
 
+    # [maint-note:348c9bace0db]
+    # 维护导航：search；下列为本函数源码中的接口与路径索引。
+    # 输入 query：str。
+    # 输入 project_id：str | None；缺省表达式 None。
+    # 输入 thread_id：str | None；缺省表达式 None。
+    # 输入 run_id：str | None；缺省表达式 None。
+    # 输入 limit：int；缺省表达式 5。
+    # 输入 exclude_kinds：set[str] | frozenset[str] | None；缺省表达式 None。
+    # 返回契约：list[dict[str, Any]]。
+    # 分支条件：not terms。
+    # 分支条件：exclusions。
+    # 返回路径：[]。
+    # 返回路径：[dict(row) for row in rows]。
+    # 直接调用：query.replace('"', ' ').split。
+    # 直接调用：query.replace。
+    # 直接调用：' OR '.join。
+    # 直接调用：part.replace。
+    # 直接调用：chr。
+    # 直接调用：sorted。
+    # 直接调用：','.join。
+    # 直接调用：params.extend。
+    # 直接调用：params.append。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute(f'\n SELECT m.*, bm25(memory_fts) AS rank\n FROM memory_fts JOIN memories m ON m.id=memory_fts.id\n WHERE memory_fts MATCH ?\n AND {RECALL_VISIBILITY}\n {exclusion_sql}\n ORDER BY rank, m.confidence DESC, m.updated_at DES。
+    # 直接调用：connection.execute。
+    # 直接调用：dict。
+    # 集合派生：part 来自 query.replace('"', ' ').split()；过滤 part。
+    # 集合派生：part 来自 raw_terms。
+    # 集合派生：_ 来自 exclusions。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 集合派生：row 来自 rows。
+    # [/maint-note:348c9bace0db]
     def search(
         self,
         query: str,
@@ -429,6 +634,32 @@ class MemoryStore:
             ).fetchall()
         return [dict(row) for row in rows]
 
+    # [maint-note:9e0e6c3cfc07]
+    # 维护导航：semantic_recall_candidates；下列为本函数源码中的接口与路径索引。
+    # 输入 project_id：str。
+    # 输入 thread_id：str | None。
+    # 输入 run_id：str。
+    # 输入 selected_ids：list[str] | None；缺省表达式 None。
+    # 返回契约：list[dict[str, Any]]。
+    # 分支条件：selected_ids == []。
+    # 分支条件：selected_ids is not None。
+    # 分支条件：selected_ids is None。
+    # 返回路径：[]。
+    # 返回路径：[dict(row) for row in rows]。
+    # 返回路径：[by_id[item] for item in selected_ids if item in by_id]。
+    # 直接调用：sorted。
+    # 直接调用：','.join。
+    # 直接调用：params.extend。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute(f'SELECT m.* FROM memories m WHERE {RECALL_VISIBILITY}\n AND m.kind NOT IN ({placeholders}) {id_filter}\n ORDER BY m.updated_at DESC, m.id LIMIT 16', params).fetchall。
+    # 直接调用：connection.execute。
+    # 直接调用：dict。
+    # 集合派生：_ 来自 pinned。
+    # 集合派生：_ 来自 selected_ids。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 集合派生：row 来自 rows。
+    # 集合派生：item 来自 selected_ids；过滤 item in by_id。
+    # [/maint-note:9e0e6c3cfc07]
     def semantic_recall_candidates(
         self,
         *,
@@ -459,6 +690,23 @@ class MemoryStore:
         by_id = {row["id"]: dict(row) for row in rows}
         return [by_id[item] for item in selected_ids if item in by_id]
 
+    # [maint-note:795480631b51]
+    # 维护导航：list_pinned_for_context；下列为本函数源码中的接口与路径索引。
+    # 输入 project_id：str | None；缺省表达式 None。
+    # 输入 thread_id：str | None；缺省表达式 None。
+    # 输入 limit：int；缺省表达式 24。
+    # 返回契约：list[dict[str, Any]]。
+    # 返回路径：[dict(row) for row in rows]。
+    # 直接调用：sorted。
+    # 直接调用：','.join。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute(f"\n SELECT m.*\n FROM memories m\n WHERE m.status='active'\n AND (m.expires_at IS NULL OR julianday(m.expires_at) > julianday('now'))\n AND m.kind IN ({placeholders})\n AND (\n m.scope='user'\n OR (m.scope='project' AND 。
+    # 直接调用：connection.execute。
+    # 直接调用：dict。
+    # 集合派生：_ 来自 kinds。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 集合派生：row 来自 rows。
+    # [/maint-note:795480631b51]
     def list_pinned_for_context(
         self,
         *,
@@ -497,6 +745,21 @@ class MemoryStore:
             ).fetchall()
         return [dict(row) for row in rows]
 
+    # [maint-note:74160b03ed37]
+    # 维护导航：mark_stale_for_revision；下列为本函数源码中的接口与路径索引。
+    # 输入 project_id：str。
+    # 输入 current_revision：str。
+    # 返回契约：int。
+    # 遍历边界：row ← rows。
+    # 返回路径：len(rows)。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute("SELECT id FROM memories WHERE project_id=? AND status='active' AND source_revision IS NOT NULL AND source_revision<>?", (project_id, current_revision)).fetchall。
+    # 直接调用：connection.execute。
+    # 直接调用：now_iso。
+    # 直接调用：connection.commit。
+    # 直接调用：len。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # [/maint-note:74160b03ed37]
     def mark_stale_for_revision(self, project_id: str, current_revision: str) -> int:
         with self._connect() as connection:
             rows = connection.execute(
@@ -509,6 +772,16 @@ class MemoryStore:
             connection.commit()
         return len(rows)
 
+    # [maint-note:2e7b26aee07c]
+    # 维护导航：delete；下列为本函数源码中的接口与路径索引。
+    # 输入 memory_id：str。
+    # 返回契约：bool。
+    # 返回路径：cursor.rowcount > 0。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute。
+    # 直接调用：connection.commit。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # [/maint-note:2e7b26aee07c]
     def delete(self, memory_id: str) -> bool:
         with self._connect() as connection:
             connection.execute("DELETE FROM memory_fts WHERE id=?", (memory_id,))
@@ -516,6 +789,30 @@ class MemoryStore:
             connection.commit()
         return cursor.rowcount > 0
 
+    # [maint-note:7cc2c517415c]
+    # 维护导航：list；下列为本函数源码中的接口与路径索引。
+    # 输入 status：str | None；缺省表达式 None。
+    # 输入 project_id：str | None；缺省表达式 None。
+    # 输入 thread_id：str | None；缺省表达式 None。
+    # 返回契约：list[dict[str, Any]]。
+    # 分支条件：status。
+    # 分支条件：project_id。
+    # 分支条件：thread_id。
+    # 遍历边界：item ← items。
+    # 返回路径：items。
+    # 写入目标：item['status']。
+    # 直接调用：clauses.append。
+    # 直接调用：params.append。
+    # 直接调用：' AND '.join。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute(f'SELECT *, {effective_status} AS effective_status FROM memories{where} ORDER BY updated_at DESC', params).fetchall。
+    # 直接调用：connection.execute。
+    # 直接调用：dict。
+    # 直接调用：item.pop。
+    # 表达式分流：clauses；真值与假值分支分别计算，不同时执行。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 集合派生：row 来自 rows。
+    # [/maint-note:7cc2c517415c]
     def list(
         self,
         *,
@@ -549,6 +846,18 @@ class MemoryStore:
             item["status"] = item.pop("effective_status")
         return items
 
+    # [maint-note:09a1ce8ea5d1]
+    # 维护导航：automatic_memory_manifest；下列为本函数源码中的接口与路径索引。
+    # 输入 project_id：str。
+    # 返回契约：list[dict[str, Any]]。
+    # 返回路径：[dict(row) for row in rows]。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute("\n SELECT id, scope, kind, subject, substr(content, 1, 180) AS summary, updated_at\n FROM memories\n WHERE status='active' AND (scope='user' OR (scope='project' AND project_id=?))\n AND (expires_at IS NULL OR julianday(e。
+    # 直接调用：connection.execute。
+    # 直接调用：dict。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 集合派生：row 来自 rows。
+    # [/maint-note:09a1ce8ea5d1]
     def automatic_memory_manifest(self, project_id: str) -> list[dict[str, Any]]:
         with self._connect() as connection:
             rows = connection.execute(
@@ -563,6 +872,54 @@ class MemoryStore:
             ).fetchall()
         return [dict(row) for row in rows]
 
+    # [maint-note:f2c0cc9e4a57]
+    # 维护导航：create_proposal；下列为本函数源码中的接口与路径索引。
+    # 输入 operation：str。
+    # 输入 target_memory_id：str | None。
+    # 输入 source_mode：str。
+    # 输入 project_id：str | None。
+    # 输入 thread_id：str | None。
+    # 输入 run_id：str | None。
+    # 输入 scope：str。
+    # 输入 kind：str。
+    # 输入 subject：str。
+    # 输入 canonical_content：str。
+    # 输入 verification：str。
+    # 输入 durability：str。
+    # 输入 confidence：float。
+    # 输入 expires_at：str | None。
+    # 输入 analysis：dict[str, Any]。
+    # 输入 raw_proposal：dict[str, Any]。
+    # 输入 warnings：list[str]。
+    # 输入 conflicts：list[str]。
+    # 输入 source_hash：str。
+    # 输入 model：str。
+    # 输入 analyzer_prompt_version：str。
+    # 输入 composer_prompt_version：str。
+    # 输入 evidence：list[dict[str, Any]]。
+    # 返回契约：str | None。
+    # 分支条件：source_mode == 'automatic_run'。
+    # 分支条件：duplicate_memory。
+    # 分支条件：duplicate。
+    # 遍历边界：(ordinal, item) ← enumerate(evidence)。
+    # 返回路径：None。
+    # 返回路径：duplicate['id']。
+    # 返回路径：proposal_id。
+    # 直接调用：str。
+    # 直接调用：uuid.uuid4。
+    # 直接调用：now_iso。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute。
+    # 直接调用：self._check_completed_source。
+    # 直接调用：connection.execute("\n SELECT 1 FROM memories\n WHERE scope=? AND (scope='user' OR project_id=?) AND kind=?\n AND lower(trim(subject))=lower(trim(?)) AND content=? AND ?<>'expire'\n AND status='active'\n AND (expires_at IS NULL OR julianday。
+    # 直接调用：connection.execute("\n SELECT id FROM memory_proposals\n WHERE source_hash=? AND source_mode=? AND scope=? AND kind=? AND subject=?\n AND canonical_content=?\n AND status IN ('review_ready','deferred','applied')\n ORDER BY created_at DESC L。
+    # 直接调用：connection.rollback。
+    # 直接调用：json.dumps。
+    # 直接调用：enumerate。
+    # 直接调用：item.get。
+    # 直接调用：connection.commit。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # [/maint-note:f2c0cc9e4a57]
     def create_proposal(
         self,
         *,
@@ -695,6 +1052,18 @@ class MemoryStore:
             connection.commit()
         return proposal_id
 
+    # [maint-note:bd6122537a06]
+    # 维护导航：get_proposal；下列为本函数源码中的接口与路径索引。
+    # 输入 proposal_id：str。
+    # 返回契约：dict[str, Any] | None。
+    # 返回路径：self._decode_proposal_row(row) if row else None。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute('SELECT * FROM memory_proposals WHERE id=?', (proposal_id,)).fetchone。
+    # 直接调用：connection.execute。
+    # 直接调用：self._decode_proposal_row。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 表达式分流：row；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:bd6122537a06]
     def get_proposal(self, proposal_id: str) -> dict[str, Any] | None:
         with self._connect() as connection:
             row = connection.execute(
@@ -702,6 +1071,24 @@ class MemoryStore:
             ).fetchone()
         return self._decode_proposal_row(row) if row else None
 
+    # [maint-note:5ff4d095bb95]
+    # 维护导航：get_proposal_internal；下列为本函数源码中的接口与路径索引。
+    # 输入 proposal_id：str。
+    # 返回契约：dict[str, Any] | None。
+    # 分支条件：row is None。
+    # 遍历边界：(source, target, default) ← (('analysis_json', 'analysis', {}), ('proposal_json', 'raw_proposal', {}), ('warnings_json', 'warnings', []), ('conflicts_json', 'conflicts', []), ('error_json', 'error', None))。
+    # 返回路径：None。
+    # 返回路径：value。
+    # 写入目标：value[target]。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute('SELECT * FROM memory_proposals WHERE id=?', (proposal_id,)).fetchone。
+    # 直接调用：connection.execute。
+    # 直接调用：dict。
+    # 直接调用：value.pop。
+    # 直接调用：json.loads。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 表达式分流：raw；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:5ff4d095bb95]
     def get_proposal_internal(self, proposal_id: str) -> dict[str, Any] | None:
         with self._connect() as connection:
             row = connection.execute(
@@ -721,6 +1108,27 @@ class MemoryStore:
             value[target] = json.loads(raw) if raw else default
         return value
 
+    # [maint-note:0fead33b1342]
+    # 维护导航：list_proposals；下列为本函数源码中的接口与路径索引。
+    # 输入 status：str | None；缺省表达式 None。
+    # 输入 project_id：str | None；缺省表达式 None。
+    # 输入 thread_id：str | None；缺省表达式 None。
+    # 返回契约：list[dict[str, Any]]。
+    # 分支条件：status。
+    # 分支条件：project_id。
+    # 分支条件：thread_id。
+    # 返回路径：[self._decode_proposal_row(row) for row in rows]。
+    # 直接调用：clauses.append。
+    # 直接调用：params.append。
+    # 直接调用：' AND '.join。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute(f'SELECT * FROM memory_proposals{where} ORDER BY updated_at DESC', params).fetchall。
+    # 直接调用：connection.execute。
+    # 直接调用：self._decode_proposal_row。
+    # 表达式分流：clauses；真值与假值分支分别计算，不同时执行。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 集合派生：row 来自 rows。
+    # [/maint-note:0fead33b1342]
     def list_proposals(
         self,
         *,
@@ -747,6 +1155,22 @@ class MemoryStore:
             ).fetchall()
         return [self._decode_proposal_row(row) for row in rows]
 
+    # [maint-note:9ea0b8092752]
+    # 维护导航：get_proposal_evidence；下列为本函数源码中的接口与路径索引。
+    # 输入 proposal_id：str。
+    # 返回契约：list[dict[str, Any]]。
+    # 分支条件：connection.execute('SELECT 1 FROM memory_proposals WHERE id=?', (proposal_id,)).fetchone() is None。
+    # 返回路径：[dict(row) for row in rows]。
+    # 显式抛出：KeyError(proposal_id)。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute('SELECT 1 FROM memory_proposals WHERE id=?', (proposal_id,)).fetchone。
+    # 直接调用：connection.execute。
+    # 直接调用：KeyError。
+    # 直接调用：connection.execute('\n SELECT * FROM memory_proposal_evidence\n WHERE proposal_id=? ORDER BY ordinal\n ', (proposal_id,)).fetchall。
+    # 直接调用：dict。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 集合派生：row 来自 rows。
+    # [/maint-note:9ea0b8092752]
     def get_proposal_evidence(self, proposal_id: str) -> list[dict[str, Any]]:
         with self._connect() as connection:
             if connection.execute(
@@ -762,6 +1186,13 @@ class MemoryStore:
             ).fetchall()
         return [dict(row) for row in rows]
 
+    # [maint-note:f6ad11ef34c9]
+    # 维护导航：_proposal_snapshot；下列为本函数源码中的接口与路径索引。
+    # 输入 row：sqlite3.Row | dict[str, Any]。
+    # 返回契约：dict[str, Any]。
+    # 返回路径：{key: row[key] for key in ('status', 'scope', 'kind', 'subject', 'canonical_content', 'expires_at', 'version', 'applied_memory_id')}。
+    # 集合派生：key 来自 ('status', 'scope', 'kind', 'subject', 'canonical_content', 'expires_at', 'version', 'applied_memory_id')。
+    # [/maint-note:f6ad11ef34c9]
     @staticmethod
     def _proposal_snapshot(row: sqlite3.Row | dict[str, Any]) -> dict[str, Any]:
         return {
@@ -778,6 +1209,22 @@ class MemoryStore:
             )
         }
 
+    # [maint-note:33639ce3902c]
+    # 维护导航：_insert_review_action；下列为本函数源码中的接口与路径索引。
+    # 输入 connection：sqlite3.Connection。
+    # 输入 proposal_id：str。
+    # 输入 action：str。
+    # 输入 actor：str。
+    # 输入 before：dict[str, Any]。
+    # 输入 after：dict[str, Any]。
+    # 输入 reason：str。
+    # 返回契约：None。
+    # 直接调用：connection.execute。
+    # 直接调用：str。
+    # 直接调用：uuid.uuid4。
+    # 直接调用：json.dumps。
+    # 直接调用：now_iso。
+    # [/maint-note:33639ce3902c]
     @staticmethod
     def _insert_review_action(
         connection: sqlite3.Connection,
@@ -808,6 +1255,63 @@ class MemoryStore:
             ),
         )
 
+    # [maint-note:8a4f703f2568]
+    # 维护导航：update_proposal；下列为本函数源码中的接口与路径索引。
+    # 输入 proposal_id：str。
+    # 输入 expected_version：int。
+    # 输入 actor：str。
+    # 输入 subject：str | None；缺省表达式 None。
+    # 输入 canonical_content：str | None；缺省表达式 None。
+    # 输入 scope：str | None；缺省表达式 None。
+    # 输入 kind：str | None；缺省表达式 None。
+    # 输入 expires_at：str | None；缺省表达式 None。
+    # 返回契约：None。
+    # 分支条件：subject is not None。
+    # 分支条件：not subject.strip()。
+    # 分支条件：canonical_content is not None。
+    # 分支条件：not canonical_content.strip()。
+    # 分支条件：scope is not None。
+    # 分支条件：scope not in {'run', 'thread', 'project', 'user'}。
+    # 分支条件：kind is not None。
+    # 分支条件：expires_at is not None。
+    # 分支条件：not changes。
+    # 分支条件：row is None。
+    # 分支条件：int(row['version']) != expected_version。
+    # 分支条件：row['status'] not in {'review_ready', 'deferred'}。
+    # 返回路径：无返回值。
+    # 显式抛出：ValueError('proposal subject cannot be empty')。
+    # 显式抛出：ValueError('proposal content cannot be empty')。
+    # 显式抛出：ValueError('invalid memory scope')。
+    # 显式抛出：KeyError(proposal_id)。
+    # 显式抛出：MemoryProposalConflict(f"expected proposal version {expected_version}, found {row['version']}")。
+    # 显式抛出：MemoryProposalConflict('proposal is no longer editable')。
+    # 写入目标：changes['subject']。
+    # 写入目标：changes['canonical_content']。
+    # 写入目标：changes['scope']。
+    # 写入目标：changes['kind']。
+    # 写入目标：changes['expires_at']。
+    # 写入目标：changes['status']。
+    # 写入目标：changes['version']。
+    # 写入目标：changes['updated_at']。
+    # 直接调用：subject.strip。
+    # 直接调用：ValueError。
+    # 直接调用：canonical_content.strip。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute。
+    # 直接调用：connection.execute('SELECT * FROM memory_proposals WHERE id=?', (proposal_id,)).fetchone。
+    # 直接调用：connection.rollback。
+    # 直接调用：KeyError。
+    # 直接调用：int。
+    # 直接调用：MemoryProposalConflict。
+    # 直接调用：self._proposal_snapshot。
+    # 直接调用：now_iso。
+    # 直接调用：', '.join。
+    # 直接调用：changes.values。
+    # 直接调用：self._insert_review_action。
+    # 直接调用：connection.commit。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 集合派生：key 来自 changes。
+    # [/maint-note:8a4f703f2568]
     def update_proposal(
         self,
         proposal_id: str,
@@ -878,6 +1382,37 @@ class MemoryStore:
             )
             connection.commit()
 
+    # [maint-note:60f987b734cd]
+    # 维护导航：review_proposal；下列为本函数源码中的接口与路径索引。
+    # 输入 proposal_id：str。
+    # 输入 action：str。
+    # 输入 expected_version：int。
+    # 输入 actor：str。
+    # 输入 reason：str；缺省表达式 ''。
+    # 返回契约：None。
+    # 分支条件：target_status is None。
+    # 分支条件：row is None。
+    # 分支条件：int(row['version']) != expected_version。
+    # 分支条件：row['status'] not in {'review_ready', 'deferred'}。
+    # 显式抛出：ValueError('unsupported proposal review action')。
+    # 显式抛出：KeyError(proposal_id)。
+    # 显式抛出：MemoryProposalConflict(f"expected proposal version {expected_version}, found {row['version']}")。
+    # 显式抛出：MemoryProposalConflict('proposal has already been finalized')。
+    # 直接调用：{'reject': 'rejected', 'defer': 'deferred'}.get。
+    # 直接调用：ValueError。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute。
+    # 直接调用：connection.execute('SELECT * FROM memory_proposals WHERE id=?', (proposal_id,)).fetchone。
+    # 直接调用：connection.rollback。
+    # 直接调用：KeyError。
+    # 直接调用：int。
+    # 直接调用：MemoryProposalConflict。
+    # 直接调用：self._proposal_snapshot。
+    # 直接调用：now_iso。
+    # 直接调用：self._insert_review_action。
+    # 直接调用：connection.commit。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # [/maint-note:60f987b734cd]
     def review_proposal(
         self,
         proposal_id: str,
@@ -930,6 +1465,63 @@ class MemoryStore:
             )
             connection.commit()
 
+    # [maint-note:90f0ec389c75]
+    # 维护导航：approve_proposal；下列为本函数源码中的接口与路径索引。
+    # 输入 proposal_id：str。
+    # 输入 expected_version：int。
+    # 输入 actor：str。
+    # 返回契约：str | None。
+    # 分支条件：row is None。
+    # 分支条件：int(row['version']) != expected_version。
+    # 分支条件：row['status'] not in {'review_ready', 'deferred'}。
+    # 分支条件：row['source_mode'] == 'automatic_run'。
+    # 分支条件：row['source_mode'] == 'automatic_run' and row['operation'] != 'create'。
+    # 分支条件：target is None or target['updated_at'] != expected_target or target['scope'] != row['scope'] or (target['kind'] != row['kind']) or (row['scope'] == 'project' and target['project_id'] != row['project_id'])。
+    # 分支条件：actor == 'auto_memory' and target['subject'].casefold() != row['subject'].casefold()。
+    # 分支条件：actor == 'auto_memory'。
+    # 分支条件：operation == 'expire'。
+    # 分支条件：not target_id。
+    # 分支条件：operation == 'create' and target_id。
+    # 分支条件：target is None or target['status'] != 'candidate'。
+    # 分支条件：operation in {'update', 'supersede'}。
+    # 分支条件：target is None or target['status'] != 'active'。
+    # 分支条件：target_id and operation in {'update', 'supersede'}。
+    # 分支条件：applied_memory_id。
+    # 返回路径：applied_memory_id。
+    # 显式抛出：KeyError(proposal_id)。
+    # 显式抛出：MemoryProposalConflict(f"expected proposal version {expected_version}, found {row['version']}")。
+    # 显式抛出：MemoryProposalConflict('proposal has already been finalized')。
+    # 显式抛出：MemoryProposalConflict('memory target changed after analysis')。
+    # 显式抛出：MemoryProposalConflict('a subject change requires human review')。
+    # 显式抛出：MemoryProposalConflict('expire proposal has no target memory')。
+    # 显式抛出：MemoryProposalConflict('legacy candidate is no longer available')。
+    # 显式抛出：MemoryProposalConflict('target memory is not active')。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute。
+    # 直接调用：connection.execute('SELECT * FROM memory_proposals WHERE id=?', (proposal_id,)).fetchone。
+    # 直接调用：connection.rollback。
+    # 直接调用：KeyError。
+    # 直接调用：int。
+    # 直接调用：MemoryProposalConflict。
+    # 直接调用：self._check_completed_source。
+    # 直接调用：connection.execute("SELECT * FROM memories WHERE id=? AND status='active'", (row['target_memory_id'],)).fetchone。
+    # 直接调用：json.loads(row['proposal_json']).get。
+    # 直接调用：json.loads。
+    # 直接调用：target['subject'].casefold。
+    # 直接调用：row['subject'].casefold。
+    # 直接调用：self._check_automatic_approval。
+    # 直接调用：self._proposal_snapshot。
+    # 直接调用：now_iso。
+    # 直接调用：connection.execute('SELECT COUNT(*) AS count FROM memory_proposal_evidence WHERE proposal_id=?', (proposal_id,)).fetchone。
+    # 直接调用：connection.execute('SELECT status FROM memories WHERE id=?', (target_id,)).fetchone。
+    # 直接调用：connection.execute('SELECT id, status FROM memories WHERE id=?', (target_id,)).fetchone。
+    # 直接调用：str。
+    # 直接调用：uuid.uuid4。
+    # 直接调用：self._insert_review_action。
+    # 直接调用：connection.commit。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # 表达式分流：row['verification'] not in {'model_inferred', 'legacy_unverified'}；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:90f0ec389c75]
     def approve_proposal(
         self,
         proposal_id: str,
@@ -1084,6 +1676,19 @@ class MemoryStore:
             connection.commit()
         return applied_memory_id
 
+    # [maint-note:ef8e8a7fcf6d]
+    # 维护导航：_check_completed_source；下列为本函数源码中的接口与路径索引。
+    # 输入 connection：sqlite3.Connection。
+    # 输入 run_id：str | None。
+    # 输入 thread_id：str | None。
+    # 输入 project_id：str | None。
+    # 返回契约：None。
+    # 分支条件：connection.execute("SELECT 1 FROM runs\n WHERE id=? AND thread_id=? AND workspace=? AND status='completed'", (run_id, thread_id, project_id)).fetchone() is None。
+    # 显式抛出：MemoryProposalConflict('source run is no longer available')。
+    # 直接调用：connection.execute("SELECT 1 FROM runs\n WHERE id=? AND thread_id=? AND workspace=? AND status='completed'", (run_id, thread_id, project_id)).fetchone。
+    # 直接调用：connection.execute。
+    # 直接调用：MemoryProposalConflict。
+    # [/maint-note:ef8e8a7fcf6d]
     @staticmethod
     def _check_completed_source(
         connection: sqlite3.Connection, run_id: str | None,
@@ -1096,6 +1701,28 @@ class MemoryStore:
         ).fetchone() is None:
             raise MemoryProposalConflict("source run is no longer available")
 
+    # [maint-note:beb3bf71e067]
+    # 维护导航：_check_automatic_approval；下列为本函数源码中的接口与路径索引。
+    # 输入 connection：sqlite3.Connection。
+    # 输入 proposal：sqlite3.Row。
+    # 返回契约：None。
+    # 分支条件：proposal['source_mode'] != 'automatic_run' or proposal['operation'] == 'expire' or (proposal['verification'] not in {'user_asserted', 'test_verified'} and (not verified_recovery)) or (proposal['confidence'] < 0.6) or json.loads(proposal['co。
+    # 分支条件：analysis['contradictions'] or analysis['sensitive_findings']。
+    # 分支条件：len(cited) < (3 if verified_recovery else 1)。
+    # 分支条件：duplicate_subject。
+    # 显式抛出：MemoryProposalConflict('proposal requires human review')。
+    # 显式抛出：MemoryProposalConflict('evidence analysis requires human review')。
+    # 显式抛出：MemoryProposalConflict('proposal lacks matching direct evidence')。
+    # 显式抛出：MemoryProposalConflict('another active memory already uses this subject')。
+    # 直接调用：json.loads。
+    # 直接调用：MemoryProposalConflict。
+    # 直接调用：connection.execute('\n SELECT evidence_ref FROM memory_proposal_evidence\n WHERE proposal_id=? AND verification=?\n ', (proposal['id'], proposal['verification'])).fetchall。
+    # 直接调用：connection.execute。
+    # 直接调用：len。
+    # 直接调用：connection.execute("\n SELECT 1 FROM memories\n WHERE scope=? AND (scope='user' OR project_id=?) AND kind=?\n AND lower(trim(subject))=lower(trim(?)) AND id IS NOT ?\n AND status='active'\n AND (expires_at IS NULL OR julianday(expires_at) >。
+    # 集合派生：row 来自 matching；过滤 row['evidence_ref'] in evidence。
+    # 表达式分流：verified_recovery；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:beb3bf71e067]
     @staticmethod
     def _check_automatic_approval(
         connection: sqlite3.Connection, proposal: sqlite3.Row
@@ -1145,6 +1772,23 @@ class MemoryStore:
         if duplicate_subject:
             raise MemoryProposalConflict("another active memory already uses this subject")
 
+    # [maint-note:f702a9d79ba5]
+    # 维护导航：list_review_actions；下列为本函数源码中的接口与路径索引。
+    # 输入 proposal_id：str。
+    # 返回契约：list[dict[str, Any]]。
+    # 遍历边界：row ← rows。
+    # 返回路径：result。
+    # 写入目标：value['before']。
+    # 写入目标：value['after']。
+    # 直接调用：self._connect。
+    # 直接调用：connection.execute('SELECT * FROM memory_review_actions WHERE proposal_id=? ORDER BY created_at', (proposal_id,)).fetchall。
+    # 直接调用：connection.execute。
+    # 直接调用：dict。
+    # 直接调用：json.loads。
+    # 直接调用：value.pop。
+    # 直接调用：result.append。
+    # 资源作用域：self._connect()；退出该 with 时调用对应上下文清理。
+    # [/maint-note:f702a9d79ba5]
     def list_review_actions(self, proposal_id: str) -> list[dict[str, Any]]:
         with self._connect() as connection:
             rows = connection.execute(

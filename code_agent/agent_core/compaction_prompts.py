@@ -115,6 +115,13 @@ required covered_range exactly unchanged. Never call tools or answer the user.
 """.strip()
 
 
+# [maint-note:62e45a1ad73a]
+# 维护导航：analyzer_messages；下列为本函数源码中的接口与路径索引。
+# 输入 payload：dict[str, Any]。
+# 返回契约：list[dict[str, Any]]。
+# 返回路径：[{'role': 'system', 'content': ANALYZER_SYSTEM_PROMPT}, {'role': 'user', 'content': json.dumps({'schema': COMPACTION_ANALYSIS_SCHEMA, 'input': payload}, ensure_ascii=False, sort_keys=True)}]。
+# 直接调用：json.dumps。
+# [/maint-note:62e45a1ad73a]
 def analyzer_messages(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return [
         {"role": "system", "content": ANALYZER_SYSTEM_PROMPT},
@@ -129,6 +136,13 @@ def analyzer_messages(payload: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+# [maint-note:2101373d6ad7]
+# 维护导航：summarizer_messages；下列为本函数源码中的接口与路径索引。
+# 输入 payload：dict[str, Any]。
+# 返回契约：list[dict[str, Any]]。
+# 返回路径：[{'role': 'system', 'content': SUMMARIZER_SYSTEM_PROMPT}, {'role': 'user', 'content': json.dumps({'schema': CHECKPOINT_SCHEMA, 'input': payload}, ensure_ascii=False, sort_keys=True)}]。
+# 直接调用：json.dumps。
+# [/maint-note:2101373d6ad7]
 def summarizer_messages(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return [
         {"role": "system", "content": SUMMARIZER_SYSTEM_PROMPT},
@@ -143,6 +157,15 @@ def summarizer_messages(payload: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+# [maint-note:7f9ef6d76b43]
+# 维护导航：repair_messages；下列为本函数源码中的接口与路径索引。
+# 输入 invalid_content：str。
+# 输入 schema：dict[str, Any]。
+# 输入 covered_range：dict[str, int]。
+# 返回契约：list[dict[str, Any]]。
+# 返回路径：[{'role': 'system', 'content': REPAIR_SYSTEM_PROMPT}, {'role': 'user', 'content': json.dumps({'schema': schema, 'covered_range': covered_range, 'invalid_content': invalid_content}, ensure_ascii=False, sort_keys=True)}]。
+# 直接调用：json.dumps。
+# [/maint-note:7f9ef6d76b43]
 def repair_messages(
     *,
     invalid_content: str,

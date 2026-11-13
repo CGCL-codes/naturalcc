@@ -14,6 +14,19 @@ import {
 const TICK_MS = 500
 
 /** React projection for the UI-only SessionTimingController. */
+// [maint-note:dc3cc079ec1c]
+// 维护导航：useSessionTiming；下列为本函数源码中的接口与路径索引。
+// 输入 generation：SessionGeneration；缺省表达式 'initial'。
+// 输入 clock：MonotonicClock（可省略）。
+// 分支条件：!controllerRef.current。
+// 返回路径：{ controller, snapshot, beginRun, handleEvent, finishRun, clearSession, finalizeSession, } as const。
+// 写入目标：controllerRef.current。
+// 直接调用：useRef。
+// 直接调用：useReducer。
+// 直接调用：useCallback。
+// 直接调用：controller.snapshot。
+// 直接调用：useEffect。
+// [/maint-note:dc3cc079ec1c]
 export function useSessionTiming(generation: SessionGeneration = 'initial', clock?: MonotonicClock) {
   const controllerRef = useRef<SessionTimingController | null>(null)
   if (!controllerRef.current) controllerRef.current = new SessionTimingController(clock, generation)
@@ -66,4 +79,8 @@ export function useSessionTiming(generation: SessionGeneration = 'initial', cloc
   } as const
 }
 
+// [maint-note:e44a2ce3302f]
+// 数据契约导航：SessionTimingView；字段含义以消费端校验为准。
+// 类型组合：SessionTimingSnapshot。
+// [/maint-note:e44a2ce3302f]
 export type SessionTimingView = SessionTimingSnapshot

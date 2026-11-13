@@ -34,6 +34,17 @@ import {
  * external abort installs nothing, repairs nothing and stops the run.
  */
 
+// [maint-note:c5d38c832aa6]
+// 数据契约导航：MaintenanceLedger；字段含义以消费端校验为准。
+// 成员 cycles：number。
+// 成员 calls：number。
+// 成员 repairs：number。
+// 成员 maintenanceMs：number。
+// 成员 installedSummaries：number。
+// 成员 lastFailure（可省略）：{ readonly kind: string; readonly message: string }。
+// 成员 maintenanceFirstCause（可省略）：string。
+// 成员 usage（可省略）：CompactionUsage。
+// [/maint-note:c5d38c832aa6]
 export interface MaintenanceLedger {
   readonly cycles: number
   readonly calls: number
@@ -46,6 +57,11 @@ export interface MaintenanceLedger {
   readonly usage?: CompactionUsage
 }
 
+// [maint-note:fe9dea8970c1]
+// 数据契约导航：CompactionPort；字段含义以消费端校验为准。
+// 成员 maintainAtBoundary：Promise<boolean>。
+// 成员 ledger：MaintenanceLedger。
+// [/maint-note:fe9dea8970c1]
 export interface CompactionPort {
   /** Freeze + maybe run maintenance; returns whether a summary was installed. */
   maintainAtBoundary(input: {
@@ -92,6 +108,17 @@ export interface CompactionPort {
   readonly ledger: MaintenanceLedger
 }
 
+// [maint-note:4de0f29edffe]
+// 数据契约导航：CompactionEngineThread；字段含义以消费端校验为准。
+// 成员 freezeCompactionSource：FreezeReceipt。
+// 成员 installCompactionSummary：boolean。
+// 成员 invalidateCompactionSummaryIfStale：void。
+// 成员 activeCompactionSummary：import('./contracts.js').CompactionSummary | undefined。
+// 成员 rememberFailedCompactionFrontier：void。
+// 成员 hasFailedCompactionFrontier：boolean。
+// 成员 prepareCompactionCandidate：{ ok: true; candidate: import('../thread/threadCompaction.js').SealedCompactionCandidate; measurement: import('../thread/threadCompaction.js').CandidateMeasurement } | { ok: false; reason: string }。
+// 成员 finalizeReceiptTrim：FreezeReceipt | undefined。
+// [/maint-note:4de0f29edffe]
 export interface CompactionEngineThread {
   freezeCompactionSource(options?: { readonly pendingClosed?: readonly ModelMessage[] }): FreezeReceipt
   installCompactionSummary(
@@ -125,6 +152,12 @@ export interface CompactionEngineThread {
   finalizeReceiptTrim(receipt: FreezeReceipt, selectedUnitIds: readonly string[]): FreezeReceipt | undefined
 }
 
+// [maint-note:b20d35bce299]
+// 数据契约导航：BoundedProvider；字段含义以消费端校验为准。
+// 成员 compact：Promise<ProviderBodyResult>。
+// 成员 prepare（可省略）：import('./contracts.js').CompactionProvider['prepare']。
+// 成员 budgetCapabilities（可省略）：ModelBudgetCapabilities。
+// [/maint-note:b20d35bce299]
 type BoundedProvider = { compact(request: {
   readonly source: CompactionSource
   readonly requestMessages: readonly ModelMessage[]
@@ -135,6 +168,12 @@ type BoundedProvider = { compact(request: {
   readonly budgetCapabilities?: ModelBudgetCapabilities
 }
 
+// [maint-note:919d5227d9c3]
+// 维护导航：createRunCompactionCoordinator；下列为本函数源码中的接口与路径索引。
+// 输入 options：{ readonly provider: BoundedProvider readonly thread: CompactionEngineThread readonly now?: () => number }。
+// 返回契约：CompactionPort。
+// 返回路径：{ get ledger() { return ledger() }, async maintainAtBoundary(input) { // Safety point: the pending tail must be empty, exactly one complete // closed exchange, or the CURRENT USER message awaiting its first model // request (a legal prepara。
+// [/maint-note:919d5227d9c3]
 export function createRunCompactionCoordinator(options: {
   readonly provider: BoundedProvider
   readonly thread: CompactionEngineThread
@@ -155,6 +194,15 @@ export function createRunCompactionCoordinator(options: {
   // that sticks for the whole run (later known values accumulate but never
   // restore completeness); an empty boundary (no new dispatch) changes
   // nothing.
+  // [maint-note:aefddf7c94e0]
+  // 维护导航：mergeUsage；下列为本函数源码中的接口与路径索引。
+  // 输入 incoming：CompactionUsage | undefined。
+  // 返回契约：void。
+  // 分支条件：incoming === undefined。
+  // 分支条件：usage === undefined。
+  // 返回路径：无返回值。
+  // 写入目标：usage。
+  // [/maint-note:aefddf7c94e0]
   const mergeUsage = (incoming: CompactionUsage | undefined): void => {
     if (incoming === undefined) {
       if (usage === undefined) usage = { usageComplete: false }
@@ -177,6 +225,10 @@ export function createRunCompactionCoordinator(options: {
     }
   }
 
+  // [maint-note:8f5c4fa7565e]
+  // 维护导航：ledger；下列为本函数源码中的接口与路径索引。
+  // 返回契约：MaintenanceLedger。
+  // [/maint-note:8f5c4fa7565e]
   const ledger = (): MaintenanceLedger => ({
     cycles,
     calls,
@@ -189,9 +241,89 @@ export function createRunCompactionCoordinator(options: {
   })
 
   return {
+    // [maint-note:1c34baee95f0]
+    // 维护导航：ledger；下列为本函数源码中的接口与路径索引。
+    // 返回路径：ledger()。
+    // 直接调用：ledger。
+    // [/maint-note:1c34baee95f0]
     get ledger() {
       return ledger()
     },
+    // [maint-note:cb5037a65dd5]
+    // 维护导航：maintainAtBoundary；下列为本函数源码中的接口与路径索引。
+    // 输入 input：类型由调用方与函数体约束。
+    // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+    // 分支条件：pendingClosed === null && !userOnlyPending && input.pendingTail.length > 0。
+    // 分支条件：input.closing。
+    // 分支条件：receipt.source.units.length === 0。
+    // 分支条件：newUnits.length === 0。
+    // 分支条件：!input.contextPressure && rawChars <= compactionSoftTarget(input.maxHistoryChars)。
+    // 分支条件：finalReceipt === undefined。
+    // 分支条件：source.units.length === 0。
+    // 分支条件：previousCoverage.length > 0。
+    // 分支条件：lostOld。
+    // 分支条件：source.units.every((unit) => !receipt.newUnitIds.includes(unit.exchangeId))。
+    // 分支条件：options.thread.hasFailedCompactionFrontier(frontier)。
+    // 分支条件：cycles >= COMPACTION_LIMITS.maxCyclesPerRun。
+    // 分支条件：calls >= COMPACTION_LIMITS.maxMaintenanceCallsPerRun。
+    // 分支条件：input.remainingRequests < 3。
+    // 分支条件：remainingMs <= 0。
+    // 分支条件：preparedDispatch && !preparedDispatch.validate()。
+    // 分支条件：preparedDispatch && !preparedDispatch.publish()。
+    // 分支条件：input.signal?.aborted。
+    // 分支条件：outcomeNext.ok。
+    // 分支条件：!pre.ok。
+    // 分支条件：canRepair。
+    // 分支条件：repairMessages === undefined。
+    // 分支条件：preparedRepair && !preparedRepair.validate()。
+    // 分支条件：preparedRepair && !preparedRepair.publish()。
+    // 分支条件：retry.ok。
+    // 分支条件：reparsed.ok。
+    // 分支条件：deterministicSchemaFailure。
+    // 分支条件：!outcomeNext.ok。
+    // 分支条件：outcomeNext.kind === 'invalid_output'。
+    // 分支条件：outcome.ok。
+    // 返回路径：false。
+    // 返回路径：installIfWorthwhile( finalReceipt, retry, source, pendingClosed, input.pendingTail, input.requestOnlyPeek, input.requestProjectionPeek, input.maxHistoryChars, input.prepareRequestOnly, input.prepareRequestProjection, )。
+    // 返回路径：installIfWorthwhile( finalReceipt, outcome, source, pendingClosed, input.pendingTail, input.requestOnlyPeek, input.requestProjectionPeek, input.maxHistoryChars, input.prepareRequestOnly, input.prepareRequestProjection, )。
+    // 写入目标：cycles。
+    // 写入目标：calls。
+    // 写入目标：maintenanceMs。
+    // 写入目标：repairs。
+    // 写入目标：deterministicSchemaFailure。
+    // 写入目标：outcome。
+    // 直接调用：closedTailOrNull。
+    // 直接调用：options.thread.invalidateCompactionSummaryIfStale。
+    // 直接调用：options.thread.freezeCompactionSource。
+    // 直接调用：receipt.source.units.filter。
+    // 直接调用：JSON.stringify。
+    // 直接调用：compactionSoftTarget。
+    // 直接调用：finalizeTrimAtCore。
+    // 直接调用：options.thread.activeCompactionSummary。
+    // 直接调用：source.units.map。
+    // 直接调用：previousCoverage.some。
+    // 直接调用：latchFailure。
+    // 直接调用：source.units.every。
+    // 直接调用：frontierKey。
+    // 直接调用：options.thread.hasFailedCompactionFrontier。
+    // 直接调用：Math.min。
+    // 直接调用：maintenanceRequestMessages。
+    // 直接调用：options.provider.prepare。
+    // 直接调用：input.prepareDispatch。
+    // 直接调用：preparedDispatch.validate。
+    // 直接调用：preparedDispatch.publish。
+    // 直接调用：now。
+    // 直接调用：boundedCompact。
+    // 直接调用：mergeUsage。
+    // 直接调用：preparedDispatch?.settle。
+    // 直接调用：parseCompactionBody。
+    // 直接调用：repairRequestMessages。
+    // 直接调用：preparedRepair.validate。
+    // 直接调用：preparedRepair.publish。
+    // 直接调用：preparedRepair?.settle。
+    // 直接调用：installIfWorthwhile。
+    // 直接调用：options.thread.rememberFailedCompactionFrontier。
+    // [/maint-note:cb5037a65dd5]
     async maintainAtBoundary(input) {
       // Safety point: the pending tail must be empty, exactly one complete
       // closed exchange, or the CURRENT USER message awaiting its first model
@@ -409,6 +541,33 @@ export function createRunCompactionCoordinator(options: {
   }
 
   /** same-source net gain — no install when the view would not shrink. */
+  // [maint-note:7498ef22efb2]
+  // 维护导航：installIfWorthwhile；下列为本函数源码中的接口与路径索引。
+  // 输入 finalReceipt：FreezeReceipt。
+  // 输入 outcome：ProviderBodyResult & { ok: true }。
+  // 输入 source：CompactionSource。
+  // 输入 pendingClosed：readonly ModelMessage[] | null。
+  // 输入 requestPendingMessages：readonly ModelMessage[]。
+  // 输入 requestOnlyPeek：readonly string[] | undefined。
+  // 输入 requestProjectionPeek：FinalRequestProjection | undefined。
+  // 输入 maxHistoryChars：number。
+  // 输入 prepareRequestOnly：((view: AgentRequestView, maintenanceCalls: number) => readonly string[]) | undefined。
+  // 输入 prepareRequestProjection：((view: AgentRequestView, maintenanceCalls: number) => FinalRequestProjection) | undefined。
+  // 返回契约：boolean。
+  // 分支条件：!prepared.ok。
+  // 分支条件：!overflow。
+  // 分支条件：prepared.measurement.summaryEnvelopeChars >= prepared.measurement.rawChars。
+  // 分支条件：installed。
+  // 返回路径：false。
+  // 返回路径：installed。
+  // 写入目标：installedSummaries。
+  // 直接调用：options.thread.prepareCompactionCandidate。
+  // 直接调用：/envelope|byte cap/i.test。
+  // 直接调用：latchFailure。
+  // 直接调用：options.thread.rememberFailedCompactionFrontier。
+  // 直接调用：frontierKey。
+  // 直接调用：options.thread.installCompactionSummary。
+  // [/maint-note:7498ef22efb2]
   function installIfWorthwhile(
     finalReceipt: FreezeReceipt,
     outcome: ProviderBodyResult & { ok: true },
@@ -474,6 +633,15 @@ export function createRunCompactionCoordinator(options: {
     return installed
   }
 
+  // [maint-note:21fb720895ea]
+  // 维护导航：latchFailure；下列为本函数源码中的接口与路径索引。
+  // 输入 kind：string。
+  // 输入 message：string。
+  // 返回契约：void。
+  // 分支条件：maintenanceFirstCause === undefined。
+  // 写入目标：lastFailure。
+  // 写入目标：maintenanceFirstCause。
+  // [/maint-note:21fb720895ea]
   function latchFailure(kind: string, message: string): void {
     lastFailure = { kind, message }
     if (maintenanceFirstCause === undefined) maintenanceFirstCause = kind
@@ -492,6 +660,17 @@ export function createRunCompactionCoordinator(options: {
  * - late resolutions/rejections after the race are absorbed by detached
  *   handlers so nothing leaks and the first cause stays intact.
  */
+// [maint-note:e80cd9306b8e]
+// 维护导航：boundedCompact；下列为本函数源码中的接口与路径索引。
+// 输入 provider：BoundedProvider。
+// 输入 request：{ readonly source: CompactionSource readonly requestMessages: readonly ModelMessage[] readonly signal?: AbortSignal readonly deadlineMs: number }。
+// 返回契约：Promise<ProviderBodyResult>。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 返回路径：new Promise<ProviderBodyResult>((resolve) => { let settled = false const finish = (value: ProviderBodyResult): void => { if (settled) return settled = true if (timer !== undefined) clearTimeout(timer) request.signal?.removeEventListener('ab。
+// 直接调用：Math.max。
+// 直接调用：request.signal?.addEventListener。
+// 直接调用：new Promise<ProviderBodyResult>((resolve) => { let settled = false const finish = (value: ProviderBodyResult): void => { if (settled) return settled = true if (timer !== undefined) clearTimeout(timer) request.signal?.removeEventListener('ab。
+// [/maint-note:e80cd9306b8e]
 async function boundedCompact(
   provider: BoundedProvider,
   request: {
@@ -507,10 +686,28 @@ async function boundedCompact(
   // provider actually observes cancellation, while the parent run stays
   // untouched (a maintenance timeout degrades, never interrupts the run).
   const child = new AbortController()
+  // [maint-note:3cbc360e1e9a]
+  // 维护导航：forwardAbort；下列为本函数源码中的接口与路径索引。
+  // 直接调用：child.abort。
+  // [/maint-note:3cbc360e1e9a]
   const forwardAbort = () => child.abort()
   request.signal?.addEventListener('abort', forwardAbort, { once: true })
   return new Promise<ProviderBodyResult>((resolve) => {
     let settled = false
+    // [maint-note:77ad24488b7f]
+    // 维护导航：finish；下列为本函数源码中的接口与路径索引。
+    // 输入 value：ProviderBodyResult。
+    // 返回契约：void。
+    // 分支条件：settled。
+    // 分支条件：timer !== undefined。
+    // 分支条件：!child.signal.aborted。
+    // 返回路径：无返回值。
+    // 写入目标：settled。
+    // 直接调用：clearTimeout。
+    // 直接调用：request.signal?.removeEventListener。
+    // 直接调用：child.abort。
+    // 直接调用：resolve。
+    // [/maint-note:77ad24488b7f]
     const finish = (value: ProviderBodyResult): void => {
       if (settled) return
       settled = true
@@ -525,6 +722,10 @@ async function boundedCompact(
       child.abort()
       finish({ ok: false, kind: 'timeout', message: 'The maintenance request exceeded its deadline' })
     }, deadline)
+    // [maint-note:3b3552df9d69]
+    // 维护导航：onAbort；下列为本函数源码中的接口与路径索引。
+    // 直接调用：finish。
+    // [/maint-note:3b3552df9d69]
     const onAbort = () => {
       finish({ ok: false, kind: 'aborted', message: 'The maintenance request was aborted' })
     }
@@ -564,6 +765,17 @@ async function boundedCompact(
  * core refused the selection (not issued / not a closed span) and maintenance
  * degrades without locking the frontier.
  */
+// [maint-note:8dac8ccfc637]
+// 维护导航：finalizeTrimAtCore；下列为本函数源码中的接口与路径索引。
+// 输入 thread：CompactionEngineThread。
+// 输入 receipt：FreezeReceipt。
+// 返回契约：FreezeReceipt | undefined。
+// 分支条件：selectedIds.length === receipt.source.units.length。
+// 返回路径：receipt。
+// 返回路径：thread.finalizeReceiptTrim(receipt, selectedIds)。
+// 直接调用：selectUnitsForInputShell。
+// 直接调用：thread.finalizeReceiptTrim。
+// [/maint-note:8dac8ccfc637]
 function finalizeTrimAtCore(
   thread: CompactionEngineThread,
   receipt: FreezeReceipt,
@@ -579,6 +791,20 @@ function finalizeTrimAtCore(
  * compressible units are dropped from the tail first — old (re-read)
  * coverage sits at the front, so a strict-superset replacement stays possible.
  */
+// [maint-note:4530c5bf0c8d]
+// 维护导航：selectUnitsForInputShell；下列为本函数源码中的接口与路径索引。
+// 输入 receipt：FreezeReceipt。
+// 返回契约：readonly string[]。
+// 分支条件：shellChars(receipt, receipt.source.units.length) <= COMPACTION_LIMITS.maxInputChars。
+// 遍历边界：keep > 0 && shellChars(receipt, keep) > COMPACTION_LIMITS.maxInputChars。
+// 返回路径：receipt.source.units.map((unit) => unit.exchangeId)。
+// 返回路径：receipt.source.units.slice(0, keep).map((unit) => unit.exchangeId)。
+// 写入目标：keep。
+// 直接调用：shellChars。
+// 直接调用：receipt.source.units.map。
+// 直接调用：receipt.source.units.slice(0, keep).map。
+// 直接调用：receipt.source.units.slice。
+// [/maint-note:4530c5bf0c8d]
 function selectUnitsForInputShell(receipt: FreezeReceipt): readonly string[] {
   if (shellChars(receipt, receipt.source.units.length) <= COMPACTION_LIMITS.maxInputChars) {
     return receipt.source.units.map((unit) => unit.exchangeId)
@@ -589,6 +815,22 @@ function selectUnitsForInputShell(receipt: FreezeReceipt): readonly string[] {
 }
 
 /** Real shell measurement of the first `keep` units of the issued receipt. */
+// [maint-note:4aea19d9990d]
+// 维护导航：shellChars；下列为本函数源码中的接口与路径索引。
+// 输入 receipt：FreezeReceipt。
+// 输入 keep：number。
+// 返回契约：number。
+// 分支条件：index < keep。
+// 遍历边界：let index = 0; index < receipt.source.units.length; index += 1。
+// 返回路径：JSON.stringify(maintenanceRequestMessages({ ...receipt.source, units, messages })).length。
+// 写入目标：index。
+// 写入目标：cursor。
+// 直接调用：receipt.source.units.slice。
+// 直接调用：messages.push。
+// 直接调用：receipt.source.messages.slice。
+// 直接调用：JSON.stringify。
+// 直接调用：maintenanceRequestMessages。
+// [/maint-note:4aea19d9990d]
 function shellChars(receipt: FreezeReceipt, keep: number): number {
   const units = receipt.source.units.slice(0, keep)
   const messages: ModelMessage[] = []
@@ -601,6 +843,21 @@ function shellChars(receipt: FreezeReceipt, keep: number): number {
   return JSON.stringify(maintenanceRequestMessages({ ...receipt.source, units, messages })).length
 }
 
+// [maint-note:aaef344f4f6f]
+// 维护导航：closedTailOrNull；下列为本函数源码中的接口与路径索引。
+// 输入 tail：readonly ModelMessage[]。
+// 返回契约：readonly ModelMessage[] | null。
+// 分支条件：tail.length === 0。
+// 分支条件：!first。
+// 分支条件：first.role === 'user'。
+// 分支条件：rest.length === 0。
+// 分支条件：first.role === 'assistant'。
+// 返回路径：[]。
+// 返回路径：null。
+// 返回路径：rest[0]?.role === 'assistant' ? tail : null。
+// 返回路径：tail。
+// 直接调用：tail.slice。
+// [/maint-note:aaef344f4f6f]
 function closedTailOrNull(tail: readonly ModelMessage[]): readonly ModelMessage[] | null {
   if (tail.length === 0) return []
   const first = tail[0]

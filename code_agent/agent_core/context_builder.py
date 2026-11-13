@@ -21,6 +21,29 @@ _RUNTIME_CONTEXT_GUIDANCE = (
 )
 
 
+# [maint-note:e265aec5eaaa]
+# 数据与行为导航：ContextPlan。
+# 字段 messages：list[dict[str, Any]]。
+# 字段 tools：list[dict[str, Any]]。
+# 字段 breakdown：TokenBreakdown。
+# 字段 system_tokens：int。
+# 字段 working_state_tokens：int。
+# 字段 checkpoint_tokens：int。
+# 字段 recent_history_tokens：int。
+# 字段 memory_tokens：int。
+# 字段 pinned_memory_tokens：int。
+# 字段 retrieved_memory_tokens：int。
+# 字段 tool_schema_tokens：int。
+# 字段 estimated_input_tokens：int。
+# 字段 reserved_output_tokens：int。
+# 字段 safety_margin_tokens：int。
+# 字段 context_window_tokens：int。
+# 字段 requires_compaction：bool。
+# 字段 compactable_from：int | None。
+# 字段 compactable_to：int | None。
+# 字段 recent_tail_from：int。
+# 字段 retained_message_indexes：list[int]。
+# [/maint-note:e265aec5eaaa]
 @dataclass(frozen=True)
 class ContextPlan:
     messages: list[dict[str, Any]]
@@ -45,6 +68,13 @@ class ContextPlan:
     retained_message_indexes: list[int]
 
 
+# [maint-note:b27f6191b24a]
+# 数据与行为导航：_ExchangeGroup。
+# 字段 start：int。
+# 字段 end：int。
+# 字段 messages：list[dict[str, Any]]。
+# 字段 closed：bool；初始表达式 True。
+# [/maint-note:b27f6191b24a]
 @dataclass(frozen=True)
 class _ExchangeGroup:
     start: int
@@ -53,6 +83,21 @@ class _ExchangeGroup:
     closed: bool = True
 
 
+# [maint-note:6f6a0ccf25e8]
+# 维护导航：_format_memory_items；下列为本函数源码中的接口与路径索引。
+# 输入 memories：list[dict[str, Any]]。
+# 返回契约：str。
+# 遍历边界：memory ← memories。
+# 返回路径：'\n'.join(rows)。
+# 直接调用：memory.get。
+# 直接调用：' '.join。
+# 直接调用：escape。
+# 直接调用：str。
+# 直接调用：attributes.items。
+# 直接调用：rows.append。
+# 直接调用：'\n'.join。
+# 集合派生：(name, value) 来自 attributes.items()。
+# [/maint-note:6f6a0ccf25e8]
 def _format_memory_items(memories: list[dict[str, Any]]) -> str:
     rows: list[str] = []
     for memory in memories:
@@ -75,6 +120,18 @@ def _format_memory_items(memories: list[dict[str, Any]]) -> str:
     return "\n".join(rows)
 
 
+# [maint-note:5e23393c3a5e]
+# 维护导航：_format_runtime_authorization；下列为本函数源码中的接口与路径索引。
+# 输入 value：dict[str, Any]。
+# 返回契约：str。
+# 返回路径：f'<workspace>{workspace}</workspace><target_files>{target_files}</target_files><authorized_paths description="user-authorized external paths">{authorized_paths}</authorized_paths>'。
+# 直接调用：escape。
+# 直接调用：str。
+# 直接调用：value.get。
+# 直接调用：''.join。
+# 集合派生：path 来自 value.get('target_files', [])。
+# 集合派生：path 来自 value.get('authorized_paths', [])。
+# [/maint-note:5e23393c3a5e]
 def _format_runtime_authorization(value: dict[str, Any]) -> str:
     workspace = escape(str(value.get("workspace", "")))
     target_files = "".join(
@@ -94,6 +151,16 @@ def _format_runtime_authorization(value: dict[str, Any]) -> str:
 
 
 class ContextPlanner:
+    # [maint-note:44e651e0aa26]
+    # 维护导航：__init__；下列为本函数源码中的接口与路径索引。
+    # 输入 counter：DeepSeekTokenCounter。
+    # 输入 serializer：DeepSeekRequestSerializer。
+    # 输入 profile：DeepSeekModelProfile。
+    # 返回契约：None。
+    # 写入目标：self.counter。
+    # 写入目标：self.serializer。
+    # 写入目标：self.profile。
+    # [/maint-note:44e651e0aa26]
     def __init__(
         self,
         counter: DeepSeekTokenCounter,
@@ -104,6 +171,24 @@ class ContextPlanner:
         self.serializer = serializer
         self.profile = profile
 
+    # [maint-note:725db6776be8]
+    # 维护导航：plan；下列为本函数源码中的接口与路径索引。
+    # 输入 system_rules：str。
+    # 输入 goal：str。
+    # 输入 messages：list[dict[str, Any]]。
+    # 输入 active_state：dict[str, Any]。
+    # 输入 memories：list[dict[str, Any]]。
+    # 输入 tools：list[dict[str, Any]]。
+    # 输入 checkpoint：dict[str, Any] | None；缺省表达式 None。
+    # 输入 reserved_output_tokens：int | None；缺省表达式 None。
+    # 输入 pinned_memories：list[dict[str, Any]] | None；缺省表达式 None。
+    # 输入 runtime_authorization：dict[str, Any] | None；缺省表达式 None。
+    # 输入 profile：DeepSeekModelProfile | None；缺省表达式 None。
+    # 返回契约：ContextPlan。
+    # 返回路径：self._build_plan(system_rules=system_rules, goal=goal, messages=messages, active_state=active_state, memories=memories, pinned_memories=list(pinned_memories or []), tools=tools, checkpoint=checkpoint, reserved_output_tokens=reserved_output_。
+    # 直接调用：self._build_plan。
+    # 直接调用：list。
+    # [/maint-note:725db6776be8]
     def plan(
         self,
         *,
@@ -133,6 +218,62 @@ class ContextPlanner:
             profile=profile or self.profile,
         )
 
+    # [maint-note:f38cfca970b0]
+    # 维护导航：_build_plan；下列为本函数源码中的接口与路径索引。
+    # 输入 system_rules：str。
+    # 输入 goal：str。
+    # 输入 messages：list[dict[str, Any]]。
+    # 输入 active_state：dict[str, Any]。
+    # 输入 memories：list[dict[str, Any]]。
+    # 输入 pinned_memories：list[dict[str, Any]]。
+    # 输入 tools：list[dict[str, Any]]。
+    # 输入 checkpoint：dict[str, Any] | None。
+    # 输入 reserved_output_tokens：int | None。
+    # 输入 runtime_authorization：dict[str, Any]。
+    # 输入 profile：DeepSeekModelProfile。
+    # 返回契约：ContextPlan。
+    # 分支条件：protected.total_with_reserve <= protected.context_window_tokens。
+    # 分支条件：retained_memories。
+    # 分支条件：requires_compaction。
+    # 分支条件：full_breakdown.total_with_reserve <= selection_limit。
+    # 分支条件：candidate_breakdown.total_with_reserve > selection_limit。
+    # 分支条件：open_groups。
+    # 分支条件：selected_start > earliest_open。
+    # 分支条件：retained_start > 0。
+    # 分支条件：any((not group.closed for group in omitted_groups))。
+    # 遍历边界：retained_pinned_memories or retained_memories。
+    # 遍历边界：group ← reversed(groups)。
+    # 返回路径：ContextPlan(messages=planned_messages, tools=self.serializer.serialize_tools(tools), breakdown=breakdown, system_tokens=self.counter.count_text(category_text['system']), working_state_tokens=self.counter.count_text(category_text['working_st。
+    # 显式抛出：ContextHardLimitExceeded(breakdown)。
+    # 直接调用：list。
+    # 直接调用：self._system_message。
+    # 直接调用：self.counter.count_request。
+    # 直接调用：retained_memories.pop。
+    # 直接调用：retained_pinned_memories.pop。
+    # 直接调用：self.counter.assert_fits。
+    # 直接调用：int。
+    # 直接调用：self._exchange_groups。
+    # 直接调用：reversed。
+    # 直接调用：min。
+    # 直接调用：len。
+    # 直接调用：range。
+    # 直接调用：any。
+    # 直接调用：ContextHardLimitExceeded。
+    # 直接调用：json.dumps。
+    # 直接调用：ContextPlan。
+    # 直接调用：self.serializer.serialize_tools。
+    # 直接调用：self.counter.count_text。
+    # 集合派生：candidate_group 来自 candidate_groups。
+    # 集合派生：message 来自 candidate_group.messages。
+    # 集合派生：group 来自 groups；过滤 not group.closed。
+    # 集合派生：group 来自 open_groups。
+    # 表达式分流：selected_groups；真值与假值分支分别计算，不同时执行。
+    # 集合派生：group 来自 groups；过滤 group.start >= earliest_open。
+    # 集合派生：group 来自 selected_groups。
+    # 集合派生：message 来自 group.messages。
+    # 集合派生：group 来自 groups；过滤 group.end < retained_start。
+    # 集合派生：group 来自 omitted_groups。
+    # [/maint-note:f38cfca970b0]
     def _build_plan(
         self,
         *,
@@ -304,6 +445,26 @@ class ContextPlanner:
             retained_message_indexes=retained_indexes,
         )
 
+    # [maint-note:794231b38ae6]
+    # 维护导航：_system_message；下列为本函数源码中的接口与路径索引。
+    # 输入 system_rules：str。
+    # 输入 goal：str。
+    # 输入 active_state：dict[str, Any]。
+    # 输入 pinned_memories：list[dict[str, Any]]。
+    # 输入 memories：list[dict[str, Any]]。
+    # 输入 checkpoint：dict[str, Any] | None。
+    # 输入 runtime_authorization：dict[str, Any]。
+    # 返回契约：tuple[dict[str, Any], dict[str, Any], dict[str, str]]。
+    # 分支条件：checkpoint is not None。
+    # 分支条件：checkpoint_text。
+    # 返回路径：({'role': 'system', 'content': '\n\n'.join(parts)}, {'role': 'user', 'content': f'[RUNTIME_CONTEXT]\n{retrieved_memory_block}\n\n{active_state_text}\n[/RUNTIME_CONTEXT]'}, {'system': f'{system_rules}\n\n{_RUNTIME_CONTEXT_GUIDANCE}', 'workin。
+    # 直接调用：self._format_memories。
+    # 直接调用：json.dumps。
+    # 直接调用：_format_runtime_authorization。
+    # 直接调用：parts.append。
+    # 直接调用：parts.extend。
+    # 直接调用：'\n\n'.join。
+    # [/maint-note:794231b38ae6]
     def _system_message(
         self,
         system_rules: str,
@@ -374,6 +535,27 @@ class ContextPlanner:
             },
         )
 
+    # [maint-note:887061a13151]
+    # 维护导航：_exchange_groups；下列为本函数源码中的接口与路径索引。
+    # 输入 messages：list[dict[str, Any]]。
+    # 返回契约：list[_ExchangeGroup]。
+    # 分支条件：message.get('role') == 'assistant' and message.get('tool_calls')。
+    # 分支条件：candidate.get('role') != 'tool' or tool_call_id not in call_ids。
+    # 遍历边界：index < len(messages)。
+    # 返回路径：groups。
+    # 直接调用：len。
+    # 直接调用：message.get。
+    # 直接调用：str。
+    # 直接调用：call.get。
+    # 直接调用：set。
+    # 直接调用：candidate.get。
+    # 直接调用：group_messages.append。
+    # 直接调用：seen_ids.add。
+    # 直接调用：groups.append。
+    # 直接调用：_ExchangeGroup。
+    # 直接调用：bool。
+    # 集合派生：call 来自 message.get('tool_calls', [])；过滤 call.get('id') is not None。
+    # [/maint-note:887061a13151]
     def _exchange_groups(
         self, messages: list[dict[str, Any]]
     ) -> list[_ExchangeGroup]:
@@ -421,16 +603,65 @@ class ContextPlanner:
                 index += 1
         return groups
 
+    # [maint-note:4f1f8e61b12f]
+    # 维护导航：_format_memories；下列为本函数源码中的接口与路径索引。
+    # 输入 memories：list[dict[str, Any]]。
+    # 返回契约：str。
+    # 返回路径：_format_memory_items(memories)。
+    # 直接调用：_format_memory_items。
+    # [/maint-note:4f1f8e61b12f]
     def _format_memories(self, memories: list[dict[str, Any]]) -> str:
         return _format_memory_items(memories)
 
 
 class ContextBuilder:
+    # [maint-note:20c801010cba]
+    # 维护导航：__init__；下列为本函数源码中的接口与路径索引。
+    # 输入 max_chars：int；缺省表达式 40000。
+    # 返回契约：None。
+    # 分支条件：max_chars < 200。
+    # 显式抛出：ValueError('max_chars must be at least 200')。
+    # 写入目标：self.max_chars。
+    # 直接调用：ValueError。
+    # [/maint-note:20c801010cba]
     def __init__(self, max_chars: int = 40_000) -> None:
         if max_chars < 200:
             raise ValueError("max_chars must be at least 200")
         self.max_chars = max_chars
 
+    # [maint-note:ba49235f8b88]
+    # 维护导航：build；下列为本函数源码中的接口与路径索引。
+    # 输入 system_rules：str。
+    # 输入 goal：str。
+    # 输入 messages：list[dict[str, Any]]。
+    # 输入 active_state：dict[str, Any]。
+    # 输入 memories：list[dict[str, Any]]。
+    # 输入 pinned_memories：list[dict[str, Any]] | None；缺省表达式 None。
+    # 输入 runtime_authorization：dict[str, Any] | None；缺省表达式 None。
+    # 返回契约：list[dict[str, Any]]。
+    # 分支条件：selected and used + size > budget。
+    # 分支条件：used >= budget。
+    # 分支条件：omitted_messages。
+    # 遍历边界：group ← reversed(groups)。
+    # 返回路径：[system, *flattened, runtime_context]。
+    # 直接调用：self._format_memories。
+    # 直接调用：list。
+    # 直接调用：_format_runtime_authorization。
+    # 直接调用：json.dumps。
+    # 直接调用：max。
+    # 直接调用：len。
+    # 直接调用：self._exchange_groups。
+    # 直接调用：reversed。
+    # 直接调用：selected.append。
+    # 直接调用：selected.reverse。
+    # 直接调用：id。
+    # 直接调用：flattened.insert。
+    # 直接调用：self._summarize_messages。
+    # 集合派生：group 来自 selected。
+    # 集合派生：message 来自 group。
+    # 集合派生：message 来自 flattened。
+    # 集合派生：message 来自 messages；过滤 id(message) not in selected_message_ids。
+    # [/maint-note:ba49235f8b88]
     def build(
         self,
         *,
@@ -504,6 +735,23 @@ class ContextBuilder:
             )
         return [system, *flattened, runtime_context]
 
+    # [maint-note:24a8c7682ac7]
+    # 维护导航：_exchange_groups；下列为本函数源码中的接口与路径索引。
+    # 输入 messages：list[dict[str, Any]]。
+    # 返回契约：list[list[dict[str, Any]]]。
+    # 分支条件：message.get('role') == 'assistant' and message.get('tool_calls')。
+    # 分支条件：candidate.get('role') != 'tool' or candidate.get('tool_call_id') not in call_ids。
+    # 分支条件：len(group) == 1。
+    # 遍历边界：index < len(messages)。
+    # 返回路径：groups。
+    # 直接调用：len。
+    # 直接调用：message.get。
+    # 直接调用：call.get。
+    # 直接调用：candidate.get。
+    # 直接调用：group.append。
+    # 直接调用：groups.append。
+    # 集合派生：call 来自 message.get('tool_calls', [])。
+    # [/maint-note:24a8c7682ac7]
     def _exchange_groups(self, messages: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
         groups: list[list[dict[str, Any]]] = []
         index = 0
@@ -527,9 +775,39 @@ class ContextBuilder:
                 index += 1
         return groups
 
+    # [maint-note:13237d07ba12]
+    # 维护导航：_format_memories；下列为本函数源码中的接口与路径索引。
+    # 输入 memories：list[dict[str, Any]]。
+    # 返回契约：str。
+    # 返回路径：_format_memory_items(memories)。
+    # 直接调用：_format_memory_items。
+    # [/maint-note:13237d07ba12]
     def _format_memories(self, memories: list[dict[str, Any]]) -> str:
         return _format_memory_items(memories)
 
+    # [maint-note:49fa8883c080]
+    # 维护导航：_summarize_messages；下列为本函数源码中的接口与路径索引。
+    # 输入 messages：list[dict[str, Any]]。
+    # 输入 max_chars：int；缺省表达式 1200。
+    # 返回契约：str。
+    # 分支条件：role == 'assistant' and message.get('tool_calls')。
+    # 分支条件：role == 'tool'。
+    # 分支条件：sum((len(item) + 1 for item in lines)) + len(line) > max_chars。
+    # 遍历边界：message ← messages。
+    # 返回路径：'\n'.join(lines) or '- no textual history'。
+    # 直接调用：str。
+    # 直接调用：message.get。
+    # 直接调用：' '.join。
+    # 直接调用：str(message.get('content', '')).split。
+    # 直接调用：', '.join。
+    # 直接调用：call.get。
+    # 直接调用：sum。
+    # 直接调用：len。
+    # 直接调用：lines.append。
+    # 直接调用：'\n'.join。
+    # 集合派生：call 来自 message.get('tool_calls', [])。
+    # 集合派生：item 来自 lines。
+    # [/maint-note:49fa8883c080]
     def _summarize_messages(self, messages: list[dict[str, Any]], max_chars: int = 1_200) -> str:
         lines: list[str] = []
         for message in messages:

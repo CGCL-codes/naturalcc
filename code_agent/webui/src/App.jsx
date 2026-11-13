@@ -89,6 +89,26 @@ const defaultCodeGraphCapabilities = {
   }
 };
 
+// [maint-note:7b154180a19a]
+// 维护导航：codeGraphStatusLabel；下列为本函数源码中的接口与路径索引。
+// 输入 enabled：类型由调用方与函数体约束。
+// 输入 status：类型由调用方与函数体约束。
+// 分支条件：!enabled。
+// 分支条件：!status。
+// 分支条件：!status.installed。
+// 分支条件：!status.available。
+// 分支条件：!status.initialized。
+// 分支条件：status.stale。
+// 分支条件：status.ready。
+// 返回路径："Off"。
+// 返回路径："Checking"。
+// 返回路径："Not installed"。
+// 返回路径："Unavailable"。
+// 返回路径："Not initialized"。
+// 返回路径："Needs sync"。
+// 返回路径："Ready"。
+// 返回路径："Error"。
+// [/maint-note:7b154180a19a]
 function codeGraphStatusLabel(enabled, status) {
   if (!enabled) return "Off";
   if (!status) return "Checking";
@@ -100,10 +120,31 @@ function codeGraphStatusLabel(enabled, status) {
   return "Error";
 }
 
+// [maint-note:b36e6bdcac7c]
+// 维护导航：classNames；下列为本函数源码中的接口与路径索引。
+// 输入 items：类型由调用方与函数体约束。
+// 返回路径：items.filter(Boolean).join(" ")。
+// 直接调用：items.filter(Boolean).join。
+// 直接调用：items.filter。
+// [/maint-note:b36e6bdcac7c]
 function classNames(...items) {
   return items.filter(Boolean).join(" ");
 }
 
+// [maint-note:0b9ae1ab13ec]
+// 维护导航：requestJson；下列为本函数源码中的接口与路径索引。
+// 输入 path：类型由调用方与函数体约束。
+// 输入 options：类型由调用方与函数体约束；缺省表达式 {}。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：!response.ok。
+// 返回路径：response.json()。
+// 显式抛出：error。
+// 写入目标：detail。
+// 写入目标：error.status。
+// 直接调用：fetch。
+// 直接调用：response.json。
+// 直接调用：JSON.stringify。
+// [/maint-note:0b9ae1ab13ec]
 async function requestJson(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     headers: {
@@ -127,6 +168,14 @@ async function requestJson(path, options = {}) {
   return response.json();
 }
 
+// [maint-note:0222e4ad112f]
+// 维护导航：metricLabel；下列为本函数源码中的接口与路径索引。
+// 输入 value：类型由调用方与函数体约束。
+// 分支条件：value === undefined || value === null || value === ""。
+// 返回路径："not set"。
+// 返回路径：String(value)。
+// 直接调用：String。
+// [/maint-note:0222e4ad112f]
 function metricLabel(value) {
   if (value === undefined || value === null || value === "") {
     return "not set";
@@ -134,11 +183,23 @@ function metricLabel(value) {
   return String(value);
 }
 
+// [maint-note:bbff09ef447f]
+// 维护导航：formatTime；下列为本函数源码中的接口与路径索引。
+// 输入 date：类型由调用方与函数体约束。
+// 分支条件：!date。
+// 返回路径：""。
+// 返回路径：date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })。
+// 直接调用：date.toLocaleTimeString。
+// [/maint-note:bbff09ef447f]
 function formatTime(date) {
   if (!date) return "";
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+// [maint-note:133ee478d499]
+// 维护导航：nextFrame；下列为本函数源码中的接口与路径索引。
+// 返回路径：new Promise((resolve) => requestAnimationFrame(resolve))。
+// [/maint-note:133ee478d499]
 function nextFrame() {
   return new Promise((resolve) => requestAnimationFrame(resolve));
 }
@@ -208,6 +269,12 @@ const FIELD_TYPE_COMPONENTS = {
   ),
 };
 
+// [maint-note:e00eb59ee578]
+// 维护导航：DynamicForm；下列为本函数源码中的接口与路径索引。
+// 输入 { schema, values, onChange }：类型由调用方与函数体约束。
+// 返回路径：( <div className="dynamic-form"> {schema.map((field) => { const Component = FIELD_TYPE_COMPONENTS[field.type]; if (!Component) return null; return ( <div key={field.name} className="form-field"> <label className="field-label" htmlFor={`fiel。
+// 直接调用：schema.map。
+// [/maint-note:e00eb59ee578]
 function DynamicForm({ schema, values, onChange }) {
   return (
     <div className="dynamic-form">
@@ -235,6 +302,50 @@ function DynamicForm({ schema, values, onChange }) {
   );
 }
 
+// [maint-note:e1f6a2675af4]
+// 维护导航：App；下列为本函数源码中的接口与路径索引。
+// 返回路径：( <div className="app-root" data-theme={theme} style={toLayoutStyle(layoutPrefs)}> {/* Mobile overlay */} {sidebarOpen && ( <div className="drawer-overlay" style={{ zIndex: 25 }} onClick={() => setSidebarOpen(false)} /> )} {/* Left Sidebar 。
+// 直接调用：useState。
+// 直接调用：useRef。
+// 直接调用：canControlAgentRun。
+// 直接调用：useMemo。
+// 直接调用：budgetProgress。
+// 直接调用：promptCacheHitTokens.toLocaleString。
+// 直接调用：promptCacheMeasuredTokens.toLocaleString。
+// 直接调用：((promptCacheHitTokens / promptCacheMeasuredTokens) * 100).toFixed。
+// 直接调用：useEffect。
+// 直接调用：toLayoutStyle。
+// 直接调用：classNames。
+// 直接调用：threadGroups.map。
+// 直接调用：models.map。
+// 直接调用：(() => { const selectedModel = runtimeMode === "agent" ? runtimeModel : model; return !models.includes(selectedModel) && selectedModel ? <option value={selectedModel}>{selectedModel}</option> : null; })。
+// 直接调用：messages.map。
+// 直接调用：contextItems.map。
+// 直接调用：contextSuggestions.slice(0, 8).map。
+// 直接调用：contextSuggestions.slice。
+// 直接调用：instruction.trim。
+// 直接调用：canRunWithoutInstruction。
+// 直接调用：agentState.runId.slice。
+// 直接调用：Number(agentRunState?.cost_usd || 0).toFixed。
+// 直接调用：Number。
+// 直接调用：agentState.changedFiles.map。
+// 直接调用：agentState.verification.results.map((result) => result.passed ? "Verification passed" : "Verification failed").join。
+// 直接调用：agentState.verification.results.map。
+// 直接调用：agentState.events.filter((event) => !event.type.endsWith(".delta")).slice(-30).map。
+// 直接调用：agentState.events.filter((event) => !event.type.endsWith(".delta")).slice。
+// 直接调用：agentState.events.filter。
+// 直接调用：memoryExtraction.status.replaceAll。
+// 直接调用：memoryExtraction.reason.replaceAll。
+// 直接调用：agentMemories.filter((memory) => memory.status === "active").slice(0, 12).map。
+// 直接调用：agentMemories.filter((memory) => memory.status === "active").slice。
+// 直接调用：agentMemories.filter。
+// 直接调用：agentMemories.some。
+// 直接调用：codeGraphStatusLabel。
+// 直接调用：modelInputValue。
+// 直接调用：features.map。
+// 直接调用：threadNeedsCancellation。
+// 直接调用：Boolean。
+// [/maint-note:e1f6a2675af4]
 function App() {
   const [models, setModels] = useState([]);
   const [completionTypes, setCompletionTypes] = useState(defaultCompletionTypes);
@@ -365,6 +476,13 @@ function App() {
     [apiKey, completionType, currentFeature, featureConfig, instruction, model, prefix, projectDir, symbol, targets]
   );
 
+  // [maint-note:14d7a3c2c7f6]
+  // 维护导航：runtimeModelConfig；下列为本函数源码中的接口与路径索引。
+  // 输入 modelOverride：类型由调用方与函数体约束；缺省表达式 runtimeModel。
+  // 输入 providerOverride：类型由调用方与函数体约束；缺省表达式 runtimeProvider。
+  // 返回路径：runtimeConfigForEdit( activeThread?.runtime_model_config || defaultRuntimeConfig, providerOverride, modelOverride )。
+  // 直接调用：runtimeConfigForEdit。
+  // [/maint-note:14d7a3c2c7f6]
   function runtimeModelConfig(modelOverride = runtimeModel, providerOverride = runtimeProvider) {
     return runtimeConfigForEdit(
       activeThread?.runtime_model_config || defaultRuntimeConfig,
@@ -373,6 +491,16 @@ function App() {
     );
   }
 
+  // [maint-note:a882878b751e]
+  // 维护导航：changeRuntimeProvider；下列为本函数源码中的接口与路径索引。
+  // 输入 nextProvider：类型由调用方与函数体约束。
+  // 分支条件：activeThread?.id。
+  // 直接调用：setRuntimeProvider。
+  // 直接调用：setRuntimeModel。
+  // 直接调用：updateActiveThread({ model: nextModel, runtime_model_config: runtimeModelConfig(nextModel, nextProvider) }).catch。
+  // 直接调用：updateActiveThread。
+  // 直接调用：runtimeModelConfig。
+  // [/maint-note:a882878b751e]
   function changeRuntimeProvider(nextProvider) {
     const currentDefault = runtimeProviderDefaults[runtimeProvider]?.model;
     const nextDefault = runtimeProviderDefaults[nextProvider]?.model;
@@ -506,6 +634,19 @@ function App() {
     let active = true;
     let timer;
     let pendingChecks = 0;
+    // [maint-note:20f4c8ba5d94]
+    // 维护导航：readExtraction；下列为本函数源码中的接口与路径索引。
+    // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+    // 分支条件：!active。
+    // 分支条件：["queued", "running"].includes(outcome.status) || (outcome.status === "not_scheduled" && outcome.run_status === "completed" && pendingChecks++ < 2)。
+    // 分支条件：active。
+    // 返回路径：无返回值。
+    // 写入目标：timer。
+    // 直接调用：requestJson。
+    // 直接调用：setMemoryExtraction。
+    // 直接调用：["queued", "running"].includes。
+    // 直接调用：setTimeout。
+    // [/maint-note:20f4c8ba5d94]
     async function readExtraction() {
       try {
         const outcome = await requestJson(`/api/agent/runs/${runId}/memory-extraction`);
@@ -552,6 +693,14 @@ function App() {
     if (runtimeMode !== "agent" || !runId || !["queued", "running"].includes(agentState.status)) return;
     const controller = new AbortController();
     let after = agentState.lastSequence || 0;
+    // [maint-note:4c31d166d439]
+    // 维护导航：follow；下列为本函数源码中的接口与路径索引。
+    // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+    // 分支条件：controller.signal.aborted。
+    // 遍历边界：!controller.signal.aborted。
+    // 返回路径：无返回值。
+    // 直接调用：followAgentEvents。
+    // [/maint-note:4c31d166d439]
     const follow = async () => {
       while (!controller.signal.aborted) {
         try {
@@ -591,6 +740,22 @@ function App() {
     return () => window.clearTimeout(timer);
   }, [runtimeMode, activeThread?.id, instruction]);
 
+  // [maint-note:92135e27defc]
+  // 维护导航：refreshWorkspace；下列为本函数源码中的接口与路径索引。
+  // 输入 dir：类型由调用方与函数体约束；缺省表达式 projectDir。
+  // 输入 nextTargets：类型由调用方与函数体约束；缺省表达式 targets。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：data.normalized_root。
+  // 返回路径：data。
+  // 直接调用：setLastError。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：setWorkspace。
+  // 直接调用：setTargets。
+  // 直接调用：setProjectDir。
+  // 直接调用：setLastUpdated。
+  // 直接调用：new Date().toLocaleTimeString。
+  // [/maint-note:92135e27defc]
   async function refreshWorkspace(dir = projectDir, nextTargets = targets) {
     setLastError("");
     const data = await requestJson("/api/workspace/scan", {
@@ -606,6 +771,16 @@ function App() {
     return data;
   }
 
+  // [maint-note:84e83ed318e5]
+  // 维护导航：applyWorkspace；下列为本函数源码中的接口与路径索引。
+  // 输入 dir：类型由调用方与函数体约束；缺省表达式 projectDir。
+  // 输入 nextTargets：类型由调用方与函数体约束；缺省表达式 targets。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：activeThread?.id。
+  // 返回路径：data。
+  // 直接调用：refreshWorkspace。
+  // 直接调用：updateActiveThread。
+  // [/maint-note:84e83ed318e5]
   async function applyWorkspace(dir = projectDir, nextTargets = targets) {
     const data = await refreshWorkspace(dir, nextTargets);
     const normalizedRoot = data.normalized_root || dir;
@@ -615,6 +790,19 @@ function App() {
     return data;
   }
 
+  // [maint-note:6470afa2cb91]
+  // 维护导航：chooseWorkspaceDirectory；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!data.selected || !data.path。
+  // 返回路径：无返回值。
+  // 直接调用：setWorkspacePickerBusy。
+  // 直接调用：setLastError。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：applyWorkspace。
+  // 直接调用：loadBrowse(data.path).catch。
+  // 直接调用：loadBrowse。
+  // [/maint-note:6470afa2cb91]
   async function chooseWorkspaceDirectory() {
     setWorkspacePickerBusy(true);
     setLastError("");
@@ -635,6 +823,17 @@ function App() {
     }
   }
 
+  // [maint-note:255f37feb5a7]
+  // 维护导航：loadBrowse；下列为本函数源码中的接口与路径索引。
+  // 输入 path：类型由调用方与函数体约束；缺省表达式 projectDir。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!path。
+  // 返回路径：无返回值。
+  // 直接调用：setLastError。
+  // 直接调用：requestJson。
+  // 直接调用：encodeURIComponent。
+  // 直接调用：setBrowseState。
+  // [/maint-note:255f37feb5a7]
   async function loadBrowse(path = projectDir) {
     if (!path) {
       return;
@@ -644,6 +843,11 @@ function App() {
     setBrowseState(data);
   }
 
+  // [maint-note:dec7af9dfe01]
+  // 维护导航：toggleTarget；下列为本函数源码中的接口与路径索引。
+  // 输入 file：类型由调用方与函数体约束。
+  // 直接调用：setTargets。
+  // [/maint-note:dec7af9dfe01]
   function toggleTarget(file) {
     setTargets((current) => {
       if (current.includes(file)) {
@@ -653,6 +857,15 @@ function App() {
     });
   }
 
+  // [maint-note:6146c142707f]
+  // 维护导航：addCustomTarget；下列为本函数源码中的接口与路径索引。
+  // 分支条件：!next。
+  // 返回路径：无返回值。
+  // 直接调用：customTarget.trim().replaceAll。
+  // 直接调用：customTarget.trim。
+  // 直接调用：setTargets。
+  // 直接调用：setCustomTarget。
+  // [/maint-note:6146c142707f]
   function addCustomTarget() {
     const next = customTarget.trim().replaceAll("\\", "/");
     if (!next) {
@@ -662,14 +875,37 @@ function App() {
     setCustomTarget("");
   }
 
+  // [maint-note:0082750fedd2]
+  // 维护导航：makePrimary；下列为本函数源码中的接口与路径索引。
+  // 输入 file：类型由调用方与函数体约束。
+  // 直接调用：setTargets。
+  // [/maint-note:0082750fedd2]
   function makePrimary(file) {
     setTargets((current) => [file, ...current.filter((item) => item !== file)]);
   }
 
+  // [maint-note:6298691f150c]
+  // 维护导航：removeTarget；下列为本函数源码中的接口与路径索引。
+  // 输入 file：类型由调用方与函数体约束。
+  // 直接调用：setTargets。
+  // [/maint-note:6298691f150c]
   function removeTarget(file) {
     setTargets((current) => current.filter((item) => item !== file));
   }
 
+  // [maint-note:65907c61ed8e]
+  // 维护导航：addMessage；下列为本函数源码中的接口与路径索引。
+  // 输入 type：类型由调用方与函数体约束。
+  // 输入 content：类型由调用方与函数体约束。
+  // 输入 status：类型由调用方与函数体约束；缺省表达式 "complete"。
+  // 输入 extra：类型由调用方与函数体约束；缺省表达式 {}。
+  // 返回路径：id。
+  // 直接调用：Date.now。
+  // 直接调用：Math.random().toString(36).slice。
+  // 直接调用：Math.random().toString。
+  // 直接调用：Math.random。
+  // 直接调用：setMessages。
+  // [/maint-note:65907c61ed8e]
   function addMessage(type, content, status = "complete", extra = {}) {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const msg = { id, type, content, timestamp: new Date(), status, ...extra };
@@ -677,10 +913,37 @@ function App() {
     return id;
   }
 
+  // [maint-note:94918a402d0e]
+  // 维护导航：updateMessage；下列为本函数源码中的接口与路径索引。
+  // 输入 id：类型由调用方与函数体约束。
+  // 输入 updates：类型由调用方与函数体约束。
+  // 直接调用：setMessages。
+  // [/maint-note:94918a402d0e]
   function updateMessage(id, updates) {
     setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, ...updates } : m)));
   }
 
+  // [maint-note:06ab15510d68]
+  // 维护导航：handlePreview；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!instruction.trim() && !canRunWithoutInstruction()。
+  // 返回路径：无返回值。
+  // 直接调用：instruction.trim。
+  // 直接调用：canRunWithoutInstruction。
+  // 直接调用：setLastError。
+  // 直接调用：setBusy。
+  // 直接调用：setMode。
+  // 直接调用：setTerminalLog。
+  // 直接调用：addMessage。
+  // 直接调用：defaultTaskLabel。
+  // 直接调用：setActiveMessageId。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：setPreviewCommand。
+  // 直接调用：setLastUpdated。
+  // 直接调用：new Date().toLocaleTimeString。
+  // 直接调用：updateMessage。
+  // [/maint-note:06ab15510d68]
   async function handlePreview() {
     if (!instruction.trim() && !canRunWithoutInstruction()) {
       setLastError("Please enter an instruction first.");
@@ -723,6 +986,17 @@ function App() {
     }
   }
 
+  // [maint-note:8603a82b1913]
+  // 维护导航：buildFormData；下列为本函数源码中的接口与路径索引。
+  // 分支条件：value instanceof FileList。
+  // 遍历边界：const [key, value] ← Object.entries(featureConfig)。
+  // 遍历边界：let i = 0; i < value.length; i++。
+  // 返回路径：formData。
+  // 写入目标：cleanConfig[key]。
+  // 直接调用：formData.append。
+  // 直接调用：JSON.stringify。
+  // 直接调用：Object.entries。
+  // [/maint-note:8603a82b1913]
   function buildFormData() {
     const formData = new FormData();
     formData.append("project_dir", projectDir);
@@ -746,6 +1020,49 @@ function App() {
     return formData;
   }
 
+  // [maint-note:335bd23a2cf9]
+  // 维护导航：handlePipelineRun；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!instruction.trim() && !canRunWithoutInstruction()。
+  // 分支条件：!userMessageAddedRef.current。
+  // 分支条件：!response.ok || !response.body。
+  // 分支条件：done。
+  // 分支条件：!line.trim()。
+  // 分支条件：buffer.trim()。
+  // 遍历边界：true。
+  // 遍历边界：const line ← lines。
+  // 返回路径：无返回值。
+  // 显式抛出：new Error(response.statusText || "Execution stream failed")。
+  // 写入目标：userMessageAddedRef.current。
+  // 写入目标：buffer。
+  // 直接调用：instruction.trim。
+  // 直接调用：canRunWithoutInstruction。
+  // 直接调用：setLastError。
+  // 直接调用：setBusy。
+  // 直接调用：setMode。
+  // 直接调用：setTerminalLog。
+  // 直接调用：addMessage。
+  // 直接调用：defaultTaskLabel。
+  // 直接调用：setActiveMessageId。
+  // 直接调用：Object.values(featureConfig).some。
+  // 直接调用：Object.values。
+  // 直接调用：buildFormData。
+  // 直接调用：JSON.stringify。
+  // 直接调用：fetch。
+  // 直接调用：response.body.getReader。
+  // 直接调用：reader.read。
+  // 直接调用：decoder.decode。
+  // 直接调用：buffer.split。
+  // 直接调用：lines.pop。
+  // 直接调用：line.trim。
+  // 直接调用：JSON.parse。
+  // 直接调用：applyStreamEvent。
+  // 直接调用：nextFrame。
+  // 直接调用：buffer.trim。
+  // 直接调用：setLastUpdated。
+  // 直接调用：new Date().toLocaleTimeString。
+  // 直接调用：updateMessage。
+  // [/maint-note:335bd23a2cf9]
   async function handlePipelineRun() {
     if (!instruction.trim() && !canRunWithoutInstruction()) {
       setLastError("Please enter an instruction first.");
@@ -789,6 +1106,19 @@ function App() {
       let buffer = "";
       let latestLog = "Preparing execution...\n";
       let latestCommand = "";
+      // [maint-note:b9f7369bfe27]
+      // 维护导航：applyStreamEvent；下列为本函数源码中的接口与路径索引。
+      // 输入 event：类型由调用方与函数体约束。
+      // 分支条件：event.command。
+      // 分支条件：event.log !== undefined。
+      // 分支条件：event.status。
+      // 写入目标：latestCommand。
+      // 写入目标：latestLog。
+      // 直接调用：setRunCommand。
+      // 直接调用：setTerminalLog。
+      // 直接调用：setMode。
+      // 直接调用：updateMessage。
+      // [/maint-note:b9f7369bfe27]
       const applyStreamEvent = (event) => {
         if (event.command) {
           latestCommand = event.command;
@@ -844,12 +1174,56 @@ function App() {
     }
   }
 
+  // [maint-note:0e3a30b73860]
+  // 维护导航：refreshThreadList；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 返回路径：payload.threads || []。
+  // 直接调用：requestJson。
+  // 直接调用：setAgentThreads。
+  // [/maint-note:0e3a30b73860]
   async function refreshThreadList() {
     const payload = await requestJson("/api/agent/threads");
     setAgentThreads(payload.threads || []);
     return payload.threads || [];
   }
 
+  // [maint-note:bad84b66a197]
+  // 维护导航：loadAgentThread；下列为本函数源码中的接口与路径索引。
+  // 输入 threadId：类型由调用方与函数体约束。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：detail.last_run?.run_id。
+  // 分支条件：graphEnabled。
+  // 返回路径：detail。
+  // 直接调用：setConversationLoading。
+  // 直接调用：setLastError。
+  // 直接调用：setAgentState。
+  // 直接调用：setAgentRunState。
+  // 直接调用：requestJson。
+  // 直接调用：setRuntimeMode。
+  // 直接调用：setActiveThread。
+  // 直接调用：rememberActiveThread。
+  // 直接调用：setProjectDir。
+  // 直接调用：setRuntimeModel。
+  // 直接调用：setRuntimeProvider。
+  // 直接调用：setBudgetDraft。
+  // 直接调用：normalizeBudgetDraft。
+  // 直接调用：setContextItems。
+  // 直接调用：Boolean。
+  // 直接调用：setCodeGraphEnabled。
+  // 直接调用：setCodeGraphStatus。
+  // 直接调用：setTargets。
+  // 直接调用：(thread.context_items || []).map((item) => item.path).filter。
+  // 直接调用：(thread.context_items || []).map。
+  // 直接调用：setMessages。
+  // 直接调用：hydrateConversationMessages。
+  // 直接调用：setSelectedMemoryEvidence。
+  // 直接调用：encodeURIComponent。
+  // 直接调用：setMemoryProposals。
+  // 直接调用：(proposalPayload.proposals || []).map。
+  // 直接调用：refreshAgentState。
+  // 直接调用：setMode。
+  // 直接调用：setSidebarOpen。
+  // [/maint-note:bad84b66a197]
   async function loadAgentThread(threadId) {
     setConversationLoading(true);
     setLastError("");
@@ -894,6 +1268,32 @@ function App() {
     }
   }
 
+  // [maint-note:0086048cf1ca]
+  // 维护导航：createNewThread；下列为本函数源码中的接口与路径索引。
+  // 输入 title：类型由调用方与函数体约束；缺省表达式 "New task"。
+  // 输入 config：类型由调用方与函数体约束；缺省表达式 defaultRuntimeConfig。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!bootstrapReady || !config。
+  // 分支条件：!projectDir.trim()。
+  // 返回路径：payload.thread。
+  // 显式抛出：new Error("Wait for settings to finish loading before creating a conversation.")。
+  // 显式抛出：new Error("Set a workspace before creating a conversation.")。
+  // 直接调用：projectDir.trim。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：setActiveThread。
+  // 直接调用：rememberActiveThread。
+  // 直接调用：setRuntimeProvider。
+  // 直接调用：setRuntimeModel。
+  // 直接调用：setMessages。
+  // 直接调用：setSelectedMemoryEvidence。
+  // 直接调用：setContextItems。
+  // 直接调用：setTargets。
+  // 直接调用：setAgentState。
+  // 直接调用：setAgentRunState。
+  // 直接调用：setMode。
+  // 直接调用：refreshThreadList。
+  // [/maint-note:0086048cf1ca]
   async function createNewThread(title = "New task", config = defaultRuntimeConfig) {
     if (!bootstrapReady || !config) {
       throw new Error("Wait for settings to finish loading before creating a conversation.");
@@ -934,6 +1334,17 @@ function App() {
     return payload.thread;
   }
 
+  // [maint-note:6dcb80cf52b6]
+  // 维护导航：ensureAgentThread；下列为本函数源码中的接口与路径索引。
+  // 输入 goal：类型由调用方与函数体约束。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：activeThread?.id。
+  // 返回路径：activeThread。
+  // 返回路径：createNewThread(goal.slice(0, 80) || "New task", runtimeModelConfig())。
+  // 直接调用：createNewThread。
+  // 直接调用：goal.slice。
+  // 直接调用：runtimeModelConfig。
+  // [/maint-note:6dcb80cf52b6]
   async function ensureAgentThread(goal) {
     if (activeThread?.id) {
       return activeThread;
@@ -941,6 +1352,18 @@ function App() {
     return createNewThread(goal.slice(0, 80) || "New task", runtimeModelConfig());
   }
 
+  // [maint-note:a747a360c3d9]
+  // 维护导航：updateActiveThread；下列为本函数源码中的接口与路径索引。
+  // 输入 changes：类型由调用方与函数体约束。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!activeThread?.id。
+  // 返回路径：null。
+  // 返回路径：payload.thread。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：setActiveThread。
+  // 直接调用：refreshThreadList。
+  // [/maint-note:a747a360c3d9]
   async function updateActiveThread(changes) {
     if (!activeThread?.id) return null;
     const payload = await requestJson(`/api/agent/threads/${activeThread.id}`, {
@@ -955,6 +1378,30 @@ function App() {
     return payload.thread;
   }
 
+  // [maint-note:107432de0719]
+  // 维护导航：resetConversationView；下列为本函数源码中的接口与路径索引。
+  // 直接调用：setActiveThread。
+  // 直接调用：rememberActiveThread。
+  // 直接调用：setRuntimeProvider。
+  // 直接调用：setRuntimeModel。
+  // 直接调用：setMessages。
+  // 直接调用：setContextItems。
+  // 直接调用：setContextSuggestions。
+  // 直接调用：setTargets。
+  // 直接调用：setInstruction。
+  // 直接调用：setAgentState。
+  // 直接调用：setAgentRunState。
+  // 直接调用：setMode。
+  // 直接调用：setBusy。
+  // 直接调用：setActiveMessageId。
+  // 直接调用：setSelectedMemoryEvidence。
+  // 直接调用：setMemoryProposals。
+  // 直接调用：setRunDetailsOpen。
+  // 直接调用：setBudgetOpen。
+  // 直接调用：setCodeGraphEnabled。
+  // 直接调用：setCodeGraphStatus。
+  // 直接调用：setConversationLoading。
+  // [/maint-note:107432de0719]
   function resetConversationView() {
     setActiveThread(null);
     rememberActiveThread(null);
@@ -979,12 +1426,39 @@ function App() {
     setConversationLoading(false);
   }
 
+  // [maint-note:0aada8127cc2]
+  // 维护导航：requestThreadDeletion；下列为本函数源码中的接口与路径索引。
+  // 输入 event：类型由调用方与函数体约束。
+  // 输入 thread：类型由调用方与函数体约束。
+  // 直接调用：event.stopPropagation。
+  // 直接调用：setThreadDeleteError。
+  // 直接调用：setThreadPendingDelete。
+  // [/maint-note:0aada8127cc2]
   function requestThreadDeletion(event, thread) {
     event.stopPropagation();
     setThreadDeleteError("");
     setThreadPendingDelete(thread);
   }
 
+  // [maint-note:3546128decee]
+  // 维护导航：deletePendingThread；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!thread || deletingThreadId || cancellingThreadId。
+  // 分支条件：thread.id !== activeThread?.id。
+  // 分支条件：nextThreadId。
+  // 返回路径：无返回值。
+  // 直接调用：setDeletingThreadId。
+  // 直接调用：setThreadDeleteError。
+  // 直接调用：setLastError。
+  // 直接调用：requestJson。
+  // 直接调用：Promise.all。
+  // 直接调用：refreshThreadList。
+  // 直接调用：setAgentRuns。
+  // 直接调用：selectThreadAfterDeletion。
+  // 直接调用：setThreadPendingDelete。
+  // 直接调用：loadAgentThread。
+  // 直接调用：resetConversationView。
+  // [/maint-note:3546128decee]
   async function deletePendingThread() {
     const thread = threadPendingDelete;
     if (!thread || deletingThreadId || cancellingThreadId) return;
@@ -1020,6 +1494,23 @@ function App() {
     }
   }
 
+  // [maint-note:14a236e6208e]
+  // 维护导航：cancelPendingThreadRun；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!activeRunId || deletingThreadId || cancellingThreadId。
+  // 分支条件：activeThread?.id === thread.id。
+  // 返回路径：无返回值。
+  // 直接调用：setCancellingThreadId。
+  // 直接调用：setThreadDeleteError。
+  // 直接调用：setLastError。
+  // 直接调用：requestJson。
+  // 直接调用：Promise.all。
+  // 直接调用：setThreadPendingDelete。
+  // 直接调用：setAgentThreads。
+  // 直接调用：setAgentRuns。
+  // 直接调用：setActiveThread。
+  // 直接调用：refreshAgentState。
+  // [/maint-note:14a236e6208e]
   async function cancelPendingThreadRun() {
     const thread = threadPendingDelete;
     const activeRunId = thread?.active_run_id || thread?.last_run_id;
@@ -1051,6 +1542,15 @@ function App() {
     }
   }
 
+  // [maint-note:1ca434f1f272]
+  // 维护导航：startThreadRename；下列为本函数源码中的接口与路径索引。
+  // 输入 thread：类型由调用方与函数体约束。
+  // 分支条件：!thread?.id || renamingBusy。
+  // 返回路径：无返回值。
+  // 直接调用：setRenamingThreadId。
+  // 直接调用：setRenamingDraft。
+  // 直接调用：setRenameError。
+  // [/maint-note:1ca434f1f272]
   function startThreadRename(thread) {
     if (!thread?.id || renamingBusy) return;
     setRenamingThreadId(thread.id);
@@ -1058,6 +1558,14 @@ function App() {
     setRenameError("");
   }
 
+  // [maint-note:d36c4f8b3d9c]
+  // 维护导航：cancelThreadRename；下列为本函数源码中的接口与路径索引。
+  // 分支条件：renamingBusy。
+  // 返回路径：无返回值。
+  // 直接调用：setRenamingThreadId。
+  // 直接调用：setRenamingDraft。
+  // 直接调用：setRenameError。
+  // [/maint-note:d36c4f8b3d9c]
   function cancelThreadRename() {
     if (renamingBusy) return;
     setRenamingThreadId("");
@@ -1065,6 +1573,25 @@ function App() {
     setRenameError("");
   }
 
+  // [maint-note:cd466aef4767]
+  // 维护导航：commitThreadRename；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!thread || !nextTitle || nextTitle === (thread.title || "")。
+  // 分支条件：activeThread?.id === thread.id。
+  // 返回路径：无返回值。
+  // 直接调用：agentThreads.find。
+  // 直接调用：renamingDraft.trim。
+  // 直接调用：cancelThreadRename。
+  // 直接调用：setRenamingBusy。
+  // 直接调用：setRenameError。
+  // 直接调用：setLastError。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：setActiveThread。
+  // 直接调用：refreshThreadList。
+  // 直接调用：setRenamingThreadId。
+  // 直接调用：setRenamingDraft。
+  // [/maint-note:cd466aef4767]
   async function commitThreadRename() {
     const threadId = renamingThreadId;
     const thread = agentThreads.find((item) => item.id === threadId)
@@ -1101,6 +1628,12 @@ function App() {
     }
   }
 
+  // [maint-note:569a0b567aca]
+  // 维护导航：addContextItem；下列为本函数源码中的接口与路径索引。
+  // 输入 item：类型由调用方与函数体约束。
+  // 直接调用：setContextItems。
+  // 直接调用：setContextSuggestions。
+  // [/maint-note:569a0b567aca]
   function addContextItem(item) {
     setContextItems((current) => {
       const key = item.absolute_path || item.path;
@@ -1114,6 +1647,11 @@ function App() {
     setContextSuggestions([]);
   }
 
+  // [maint-note:9e8ab4037162]
+  // 维护导航：removeContextItem；下列为本函数源码中的接口与路径索引。
+  // 输入 item：类型由调用方与函数体约束。
+  // 直接调用：setContextItems。
+  // [/maint-note:9e8ab4037162]
   function removeContextItem(item) {
     setContextItems((current) => {
       const key = item.absolute_path || item.path;
@@ -1123,12 +1661,36 @@ function App() {
     });
   }
 
+  // [maint-note:4796df9398f0]
+  // 维护导航：selectContextSuggestion；下列为本函数源码中的接口与路径索引。
+  // 输入 item：类型由调用方与函数体约束。
+  // 直接调用：addContextItem。
+  // 直接调用：setInstruction。
+  // 直接调用：requestAnimationFrame。
+  // [/maint-note:4796df9398f0]
   function selectContextSuggestion(item) {
     addContextItem(item);
     setInstruction((current) => current.replace(/(?:^|\s)@[^\s@]*$/, "").trimEnd());
     requestAnimationFrame(() => chatInputRef.current?.focus());
   }
 
+  // [maint-note:037fd5d91681]
+  // 维护导航：resolveAbsoluteContextFromInput；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!activeThread?.id。
+  // 分支条件：candidate?.kind !== "absolute"。
+  // 分支条件：payload.matches?.[0]。
+  // 分支条件：payload.thread。
+  // 返回路径：无返回值。
+  // 直接调用：setLastError。
+  // 直接调用：detectContextCandidate。
+  // 直接调用：setInstruction。
+  // 直接调用：requestAnimationFrame。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：addContextItem。
+  // 直接调用：setActiveThread。
+  // [/maint-note:037fd5d91681]
   async function resolveAbsoluteContextFromInput() {
     if (!activeThread?.id) {
       setLastError("Create or select a conversation before adding context.");
@@ -1155,6 +1717,26 @@ function App() {
     }
   }
 
+  // [maint-note:2916b2df1bc9]
+  // 维护导航：saveBudget；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：Object.keys(errors).length。
+  // 分支条件：agentState.runId && agentRunControllable。
+  // 分支条件：activeThread?.id。
+  // 返回路径：无返回值。
+  // 直接调用：normalizeBudgetDraft。
+  // 直接调用：validateBudgetChange。
+  // 直接调用：Object.keys。
+  // 直接调用：setLastError。
+  // 直接调用：Object.values。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：refreshAgentState。
+  // 直接调用：setActiveThread。
+  // 直接调用：updateActiveThread。
+  // 直接调用：setBudgetDraft。
+  // 直接调用：setBudgetOpen。
+  // [/maint-note:2916b2df1bc9]
   async function saveBudget() {
     const normalized = normalizeBudgetDraft(budgetDraft, activeThread?.budget || budgetDraft);
     const errors = validateBudgetChange(normalized, agentRunState || {});
@@ -1182,6 +1764,24 @@ function App() {
     }
   }
 
+  // [maint-note:dcdf7b0a37b8]
+  // 维护导航：refreshAgentState；下列为本函数源码中的接口与路径索引。
+  // 输入 runId：类型由调用方与函数体约束。
+  // 输入 memoryProjectId：类型由调用方与函数体约束；缺省表达式 projectDir。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 返回路径：next。
+  // 直接调用：Promise.all。
+  // 直接调用：requestJson。
+  // 直接调用：encodeURIComponent。
+  // 直接调用：hydrateAgentState。
+  // 直接调用：setAgentState。
+  // 直接调用：setAgentRunState。
+  // 直接调用：setAgentRuns。
+  // 直接调用：setAgentMemories。
+  // 直接调用：setMemoryProposals。
+  // 直接调用：(proposalsPayload.proposals || []).map。
+  // 直接调用：setMode。
+  // [/maint-note:dcdf7b0a37b8]
   async function refreshAgentState(runId, memoryProjectId = projectDir) {
     const [eventPayload, runState, runsPayload, memoriesPayload, proposalsPayload] = await Promise.all([
       requestJson(`/api/agent/runs/${runId}/events`),
@@ -1208,6 +1808,33 @@ function App() {
     return next;
   }
 
+  // [maint-note:8606e347e375]
+  // 维护导航：handleAgentRun；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!submittedInstruction。
+  // 分支条件：shouldAppendUserMessage(userMessageAddedRef.current)。
+  // 分支条件：next.status === "completed"。
+  // 返回路径：无返回值。
+  // 写入目标：userMessageAddedRef.current。
+  // 直接调用：instruction.trim。
+  // 直接调用：setLastError。
+  // 直接调用：setBusy。
+  // 直接调用：setMode。
+  // 直接调用：shouldAppendUserMessage。
+  // 直接调用：addMessage。
+  // 直接调用：ensureAgentThread。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：buildThreadMessagePayload。
+  // 直接调用：normalizeBudgetDraft。
+  // 直接调用：updateMessage。
+  // 直接调用：setAgentState。
+  // 直接调用：setAgentRunState。
+  // 直接调用：refreshAgentState。
+  // 直接调用：buildAgentRunMessage。
+  // 直接调用：loadAgentThread。
+  // 直接调用：refreshThreadList。
+  // [/maint-note:8606e347e375]
   async function handleAgentRun() {
     const submittedInstruction = instruction.trim();
     if (!submittedInstruction) {
@@ -1268,6 +1895,18 @@ function App() {
     }
   }
 
+  // [maint-note:6e9c2bace58b]
+  // 维护导航：refreshCodeGraphStatus；下列为本函数源码中的接口与路径索引。
+  // 输入 thread：类型由调用方与函数体约束；缺省表达式 activeThread。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!thread?.id。
+  // 返回路径：null。
+  // 返回路径：payload.status || null。
+  // 直接调用：setCodeGraphBusy。
+  // 直接调用：requestJson。
+  // 直接调用：setCodeGraphStatus。
+  // 直接调用：setLastError。
+  // [/maint-note:6e9c2bace58b]
   async function refreshCodeGraphStatus(thread = activeThread) {
     if (!thread?.id) return null;
     setCodeGraphBusy(true);
@@ -1283,6 +1922,20 @@ function App() {
     }
   }
 
+  // [maint-note:97b167ee0ab5]
+  // 维护导航：handleCodeGraphToggle；下列为本函数源码中的接口与路径索引。
+  // 输入 enabled：类型由调用方与函数体约束。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!activeThread?.id。
+  // 分支条件：enabled。
+  // 返回路径：无返回值。
+  // 直接调用：setCodeGraphEnabled。
+  // 直接调用：setCodeGraphStatus。
+  // 直接调用：setCodeGraphBusy。
+  // 直接调用：updateActiveThread。
+  // 直接调用：requestJson。
+  // 直接调用：setLastError。
+  // [/maint-note:97b167ee0ab5]
   async function handleCodeGraphToggle(enabled) {
     setCodeGraphEnabled(enabled);
     setCodeGraphStatus(null);
@@ -1309,6 +1962,21 @@ function App() {
     }
   }
 
+  // [maint-note:0f6bdae32f08]
+  // 维护导航：runCodeGraphAction；下列为本函数源码中的接口与路径索引。
+  // 输入 action：类型由调用方与函数体约束。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!activeThread?.id。
+  // 分支条件：payload.status。
+  // 分支条件：payload.url。
+  // 返回路径：无返回值。
+  // 直接调用：setCodeGraphBusy。
+  // 直接调用：setLastError。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：setCodeGraphStatus。
+  // 直接调用：window.open。
+  // [/maint-note:0f6bdae32f08]
   async function runCodeGraphAction(action) {
     if (!activeThread?.id) return;
     setCodeGraphBusy(true);
@@ -1332,6 +2000,28 @@ function App() {
     }
   }
 
+  // [maint-note:b8da650c76ca]
+  // 维护导航：handleAgentApproval；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：busy || conversationLoading || approvalBusyRef.current || !agentState.runId || !agentState.pendingApproval?.risk。
+  // 分支条件：pendingCard。
+  // 分支条件：next.status === "completed"。
+  // 返回路径：无返回值。
+  // 写入目标：approvalBusyRef.current。
+  // 直接调用：setBusy。
+  // 直接调用：setLastError。
+  // 直接调用：approveAgentAction。
+  // 直接调用：setAgentState。
+  // 直接调用：requestJson。
+  // 直接调用：refreshAgentState。
+  // 直接调用：buildAgentRunMessage。
+  // 直接调用：next.changedFiles.join。
+  // 直接调用：messages.find。
+  // 直接调用：updateMessage。
+  // 直接调用：addMessage。
+  // 直接调用：loadAgentThread。
+  // 直接调用：handleApprovalError。
+  // [/maint-note:b8da650c76ca]
   async function handleAgentApproval() {
     if (busy || conversationLoading || approvalBusyRef.current || !agentState.runId || !agentState.pendingApproval?.risk) return;
     approvalBusyRef.current = true;
@@ -1363,6 +2053,20 @@ function App() {
     }
   }
 
+  // [maint-note:33d2abe3d96d]
+  // 维护导航：handleApprovalError；下列为本函数源码中的接口与路径索引。
+  // 输入 error：类型由调用方与函数体约束。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：error.status === 404 || error.status === 409。
+  // 分支条件：error.status === 409。
+  // 直接调用：setAgentState。
+  // 直接调用：setAgentRunState。
+  // 直接调用：setMode。
+  // 直接调用：refreshAgentState。
+  // 直接调用：refreshThreadList。
+  // 直接调用：setLastError。
+  // 直接调用：approvalErrorMessage。
+  // [/maint-note:33d2abe3d96d]
   async function handleApprovalError(error) {
     if (error.status === 404 || error.status === 409) {
       setAgentState(initialAgentState);
@@ -1378,6 +2082,25 @@ function App() {
     setLastError(approvalErrorMessage(error));
   }
 
+  // [maint-note:c29af3861157]
+  // 维护导航：handleAgentRejection；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：busy || conversationLoading || approvalBusyRef.current || !agentState.runId || !agentState.pendingApproval。
+  // 分支条件：pendingCard。
+  // 分支条件：next.status === "completed"。
+  // 返回路径：无返回值。
+  // 写入目标：approvalBusyRef.current。
+  // 直接调用：setBusy。
+  // 直接调用：requestJson。
+  // 直接调用：setAgentState。
+  // 直接调用：refreshAgentState。
+  // 直接调用：buildAgentRunMessage。
+  // 直接调用：messages.find。
+  // 直接调用：updateMessage。
+  // 直接调用：addMessage。
+  // 直接调用：loadAgentThread。
+  // 直接调用：handleApprovalError。
+  // [/maint-note:c29af3861157]
   async function handleAgentRejection() {
     if (busy || conversationLoading || approvalBusyRef.current || !agentState.runId || !agentState.pendingApproval) return;
     approvalBusyRef.current = true;
@@ -1406,6 +2129,17 @@ function App() {
     }
   }
 
+  // [maint-note:dccff7cef2c2]
+  // 维护导航：handleAgentControl；下列为本函数源码中的接口与路径索引。
+  // 输入 action：类型由调用方与函数体约束。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!agentState.runId。
+  // 返回路径：无返回值。
+  // 直接调用：setBusy。
+  // 直接调用：requestJson。
+  // 直接调用：refreshAgentState。
+  // 直接调用：setLastError。
+  // [/maint-note:dccff7cef2c2]
   async function handleAgentControl(action) {
     if (!agentState.runId) return;
     setBusy(true);
@@ -1419,11 +2153,29 @@ function App() {
     }
   }
 
+  // [maint-note:d181af9cd1cb]
+  // 维护导航：loadAgentRun；下列为本函数源码中的接口与路径索引。
+  // 输入 runId：类型由调用方与函数体约束。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 直接调用：setRuntimeMode。
+  // 直接调用：refreshAgentState。
+  // [/maint-note:d181af9cd1cb]
   async function loadAgentRun(runId) {
     setRuntimeMode("agent");
     await refreshAgentState(runId);
   }
 
+  // [maint-note:1373932c3b45]
+  // 维护导航：handleMemoryAction；下列为本函数源码中的接口与路径索引。
+  // 输入 memoryId：类型由调用方与函数体约束。
+  // 输入 action：类型由调用方与函数体约束。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 直接调用：setBusy。
+  // 直接调用：requestJson。
+  // 直接调用：encodeURIComponent。
+  // 直接调用：setAgentMemories。
+  // 直接调用：setLastError。
+  // [/maint-note:1373932c3b45]
   async function handleMemoryAction(memoryId, action) {
     setBusy(true);
     try {
@@ -1440,6 +2192,16 @@ function App() {
     }
   }
 
+  // [maint-note:a37ae32782d2]
+  // 维护导航：refreshMemoryGovernance；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 直接调用：encodeURIComponent。
+  // 直接调用：Promise.all。
+  // 直接调用：requestJson。
+  // 直接调用：setMemoryProposals。
+  // 直接调用：(proposalPayload.proposals || []).map。
+  // 直接调用：setAgentMemories。
+  // [/maint-note:a37ae32782d2]
   async function refreshMemoryGovernance() {
     const suffix = `project_id=${encodeURIComponent(projectDir)}${activeThread?.id ? `&thread_id=${encodeURIComponent(activeThread.id)}` : ""}`;
     const [proposalPayload, memoryPayload] = await Promise.all([
@@ -1450,10 +2212,32 @@ function App() {
     setAgentMemories(memoryPayload.memories || []);
   }
 
+  // [maint-note:ff6dc37da242]
+  // 维护导航：handleMemoryEvidenceToggle；下列为本函数源码中的接口与路径索引。
+  // 输入 messageId：类型由调用方与函数体约束。
+  // 直接调用：setSelectedMemoryEvidence。
+  // [/maint-note:ff6dc37da242]
   function handleMemoryEvidenceToggle(messageId) {
     setSelectedMemoryEvidence((current) => toggleEvidenceSelection(current, messageId));
   }
 
+  // [maint-note:ccacdabdda5f]
+  // 维护导航：handleCreateMemoryProposals；下列为本函数源码中的接口与路径索引。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!activeThread?.id || !selectedMemoryEvidence.length。
+  // 分支条件：!payload.count。
+  // 返回路径：无返回值。
+  // 直接调用：setBusy。
+  // 直接调用：setLastError。
+  // 直接调用：setMemoryError。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：buildMemoryProposalSelection。
+  // 直接调用：setSelectedMemoryEvidence。
+  // 直接调用：refreshMemoryGovernance。
+  // 直接调用：setRunDetailsOpen。
+  // 直接调用：setLastUpdated。
+  // [/maint-note:ccacdabdda5f]
   async function handleCreateMemoryProposals() {
     if (!activeThread?.id || !selectedMemoryEvidence.length) return;
     setBusy(true);
@@ -1481,6 +2265,21 @@ function App() {
     }
   }
 
+  // [maint-note:dd3e950c92de]
+  // 维护导航：handleProposalAction；下列为本函数源码中的接口与路径索引。
+  // 输入 proposal：类型由调用方与函数体约束。
+  // 输入 action：类型由调用方与函数体约束。
+  // 输入 changes：类型由调用方与函数体约束；缺省表达式 null。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：action === "edit"。
+  // 直接调用：setBusy。
+  // 直接调用：setLastError。
+  // 直接调用：setMemoryError。
+  // 直接调用：requestJson。
+  // 直接调用：JSON.stringify。
+  // 直接调用：refreshMemoryGovernance。
+  // 直接调用：refreshMemoryGovernance().catch。
+  // [/maint-note:dd3e950c92de]
   async function handleProposalAction(proposal, action, changes = null) {
     setBusy(true);
     setLastError("");
@@ -1507,10 +2306,29 @@ function App() {
     }
   }
 
+  // [maint-note:135955ca8fb5]
+  // 维护导航：handleRun；下列为本函数源码中的接口与路径索引。
+  // 返回路径：runtimeMode === "agent" ? handleAgentRun() : handlePipelineRun()。
+  // 直接调用：handleAgentRun。
+  // 直接调用：handlePipelineRun。
+  // [/maint-note:135955ca8fb5]
   function handleRun() {
     return runtimeMode === "agent" ? handleAgentRun() : handlePipelineRun();
   }
 
+  // [maint-note:b7301c3d9de1]
+  // 维护导航：canRunWithoutInstruction；下列为本函数源码中的接口与路径索引。
+  // 分支条件：currentFeature === "knowledge_graph"。
+  // 分支条件：currentFeature === "code_repair"。
+  // 分支条件：currentFeature === "design_to_code"。
+  // 返回路径：true。
+  // 返回路径：Boolean( (featureConfig.failure_log || "").trim() || (featureConfig.extra_context || "").trim() )。
+  // 返回路径：Boolean( featureConfig.screenshot instanceof FileList && featureConfig.screenshot.length > 0 )。
+  // 返回路径：currentFeature === "code_summary" || (currentFeature === "vulnerability_detection" && !featureConfig.auto_fix)。
+  // 直接调用：Boolean。
+  // 直接调用：(featureConfig.failure_log || "").trim。
+  // 直接调用：(featureConfig.extra_context || "").trim。
+  // [/maint-note:b7301c3d9de1]
   function canRunWithoutInstruction() {
     if (currentFeature === "knowledge_graph") {
       return true;
@@ -1530,6 +2348,20 @@ function App() {
       || (currentFeature === "vulnerability_detection" && !featureConfig.auto_fix);
   }
 
+  // [maint-note:adb8aaaa835c]
+  // 维护导航：defaultTaskLabel；下列为本函数源码中的接口与路径索引。
+  // 分支条件：currentFeature === "knowledge_graph"。
+  // 分支条件：currentFeature === "code_summary"。
+  // 分支条件：currentFeature === "vulnerability_detection"。
+  // 分支条件：currentFeature === "code_repair"。
+  // 分支条件：currentFeature === "design_to_code"。
+  // 返回路径："Knowledge graph generation"。
+  // 返回路径："Code summarization"。
+  // 返回路径："Vulnerability scan"。
+  // 返回路径："Code repair"。
+  // 返回路径："Design to code"。
+  // 返回路径："Code task"。
+  // [/maint-note:adb8aaaa835c]
   function defaultTaskLabel() {
     if (currentFeature === "knowledge_graph") {
       return "Knowledge graph generation";
@@ -1549,15 +2381,36 @@ function App() {
     return "Code task";
   }
 
+  // [maint-note:bb0093517016]
+  // 维护导航：handleFeatureChange；下列为本函数源码中的接口与路径索引。
+  // 输入 featureName：类型由调用方与函数体约束。
+  // 直接调用：setCurrentFeature。
+  // 直接调用：setFeatureConfig。
+  // [/maint-note:bb0093517016]
   function handleFeatureChange(featureName) {
     setCurrentFeature(featureName);
     setFeatureConfig({});
   }
 
+  // [maint-note:79f2f85a7134]
+  // 维护导航：handleFeatureConfigChange；下列为本函数源码中的接口与路径索引。
+  // 输入 name：类型由调用方与函数体约束。
+  // 输入 value：类型由调用方与函数体约束。
+  // 直接调用：setFeatureConfig。
+  // [/maint-note:79f2f85a7134]
   function handleFeatureConfigChange(name, value) {
     setFeatureConfig((prev) => ({ ...prev, [name]: value }));
   }
 
+  // [maint-note:f77b2b4e1723]
+  // 维护导航：handleClear；下列为本函数源码中的接口与路径索引。
+  // 直接调用：setInstruction。
+  // 直接调用：setTerminalLog。
+  // 直接调用：setMode。
+  // 直接调用：setLastError。
+  // 直接调用：setMessages。
+  // 直接调用：setActiveMessageId。
+  // [/maint-note:f77b2b4e1723]
   function handleClear() {
     setInstruction("");
     setTerminalLog("");
@@ -1567,6 +2420,14 @@ function App() {
     setActiveMessageId(null);
   }
 
+  // [maint-note:0254f6108f15]
+  // 维护导航：copyCommand；下列为本函数源码中的接口与路径索引。
+  // 输入 command：类型由调用方与函数体约束。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：!command。
+  // 返回路径：无返回值。
+  // 直接调用：navigator.clipboard.writeText。
+  // [/maint-note:0254f6108f15]
   async function copyCommand(command) {
     if (!command) {
       return;
@@ -1574,6 +2435,21 @@ function App() {
     await navigator.clipboard.writeText(command);
   }
 
+  // [maint-note:c6d8815d7d6f]
+  // 维护导航：handleSend；下列为本函数源码中的接口与路径索引。
+  // 分支条件：busy。
+  // 分支条件：!instruction.trim() && !canRunWithoutInstruction()。
+  // 返回路径：无返回值。
+  // 写入目标：userMessageAddedRef.current。
+  // 直接调用：instruction.trim。
+  // 直接调用：canRunWithoutInstruction。
+  // 直接调用：setLastError。
+  // 直接调用：addMessage。
+  // 直接调用：defaultTaskLabel。
+  // 直接调用：handleRun。
+  // 直接调用：setInstruction。
+  // 直接调用：requestAnimationFrame。
+  // [/maint-note:c6d8815d7d6f]
   function handleSend() {
     if (busy) return;
     if (!instruction.trim() && !canRunWithoutInstruction()) {
@@ -1591,6 +2467,13 @@ function App() {
     });
   }
 
+  // [maint-note:f072b3dc7994]
+  // 维护导航：handleKeyDown；下列为本函数源码中的接口与路径索引。
+  // 输入 e：类型由调用方与函数体约束。
+  // 分支条件：e.key === "Enter" && !e.shiftKey。
+  // 直接调用：e.preventDefault。
+  // 直接调用：handleSend。
+  // [/maint-note:f072b3dc7994]
   function handleKeyDown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -1598,6 +2481,13 @@ function App() {
     }
   }
 
+  // [maint-note:df039f864c24]
+  // 维护导航：autoResizeTextarea；下列为本函数源码中的接口与路径索引。
+  // 分支条件：!el。
+  // 返回路径：无返回值。
+  // 写入目标：el.style.height。
+  // 直接调用：Math.min。
+  // [/maint-note:df039f864c24]
   function autoResizeTextarea() {
     const el = chatInputRef.current;
     if (!el) return;
@@ -1605,6 +2495,11 @@ function App() {
     el.style.height = Math.min(el.scrollHeight, 200) + "px";
   }
 
+  // [maint-note:eee49c70d677]
+  // 维护导航：updateLayoutPrefs；下列为本函数源码中的接口与路径索引。
+  // 输入 nextValue：类型由调用方与函数体约束。
+  // 直接调用：setLayoutPrefs。
+  // [/maint-note:eee49c70d677]
   function updateLayoutPrefs(nextValue) {
     setLayoutPrefs((current) => {
       const next = typeof nextValue === "function" ? nextValue(current) : nextValue;
@@ -1612,6 +2507,17 @@ function App() {
     });
   }
 
+  // [maint-note:fb4807877ab8]
+  // 维护导航：resizeDelta；下列为本函数源码中的接口与路径索引。
+  // 输入 kind：类型由调用方与函数体约束。
+  // 输入 event：类型由调用方与函数体约束。
+  // 输入 start：类型由调用方与函数体约束。
+  // 分支条件：kind === "sidebarWidth"。
+  // 分支条件：kind === "drawerWidth"。
+  // 返回路径：event.clientX - start.x。
+  // 返回路径：start.x - event.clientX。
+  // 返回路径：event.clientY - start.y。
+  // [/maint-note:fb4807877ab8]
   function resizeDelta(kind, event, start) {
     if (kind === "sidebarWidth") {
       return event.clientX - start.x;
@@ -1622,6 +2528,16 @@ function App() {
     return event.clientY - start.y;
   }
 
+  // [maint-note:032ce8325a4e]
+  // 维护导航：startResize；下列为本函数源码中的接口与路径索引。
+  // 输入 kind：类型由调用方与函数体约束。
+  // 输入 event：类型由调用方与函数体约束。
+  // 分支条件：event.button !== 0。
+  // 返回路径：无返回值。
+  // 直接调用：event.preventDefault。
+  // 直接调用：document.body.classList.add。
+  // 直接调用：window.addEventListener。
+  // [/maint-note:032ce8325a4e]
   function startResize(kind, event) {
     if (event.button !== 0) {
       return;
@@ -1633,10 +2549,21 @@ function App() {
       value: layoutPrefs[kind]
     };
     document.body.classList.add("is-resizing-layout");
+    // [maint-note:dff1dcf80f6b]
+    // 维护导航：onPointerMove；下列为本函数源码中的接口与路径索引。
+    // 输入 moveEvent：类型由调用方与函数体约束。
+    // 直接调用：resizeDelta。
+    // 直接调用：updateLayoutPrefs。
+    // [/maint-note:dff1dcf80f6b]
     const onPointerMove = (moveEvent) => {
       const delta = resizeDelta(kind, moveEvent, start);
       updateLayoutPrefs({ [kind]: start.value + delta });
     };
+    // [maint-note:add5e80f87c6]
+    // 维护导航：onPointerUp；下列为本函数源码中的接口与路径索引。
+    // 直接调用：document.body.classList.remove。
+    // 直接调用：window.removeEventListener。
+    // [/maint-note:add5e80f87c6]
     const onPointerUp = () => {
       document.body.classList.remove("is-resizing-layout");
       window.removeEventListener("pointermove", onPointerMove);
@@ -1648,6 +2575,15 @@ function App() {
     window.addEventListener("pointercancel", onPointerUp);
   }
 
+  // [maint-note:77a473bb6042]
+  // 维护导航：handleResizeKey；下列为本函数源码中的接口与路径索引。
+  // 输入 kind：类型由调用方与函数体约束。
+  // 输入 event：类型由调用方与函数体约束。
+  // 分支条件：!keyDelta。
+  // 返回路径：无返回值。
+  // 直接调用：event.preventDefault。
+  // 直接调用：updateLayoutPrefs。
+  // [/maint-note:77a473bb6042]
   function handleResizeKey(kind, event) {
     const step = event.shiftKey ? 40 : 10;
     const keyDelta = {
@@ -1662,6 +2598,10 @@ function App() {
     updateLayoutPrefs((current) => ({ [kind]: current[kind] + keyDelta }));
   }
 
+  // [maint-note:32dd64183263]
+  // 维护导航：toggleTheme；下列为本函数源码中的接口与路径索引。
+  // 直接调用：setTheme。
+  // [/maint-note:32dd64183263]
   function toggleTheme() {
     setTheme((current) => saveThemePref(globalThis.localStorage, nextTheme(current)));
   }
@@ -2676,6 +3616,12 @@ function App() {
   );
 }
 
+// [maint-note:75b69967f52b]
+// 维护导航：BudgetMeter；下列为本函数源码中的接口与路径索引。
+// 输入 { label, progress }：类型由调用方与函数体约束。
+// 返回路径：( <div className={classNames("budget-meter", progress.level)}> <div className="budget-meter-label"> <span>{label}</span> <strong>{progress.used} / {progress.limit}</strong> </div> <div className="budget-meter-track"> <span style={{ width: `。
+// 直接调用：classNames。
+// [/maint-note:75b69967f52b]
 function BudgetMeter({ label, progress }) {
   return (
     <div className={classNames("budget-meter", progress.level)}>
@@ -2690,6 +3636,12 @@ function BudgetMeter({ label, progress }) {
   );
 }
 
+// [maint-note:1854a8752f89]
+// 维护导航：Metric；下列为本函数源码中的接口与路径索引。
+// 输入 { label, value }：类型由调用方与函数体约束。
+// 返回路径：( <div className="metric"> <span>{label}</span> <strong>{metricLabel(value)}</strong> </div> )。
+// 直接调用：metricLabel。
+// [/maint-note:1854a8752f89]
 function Metric({ label, value }) {
   return (
     <div className="metric">
@@ -2699,6 +3651,13 @@ function Metric({ label, value }) {
   );
 }
 
+// [maint-note:765054e83139]
+// 维护导航：Info；下列为本函数源码中的接口与路径索引。
+// 输入 { label, value }：类型由调用方与函数体约束。
+// 返回路径：( <> <dt>{label}</dt> <dd title={String(value || "")}>{metricLabel(value)}</dd> </> )。
+// 直接调用：String。
+// 直接调用：metricLabel。
+// [/maint-note:765054e83139]
 function Info({ label, value }) {
   return (
     <>

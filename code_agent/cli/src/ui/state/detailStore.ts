@@ -14,6 +14,15 @@ import { boundRetainedLines } from '../presentation/boundedLines.js'
  * resurrect detail.
  */
 
+// [maint-note:d5295bb78946]
+// 数据契约导航：DetailStoreEntry；字段含义以消费端校验为准。
+// 成员 recordId：string。
+// 成员 label：string。
+// 成员 lines：readonly string[]。
+// 成员 sourceTruncated：boolean。
+// 成员 viewCollapsed：boolean。
+// 成员 chars：number。
+// [/maint-note:d5295bb78946]
 export interface DetailStoreEntry {
   recordId: string
   /** Bounded viewer label (tool name etc.); never callId/requestId. */
@@ -25,6 +34,12 @@ export interface DetailStoreEntry {
   chars: number
 }
 
+// [maint-note:53d4643a97f5]
+// 数据契约导航：DetailStoreState；字段含义以消费端校验为准。
+// 成员 generation：number。
+// 成员 entries：ReadonlyMap<string, DetailStoreEntry>。
+// 成员 retainedChars：number。
+// [/maint-note:53d4643a97f5]
 export interface DetailStoreState {
   readonly generation: number
   /** Insertion order = LRU order (oldest first). */
@@ -32,6 +47,12 @@ export interface DetailStoreState {
   readonly retainedChars: number
 }
 
+// [maint-note:ff321c8f316d]
+// 数据契约导航：DetailCommit；字段含义以消费端校验为准。
+// 成员 state：DetailStoreState。
+// 成员 evicted：readonly string[]。
+// 成员 clipped：boolean。
+// [/maint-note:ff321c8f316d]
 export interface DetailCommit {
   readonly state: DetailStoreState
   /** recordIds evicted by this commit, oldest first. */
@@ -40,6 +61,12 @@ export interface DetailCommit {
   readonly clipped: boolean
 }
 
+// [maint-note:f00a93f623e8]
+// 维护导航：createDetailStoreState；下列为本函数源码中的接口与路径索引。
+// 输入 generation：类型由调用方与函数体约束；缺省表达式 1。
+// 返回契约：DetailStoreState。
+// 返回路径：{ generation, entries: new Map(), retainedChars: 0 }。
+// [/maint-note:f00a93f623e8]
 export function createDetailStoreState(generation = 1): DetailStoreState {
   return { generation, entries: new Map(), retainedChars: 0 }
 }
@@ -56,6 +83,24 @@ export function createDetailStoreState(generation = 1): DetailStoreState {
  * every commit then evicts oldest-first until the whole store is back under
  * the global character budget (always keeping at least one entry).
  */
+// [maint-note:e9d066e3b17d]
+// 维护导航：commitDetailRecord；下列为本函数源码中的接口与路径索引。
+// 输入 state：DetailStoreState。
+// 输入 input：{ recordId: string label: string lines: readonly string[] sourceTruncated: boolean viewCollapsed: boolean }。
+// 返回契约：DetailCommit。
+// 分支条件：oldest === undefined。
+// 分支条件：evictedEntry。
+// 遍历边界：retainedChars > UiPresentationLimits.detailCacheMaxChars && entries.size > 1。
+// 返回路径：{ state: { generation: state.generation, entries, retainedChars }, evicted, clipped: clippedRecord.clipped, }。
+// 写入目标：retainedChars。
+// 直接调用：boundRetainedLines。
+// 直接调用：entries.get。
+// 直接调用：entries.delete。
+// 直接调用：entries.set。
+// 直接调用：entries.keys().next。
+// 直接调用：entries.keys。
+// 直接调用：evicted.push。
+// [/maint-note:e9d066e3b17d]
 export function commitDetailRecord(
   state: DetailStoreState,
   input: {
@@ -101,19 +146,48 @@ export function commitDetailRecord(
   }
 }
 
+// [maint-note:95b2fd1f6565]
+// 维护导航：detailStoreHas；下列为本函数源码中的接口与路径索引。
+// 输入 state：DetailStoreState。
+// 输入 recordId：string。
+// 返回契约：boolean。
+// 返回路径：state.entries.has(recordId)。
+// 直接调用：state.entries.has。
+// [/maint-note:95b2fd1f6565]
 export function detailStoreHas(state: DetailStoreState, recordId: string): boolean {
   return state.entries.has(recordId)
 }
 
+// [maint-note:0c1a3c4f9f30]
+// 维护导航：detailStoreGet；下列为本函数源码中的接口与路径索引。
+// 输入 state：DetailStoreState。
+// 输入 recordId：string。
+// 返回契约：DetailStoreEntry | undefined。
+// 返回路径：state.entries.get(recordId)。
+// 直接调用：state.entries.get。
+// [/maint-note:0c1a3c4f9f30]
 export function detailStoreGet(state: DetailStoreState, recordId: string): DetailStoreEntry | undefined {
   return state.entries.get(recordId)
 }
 
 /** recordIds from oldest to newest (LRU order). */
+// [maint-note:8bb93014de79]
+// 维护导航：detailStoreOrder；下列为本函数源码中的接口与路径索引。
+// 输入 state：DetailStoreState。
+// 返回契约：readonly string[]。
+// 返回路径：[...state.entries.keys()]。
+// 直接调用：state.entries.keys。
+// [/maint-note:8bb93014de79]
 export function detailStoreOrder(state: DetailStoreState): readonly string[] {
   return [...state.entries.keys()]
 }
 
+// [maint-note:e4134cddf0eb]
+// 维护导航：detailStoreCount；下列为本函数源码中的接口与路径索引。
+// 输入 state：DetailStoreState。
+// 返回契约：number。
+// 返回路径：state.entries.size。
+// [/maint-note:e4134cddf0eb]
 export function detailStoreCount(state: DetailStoreState): number {
   return state.entries.size
 }

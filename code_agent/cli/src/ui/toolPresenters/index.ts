@@ -19,9 +19,18 @@ import { MAX_SUGGESTED_CONTINUATION_RANGES } from '../../tools/readFile/index.js
 const DEFAULT_MAX_PRESENTATION_CHARS = UiPresentationLimits.summaryMaxChars
 const DEFAULT_MAX_PRESENTATION_LINES = UiPresentationLimits.summaryMaxLogicalLines
 const GLOBAL_TRUNCATION_NOTICE = '… output truncated; details unavailable'
+// [maint-note:09ae81a30209]
+// 维护导航：VIEW_COLLAPSED_NOTICE；下列为本函数源码中的接口与路径索引。
+// 输入 hidden：number。
+// 返回契约：string。
+// [/maint-note:09ae81a30209]
 const VIEW_COLLAPSED_NOTICE = (hidden: number): string => `${hidden} lines hidden · Ctrl+O view details`
 const SECTION_TRUNCATION_NOTICE = '… section truncated'
 
+// [maint-note:381192c731f3]
+// 数据契约导航：ToolDisplayBlock；字段含义以消费端校验为准。
+// 类型组合：| { kind: 'summary'; text: string } | { kind: 'spacer' } | { kind: 'field'; label: string; text: string; preformatted?: boolean; truncated?: boolean } | { kind: 'list'; label: string; items: string[]; truncated?: boolean } | { kind: 'table'。
+// [/maint-note:381192c731f3]
 export type ToolDisplayBlock =
   | { kind: 'summary'; text: string }
   | { kind: 'spacer' }
@@ -41,6 +50,14 @@ export type ToolDisplayBlock =
  * dual truncation state only. The heavy retained lines live exclusively in
  * the bounded detail store (see `detailSource`), so eviction actually frees.
  */
+// [maint-note:f5248041b43e]
+// 数据契约导航：ToolResultDetail；字段含义以消费端校验为准。
+// 成员 totalRecords：number。
+// 成员 omittedRecords：number。
+// 成员 sourceTruncated：boolean。
+// 成员 viewCollapsed：boolean。
+// 成员 canExpand：boolean。
+// [/maint-note:f5248041b43e]
 export interface ToolResultDetail {
   totalRecords: number
   omittedRecords: number
@@ -54,12 +71,31 @@ export interface ToolResultDetail {
  * commit owner transfers it into the detail store exactly once and strips it
  * from the stored message; presenters never keep it elsewhere.
  */
+// [maint-note:c23b5abdc36d]
+// 数据契约导航：ToolResultDetailSource；字段含义以消费端校验为准。
+// 成员 lines：readonly string[]。
+// 成员 sourceTruncated：boolean。
+// 成员 viewCollapsed：boolean。
+// [/maint-note:c23b5abdc36d]
 export interface ToolResultDetailSource {
   lines: readonly string[]
   sourceTruncated: boolean
   viewCollapsed: boolean
 }
 
+// [maint-note:a86ab36e6eb9]
+// 数据契约导航：ToolResultPresentation；字段含义以消费端校验为准。
+// 成员 toolName：string。
+// 成员 summary：string。
+// 成员 blocks：readonly ToolDisplayBlock[]。
+// 成员 plainText：string。
+// 成员 truncated：boolean。
+// 成员 sourceTruncated：boolean。
+// 成员 viewCollapsed：boolean。
+// 成员 canExpand：boolean。
+// 成员 detail：ToolResultDetail。
+// 成员 detailSource（可省略）：ToolResultDetailSource。
+// [/maint-note:a86ab36e6eb9]
 export interface ToolResultPresentation {
   toolName: string
   summary: string
@@ -80,6 +116,54 @@ export interface ToolResultPresentation {
  * renders when the facts parse strictly — a malformed payload degrades to
  * the table rather than inventing a diff.
  */
+// [maint-note:d67c3b6a3419]
+// 维护导航：presentApplyPatchDiff；下列为本函数源码中的接口与路径索引。
+// 输入 display：import('../../tools/types.js').ToolDisplayFacts。
+// 输入 value：unknown。
+// 输入 maxChars：number。
+// 输入 maxLines：number。
+// 输入 _reserveGlobalNotice：boolean。
+// 输入 contentWidth：number。
+// 返回契约：ToolResultPresentation | undefined。
+// 分支条件：!isRecord(value) || !hasExactKeys(value, ['applied', 'truncated']) || !Array.isArray(value.applied) || typeof value.truncated !== 'boolean'。
+// 分支条件：files === undefined。
+// 分支条件：contentWidth < fullDiffMinWidth。
+// 分支条件：choice === undefined。
+// 分支条件：view.lines.length > 0。
+// 分支条件：sourceNotice !== undefined。
+// 遍历边界：const candidate ← compactCandidates。
+// 返回路径：undefined。
+// 返回路径：{ toolName: 'apply_patch', summary: sanitizeToolText(blocks.find((block) => block.kind === 'summary')?.text ?? ''), blocks, plainText: sanitizeToolText(plainText), truncated: sourceTruncated, sourceTruncated, viewCollapsed, canExpand: viewC。
+// 返回路径：{ toolName: 'apply_patch', summary: sanitizeToolText(summary), blocks, plainText: sanitizeToolText(plainText), truncated: sourceTruncated, sourceTruncated, viewCollapsed: view.viewCollapsed, canExpand: view.viewCollapsed, detail: { totalRec。
+// 写入目标：usedRows。
+// 写入目标：usedChars。
+// 直接调用：isRecord。
+// 直接调用：hasExactKeys。
+// 直接调用：Array.isArray。
+// 直接调用：parseDiffFiles。
+// 直接调用：projectDiffRows。
+// 直接调用：boundDetailLines。
+// 直接调用：renderDiffRowsAsText(unfolded.rows).split。
+// 直接调用：renderDiffRowsAsText。
+// 直接调用：candidate.choices.find。
+// 直接调用：physicalRows。
+// 直接调用：lines.reduce。
+// 直接调用：blocks.push。
+// 直接调用：lines.join。
+// 直接调用：blocks.map((block) => block.kind === 'summary' || block.kind === 'notice' ? block.text : '').filter(Boolean).join。
+// 直接调用：blocks.map((block) => block.kind === 'summary' || block.kind === 'notice' ? block.text : '').filter。
+// 直接调用：blocks.map。
+// 直接调用：sanitizeToolText。
+// 直接调用：blocks.find。
+// 直接调用：fixedLines.reduce。
+// 直接调用：finalizeDiffView。
+// 直接调用：Math.max。
+// 直接调用：renderDiffLinesAsText。
+// 直接调用：blocks.flatMap。
+// 直接调用：plainRows.filter(Boolean).join。
+// 直接调用：plainRows.filter。
+// 直接调用：view.lines.filter。
+// [/maint-note:d67c3b6a3419]
 function presentApplyPatchDiff(
   display: import('../../tools/types.js').ToolDisplayFacts,
   value: unknown,
@@ -113,6 +197,12 @@ function presentApplyPatchDiff(
   const sourceNotice = sourceTruncated
     ? 'Output was truncated at the source; all retained output is shown'
     : undefined
+  // [maint-note:e48d94913640]
+  // 维护导航：physicalRows；下列为本函数源码中的接口与路径索引。
+  // 输入 text：string。
+  // 返回契约：readonly string[]。
+  // 直接调用：wrapDisplayLines。
+  // [/maint-note:e48d94913640]
   const physicalRows = (text: string): readonly string[] => wrapDisplayLines(text, contentWidth, {
     hard: true,
     trim: false,
@@ -229,6 +319,13 @@ function presentApplyPatchDiff(
  * Any loss is upstream-of-cache and MUST surface as `clipped` so the record
  * is marked sourceTruncated instead of silently claiming completeness.
  */
+// [maint-note:f91bf8f4a4da]
+// 维护导航：boundDetailLines；下列为本函数源码中的接口与路径索引。
+// 输入 lines：readonly string[]。
+// 返回契约：{ lines: string[]; clipped: boolean }。
+// 返回路径：{ lines: [...bounded.lines], clipped: bounded.clipped }。
+// 直接调用：boundRetainedLines。
+// [/maint-note:f91bf8f4a4da]
 function boundDetailLines(lines: readonly string[]): { lines: string[]; clipped: boolean } {
   const bounded = boundRetainedLines(
     lines,
@@ -239,6 +336,37 @@ function boundDetailLines(lines: readonly string[]): { lines: string[]; clipped:
 }
 
 /** Strict parse of the neutral display payload; any drift degrades. */
+// [maint-note:14db45444b78]
+// 维护导航：parseDiffFiles；下列为本函数源码中的接口与路径索引。
+// 输入 facts：Record<string, unknown> | null | undefined。
+// 返回契约：readonly import('../presentation/applyPatchDiff.js').DiffFile[] | undefined。
+// 分支条件：!isRecord(facts)。
+// 分支条件：!Array.isArray(facts.files)。
+// 分支条件：!isRecord(file)。
+// 分支条件：typeof file.path !== 'string' || typeof file.action !== 'string'。
+// 分支条件：file.action !== 'add' && file.action !== 'update' && file.action !== 'delete'。
+// 分支条件：!isPositiveIntegerOrZero(file.additions) || !isPositiveIntegerOrZero(file.deletions)。
+// 分支条件：!Array.isArray(file.records)。
+// 分支条件：file.records.length > 4_000。
+// 分支条件：!isRecord(record)。
+// 分支条件：record.kind !== 'context' && record.kind !== 'added' && record.kind !== 'removed'。
+// 分支条件：typeof record.text !== 'string'。
+// 分支条件：oldLine !== undefined && (typeof oldLine !== 'number' || !Number.isSafeInteger(oldLine) || oldLine < 1)。
+// 分支条件：newLine !== undefined && (typeof newLine !== 'number' || !Number.isSafeInteger(newLine) || newLine < 1)。
+// 分支条件：record.kind === 'removed' && oldLine === undefined。
+// 分支条件：record.kind === 'added' && newLine === undefined。
+// 分支条件：record.kind === 'context' && (oldLine === undefined || newLine === undefined)。
+// 遍历边界：const file ← facts.files。
+// 遍历边界：const record ← file.records。
+// 返回路径：undefined。
+// 返回路径：files。
+// 直接调用：isRecord。
+// 直接调用：Array.isArray。
+// 直接调用：isPositiveIntegerOrZero。
+// 直接调用：Number.isSafeInteger。
+// 直接调用：records.push。
+// 直接调用：files.push。
+// [/maint-note:14db45444b78]
 function parseDiffFiles(facts: Record<string, unknown> | null | undefined): readonly import('../presentation/applyPatchDiff.js').DiffFile[] | undefined {
   if (!isRecord(facts)) return undefined
   if (!Array.isArray(facts.files)) return undefined
@@ -291,6 +419,30 @@ function parseDiffFiles(facts: Record<string, unknown> | null | undefined): read
  * the approval UI without exposing protocol IDs or routing it through the
  * result JSON parser.
  */
+// [maint-note:bfde4b5d0787]
+// 维护导航：presentDeniedTool；下列为本函数源码中的接口与路径索引。
+// 输入 toolName：string。
+// 输入 input：unknown。
+// 输入 reason：string。
+// 输入 options：{ maxChars?: number; maxLines?: number }；缺省表达式 {}。
+// 返回契约：ToolResultPresentation。
+// 分支条件：instructionPart.visible。
+// 分支条件：reasonPart.visible。
+// 返回路径：makePresentation( safeToolName, summaryPart.text, blocks, budget.output(), false, detailLines, visibleRecords, budget, )。
+// 直接调用：isRecord。
+// 直接调用：buildApprovalPresentation。
+// 直接调用：sanitizeToolText。
+// 直接调用：Math.max。
+// 直接调用：Math.floor。
+// 直接调用：budget.takePlain。
+// 直接调用：budget.takeField。
+// 直接调用：appendSectionSpacer。
+// 直接调用：blocks.push。
+// 直接调用：appendSectionNotice。
+// 直接调用：deniedDetailLines。
+// 直接调用：makePresentation。
+// 直接调用：budget.output。
+// [/maint-note:bfde4b5d0787]
 export function presentDeniedTool(
   toolName: string,
   input: unknown,
@@ -348,6 +500,19 @@ export function presentDeniedTool(
 }
 
 /** Denied detail: the summary plus the full literal request and reason. */
+// [maint-note:74ddf80ba305]
+// 维护导航：deniedDetailLines；下列为本函数源码中的接口与路径索引。
+// 输入 summary：string。
+// 输入 instruction：string。
+// 输入 reason：string。
+// 返回契约：string[]。
+// 分支条件：safe。
+// 遍历边界：const literal ← [instruction, reason]。
+// 返回路径：lines。
+// 直接调用：sanitizeToolText。
+// 直接调用：lines.push。
+// 直接调用：safe.split。
+// [/maint-note:74ddf80ba305]
 function deniedDetailLines(summary: string, instruction: string, reason: string): string[] {
   const lines = [summary]
   for (const literal of [instruction, reason]) {
@@ -357,6 +522,15 @@ function deniedDetailLines(summary: string, instruction: string, reason: string)
   return lines
 }
 
+// [maint-note:f178f7139a6c]
+// 数据契约导航：PresentationOptions；字段含义以消费端校验为准。
+// 成员 maxChars（可省略）：number。
+// 成员 maxLines（可省略）：number。
+// 成员 input（可省略）：unknown。
+// 成员 reserveGlobalNotice（可省略）：boolean。
+// 成员 display（可省略）：import('../../tools/types.js').ToolDisplayFacts。
+// 成员 contentWidth（可省略）：number。
+// [/maint-note:f178f7139a6c]
 interface PresentationOptions {
   maxChars?: number
   maxLines?: number
@@ -368,6 +542,17 @@ interface PresentationOptions {
   contentWidth?: number
 }
 
+// [maint-note:190484ccf615]
+// 维护导航：presentToolResult；下列为本函数源码中的接口与路径索引。
+// 输入 toolName：string。
+// 输入 output：string。
+// 输入 options：PresentationOptions；缺省表达式 {}。
+// 返回契约：ToolResultPresentation。
+// 分支条件：(!first.sourceTruncated && !first.viewCollapsed) || options.reserveGlobalNotice。
+// 返回路径：first。
+// 返回路径：presentToolResultOnce(toolName, output, { ...options, reserveGlobalNotice: true })。
+// 直接调用：presentToolResultOnce。
+// [/maint-note:190484ccf615]
 export function presentToolResult(
   toolName: string,
   output: string,
@@ -383,6 +568,18 @@ export function presentToolResult(
 }
 
 /** registry instance assembled at the UI boundary. */
+// [maint-note:3e51005b1c58]
+// 维护导航：registryFallback；下列为本函数源码中的接口与路径索引。
+// 输入 toolName：string。
+// 输入 output：string。
+// 输入 options：Parameters<ToolPresenter>[1]。
+// 返回契约：ToolResultPresentation。
+// 返回路径：fallbackPresentation( toolName, sanitizeToolText(output), Math.max(1, Math.floor(options.maxChars ?? DEFAULT_MAX_PRESENTATION_CHARS)), Math.max(1, Math.floor(options.maxLines ?? DEFAULT_MAX_PRESENTATION_LINES)), options.reserveGlobalNotice 。
+// 直接调用：fallbackPresentation。
+// 直接调用：sanitizeToolText。
+// 直接调用：Math.max。
+// 直接调用：Math.floor。
+// [/maint-note:3e51005b1c58]
 function registryFallback(toolName: string, output: string, options: Parameters<ToolPresenter>[1]): ToolResultPresentation {
   return fallbackPresentation(
     toolName,
@@ -394,6 +591,13 @@ function registryFallback(toolName: string, output: string, options: Parameters<
 }
 
 /** A typed presenter that declines (undefined) degrades to the fallback. */
+// [maint-note:92fbbefda0c2]
+// 维护导航：degrade；下列为本函数源码中的接口与路径索引。
+// 输入 toolName：string。
+// 输入 typed：(output: string, options: Parameters<ToolPresenter>[1]) => ToolResultPresentation | undefined。
+// 返回契约：ToolPresenter。
+// 返回路径：(output, options) => typed(output, options) ?? registryFallback(toolName, output, options)。
+// [/maint-note:92fbbefda0c2]
 function degrade(
   toolName: string,
   typed: (output: string, options: Parameters<ToolPresenter>[1]) => ToolResultPresentation | undefined,
@@ -401,8 +605,22 @@ function degrade(
   return (output, options) => typed(output, options) ?? registryFallback(toolName, output, options)
 }
 
+// [maint-note:207750b9f8ab]
+// 维护导航：registryChars；下列为本函数源码中的接口与路径索引。
+// 输入 options：PresentationOptions。
+// 返回契约：number。
+// 直接调用：Math.max。
+// 直接调用：Math.floor。
+// [/maint-note:207750b9f8ab]
 const registryChars = (options: PresentationOptions): number =>
   Math.max(1, Math.floor(options.maxChars ?? DEFAULT_MAX_PRESENTATION_CHARS))
+// [maint-note:3a4547bad310]
+// 维护导航：registryLines；下列为本函数源码中的接口与路径索引。
+// 输入 options：PresentationOptions。
+// 返回契约：number。
+// 直接调用：Math.max。
+// 直接调用：Math.floor。
+// [/maint-note:3a4547bad310]
 const registryLines = (options: PresentationOptions): number =>
   Math.max(1, Math.floor(options.maxLines ?? DEFAULT_MAX_PRESENTATION_LINES))
 
@@ -437,6 +655,12 @@ toolPresenterRegistry.register('git_changes', (output, options) => {
 })
 
 /** Wrap one JSON decode around a typed presenter; decode failure declines. */
+// [maint-note:b55da2d5f95e]
+// 维护导航：typedViaJson；下列为本函数源码中的接口与路径索引。
+// 输入 present：(parsed: unknown, options: PresentationOptions) => ToolResultPresentation | undefined。
+// 返回契约：(output: string, options: Parameters<ToolPresenter>[1]) => ToolResultPresentation | undefined。
+// 返回路径：(output, options) => { const safeOutput = sanitizeToolText(output) let parsed: unknown try { // This is the one and only JSON decode in the UI projection. Assistant // content and preformatted tool fields are never passed through it. parsed。
+// [/maint-note:b55da2d5f95e]
 function typedViaJson(
   present: (parsed: unknown, options: PresentationOptions) => ToolResultPresentation | undefined,
 ): (output: string, options: Parameters<ToolPresenter>[1]) => ToolResultPresentation | undefined {
@@ -454,6 +678,18 @@ function typedViaJson(
   }
 }
 
+// [maint-note:a3410279fbe5]
+// 维护导航：presentToolResultOnce；下列为本函数源码中的接口与路径索引。
+// 输入 toolName：string。
+// 输入 output：string。
+// 输入 options：PresentationOptions。
+// 返回契约：ToolResultPresentation。
+// 返回路径：toolPresenterRegistry.present(toolName, safeOutput, { ...options, maxChars, maxLines })。
+// 直接调用：Math.max。
+// 直接调用：Math.floor。
+// 直接调用：sanitizeToolText。
+// 直接调用：toolPresenterRegistry.present。
+// [/maint-note:a3410279fbe5]
 function presentToolResultOnce(
   toolName: string,
   output: string,
@@ -465,6 +701,19 @@ function presentToolResultOnce(
   return toolPresenterRegistry.present(toolName, safeOutput, { ...options, maxChars, maxLines })
 }
 
+// [maint-note:076a645c2c48]
+// 维护导航：sanitizeToolText；下列为本函数源码中的接口与路径索引。
+// 输入 value：string。
+// 返回契约：string。
+// 返回路径：value .replace(/\u001b\][\s\S]*?(?:\u0007|\u001b\\)/gu, '') .replace(/\u001b(?:\[[0-?]*[ -/]*[@-~]|[()][0-2A-Z])/gu, '') .replace(/[\u0000-\u0008\u000b-\u000c\u000e-\u001f\u007f-\u009f]/gu, '') .replace(/\u001b/gu, '') .split('') .map((char。
+// 直接调用：value .replace(/\u001b\][\s\S]*?(?:\u0007|\u001b\\)/gu, '') .replace(/\u001b(?:\[[0-?]*[ -/]*[@-~]|[()][0-2A-Z])/gu, '') .replace(/[\u0000-\u0008\u000b-\u000c\u000e-\u001f\u007f-\u009f]/gu, '') .replace(/\u001b/gu, '') .split('') .map((char。
+// 直接调用：value .replace(/\u001b\][\s\S]*?(?:\u0007|\u001b\\)/gu, '') .replace(/\u001b(?:\[[0-?]*[ -/]*[@-~]|[()][0-2A-Z])/gu, '') .replace(/[\u0000-\u0008\u000b-\u000c\u000e-\u001f\u007f-\u009f]/gu, '') .replace(/\u001b/gu, '') .split('') .map。
+// 直接调用：value .replace(/\u001b\][\s\S]*?(?:\u0007|\u001b\\)/gu, '') .replace(/\u001b(?:\[[0-?]*[ -/]*[@-~]|[()][0-2A-Z])/gu, '') .replace(/[\u0000-\u0008\u000b-\u000c\u000e-\u001f\u007f-\u009f]/gu, '') .replace(/\u001b/gu, '') .split。
+// 直接调用：value .replace(/\u001b\][\s\S]*?(?:\u0007|\u001b\\)/gu, '') .replace(/\u001b(?:\[[0-?]*[ -/]*[@-~]|[()][0-2A-Z])/gu, '') .replace(/[\u0000-\u0008\u000b-\u000c\u000e-\u001f\u007f-\u009f]/gu, '') .replace。
+// 直接调用：value .replace(/\u001b\][\s\S]*?(?:\u0007|\u001b\\)/gu, '') .replace(/\u001b(?:\[[0-?]*[ -/]*[@-~]|[()][0-2A-Z])/gu, '') .replace。
+// 直接调用：value .replace(/\u001b\][\s\S]*?(?:\u0007|\u001b\\)/gu, '') .replace。
+// 直接调用：value .replace。
+// [/maint-note:076a645c2c48]
 export function sanitizeToolText(value: string): string {
   return value
     .replace(/\u001b\][\s\S]*?(?:\u0007|\u001b\\)/gu, '')
@@ -482,11 +731,25 @@ export function sanitizeToolText(value: string): string {
     .replace(/\r\n?/g, '\n')
 }
 
+// [maint-note:767fb351871c]
+// 维护导航：toolPresentationText；下列为本函数源码中的接口与路径索引。
+// 输入 presentation：ToolResultPresentation。
+// 返回契约：string。
+// 返回路径：presentation.plainText。
+// [/maint-note:767fb351871c]
 export function toolPresentationText(presentation: ToolResultPresentation): string {
   return presentation.plainText
 }
 
 /** The table renderer and character ledger must measure the same row. */
+// [maint-note:f95a112df810]
+// 维护导航：serializeToolTableRow；下列为本函数源码中的接口与路径索引。
+// 输入 row：readonly string[]。
+// 返回契约：string。
+// 返回路径：row.map((cell) => cell.replace(/\r\n?|\n/gu, '\\n')).join(' ')。
+// 直接调用：row.map((cell) => cell.replace(/\r\n?|\n/gu, '\\n')).join。
+// 直接调用：row.map。
+// [/maint-note:f95a112df810]
 export function serializeToolTableRow(row: readonly string[]): string {
   return row.map((cell) => cell.replace(/\r\n?|\n/gu, '\\n')).join(' ')
 }
@@ -498,17 +761,32 @@ export function serializeToolTableRow(row: readonly string[]): string {
  * source truncation, and the empty file's only legal form is 1..0 with
  * totalLines 0.
  */
+// [maint-note:1829b2e5e900]
+// 数据契约导航：ContinuationRangeProjection；字段含义以消费端校验为准。
+// 成员 startLine：number。
+// 成员 endLine：number。
+// [/maint-note:1829b2e5e900]
 export interface ContinuationRangeProjection {
   startLine: number
   endLine: number
 }
 
+// [maint-note:e86c6d46295e]
+// 数据契约导航：PagePlanProjection；字段含义以消费端校验为准。
+// 成员 suggestedContinuationRanges：readonly ContinuationRangeProjection[]。
+// 成员 pagePlanComplete：boolean。
+// 成员 nextPlanStartLine（可省略）：number。
+// [/maint-note:e86c6d46295e]
 export interface PagePlanProjection {
   suggestedContinuationRanges: readonly ContinuationRangeProjection[]
   pagePlanComplete: boolean
   nextPlanStartLine?: number
 }
 
+// [maint-note:64f458c4cfaa]
+// 数据契约导航：ReadFilePageProjection；字段含义以消费端校验为准。
+// 类型组合：| { complete: true path: string startLine: number endLine: number totalLines: number content: string } | { complete: false path: string startLine: number endLine: number totalLines: number content: string nextStartLine: number plan?: PagePl。
+// [/maint-note:64f458c4cfaa]
 type ReadFilePageProjection =
   | {
     complete: true
@@ -529,6 +807,36 @@ type ReadFilePageProjection =
     plan?: PagePlanProjection
   }
 
+// [maint-note:0284f693f755]
+// 维护导航：parseReadFilePage；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：ReadFilePageProjection | undefined。
+// 分支条件：!isRecord(value)。
+// 分支条件：!hasExactKeys( value, ['path', 'startLine', 'endLine', 'totalLines', 'content', 'complete', 'truncated'], ['nextStartLine', 'suggestedContinuationRanges', 'pagePlanComplete', 'nextPlanStartLine'], )。
+// 分支条件：typeof value.path !== 'string' || !value.path。
+// 分支条件：!isPositiveInteger(value.startLine)。
+// 分支条件：!isNonNegativeInteger(value.endLine) || !isNonNegativeInteger(value.totalLines)。
+// 分支条件：typeof value.content !== 'string' || typeof value.complete !== 'boolean' || typeof value.truncated !== 'boolean'。
+// 分支条件：value.truncated === value.complete。
+// 分支条件：value.totalLines === 0。
+// 分支条件：value.startLine !== 1 || value.endLine !== 0 || !value.complete || value.content !== ''。
+// 分支条件：value.startLine > value.endLine || value.endLine > value.totalLines。
+// 分支条件：value.complete。
+// 分支条件：'nextStartLine' in value || 'suggestedContinuationRanges' in value || 'pagePlanComplete' in value || 'nextPlanStartLine' in value。
+// 分支条件：value.endLine !== value.totalLines。
+// 分支条件：value.endLine >= value.totalLines。
+// 分支条件：!isPositiveInteger(value.nextStartLine) || value.nextStartLine !== value.endLine + 1。
+// 分支条件：plan === undefined && ('suggestedContinuationRanges' in value || 'pagePlanComplete' in value || 'nextPlanStartLine' in value)。
+// 返回路径：undefined。
+// 返回路径：{ complete: true, path: value.path, startLine: 1, endLine: 0, totalLines: 0, content: '' }。
+// 返回路径：{ complete: true, path: value.path, startLine: value.startLine, endLine: value.endLine, totalLines: value.totalLines, content: value.content }。
+// 返回路径：{ complete: false, path: value.path, startLine: value.startLine, endLine: value.endLine, totalLines: value.totalLines, content: value.content, nextStartLine: value.nextStartLine, ...(plan === undefined ? {} : { plan }), }。
+// 直接调用：isRecord。
+// 直接调用：hasExactKeys。
+// 直接调用：isPositiveInteger。
+// 直接调用：isNonNegativeInteger。
+// 直接调用：parsePagePlan。
+// [/maint-note:0284f693f755]
 function parseReadFilePage(value: unknown): ReadFilePageProjection | undefined {
   if (!isRecord(value)) return undefined
   if (!hasExactKeys(
@@ -582,6 +890,38 @@ function parseReadFilePage(value: unknown): ReadFilePageProjection | undefined {
  * the last range to reach totalLines and forbids nextPlanStartLine; false
  * requires nextPlanStartLine to be lastEnd + 1.
  */
+// [maint-note:de3dfd8cdba1]
+// 维护导航：parsePagePlan；下列为本函数源码中的接口与路径索引。
+// 输入 value：Record<string, unknown>。
+// 输入 nextStartLine：number。
+// 输入 totalLines：number。
+// 返回契约：PagePlanProjection | undefined。
+// 分支条件：!hasRanges && !hasComplete && !hasNextPlan。
+// 分支条件：!hasRanges || !hasComplete。
+// 分支条件：!Array.isArray(ranges) || ranges.length === 0 || ranges.length > MAX_SUGGESTED_CONTINUATION_RANGES。
+// 分支条件：!isRecord(item) || !hasExactKeys(item, ['startLine', 'endLine'])。
+// 分支条件：!isPositiveInteger(item.startLine) || !isPositiveInteger(item.endLine)。
+// 分支条件：item.startLine !== expectedStart。
+// 分支条件：item.endLine < item.startLine || item.endLine > totalLines。
+// 分支条件：typeof value.pagePlanComplete !== 'boolean'。
+// 分支条件：value.pagePlanComplete。
+// 分支条件：hasNextPlan || lastEnd !== totalLines。
+// 分支条件：!hasNextPlan || !isPositiveInteger(value.nextPlanStartLine)。
+// 分支条件：lastEnd >= totalLines。
+// 分支条件：value.nextPlanStartLine > totalLines。
+// 分支条件：value.nextPlanStartLine !== lastEnd + 1。
+// 遍历边界：const item ← ranges。
+// 返回路径：undefined。
+// 返回路径：{ suggestedContinuationRanges: parsed, pagePlanComplete: true }。
+// 返回路径：{ suggestedContinuationRanges: parsed, pagePlanComplete: false, nextPlanStartLine: value.nextPlanStartLine }。
+// 写入目标：expectedStart。
+// 直接调用：Array.isArray。
+// 直接调用：isRecord。
+// 直接调用：hasExactKeys。
+// 直接调用：isPositiveInteger。
+// 直接调用：parsed.push。
+// 直接调用：parsed.at。
+// [/maint-note:de3dfd8cdba1]
 function parsePagePlan(
   value: Record<string, unknown>,
   nextStartLine: number,
@@ -620,6 +960,34 @@ function parsePagePlan(
   return { suggestedContinuationRanges: parsed, pagePlanComplete: false, nextPlanStartLine: value.nextPlanStartLine }
 }
 
+// [maint-note:35f91ac39684]
+// 维护导航：presentReadFile；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 输入 maxChars：number。
+// 输入 maxLines：number。
+// 输入 reserveGlobalNotice：boolean。
+// 返回契约：ToolResultPresentation | undefined。
+// 分支条件：!page。
+// 分支条件：contentPart?.visible。
+// 分支条件：!page.complete && page.plan。
+// 分支条件：planPart.visible。
+// 返回路径：undefined。
+// 返回路径：makePresentation('read_file', summaryPart.text, blocks, budget.output(), false, detailLines, visibleRecords, budget)。
+// 直接调用：parseReadFilePage。
+// 直接调用：sanitizeToolText。
+// 直接调用：budget.takePlain。
+// 直接调用：content.endsWith。
+// 直接调用：content.slice。
+// 直接调用：budget.takeField。
+// 直接调用：appendSectionSpacer。
+// 直接调用：blocks.push。
+// 直接调用：appendSectionNotice。
+// 直接调用：page.plan.suggestedContinuationRanges .map((range) => `${range.startLine}–${range.endLine}`) .join。
+// 直接调用：page.plan.suggestedContinuationRanges .map。
+// 直接调用：displayContent.split。
+// 直接调用：makePresentation。
+// 直接调用：budget.output。
+// [/maint-note:35f91ac39684]
 function presentReadFile(value: unknown, maxChars: number, maxLines: number, reserveGlobalNotice: boolean): ToolResultPresentation | undefined {
   const page = parseReadFilePage(value)
   if (!page) return undefined
@@ -667,6 +1035,40 @@ function presentReadFile(value: unknown, maxChars: number, maxLines: number, res
   return makePresentation('read_file', summaryPart.text, blocks, budget.output(), false, detailLines, visibleRecords, budget)
 }
 
+// [maint-note:495e2ff7cce9]
+// 维护导航：presentBash；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 输入 maxChars：number。
+// 输入 maxLines：number。
+// 输入 input：unknown。
+// 输入 reserveGlobalNotice：boolean。
+// 返回契约：ToolResultPresentation | undefined。
+// 分支条件：!isRecord(value) || !hasExactKeys(value, ['stdout', 'stderr', 'exitCode', 'timedOut', 'interrupted', 'truncated'])。
+// 分支条件：typeof value.stdout !== 'string' || typeof value.stderr !== 'string' || !Number.isInteger(value.exitCode) || typeof value.timedOut !== 'boolean' || typeof value.interrupted !== 'boolean' || typeof value.truncated !== 'boolean'。
+// 分支条件：isRecord(input) && typeof input.command === 'string' && input.command.trim()。
+// 分支条件：command.visible。
+// 分支条件：stdout?.visible。
+// 分支条件：stderr?.visible。
+// 返回路径：undefined。
+// 返回路径：makePresentation( 'bash', summaryPart.text, blocks, budget.output(), value.truncated === true, detailLines, visibleRecords, budget, )。
+// 写入目标：command。
+// 直接调用：isRecord。
+// 直接调用：hasExactKeys。
+// 直接调用：Number.isInteger。
+// 直接调用：sanitizeToolText。
+// 直接调用：[ `exit ${value.exitCode}`, value.timedOut ? 'timeout' : '', value.interrupted ? 'interrupted' : '', value.truncated ? 'truncated' : '', ].filter(Boolean).join。
+// 直接调用：[ `exit ${value.exitCode}`, value.timedOut ? 'timeout' : '', value.interrupted ? 'interrupted' : '', value.truncated ? 'truncated' : '', ].filter。
+// 直接调用：budget.takePlain。
+// 直接调用：input.command.trim。
+// 直接调用：budget.takeField。
+// 直接调用：appendSectionSpacer。
+// 直接调用：blocks.push。
+// 直接调用：appendSectionNotice。
+// 直接调用：stdoutText.split。
+// 直接调用：stderrText.split。
+// 直接调用：makePresentation。
+// 直接调用：budget.output。
+// [/maint-note:495e2ff7cce9]
 function presentBash(value: unknown, maxChars: number, maxLines: number, input: unknown, reserveGlobalNotice: boolean): ToolResultPresentation | undefined {
   if (!isRecord(value) || !hasExactKeys(value, ['stdout', 'stderr', 'exitCode', 'timedOut', 'interrupted', 'truncated'])) return undefined
   if (
@@ -724,6 +1126,33 @@ function presentBash(value: unknown, maxChars: number, maxLines: number, input: 
   )
 }
 
+// [maint-note:04b9cd8fa872]
+// 维护导航：presentListFiles；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 输入 maxChars：number。
+// 输入 maxLines：number。
+// 输入 reserveGlobalNotice：boolean。
+// 返回契约：ToolResultPresentation | undefined。
+// 分支条件：!isRecord(value) || !hasExactKeys(value, ['entries', 'truncated']) || !Array.isArray(value.entries) || typeof value.truncated !== 'boolean'。
+// 分支条件：!isRecord(item) || typeof item.path !== 'string' || item.type !== 'file'。
+// 分支条件：bounded.visible。
+// 遍历边界：const item ← value.entries。
+// 返回路径：undefined。
+// 返回路径：makePresentation('list_files', summaryPart.text, blocks, budget.output(), value.truncated === true, entries, bounded.records.length, budget)。
+// 直接调用：isRecord。
+// 直接调用：hasExactKeys。
+// 直接调用：Array.isArray。
+// 直接调用：entries.push。
+// 直接调用：sanitizeToolText。
+// 直接调用：budget.takePlain。
+// 直接调用：budget.takeField。
+// 直接调用：entries.join。
+// 直接调用：appendSectionSpacer。
+// 直接调用：blocks.push。
+// 直接调用：appendSectionNotice。
+// 直接调用：makePresentation。
+// 直接调用：budget.output。
+// [/maint-note:04b9cd8fa872]
 function presentListFiles(value: unknown, maxChars: number, maxLines: number, reserveGlobalNotice: boolean): ToolResultPresentation | undefined {
   if (!isRecord(value) || !hasExactKeys(value, ['entries', 'truncated']) || !Array.isArray(value.entries) || typeof value.truncated !== 'boolean') return undefined
   const entries: string[] = []
@@ -747,6 +1176,34 @@ function presentListFiles(value: unknown, maxChars: number, maxLines: number, re
     budget.output(), value.truncated === true, entries, bounded.records.length, budget)
 }
 
+// [maint-note:6f6eb5e8eefd]
+// 维护导航：presentSearchText；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 输入 maxChars：number。
+// 输入 maxLines：number。
+// 输入 reserveGlobalNotice：boolean。
+// 返回契约：ToolResultPresentation | undefined。
+// 分支条件：!isRecord(value) || !hasExactKeys(value, ['matches', 'truncated']) || !Array.isArray(value.matches) || typeof value.truncated !== 'boolean'。
+// 分支条件：!isRecord(item) || typeof item.path !== 'string' || !isPositiveInteger(item.line) || !isPositiveInteger(item.column) || typeof item.text !== 'string'。
+// 分支条件：bounded.visible。
+// 遍历边界：const item ← value.matches。
+// 返回路径：undefined。
+// 返回路径：makePresentation('search_text', summaryPart.text, blocks, budget.output(), value.truncated === true, matches, bounded.records.length, budget)。
+// 直接调用：isRecord。
+// 直接调用：hasExactKeys。
+// 直接调用：Array.isArray。
+// 直接调用：isPositiveInteger。
+// 直接调用：matches.push。
+// 直接调用：sanitizeToolText。
+// 直接调用：budget.takePlain。
+// 直接调用：budget.takeField。
+// 直接调用：matches.join。
+// 直接调用：appendSectionSpacer。
+// 直接调用：blocks.push。
+// 直接调用：appendSectionNotice。
+// 直接调用：makePresentation。
+// 直接调用：budget.output。
+// [/maint-note:6f6eb5e8eefd]
 function presentSearchText(value: unknown, maxChars: number, maxLines: number, reserveGlobalNotice: boolean): ToolResultPresentation | undefined {
   if (!isRecord(value) || !hasExactKeys(value, ['matches', 'truncated']) || !Array.isArray(value.matches) || typeof value.truncated !== 'boolean') return undefined
   const matches: string[] = []
@@ -773,6 +1230,54 @@ function presentSearchText(value: unknown, maxChars: number, maxLines: number, r
     budget.output(), value.truncated === true, matches, bounded.records.length, budget)
 }
 
+// [maint-note:783f325e91b5]
+// 维护导航：presentGitChanges；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 输入 maxChars：number。
+// 输入 maxLines：number。
+// 输入 reserveGlobalNotice：boolean。
+// 返回契约：ToolResultPresentation | undefined。
+// 分支条件：!isValidGitChangesEnvelope(value)。
+// 分支条件：!value.applicable。
+// 分支条件：value.reason !== 'not_git_repository' || value.complete !== true。
+// 分支条件：value.mode === 'summary'。
+// 分支条件：!isValidGitSummary(value.summary)。
+// 分支条件：isRecord(value.summary.byLayer)。
+// 分支条件：value.mode === 'files'。
+// 分支条件：!Array.isArray(value.items)。
+// 分支条件：!isValidGitFileRecord(item)。
+// 分支条件：value.mode === 'patch'。
+// 分支条件：!Array.isArray(value.patches)。
+// 分支条件：!isValidGitPatchLayer(patch)。
+// 分支条件：isRecord(value.coverage) && value.coverage.submoduleWorktrees === 'not_observed'。
+// 分支条件：typeof value.guidance === 'string'。
+// 分支条件：detailPart?.visible。
+// 遍历边界：const item ← value.items。
+// 遍历边界：const patch ← value.patches。
+// 遍历边界：const hunk ← patch.hunks。
+// 遍历边界：const line ← hunk.lines。
+// 返回路径：undefined。
+// 返回路径：makePresentation( 'git_changes', summaryPart.text, blocks, budget.output(), false, detailLines, detailPart?.records.length ?? 0, budget, )。
+// 写入目标：summary。
+// 写入目标：hunkCount。
+// 直接调用：isValidGitChangesEnvelope。
+// 直接调用：isValidGitSummary。
+// 直接调用：isRecord。
+// 直接调用：detailLines.push。
+// 直接调用：String。
+// 直接调用：Array.isArray。
+// 直接调用：isValidGitFileRecord。
+// 直接调用：sanitizeToolText。
+// 直接调用：isValidGitPatchLayer。
+// 直接调用：budget.takePlain。
+// 直接调用：budget.takeField。
+// 直接调用：detailLines.join。
+// 直接调用：appendSectionSpacer。
+// 直接调用：blocks.push。
+// 直接调用：appendSectionNotice。
+// 直接调用：makePresentation。
+// 直接调用：budget.output。
+// [/maint-note:783f325e91b5]
 function presentGitChanges(
   value: unknown,
   maxChars: number,
@@ -838,6 +1343,24 @@ function presentGitChanges(
   )
 }
 
+// [maint-note:d524a9e2d49c]
+// 数据契约导航：GitPresentationEnvelope；字段含义以消费端校验为准。
+// 成员 version：1。
+// 成员 applicable：boolean。
+// 成员 mode：'summary' | 'files' | 'patch'。
+// 成员 scope：'staged' | 'unstaged' | 'both'。
+// 成员 complete：boolean。
+// 成员 reason（可省略）：'not_git_repository'。
+// 成员 revision（可省略）：string。
+// 成员 path（可省略）：string。
+// 成员 offset（可省略）：number。
+// 成员 nextCursor（可省略）：string。
+// 成员 guidance（可省略）：string。
+// 成员 coverage（可省略）：GitPresentationCoverage。
+// 成员 summary（可省略）：GitPresentationSummary。
+// 成员 items（可省略）：GitPresentationFile[]。
+// 成员 patches（可省略）：GitPresentationPatch[]。
+// [/maint-note:d524a9e2d49c]
 interface GitPresentationEnvelope extends Record<string, unknown> {
   version: 1
   applicable: boolean
@@ -856,12 +1379,29 @@ interface GitPresentationEnvelope extends Record<string, unknown> {
   patches?: GitPresentationPatch[]
 }
 
+// [maint-note:469d684b8b63]
+// 数据契约导航：GitPresentationCoverage；字段含义以消费端校验为准。
+// 成员 parentRepositoryChanges：'complete'。
+// 成员 submoduleWorktrees：'not_present' | 'not_observed'。
+// 成员 gitlinkCount：number。
+// [/maint-note:469d684b8b63]
 interface GitPresentationCoverage {
   parentRepositoryChanges: 'complete'
   submoduleWorktrees: 'not_present' | 'not_observed'
   gitlinkCount: number
 }
 
+// [maint-note:643a43737501]
+// 数据契约导航：GitPresentationSummary；字段含义以消费端校验为准。
+// 成员 uniqueFiles：number。
+// 成员 layerRecords：number。
+// 成员 byLayer：{ staged: number; unstaged: number; unmerged: number }。
+// 成员 byAction：Record<string, number>。
+// 成员 recordsWithBinary：number。
+// 成员 recordsWithModeChange：number。
+// 成员 recordsWithTypeChange：number。
+// 成员 recordsUnmerged：number。
+// [/maint-note:643a43737501]
 interface GitPresentationSummary {
   uniqueFiles: number
   layerRecords: number
@@ -873,6 +1413,17 @@ interface GitPresentationSummary {
   recordsUnmerged: number
 }
 
+// [maint-note:c7582996b36d]
+// 数据契约导航：GitPresentationFile；字段含义以消费端校验为准。
+// 成员 layer：'staged' | 'unstaged' | 'unmerged'。
+// 成员 action：'added' | 'modified' | 'deleted' | 'renamed' | 'untracked' | 'type_changed' | 'unmerged'。
+// 成员 path：string。
+// 成员 oldPath（可省略）：string。
+// 成员 contentChanged：boolean | 'unknown'。
+// 成员 binary：boolean | 'unknown'。
+// 成员 modeChanged：boolean。
+// 成员 objectType：'file' | 'symlink' | 'gitlink' | 'other'。
+// [/maint-note:c7582996b36d]
 interface GitPresentationFile extends Record<string, unknown> {
   layer: 'staged' | 'unstaged' | 'unmerged'
   action: 'added' | 'modified' | 'deleted' | 'renamed' | 'untracked' | 'type_changed' | 'unmerged'
@@ -884,12 +1435,29 @@ interface GitPresentationFile extends Record<string, unknown> {
   objectType: 'file' | 'symlink' | 'gitlink' | 'other'
 }
 
+// [maint-note:b862553c407e]
+// 数据契约导航：GitPresentationPatch；字段含义以消费端校验为准。
+// 成员 layer：'staged' | 'unstaged'。
+// 成员 file：GitPresentationFile。
+// 成员 hunks：GitPresentationHunk[]。
+// [/maint-note:b862553c407e]
 interface GitPresentationPatch extends Record<string, unknown> {
   layer: 'staged' | 'unstaged'
   file: GitPresentationFile
   hunks: GitPresentationHunk[]
 }
 
+// [maint-note:a9df1ab97819]
+// 数据契约导航：GitPresentationHunk；字段含义以消费端校验为准。
+// 成员 oldStart：number。
+// 成员 oldLines：number。
+// 成员 newStart：number。
+// 成员 newLines：number。
+// 成员 section（可省略）：string。
+// 成员 continuedFromPrevious（可省略）：boolean。
+// 成员 continuesNext（可省略）：boolean。
+// 成员 lines：GitPresentationLine[]。
+// [/maint-note:a9df1ab97819]
 interface GitPresentationHunk extends Record<string, unknown> {
   oldStart: number
   oldLines: number
@@ -901,6 +1469,14 @@ interface GitPresentationHunk extends Record<string, unknown> {
   lines: GitPresentationLine[]
 }
 
+// [maint-note:c58685ad30e3]
+// 数据契约导航：GitPresentationLine；字段含义以消费端校验为准。
+// 成员 kind：'context' | 'add' | 'delete' | 'no_newline'。
+// 成员 text（可省略）：string。
+// 成员 oldLine（可省略）：number | null。
+// 成员 newLine（可省略）：number | null。
+// 成员 appliesTo（可省略）：'old' | 'new'。
+// [/maint-note:c58685ad30e3]
 interface GitPresentationLine extends Record<string, unknown> {
   kind: 'context' | 'add' | 'delete' | 'no_newline'
   text?: string
@@ -909,6 +1485,32 @@ interface GitPresentationLine extends Record<string, unknown> {
   appliesTo?: 'old' | 'new'
 }
 
+// [maint-note:df486da5d927]
+// 维护导航：isValidGitChangesEnvelope；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is GitPresentationEnvelope。
+// 分支条件：!isRecord(value) || value.version !== 1 || typeof value.applicable !== 'boolean' || !isOneOf(value.mode, ['summary', 'files', 'patch']) || !isOneOf(value.scope, ['staged', 'unstaged', 'both']) || typeof value.complete !== 'boolean'。
+// 分支条件：value.applicable === false。
+// 分支条件：typeof value.revision !== 'string' || !isValidGitCoverage(value.coverage) || (value.guidance !== undefined && typeof value.guidance !== 'string') || (value.path !== undefined && typeof value.path !== 'string') || (value.nextCursor !== undef。
+// 分支条件：value.mode === 'summary'。
+// 分支条件：!isNonNegativeInteger(value.offset)。
+// 分支条件：value.complete === false && typeof value.nextCursor !== 'string'。
+// 分支条件：value.complete === true && value.nextCursor !== undefined。
+// 分支条件：value.mode === 'files'。
+// 返回路径：false。
+// 返回路径：value.reason === 'not_git_repository' && value.complete === true。
+// 返回路径：value.complete === true && isValidGitSummary(value.summary)。
+// 返回路径：Array.isArray(value.items) && value.items.every(isValidGitFileRecord)。
+// 返回路径：typeof value.path === 'string' && Array.isArray(value.patches) && value.patches.every(isValidGitPatchLayer)。
+// 直接调用：isRecord。
+// 直接调用：isOneOf。
+// 直接调用：isValidGitCoverage。
+// 直接调用：isValidGitSummary。
+// 直接调用：isNonNegativeInteger。
+// 直接调用：Array.isArray。
+// 直接调用：value.items.every。
+// 直接调用：value.patches.every。
+// [/maint-note:df486da5d927]
 function isValidGitChangesEnvelope(value: unknown): value is GitPresentationEnvelope {
   if (
     !isRecord(value) || value.version !== 1 || typeof value.applicable !== 'boolean' ||
@@ -932,12 +1534,34 @@ function isValidGitChangesEnvelope(value: unknown): value is GitPresentationEnve
   return typeof value.path === 'string' && Array.isArray(value.patches) && value.patches.every(isValidGitPatchLayer)
 }
 
+// [maint-note:fbe90b85bc8a]
+// 维护导航：isValidGitCoverage；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is GitPresentationCoverage。
+// 返回路径：isRecord(value) && value.parentRepositoryChanges === 'complete' && isOneOf(value.submoduleWorktrees, ['not_present', 'not_observed']) && isNonNegativeInteger(value.gitlinkCount)。
+// 直接调用：isRecord。
+// 直接调用：isOneOf。
+// 直接调用：isNonNegativeInteger。
+// [/maint-note:fbe90b85bc8a]
 function isValidGitCoverage(value: unknown): value is GitPresentationCoverage {
   return isRecord(value) && value.parentRepositoryChanges === 'complete' &&
     isOneOf(value.submoduleWorktrees, ['not_present', 'not_observed']) &&
     isNonNegativeInteger(value.gitlinkCount)
 }
 
+// [maint-note:1e95614e1afb]
+// 维护导航：isValidGitSummary；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is GitPresentationSummary。
+// 分支条件：!isRecord(value) || !isNonNegativeInteger(value.uniqueFiles) || !isNonNegativeInteger(value.layerRecords)。
+// 分支条件：!isRecord(value.byLayer) || !hasNonNegativeIntegerKeys(value.byLayer, ['staged', 'unstaged', 'unmerged']) || !isRecord(value.byAction) || !hasNonNegativeIntegerKeys(value.byAction, [ 'added', 'modified', 'deleted', 'renamed', 'untracked', '。
+// 返回路径：false。
+// 返回路径：[ value.recordsWithBinary, value.recordsWithModeChange, value.recordsWithTypeChange, value.recordsUnmerged, ].every(isNonNegativeInteger)。
+// 直接调用：isRecord。
+// 直接调用：isNonNegativeInteger。
+// 直接调用：hasNonNegativeIntegerKeys。
+// 直接调用：[ value.recordsWithBinary, value.recordsWithModeChange, value.recordsWithTypeChange, value.recordsUnmerged, ].every。
+// [/maint-note:1e95614e1afb]
 function isValidGitSummary(value: unknown): value is GitPresentationSummary {
   if (!isRecord(value) || !isNonNegativeInteger(value.uniqueFiles) || !isNonNegativeInteger(value.layerRecords)) return false
   if (
@@ -954,6 +1578,23 @@ function isValidGitSummary(value: unknown): value is GitPresentationSummary {
   ].every(isNonNegativeInteger)
 }
 
+// [maint-note:80aac81ad3ee]
+// 维护导航：isValidGitFileRecord；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is GitPresentationFile。
+// 分支条件：!isRecord(value) || !isOneOf(value.layer, ['staged', 'unstaged', 'unmerged']) || !isOneOf(value.action, ['added', 'modified', 'deleted', 'renamed', 'untracked', 'type_changed', 'unmerged']) || typeof value.path !== 'string' || (value.oldPat。
+// 分支条件：value.conflictStages !== undefined。
+// 分支条件：!Array.isArray(value.conflictStages) || value.conflictStages.length === 0。
+// 分支条件：!stages.every((stage) => stage === 1 || stage === 2 || stage === 3)。
+// 分支条件：new Set(stages).size !== stages.length。
+// 返回路径：false。
+// 返回路径：true。
+// 直接调用：isRecord。
+// 直接调用：isOneOf。
+// 直接调用：isBooleanOrUnknown。
+// 直接调用：Array.isArray。
+// 直接调用：stages.every。
+// [/maint-note:80aac81ad3ee]
 function isValidGitFileRecord(value: unknown): value is GitPresentationFile {
   if (
     !isRecord(value) || !isOneOf(value.layer, ['staged', 'unstaged', 'unmerged']) ||
@@ -974,11 +1615,32 @@ function isValidGitFileRecord(value: unknown): value is GitPresentationFile {
   return true
 }
 
+// [maint-note:5dc21d656aba]
+// 维护导航：isValidGitPatchLayer；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is GitPresentationPatch。
+// 返回路径：isRecord(value) && isOneOf(value.layer, ['staged', 'unstaged']) && isValidGitFileRecord(value.file) && Array.isArray(value.hunks) && value.hunks.every(isValidGitHunk)。
+// 直接调用：isRecord。
+// 直接调用：isOneOf。
+// 直接调用：isValidGitFileRecord。
+// 直接调用：Array.isArray。
+// 直接调用：value.hunks.every。
+// [/maint-note:5dc21d656aba]
 function isValidGitPatchLayer(value: unknown): value is GitPresentationPatch {
   return isRecord(value) && isOneOf(value.layer, ['staged', 'unstaged']) &&
     isValidGitFileRecord(value.file) && Array.isArray(value.hunks) && value.hunks.every(isValidGitHunk)
 }
 
+// [maint-note:2ea781a9eae6]
+// 维护导航：isValidGitHunk；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is GitPresentationHunk。
+// 返回路径：isRecord(value) && isNonNegativeInteger(value.oldStart) && isNonNegativeInteger(value.oldLines) && isNonNegativeInteger(value.newStart) && isNonNegativeInteger(value.newLines) && (value.section === undefined || typeof value.section === 'str。
+// 直接调用：isRecord。
+// 直接调用：isNonNegativeInteger。
+// 直接调用：Array.isArray。
+// 直接调用：value.lines.every。
+// [/maint-note:2ea781a9eae6]
 function isValidGitHunk(value: unknown): value is GitPresentationHunk {
   return isRecord(value) &&
     isNonNegativeInteger(value.oldStart) && isNonNegativeInteger(value.oldLines) &&
@@ -989,6 +1651,20 @@ function isValidGitHunk(value: unknown): value is GitPresentationHunk {
     Array.isArray(value.lines) && value.lines.every(isValidGitLine)
 }
 
+// [maint-note:c178d80178f9]
+// 维护导航：isValidGitLine；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is GitPresentationLine。
+// 分支条件：!isRecord(value) || !isOneOf(value.kind, ['context', 'add', 'delete', 'no_newline'])。
+// 分支条件：value.kind === 'no_newline'。
+// 分支条件：typeof value.text !== 'string'。
+// 返回路径：false。
+// 返回路径：isOneOf(value.appliesTo, ['old', 'new'])。
+// 返回路径：isNullableLineNumber(value.oldLine) && isNullableLineNumber(value.newLine)。
+// 直接调用：isRecord。
+// 直接调用：isOneOf。
+// 直接调用：isNullableLineNumber。
+// [/maint-note:c178d80178f9]
 function isValidGitLine(value: unknown): value is GitPresentationLine {
   if (!isRecord(value) || !isOneOf(value.kind, ['context', 'add', 'delete', 'no_newline'])) return false
   if (value.kind === 'no_newline') return isOneOf(value.appliesTo, ['old', 'new'])
@@ -996,22 +1672,82 @@ function isValidGitLine(value: unknown): value is GitPresentationLine {
   return isNullableLineNumber(value.oldLine) && isNullableLineNumber(value.newLine)
 }
 
+// [maint-note:9925f9fddea1]
+// 维护导航：isNullableLineNumber；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：boolean。
+// 返回路径：value === null || (Number.isSafeInteger(value) && (value as number) >= 0)。
+// 直接调用：Number.isSafeInteger。
+// [/maint-note:9925f9fddea1]
 function isNullableLineNumber(value: unknown): boolean {
   return value === null || (Number.isSafeInteger(value) && (value as number) >= 0)
 }
 
+// [maint-note:0a638178baf7]
+// 维护导航：isBooleanOrUnknown；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：boolean。
+// 返回路径：typeof value === 'boolean' || value === 'unknown'。
+// [/maint-note:0a638178baf7]
 function isBooleanOrUnknown(value: unknown): boolean {
   return typeof value === 'boolean' || value === 'unknown'
 }
 
+// [maint-note:734154ad5f85]
+// 维护导航：hasNonNegativeIntegerKeys；下列为本函数源码中的接口与路径索引。
+// 输入 value：Record<string, unknown>。
+// 输入 keys：readonly string[]。
+// 返回契约：boolean。
+// 返回路径：hasExactKeys(value, keys) && keys.every((key) => isNonNegativeInteger(value[key]))。
+// 直接调用：hasExactKeys。
+// 直接调用：keys.every。
+// [/maint-note:734154ad5f85]
 function hasNonNegativeIntegerKeys(value: Record<string, unknown>, keys: readonly string[]): boolean {
   return hasExactKeys(value, keys) && keys.every((key) => isNonNegativeInteger(value[key]))
 }
 
+// [maint-note:741a6ef5f5c8]
+// 维护导航：isOneOf；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 输入 accepted：T。
+// 返回契约：value is T[number]。
+// 返回路径：typeof value === 'string' && accepted.includes(value)。
+// 直接调用：accepted.includes。
+// [/maint-note:741a6ef5f5c8]
 function isOneOf<const T extends readonly string[]>(value: unknown, accepted: T): value is T[number] {
   return typeof value === 'string' && accepted.includes(value)
 }
 
+// [maint-note:f69fc7a87bd0]
+// 维护导航：presentTaskPlan；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 输入 maxChars：number。
+// 输入 maxLines：number。
+// 输入 reserveGlobalNotice：boolean。
+// 返回契约：ToolResultPresentation | undefined。
+// 分支条件：!isRecord(value) || value.ok !== true || typeof value.operation !== 'string'。
+// 分支条件：planValue !== undefined && planValue !== null && !plan。
+// 分支条件：historical。
+// 分支条件：operation === 'list_snapshots'。
+// 分支条件：operation === 'claim_run_complete'。
+// 分支条件：plan。
+// 分支条件：listPart?.visible。
+// 返回路径：undefined。
+// 返回路径：makePresentation( 'update_task_plan', summaryPart.text, blocks, budget.output(), false, items, listPart?.records.length ?? 0, budget, )。
+// 写入目标：summary。
+// 直接调用：isRecord。
+// 直接调用：parseTaskPlanPresentation。
+// 直接调用：Array.isArray。
+// 直接调用：plan?.steps.map。
+// 直接调用：budget.takePlain。
+// 直接调用：budget.takeField。
+// 直接调用：items.join。
+// 直接调用：appendSectionSpacer。
+// 直接调用：blocks.push。
+// 直接调用：appendSectionNotice。
+// 直接调用：makePresentation。
+// 直接调用：budget.output。
+// [/maint-note:f69fc7a87bd0]
 function presentTaskPlan(
   value: unknown,
   maxChars: number,
@@ -1068,6 +1804,21 @@ function presentTaskPlan(
   )
 }
 
+// [maint-note:28fb4fd5fa0b]
+// 维护导航：parseTaskPlanPresentation；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：{ readonly revision: number readonly steps: readonly { readonly content: string; readonly status: 'pending' | 'in_progress' | 'completed' }[] } | undefined。
+// 分支条件：!isRecord(value) || !isPositiveInteger(value.revision) || !Array.isArray(value.steps)。
+// 分支条件：!isRecord(step) || typeof step.content !== 'string'。
+// 分支条件：step.status !== 'pending' && step.status !== 'in_progress' && step.status !== 'completed'。
+// 遍历边界：const step ← value.steps。
+// 返回路径：undefined。
+// 返回路径：{ revision: value.revision, steps }。
+// 直接调用：isRecord。
+// 直接调用：isPositiveInteger。
+// 直接调用：Array.isArray。
+// 直接调用：steps.push。
+// [/maint-note:28fb4fd5fa0b]
 function parseTaskPlanPresentation(value: unknown): {
   readonly revision: number
   readonly steps: readonly { readonly content: string; readonly status: 'pending' | 'in_progress' | 'completed' }[]
@@ -1082,12 +1833,56 @@ function parseTaskPlanPresentation(value: unknown): {
   return { revision: value.revision, steps }
 }
 
+// [maint-note:2f231aad79a1]
+// 维护导航：taskStepSymbol；下列为本函数源码中的接口与路径索引。
+// 输入 status：'pending' | 'in_progress' | 'completed'。
+// 返回契约：'[ ]' | '[>]' | '[✓]'。
+// 分支条件：status === 'pending'。
+// 分支条件：status === 'in_progress'。
+// 返回路径：'[ ]'。
+// 返回路径：'[>]'。
+// 返回路径：'[✓]'。
+// [/maint-note:2f231aad79a1]
 function taskStepSymbol(status: 'pending' | 'in_progress' | 'completed'): '[ ]' | '[>]' | '[✓]' {
   if (status === 'pending') return '[ ]'
   if (status === 'in_progress') return '[>]'
   return '[✓]'
 }
 
+// [maint-note:ffbc97a0353d]
+// 维护导航：presentApplyPatch；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 输入 maxChars：number。
+// 输入 maxLines：number。
+// 输入 reserveGlobalNotice：boolean。
+// 输入 display：import('../../tools/types.js').ToolDisplayFacts | undefined。
+// 输入 contentWidth：number。
+// 返回契约：ToolResultPresentation | undefined。
+// 分支条件：display?.kind === 'apply_patch_diff'。
+// 分支条件：projected !== undefined。
+// 分支条件：!isRecord(value) || !hasExactKeys(value, ['applied', 'truncated']) || !Array.isArray(value.applied) || typeof value.truncated !== 'boolean'。
+// 分支条件：!isRecord(item) || typeof item.path !== 'string' || typeof item.action !== 'string' || !isPositiveIntegerOrZero(item.additions) || !isPositiveIntegerOrZero(item.deletions)。
+// 分支条件：bounded.visible。
+// 遍历边界：const item ← value.applied。
+// 返回路径：projected。
+// 返回路径：undefined。
+// 返回路径：makePresentation('apply_patch', summaryPart.text, blocks, budget.output(), value.truncated === true, rows.map((row) => row.join(' ')), bounded.rows.length, budget)。
+// 直接调用：presentApplyPatchDiff。
+// 直接调用：isRecord。
+// 直接调用：hasExactKeys。
+// 直接调用：Array.isArray。
+// 直接调用：isPositiveIntegerOrZero。
+// 直接调用：rows.push。
+// 直接调用：sanitizeToolText。
+// 直接调用：budget.takePlain。
+// 直接调用：budget.takeTable。
+// 直接调用：appendSectionSpacer。
+// 直接调用：blocks.push。
+// 直接调用：appendSectionNotice。
+// 直接调用：makePresentation。
+// 直接调用：budget.output。
+// 直接调用：rows.map。
+// [/maint-note:ffbc97a0353d]
 function presentApplyPatch(value: unknown, maxChars: number, maxLines: number, reserveGlobalNotice: boolean, display: import('../../tools/types.js').ToolDisplayFacts | undefined, contentWidth: number): ToolResultPresentation | undefined {
   if (display?.kind === 'apply_patch_diff') {
     const projected = presentApplyPatchDiff(display, value, maxChars, maxLines, reserveGlobalNotice, contentWidth)
@@ -1122,6 +1917,20 @@ function presentApplyPatch(value: unknown, maxChars: number, maxLines: number, r
     budget.output(), value.truncated === true, rows.map((row) => row.join(' ')), bounded.rows.length, budget)
 }
 
+// [maint-note:11ecc143cbfd]
+// 维护导航：fallbackPresentation；下列为本函数源码中的接口与路径索引。
+// 输入 toolName：string。
+// 输入 output：string。
+// 输入 maxChars：number。
+// 输入 maxLines：number。
+// 输入 reserveGlobalNotice：boolean。
+// 返回契约：ToolResultPresentation。
+// 返回路径：makePresentation(toolName, summaryPart.text, blocks, budget.output(), summaryPart.truncated, candidate.split('\n'), summaryPart.records.length, budget)。
+// 直接调用：budget.takePlain。
+// 直接调用：makePresentation。
+// 直接调用：budget.output。
+// 直接调用：candidate.split。
+// [/maint-note:11ecc143cbfd]
 function fallbackPresentation(toolName: string, output: string, maxChars: number, maxLines: number, reserveGlobalNotice: boolean): ToolResultPresentation {
   const budget = new PresentationBudget(maxChars, maxLines, reserveGlobalNotice)
   const candidate = output || 'completed'
@@ -1138,6 +1947,32 @@ function fallbackPresentation(toolName: string, output: string, maxChars: number
  * `viewCollapsed` (recoverable via the viewer); only upstream loss (canonical
  * flags or the detail bound's own clip) is `sourceTruncated`.
  */
+// [maint-note:d8d6cfa4601c]
+// 维护导航：makePresentation；下列为本函数源码中的接口与路径索引。
+// 输入 toolName：string。
+// 输入 summary：string。
+// 输入 blocks：ToolDisplayBlock[]。
+// 输入 plainText：string。
+// 输入 upstreamTruncated：boolean。
+// 输入 detailLines：readonly string[]。
+// 输入 visibleRecords：number。
+// 输入 budget：PresentationBudget（可省略）。
+// 返回契约：ToolResultPresentation。
+// 分支条件：sourceTruncated && budget。
+// 分支条件：notice.visible。
+// 分支条件：viewCollapsed。
+// 分支条件：notice?.visible。
+// 返回路径：{ toolName, summary: sanitizeToolText(summary), blocks: renderedBlocks, plainText: sanitizeToolText(renderedPlainText), truncated: sourceTruncated, sourceTruncated, viewCollapsed, canExpand: viewCollapsed, detail: { totalRecords: detail.lin。
+// 直接调用：sanitizeToolText。
+// 直接调用：boundDetailLines。
+// 直接调用：Math.max。
+// 直接调用：Math.min。
+// 直接调用：budget.takeNotice。
+// 直接调用：renderedBlocks.push。
+// 直接调用：budget?.takeNotice。
+// 直接调用：VIEW_COLLAPSED_NOTICE。
+// 直接调用：budget?.output。
+// [/maint-note:d8d6cfa4601c]
 function makePresentation(
   toolName: string,
   summary: string,
@@ -1188,6 +2023,16 @@ function makePresentation(
   }
 }
 
+// [maint-note:1722410edfe3]
+// 数据契约导航：BoundedSelection；字段含义以消费端校验为准。
+// 成员 text：string。
+// 成员 records：string[]。
+// 成员 totalRecords：number。
+// 成员 omittedRecords：number。
+// 成员 truncated：boolean。
+// 成员 visible：boolean。
+// 成员 separator：boolean。
+// [/maint-note:1722410edfe3]
 interface BoundedSelection {
   text: string
   records: string[]
@@ -1198,6 +2043,10 @@ interface BoundedSelection {
   separator: boolean
 }
 
+// [maint-note:066d811355bb]
+// 数据契约导航：BoundedTableSelection；字段含义以消费端校验为准。
+// 成员 rows：string[][]。
+// [/maint-note:066d811355bb]
 interface BoundedTableSelection extends BoundedSelection {
   rows: string[][]
 }
@@ -1212,12 +2061,29 @@ class PresentationBudget {
   omittedRecords = 0
   truncated = false
 
+  // [maint-note:31470e883b54]
+  // 维护导航：constructor；下列为本函数源码中的接口与路径索引。
+  // 输入 maxChars：number。
+  // 输入 maxLines：number。
+  // 输入 reserveGlobalNotice：类型由调用方与函数体约束；缺省表达式 false。
+  // [/maint-note:31470e883b54]
   constructor(
     private readonly maxChars: number,
     private readonly maxLines: number,
     private readonly reserveGlobalNotice = false,
   ) {}
 
+  // [maint-note:038cdfca3904]
+  // 维护导航：takePlain；下列为本函数源码中的接口与路径索引。
+  // 输入 value：string。
+  // 返回契约：BoundedSelection。
+  // 返回路径：{ text: selected.records.join('\n'), records: selected.records, totalRecords: allRecords.length, omittedRecords: Math.max(0, allRecords.length - selected.records.length), truncated, visible: selected.records.length > 0, separator: false, }。
+  // 写入目标：this.truncated。
+  // 直接调用：value.split。
+  // 直接调用：this.selectRows。
+  // 直接调用：selected.records.join。
+  // 直接调用：Math.max。
+  // [/maint-note:038cdfca3904]
   takePlain(value: string): BoundedSelection {
     const allRecords = value ? value.split('\n') : []
     const selected = this.selectRows(allRecords, true)
@@ -1234,6 +2100,34 @@ class PresentationBudget {
     }
   }
 
+  // [maint-note:7ff0150725d8]
+  // 维护导航：takeField；下列为本函数源码中的接口与路径索引。
+  // 输入 label：string。
+  // 输入 value：string。
+  // 返回契约：BoundedSelection。
+  // 分支条件：allRecords.length === 0。
+  // 分支条件：separator && !this.appendExact('')。
+  // 分支条件：!this.appendExact(`${label}:`)。
+  // 分支条件：selected.truncated && this.reserveGlobalNotice && !this.noticeWritten。
+  // 分支条件：selected.records.length === 0。
+  // 返回路径：{ text: '', records: [], totalRecords: 0, omittedRecords: 0, truncated: false, visible: false, separator: false }。
+  // 返回路径：this.omittedField(allRecords, false)。
+  // 返回路径：this.omittedField(allRecords, true)。
+  // 返回路径：{ text: selected.records.join('\n'), records: selected.records, totalRecords: allRecords.length, omittedRecords, truncated, visible: true, separator, }。
+  // 写入目标：selected。
+  // 写入目标：this.totalRecords。
+  // 写入目标：this.omittedRecords。
+  // 写入目标：this.truncated。
+  // 直接调用：value.split。
+  // 直接调用：this.snapshot。
+  // 直接调用：this.appendExact。
+  // 直接调用：this.omittedField。
+  // 直接调用：this.restore。
+  // 直接调用：this.selectRows。
+  // 直接调用：Math.max。
+  // 直接调用：this.records.push。
+  // 直接调用：selected.records.join。
+  // [/maint-note:7ff0150725d8]
   takeField(label: string, value: string): BoundedSelection {
     const allRecords = value ? value.split('\n') : []
     if (allRecords.length === 0) {
@@ -1274,6 +2168,34 @@ class PresentationBudget {
     }
   }
 
+  // [maint-note:1b06b5712360]
+  // 维护导航：takeTable；下列为本函数源码中的接口与路径索引。
+  // 输入 label：string。
+  // 输入 rows：string[][]。
+  // 返回契约：BoundedTableSelection。
+  // 分支条件：rows.length === 0。
+  // 分支条件：separator && !this.appendExact('')。
+  // 分支条件：!this.appendExact(`${label}:`)。
+  // 分支条件：tableSelection.truncated && this.reserveGlobalNotice && !this.noticeWritten。
+  // 分支条件：selectedRows.length === 0。
+  // 返回路径：{ text: '', records: [], rows: [], totalRecords: 0, omittedRecords: 0, truncated: false, visible: false, separator: false }。
+  // 返回路径：this.omittedTable(rows, false)。
+  // 返回路径：this.omittedTable(rows, true)。
+  // 返回路径：{ text: selectedRecords.join('\n'), records: selectedRecords, rows: selectedRows, totalRecords: rows.length, omittedRecords, truncated, visible: true, separator, }。
+  // 写入目标：tableSelection。
+  // 写入目标：truncated。
+  // 写入目标：this.totalRecords。
+  // 写入目标：this.omittedRecords。
+  // 写入目标：this.truncated。
+  // 直接调用：this.snapshot。
+  // 直接调用：this.appendExact。
+  // 直接调用：this.omittedTable。
+  // 直接调用：this.restore。
+  // 直接调用：this.selectTableRows。
+  // 直接调用：Math.max。
+  // 直接调用：this.records.push。
+  // 直接调用：selectedRecords.join。
+  // [/maint-note:1b06b5712360]
   takeTable(label: string, rows: string[][]): BoundedTableSelection {
     if (rows.length === 0) {
       return { text: '', records: [], rows: [], totalRecords: 0, omittedRecords: 0, truncated: false, visible: false, separator: false }
@@ -1316,19 +2238,58 @@ class PresentationBudget {
     }
   }
 
+  // [maint-note:c8c751a665e3]
+  // 维护导航：takeNotice；下列为本函数源码中的接口与路径索引。
+  // 输入 text：string。
+  // 返回契约：BoundedSelection。
+  // 返回路径：this.takePlain(text)。
+  // 写入目标：this.noticeWritten。
+  // 直接调用：this.takePlain。
+  // [/maint-note:c8c751a665e3]
   takeNotice(text: string): BoundedSelection {
     this.noticeWritten = true
     return this.takePlain(text)
   }
 
+  // [maint-note:18904fd6da09]
+  // 维护导航：takeSectionNotice；下列为本函数源码中的接口与路径索引。
+  // 输入 text：string。
+  // 返回契约：BoundedSelection。
+  // 返回路径：this.takePlain(text)。
+  // 直接调用：this.takePlain。
+  // [/maint-note:18904fd6da09]
   takeSectionNotice(text: string): BoundedSelection {
     return this.takePlain(text)
   }
 
+  // [maint-note:beb42a33cbbc]
+  // 维护导航：output；下列为本函数源码中的接口与路径索引。
+  // 返回契约：string。
+  // 返回路径：this.outputRows.join('\n')。
+  // 直接调用：this.outputRows.join。
+  // [/maint-note:beb42a33cbbc]
   output(): string {
     return this.outputRows.join('\n')
   }
 
+  // [maint-note:5c572a2bbec5]
+  // 维护导航：selectRows；下列为本函数源码中的接口与路径索引。
+  // 输入 records：readonly string[]。
+  // 输入 allowPartial：boolean。
+  // 输入 reserve：{ lines: number; chars: number }；缺省表达式 { lines: 0, chars: 0 }。
+  // 返回契约：{ records: string[]; truncated: boolean }。
+  // 分支条件：this.remainingLines() <= reserve.lines。
+  // 分支条件：available < record.length。
+  // 分支条件：allowPartial && available > 0。
+  // 遍历边界：const record ← records。
+  // 返回路径：{ records: selected, truncated }。
+  // 写入目标：truncated。
+  // 直接调用：this.remainingLines。
+  // 直接调用：this.remainingChars。
+  // 直接调用：truncateCharacters。
+  // 直接调用：this.appendExact。
+  // 直接调用：selected.push。
+  // [/maint-note:5c572a2bbec5]
   private selectRows(
     records: readonly string[],
     allowPartial: boolean,
@@ -1357,6 +2318,22 @@ class PresentationBudget {
     return { records: selected, truncated }
   }
 
+  // [maint-note:292cb345583a]
+  // 维护导航：selectTableRows；下列为本函数源码中的接口与路径索引。
+  // 输入 rows：readonly string[][]。
+  // 输入 reserve：{ lines: number; chars: number }；缺省表达式 { lines: 0, chars: 0 }。
+  // 返回契约：{ selectedRows: string[][]; selectedRecords: string[]; truncated: boolean }。
+  // 分支条件：this.remainingLines() <= reserve.lines || this.remainingChars() - reserve.chars < record.length。
+  // 遍历边界：const row ← rows。
+  // 返回路径：{ selectedRows, selectedRecords, truncated }。
+  // 写入目标：truncated。
+  // 直接调用：serializeToolTableRow。
+  // 直接调用：this.remainingLines。
+  // 直接调用：this.remainingChars。
+  // 直接调用：this.appendExact。
+  // 直接调用：selectedRows.push。
+  // 直接调用：selectedRecords.push。
+  // [/maint-note:292cb345583a]
   private selectTableRows(
     rows: readonly string[][],
     reserve: { lines: number; chars: number } = { lines: 0, chars: 0 },
@@ -1379,6 +2356,19 @@ class PresentationBudget {
     return { selectedRows, selectedRecords, truncated }
   }
 
+  // [maint-note:834adab110b2]
+  // 维护导航：appendExact；下列为本函数源码中的接口与路径索引。
+  // 输入 value：string。
+  // 返回契约：boolean。
+  // 分支条件：this.remainingLines() <= 0 || this.remainingChars() < value.length。
+  // 返回路径：false。
+  // 返回路径：true。
+  // 写入目标：this.usedLines。
+  // 写入目标：this.usedChars。
+  // 直接调用：this.remainingLines。
+  // 直接调用：this.remainingChars。
+  // 直接调用：this.outputRows.push。
+  // [/maint-note:834adab110b2]
   private appendExact(value: string): boolean {
     if (this.remainingLines() <= 0 || this.remainingChars() < value.length) return false
     this.outputRows.push(value)
@@ -1387,6 +2377,13 @@ class PresentationBudget {
     return true
   }
 
+  // [maint-note:22921e538deb]
+  // 维护导航：remainingChars；下列为本函数源码中的接口与路径索引。
+  // 返回契约：number。
+  // 返回路径：this.maxChars - this.usedChars - separator - notice。
+  // 直接调用：Math.min。
+  // 直接调用：Math.max。
+  // [/maint-note:22921e538deb]
   private remainingChars(): number {
     const separator = this.outputRows.length > 0 ? 1 : 0
     const notice = this.reserveGlobalNotice && !this.noticeWritten
@@ -1395,21 +2392,49 @@ class PresentationBudget {
     return this.maxChars - this.usedChars - separator - notice
   }
 
+  // [maint-note:c886000e7832]
+  // 维护导航：remainingLines；下列为本函数源码中的接口与路径索引。
+  // 返回契约：number。
+  // 返回路径：this.maxLines - this.usedLines - notice。
+  // [/maint-note:c886000e7832]
   private remainingLines(): number {
     const notice = this.reserveGlobalNotice && !this.noticeWritten ? 1 : 0
     return this.maxLines - this.usedLines - notice
   }
 
+  // [maint-note:c91797da0bff]
+  // 维护导航：snapshot；下列为本函数源码中的接口与路径索引。
+  // 返回契约：{ rows: number; usedLines: number; usedChars: number }。
+  // 返回路径：{ rows: this.outputRows.length, usedLines: this.usedLines, usedChars: this.usedChars }。
+  // [/maint-note:c91797da0bff]
   private snapshot(): { rows: number; usedLines: number; usedChars: number } {
     return { rows: this.outputRows.length, usedLines: this.usedLines, usedChars: this.usedChars }
   }
 
+  // [maint-note:6105bf4701db]
+  // 维护导航：restore；下列为本函数源码中的接口与路径索引。
+  // 输入 snapshot：{ rows: number; usedLines: number; usedChars: number }。
+  // 返回契约：void。
+  // 写入目标：this.outputRows.length。
+  // 写入目标：this.usedLines。
+  // 写入目标：this.usedChars。
+  // [/maint-note:6105bf4701db]
   private restore(snapshot: { rows: number; usedLines: number; usedChars: number }): void {
     this.outputRows.length = snapshot.rows
     this.usedLines = snapshot.usedLines
     this.usedChars = snapshot.usedChars
   }
 
+  // [maint-note:5918bb59f277]
+  // 维护导航：omittedField；下列为本函数源码中的接口与路径索引。
+  // 输入 records：readonly string[]。
+  // 输入 truncated：boolean。
+  // 返回契约：BoundedSelection。
+  // 返回路径：{ text: '', records: [], totalRecords: records.length, omittedRecords: omitted, truncated: true, visible: false, separator: false }。
+  // 写入目标：this.truncated。
+  // 写入目标：this.totalRecords。
+  // 写入目标：this.omittedRecords。
+  // [/maint-note:5918bb59f277]
   private omittedField(records: readonly string[], truncated: boolean): BoundedSelection {
     const omitted = records.length
     this.truncated ||= truncated || omitted > 0
@@ -1418,6 +2443,16 @@ class PresentationBudget {
     return { text: '', records: [], totalRecords: records.length, omittedRecords: omitted, truncated: true, visible: false, separator: false }
   }
 
+  // [maint-note:682eb77e92eb]
+  // 维护导航：omittedTable；下列为本函数源码中的接口与路径索引。
+  // 输入 rows：readonly string[][]。
+  // 输入 truncated：boolean。
+  // 返回契约：BoundedTableSelection。
+  // 返回路径：{ text: '', records: [], rows: [], totalRecords: rows.length, omittedRecords: omitted, truncated: true, visible: false, separator: false }。
+  // 写入目标：this.truncated。
+  // 写入目标：this.totalRecords。
+  // 写入目标：this.omittedRecords。
+  // [/maint-note:682eb77e92eb]
   private omittedTable(rows: readonly string[][], truncated: boolean): BoundedTableSelection {
     const omitted = rows.length
     this.truncated ||= truncated || omitted > 0
@@ -1427,16 +2462,52 @@ class PresentationBudget {
   }
 }
 
+// [maint-note:e8bb3cdc6807]
+// 维护导航：appendSectionSpacer；下列为本函数源码中的接口与路径索引。
+// 输入 blocks：ToolDisplayBlock[]。
+// 输入 selection：BoundedSelection。
+// 返回契约：void。
+// 分支条件：selection.separator。
+// 直接调用：blocks.push。
+// [/maint-note:e8bb3cdc6807]
 function appendSectionSpacer(blocks: ToolDisplayBlock[], selection: BoundedSelection): void {
   if (selection.separator) blocks.push({ kind: 'spacer' })
 }
 
+// [maint-note:d27a496305f9]
+// 维护导航：appendSectionNotice；下列为本函数源码中的接口与路径索引。
+// 输入 blocks：ToolDisplayBlock[]。
+// 输入 budget：PresentationBudget。
+// 输入 selection：BoundedSelection。
+// 返回契约：void。
+// 分支条件：!selection.truncated。
+// 分支条件：notice.visible。
+// 返回路径：无返回值。
+// 直接调用：budget.takeSectionNotice。
+// 直接调用：blocks.push。
+// [/maint-note:d27a496305f9]
 function appendSectionNotice(blocks: ToolDisplayBlock[], budget: PresentationBudget, selection: BoundedSelection): void {
   if (!selection.truncated) return
   const notice = budget.takeSectionNotice(SECTION_TRUNCATION_NOTICE)
   if (notice.visible) blocks.push({ kind: 'notice', text: notice.text })
 }
 
+// [maint-note:071ac8c17b1d]
+// 维护导航：truncateCharacters；下列为本函数源码中的接口与路径索引。
+// 输入 value：string。
+// 输入 maxChars：number。
+// 返回契约：string。
+// 分支条件：value.length <= maxChars。
+// 分支条件：maxChars <= 1。
+// 分支条件：prefix.length + character.length + 1 > maxChars。
+// 遍历边界：const character ← value。
+// 返回路径：value。
+// 返回路径：'…'.slice(0, maxChars)。
+// 返回路径：`${prefix}…`.slice(0, maxChars)。
+// 写入目标：prefix。
+// 直接调用：'…'.slice。
+// 直接调用：`${prefix}…`.slice。
+// [/maint-note:071ac8c17b1d]
 function truncateCharacters(value: string, maxChars: number): string {
   if (value.length <= maxChars) return value
   if (maxChars <= 1) return '…'.slice(0, maxChars)
@@ -1448,23 +2519,63 @@ function truncateCharacters(value: string, maxChars: number): string {
   return `${prefix}…`.slice(0, maxChars)
 }
 
+// [maint-note:57e67e9bd04f]
+// 维护导航：hasExactKeys；下列为本函数源码中的接口与路径索引。
+// 输入 value：Record<string, unknown>。
+// 输入 keys：readonly string[]。
+// 输入 optionalKeys：readonly string[]；缺省表达式 []。
+// 返回契约：boolean。
+// 返回路径：Object.keys(value).every((key) => expected.has(key)) && keys.every((key) => key in value)。
+// 直接调用：Object.keys(value).every。
+// 直接调用：Object.keys。
+// 直接调用：keys.every。
+// [/maint-note:57e67e9bd04f]
 function hasExactKeys(value: Record<string, unknown>, keys: readonly string[], optionalKeys: readonly string[] = []): boolean {
   const expected = new Set([...keys, ...optionalKeys])
   return Object.keys(value).every((key) => expected.has(key)) && keys.every((key) => key in value)
 }
 
+// [maint-note:a36e9428b5d5]
+// 维护导航：isPositiveInteger；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is number。
+// 返回路径：Number.isInteger(value) && (value as number) > 0。
+// 直接调用：Number.isInteger。
+// [/maint-note:a36e9428b5d5]
 function isPositiveInteger(value: unknown): value is number {
   return Number.isInteger(value) && (value as number) > 0
 }
 
+// [maint-note:fc7049068b6c]
+// 维护导航：isNonNegativeInteger；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is number。
+// 返回路径：Number.isInteger(value) && (value as number) >= 0。
+// 直接调用：Number.isInteger。
+// [/maint-note:fc7049068b6c]
 function isNonNegativeInteger(value: unknown): value is number {
   return Number.isInteger(value) && (value as number) >= 0
 }
 
+// [maint-note:dd96480c90d7]
+// 维护导航：isPositiveIntegerOrZero；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is number。
+// 返回路径：Number.isInteger(value) && (value as number) >= 0。
+// 直接调用：Number.isInteger。
+// [/maint-note:dd96480c90d7]
 function isPositiveIntegerOrZero(value: unknown): value is number {
   return Number.isInteger(value) && (value as number) >= 0
 }
 
+// [maint-note:58ecf3e80aaf]
+// 维护导航：isRecord；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is Record<string, unknown>。
+// 返回路径：Boolean(value) && typeof value === 'object' && !Array.isArray(value)。
+// 直接调用：Boolean。
+// 直接调用：Array.isArray。
+// [/maint-note:58ecf3e80aaf]
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 }

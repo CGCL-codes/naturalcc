@@ -11,6 +11,14 @@ class CompletionPromptAgent:
     4. 输出适合 LLM / Aider 使用的 prompt
     """
 
+    # [maint-note:9c4bd9046fdc]
+    # 维护导航：__init__；下列为本函数源码中的接口与路径索引。
+    # 写入目标：self.project_parser。
+    # 写入目标：self.language。
+    # 写入目标：self.proj_dir。
+    # 写入目标：self.parse_res。
+    # 写入目标：self.searcher。
+    # [/maint-note:9c4bd9046fdc]
     def __init__(self):
         self.project_parser = None
         self.language: str = "c"
@@ -18,6 +26,22 @@ class CompletionPromptAgent:
         self.parse_res: Optional[Dict] = None
         self.searcher = None
 
+    # [maint-note:af4641f13c45]
+    # 维护导航：_infer_language；下列为本函数源码中的接口与路径索引。
+    # 输入 file_path：Optional[str]。
+    # 输入 explicit_language：Optional[str]；缺省表达式 None。
+    # 返回契约：str。
+    # 分支条件：explicit_language。
+    # 分支条件：lang in {'c', 'java'}。
+    # 分支条件：suffix == '.java'。
+    # 返回路径：lang。
+    # 返回路径：'java'。
+    # 返回路径：'c'。
+    # 直接调用：explicit_language.strip().lower。
+    # 直接调用：explicit_language.strip。
+    # 直接调用：Path(file_path or '').suffix.lower。
+    # 直接调用：Path。
+    # [/maint-note:af4641f13c45]
     @staticmethod
     def _infer_language(file_path: Optional[str], explicit_language: Optional[str] = None) -> str:
         if explicit_language:
@@ -33,6 +57,27 @@ class CompletionPromptAgent:
     # ---------------------------
     # 项目加载
     # ---------------------------
+    # [maint-note:bbd393733b7b]
+    # 维护导航：load_project；下列为本函数源码中的接口与路径索引。
+    # 输入 proj_dir：str。
+    # 输入 language：str；缺省表达式 'c'。
+    # 分支条件：not proj_dir。
+    # 分支条件：language not in {'c', 'java'}。
+    # 分支条件：language == 'java'。
+    # 分支条件：self.language == 'c'。
+    # 显式抛出：ValueError('proj_dir 不能为空')。
+    # 显式抛出：ValueError(f'不支持的语言: {language}')。
+    # 写入目标：self.project_parser。
+    # 写入目标：self.searcher。
+    # 写入目标：self.proj_dir。
+    # 写入目标：self.language。
+    # 写入目标：self.parse_res。
+    # 直接调用：ValueError。
+    # 直接调用：JavaProjectParserTS。
+    # 直接调用：getattr。
+    # 直接调用：CProjectParser。
+    # 直接调用：self.project_parser.parse_dir。
+    # [/maint-note:bbd393733b7b]
     def load_project(self, proj_dir: str, language: str = "c"):
         if not proj_dir:
             raise ValueError("proj_dir 不能为空")
@@ -60,6 +105,43 @@ class CompletionPromptAgent:
     # ---------------------------
     # 用户请求入口
     # ---------------------------
+    # [maint-note:7f997816a442]
+    # 维护导航：build_prompt；下列为本函数源码中的接口与路径索引。
+    # 输入 request：Dict。
+    # 返回契约：str。
+    # 分支条件：proj_dir and (self.proj_dir != proj_dir or self.parse_res is None or self.language != language)。
+    # 分支条件：self.parse_res is None。
+    # 分支条件：self.language == 'java'。
+    # 分支条件：not symbol。
+    # 分支条件：not completion_type。
+    # 分支条件：completion_type == 'member'。
+    # 分支条件：completion_type == 'variable'。
+    # 分支条件：completion_type == 'function'。
+    # 分支条件：completion_type == 'function_body'。
+    # 分支条件：completion_type == 'type'。
+    # 返回路径：self._build_java_completion_prompt(user_instruction=user_instruction, file_path=file_path, symbol=symbol, completion_type=completion_type, prefix=prefix)。
+    # 返回路径：self._build_member_completion_prompt(user_instruction=user_instruction, file_path=file_path, symbol=symbol, prefix=prefix)。
+    # 返回路径：self._build_variable_completion_prompt(user_instruction=user_instruction, file_path=file_path, prefix=prefix)。
+    # 返回路径：self._build_function_completion_prompt(user_instruction=user_instruction, file_path=file_path, symbol=symbol, prefix=prefix)。
+    # 返回路径：self._build_function_body_completion_prompt(user_instruction=user_instruction, file_path=file_path, symbol=symbol)。
+    # 返回路径：self._build_type_completion_prompt(user_instruction=user_instruction, file_path=file_path, symbol=symbol, prefix=prefix)。
+    # 返回路径：self._build_fallback_prompt(user_instruction=user_instruction, file_path=file_path, symbol=symbol, prefix=prefix)。
+    # 显式抛出：ValueError('项目尚未加载，请提供有效的 project_dir')。
+    # 直接调用：request.get。
+    # 直接调用：self._infer_language。
+    # 直接调用：self.load_project。
+    # 直接调用：ValueError。
+    # 直接调用：request.get('user_instruction', '').strip。
+    # 直接调用：self._build_java_completion_prompt。
+    # 直接调用：self._infer_symbol_from_instruction。
+    # 直接调用：self._infer_completion_type。
+    # 直接调用：self._build_member_completion_prompt。
+    # 直接调用：self._build_variable_completion_prompt。
+    # 直接调用：self._build_function_completion_prompt。
+    # 直接调用：self._build_function_body_completion_prompt。
+    # 直接调用：self._build_type_completion_prompt。
+    # 直接调用：self._build_fallback_prompt。
+    # [/maint-note:7f997816a442]
     def build_prompt(self, request: Dict) -> str:
         """
         request 示例：
@@ -152,6 +234,50 @@ class CompletionPromptAgent:
             prefix=prefix,
         )
 
+    # [maint-note:0690e7dd9c5b]
+    # 维护导航：_build_java_completion_prompt；下列为本函数源码中的接口与路径索引。
+    # 输入 user_instruction：str。
+    # 输入 file_path：Optional[str]。
+    # 输入 symbol：Optional[str]。
+    # 输入 completion_type：Optional[str]。
+    # 输入 prefix：str；缺省表达式 ''。
+    # 返回契约：str。
+    # 分支条件：file_info。
+    # 分支条件：not name or name == ''。
+    # 分支条件：ntype in {'Class', 'Interface', 'Enum', 'Annotation', 'Record', 'Method', 'Constructor', 'Field'}。
+    # 分支条件：symbol。
+    # 分支条件：prefix。
+    # 分支条件：not name or info.get('type') not in {'Class', 'Interface', 'Enum', 'Record', 'Method'}。
+    # 分支条件：symbol and symbol not in name。
+    # 分支条件：prefix and (not name.split('.')[-1].startswith(prefix))。
+    # 分支条件：not snippet。
+    # 分支条件：len(related_defs) >= 20。
+    # 遍历边界：(name, info) ← file_info.items()。
+    # 遍历边界：(fpath, finfo) ← (self.parse_res or {}).items()。
+    # 遍历边界：(name, info) ← finfo.items()。
+    # 返回路径：f"你是一个 Java 代码补全助手。\n任务：基于项目内真实符号与定义，在目标文件中直接完成补全或修正。\n\n【用户指令】\n{user_instruction}\n\n【目标文件】\n{file_path}\n\n【补全类型】\n{completion_hint}\n\n【目标符号】\n{symbol}\n\n【前缀】\n{prefix}\n\n【当前文件候选符号】\n{(chr(10).join((f'- {x}' for x in symbol_candidates。
+    # 直接调用：self._get_file_info。
+    # 直接调用：file_info.items。
+    # 直接调用：info.get。
+    # 直接调用：symbol_candidates.append。
+    # 直接调用：x.split('.')[-1].startswith。
+    # 直接调用：x.split。
+    # 直接调用：sorted。
+    # 直接调用：(self.parse_res or {}).items。
+    # 直接调用：finfo.items。
+    # 直接调用：name.split('.')[-1].startswith。
+    # 直接调用：name.split。
+    # 直接调用：related_defs.append。
+    # 直接调用：len。
+    # 直接调用：chr(10).join。
+    # 直接调用：chr。
+    # 表达式分流：file_path；真值与假值分支分别计算，不同时执行。
+    # 集合派生：x 来自 symbol_candidates；过滤 symbol in x。
+    # 集合派生：x 来自 symbol_candidates；过滤 x.split('.')[-1].startswith(prefix)。
+    # 表达式分流：symbol_candidates；真值与假值分支分别计算，不同时执行。
+    # 集合派生：x 来自 symbol_candidates。
+    # 表达式分流：related_defs；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:0690e7dd9c5b]
     def _build_java_completion_prompt(
         self,
         user_instruction: str,
@@ -238,6 +364,18 @@ class CompletionPromptAgent:
 5. 如果代码存在未完成表达式、占位符或 TODO，请直接补全为可工作的实现。
 """
 
+    # [maint-note:366f537bc0d8]
+    # 维护导航：_infer_symbol_from_instruction；下列为本函数源码中的接口与路径索引。
+    # 输入 instruction：str。
+    # 返回契约：Optional[str]。
+    # 分支条件：not instruction。
+    # 分支条件：m。
+    # 遍历边界：pattern ← patterns。
+    # 返回路径：None。
+    # 返回路径：m.group(1)。
+    # 直接调用：re.search。
+    # 直接调用：m.group。
+    # [/maint-note:366f537bc0d8]
     def _infer_symbol_from_instruction(self, instruction: str) -> Optional[str]:
         """
         从用户自然语言里自动提取目标函数/符号名。
@@ -269,6 +407,29 @@ class CompletionPromptAgent:
     # ---------------------------
     # 识别补全类型
     # ---------------------------
+    # [maint-note:8319e9ed0fc1]
+    # 维护导航：_infer_completion_type；下列为本函数源码中的接口与路径索引。
+    # 输入 instruction：str。
+    # 输入 symbol：Optional[str]。
+    # 返回契约：str。
+    # 分支条件：any((x in instruction for x in ['函数体', '函数实现', '补全函数内容', '完善函数实现', '实现函数', '补全整个函数', '补全完整函数', '补全', '完善', '实现']))。
+    # 分支条件：symbol。
+    # 分支条件：any((x in instruction for x in ['成员', '字段', 'struct字段', '成员补全'])) or '->' in instruction or '.' in instruction。
+    # 分支条件：any((x in instruction for x in ['局部变量', '全局变量', '变量补全', '变量名', '变量']))。
+    # 分支条件：any((x in instruction for x in ['函数签名', '函数声明', '函数名']))。
+    # 分支条件：any((x in instruction for x in ['类型', 'typedef', 'struct', 'union', 'enum']))。
+    # 返回路径：'function_body'。
+    # 返回路径：'member'。
+    # 返回路径：'variable'。
+    # 返回路径：'function'。
+    # 返回路径：'type'。
+    # 直接调用：any。
+    # 集合派生：x 来自 ['函数体', '函数实现', '补全函数内容', '完善函数实现', '实现函数', '补全整个函数', '补全完整函数', '补全', '完善', '实现']。
+    # 集合派生：x 来自 ['成员', '字段', 'struct字段', '成员补全']。
+    # 集合派生：x 来自 ['局部变量', '全局变量', '变量补全', '变量名', '变量']。
+    # 集合派生：x 来自 ['函数签名', '函数声明', '函数名']。
+    # 集合派生：x 来自 ['类型', 'typedef', 'struct', 'union', 'enum']。
+    # [/maint-note:8319e9ed0fc1]
     def _infer_completion_type(self, instruction: str, symbol: Optional[str]) -> str:
         instruction = instruction or ""
 
@@ -313,18 +474,53 @@ class CompletionPromptAgent:
     # ---------------------------
     # 工具函数
     # ---------------------------
+    # [maint-note:997385885c14]
+    # 维护导航：_get_file_info；下列为本函数源码中的接口与路径索引。
+    # 输入 file_path：str。
+    # 返回契约：Optional[Dict]。
+    # 分支条件：not file_path or not self.parse_res。
+    # 返回路径：None。
+    # 返回路径：self.parse_res.get(normalized_file_path)。
+    # 直接调用：str(file_path).replace。
+    # 直接调用：str。
+    # 直接调用：self.parse_res.get。
+    # [/maint-note:997385885c14]
     def _get_file_info(self, file_path: str) -> Optional[Dict]:
         if not file_path or not self.parse_res:
             return None
         normalized_file_path = str(file_path).replace("\\", "/")
         return self.parse_res.get(normalized_file_path)
 
+    # [maint-note:5d336880cd91]
+    # 维护导航：_iter_symbols_in_file；下列为本函数源码中的接口与路径索引。
+    # 输入 file_info：Dict。
+    # 分支条件：not name。
+    # 遍历边界：(name, info) ← file_info.items()。
+    # 直接调用：file_info.items。
+    # 生成器交付：(name, info)。
+    # [/maint-note:5d336880cd91]
     def _iter_symbols_in_file(self, file_info: Dict):
         for name, info in file_info.items():
             if not name:
                 continue
             yield name, info
 
+    # [maint-note:236c8ea65ca5]
+    # 维护导航：_find_symbol_info；下列为本函数源码中的接口与路径索引。
+    # 输入 file_path：str。
+    # 输入 symbol：str。
+    # 返回契约：Optional[Tuple[str, Dict]]。
+    # 分支条件：not file_info or not symbol。
+    # 分支条件：symbol in file_info。
+    # 分支条件：name.endswith(f'.{symbol}')。
+    # 遍历边界：(name, info) ← self._iter_symbols_in_file(file_info)。
+    # 返回路径：None。
+    # 返回路径：(symbol, file_info[symbol])。
+    # 返回路径：(name, info)。
+    # 直接调用：self._get_file_info。
+    # 直接调用：self._iter_symbols_in_file。
+    # 直接调用：name.endswith。
+    # [/maint-note:236c8ea65ca5]
     def _find_symbol_info(self, file_path: str, symbol: str) -> Optional[Tuple[str, Dict]]:
         file_info = self._get_file_info(file_path)
         if not file_info or not symbol:
@@ -339,6 +535,20 @@ class CompletionPromptAgent:
 
         return None
 
+    # [maint-note:99f3b10a578c]
+    # 维护导航：_find_type_of_symbol；下列为本函数源码中的接口与路径索引。
+    # 输入 file_path：str。
+    # 输入 symbol：str。
+    # 返回契约：Optional[str]。
+    # 分支条件：not res。
+    # 分支条件：len(item) >= 2 and item[-1] == 'Typeof'。
+    # 遍历边界：item ← rels。
+    # 返回路径：None。
+    # 返回路径：item[0]。
+    # 直接调用：self._find_symbol_info。
+    # 直接调用：info.get。
+    # 直接调用：len。
+    # [/maint-note:99f3b10a578c]
     def _find_type_of_symbol(self, file_path: str, symbol: str) -> Optional[str]:
         res = self._find_symbol_info(file_path, symbol)
         if not res:
@@ -351,6 +561,30 @@ class CompletionPromptAgent:
                 return item[0]
         return None
 
+    # [maint-note:7e172cff5660]
+    # 维护导航：_find_struct_like_by_type；下列为本函数源码中的接口与路径索引。
+    # 输入 file_path：str。
+    # 输入 type_name：str。
+    # 返回契约：Optional[str]。
+    # 分支条件：not type_name。
+    # 分支条件：clean != type_name。
+    # 分支条件：file_info。
+    # 分支条件：cand in file_info and file_info[cand].get('type') in ('Struct', 'Union', 'Enum')。
+    # 分支条件：cand in finfo and finfo[cand].get('type') in ('Struct', 'Union', 'Enum')。
+    # 遍历边界：cand ← candidates。
+    # 遍历边界：(_fpath, finfo) ← self.parse_res.items()。
+    # 返回路径：None。
+    # 返回路径：cand。
+    # 直接调用：self._get_file_info。
+    # 直接调用：type_name.replace('*', '').replace('&', '').replace('const', '').strip。
+    # 直接调用：type_name.replace('*', '').replace('&', '').replace。
+    # 直接调用：type_name.replace('*', '').replace。
+    # 直接调用：type_name.replace。
+    # 直接调用：candidates.append。
+    # 直接调用：file_info[cand].get。
+    # 直接调用：self.parse_res.items。
+    # 直接调用：finfo[cand].get。
+    # [/maint-note:7e172cff5660]
     def _find_struct_like_by_type(self, file_path: str, type_name: str) -> Optional[str]:
         file_info = self._get_file_info(file_path)
         if not type_name:
@@ -373,6 +607,22 @@ class CompletionPromptAgent:
 
         return None
 
+    # [maint-note:e53babd584e3]
+    # 维护导航：_collect_struct_members；下列为本函数源码中的接口与路径索引。
+    # 输入 struct_name：str。
+    # 返回契约：List[str]。
+    # 分支条件：not struct_name。
+    # 分支条件：info.get('in_struct') == struct_name。
+    # 遍历边界：(_fpath, finfo) ← self.parse_res.items()。
+    # 遍历边界：(name, info) ← finfo.items()。
+    # 返回路径：[]。
+    # 返回路径：sorted(members)。
+    # 直接调用：self.parse_res.items。
+    # 直接调用：finfo.items。
+    # 直接调用：info.get。
+    # 直接调用：members.append。
+    # 直接调用：sorted。
+    # [/maint-note:e53babd584e3]
     def _collect_struct_members(self, struct_name: str) -> List[str]:
         if not struct_name:
             return []
@@ -384,11 +634,37 @@ class CompletionPromptAgent:
                     members.append(name)
         return sorted(members)
 
+    # [maint-note:62eba261e55a]
+    # 维护导航：_filter_prefix；下列为本函数源码中的接口与路径索引。
+    # 输入 names：List[str]。
+    # 输入 prefix：str。
+    # 返回契约：List[str]。
+    # 分支条件：not prefix。
+    # 返回路径：names。
+    # 返回路径：[x for x in names if x.split('.')[-1].startswith(prefix)]。
+    # 直接调用：x.split('.')[-1].startswith。
+    # 直接调用：x.split。
+    # 集合派生：x 来自 names；过滤 x.split('.')[-1].startswith(prefix)。
+    # [/maint-note:62eba261e55a]
     def _filter_prefix(self, names: List[str], prefix: str) -> List[str]:
         if not prefix:
             return names
         return [x for x in names if x.split(".")[-1].startswith(prefix)]
 
+    # [maint-note:2c4dbf65915c]
+    # 维护导航：_safe_get_prompt4names；下列为本函数源码中的接口与路径索引。
+    # 输入 file_path：str。
+    # 输入 names：set。
+    # 输入 only_def：bool；缺省表达式 False。
+    # 输入 enable_docstring：bool；缺省表达式 True。
+    # 返回契约：str。
+    # 分支条件：not self.searcher or not file_path。
+    # 返回路径：''。
+    # 返回路径：self.searcher.get_prompt4names(file_path, names, only_def=only_def, enable_docstring=enable_docstring)。
+    # 返回路径：f'/* 获取上下文失败: {exc} */'。
+    # 捕获异常：Exception。
+    # 直接调用：self.searcher.get_prompt4names。
+    # [/maint-note:2c4dbf65915c]
     def _safe_get_prompt4names(
         self,
         file_path: str,
@@ -408,12 +684,31 @@ class CompletionPromptAgent:
         except Exception as exc:
             return f"/* 获取上下文失败: {exc} */"
 
+    # [maint-note:c4046d1d0748]
+    # 维护导航：_find_owner_file；下列为本函数源码中的接口与路径索引。
+    # 输入 symbol_name：str。
+    # 返回契约：Optional[str]。
+    # 分支条件：symbol_name in finfo。
+    # 遍历边界：(fpath, finfo) ← self.parse_res.items()。
+    # 返回路径：fpath。
+    # 返回路径：None。
+    # 直接调用：self.parse_res.items。
+    # [/maint-note:c4046d1d0748]
     def _find_owner_file(self, symbol_name: str) -> Optional[str]:
         for fpath, finfo in self.parse_res.items():
             if symbol_name in finfo:
                 return fpath
         return None
 
+    # [maint-note:cd23c3601982]
+    # 维护导航：_build_aider_edit_requirements；下列为本函数源码中的接口与路径索引。
+    # 输入 extra_rules：Optional[List[str]]；缺省表达式 None。
+    # 返回契约：str。
+    # 分支条件：extra_rules。
+    # 返回路径：'【执行要求】\n' + '\n'.join(rules)。
+    # 直接调用：rules.extend。
+    # 直接调用：'\n'.join。
+    # [/maint-note:cd23c3601982]
     def _build_aider_edit_requirements(self, extra_rules: Optional[List[str]] = None) -> str:
         rules = [
             "1. 不要只输出候选列表，也不要停留在解释层面；你的任务是直接修改目标文件中的代码。",
@@ -430,6 +725,39 @@ class CompletionPromptAgent:
     # ---------------------------
     # 1. 成员补全
     # ---------------------------
+    # [maint-note:8ad8c7459f81]
+    # 维护导航：_build_member_completion_prompt；下列为本函数源码中的接口与路径索引。
+    # 输入 user_instruction：str。
+    # 输入 file_path：str。
+    # 输入 symbol：Optional[str]。
+    # 输入 prefix：str；缺省表达式 ''。
+    # 返回契约：str。
+    # 分支条件：not file_info。
+    # 分支条件：symbol and symbol in file_info。
+    # 分支条件：struct_name。
+    # 分支条件：owner_file。
+    # 分支条件：member_names。
+    # 返回路径：f'无法找到文件 {file_path} 的解析信息。'。
+    # 返回路径：prompt。
+    # 直接调用：self._get_file_info。
+    # 直接调用：self._find_type_of_symbol。
+    # 直接调用：self._find_struct_like_by_type。
+    # 直接调用：self._collect_struct_members。
+    # 直接调用：self._filter_prefix。
+    # 直接调用：context_parts.append。
+    # 直接调用：self._safe_get_prompt4names。
+    # 直接调用：self._find_owner_file。
+    # 直接调用：set。
+    # 直接调用：context_parts.extend。
+    # 直接调用：m.split。
+    # 直接调用：chr(10).join。
+    # 直接调用：chr。
+    # 直接调用：self._build_aider_edit_requirements。
+    # 表达式分流：symbol；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：type_name；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：struct_name；真值与假值分支分别计算，不同时执行。
+    # 集合派生：m 来自 member_names。
+    # [/maint-note:8ad8c7459f81]
     def _build_member_completion_prompt(
         self,
         user_instruction: str,
@@ -500,6 +828,39 @@ class CompletionPromptAgent:
     # ---------------------------
     # 2. 变量补全
     # ---------------------------
+    # [maint-note:9a730788d28f]
+    # 维护导航：_build_variable_completion_prompt；下列为本函数源码中的接口与路径索引。
+    # 输入 user_instruction：str。
+    # 输入 file_path：str。
+    # 输入 prefix：str；缺省表达式 ''。
+    # 返回契约：str。
+    # 分支条件：not file_info。
+    # 分支条件：info.get('type') != 'Variable'。
+    # 分支条件：info.get('in_struct')。
+    # 分支条件：info.get('in_function')。
+    # 分支条件：prefix。
+    # 遍历边界：(name, info) ← self._iter_symbols_in_file(file_info)。
+    # 返回路径：f'无法找到文件 {file_path} 的解析信息。'。
+    # 返回路径：prompt。
+    # 直接调用：self._get_file_info。
+    # 直接调用：self._iter_symbols_in_file。
+    # 直接调用：info.get。
+    # 直接调用：local_vars.append。
+    # 直接调用：global_vars.append。
+    # 直接调用：n.startswith。
+    # 直接调用：local_vars.sort。
+    # 直接调用：global_vars.sort。
+    # 直接调用：self._safe_get_prompt4names。
+    # 直接调用：chr(10).join。
+    # 直接调用：chr。
+    # 直接调用：self._build_aider_edit_requirements。
+    # 集合派生：(n, i) 来自 local_vars；过滤 n.startswith(prefix)。
+    # 集合派生：(n, i) 来自 global_vars；过滤 n.startswith(prefix)。
+    # 表达式分流：local_vars；真值与假值分支分别计算，不同时执行。
+    # 集合派生：(n, _) 来自 local_vars。
+    # 表达式分流：global_vars；真值与假值分支分别计算，不同时执行。
+    # 集合派生：(n, _) 来自 global_vars。
+    # [/maint-note:9a730788d28f]
     def _build_variable_completion_prompt(
         self,
         user_instruction: str,
@@ -563,6 +924,33 @@ class CompletionPromptAgent:
     # ---------------------------
     # 3. 函数签名补全
     # ---------------------------
+    # [maint-note:a4e7d00cd094]
+    # 维护导航：_build_function_completion_prompt；下列为本函数源码中的接口与路径索引。
+    # 输入 user_instruction：str。
+    # 输入 file_path：Optional[str]。
+    # 输入 symbol：Optional[str]。
+    # 输入 prefix：str；缺省表达式 ''。
+    # 返回契约：str。
+    # 分支条件：info.get('type') != 'Function'。
+    # 分支条件：symbol and name == symbol。
+    # 分支条件：prefix and name.startswith(prefix)。
+    # 分支条件：not symbol and (not prefix)。
+    # 遍历边界：(fpath, finfo) ← self.parse_res.items()。
+    # 遍历边界：(name, info) ← finfo.items()。
+    # 遍历边界：(fpath, _name, info) ← matched。
+    # 返回路径：prompt。
+    # 直接调用：self.parse_res.items。
+    # 直接调用：finfo.items。
+    # 直接调用：info.get。
+    # 直接调用：matched.append。
+    # 直接调用：name.startswith。
+    # 直接调用：matched.sort。
+    # 直接调用：func_blocks.append。
+    # 直接调用：chr(10).join。
+    # 直接调用：chr。
+    # 直接调用：self._build_aider_edit_requirements。
+    # 表达式分流：func_blocks；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:a4e7d00cd094]
     def _build_function_completion_prompt(
         self,
         user_instruction: str,
@@ -617,6 +1005,37 @@ prefix={prefix}
     # ---------------------------
     # 4. 函数体补全
     # ---------------------------
+    # [maint-note:f7a7641a6ae7]
+    # 维护导航：_build_function_body_completion_prompt；下列为本函数源码中的接口与路径索引。
+    # 输入 user_instruction：str。
+    # 输入 file_path：Optional[str]。
+    # 输入 symbol：Optional[str]。
+    # 返回契约：str。
+    # 分支条件：not file_info。
+    # 分支条件：symbol and symbol in file_info。
+    # 分支条件：info.get('type') == 'Function' and name != symbol。
+    # 分支条件：same_file_funcs。
+    # 分支条件：symbol and symbol in finfo and (fpath != file_path)。
+    # 分支条件：info.get('type') == 'Function'。
+    # 分支条件：related_blocks。
+    # 遍历边界：(name, info) ← self._iter_symbols_in_file(file_info)。
+    # 遍历边界：(fpath, finfo) ← self.parse_res.items()。
+    # 返回路径：f'无法找到文件 {file_path} 的解析信息。'。
+    # 返回路径：prompt。
+    # 直接调用：self._get_file_info。
+    # 直接调用：context_parts.append。
+    # 直接调用：self._safe_get_prompt4names。
+    # 直接调用：self._iter_symbols_in_file。
+    # 直接调用：info.get。
+    # 直接调用：same_file_funcs.append。
+    # 直接调用：self.parse_res.items。
+    # 直接调用：related_blocks.append。
+    # 直接调用：'\n'.join。
+    # 直接调用：chr(10).join。
+    # 直接调用：chr。
+    # 直接调用：self._build_aider_edit_requirements。
+    # 集合派生：(name, _) 来自 same_file_funcs。
+    # [/maint-note:f7a7641a6ae7]
     def _build_function_body_completion_prompt(
         self,
         user_instruction: str,
@@ -688,6 +1107,35 @@ prefix={prefix}
     # ---------------------------
     # 5. 类型相关补全
     # ---------------------------
+    # [maint-note:06cb15705c0c]
+    # 维护导航：_build_type_completion_prompt；下列为本函数源码中的接口与路径索引。
+    # 输入 user_instruction：str。
+    # 输入 file_path：Optional[str]。
+    # 输入 symbol：Optional[str]。
+    # 输入 prefix：str；缺省表达式 ''。
+    # 返回契约：str。
+    # 分支条件：info.get('type') not in ('Struct', 'Union', 'Enum', 'Variable')。
+    # 分支条件：symbol and name == symbol。
+    # 分支条件：prefix and name.startswith(prefix)。
+    # 分支条件：not symbol and (not prefix)。
+    # 分支条件：info.get('type') in ('Struct', 'Union', 'Enum')。
+    # 遍历边界：(fpath, finfo) ← self.parse_res.items()。
+    # 遍历边界：(name, info) ← finfo.items()。
+    # 遍历边界：(fpath, name, info) ← matched。
+    # 返回路径：prompt。
+    # 直接调用：self.parse_res.items。
+    # 直接调用：finfo.items。
+    # 直接调用：info.get。
+    # 直接调用：matched.append。
+    # 直接调用：name.startswith。
+    # 直接调用：matched.sort。
+    # 直接调用：blocks.append。
+    # 直接调用：self._safe_get_prompt4names。
+    # 直接调用：chr(10).join。
+    # 直接调用：chr。
+    # 直接调用：self._build_aider_edit_requirements。
+    # 表达式分流：blocks；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:06cb15705c0c]
     def _build_type_completion_prompt(
         self,
         user_instruction: str,
@@ -750,6 +1198,18 @@ prefix={prefix}
     # ---------------------------
     # fallback
     # ---------------------------
+    # [maint-note:f69132b6f2b3]
+    # 维护导航：_build_fallback_prompt；下列为本函数源码中的接口与路径索引。
+    # 输入 user_instruction：str。
+    # 输入 file_path：Optional[str]。
+    # 输入 symbol：Optional[str]。
+    # 输入 prefix：str；缺省表达式 ''。
+    # 返回契约：str。
+    # 分支条件：file_path and file_path in self.parse_res。
+    # 返回路径：f'你是一个 C/C++ 代码补全助手。\n请基于以下项目上下文，直接修改目标文件中的相关代码并完成任务。\n\n【用户指令】\n{user_instruction}\n\n【文件】\n{file_path}\n\n【符号】\n{symbol}\n\n【前缀】\n{prefix}\n\n【文件上下文】\n{context}\n\n{self._build_aider_edit_requirements()}\n'。
+    # 直接调用：self._safe_get_prompt4names。
+    # 直接调用：self._build_aider_edit_requirements。
+    # [/maint-note:f69132b6f2b3]
     def _build_fallback_prompt(
         self,
         user_instruction: str,

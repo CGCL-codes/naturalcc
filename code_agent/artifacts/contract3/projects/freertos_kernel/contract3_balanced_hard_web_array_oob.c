@@ -61,9 +61,7 @@ static int contract3_independent_array_oob_case_07(void)
 static int contract3_independent_array_oob_case_08(void)
 {
     int values[3] = {1, 2, 3};
-    int total = 0;
-    for (int index = 3; index >= 0; --index) total += values[index];
-    return total;
+    return values[sizeof(values) / sizeof(values[0])];
 }
 
 static int contract3_independent_array_oob_case_09(void)
@@ -100,9 +98,8 @@ static int contract3_independent_array_oob_case_13(void)
 
 static int contract3_independent_array_oob_case_14(void)
 {
-    int values[3] = {1, 2, 3};
-    int *end = values + 3;
-    return end[0];
+    int values[4] = {1, 2, 3, 4};
+    return values[4];
 }
 
 static int contract3_independent_array_oob_case_15(void)
@@ -114,14 +111,17 @@ static int contract3_independent_array_oob_case_15(void)
 
 static int contract3_independent_array_oob_case_16(void)
 {
-    int values[4] = {1, 2, 3, 4};
-    return values[4];
+    int values[3] = {1, 2, 3};
+    int *end = values + 3;
+    return end[0];
 }
 
 static int contract3_independent_array_oob_case_17(void)
 {
-    int values[4] = {1, 2, 3, 4};
-    return values[3];
+    int values[3] = {1, 2, 3};
+    int index = contract3_identity(3);
+    if (index >= 3) return 0;
+    return values[index];
 }
 
 static int contract3_independent_array_oob_case_18(void)
@@ -158,8 +158,9 @@ static int contract3_independent_array_oob_case_21(void)
 static int contract3_independent_array_oob_case_22(void)
 {
     int values[3] = {1, 2, 3};
-    int *end = values + 3;
-    return end[0];
+    int index = contract3_identity(3);
+    if (index > 3) return 0;
+    return values[index];
 }
 
 static int contract3_independent_array_oob_case_23(void)
@@ -173,30 +174,31 @@ static int contract3_independent_array_oob_case_23(void)
 static int contract3_independent_array_oob_case_24(void)
 {
     int values[3] = {1, 2, 3};
-    int index = contract3_identity(3);
-    if (index >= 3) return 0;
-    return values[index];
+    int total = 0;
+    for (int index = 3; index-- > 0;) total += values[index];
+    return total;
 }
 
 static int contract3_independent_array_oob_case_25(void)
 {
-    int values[3] = {1, 2, 3};
-    int *end = values + 3;
-    return end[-1];
+    int values[4] = {1, 2, 3, 4};
+    return values[3];
 }
 
 static int contract3_independent_array_oob_case_26(void)
 {
     int values[3] = {1, 2, 3};
-    int index = contract3_identity(3);
-    if (index > 3) return 0;
-    return values[index];
+    int total = 0;
+    for (int index = 3; index >= 0; --index) total += values[index];
+    return total;
 }
 
 static int contract3_independent_array_oob_case_27(void)
 {
-    int values[4] = {1, 2, 3, 4};
-    return values[4];
+    int values[3] = {1, 2, 3};
+    int index = contract3_identity(3);
+    if (index > 3) return 0;
+    return values[index];
 }
 
 static int contract3_independent_array_oob_case_28(void)
@@ -216,21 +218,20 @@ static int contract3_independent_array_oob_case_29(void)
 static int contract3_independent_array_oob_case_30(void)
 {
     int values[3] = {1, 2, 3};
-    int total = 0;
-    for (int index = 3; index-- > 0;) total += values[index];
-    return total;
+    return values[sizeof(values) / sizeof(values[0]) - 1];
 }
 
 static int contract3_independent_array_oob_case_31(void)
 {
-    int values[3] = {1, 2, 3};
-    return values[sizeof(values) / sizeof(values[0]) - 1];
+    int values[4] = {1, 2, 3, 4};
+    return values[3];
 }
 
 static int contract3_independent_array_oob_case_32(void)
 {
-    int values[4] = {1, 2, 3, 4};
-    return values[3];
+    int values[3] = {1, 2, 3};
+    int *end = values + 3;
+    return end[-1];
 }
 
 static int contract3_independent_array_oob_case_33(void)
@@ -248,8 +249,8 @@ static int contract3_independent_array_oob_case_34(void)
 
 static int contract3_independent_array_oob_case_35(void)
 {
-    int values[3] = {1, 2, 3};
-    return values[sizeof(values) / sizeof(values[0])];
+    int values[4] = {1, 2, 3, 4};
+    return values[4];
 }
 
 static int contract3_independent_array_oob_case_36(void)
@@ -269,8 +270,9 @@ static int contract3_independent_array_oob_case_37(void)
 static int contract3_independent_array_oob_case_38(void)
 {
     int values[3] = {1, 2, 3};
-    int *end = values + 3;
-    return end[-1];
+    int index = contract3_identity(3);
+    if (index >= 3) return 0;
+    return values[index];
 }
 
 static int contract3_independent_array_oob_case_39(void)

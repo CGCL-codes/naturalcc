@@ -1,3 +1,9 @@
+// [maint-note:cc4dec8e3b70]
+// 维护导航：help_info；下列为本函数源码中的接口与路径索引。
+// 返回契约：string。
+// 返回路径：[ 'commands:', '/help 显示帮助信息', '/clear 清除 UI 与 agent 对话历史', '/exit 退出 REPL', '', 'CLI options:', '--model <name> 使用指定模型', '--api-key <key> 使用指定 API Key（默认读取 OPENAI_API_KEY）', '--base-url <url> 使用指定 OpenAI-compatible endpoint', '--project-di。
+// 直接调用：[ 'commands:', '/help 显示帮助信息', '/clear 清除 UI 与 agent 对话历史', '/exit 退出 REPL', '', 'CLI options:', '--model <name> 使用指定模型', '--api-key <key> 使用指定 API Key（默认读取 OPENAI_API_KEY）', '--base-url <url> 使用指定 OpenAI-compatible endpoint', '--project-di。
+// [/maint-note:cc4dec8e3b70]
 export function help_info(): string {
   return [
     'commands:',

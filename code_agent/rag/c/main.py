@@ -11,14 +11,39 @@ from .generator import CGenerator
 from .utils import DS_REPO_DIR, DS_FILE, DS_GRAPH_DIR, PT_FILE, MODEL
 
 
+# [maint-note:2b7bdb521a94]
+# 数据与行为导航：TimeoutException。
+# 继承接口：Exception。
+# [/maint-note:2b7bdb521a94]
 class TimeoutException(Exception):
     pass
 
 
+# [maint-note:e29c75658f60]
+# 维护导航：timeout_handler；下列为本函数源码中的接口与路径索引。
+# 输入 signum：类型由调用方与函数体约束。
+# 输入 frame：类型由调用方与函数体约束。
+# 显式抛出：TimeoutException('处理超时')。
+# 直接调用：TimeoutException。
+# [/maint-note:e29c75658f60]
 def timeout_handler(signum, frame):
     raise TimeoutException("处理超时")
 
 
+# [maint-note:244d777b4731]
+# 维护导航：_append_jsonl；下列为本函数源码中的接口与路径索引。
+# 输入 path：str。
+# 输入 items：list。
+# 分支条件：not items。
+# 遍历边界：it ← items。
+# 返回路径：无返回值。
+# 直接调用：os.makedirs。
+# 直接调用：os.path.dirname。
+# 直接调用：open。
+# 直接调用：json.dump。
+# 直接调用：f.write。
+# 资源作用域：open(path, 'a', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:244d777b4731]
 def _append_jsonl(path: str, items: list):
     """Append a list of json-serializable dicts to jsonl file."""
     if not items:

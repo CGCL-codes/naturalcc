@@ -60,6 +60,13 @@ def test_completed_records_can_skip_without_a_web_connection():
     assert not web.is_skippable({"status": "credit_exhausted"}, retry_failed=False)
 
 
+def test_revised_dataset_does_not_resume_legacy_web_predictions():
+    from code_agent.scripts.benchmark_contract3_independent import DATASET_REVISION
+    destination = web.checkpoint_directory("balanced")
+    assert destination != web.DATA / "web-sonnet45-balanced"
+    assert DATASET_REVISION in destination.name
+
+
 def test_only_currently_scored_rows_are_reported():
     checkpoint = {"samples": {
         "completed": {"status": "scored", "rows": [{"expected": "defect", "detected": True}]},

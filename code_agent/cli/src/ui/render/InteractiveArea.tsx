@@ -16,10 +16,40 @@ import { calculateContentWidth, fillDisplayWidth, sanitizeTerminalText, truncate
 
 const HELP_HINT = 'enter /help for help'
 
+// [maint-note:a8169764cc2a]
+// 维护导航：projectHelpHint；下列为本函数源码中的接口与路径索引。
+// 输入 width：number。
+// 返回契约：string。
+// 返回路径：truncateDisplayText(HELP_HINT, Math.max(1, width))。
+// 直接调用：truncateDisplayText。
+// 直接调用：Math.max。
+// [/maint-note:a8169764cc2a]
 function projectHelpHint(width: number): string {
   return truncateDisplayText(HELP_HINT, Math.max(1, width))
 }
 
+// [maint-note:8689103226c8]
+// 数据契约导航：InteractiveAreaProps；字段含义以消费端校验为准。
+// 成员 footer：SessionFooterDescriptor | undefined。
+// 成员 inputVisible：boolean。
+// 成员 showHelpHint（可省略）：boolean。
+// 成员 keepInputMounted（可省略）：boolean。
+// 成员 input：string。
+// 成员 onInputChange：(value: string) => void。
+// 成员 onSubmit：(value: string) => void。
+// 成员 placeholder：string。
+// 成员 onDropdownChange：(open: boolean) => void。
+// 成员 resetGeneration：number。
+// 成员 onControlC：(inputLength: number, exitArmed: boolean) => ReplCtrlCAction。
+// 成员 exitArmed：boolean。
+// 成员 clearing：boolean。
+// 成员 width：number。
+// 成员 onInputSubscriptionChange（可省略）：(attached: boolean) => void。
+// 成员 initialEditingState（可省略）：{ value: string; cursor: number; dropdownOpen: boolean; selectedIndex: number }。
+// 成员 inputRef（可省略）：RefObject<InputLineHandle | null>。
+// 成员 statusMetadata（可省略）：SessionStatusMetadata。
+// 成员 resizeGeneration（可省略）：number。
+// [/maint-note:8689103226c8]
 export interface InteractiveAreaProps {
   footer: SessionFooterDescriptor | undefined
   inputVisible: boolean
@@ -52,6 +82,29 @@ export interface InteractiveAreaProps {
  * the interactive chrome; startup resize is disabled once a turn or a batch
  * exists, so no model/tool content is guessed here.
  */
+// [maint-note:c1a1be624ff5]
+// 维护导航：projectInteractiveAreaForResize；下列为本函数源码中的接口与路径索引。
+// 输入 input：Pick<InteractiveAreaProps, 'footer' | 'inputVisible' | 'showHelpHint' | 'input' | 'placeholder' | 'clearing' | 'exitArmed' | 'width' | 'statusMetadata'>。
+// 返回契约：string。
+// 分支条件：input.footer。
+// 分支条件：input.clearing。
+// 分支条件：input.inputVisible。
+// 分支条件：input.showHelpHint !== false && input.width > 4。
+// 分支条件：input.width <= 4。
+// 返回路径：rows.join('\n')。
+// 直接调用：rows.push。
+// 直接调用：renderSessionFooter。
+// 直接调用：truncateDisplayText。
+// 直接调用：Math.max。
+// 直接调用：projectHelpHint。
+// 直接调用：sanitizeTerminalText。
+// 直接调用：calculateContentWidth。
+// 直接调用：projectInputLine。
+// 直接调用：fillDisplayWidth。
+// 直接调用：projectSessionStatusWarning。
+// 直接调用：projectSessionStatus。
+// 直接调用：rows.join。
+// [/maint-note:c1a1be624ff5]
 export function projectInteractiveAreaForResize(input: Pick<InteractiveAreaProps, 'footer' | 'inputVisible' | 'showHelpHint' | 'input' | 'placeholder' | 'clearing' | 'exitArmed' | 'width' | 'statusMetadata'>): string {
   const rows: string[] = []
   if (input.footer) rows.push(renderSessionFooter(input.footer.durationMs, input.width))
@@ -80,6 +133,14 @@ export function projectInteractiveAreaForResize(input: Pick<InteractiveAreaProps
  * The footer/status never live inside a frozen turn batch, so they update in
  * place without adding another stable history owner.
  */
+// [maint-note:dbc19d431600]
+// 维护导航：InteractiveArea；下列为本函数源码中的接口与路径索引。
+// 输入 { footer, inputVisible, showHelpHint = true, input, onInputChange, onSubmit, placeholder, onDropdownChange, resetGeneration, onControlC, exitArmed, clearing, width, onInputSubscriptionChange, initialEditingState, inputRef, statusMetadata = ：InteractiveAreaProps。
+// 返回路径：( <Box flexDirection="column" width={Math.max(1, width)}> {/* The footer follows the session timing owner, not input visibility: it appears the moment the run's timing closes (which may precede the executor's iterator drain) and hides as so。
+// 直接调用：Math.max。
+// 直接调用：truncateDisplayText。
+// 直接调用：projectHelpHint。
+// [/maint-note:dbc19d431600]
 export function InteractiveArea({
   footer, inputVisible, showHelpHint = true, input, onInputChange, onSubmit, placeholder,
   onDropdownChange, resetGeneration, onControlC, exitArmed, clearing, width,

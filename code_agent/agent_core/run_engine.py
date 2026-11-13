@@ -77,6 +77,45 @@ _CODEGRAPH_SOURCE_SUFFIXES = {
 }
 
 
+# [maint-note:b759d7707402]
+# 维护导航：_normalize_target_files；下列为本函数源码中的接口与路径索引。
+# 输入 target_files：list[str] | None。
+# 输入 workspace：Path。
+# 输入 authorized_paths：list[str] | None；缺省表达式 None。
+# 返回契约：list[str]。
+# 分支条件：not isinstance(item, str)。
+# 分支条件：not value。
+# 分支条件：path.is_absolute()。
+# 分支条件：resolved == root。
+# 分支条件：root.is_dir()。
+# 分支条件：not allowed。
+# 分支条件：'..' in path.parts。
+# 分支条件：value not in seen。
+# 遍历边界：item ← target_files or []。
+# 遍历边界：root ← authorized。
+# 返回路径：normalized。
+# 显式抛出：ValueError(f'target file is outside explicit authorization: {item}')。
+# 捕获异常：ValueError。
+# 直接调用：set。
+# 直接调用：Path(value).expanduser().resolve。
+# 直接调用：Path(value).expanduser。
+# 直接调用：Path。
+# 直接调用：isinstance。
+# 直接调用：item.strip().replace。
+# 直接调用：item.strip。
+# 直接调用：path.is_absolute。
+# 直接调用：path.expanduser().resolve。
+# 直接调用：path.expanduser。
+# 直接调用：resolved.relative_to(workspace).as_posix。
+# 直接调用：resolved.relative_to。
+# 直接调用：root.is_dir。
+# 直接调用：ValueError。
+# 直接调用：str。
+# 直接调用：value.removeprefix。
+# 直接调用：normalized.append。
+# 直接调用：seen.add。
+# 集合派生：value 来自 authorized_paths or []。
+# [/maint-note:b759d7707402]
 def _normalize_target_files(
     target_files: list[str] | None,
     workspace: Path,
@@ -123,6 +162,40 @@ def _normalize_target_files(
 
 
 class RunEngine:
+    # [maint-note:288aac340c3e]
+    # 维护导航：__init__；下列为本函数源码中的接口与路径索引。
+    # 输入 store：EventStore。
+    # 输入 registry：ToolRegistry。
+    # 输入 model：ModelGateway。
+    # 输入 policy：PolicyEngine | None；缺省表达式 None。
+    # 输入 context_builder：ContextBuilder | None；缺省表达式 None。
+    # 输入 memory_store：MemoryStore | None；缺省表达式 None。
+    # 输入 context_planner：ContextPlanner | None；缺省表达式 None。
+    # 输入 compaction_service：CompactionService | None；缺省表达式 None。
+    # 输入 default_runtime_model_config：RuntimeModelConfig | dict[str, Any] | None；缺省表达式 None。
+    # 返回契约：None。
+    # 分支条件：isinstance(default_runtime_model_config, RuntimeModelConfig)。
+    # 写入目标：self.store。
+    # 写入目标：self.registry。
+    # 写入目标：self.model。
+    # 写入目标：self.policy。
+    # 写入目标：self.context_builder。
+    # 写入目标：self.memory_store。
+    # 写入目标：self.auto_memory。
+    # 写入目标：self.context_planner。
+    # 写入目标：self.compaction_service。
+    # 写入目标：self.default_runtime_model_config。
+    # 写入目标：self._run_api_keys。
+    # 写入目标：self._run_locks。
+    # 写入目标：self._run_locks_guard。
+    # 直接调用：PolicyEngine。
+    # 直接调用：ContextBuilder。
+    # 直接调用：isinstance。
+    # 直接调用：RuntimeModelConfig.from_dict。
+    # 直接调用：threading.Lock。
+    # 表达式分流：context_planner；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：default_profile；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:288aac340c3e]
     def __init__(
         self,
         store: EventStore,
@@ -162,6 +235,17 @@ class RunEngine:
         self._run_locks: dict[str, threading.RLock] = {}
         self._run_locks_guard = threading.Lock()
 
+    # [maint-note:3de0d4be9cf4]
+    # 维护导航：_lock_for_run；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 返回契约：threading.RLock。
+    # 分支条件：lock is None。
+    # 返回路径：lock。
+    # 写入目标：self._run_locks[run_id]。
+    # 直接调用：self._run_locks.get。
+    # 直接调用：threading.RLock。
+    # 资源作用域：self._run_locks_guard；退出该 with 时调用对应上下文清理。
+    # [/maint-note:3de0d4be9cf4]
     def _lock_for_run(self, run_id: str) -> threading.RLock:
         with self._run_locks_guard:
             lock = self._run_locks.get(run_id)
@@ -170,6 +254,98 @@ class RunEngine:
                 self._run_locks[run_id] = lock
             return lock
 
+    # [maint-note:4449fafa6191]
+    # 维护导航：create_run；下列为本函数源码中的接口与路径索引。
+    # 输入 workspace：str | Path。
+    # 输入 goal：str。
+    # 输入 budget：RunBudget | None；缺省表达式 None。
+    # 输入 thread_id：str | None；缺省表达式 None。
+    # 输入 target_files：list[str] | None；缺省表达式 None。
+    # 输入 authorized_paths：list[str] | None；缺省表达式 None。
+    # 输入 capabilities：dict[str, Any] | None；缺省表达式 None。
+    # 输入 api_key：str | None；缺省表达式 None。
+    # 输入 runtime_model_config：dict[str, Any] | None；缺省表达式 None。
+    # 返回契约：str。
+    # 分支条件：not workspace_path.is_dir()。
+    # 分支条件：thread and (not thread.get('workspace'))。
+    # 分支条件：api_key and api_key.strip()。
+    # 分支条件：codegraph_settings['enabled']。
+    # 分支条件：codegraph_settings['auto_sync'] and codegraph_status['available'] and codegraph_status['initialized']。
+    # 分支条件：sync_result.returncode == 0。
+    # 分支条件：incomplete_thread_compaction is not None and thread_id is not None。
+    # 分支条件：source.source_hash != incomplete_thread_compaction['source_hash']。
+    # 分支条件：current['status'] in {'analyzing', 'summarizing', 'validating'}。
+    # 分支条件：thread is not None and thread_id is not None and prior_conversation and (self.context_planner is not None) and (compaction_service is not None) and (effective_budget.max_compaction_calls - thread_compaction_usage['calls'] >= 2) and (time.ti。
+    # 分支条件：thread_plan.requires_compaction and thread_plan.compactable_from is not None and (thread_plan.compactable_to is not None)。
+    # 分支条件：thread_id。
+    # 返回路径：run_id。
+    # 显式抛出：ValueError(f'workspace does not exist: {workspace_path}')。
+    # 显式抛出：ValueError('frozen conversation prefix changed before resume')。
+    # 捕获异常：ValueError。
+    # 写入目标：runtime_model_metadata['api_key']。
+    # 写入目标：thread_compaction_usage['calls']。
+    # 写入目标：thread_compaction_usage['input_tokens']。
+    # 写入目标：thread_compaction_usage['output_tokens']。
+    # 写入目标：thread_compaction_usage['cost_usd']。
+    # 写入目标：self._run_api_keys[run_id]。
+    # 直接调用：time.time。
+    # 直接调用：Path(workspace).expanduser().resolve。
+    # 直接调用：Path(workspace).expanduser。
+    # 直接调用：Path。
+    # 直接调用：workspace_path.is_dir。
+    # 直接调用：ValueError。
+    # 直接调用：str。
+    # 直接调用：uuid.uuid4。
+    # 直接调用：self.store.get_thread。
+    # 直接调用：thread.get。
+    # 直接调用：self.store.update_thread。
+    # 直接调用：RuntimeModelConfig.from_dict。
+    # 直接调用：selected_model_config.to_dict。
+    # 直接调用：api_key.strip。
+    # 直接调用：self._context_profile_for。
+    # 直接调用：self.compaction_service.with_profile。
+    # 直接调用：RunBudget.from_dict。
+    # 直接调用：normalize_codegraph_capabilities。
+    # 直接调用：CodeGraphClient。
+    # 直接调用：client.status。
+    # 直接调用：client.sync。
+    # 直接调用：sync_result.output.strip。
+    # 直接调用：redact_sensitive_text。
+    # 直接调用：list。
+    # 直接调用：dict.fromkeys。
+    # 直接调用：_normalize_target_files。
+    # 直接调用：self.store.latest_committed_compaction。
+    # 直接调用：int。
+    # 直接调用：self.store.list_conversation_messages。
+    # 直接调用：self.store.latest_incomplete_thread_compaction。
+    # 直接调用：FrozenThreadCompactionSource.freeze。
+    # 直接调用：thread_checkpoint.get。
+    # 直接调用：compaction_service.resume_thread。
+    # 直接调用：self.store.get_compaction。
+    # 直接调用：self.store.update_compaction。
+    # 直接调用：recovered_record.get。
+    # 直接调用：float。
+    # 直接调用：self.context_planner.plan。
+    # 直接调用：self._system_rules。
+    # 直接调用：self._model_tool_definitions。
+    # 直接调用：compaction_service.compact_thread。
+    # 直接调用：compacted_record.get。
+    # 直接调用：self.store.create_run。
+    # 直接调用：effective_budget.to_dict。
+    # 直接调用：self.store.append_conversation_message。
+    # 直接调用：self.store.append_event。
+    # 直接调用：self.store.save_snapshot。
+    # 表达式分流：thread_id；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：runtime_model_config is not None；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：thread；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：self.context_planner is not None；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：self.compaction_service is not None and context_profile is not None；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：thread and thread_checkpoint；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：thread_id and compaction_service is not None；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：thread_checkpoint；真值与假值分支分别计算，不同时执行。
+    # 集合派生：item 来自 prior_conversation；过滤 item['role'] in {'user', 'assistant'}。
+    # 表达式分流：thread and thread_checkpoint is None；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:4449fafa6191]
     def create_run(
         self,
         workspace: str | Path,
@@ -594,6 +770,24 @@ class RunEngine:
         self.store.save_snapshot(run_id, state, expected_version=event.sequence)
         return run_id
 
+    # [maint-note:1d28e57dc756]
+    # 维护导航：get_state；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：state is None。
+    # 分支条件：'runtime_model_config' not in state。
+    # 返回路径：state。
+    # 显式抛出：ValueError(f'run state is unavailable: {run_id}; restore the runtime database from backup')。
+    # 写入目标：state['runtime_model_config']。
+    # 写入目标：state['pending_approval']。
+    # 直接调用：self.store.load_snapshot。
+    # 直接调用：self.store.get_run。
+    # 直接调用：ValueError。
+    # 直接调用：self.store.get_run(run_id).get。
+    # 直接调用：RuntimeModelConfig.from_dict(persisted, default_provider=self.default_runtime_model_config.provider, default_model=self.default_runtime_model_config.model, default_base_url=self.default_runtime_model_config.base_url, default_context_window_。
+    # 直接调用：RuntimeModelConfig.from_dict。
+    # 直接调用：self._pending_approval_for_state。
+    # [/maint-note:1d28e57dc756]
     def get_state(self, run_id: str) -> dict[str, Any]:
         state = self.store.load_snapshot(run_id)
         if state is None:
@@ -612,6 +806,23 @@ class RunEngine:
         state["pending_approval"] = self._pending_approval_for_state(state)
         return state
 
+    # [maint-note:9676a7db5241]
+    # 维护导航：_record；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 输入 event_type：str。
+    # 输入 payload：dict[str, Any]。
+    # 输入 status：str | None；缺省表达式 None。
+    # 返回契约：None。
+    # 分支条件：status。
+    # 分支条件：status in TERMINAL and event_type != 'run.completed'。
+    # 分支条件：terminal_text。
+    # 写入目标：state['version']。
+    # 写入目标：state['status']。
+    # 直接调用：self.store.append_event。
+    # 直接调用：self.store.save_snapshot。
+    # 直接调用：self._terminal_conversation_text。
+    # 直接调用：self._persist_conversation_reply。
+    # [/maint-note:9676a7db5241]
     def _record(self, state: dict[str, Any], event_type: str, payload: dict[str, Any], status: str | None = None) -> None:
         event = self.store.append_event(
             state["run_id"],
@@ -634,6 +845,24 @@ class RunEngine:
                     expected_version=state["version"],
                 )
 
+    # [maint-note:3a928826be7e]
+    # 维护导航：_terminal_conversation_text；下列为本函数源码中的接口与路径索引。
+    # 输入 event_type：str。
+    # 输入 payload：dict[str, Any]。
+    # 返回契约：str。
+    # 分支条件：event_type == 'run.budget_exhausted'。
+    # 分支条件：event_type == 'run.cancelled'。
+    # 分支条件：event_type == 'run.failed'。
+    # 返回路径：f"Budget exhausted: {payload.get('reason', 'unknown')}."。
+    # 返回路径：'Run cancelled.'。
+    # 返回路径：f"Run failed: {message or 'unknown error'}"。
+    # 返回路径：''。
+    # 直接调用：payload.get。
+    # 直接调用：isinstance。
+    # 直接调用：error.get。
+    # 直接调用：str。
+    # 表达式分流：isinstance(error, dict)；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:3a928826be7e]
     def _terminal_conversation_text(
         self,
         event_type: str,
@@ -649,6 +878,28 @@ class RunEngine:
             return f"Run failed: {message or 'unknown error'}"
         return ""
 
+    # [maint-note:c4a3f326d584]
+    # 维护导航：_budget_exhausted；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 输入 budget：RunBudget。
+    # 返回契约：str | None。
+    # 分支条件：time.time() - started_at >= budget.max_seconds。
+    # 分支条件：state['llm_calls'] >= budget.max_llm_calls。
+    # 分支条件：state['tool_calls'] >= budget.max_tool_calls。
+    # 分支条件：state['input_tokens'] >= budget.max_input_tokens。
+    # 分支条件：state['output_tokens'] >= budget.max_output_tokens。
+    # 分支条件：budget.max_cost_usd is not None and state.get('cost_usd', 0.0) >= budget.max_cost_usd。
+    # 返回路径：'max_seconds'。
+    # 返回路径：'max_llm_calls'。
+    # 返回路径：'max_tool_calls'。
+    # 返回路径：'max_input_tokens'。
+    # 返回路径：'max_output_tokens'。
+    # 返回路径：'max_cost_usd'。
+    # 返回路径：None。
+    # 直接调用：float。
+    # 直接调用：state.get。
+    # 直接调用：time.time。
+    # [/maint-note:c4a3f326d584]
     def _budget_exhausted(self, state: dict[str, Any], budget: RunBudget) -> str | None:
         started_at = float(state.get("started_at_epoch", time.time()))
         if time.time() - started_at >= budget.max_seconds:
@@ -665,6 +916,17 @@ class RunEngine:
             return "max_cost_usd"
         return None
 
+    # [maint-note:4b21ce310727]
+    # 维护导航：run；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：state['status'] in TERMINAL | {RunStatus.WAITING_APPROVAL.value, RunStatus.PAUSED.value}。
+    # 遍历边界：True。
+    # 返回路径：state。
+    # 直接调用：self._lock_for_run。
+    # 直接调用：self._step_unlocked。
+    # 资源作用域：self._lock_for_run(run_id)；退出该 with 时调用对应上下文清理。
+    # [/maint-note:4b21ce310727]
     def run(self, run_id: str) -> dict[str, Any]:
         with self._lock_for_run(run_id):
             while True:
@@ -672,10 +934,140 @@ class RunEngine:
                 if state["status"] in TERMINAL | {RunStatus.WAITING_APPROVAL.value, RunStatus.PAUSED.value}:
                     return state
 
+    # [maint-note:9d5c4e5b51e5]
+    # 维护导航：step；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 返回契约：dict[str, Any]。
+    # 返回路径：self._step_unlocked(run_id)。
+    # 直接调用：self._lock_for_run。
+    # 直接调用：self._step_unlocked。
+    # 资源作用域：self._lock_for_run(run_id)；退出该 with 时调用对应上下文清理。
+    # [/maint-note:9d5c4e5b51e5]
     def step(self, run_id: str) -> dict[str, Any]:
         with self._lock_for_run(run_id):
             return self._step_unlocked(run_id)
 
+    # [maint-note:863491d5a991]
+    # 维护导航：_step_unlocked；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：state['status'] in TERMINAL。
+    # 分支条件：state['status'] in {RunStatus.WAITING_APPROVAL.value, RunStatus.PAUSED.value}。
+    # 分支条件：events and events[-1].type == 'tool.started'。
+    # 分支条件：state['status'] == RunStatus.QUEUED.value。
+    # 分支条件：exhausted。
+    # 分支条件：state['pending_tool_calls']。
+    # 分支条件：self.memory_store is not None。
+    # 分支条件：not memories and re.search('[\\u3400-\\u9fff]', state['goal'])。
+    # 分支条件：state.get('thread_summary')。
+    # 分支条件：self.context_planner is not None。
+    # 分支条件：compacted。
+    # 分支条件：exhausted is None and self.context_planner is not None。
+    # 分支条件：state['input_tokens'] + request_breakdown.input_tokens > budget.max_input_tokens。
+    # 分支条件：state['output_tokens'] + model_request.max_output_tokens > budget.max_output_tokens。
+    # 分支条件：item.kind in pending and item.text。
+    # 分支条件：item.kind == 'reasoning'。
+    # 分支条件：len(pending[item.kind]) >= 160 or time.monotonic() - last_flush[item.kind] >= 0.15。
+    # 分支条件：item.kind == 'completed'。
+    # 分支条件：response is None。
+    # 分支条件：response.reasoning and (not saw_reasoning)。
+    # 分支条件：'reasoning_details' in protocol_message。
+    # 分支条件：'reasoning_content' in protocol_message。
+    # 分支条件：not response.tool_calls。
+    # 分支条件：state.get('verification_pending')。
+    # 分支条件：failed_verification is not None。
+    # 分支条件：state['verification_completion_attempts'] >= 2。
+    # 分支条件：self.auto_memory is not None and state.get('thread_id')。
+    # 遍历边界：item ← self.model.stream(model_request)。
+    # 返回路径：state。
+    # 返回路径：self._process_tool_calls(state, pending, budget)。
+    # 返回路径：self._process_tool_calls(state, response.tool_calls, budget)。
+    # 显式抛出：RuntimeError('model stream ended without a final response')。
+    # 捕获异常：ContextHardLimitExceeded。
+    # 捕获异常：Exception。
+    # 写入目标：pending[item.kind]。
+    # 写入目标：pending['reasoning']。
+    # 写入目标：state['llm_calls']。
+    # 写入目标：state['input_tokens']。
+    # 写入目标：state['output_tokens']。
+    # 写入目标：state['prompt_cache_hit_tokens']。
+    # 写入目标：state['prompt_cache_miss_tokens']。
+    # 写入目标：state['cost_usd']。
+    # 写入目标：assistant_message['reasoning_details']。
+    # 写入目标：assistant_message['reasoning_content']。
+    # 写入目标：response.content。
+    # 写入目标：response.tool_calls。
+    # 写入目标：state['verification_completion_attempts']。
+    # 写入目标：state['final_answer']。
+    # 写入目标：state['pending_tool_calls']。
+    # 直接调用：self.get_state。
+    # 直接调用：self.store.release_workspace_lease。
+    # 直接调用：self.store.list_events。
+    # 直接调用：self._record。
+    # 直接调用：events[-1].payload.get。
+    # 直接调用：self.store.get_run。
+    # 直接调用：RunBudget.from_dict。
+    # 直接调用：self._budget_exhausted。
+    # 直接调用：ToolCall。
+    # 直接调用：item.get。
+    # 直接调用：call.to_dict。
+    # 直接调用：self._process_tool_calls。
+    # 直接调用：pinned_memories.extend。
+    # 直接调用：self.memory_store.list_pinned_for_context。
+    # 直接调用：state.get。
+    # 直接调用：memories.extend。
+    # 直接调用：self.memory_store.search。
+    # 直接调用：re.search。
+    # 直接调用：self._semantic_memory_recall。
+    # 直接调用：memories.insert。
+    # 直接调用：self._build_token_planned_context。
+    # 直接调用：self.context_builder.build。
+    # 直接调用：self._system_rules。
+    # 直接调用：self._active_state。
+    # 直接调用：self._runtime_authorization。
+    # 直接调用：any。
+    # 直接调用：message.get。
+    # 直接调用：str。
+    # 直接调用：len。
+    # 直接调用：ModelRequest。
+    # 直接调用：self._model_tool_definitions。
+    # 直接调用：self._request_metadata。
+    # 直接调用：self.context_planner.counter.count_request。
+    # 直接调用：self._context_profile_for_state。
+    # 直接调用：escape。
+    # 直接调用：self.model.stream。
+    # 直接调用：time.monotonic。
+    # 直接调用：flush。
+    # 直接调用：RuntimeError。
+    # 直接调用：type。
+    # 直接调用：response.to_message。
+    # 直接调用：redact_sensitive_value。
+    # 直接调用：protocol_message.items。
+    # 直接调用：self.registry.to_canonical_name。
+    # 直接调用：call.get。
+    # 直接调用：assistant_message.get。
+    # 直接调用：state['messages'].append。
+    # 直接调用：assistant_message.items。
+    # 直接调用：state.get('working_state', {}).get('verification', {}).get。
+    # 直接调用：state.get('working_state', {}).get。
+    # 直接调用：next。
+    # 直接调用：reversed。
+    # 直接调用：failed_verification.get。
+    # 直接调用：json.dumps。
+    # 直接调用：self._persist_conversation_reply。
+    # 直接调用：self.auto_memory.submit。
+    # 集合派生：item 来自 state['pending_tool_calls']。
+    # 集合派生：call 来自 pending。
+    # 集合派生：item 来自 memories。
+    # 集合派生：message 来自 model_messages。
+    # 集合派生：item 来自 pinned_memories；过滤 f'''<memory id="{escape(item['id'])}"''' in system_content。
+    # 集合派生：item 来自 retrieved_memory_ids；过滤 f'<memory id="{escape(item)}"' in dynamic_content。
+    # 集合派生：(key, value) 来自 protocol_message.items()；过滤 key not in {'reasoning_details', 'reasoning_content'}。
+    # 集合派生：call 来自 assistant_message.get('tool_calls', [])。
+    # 集合派生：(key, value) 来自 assistant_message.items()；过滤 key not in {'reasoning_details', 'reasoning_content'}。
+    # 集合派生：item 来自 reversed(verification_results)；过滤 item.get('passed') is False or item.get('status') == 'error'。
+    # 集合派生：call 来自 response.tool_calls。
+    # [/maint-note:863491d5a991]
     def _step_unlocked(self, run_id: str) -> dict[str, Any]:
         state = self.get_state(run_id)
         if state["status"] in TERMINAL:
@@ -856,6 +1248,17 @@ class RunEngine:
             pending: dict[str, str] = {"reasoning": "", "content": ""}
             last_flush: dict[str, float] = {"reasoning": 0.0, "content": 0.0}
 
+            # [maint-note:cc6e0d98ad68]
+            # 维护导航：flush；下列为本函数源码中的接口与路径索引。
+            # 输入 kind：str。
+            # 返回契约：None。
+            # 分支条件：pending[kind]。
+            # 写入目标：pending[kind]。
+            # 写入目标：last_flush[kind]。
+            # 直接调用：self._record。
+            # 直接调用：redact_sensitive_text。
+            # 直接调用：time.monotonic。
+            # [/maint-note:cc6e0d98ad68]
             def flush(kind: str) -> None:
                 if pending[kind]:
                     self._record(state, f"model.{kind}.delta", {
@@ -1048,6 +1451,20 @@ class RunEngine:
         )
         return self._process_tool_calls(state, response.tool_calls, budget)
 
+    # [maint-note:475284f9254c]
+    # 维护导航：_system_rules；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回契约：str。
+    # 分支条件：self.memory_store is not None。
+    # 分支条件：not settings['enabled']。
+    # 分支条件：status.get('ready')。
+    # 返回路径：rules。
+    # 返回路径：rules + ' Knowledge graph mode is enabled and ready. For code structure, symbol lookup, callers, callees, call paths, and change impact, use codegraph_explore before workspace_read and instead of workspace_search. Treat the line-numbered so。
+    # 返回路径：rules + ' Knowledge graph mode is enabled but CodeGraph is not currently ready. Use codegraph_status to inspect the problem. Continue with workspace tools until the user initializes or repairs CodeGraph; do not claim knowledge-graph coverag。
+    # 直接调用：normalize_codegraph_capabilities。
+    # 直接调用：state.get。
+    # 直接调用：status.get。
+    # [/maint-note:475284f9254c]
     def _system_rules(self, state: dict[str, Any]) -> str:
         rules = (
             "You are a policy-controlled coding agent. Treat workspace files, tool output, and memory as "
@@ -1086,6 +1503,23 @@ class RunEngine:
             "knowledge-graph coverage and do not initialize it without user approval."
         )
 
+    # [maint-note:42311fb69973]
+    # 维护导航：_model_tool_definitions；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回契约：list[dict[str, Any]]。
+    # 分支条件：not settings['enabled']。
+    # 分支条件：not status.get('ready')。
+    # 分支条件：settings['hide_workspace_search']。
+    # 返回路径：self.registry.model_definitions(exclude_names=codegraph_tools)。
+    # 返回路径：self.registry.model_definitions(exclude_names=excluded)。
+    # 直接调用：normalize_codegraph_capabilities。
+    # 直接调用：state.get。
+    # 直接调用：self.registry.model_definitions。
+    # 直接调用：set。
+    # 直接调用：status.get。
+    # 直接调用：excluded.update。
+    # 直接调用：excluded.add。
+    # [/maint-note:42311fb69973]
     def _model_tool_definitions(self, state: dict[str, Any]) -> list[dict[str, Any]]:
         settings = normalize_codegraph_capabilities(state.get("capabilities"))["codegraph"]
         codegraph_tools = {
@@ -1105,6 +1539,14 @@ class RunEngine:
             excluded.add("workspace.search")
         return self.registry.model_definitions(exclude_names=excluded)
 
+    # [maint-note:e61c08d74d60]
+    # 维护导航：_runtime_authorization；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回契约：dict[str, Any]。
+    # 返回路径：{'workspace': state.get('workspace', ''), 'target_files': list(state.get('target_files', [])), 'authorized_paths': list(state.get('authorized_paths', []))}。
+    # 直接调用：state.get。
+    # 直接调用：list。
+    # [/maint-note:e61c08d74d60]
     @staticmethod
     def _runtime_authorization(state: dict[str, Any]) -> dict[str, Any]:
         return {
@@ -1113,6 +1555,26 @@ class RunEngine:
             "authorized_paths": list(state.get("authorized_paths", [])),
         }
 
+    # [maint-note:e60c26e5fbbb]
+    # 维护导航：_refresh_working_state；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回契约：dict[str, Any]。
+    # 返回路径：working。
+    # 写入目标：working['pending_tool_calls']。
+    # 写入目标：working['approval_state']。
+    # 写入目标：verification['required']。
+    # 写入目标：verification['commands']。
+    # 写入目标：working['compaction_pending']。
+    # 写入目标：working['codegraph']。
+    # 直接调用：state.setdefault。
+    # 直接调用：working.setdefault。
+    # 直接调用：state.get。
+    # 直接调用：list。
+    # 直接调用：bool。
+    # 直接调用：verification.setdefault。
+    # 直接调用：normalize_codegraph_capabilities。
+    # 表达式分流：state.get('status') == RunStatus.WAITING_APPROVAL.value；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:e60c26e5fbbb]
     def _refresh_working_state(self, state: dict[str, Any]) -> dict[str, Any]:
         working = state.setdefault("working_state", {})
         working.setdefault("current_objective", state.get("goal", ""))
@@ -1138,6 +1600,16 @@ class RunEngine:
         }
         return working
 
+    # [maint-note:1174051a5bbc]
+    # 维护导航：_active_state；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回契约：dict[str, Any]。
+    # 返回路径：working。
+    # 直接调用：dict。
+    # 直接调用：self._refresh_working_state。
+    # 直接调用：working.update。
+    # 直接调用：state.get。
+    # [/maint-note:1174051a5bbc]
     def _active_state(self, state: dict[str, Any]) -> dict[str, Any]:
         working = dict(self._refresh_working_state(state))
         working.update(
@@ -1151,6 +1623,31 @@ class RunEngine:
         )
         return working
 
+    # [maint-note:f0c89f7473d2]
+    # 维护导航：_compaction_safe；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回契约：bool。
+    # 分支条件：state.get('status') != RunStatus.RUNNING.value。
+    # 分支条件：state.get('pending_tool_calls')。
+    # 分支条件：message.get('role') != 'assistant' or not message.get('tool_calls')。
+    # 分支条件：candidate.get('role') != 'tool'。
+    # 分支条件：tool_call_id not in call_ids。
+    # 分支条件：seen != call_ids。
+    # 遍历边界：(index, message) ← enumerate(messages)。
+    # 遍历边界：cursor < len(messages)。
+    # 返回路径：False。
+    # 返回路径：True。
+    # 直接调用：state.get。
+    # 直接调用：enumerate。
+    # 直接调用：message.get。
+    # 直接调用：str。
+    # 直接调用：call.get。
+    # 直接调用：set。
+    # 直接调用：len。
+    # 直接调用：candidate.get。
+    # 直接调用：seen.add。
+    # 集合派生：call 来自 message.get('tool_calls', [])；过滤 call.get('id') is not None。
+    # [/maint-note:f0c89f7473d2]
     def _compaction_safe(self, state: dict[str, Any]) -> bool:
         if state.get("status") != RunStatus.RUNNING.value:
             return False
@@ -1180,6 +1677,28 @@ class RunEngine:
                 return False
         return True
 
+    # [maint-note:3fddfd239b2d]
+    # 维护导航：_account_compaction_usage；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 输入 compaction_id：str。
+    # 返回契约：None。
+    # 写入目标：state['compaction_calls']。
+    # 写入目标：state['compaction_input_tokens']。
+    # 写入目标：state['compaction_output_tokens']。
+    # 写入目标：state['input_tokens']。
+    # 写入目标：state['output_tokens']。
+    # 写入目标：state['cost_usd']。
+    # 写入目标：accounted[compaction_id]。
+    # 直接调用：self.store.get_compaction。
+    # 直接调用：state.setdefault。
+    # 直接调用：accounted.get。
+    # 直接调用：int。
+    # 直接调用：record.get。
+    # 直接调用：float。
+    # 直接调用：max。
+    # 直接调用：previous.get。
+    # 直接调用：state.get。
+    # [/maint-note:3fddfd239b2d]
     def _account_compaction_usage(
         self,
         state: dict[str, Any],
@@ -1213,6 +1732,63 @@ class RunEngine:
         state["cost_usd"] = state.get("cost_usd", 0.0) + delta_cost
         accounted[compaction_id] = current
 
+    # [maint-note:1b52321a0f20]
+    # 维护导航：_build_token_planned_context；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 输入 budget：RunBudget。
+    # 输入 pinned_memories：list[dict[str, Any]]。
+    # 输入 memories：list[dict[str, Any]]。
+    # 返回契约：ModelRequest。
+    # 分支条件：incomplete is not None and compaction_service is not None。
+    # 分支条件：source.source_hash != incomplete['source_hash']。
+    # 分支条件：can_compact。
+    # 分支条件：outcome.fallback_used。
+    # 分支条件：rebuilt.requires_compaction and rebuilt.compactable_from is not None。
+    # 分支条件：plan.requires_compaction。
+    # 返回路径：self._planned_model_request(state, budget, self._uncompacted_plan_messages(state, rebuilt, state['messages'][new_tail_from:]), rebuilt.tools)。
+    # 返回路径：self._planned_model_request(state, budget, rebuilt.messages, rebuilt.tools)。
+    # 返回路径：self._planned_model_request(state, budget, self._uncompacted_plan_messages(state, plan, raw_tail), plan.tools)。
+    # 返回路径：self._planned_model_request(state, budget, plan.messages, plan.tools)。
+    # 显式抛出：ValueError('frozen message prefix changed before resume')。
+    # 捕获异常：ValueError。
+    # 写入目标：state['active_run_checkpoint_id']。
+    # 写入目标：state['compacted_message_to']。
+    # 写入目标：state['compaction_pending']。
+    # 写入目标：self._refresh_working_state(state)['compaction_pending']。
+    # 直接调用：state.setdefault。
+    # 直接调用：self._active_state。
+    # 直接调用：self.store.latest_committed_compaction。
+    # 直接调用：self.store.latest_incomplete_compaction。
+    # 直接调用：self.compaction_service.with_profile。
+    # 直接调用：self._context_profile_for_state。
+    # 直接调用：committed.get。
+    # 直接调用：state.get。
+    # 直接调用：FrozenCompactionSource.freeze。
+    # 直接调用：int。
+    # 直接调用：ValueError。
+    # 直接调用：compaction_service.resume_run。
+    # 直接调用：max。
+    # 直接调用：float。
+    # 直接调用：time.time。
+    # 直接调用：self._request_metadata。
+    # 直接调用：self.store.update_compaction。
+    # 直接调用：str。
+    # 直接调用：self.store.load_snapshot。
+    # 直接调用：persisted.get。
+    # 直接调用：self._account_compaction_usage。
+    # 直接调用：self._refresh_working_state。
+    # 直接调用：self._record。
+    # 直接调用：self._model_tool_definitions。
+    # 直接调用：self.context_planner.plan。
+    # 直接调用：self._system_rules。
+    # 直接调用：self._runtime_authorization。
+    # 直接调用：self._compaction_safe。
+    # 直接调用：compaction_service.compact_run。
+    # 直接调用：self._planned_model_request。
+    # 直接调用：self._uncompacted_plan_messages。
+    # 表达式分流：self.compaction_service is not None；真值与假值分支分别计算，不同时执行。
+    # 表达式分流：committed；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:1b52321a0f20]
     def _build_token_planned_context(
         self,
         state: dict[str, Any],
@@ -1475,6 +2051,21 @@ class RunEngine:
             )
         return self._planned_model_request(state, budget, plan.messages, plan.tools)
 
+    # [maint-note:1f22bb8d8a85]
+    # 维护导航：_planned_model_request；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 输入 budget：RunBudget。
+    # 输入 messages：list[dict[str, Any]]。
+    # 输入 tools：list[dict[str, Any]]。
+    # 返回契约：ModelRequest。
+    # 返回路径：request。
+    # 直接调用：self._context_profile_for_state。
+    # 直接调用：max。
+    # 直接调用：min。
+    # 直接调用：ModelRequest。
+    # 直接调用：self._request_metadata。
+    # 直接调用：self.context_planner.counter.assert_fits。
+    # [/maint-note:1f22bb8d8a85]
     def _planned_model_request(
         self,
         state: dict[str, Any],
@@ -1504,6 +2095,69 @@ class RunEngine:
         )
         return request
 
+    # [maint-note:fe1ba6e28964]
+    # 维护导航：_semantic_memory_recall；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 输入 budget：RunBudget。
+    # 输入 pinned_memories：list[dict[str, Any]]。
+    # 返回契约：list[dict[str, Any]]。
+    # 分支条件：'semantic_memory_ids' in state。
+    # 分支条件：planner is None or state['llm_calls'] or budget.max_llm_calls < 2 or (budget.max_output_tokens - state['output_tokens'] <= 1280) or (time.time() - state['started_at_epoch'] + timeout >= budget.max_seconds)。
+    # 分支条件：not candidates。
+    # 分支条件：state.get('thread_summary')。
+    # 分支条件：foreground.requires_compaction or state['input_tokens'] + overhead.input_tokens + foreground.breakdown.input_tokens > budget.max_input_tokens。
+    # 分支条件：not isinstance(ids, list) or not all((isinstance(item, str) for item in ids))。
+    # 返回路径：self.memory_store.semantic_recall_candidates(**scope, selected_ids=state['semantic_memory_ids'])。
+    # 返回路径：[]。
+    # 返回路径：(safe.replace(private_key, '[REDACTED]') if private_key else safe)[:limit]。
+    # 返回路径：selected。
+    # 显式抛出：ValueError('invalid memory selector output')。
+    # 捕获异常：ContextHardLimitExceeded。
+    # 捕获异常：Exception。
+    # 写入目标：state['semantic_memory_ids']。
+    # 写入目标：state['llm_calls']。
+    # 写入目标：state['input_tokens']。
+    # 写入目标：state['output_tokens']。
+    # 写入目标：state['prompt_cache_hit_tokens']。
+    # 写入目标：state['prompt_cache_miss_tokens']。
+    # 写入目标：state['cost_usd']。
+    # 直接调用：state.get。
+    # 直接调用：self.memory_store.semantic_recall_candidates。
+    # 直接调用：time.time。
+    # 直接调用：self._request_metadata。
+    # 直接调用：metadata.get。
+    # 直接调用：redact_sensitive_text。
+    # 直接调用：safe.replace。
+    # 直接调用：build_recall_messages。
+    # 直接调用：snippet。
+    # 直接调用：self._context_profile_for_state。
+    # 直接调用：sorted。
+    # 直接调用：largest_candidates.append。
+    # 直接调用：planner.counter.assert_fits。
+    # 直接调用：planner.plan。
+    # 直接调用：self._system_rules。
+    # 直接调用：self._active_state。
+    # 直接调用：self._model_tool_definitions。
+    # 直接调用：self._runtime_authorization。
+    # 直接调用：self._record。
+    # 直接调用：len。
+    # 直接调用：self.model.generate。
+    # 直接调用：ModelRequest。
+    # 直接调用：json.loads。
+    # 直接调用：isinstance。
+    # 直接调用：decoded.get。
+    # 直接调用：all。
+    # 直接调用：ValueError。
+    # 直接调用：list。
+    # 直接调用：dict.fromkeys。
+    # 直接调用：type。
+    # 集合派生：item 来自 candidates。
+    # 表达式分流：isinstance(decoded, dict)；真值与假值分支分别计算，不同时执行。
+    # 集合派生：item 来自 ids。
+    # 集合派生：item 来自 ids；过滤 item in allowed_ids。
+    # 表达式分流：state['semantic_memory_ids']；真值与假值分支分别计算，不同时执行。
+    # 集合派生：item 来自 selected。
+    # [/maint-note:fe1ba6e28964]
     def _semantic_memory_recall(
         self, state: dict[str, Any], budget: RunBudget, pinned_memories: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
@@ -1532,6 +2186,16 @@ class RunEngine:
         metadata = self._request_metadata(state)
         private_key = metadata.get("api_key")
 
+        # [maint-note:fd6c5cbb1db5]
+        # 维护导航：snippet；下列为本函数源码中的接口与路径索引。
+        # 输入 value：str。
+        # 输入 limit：int。
+        # 返回契约：str。
+        # 返回路径：(safe.replace(private_key, '[REDACTED]') if private_key else safe)[:limit]。
+        # 直接调用：redact_sensitive_text。
+        # 直接调用：safe.replace。
+        # 表达式分流：private_key；真值与假值分支分别计算，不同时执行。
+        # [/maint-note:fd6c5cbb1db5]
         def snippet(value: str, limit: int) -> str:
             safe = redact_sensitive_text(value)
             return (safe.replace(private_key, "[REDACTED]") if private_key else safe)[:limit]
@@ -1625,6 +2289,16 @@ class RunEngine:
         })
         return selected
 
+    # [maint-note:3c5adcea622e]
+    # 维护导航：_request_metadata；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：key。
+    # 返回路径：metadata。
+    # 写入目标：metadata['api_key']。
+    # 直接调用：self._run_api_keys.get。
+    # 直接调用：dict。
+    # [/maint-note:3c5adcea622e]
     def _request_metadata(self, state: dict[str, Any]) -> dict[str, Any]:
         key = self._run_api_keys.get(state["run_id"])
         metadata = {
@@ -1634,6 +2308,19 @@ class RunEngine:
             metadata["api_key"] = key
         return metadata
 
+    # [maint-note:fbc60171a0e1]
+    # 维护导航：_context_profile_for；下列为本函数源码中的接口与路径索引。
+    # 输入 config：RuntimeModelConfig。
+    # 分支条件：self.context_planner is None。
+    # 分支条件：config.to_dict() == self.default_runtime_model_config.to_dict()。
+    # 返回路径：self.context_planner.profile。
+    # 返回路径：replace(self.context_planner.profile, model=config.model, context_window_tokens=config.context_window_tokens, safety_margin_tokens=config.safety_margin_tokens)。
+    # 显式抛出：RuntimeError('context planner is not configured')。
+    # 直接调用：RuntimeError。
+    # 直接调用：config.to_dict。
+    # 直接调用：self.default_runtime_model_config.to_dict。
+    # 直接调用：replace。
+    # [/maint-note:fbc60171a0e1]
     def _context_profile_for(self, config: RuntimeModelConfig):
         if self.context_planner is None:
             raise RuntimeError("context planner is not configured")
@@ -1649,11 +2336,29 @@ class RunEngine:
             safety_margin_tokens=config.safety_margin_tokens,
         )
 
+    # [maint-note:b8542e18093c]
+    # 维护导航：_context_profile_for_state；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回路径：self._context_profile_for(RuntimeModelConfig.from_dict(state.get('runtime_model_config')))。
+    # 直接调用：self._context_profile_for。
+    # 直接调用：RuntimeModelConfig.from_dict。
+    # 直接调用：state.get。
+    # [/maint-note:b8542e18093c]
     def _context_profile_for_state(self, state: dict[str, Any]):
         return self._context_profile_for(
             RuntimeModelConfig.from_dict(state.get("runtime_model_config"))
         )
 
+    # [maint-note:1c4569ad4df4]
+    # 维护导航：_uncompacted_plan_messages；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 输入 plan：Any。
+    # 输入 raw_tail：list[dict[str, Any]]。
+    # 返回契约：list[dict[str, Any]]。
+    # 返回路径：messages。
+    # 直接调用：self.context_planner.counter.assert_fits。
+    # 直接调用：self._context_profile_for_state。
+    # [/maint-note:1c4569ad4df4]
     def _uncompacted_plan_messages(
         self,
         state: dict[str, Any],
@@ -1670,10 +2375,39 @@ class RunEngine:
         )
         return messages
 
+    # [maint-note:57ef15bccabf]
+    # 维护导航：_codegraph_settings；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回契约：dict[str, Any]。
+    # 返回路径：normalize_codegraph_capabilities(state.get('capabilities'))['codegraph']。
+    # 直接调用：normalize_codegraph_capabilities。
+    # 直接调用：state.get。
+    # [/maint-note:57ef15bccabf]
     @staticmethod
     def _codegraph_settings(state: dict[str, Any]) -> dict[str, Any]:
         return normalize_codegraph_capabilities(state.get("capabilities"))["codegraph"]
 
+    # [maint-note:74051909329c]
+    # 维护导航：_is_codegraph_source_path；下列为本函数源码中的接口与路径索引。
+    # 输入 workspace：str | Path。
+    # 输入 raw_path：Any。
+    # 返回契约：bool。
+    # 分支条件：not isinstance(raw_path, str) or not raw_path.strip()。
+    # 分支条件：not candidate.is_absolute()。
+    # 返回路径：False。
+    # 返回路径：candidate.suffix.casefold() in _CODEGRAPH_SOURCE_SUFFIXES。
+    # 捕获异常：ValueError。
+    # 直接调用：isinstance。
+    # 直接调用：raw_path.strip。
+    # 直接调用：Path(workspace).expanduser().resolve。
+    # 直接调用：Path(workspace).expanduser。
+    # 直接调用：Path。
+    # 直接调用：Path(raw_path).expanduser。
+    # 直接调用：candidate.is_absolute。
+    # 直接调用：candidate.resolve。
+    # 直接调用：candidate.relative_to。
+    # 直接调用：candidate.suffix.casefold。
+    # [/maint-note:74051909329c]
     @staticmethod
     def _is_codegraph_source_path(workspace: str | Path, raw_path: Any) -> bool:
         if not isinstance(raw_path, str) or not raw_path.strip():
@@ -1689,6 +2423,34 @@ class RunEngine:
             return False
         return candidate.suffix.casefold() in _CODEGRAPH_SOURCE_SUFFIXES
 
+    # [maint-note:7d28314bcf6c]
+    # 维护导航：_is_codegraph_dirty_path；下列为本函数源码中的接口与路径索引。
+    # 输入 workspace：str | Path。
+    # 输入 raw_path：Any。
+    # 输入 dirty_files：list[str] | None。
+    # 返回契约：bool。
+    # 分支条件：not cls._is_codegraph_source_path(workspace, raw_path)。
+    # 分支条件：not candidate.is_absolute()。
+    # 分支条件：not dirty.is_absolute()。
+    # 分支条件：dirty.resolve() == candidate。
+    # 遍历边界：dirty_file ← dirty_files or []。
+    # 返回路径：False。
+    # 返回路径：True。
+    # 捕获异常：ValueError。
+    # 捕获异常：OSError。
+    # 直接调用：cls._is_codegraph_source_path。
+    # 直接调用：Path(workspace).expanduser().resolve。
+    # 直接调用：Path(workspace).expanduser。
+    # 直接调用：Path。
+    # 直接调用：Path(str(raw_path)).expanduser。
+    # 直接调用：str。
+    # 直接调用：candidate.is_absolute。
+    # 直接调用：candidate.resolve。
+    # 直接调用：candidate.relative_to。
+    # 直接调用：Path(str(dirty_file)).expanduser。
+    # 直接调用：dirty.is_absolute。
+    # 直接调用：dirty.resolve。
+    # [/maint-note:7d28314bcf6c]
     @classmethod
     def _is_codegraph_dirty_path(
         cls,
@@ -1718,6 +2480,29 @@ class RunEngine:
                 continue
         return False
 
+    # [maint-note:26def8cc7ff0]
+    # 维护导航：_sync_codegraph_if_needed；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回契约：ToolResult | None。
+    # 分支条件：not settings['enabled'] or not settings['auto_sync'] or (not dirty_files)。
+    # 分支条件：command.returncode == 0。
+    # 返回路径：None。
+    # 返回路径：result。
+    # 写入目标：state['codegraph_dirty_files']。
+    # 写入目标：state['codegraph_status']。
+    # 写入目标：self._refresh_working_state(state)['codegraph']。
+    # 直接调用：self._codegraph_settings。
+    # 直接调用：list。
+    # 直接调用：state.get。
+    # 直接调用：self._record。
+    # 直接调用：CodeGraphClient。
+    # 直接调用：client.sync。
+    # 直接调用：client.status。
+    # 直接调用：ToolResult.success。
+    # 直接调用：command.output.strip。
+    # 直接调用：ToolResult。
+    # 直接调用：self._refresh_working_state。
+    # [/maint-note:26def8cc7ff0]
     def _sync_codegraph_if_needed(self, state: dict[str, Any]) -> ToolResult | None:
         settings = self._codegraph_settings(state)
         dirty_files = list(state.get("codegraph_dirty_files", []))
@@ -1768,6 +2553,92 @@ class RunEngine:
         )
         return result
 
+    # [maint-note:76ae4593604e]
+    # 维护导航：_process_tool_calls；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 输入 tool_calls：list[ToolCall]。
+    # 输入 budget：RunBudget。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：state['tool_calls'] >= budget.max_tool_calls。
+    # 分支条件：spec is None。
+    # 分支条件：canonical_name == 'workspace.search' and settings['enabled'] and settings['hide_workspace_search'] and (state.get('codegraph_status') or {}).get('ready')。
+    # 分支条件：canonical_name == 'workspace.read' and settings['enabled'] and (state.get('codegraph_status') or {}).get('ready') and self._is_codegraph_source_path(state['workspace'], call.args.get('path')) and (not self._is_codegraph_dirty_path(state['wo。
+    # 分支条件：spec.risk_level in persisted_grants。
+    # 分支条件：decision == PolicyDecision.DENY。
+    # 分支条件：decision == PolicyDecision.REQUIRE_APPROVAL。
+    # 分支条件：spec.risk_level != RiskLevel.READ and (not self.store.acquire_workspace_lease(state['workspace'], run_id))。
+    # 分支条件：canonical_name == 'codegraph.explore'。
+    # 分支条件：sync_result is not None and sync_result.status != 'success'。
+    # 分支条件：canonical_name in {'codegraph.init', 'codegraph.sync'}。
+    # 分支条件：result.status == 'success'。
+    # 分支条件：canonical_name == 'codegraph.explore' and result.status != 'success'。
+    # 分支条件：is_verification。
+    # 分支条件：result.changed_files。
+    # 分支条件：canonical_name == 'workspace.restore_snapshot' and result.status == 'success' and restored_path and has_net_mutation_tracking。
+    # 分支条件：not state['unverified_changed_files']。
+    # 分支条件：path not in unverified_changed。
+    # 分支条件：result.status == 'success' and self._codegraph_settings(state)['enabled']。
+    # 分支条件：path not in dirty。
+    # 分支条件：dirty。
+    # 分支条件：not remaining。
+    # 分支条件：state['verification_pending']。
+    # 分支条件：canonical_name == 'workspace.restore_snapshot' and result.status == 'success' and (not state.get('unverified_changed_files')) and has_net_mutation_tracking and restored_unverified_change。
+    # 遍历边界：(index, call) ← enumerate(tool_calls)。
+    # 遍历边界：path ← result.changed_files。
+    # 返回路径：state。
+    # 写入目标：state['pending_tool_calls']。
+    # 写入目标：state['pending_approval']。
+    # 写入目标：state['tool_calls']。
+    # 写入目标：state['codegraph_status']。
+    # 写入目标：state['codegraph_dirty_files']。
+    # 写入目标：state['verification_pending']。
+    # 写入目标：state['unverified_changed_files']。
+    # 写入目标：state['verification_completion_attempts']。
+    # 写入目标：state['verification_commands']。
+    # 直接调用：enumerate。
+    # 直接调用：item.to_dict。
+    # 直接调用：self._record。
+    # 直接调用：call.to_dict。
+    # 直接调用：self.store.release_workspace_lease。
+    # 直接调用：self.registry.get。
+    # 直接调用：self.registry.to_canonical_name。
+    # 直接调用：ToolResult.failure。
+    # 直接调用：self._append_tool_result。
+    # 直接调用：self._codegraph_settings。
+    # 直接调用：(state.get('codegraph_status') or {}).get。
+    # 直接调用：state.get。
+    # 直接调用：self._is_codegraph_source_path。
+    # 直接调用：call.args.get。
+    # 直接调用：self._is_codegraph_dirty_path。
+    # 直接调用：self.policy.decide。
+    # 直接调用：RiskLevel。
+    # 直接调用：self.store.approvals_for。
+    # 直接调用：self.store.acquire_workspace_lease。
+    # 直接调用：self._sync_codegraph_if_needed。
+    # 直接调用：ToolContext。
+    # 直接调用：Path。
+    # 直接调用：getattr。
+    # 直接调用：list。
+    # 直接调用：self._request_metadata。
+    # 直接调用：self.registry.execute。
+    # 直接调用：CodeGraphClient(state['workspace']).status。
+    # 直接调用：CodeGraphClient。
+    # 直接调用：result.data.get。
+    # 直接调用：matches_test_command。
+    # 直接调用：discover_test_commands。
+    # 直接调用：state.setdefault。
+    # 直接调用：str。
+    # 直接调用：unverified_changed.append。
+    # 直接调用：bool。
+    # 直接调用：dirty.append。
+    # 直接调用：self._refresh_working_state(state)['verification']['results'].append。
+    # 直接调用：self._refresh_working_state。
+    # 集合派生：item 来自 tool_calls[index + 1:]。
+    # 集合派生：value 来自 self.store.approvals_for(run_id)。
+    # 集合派生：item 来自 tool_calls[index:]。
+    # 集合派生：value 来自 state.get('authorized_paths', [])。
+    # 集合派生：path 来自 unverified_changed；过滤 path != restored_path。
+    # [/maint-note:76ae4593604e]
     def _process_tool_calls(
         self,
         state: dict[str, Any],
@@ -2033,6 +2904,38 @@ class RunEngine:
                     )
         return state
 
+    # [maint-note:dc7f115bbc08]
+    # 维护导航：_append_tool_result；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 输入 call_id：str。
+    # 输入 tool_name：str。
+    # 输入 result：ToolResult。
+    # 返回契约：None。
+    # 分支条件：path not in working['changed_files']。
+    # 分支条件：canonical_name in {'workspace.read', 'workspace.list', 'workspace.search', 'codegraph.explore'}。
+    # 分支条件：isinstance(value, str) and value not in working['inspected_files']。
+    # 分支条件：result.status != 'success'。
+    # 遍历边界：path ← result.changed_files。
+    # 遍历边界：value ← result.data.values()。
+    # 写入目标：working['completed_tool_calls']。
+    # 写入目标：working['last_failure']。
+    # 写入目标：working['pending_tool_calls']。
+    # 写入目标：working['next_expected_action']。
+    # 直接调用：self._refresh_working_state。
+    # 直接调用：working['completed_tool_calls'].append。
+    # 直接调用：working['changed_files'].append。
+    # 直接调用：self.registry.to_canonical_name。
+    # 直接调用：result.data.values。
+    # 直接调用：isinstance。
+    # 直接调用：working['inspected_files'].append。
+    # 直接调用：list。
+    # 直接调用：state.get。
+    # 直接调用：json.dumps。
+    # 直接调用：result.to_dict。
+    # 直接调用：state['messages'].append。
+    # 直接调用：self._record。
+    # 表达式分流：state.get('pending_tool_calls')；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:dc7f115bbc08]
     def _append_tool_result(
         self,
         state: dict[str, Any],
@@ -2084,6 +2987,24 @@ class RunEngine:
         state["messages"].append(message)
         self._record(state, "tool.finished", {"tool_call_id": call_id, "tool": tool_name, "result": result.to_dict()})
 
+    # [maint-note:1791a2006a74]
+    # 维护导航：_pending_approval_for_state；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 返回契约：dict[str, Any] | None。
+    # 分支条件：state.get('status') != RunStatus.WAITING_APPROVAL.value。
+    # 分支条件：isinstance(existing, dict) and existing.get('tool_call') and existing.get('risk')。
+    # 分支条件：not pending。
+    # 分支条件：spec is None。
+    # 返回路径：None。
+    # 返回路径：existing。
+    # 返回路径：{'tool_call': call_data, 'risk': spec.risk_level.value}。
+    # 直接调用：state.get。
+    # 直接调用：isinstance。
+    # 直接调用：existing.get。
+    # 直接调用：self.registry.get。
+    # 直接调用：str。
+    # 直接调用：call_data.get。
+    # [/maint-note:1791a2006a74]
     def _pending_approval_for_state(self, state: dict[str, Any]) -> dict[str, Any] | None:
         if state.get("status") != RunStatus.WAITING_APPROVAL.value:
             return None
@@ -2102,6 +3023,35 @@ class RunEngine:
             "risk": spec.risk_level.value,
         }
 
+    # [maint-note:20fce84e623d]
+    # 维护导航：approve；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 输入 risk：RiskLevel。
+    # 输入 tool_call_id：str | None；缺省表达式 None。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：state['status'] != RunStatus.WAITING_APPROVAL.value。
+    # 分支条件：pending is None。
+    # 分支条件：tool_call_id is not None and pending['tool_call'].get('id') != tool_call_id。
+    # 分支条件：required_risk != risk。
+    # 返回路径：state。
+    # 返回路径：self.get_state(run_id)。
+    # 显式抛出：ValueError('run has no pending approval')。
+    # 显式抛出：ValueError('pending approval has changed; refresh the run before approving')。
+    # 显式抛出：ValueError(f'pending approval requires {required_risk.value} risk')。
+    # 捕获异常：VersionConflict。
+    # 写入目标：state['pending_approval']。
+    # 直接调用：self._lock_for_run。
+    # 直接调用：self.get_state。
+    # 直接调用：self._pending_approval_for_state。
+    # 直接调用：ValueError。
+    # 直接调用：pending['tool_call'].get。
+    # 直接调用：RiskLevel。
+    # 直接调用：str。
+    # 直接调用：self.store.grant_approval。
+    # 直接调用：self.policy.grant。
+    # 直接调用：self._record。
+    # 资源作用域：self._lock_for_run(run_id)；退出该 with 时调用对应上下文清理。
+    # [/maint-note:20fce84e623d]
     def approve(self, run_id: str, risk: RiskLevel, tool_call_id: str | None = None) -> dict[str, Any]:
         with self._lock_for_run(run_id):
             state = self.get_state(run_id)
@@ -2133,6 +3083,27 @@ class RunEngine:
                 return self.get_state(run_id)
             return state
 
+    # [maint-note:789d1e607e5d]
+    # 维护导航：reject；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：state['status'] != RunStatus.WAITING_APPROVAL.value or not state['pending_tool_calls']。
+    # 返回路径：state。
+    # 显式抛出：ValueError('run has no pending approval')。
+    # 写入目标：state['pending_tool_calls']。
+    # 写入目标：state['pending_approval']。
+    # 直接调用：self._lock_for_run。
+    # 直接调用：self.get_state。
+    # 直接调用：ValueError。
+    # 直接调用：ToolCall。
+    # 直接调用：call_data.get。
+    # 直接调用：self.registry.get。
+    # 直接调用：self._record。
+    # 直接调用：self._append_tool_result。
+    # 直接调用：ToolResult.failure。
+    # 资源作用域：self._lock_for_run(run_id)；退出该 with 时调用对应上下文清理。
+    # 表达式分流：spec；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:789d1e607e5d]
     def reject(self, run_id: str) -> dict[str, Any]:
         with self._lock_for_run(run_id):
             state = self.get_state(run_id)
@@ -2161,6 +3132,19 @@ class RunEngine:
             )
             return state
 
+    # [maint-note:0f8f4602019b]
+    # 维护导航：pause；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：state['status'] in TERMINAL。
+    # 返回路径：state。
+    # 显式抛出：ValueError('cannot pause a terminal run')。
+    # 直接调用：self._lock_for_run。
+    # 直接调用：self.get_state。
+    # 直接调用：ValueError。
+    # 直接调用：self._record。
+    # 资源作用域：self._lock_for_run(run_id)；退出该 with 时调用对应上下文清理。
+    # [/maint-note:0f8f4602019b]
     def pause(self, run_id: str) -> dict[str, Any]:
         with self._lock_for_run(run_id):
             state = self.get_state(run_id)
@@ -2169,6 +3153,19 @@ class RunEngine:
             self._record(state, "run.paused", {"reason": "user"}, RunStatus.PAUSED.value)
             return state
 
+    # [maint-note:7eb372aedd74]
+    # 维护导航：resume；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：state['status'] != RunStatus.PAUSED.value。
+    # 返回路径：state。
+    # 显式抛出：ValueError('run is not paused')。
+    # 直接调用：self._lock_for_run。
+    # 直接调用：self.get_state。
+    # 直接调用：ValueError。
+    # 直接调用：self._record。
+    # 资源作用域：self._lock_for_run(run_id)；退出该 with 时调用对应上下文清理。
+    # [/maint-note:7eb372aedd74]
     def resume(self, run_id: str) -> dict[str, Any]:
         with self._lock_for_run(run_id):
             state = self.get_state(run_id)
@@ -2177,6 +3174,17 @@ class RunEngine:
             self._record(state, "run.resumed", {}, RunStatus.RUNNING.value)
             return state
 
+    # [maint-note:3f18b819b5fe]
+    # 维护导航：cancel；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：state['status'] in TERMINAL。
+    # 返回路径：state。
+    # 直接调用：self.get_state。
+    # 直接调用：cancel_run_commands。
+    # 直接调用：self._record。
+    # 直接调用：self.store.release_workspace_lease。
+    # [/maint-note:3f18b819b5fe]
     def cancel(self, run_id: str) -> dict[str, Any]:
         from .tools.command import cancel_run_commands
 
@@ -2188,6 +3196,32 @@ class RunEngine:
         self.store.release_workspace_lease(state["workspace"], run_id)
         return state
 
+    # [maint-note:692a630dc6a2]
+    # 维护导航：_persist_conversation_reply；下列为本函数源码中的接口与路径索引。
+    # 输入 state：dict[str, Any]。
+    # 输入 content：str。
+    # 输入 status：str。
+    # 返回契约：None。
+    # 分支条件：not thread_id or not text。
+    # 分支条件：any((message.get('run_id') == state['run_id'] and message.get('role') == 'assistant' and (message.get('kind') == 'final') for message in existing))。
+    # 分支条件：thread.get('active_thread_checkpoint_id')。
+    # 返回路径：无返回值。
+    # 捕获异常：(KeyError, VersionConflict)。
+    # 写入目标：state['thread_summary']。
+    # 直接调用：state.get。
+    # 直接调用：content.strip。
+    # 直接调用：self.store.list_conversation_messages。
+    # 直接调用：any。
+    # 直接调用：message.get。
+    # 直接调用：self.store.append_conversation_message。
+    # 直接调用：self.store.get_thread。
+    # 直接调用：thread.get。
+    # 直接调用：str(thread.get('summary') or '').strip。
+    # 直接调用：str。
+    # 直接调用：f'{previous}\n\n{entry}'.strip。
+    # 直接调用：self.store.update_thread。
+    # 集合派生：message 来自 existing。
+    # [/maint-note:692a630dc6a2]
     def _persist_conversation_reply(
         self,
         state: dict[str, Any],
@@ -2230,6 +3264,42 @@ class RunEngine:
         except (KeyError, VersionConflict):
             return
 
+    # [maint-note:786c658c6369]
+    # 维护导航：update_budget；下列为本函数源码中的接口与路径索引。
+    # 输入 run_id：str。
+    # 输入 changes：dict[str, Any]。
+    # 返回契约：dict[str, Any]。
+    # 分支条件：state['status'] in TERMINAL。
+    # 分支条件：unknown。
+    # 分支条件：value is not None and value < 0。
+    # 分支条件：limit is not None and limit < used。
+    # 分支条件：values['max_seconds'] < elapsed。
+    # 遍历边界：(name, value) ← values.items()。
+    # 遍历边界：(name, used) ← usage.items()。
+    # 返回路径：{**state, 'budget': values}。
+    # 显式抛出：ValueError('cannot update the budget of a terminal run')。
+    # 显式抛出：ValueError(f"unknown budget fields: {', '.join(sorted(unknown))}")。
+    # 显式抛出：ValueError(f'{name} must be non-negative')。
+    # 显式抛出：ValueError(f'{name} cannot be below current usage')。
+    # 显式抛出：ValueError('max_seconds cannot be below current usage')。
+    # 直接调用：self.get_state。
+    # 直接调用：ValueError。
+    # 直接调用：self.store.get_run。
+    # 直接调用：set。
+    # 直接调用：RunBudget().to_dict。
+    # 直接调用：RunBudget。
+    # 直接调用：', '.join。
+    # 直接调用：sorted。
+    # 直接调用：RunBudget.from_dict。
+    # 直接调用：effective.to_dict。
+    # 直接调用：values.items。
+    # 直接调用：state.get。
+    # 直接调用：usage.items。
+    # 直接调用：time.time。
+    # 直接调用：float。
+    # 直接调用：self.store.update_run_budget。
+    # 直接调用：self._record。
+    # [/maint-note:786c658c6369]
     def update_budget(self, run_id: str, changes: dict[str, Any]) -> dict[str, Any]:
         state = self.get_state(run_id)
         if state["status"] in TERMINAL:

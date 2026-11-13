@@ -20,12 +20,33 @@ from .utils import DS_FILE, PT_FILE, LC_PT_FILE, EVAL_FILE, RESULT_FILE, MODEL, 
 # -------------------------
 # IO
 # -------------------------
+# [maint-note:9977171de89d]
+# 维护导航：load_config；下列为本函数源码中的接口与路径索引。
+# 返回路径：config。
+# 直接调用：open。
+# 直接调用：os.path.join。
+# 直接调用：os.path.dirname。
+# 直接调用：yaml.safe_load。
+# 资源作用域：open(os.path.join(os.path.dirname(__file__), 'config.yaml'), 'r', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:9977171de89d]
 def load_config():
     with open(os.path.join(os.path.dirname(__file__), "config.yaml"), "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
     return config
 
 
+# [maint-note:b495e4d7a8bd]
+# 维护导航：load_jsonl；下列为本函数源码中的接口与路径索引。
+# 输入 file_path：类型由调用方与函数体约束。
+# 分支条件：not line。
+# 遍历边界：line ← f。
+# 返回路径：data。
+# 直接调用：open。
+# 直接调用：line.strip。
+# 直接调用：data.append。
+# 直接调用：json.loads。
+# 资源作用域：open(file_path, 'r', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:b495e4d7a8bd]
 def load_jsonl(file_path):
     data = []
     with open(file_path, "r", encoding="utf-8") as f:
@@ -40,6 +61,39 @@ def load_jsonl(file_path):
 # -------------------------
 # C completion postprocess (aligned with Java rules)
 # -------------------------
+# [maint-note:804f625ad343]
+# 维护导航：process_c_completion；下列为本函数源码中的接口与路径索引。
+# 输入 completion：类型由调用方与函数体约束。
+# 输入 add_log：类型由调用方与函数体约束；缺省表达式 False。
+# 分支条件：not completion。
+# 分支条件：escaped。
+# 分支条件：ch == '\\' and (in_string or in_char)。
+# 分支条件：in_line_comment。
+# 分支条件：ch == '\n'。
+# 分支条件：add_log and len(result) < len(original)。
+# 分支条件：in_block_comment。
+# 分支条件：ch == '*' and nxt == '/'。
+# 分支条件：in_string。
+# 分支条件：ch == '"' and (not escaped)。
+# 分支条件：in_char。
+# 分支条件：ch == "'" and (not escaped)。
+# 分支条件：ch == '/' and nxt == '/'。
+# 分支条件：ch == '/' and nxt == '*'。
+# 分支条件：ch == '"'。
+# 分支条件：ch == "'"。
+# 分支条件：ch == ';'。
+# 遍历边界：(i, ch) ← enumerate(completion)。
+# 返回路径：''。
+# 返回路径：result。
+# 返回路径：original。
+# 直接调用：completion.strip。
+# 直接调用：enumerate。
+# 直接调用：len。
+# 直接调用：completion[:i].strip。
+# 直接调用：print。
+# 直接调用：completion[:i + 1].strip。
+# 表达式分流：i + 1 < len(completion)；真值与假值分支分别计算，不同时执行。
+# [/maint-note:804f625ad343]
 def process_c_completion(completion, add_log=False):
     """
     单行补全版后处理（适合 C/Java 风格单行语句补全）：
@@ -141,6 +195,22 @@ def process_c_completion(completion, add_log=False):
 # -------------------------
 # vLLM batched generation
 # -------------------------
+# [maint-note:14aa60796a3c]
+# 维护导航：generate_completion_batch_vllm；下列为本函数源码中的接口与路径索引。
+# 输入 llm：类型由调用方与函数体约束。
+# 输入 sampling_params：类型由调用方与函数体约束。
+# 输入 prompts：类型由调用方与函数体约束。
+# 分支条件：not prompts。
+# 遍历边界：out ← outputs。
+# 遍历边界：prompt ← prompts。
+# 返回路径：[]。
+# 返回路径：generations。
+# 捕获异常：Exception。
+# 直接调用：llm.generate。
+# 直接调用：generations.append。
+# 直接调用：process_c_completion。
+# 直接调用：print。
+# [/maint-note:14aa60796a3c]
 def generate_completion_batch_vllm(llm, sampling_params, prompts):
     """
     使用 vLLM 对一批 prompts 做生成（C后处理）
@@ -174,6 +244,18 @@ def generate_completion_batch_vllm(llm, sampling_params, prompts):
 # -------------------------
 # Metrics
 # -------------------------
+# [maint-note:a3b799d774c2]
+# 维护导航：compute_exact_match；下列为本函数源码中的接口与路径索引。
+# 输入 prediction：类型由调用方与函数体约束。
+# 输入 ground_truth：类型由调用方与函数体约束。
+# 分支条件：prediction is None。
+# 分支条件：ground_truth is None。
+# 返回路径：1 if str(prediction).strip() == str(ground_truth).strip() else 0。
+# 直接调用：str(prediction).strip。
+# 直接调用：str。
+# 直接调用：str(ground_truth).strip。
+# 表达式分流：str(prediction).strip() == str(ground_truth).strip()；真值与假值分支分别计算，不同时执行。
+# [/maint-note:a3b799d774c2]
 def compute_exact_match(prediction, ground_truth):
     if prediction is None:
         prediction = ""
@@ -182,6 +264,22 @@ def compute_exact_match(prediction, ground_truth):
     return 1 if str(prediction).strip() == str(ground_truth).strip() else 0
 
 
+# [maint-note:159d27d72f7b]
+# 维护导航：compute_edit_similarity；下列为本函数源码中的接口与路径索引。
+# 输入 prediction：类型由调用方与函数体约束。
+# 输入 ground_truth：类型由调用方与函数体约束。
+# 分支条件：prediction is None。
+# 分支条件：ground_truth is None。
+# 分支条件：max_len == 0。
+# 返回路径：1.0。
+# 返回路径：1.0 - edit_distance / max_len。
+# 直接调用：str(prediction).strip。
+# 直接调用：str。
+# 直接调用：str(ground_truth).strip。
+# 直接调用：Levenshtein.distance。
+# 直接调用：max。
+# 直接调用：len。
+# [/maint-note:159d27d72f7b]
 def compute_edit_similarity(prediction, ground_truth):
     if prediction is None:
         prediction = ""
@@ -203,6 +301,88 @@ def compute_edit_similarity(prediction, ground_truth):
 # -------------------------
 # Main (3-way eval)
 # -------------------------
+# [maint-note:5a0269f51af3]
+# 维护导航：main；下列为本函数源码中的接口与路径索引。
+# 分支条件：not os.path.exists(DS_FILE)。
+# 分支条件：not os.path.exists(PT_FILE)。
+# 分支条件：not os.path.exists(LC_PT_FILE)。
+# 分支条件：result_dir and (not os.path.exists(result_dir))。
+# 分支条件：mp_valid_idx。
+# 分支条件：lc_valid_idx。
+# 分支条件：raw_em == 0 and mp_em == 1。
+# 分支条件：raw_em == 0 and lc_em == 1。
+# 分支条件：printed_samples < max_print_samples。
+# 分支条件：improved_samples_mp。
+# 分支条件：improved_samples_lc。
+# 遍历边界：i ← tqdm(range(0, num_samples, batch_size), desc='处理批次')。
+# 遍历边界：(t, k) ← enumerate(mp_valid_idx)。
+# 遍历边界：(t, k) ← enumerate(lc_valid_idx)。
+# 遍历边界：(j, sid) ← enumerate(batch_ids)。
+# 返回路径：无返回值。
+# 返回路径：float(np.mean(xs)) if xs else 0.0。
+# 写入目标：mp_preds[k]。
+# 写入目标：lc_preds[k]。
+# 直接调用：argparse.ArgumentParser。
+# 直接调用：parser.add_argument。
+# 直接调用：parser.parse_args。
+# 直接调用：load_config。
+# 直接调用：print。
+# 直接调用：os.path.exists。
+# 直接调用：load_jsonl。
+# 直接调用：item.get。
+# 直接调用：MODEL.lower。
+# 直接调用：SamplingParams。
+# 直接调用：LLM。
+# 直接调用：os.path.dirname。
+# 直接调用：os.makedirs。
+# 直接调用：RESULT_FILE.replace。
+# 直接调用：EVAL_FILE.replace。
+# 直接调用：len。
+# 直接调用：tqdm。
+# 直接调用：range。
+# 直接调用：s.get。
+# 直接调用：model_prompt_dict.get。
+# 直接调用：lc_prompt_dict.get。
+# 直接调用：generate_completion_batch_vllm。
+# 直接调用：enumerate。
+# 直接调用：compute_exact_match。
+# 直接调用：compute_edit_similarity。
+# 直接调用：raw_exact_matches.append。
+# 直接调用：raw_edit_similarities.append。
+# 直接调用：mp_exact_matches.append。
+# 直接调用：mp_edit_similarities.append。
+# 直接调用：lc_exact_matches.append。
+# 直接调用：lc_edit_similarities.append。
+# 直接调用：dataset_dict.get。
+# 直接调用：improved_samples_mp.append。
+# 直接调用：sd.get。
+# 直接调用：improved_samples_lc.append。
+# 直接调用：raw_results.append。
+# 直接调用：mp_results.append。
+# 直接调用：lc_results.append。
+# 直接调用：float。
+# 直接调用：np.mean。
+# 直接调用：safe_mean。
+# 直接调用：open。
+# 直接调用：json.dump。
+# 直接调用：f.write。
+# 直接调用：write_eval。
+# 直接调用：IMP_FILE.replace。
+# 集合派生：item 来自 model_prompts。
+# 集合派生：item 来自 lc_prompts。
+# 集合派生：item 来自 dataset。
+# 集合派生：s 来自 batch。
+# 集合派生：id_ 来自 batch_ids。
+# 集合派生：(k, p) 来自 enumerate(batch_model_prompts)；过滤 p。
+# 集合派生：k 来自 mp_valid_idx。
+# 集合派生：(k, p) 来自 enumerate(batch_lc_prompts)；过滤 p。
+# 集合派生：k 来自 lc_valid_idx。
+# 资源作用域：open(raw_result_file, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 资源作用域：open(mp_result_file, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 资源作用域：open(lc_result_file, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 资源作用域：open(imp_mp_file, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 资源作用域：open(imp_lc_file, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:5a0269f51af3]
 def main():
     parser = argparse.ArgumentParser(description=f"评估{MODEL}模型的代码补全性能（vLLM版，三输入源）")
     parser.add_argument("--batch_size", type=int, default=8, help="批处理大小")
@@ -383,6 +563,14 @@ def main():
             lc_results.append({"id": sid, "pred": lc_pred, "gt": gt})
 
     # ========= 汇总指标 =========
+    # [maint-note:e71a3f8753f6]
+    # 维护导航：safe_mean；下列为本函数源码中的接口与路径索引。
+    # 输入 xs：类型由调用方与函数体约束。
+    # 返回路径：float(np.mean(xs)) if xs else 0.0。
+    # 直接调用：float。
+    # 直接调用：np.mean。
+    # 表达式分流：xs；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:e71a3f8753f6]
     def safe_mean(xs):
         return float(np.mean(xs)) if xs else 0.0
 
@@ -404,6 +592,17 @@ def main():
         json.dump(lc_results, f, ensure_ascii=False, indent=2)
 
     # ========= 保存三套 eval =========
+    # [maint-note:4bc74038f0bc]
+    # 维护导航：write_eval；下列为本函数源码中的接口与路径索引。
+    # 输入 path：类型由调用方与函数体约束。
+    # 输入 title：类型由调用方与函数体约束。
+    # 输入 em：类型由调用方与函数体约束。
+    # 输入 es：类型由调用方与函数体约束。
+    # 输入 n_used：类型由调用方与函数体约束。
+    # 直接调用：open。
+    # 直接调用：f.write。
+    # 资源作用域：open(path, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+    # [/maint-note:4bc74038f0bc]
     def write_eval(path, title, em, es, n_used):
         with open(path, "w", encoding="utf-8") as f:
             f.write(f"{title}\n")

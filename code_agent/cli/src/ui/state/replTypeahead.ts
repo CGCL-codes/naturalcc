@@ -9,6 +9,17 @@ export const MAX_TYPEAHEAD_CHARS = 256
  * UTF-16 surrogates are not scalar values and are dropped too, so the queue
  * only ever holds well-formed Unicode text.
  */
+// [maint-note:1c2fafe1871b]
+// 维护导航：extractTypeaheadText；下列为本函数源码中的接口与路径索引。
+// 输入 content：string。
+// 返回契约：string。
+// 分支条件：code >= 0xd800 && code <= 0xdfff。
+// 分支条件：(code >= 0x20 && code < 0x7f) || code >= 0xa0。
+// 遍历边界：const character ← content。
+// 返回路径：result。
+// 写入目标：result。
+// 直接调用：character.codePointAt。
+// [/maint-note:1c2fafe1871b]
 export function extractTypeaheadText(content: string): string {
   let result = ''
   for (const character of content) {
@@ -25,6 +36,20 @@ export function extractTypeaheadText(content: string): string {
  * limit and leave an unpaired half, so the cap counts characters, not code
  * units. Overflow drops the excess instead of growing without limit.
  */
+// [maint-note:dfe186f931ec]
+// 维护导航：appendTypeahead；下列为本函数源码中的接口与路径索引。
+// 输入 queue：string。
+// 输入 chunk：string。
+// 返回契约：string。
+// 分支条件：!chunk。
+// 分支条件：characters.length <= MAX_TYPEAHEAD_CHARS。
+// 返回路径：queue。
+// 返回路径：next。
+// 返回路径：characters.slice(0, MAX_TYPEAHEAD_CHARS).join('')。
+// 直接调用：Array.from。
+// 直接调用：characters.slice(0, MAX_TYPEAHEAD_CHARS).join。
+// 直接调用：characters.slice。
+// [/maint-note:dfe186f931ec]
 export function appendTypeahead(queue: string, chunk: string): string {
   if (!chunk) return queue
   const next = queue + chunk

@@ -47,6 +47,12 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def checkpoint_directory(suite: str) -> Path:
+    # A revised fixture can reuse case IDs but not prior predictions. Separate
+    # the entire directory, including the early "all scored" fast path.
+    return DATA / f"web-sonnet45-{suite}-{independent.DATASET_REVISION}"
+
+
 def safe_text(value: str) -> str:
     secret = os.environ.get("OPENROUTER_API_KEY", "").strip()
     return value.replace(secret, "[REDACTED]") if secret else value
@@ -256,6 +262,7 @@ def run(checkpoint: dict[str, Any], manifest: dict[str, Any], samples: list[dict
     if (config.get("provider"), config.get("model"), config.get("base_url", "").rstrip("/")) != ("openrouter", MODEL, "https://openrouter.ai/api/v1") or config.get("fallback_models"):
         raise ValueError("Web runtime defaults must be OpenRouter / Sonnet 4.5 / no fallback")
     protocol = {"model_config": config, "budget": BUDGET, "manifest_sha256": digest((DATA / "manifest.json").read_bytes()),
+                "dataset_revision": independent.DATASET_REVISION,
                 "projects": projects, "fixture_protocol": "one deterministic category fixture per project; labels outside workspace",
                 "base_url": base}
     by_function = suite.endswith("-hard")
@@ -354,14 +361,14 @@ def main() -> None:
     parser.add_argument("--base-url", default="http://127.0.0.1:7860")
     parser.add_argument("--workspace", type=Path, default=Path("/tmp/naturalcc-contract3-web-sources"))
     parser.add_argument("--suite", choices=("balanced", "independent", "balanced-hard", "independent-hard"), default="balanced",
-                        help="balanced is the recommended acceptance mix; independent is the held-out stress mix; *-hard add safe look-alike controls and shuffled order")
+                        help="Versioned teaching mixes; *-hard add safe look-alike controls and shuffled order")
     parser.add_argument("--limit", type=int, help="Only run the first N project/category groups (for a low-cost smoke test)")
     parser.add_argument("--retry-failed", action="store_true", help="Retry prior transient failed groups and continue the queue; attempts remain in checkpoint")
     parser.add_argument("--force-rerun", action="store_true", help="Run selected groups again even when scored; preserve prior attempts and replace the current score only after completion")
     parser.add_argument("--report-only", action="store_true")
     args = parser.parse_args()
     global OUT
-    OUT = DATA / f"web-sonnet45-{args.suite}"
+    OUT = checkpoint_directory(args.suite)
     OUT.mkdir(parents=True, exist_ok=True)
     with (OUT / "benchmark.lock").open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)

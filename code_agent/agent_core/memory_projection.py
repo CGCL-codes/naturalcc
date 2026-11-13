@@ -42,6 +42,16 @@ DURABILITY_LABELS = {
 }
 
 
+# [maint-note:6806dcc9a328]
+# 维护导航：_confidence_label；下列为本函数源码中的接口与路径索引。
+# 输入 value：float。
+# 返回契约：str。
+# 分支条件：value >= 0.85。
+# 分支条件：value >= 0.6。
+# 返回路径：'高可信'。
+# 返回路径：'中等可信'。
+# 返回路径：'低可信'。
+# [/maint-note:6806dcc9a328]
 def _confidence_label(value: float) -> str:
     if value >= 0.85:
         return "高可信"
@@ -50,6 +60,28 @@ def _confidence_label(value: float) -> str:
     return "低可信"
 
 
+# [maint-note:50896e738b05]
+# 维护导航：project_memory_review；下列为本函数源码中的接口与路径索引。
+# 输入 proposal：dict[str, Any]。
+# 输入 evidence：list[dict[str, Any]]。
+# 输入 target_memory：dict[str, Any] | None；缺省表达式 None。
+# 返回契约：dict[str, Any]。
+# 分支条件：proposal['verification'] in {'model_inferred', 'legacy_unverified'}。
+# 分支条件：proposal['confidence'] < 0.6。
+# 分支条件：status in {'review_ready', 'deferred'}。
+# 返回路径：{'proposal_id': proposal['id'], 'version': proposal['version'], 'status': status, 'title': proposal['subject'], 'summary': proposal['canonical_content'], 'operation': proposal['operation'], 'operation_label': OPERATION_LABELS[proposal['oper。
+# 直接调用：list。
+# 直接调用：proposal.get。
+# 直接调用：warnings.append。
+# 直接调用：KIND_LABELS.get。
+# 直接调用：_confidence_label。
+# 直接调用：float。
+# 直接调用：{'conversation_message': '来自对话消息', 'run_event': '来自任务事件', 'tool_result': '来自工具结果', 'verification_result': '来自验证结果', 'changed_file': '来自文件变更', 'manual_note': '来自用户备注', 'legacy_memory': '来自历史候选记忆'}.get。
+# 直接调用：VERIFICATION_LABELS.get。
+# 直接调用：dict.fromkeys。
+# 集合派生：item 来自 evidence。
+# 表达式分流：target_memory；真值与假值分支分别计算，不同时执行。
+# [/maint-note:50896e738b05]
 def project_memory_review(
     proposal: dict[str, Any],
     evidence: list[dict[str, Any]],

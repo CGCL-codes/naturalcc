@@ -10,15 +10,33 @@ import {
   truncateDisplayText,
 } from '../terminal/index.js'
 
+// [maint-note:a88df9723eac]
+// 数据契约导航：MarkdownTableVisualRow；字段含义以消费端校验为准。
+// 成员 segments：readonly MarkdownTableVisualSegment[]。
+// 成员 bold（可省略）：boolean。
+// 成员 role（可省略）：MarkdownTableRowRole。
+// [/maint-note:a88df9723eac]
 export interface MarkdownTableVisualRow {
   readonly segments: readonly MarkdownTableVisualSegment[]
   readonly bold?: boolean
   readonly role?: MarkdownTableRowRole
 }
 
+// [maint-note:4584b6ff25ee]
+// 数据契约导航：MarkdownTableRowRole；字段含义以消费端校验为准。
+// 类型组合：'border' | 'header' | 'body' | 'field'。
+// [/maint-note:4584b6ff25ee]
 export type MarkdownTableRowRole = 'border' | 'header' | 'body' | 'field'
+// [maint-note:aad09b4a1d95]
+// 数据契约导航：MarkdownTableSegmentRole；字段含义以消费端校验为准。
+// 类型组合：'border' | 'header' | 'auxiliary'。
+// [/maint-note:aad09b4a1d95]
 export type MarkdownTableSegmentRole = 'border' | 'header' | 'auxiliary'
 
+// [maint-note:89fff8ea5f3f]
+// 数据契约导航：MarkdownTableVisualSegment；字段含义以消费端校验为准。
+// 成员 visualRole（可省略）：MarkdownTableSegmentRole。
+// [/maint-note:89fff8ea5f3f]
 export interface MarkdownTableVisualSegment extends InlineSegment {
   readonly visualRole?: MarkdownTableSegmentRole
 }
@@ -34,6 +52,28 @@ const TERMINAL_TAB_SIZE = 8
  * It never parses source Markdown and never turns a prior terminal frame
  * back into table input.
  */
+// [maint-note:8e50dce4516c]
+// 维护导航：buildMarkdownTableRows；下列为本函数源码中的接口与路径索引。
+// 输入 block：MarkdownTableBlock。
+// 输入 width：number。
+// 返回契约：readonly MarkdownTableVisualRow[]。
+// 分支条件：availableCellWidth < minimums.reduce((sum, value) => sum + value, 0)。
+// 遍历边界：let rowIndex = 0; rowIndex < logicalRows.length; rowIndex += 1。
+// 返回路径：buildFieldRows(block, columnCount, safeWidth)。
+// 返回路径：rows。
+// 写入目标：rowIndex。
+// 直接调用：Number.isFinite。
+// 直接调用：Math.max。
+// 直接调用：Math.floor。
+// 直接调用：logicalRows.map。
+// 直接调用：Array.from。
+// 直接调用：minimums.reduce。
+// 直接调用：buildFieldRows。
+// 直接调用：allocateColumnWidths。
+// 直接调用：buildHorizontalRule。
+// 直接调用：rows.push。
+// 直接调用：buildLogicalRow。
+// [/maint-note:8e50dce4516c]
 export function buildMarkdownTableRows(
   block: MarkdownTableBlock,
   width: number,
@@ -77,6 +117,27 @@ export function buildMarkdownTableRows(
   return rows
 }
 
+// [maint-note:3e3b3e06fc83]
+// 维护导航：buildLogicalRow；下列为本函数源码中的接口与路径索引。
+// 输入 cells：readonly InlineSegment[][]。
+// 输入 widths：readonly number[]。
+// 输入 alignments：readonly MarkdownTableAlignment[]。
+// 输入 header：boolean。
+// 返回契约：MarkdownTableVisualRow[]。
+// 遍历边界：let physicalRow = 0; physicalRow < physicalRowCount; physicalRow += 1。
+// 遍历边界：let column = 0; column < widths.length; column += 1。
+// 返回路径：rows。
+// 写入目标：physicalRow。
+// 写入目标：column。
+// 直接调用：widths.map。
+// 直接调用：Math.max。
+// 直接调用：wrappedCells.map。
+// 直接调用：borderSegment。
+// 直接调用：appendSegment。
+// 直接调用：appendSegments。
+// 直接调用：padCell。
+// 直接调用：rows.push。
+// [/maint-note:3e3b3e06fc83]
 function buildLogicalRow(
   cells: readonly InlineSegment[][],
   widths: readonly number[],
@@ -104,6 +165,16 @@ function buildLogicalRow(
   return rows
 }
 
+// [maint-note:dc887e57795d]
+// 维护导航：buildHorizontalRule；下列为本函数源码中的接口与路径索引。
+// 输入 widths：readonly number[]。
+// 输入 position：'top' | 'middle' | 'bottom'。
+// 返回契约：MarkdownTableVisualRow。
+// 返回路径：{ segments: [borderSegment(text)], role: 'border' }。
+// 直接调用：widths.map(width => '─'.repeat(width + 2)).join。
+// 直接调用：widths.map。
+// 直接调用：borderSegment。
+// [/maint-note:dc887e57795d]
 function buildHorizontalRule(
   widths: readonly number[],
   position: 'top' | 'middle' | 'bottom',
@@ -115,10 +186,37 @@ function buildHorizontalRule(
   return { segments: [borderSegment(text)], role: 'border' }
 }
 
+// [maint-note:916f9b77a5f9]
+// 维护导航：borderSegment；下列为本函数源码中的接口与路径索引。
+// 输入 text：string。
+// 返回契约：MarkdownTableVisualSegment。
+// 返回路径：{ kind: 'text', text, visualRole: 'border' }。
+// [/maint-note:916f9b77a5f9]
 function borderSegment(text: string): MarkdownTableVisualSegment {
   return { kind: 'text', text, visualRole: 'border' }
 }
 
+// [maint-note:7a90fed45381]
+// 维护导航：buildFieldRows；下列为本函数源码中的接口与路径索引。
+// 输入 block：MarkdownTableBlock。
+// 输入 columnCount：number。
+// 输入 width：number。
+// 返回契约：MarkdownTableVisualRow[]。
+// 遍历边界：let column = 0; column < columnCount; column += 1。
+// 遍历边界：let rowIndex = 0; rowIndex < block.rows.length; rowIndex += 1。
+// 返回路径：rows。
+// 写入目标：column。
+// 写入目标：rowIndex。
+// 直接调用：wrapInlineSegments([ { kind: 'text', text: 'columns:', visualRole: 'auxiliary' }, ], width).map。
+// 直接调用：wrapInlineSegments。
+// 直接调用：inlineText(header).trim。
+// 直接调用：inlineText。
+// 直接调用：rows.push。
+// 直接调用：wrapInlineSegments([ { kind: 'text', text: `column ${column + 1}: `, visualRole: 'auxiliary' }, ...visibleHeader.map(segment => ({ ...segment, visualRole: 'header' as const })), ], width).map。
+// 直接调用：visibleHeader.map。
+// 直接调用：wrapInlineSegments([ { kind: 'text', text: `row ${rowIndex + 1}:`, visualRole: 'auxiliary' }, ], width).map。
+// 直接调用：wrapInlineSegments([ { kind: 'text', text: `column ${column + 1}: `, visualRole: 'auxiliary' }, ...(inlineText(value) ? value : [{ kind: 'text' as const, text: '(empty)' }]), ], width).map。
+// [/maint-note:7a90fed45381]
 function buildFieldRows(
   block: MarkdownTableBlock,
   columnCount: number,
@@ -154,6 +252,24 @@ function buildFieldRows(
   return rows
 }
 
+// [maint-note:cde21290587f]
+// 维护导航：allocateColumnWidths；下列为本函数源码中的接口与路径索引。
+// 输入 minimums：readonly number[]。
+// 输入 desired：readonly number[]。
+// 输入 available：number。
+// 返回契约：number[]。
+// 分支条件：(widths[column] ?? 1) >= (desired[column] ?? 1)。
+// 分支条件：!changed。
+// 遍历边界：remaining > 0。
+// 遍历边界：let column = 0; column < widths.length && remaining > 0; column += 1。
+// 返回路径：widths。
+// 写入目标：column。
+// 写入目标：widths[column]。
+// 写入目标：remaining。
+// 写入目标：changed。
+// 直接调用：Math.max。
+// 直接调用：widths.reduce。
+// [/maint-note:cde21290587f]
 function allocateColumnWidths(
   minimums: readonly number[],
   desired: readonly number[],
@@ -174,6 +290,19 @@ function allocateColumnWidths(
   return widths
 }
 
+// [maint-note:c1ffda3f9b22]
+// 维护导航：padCell；下列为本函数源码中的接口与路径索引。
+// 输入 segments：readonly MarkdownTableVisualSegment[]。
+// 输入 width：number。
+// 输入 alignment：MarkdownTableAlignment。
+// 返回契约：MarkdownTableVisualSegment[]。
+// 返回路径：[ ...(left > 0 ? [{ kind: 'text' as const, text: ' '.repeat(left) }] : []), ...segments, ...(right > 0 ? [{ kind: 'text' as const, text: ' '.repeat(right) }] : []), ]。
+// 直接调用：Math.max。
+// 直接调用：displayLineWidth。
+// 直接调用：inlineText。
+// 直接调用：Math.floor。
+// 直接调用：' '.repeat。
+// [/maint-note:c1ffda3f9b22]
 function padCell(
   segments: readonly MarkdownTableVisualSegment[],
   width: number,
@@ -191,12 +320,48 @@ function padCell(
   ]
 }
 
+// [maint-note:0bfe139294f8]
+// 维护导航：wrapInlineSegments；下列为本函数源码中的接口与路径索引。
+// 输入 segments：readonly MarkdownTableVisualSegment[]。
+// 输入 width：number。
+// 返回契约：MarkdownTableVisualRow[]。
+// 分支条件：grapheme.text === '\n'。
+// 分支条件：grapheme.text === '\t'。
+// 分支条件：currentWidth > 0 && currentWidth + tabWidth > safeWidth。
+// 分支条件：spaces > 0。
+// 分支条件：currentWidth >= safeWidth。
+// 分支条件：graphemeWidth > safeWidth。
+// 分支条件：currentWidth > 0。
+// 分支条件：currentWidth > 0 && currentWidth + graphemeWidth > safeWidth。
+// 分支条件：current.length > 0 || rows.length === 0。
+// 遍历边界：const grapheme ← styledGraphemes(segments)。
+// 返回路径：rows。
+// 写入目标：currentWidth。
+// 直接调用：Math.max。
+// 直接调用：Math.floor。
+// 直接调用：styledGraphemes。
+// 直接调用：finish。
+// 直接调用：Math.min。
+// 直接调用：appendSegment。
+// 直接调用：withText。
+// 直接调用：' '.repeat。
+// 直接调用：displayLineWidth。
+// 直接调用：truncateDisplayText。
+// 直接调用：appendSegments。
+// [/maint-note:0bfe139294f8]
 function wrapInlineSegments(segments: readonly MarkdownTableVisualSegment[], width: number): MarkdownTableVisualRow[] {
   const safeWidth = Math.max(1, Math.floor(width))
   const rows: MarkdownTableVisualRow[] = []
   let current: MarkdownTableVisualSegment[] = []
   let currentWidth = 0
 
+  // [maint-note:0242c5e5b5b0]
+  // 维护导航：finish；下列为本函数源码中的接口与路径索引。
+  // 返回契约：void。
+  // 写入目标：current。
+  // 写入目标：currentWidth。
+  // 直接调用：rows.push。
+  // [/maint-note:0242c5e5b5b0]
   const finish = (): void => {
     rows.push({ segments: current })
     current = []
@@ -238,6 +403,11 @@ function wrapInlineSegments(segments: readonly MarkdownTableVisualSegment[], wid
   return rows
 }
 
+// [maint-note:7b5867444a7c]
+// 数据契约导航：StyledGrapheme；字段含义以消费端校验为准。
+// 成员 text：string。
+// 成员 segments：readonly MarkdownTableVisualSegment[]。
+// [/maint-note:7b5867444a7c]
 interface StyledGrapheme {
   readonly text: string
   readonly segments: readonly MarkdownTableVisualSegment[]
@@ -248,6 +418,29 @@ interface StyledGrapheme {
  * each cluster. Markdown may place a style boundary between code points that
  * still form one terminal grapheme (for example emoji + ZWJ + emoji).
  */
+// [maint-note:6a6f21749885]
+// 维护导航：styledGraphemes；下列为本函数源码中的接口与路径索引。
+// 输入 segments：readonly MarkdownTableVisualSegment[]。
+// 返回契约：StyledGrapheme[]。
+// 分支条件：segment.text。
+// 遍历边界：const segment ← segments。
+// 遍历边界：const grapheme ← splitDisplayGraphemes(text)。
+// 遍历边界：spans[spanIndex] && spans[spanIndex]!.end <= graphemeStart。
+// 遍历边界：let index = spanIndex; spans[index] && spans[index]!.start < graphemeEnd; index += 1。
+// 返回路径：result。
+// 写入目标：text。
+// 写入目标：spanIndex。
+// 写入目标：index。
+// 写入目标：graphemeStart。
+// 直接调用：spans.push。
+// 直接调用：splitDisplayGraphemes。
+// 直接调用：Math.max。
+// 直接调用：Math.min。
+// 直接调用：appendSegment。
+// 直接调用：withText。
+// 直接调用：text.slice。
+// 直接调用：result.push。
+// [/maint-note:6a6f21749885]
 function styledGraphemes(segments: readonly MarkdownTableVisualSegment[]): StyledGrapheme[] {
   const spans: Array<{ start: number; end: number; segment: MarkdownTableVisualSegment }> = []
   let text = ''
@@ -282,20 +475,63 @@ function styledGraphemes(segments: readonly MarkdownTableVisualSegment[]): Style
   return result
 }
 
+// [maint-note:ba4083b8e3a6]
+// 维护导航：withText；下列为本函数源码中的接口与路径索引。
+// 输入 segment：MarkdownTableVisualSegment | undefined。
+// 输入 text：string。
+// 返回契约：MarkdownTableVisualSegment。
+// 返回路径：segment ? { ...segment, text } : { kind: 'text', text }。
+// [/maint-note:ba4083b8e3a6]
 function withText(segment: MarkdownTableVisualSegment | undefined, text: string): MarkdownTableVisualSegment {
   return segment ? { ...segment, text } : { kind: 'text', text }
 }
 
+// [maint-note:175bec1f1abe]
+// 维护导航：cellDisplayWidth；下列为本函数源码中的接口与路径索引。
+// 输入 segments：readonly MarkdownTableVisualSegment[]。
+// 返回契约：number。
+// 返回路径：displayWidth(expandDisplayTabs(inlineText(segments)))。
+// 直接调用：displayWidth。
+// 直接调用：expandDisplayTabs。
+// 直接调用：inlineText。
+// [/maint-note:175bec1f1abe]
 function cellDisplayWidth(segments: readonly MarkdownTableVisualSegment[]): number {
   return displayWidth(expandDisplayTabs(inlineText(segments)))
 }
 
+// [maint-note:68c5e5fdc89d]
+// 维护导航：widestCellGrapheme；下列为本函数源码中的接口与路径索引。
+// 输入 segments：readonly MarkdownTableVisualSegment[]。
+// 返回契约：number。
+// 返回路径：Math.max(1, ...splitDisplayGraphemes(expandDisplayTabs(inlineText(segments))) .filter(grapheme => grapheme !== '\n') .map(grapheme => displayLineWidth(grapheme)))。
+// 直接调用：Math.max。
+// 直接调用：splitDisplayGraphemes(expandDisplayTabs(inlineText(segments))) .filter(grapheme => grapheme !== '\n') .map。
+// 直接调用：splitDisplayGraphemes(expandDisplayTabs(inlineText(segments))) .filter。
+// 直接调用：splitDisplayGraphemes。
+// 直接调用：expandDisplayTabs。
+// 直接调用：inlineText。
+// [/maint-note:68c5e5fdc89d]
 function widestCellGrapheme(segments: readonly MarkdownTableVisualSegment[]): number {
   return Math.max(1, ...splitDisplayGraphemes(expandDisplayTabs(inlineText(segments)))
     .filter(grapheme => grapheme !== '\n')
     .map(grapheme => displayLineWidth(grapheme)))
 }
 
+// [maint-note:552346b309eb]
+// 维护导航：expandDisplayTabs；下列为本函数源码中的接口与路径索引。
+// 输入 value：string。
+// 返回契约：string。
+// 分支条件：grapheme === '\n'。
+// 分支条件：grapheme === '\t'。
+// 遍历边界：const grapheme ← splitDisplayGraphemes(value)。
+// 返回路径：result。
+// 写入目标：result。
+// 写入目标：column。
+// 直接调用：splitDisplayGraphemes。
+// 直接调用：' '.repeat。
+// 直接调用：Math.max。
+// 直接调用：displayLineWidth。
+// [/maint-note:552346b309eb]
 function expandDisplayTabs(value: string): string {
   let column = 0
   let result = ''
@@ -317,14 +553,42 @@ function expandDisplayTabs(value: string): string {
   return result
 }
 
+// [maint-note:25ebbb839715]
+// 维护导航：inlineText；下列为本函数源码中的接口与路径索引。
+// 输入 segments：readonly MarkdownTableVisualSegment[]。
+// 返回契约：string。
+// 返回路径：segments.map(segment => segment.text).join('')。
+// 直接调用：segments.map(segment => segment.text).join。
+// 直接调用：segments.map。
+// [/maint-note:25ebbb839715]
 function inlineText(segments: readonly MarkdownTableVisualSegment[]): string {
   return segments.map(segment => segment.text).join('')
 }
 
+// [maint-note:4dc4b7bde8dc]
+// 维护导航：appendSegments；下列为本函数源码中的接口与路径索引。
+// 输入 target：MarkdownTableVisualSegment[]。
+// 输入 segments：readonly MarkdownTableVisualSegment[]。
+// 返回契约：void。
+// 遍历边界：const segment ← segments。
+// 直接调用：appendSegment。
+// [/maint-note:4dc4b7bde8dc]
 function appendSegments(target: MarkdownTableVisualSegment[], segments: readonly MarkdownTableVisualSegment[]): void {
   for (const segment of segments) appendSegment(target, segment)
 }
 
+// [maint-note:23733db3fe67]
+// 维护导航：appendSegment；下列为本函数源码中的接口与路径索引。
+// 输入 target：MarkdownTableVisualSegment[]。
+// 输入 segment：MarkdownTableVisualSegment。
+// 返回契约：void。
+// 分支条件：!segment.text。
+// 分支条件：previous && previous.kind === segment.kind && previous.href === segment.href && previous.visualRole === segment.visualRole。
+// 返回路径：无返回值。
+// 写入目标：target[target.length - 1]。
+// 直接调用：target.at。
+// 直接调用：target.push。
+// [/maint-note:23733db3fe67]
 function appendSegment(target: MarkdownTableVisualSegment[], segment: MarkdownTableVisualSegment): void {
   if (!segment.text) return
   const previous = target.at(-1)

@@ -21,6 +21,15 @@ import { sanitizeTerminalText, wrapDisplayLines } from '../terminal/index.js'
  * light foreground instead of the old whole-first-line green. Timestamps,
  * message margins and other roles stay outside the surface.
  */
+// [maint-note:73a2f4040d5c]
+// 维护导航：UserBodyLines；下列为本函数源码中的接口与路径索引。
+// 输入 { content, width }：{ content: string; width: number }。
+// 返回路径：( <Box flexDirection="column"> {lines.map((line, index) => ( // height=1 pins one physical row per wrapped line: an internal blank // line of the user's content stays a surfaced body row instead of // collapsing, and no row can ever wrap di。
+// 直接调用：Math.max。
+// 直接调用：wrapDisplayLines。
+// 直接调用：sanitizeTerminalText。
+// 直接调用：lines.map。
+// [/maint-note:73a2f4040d5c]
 export function UserBodyLines({ content, width }: { content: string; width: number }) {
   const safeWidth = Math.max(1, width)
   const lines = wrapDisplayLines(`> ${sanitizeTerminalText(content)}`, safeWidth, { hard: true, wordWrap: false })

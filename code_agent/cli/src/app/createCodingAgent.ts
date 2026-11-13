@@ -32,6 +32,22 @@ import {
   type EnvironmentClock,
 } from './session/SessionEnvironmentContext.js'
 
+// [maint-note:81292e1e2f7d]
+// 数据契约导航：CreateCodingAgentOptions；字段含义以消费端校验为准。
+// 成员 modelClient（可省略）：ModelClient。
+// 成员 modelBudgetCapability（可省略）：ModelBudgetCapabilities & { readonly countInputTokens?: (body: Readonly<Record<string, unknown>>) => number }。
+// 成员 compactionProvider（可省略）：import('../agent/compaction/contracts.js').CompactionProvider。
+// 成员 tools（可省略）：ToolRegistry。
+// 成员 runner（可省略）：AgentRunner。
+// 成员 approvalProvider（可省略）：ApprovalProvider。
+// 成员 ripgrepRunner（可省略）：RipgrepRunner。
+// 成员 gitChangesBackend（可省略）：GitChangesBackend。
+// 成员 contextProviders（可省略）：readonly ContextProvider[]。
+// 成员 gitStatusSampler（可省略）：GitStatusSampler。
+// 成员 environmentClock（可省略）：EnvironmentClock。
+// 成员 ripgrepExecutable（可省略）：string。
+// 成员 signal（可省略）：AbortSignal。
+// [/maint-note:81292e1e2f7d]
 export interface CreateCodingAgentOptions extends CodingAgentConfigInput {
   modelClient?: ModelClient
   /** Trusted endpoint/model budget metadata; never inferred from the model name. */
@@ -58,6 +74,13 @@ export interface CreateCodingAgentOptions extends CodingAgentConfigInput {
   signal?: AbortSignal
 }
 
+// [maint-note:0a51dee89831]
+// 数据契约导航：CodingAgentApplication；字段含义以消费端校验为准。
+// 成员 config：ResolvedCodingAgentConfig。
+// 成员 profile：CodingAgentProfile。
+// 成员 sessionManager：SessionManager。
+// 成员 dispose：Promise<void>。
+// [/maint-note:0a51dee89831]
 export interface CodingAgentApplication {
   readonly config: ResolvedCodingAgentConfig
   readonly profile: CodingAgentProfile
@@ -65,6 +88,35 @@ export interface CodingAgentApplication {
   dispose(): Promise<void>
 }
 
+// [maint-note:df66b55a63a6]
+// 维护导航：createCodingAgent；下列为本函数源码中的接口与路径索引。
+// 输入 options：CreateCodingAgentOptions；缺省表达式 {}。
+// 返回契约：Promise<CodingAgentApplication>。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：!options.tools && !options.ripgrepRunner。
+// 分支条件：options.signal?.aborted。
+// 分支条件：!handedOff。
+// 返回路径：{ config, get profile() { const current = manager.current() if (!current) { throw new AgentError('config_error', 'The coding agent application has no active session') } return current.profile }, sessionManager: manager, dispose: () => manag。
+// 显式抛出：createAbortError()。
+// 显式抛出：new AgentError( 'config_error', `ripgrep is required to start the coding agent. Install rg and verify that 'rg --no-config --version' works: ${errorMessage(error)}`, )。
+// 写入目标：sessionManager。
+// 写入目标：handedOff。
+// 直接调用：throwIfAborted。
+// 直接调用：resolveCodingAgentConfig。
+// 直接调用：createModelClient。
+// 直接调用：validateRunBudgetCapabilities。
+// 直接调用：createRipgrepRunner。
+// 直接调用：ripgrepRunner.healthCheck。
+// 直接调用：createAbortError。
+// 直接调用：errorMessage。
+// 直接调用：createToolRegistry。
+// 直接调用：createCodingAgentContextProvider。
+// 直接调用：createSystemEnvironmentClock。
+// 直接调用：createToolPolicy。
+// 直接调用：createModelCompactionProvider。
+// 直接调用：manager.replace。
+// 直接调用：sessionManager?.dispose。
+// [/maint-note:df66b55a63a6]
 export async function createCodingAgent(
   options: CreateCodingAgentOptions = {},
 ): Promise<CodingAgentApplication> {
@@ -189,6 +241,13 @@ export async function createCodingAgent(
     handedOff = true
     return {
       config,
+      // [maint-note:2d0502676cab]
+      // 维护导航：profile；下列为本函数源码中的接口与路径索引。
+      // 分支条件：!current。
+      // 返回路径：current.profile。
+      // 显式抛出：new AgentError('config_error', 'The coding agent application has no active session')。
+      // 直接调用：manager.current。
+      // [/maint-note:2d0502676cab]
       get profile() {
         const current = manager.current()
         if (!current) {
@@ -204,6 +263,19 @@ export async function createCodingAgent(
   }
 }
 
+// [maint-note:9ca4b28d74da]
+// 维护导航：validateRunBudgetCapabilities；下列为本函数源码中的接口与路径索引。
+// 输入 budget：import('../agent/types/types.js').RunBudgetConfig | undefined。
+// 输入 client：ModelClient。
+// 返回契约：void。
+// 分支条件：!budget。
+// 分支条件：budget.maxCostMicrousd !== undefined。
+// 分支条件：budget.maxTotalTokens === undefined && budget.maxOutputTokensPerRequest === undefined。
+// 分支条件：!client.prepare || !capability?.contextWindowTokens || capability.inputTokenEstimation !== 'exact_tokenizer' || capability.outputLimit?.covers !== 'completion_and_reasoning'。
+// 返回路径：无返回值。
+// 显式抛出：new AgentError( 'config_error', 'maxCostMicrousd requires trusted pricing and retry accounting, which are not configured', )。
+// 显式抛出：new AgentError( 'config_error', 'Hard token budgets require exact input measurement, context metadata, provider output limits, and prepared dispatch support', )。
+// [/maint-note:9ca4b28d74da]
 function validateRunBudgetCapabilities(
   budget: import('../agent/types/types.js').RunBudgetConfig | undefined,
   client: ModelClient,
@@ -230,6 +302,14 @@ function validateRunBudgetCapabilities(
   }
 }
 
+// [maint-note:86dabfa0aaae]
+// 维护导航：throwIfAborted；下列为本函数源码中的接口与路径索引。
+// 输入 signal：AbortSignal（可省略）。
+// 返回契约：void。
+// 分支条件：signal?.aborted。
+// 显式抛出：createAbortError()。
+// 直接调用：createAbortError。
+// [/maint-note:86dabfa0aaae]
 function throwIfAborted(signal?: AbortSignal): void {
   if (signal?.aborted) throw createAbortError()
 }

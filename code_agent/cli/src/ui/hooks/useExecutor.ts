@@ -11,6 +11,22 @@ import {
 import { ExecutionOwner } from '../state/executionOwner.js'
 import { DeliveryDispatcher, DeliveryEnvelopeOwner, type DeliveryGate } from '../state/deliveryGate.js'
 
+// [maint-note:5d7961f328c8]
+// 数据契约导航：ExecutorDeps；字段含义以消费端校验为准。
+// 成员 sessionManager：SessionManager。
+// 成员 addMsg：Ctx['addMsg']。
+// 成员 addRunError：(runId: number, content: string) => void。
+// 成员 beginRun：(runId: number) => void。
+// 成员 handleAgentEvent：(runId: number, event: AgentEvent) => void。
+// 成员 finishRun：(runId: number) => void。
+// 成员 onRunStarted（可省略）：(runId: number) => void。
+// 成员 onRunEvent（可省略）：(runId: number, event: AgentEvent) => void。
+// 成员 onRunTerminal（可省略）：(runId: number, event: AgentEvent) => void。
+// 成员 onRunFinished（可省略）：(runId: number) => void。
+// 成员 approvalProvider（可省略）：ApprovalController。
+// 成员 deliveryGate（可省略）：DeliveryGate。
+// 成员 deliveryOwner（可省略）：DeliveryEnvelopeOwner。
+// [/maint-note:5d7961f328c8]
 interface ExecutorDeps {
   sessionManager: SessionManager
   addMsg: Ctx['addMsg']
@@ -35,6 +51,14 @@ interface ExecutorDeps {
   deliveryOwner?: DeliveryEnvelopeOwner
 }
 
+// [maint-note:ba5417807977]
+// 维护导航：useExecutor；下列为本函数源码中的接口与路径索引。
+// 输入 deps：ExecutorDeps。
+// 返回路径：{ loading: state.status === 'running', thinkTime: state.thinkTime, isStreaming: state.phase === 'streaming', approvalPending: state.approvalPending, execute, interrupt, resolveApproval, }。
+// 直接调用：useReducer。
+// 直接调用：useRef。
+// 直接调用：useCallback。
+// [/maint-note:ba5417807977]
 export function useExecutor(deps: ExecutorDeps) {
   const [state, dispatch] = useReducer(executorReducer, initialExecutorState)
   const ownerRef = useRef(new ExecutionOwner())
@@ -127,6 +151,13 @@ export function useExecutor(deps: ExecutorDeps) {
   }
 }
 
+// [maint-note:602afca55fa5]
+// 维护导航：formatError；下列为本函数源码中的接口与路径索引。
+// 输入 error：unknown。
+// 返回契约：string。
+// 返回路径：error instanceof Error ? error.message : String(error)。
+// 直接调用：String。
+// [/maint-note:602afca55fa5]
 function formatError(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }

@@ -16,6 +16,45 @@ export const initialAgentState = {
 };
 
 
+// [maint-note:6ccf112c34b8]
+// 维护导航：reduceAgentEvent；下列为本函数源码中的接口与路径索引。
+// 输入 state：类型由调用方与函数体约束。
+// 输入 event：类型由调用方与函数体约束。
+// 分支条件：event.sequence && event.sequence <= state.lastSequence。
+// 分支条件：event.type === "run.created"。
+// 分支条件：event.type === "run.started" || event.type === "run.resumed"。
+// 分支条件：event.type === "approval.requested"。
+// 分支条件：event.type === "approval.resolved"。
+// 分支条件：event.type === "tool.finished"。
+// 分支条件：event.type === "model.reasoning.delta"。
+// 分支条件：event.type === "model.content.delta"。
+// 分支条件：event.type === "verification.required"。
+// 分支条件：event.type === "verification.finished"。
+// 分支条件：event.type === "run.completed"。
+// 分支条件：event.type === "run.failed"。
+// 分支条件：event.type === "run.cancelled"。
+// 分支条件：event.type === "run.paused"。
+// 分支条件：event.type === "tool.uncertain"。
+// 分支条件：event.type === "run.budget_exhausted"。
+// 分支条件：next.status !== "waiting_approval"。
+// 返回路径：state。
+// 返回路径：next。
+// 写入目标：next.status。
+// 写入目标：next.budget。
+// 写入目标：next.pendingApproval。
+// 写入目标：next.changedFiles。
+// 写入目标：next.thinking。
+// 写入目标：next.streamedContent。
+// 写入目标：next.streamedContentCall。
+// 写入目标：next.verification。
+// 写入目标：next.finalAnswer。
+// 写入目标：next.uncertainTool。
+// 写入目标：next.budgetExhausted。
+// 直接调用：Array.from。
+// 直接调用：Number。
+// 直接调用：next.thinking.find。
+// 直接调用：next.thinking.map。
+// [/maint-note:6ccf112c34b8]
 export function reduceAgentEvent(state, event) {
   if (event.sequence && event.sequence <= state.lastSequence) return state;
   const next = {
@@ -83,10 +122,25 @@ export function reduceAgentEvent(state, event) {
 }
 
 
+// [maint-note:4d81989ed2e1]
+// 维护导航：reduceAgentEvents；下列为本函数源码中的接口与路径索引。
+// 输入 state：类型由调用方与函数体约束。
+// 输入 events：类型由调用方与函数体约束。
+// 返回路径：events.reduce(reduceAgentEvent, state)。
+// 直接调用：events.reduce。
+// [/maint-note:4d81989ed2e1]
 export function reduceAgentEvents(state, events) {
   return events.reduce(reduceAgentEvent, state);
 }
 
+// [maint-note:08ae9b9689dc]
+// 维护导航：hydrateAgentState；下列为本函数源码中的接口与路径索引。
+// 输入 runId：类型由调用方与函数体约束。
+// 输入 events：类型由调用方与函数体约束。
+// 输入 snapshot：类型由调用方与函数体约束。
+// 返回路径：{ ...state, status: snapshot.status, pendingApproval: snapshot.status === "waiting_approval" ? snapshot.pending_approval : null }。
+// 直接调用：reduceAgentEvents。
+// [/maint-note:08ae9b9689dc]
 export function hydrateAgentState(runId, events, snapshot) {
   const state = reduceAgentEvents({ ...initialAgentState, runId }, events);
   return {

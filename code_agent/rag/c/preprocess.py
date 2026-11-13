@@ -7,7 +7,24 @@ from .node_prompt import CProjectSearcher
 from .utils import DS_REPO_DIR, DS_FILE, DS_GRAPH_DIR
 
 
+# [maint-note:66013b8efed7]
+# 数据与行为导航：CProjectParser。
+# 继承接口：object。
+# [/maint-note:66013b8efed7]
 class CProjectParser(object):
+    # [maint-note:0e390529ba95]
+    # 维护导航：__init__；下列为本函数源码中的接口与路径索引。
+    # 写入目标：self.c_parser。
+    # 写入目标：self.file_pattern。
+    # 写入目标：self.header_pattern。
+    # 写入目标：self.source_pattern。
+    # 写入目标：self.proj_searcher。
+    # 写入目标：self.proj_dir。
+    # 写入目标：self.parse_res。
+    # 直接调用：CParser。
+    # 直接调用：re.compile。
+    # 直接调用：CProjectSearcher。
+    # [/maint-note:0e390529ba95]
     def __init__(self): 
         self.c_parser = CParser()
         self.file_pattern = re.compile(r'[^\w\-]')
@@ -19,14 +36,56 @@ class CProjectParser(object):
         self.proj_dir = None
         self.parse_res = None
     
+    # [maint-note:4cfcf3b2819d]
+    # 维护导航：set_proj_dir；下列为本函数源码中的接口与路径索引。
+    # 输入 dir_path：类型由调用方与函数体约束。
+    # 写入目标：self.proj_dir。
+    # 直接调用：os.path.abspath。
+    # 直接调用：print。
+    # [/maint-note:4cfcf3b2819d]
     def set_proj_dir(self, dir_path):
         self.proj_dir = os.path.abspath(dir_path)
 
         print(f"\n📁 设置项目目录: {self.proj_dir}")
 
+    # [maint-note:15a240ab698c]
+    # 维护导航：_normalize_module_path；下列为本函数源码中的接口与路径索引。
+    # 输入 path：str。
+    # 返回契约：str。
+    # 返回路径：path.replace('\\', '/')。
+    # 直接调用：path.replace。
+    # [/maint-note:15a240ab698c]
     def _normalize_module_path(self, path: str) -> str:
         return path.replace("\\", "/")
 
+    # [maint-note:caba3f0f5e4c]
+    # 维护导航：retain_project_rels；下列为本函数源码中的接口与路径索引。
+    # 分支条件：rels is not None。
+    # 分支条件：find_info is None。
+    # 分支条件：len(item) == 2。
+    # 分支条件：len(info_dict['rels']) == 0。
+    # 分支条件：info_dict['type'] == 'Variable' and include_info is not None。
+    # 分支条件：judge_res is None。
+    # 遍历边界：(module, file_info) ← self.parse_res.items()。
+    # 遍历边界：(name, info_dict) ← file_info.items()。
+    # 遍历边界：(i, item) ← enumerate(rels)。
+    # 遍历边界：index ← reversed(del_index)。
+    # 写入目标：info_dict['rels'][i]。
+    # 写入目标：info_dict['include']。
+    # 直接调用：print。
+    # 直接调用：self.parse_res.items。
+    # 直接调用：file_info.items。
+    # 直接调用：info_dict.get。
+    # 直接调用：enumerate。
+    # 直接调用：self.proj_searcher.name_in_file。
+    # 直接调用：list。
+    # 直接调用：del_index.append。
+    # 直接调用：len。
+    # 直接调用：reversed。
+    # 直接调用：info_dict['rels'].pop。
+    # 直接调用：info_dict.pop。
+    # 直接调用：self.proj_searcher.is_local_include。
+    # [/maint-note:caba3f0f5e4c]
     def retain_project_rels(self):
         print("🔧 清洗项目内引用关系中 ...")
         for module, file_info in self.parse_res.items():
@@ -60,6 +119,36 @@ class CProjectParser(object):
                     else:
                         info_dict["include"] = judge_res
     
+    # [maint-note:64caa90d5bc1]
+    # 维护导航：_get_all_c_file_paths；下列为本函数源码中的接口与路径索引。
+    # 输入 target_path：类型由调用方与函数体约束。
+    # 分支条件：not os.path.isdir(target_path)。
+    # 分支条件：item.startswith('.')。
+    # 分支条件：os.path.isdir(fpath)。
+    # 分支条件：re.search(self.file_pattern, item) is None。
+    # 分支条件：os.path.isfile(fpath) and (self.header_pattern.search(fpath) or self.source_pattern.search(fpath))。
+    # 分支条件：re.search(self.file_pattern, os.path.splitext(item)[0]) is None。
+    # 遍历边界：len(dir_list) > 0。
+    # 遍历边界：item ← os.listdir(c_dir)。
+    # 返回路径：{}。
+    # 返回路径：c_dict。
+    # 写入目标：c_dict[c_dir]。
+    # 直接调用：print。
+    # 直接调用：os.path.isdir。
+    # 直接调用：len。
+    # 直接调用：dir_list.pop。
+    # 直接调用：set。
+    # 直接调用：os.listdir。
+    # 直接调用：item.startswith。
+    # 直接调用：os.path.join。
+    # 直接调用：re.search。
+    # 直接调用：dir_list.append。
+    # 直接调用：c_dict[c_dir].add。
+    # 直接调用：os.path.isfile。
+    # 直接调用：self.header_pattern.search。
+    # 直接调用：self.source_pattern.search。
+    # 直接调用：os.path.splitext。
+    # [/maint-note:64caa90d5bc1]
     def _get_all_c_file_paths(self, target_path):
         print(f"🔍 扫描 C/C++ 文件: {target_path}")
         if not os.path.isdir(target_path):
@@ -88,10 +177,47 @@ class CProjectParser(object):
         
         return c_dict
     
+    # [maint-note:3b6a303752f6]
+    # 维护导航：_get_module_name；下列为本函数源码中的接口与路径索引。
+    # 输入 fpath：类型由调用方与函数体约束。
+    # 返回路径：self._normalize_module_path(rel_path)。
+    # 直接调用：os.path.relpath。
+    # 直接调用：os.path.abspath。
+    # 直接调用：self._normalize_module_path。
+    # [/maint-note:3b6a303752f6]
     def _get_module_name(self, fpath):
         rel_path = os.path.relpath(os.path.abspath(fpath), self.proj_dir)
         return self._normalize_module_path(rel_path)
     
+    # [maint-note:db2df2dd1028]
+    # 维护导航：parse_dir；下列为本函数源码中的接口与路径索引。
+    # 输入 c_proj_dir：类型由调用方与函数体约束。
+    # 分支条件：os.path.isfile(fpath) and (self.header_pattern.search(fpath) or self.source_pattern.search(fpath))。
+    # 分支条件：info_dict and len(info_dict) > 0。
+    # 遍历边界：(dir_path, file_set) ← c_dict.items()。
+    # 遍历边界：fpath ← file_set。
+    # 遍历边界：fpath ← sorted(c_files)。
+    # 返回路径：self.parse_res。
+    # 捕获异常：Exception。
+    # 写入目标：self.parse_res。
+    # 写入目标：self.parse_res[module]。
+    # 直接调用：self.set_proj_dir。
+    # 直接调用：self._get_all_c_file_paths。
+    # 直接调用：set。
+    # 直接调用：c_dict.items。
+    # 直接调用：os.path.isfile。
+    # 直接调用：self.header_pattern.search。
+    # 直接调用：self.source_pattern.search。
+    # 直接调用：c_files.add。
+    # 直接调用：print。
+    # 直接调用：len。
+    # 直接调用：sorted。
+    # 直接调用：self._get_module_name。
+    # 直接调用：self.c_parser.set_file_path。
+    # 直接调用：self.c_parser.parse。
+    # 直接调用：self.proj_searcher.set_proj。
+    # 直接调用：self.retain_project_rels。
+    # [/maint-note:db2df2dd1028]
     def parse_dir(self, c_proj_dir):
         self.set_proj_dir(c_proj_dir)
 

@@ -23,6 +23,20 @@ const KIND_OPTIONS = [
 ];
 
 
+// [maint-note:393943164eab]
+// 维护导航：MemoryProposalCard；下列为本函数源码中的接口与路径索引。
+// 输入 { proposal, busy = false, onAction }：类型由调用方与函数体约束。
+// 返回路径：( <article className="memory-proposal-card"> <header> <div> <small>{proposal.operation_label}</small> <h5>{proposal.title}</h5> </div> <span className={`memory-status ${proposal.status}`}>{proposal.status.replaceAll("_", " ")}</span> </head。
+// 直接调用：useState。
+// 直接调用：useEffect。
+// 直接调用：proposal.status.replaceAll。
+// 直接调用：SCOPE_OPTIONS.map。
+// 直接调用：KIND_OPTIONS.map。
+// 直接调用：[...(proposal.warnings || []), ...(proposal.conflicts || [])].map。
+// 直接调用：draft.subject.trim。
+// 直接调用：draft.canonical_content.trim。
+// 直接调用：can。
+// [/maint-note:393943164eab]
 export function MemoryProposalCard({ proposal, busy = false, onAction }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState({});
@@ -37,7 +51,21 @@ export function MemoryProposalCard({ proposal, busy = false, onAction }) {
     setEditing(false);
   }, [proposal]);
 
+  // [maint-note:f05fd4320eff]
+  // 维护导航：can；下列为本函数源码中的接口与路径索引。
+  // 输入 action：类型由调用方与函数体约束。
+  // 直接调用：proposal.allowed_actions?.includes。
+  // [/maint-note:f05fd4320eff]
   const can = (action) => proposal.allowed_actions?.includes(action);
+  // [maint-note:308acfdf24e4]
+  // 维护导航：invoke；下列为本函数源码中的接口与路径索引。
+  // 输入 action：类型由调用方与函数体约束。
+  // 输入 changes：类型由调用方与函数体约束；缺省表达式 null。
+  // 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+  // 分支条件：action === "edit"。
+  // 直接调用：onAction。
+  // 直接调用：setEditing。
+  // [/maint-note:308acfdf24e4]
   const invoke = async (action, changes = null) => {
     await onAction(proposal, action, changes);
     if (action === "edit") setEditing(false);

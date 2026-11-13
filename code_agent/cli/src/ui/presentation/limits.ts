@@ -28,4 +28,8 @@ export const UiPresentationLimits = Object.freeze({
   detailViewportOverscanRows: 10,
 })
 
+// [maint-note:055f0ff71f1d]
+// 数据契约导航：UiPresentationLimitsType；字段含义以消费端校验为准。
+// 类型组合：typeof UiPresentationLimits。
+// [/maint-note:055f0ff71f1d]
 export type UiPresentationLimitsType = typeof UiPresentationLimits

@@ -26,6 +26,22 @@ import sys
 from pathlib import Path
 
 
+# [maint-note:8758a439ad23]
+# 维护导航：_load_module_from_path；下列为本函数源码中的接口与路径索引。
+# 输入 module_name：str。
+# 输入 file_path：Path。
+# 输入 package：str | None；缺省表达式 None。
+# 分支条件：spec is None or spec.loader is None。
+# 分支条件：package is not None。
+# 返回路径：module。
+# 显式抛出：ImportError(f'无法加载模块: {file_path}')。
+# 写入目标：module.__package__。
+# 写入目标：sys.modules[module_name]。
+# 直接调用：importlib.util.spec_from_file_location。
+# 直接调用：ImportError。
+# 直接调用：importlib.util.module_from_spec。
+# 直接调用：spec.loader.exec_module。
+# [/maint-note:8758a439ad23]
 def _load_module_from_path(module_name: str, file_path: Path, package: str | None = None):
     """通过文件路径直接加载 Python 模块（绕过包导入限制）。
 
@@ -45,6 +61,17 @@ def _load_module_from_path(module_name: str, file_path: Path, package: str | Non
     return module
 
 
+# [maint-note:cd87e47d743f]
+# 维护导航：parse_c_project；下列为本函数源码中的接口与路径索引。
+# 输入 proj_dir：str。
+# 返回契约：dict。
+# 返回路径：result。
+# 直接调用：Path(__file__).resolve。
+# 直接调用：Path。
+# 直接调用：_load_module_from_path。
+# 直接调用：preprocess.CProjectParser。
+# 直接调用：parser.parse_dir。
+# [/maint-note:cd87e47d743f]
 def parse_c_project(proj_dir: str) -> dict:
     """解析 C/C++ 项目，返回知识图谱 dict。"""
     rag_c_dir = Path(__file__).resolve().parent.parent / "c"
@@ -77,6 +104,17 @@ def parse_c_project(proj_dir: str) -> dict:
     return result
 
 
+# [maint-note:e074f87581dd]
+# 维护导航：parse_java_project；下列为本函数源码中的接口与路径索引。
+# 输入 proj_dir：str。
+# 返回契约：dict。
+# 返回路径：result。
+# 直接调用：Path(__file__).resolve。
+# 直接调用：Path。
+# 直接调用：_load_module_from_path。
+# 直接调用：java_parser.JavaProjectParserTS。
+# 直接调用：parser.parse_dir。
+# [/maint-note:e074f87581dd]
 def parse_java_project(proj_dir: str) -> dict:
     """解析 Java 项目，返回知识图谱 dict。"""
     rag_java_dir = Path(__file__).resolve().parent.parent / "java"
@@ -104,6 +142,38 @@ def parse_java_project(proj_dir: str) -> dict:
     return result
 
 
+# [maint-note:92bb2b5e989b]
+# 维护导航：main；下列为本函数源码中的接口与路径索引。
+# 返回契约：None。
+# 分支条件：not proj_dir.is_dir()。
+# 分支条件：args.lang == 'c'。
+# 分支条件：args.indent > 0。
+# 捕获异常：Exception。
+# 直接调用：argparse.ArgumentParser。
+# 直接调用：parser.add_argument。
+# 直接调用：parser.parse_args。
+# 直接调用：Path(args.dir).expanduser().resolve。
+# 直接调用：Path(args.dir).expanduser。
+# 直接调用：Path。
+# 直接调用：proj_dir.is_dir。
+# 直接调用：print。
+# 直接调用：sys.exit。
+# 直接调用：parse_c_project。
+# 直接调用：str。
+# 直接调用：parse_java_project。
+# 直接调用：traceback.print_exc。
+# 直接调用：Path(args.output).expanduser().resolve。
+# 直接调用：Path(args.output).expanduser。
+# 直接调用：output_path.parent.mkdir。
+# 直接调用：open。
+# 直接调用：json.dump。
+# 直接调用：len。
+# 直接调用：sum。
+# 直接调用：data.values。
+# 资源作用域：open(output_path, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 集合派生：k 来自 file_info；过滤 k。
+# 集合派生：file_info 来自 data.values()。
+# [/maint-note:92bb2b5e989b]
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="将 C/C++ 或 Java 项目解析为知识图谱 JSON"

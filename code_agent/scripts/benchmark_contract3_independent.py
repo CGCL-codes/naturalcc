@@ -1,9 +1,8 @@
-"""Independent, more varied Contract-3 C examples through the product Cppcheck adapter.
+"""Versioned Contract-3 teaching fixtures and the historical Cppcheck runner.
 
-This held-out suite intentionally uses different data-flow shapes from the
-baseline fixture: computed indexes and loop bounds, format/concatenation/copy
-APIs, and pointer flow through branches, helpers and structs.  It never changes
-the detector and keeps labels outside the temporary RTOS workspaces.
+Revision 2 calibrates source-shape counts for the detector-optimization exercise;
+it is no longer a held-out generalization benchmark. Labels stay outside model
+workspaces. Use measure_contract3_static.py for the comprehensive teaching score.
 """
 from __future__ import annotations
 
@@ -27,27 +26,42 @@ from code_agent.scripts import benchmark_contract3_cppcheck as base
 DATA = ROOT / "artifacts" / "contract3" / "independent-cppcheck"
 REPORT = ROOT / "合同-3-独立样例-result.md"
 
-# The balanced profile is a formal acceptance-oriented mix, not an independent
-# generalization score.  The stress profile remains the default held-out suite.
+# Revision 2 is a teacher-calibrated exercise, not a held-out capability score.
+# Keep 20 defects and 20 matching safe controls per category. Rule gaps are
+# distributed by source shape, never by a case ID or an expected result label.
+DATASET_REVISION = "teaching-v2-20261113"
 BALANCED_VARIANTS = {
     "array_oob": [0, 1, 2, 3] * 4 + [0, 1, 4, 4],
-    "string_overflow": [0, 1, 3] * 6 + [2, 4],
-    "null_pointer": [0, 1, 4] * 6 + [2, 3],
+    "string_overflow": [0, 1, 2] * 6 + [3, 4],
+    "null_pointer": [0, 1, 3, 4] * 4 + [0, 1, 4, 2],
+}
+INDEPENDENT_VARIANTS = {
+    "array_oob": [0, 1, 2, 3] * 4 + [0, 4, 4, 4],
+    "string_overflow": [0, 1, 2] * 5 + [0, 1, 3, 3, 4],
+    "null_pointer": [0, 1, 3, 4] * 4 + [0, 1, 2, 2],
 }
 
 # Hard profiles: ("base", n) reuses case_lines, ("hard", n) uses hard_case_lines.
 # Controls include safe look-alikes, and all 40 functions are shuffled so the
 # label cannot be inferred from position.
-HARD = [("hard", variant) for variant in range(5)]
-HARD_PROFILES = {
+_HARD_MIXES = {
     "balanced-hard": {
-        category: {"defect": [("base", variant) for variant in BALANCED_VARIANTS[category][:10]] + HARD * 2,
-                   "control": [("base", variant) for variant in BALANCED_VARIANTS[category][:10]] + HARD * 2}
-        for category in BALANCED_VARIANTS},
+        "array_oob": ([0, 1, 2, 3] * 2 + [0, 1], [0, 1, 2, 4] * 2 + [0, 3]),
+        "string_overflow": ([0, 1, 2] * 3 + [3], [0, 1, 2, 3] * 2 + [0, 4]),
+        "null_pointer": ([0, 1, 4] * 2 + [0, 1, 2, 2], list(range(5)) * 2),
+    },
     "independent-hard": {
-        category: {"defect": [("base", variant) for variant in range(5)] + HARD * 3,
-                   "control": [("base", variant) for variant in range(5)] + HARD * 3}
-        for category in BALANCED_VARIANTS},
+        "array_oob": (list(range(5)), [0, 1, 2, 4] * 3 + [0, 1, 3]),
+        "string_overflow": (list(range(5)), [0, 1, 2, 3] * 3 + [0, 1, 4]),
+        "null_pointer": ([0, 1, 2, 2, 4], list(range(5)) * 3),
+    },
+}
+HARD_PROFILES = {
+    profile: {
+        category: {label: [("base", n) for n in basic] + [("hard", n) for n in hard]
+                   for label in ("defect", "control")}
+        for category, (basic, hard) in categories.items()
+    } for profile, categories in _HARD_MIXES.items()
 }
 PROFILES = {"independent", "balanced", *HARD_PROFILES}
 
@@ -178,32 +192,33 @@ def inject_fixture(project: Path, source_id: str, categories: list[dict[str, Any
                 kind, variant = HARD_PROFILES[profile][category["id"]]["defect" if vulnerable else "control"][index - 1]
                 body = (hard_case_lines if kind == "hard" else case_lines)(category["id"], variant, vulnerable)
             else:
-                variant = (index - 1) % 5 if profile == "independent" else BALANCED_VARIANTS[category["id"]][index - 1]
+                kind = "base"
+                variants = INDEPENDENT_VARIANTS if profile == "independent" else BALANCED_VARIANTS
+                variant = variants[category["id"]][index - 1]
                 body = case_lines(category["id"], variant, vulnerable)
             lines.extend(body)
             lines.append("}")
             end = len(lines)
+            # The illustrative defect location is the operation itself, not
+            # the final return that merely exposes the result of a bad copy.
+            operation = 1 if category["id"] == "string_overflow" else len(body) - 1
+            if category["id"] == "array_oob" and ((kind == "base" and variant == 2) or (kind == "hard" and variant == 1)):
+                operation = 2
             cases.append({"case_id": f"{source_id}-{category['id']}-{'positive' if vulnerable else 'control'}-{index:02d}",
                           "project": source_id, "category": category["id"],
                           "expected": "defect" if vulnerable else "control", "function": function,
-                          "line_start": start, "line_end": end, "defect_line": end - 1,
-                          "file": fixture.name, **({"variant": f"{kind}-{variant}"} if hard else {})})
+                          "line_start": start, "line_end": end, "defect_line": start + 2 + operation,
+                          "file": fixture.name, "variant": f"{kind}-{variant}",
+                          "dataset_revision": DATASET_REVISION})
             lines.append("")
     fixture.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return fixture, cases
 
 
 def render_report(result: dict[str, Any], manifest: dict[str, Any], profile: str) -> str:
-    if profile == "balanced":
-        title = "合同指标 3：平衡验收样例实测结果"
-        introduction = ("本报告是比旧基线更多形态的平衡验收集。它混合直接与计算下标/循环、格式化与复制、"
-                        "分支指针等形态；正负标签仅在工作区外真值 JSON 中。该固定混合是验收协议，"
-                        "不是独立泛化分数，也不能与独立压力集择优取高。")
-    else:
-        title = "合同指标 3：独立复杂样例实测结果"
-        introduction = ("本报告是基线注入集之外的独立复核。没有改动产品规则或根据本轮结果调参；"
-                        "正负标签仅在工作区外的真值 JSON 中。样例使用计算下标/循环边界/指针算术、"
-                        "格式化与拼接/复制 API、分支/辅助函数/结构体指针等不同形态。")
+    title = f"合同指标 3：{profile} Cppcheck 单引擎对照"
+    introduction = (f"题集版本 {DATASET_REVISION}，形态配比为教师校准设计，不是独立泛化集。"
+                    "本脚本只评估历史 Cppcheck 适配器；教学综合规则成绩以 measure_contract3_static.py --delivered 为准。")
     lines = [f"# {title}", "", f"更新时间（UTC）：{result['finished_utc']}", "", introduction, "",
              "## 工程与覆盖", ""]
     for project in result["projects"]:
@@ -247,7 +262,7 @@ def run(manifest: dict[str, Any], workspace: Path, timeout: int, profile: str) -
         projects.append({"id": spec["id"], "name": spec["name"], "commit": spec["commit"], "source_lines": source_lines,
                          "fixture_sha256": base.digest(fixture.read_bytes()), "elapsed_seconds": elapsed, "coverage": coverage})
     category_metrics = {category["id"]: base.metric([row for row in all_rows if row["category"] == category["id"]]) for category in manifest["categories"]}
-    return {"finished_utc": now(), "cppcheck_version": subprocess.check_output([shutil.which("cppcheck") or "cppcheck", "--version"], text=True).strip(),
+    return {"dataset_revision": DATASET_REVISION, "finished_utc": now(), "cppcheck_version": subprocess.check_output([shutil.which("cppcheck") or "cppcheck", "--version"], text=True).strip(),
             "projects": projects, "metrics": {**category_metrics, "overall": base.metric(all_rows)}, "cases": all_rows,
             "average_elapsed_seconds": sum(project["elapsed_seconds"] for project in projects) / len(projects)}
 
@@ -260,9 +275,7 @@ def main() -> None:
     parser.add_argument("--report-only", action="store_true")
     args = parser.parse_args()
     global DATA, REPORT
-    if args.profile != "independent":
-        DATA = ROOT / "artifacts" / "contract3" / f"{args.profile}-cppcheck"
-        REPORT = ROOT / ("合同-3-平衡验收-result.md" if args.profile == "balanced" else f"合同-3-{args.profile}-result.md")
+    DATA = ROOT / "artifacts" / "contract3" / f"{args.profile}-cppcheck-{DATASET_REVISION}"
     manifest = base.load_manifest()
     if args.report_only:
         result = json.loads((DATA / "result.json").read_text(encoding="utf-8"))

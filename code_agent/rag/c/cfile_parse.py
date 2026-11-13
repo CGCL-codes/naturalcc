@@ -6,6 +6,58 @@ from ctypes.util import find_library
 from clang import cindex
 
 
+# [maint-note:beb43f6bbf72]
+# 维护导航：_iter_libclang_candidates；下列为本函数源码中的接口与路径索引。
+# 分支条件：override。
+# 分支条件：override_path.is_file()。
+# 分支条件：override_path.is_dir()。
+# 分支条件：sys.platform == 'win32'。
+# 分支条件：sys.platform == 'darwin'。
+# 分支条件：prefix。
+# 分支条件：prefix_str in seen。
+# 分支条件：found。
+# 分支条件：sys.platform != 'win32' and sys.platform != 'darwin'。
+# 遍历边界：dll ← sorted(override_path.glob('libclang-*.dll'), reverse=True)。
+# 遍历边界：env_name ← ('CONDA_PREFIX', 'VIRTUAL_ENV')。
+# 遍历边界：prefix ← prefixes。
+# 遍历边界：win_dir ← win_dirs。
+# 遍历边界：dll ← sorted(win_dir.glob('libclang-*.dll'), reverse=True)。
+# 遍历边界：lib_name ← ('clang', 'libclang')。
+# 遍历边界：llvm_lib ← sorted(Path('/usr/lib').glob('llvm-*/lib'), reverse=True)。
+# 直接调用：os.environ.get。
+# 直接调用：Path。
+# 直接调用：override_path.is_file。
+# 直接调用：override_path.is_dir。
+# 直接调用：sorted。
+# 直接调用：override_path.glob。
+# 直接调用：prefixes.append。
+# 直接调用：set。
+# 直接调用：prefix.exists。
+# 直接调用：str。
+# 直接调用：prefix.resolve。
+# 直接调用：seen.add。
+# 直接调用：win_dir.glob。
+# 直接调用：find_library。
+# 直接调用：Path('/usr/lib').glob。
+# 生成器交付：override_path。
+# 生成器交付：override_path / 'libclang.dll'。
+# 生成器交付：dll。
+# 生成器交付：override_path / 'clang.dll'。
+# 生成器交付：override_path / 'libclang.dylib'。
+# 生成器交付：override_path / 'libclang.so'。
+# 生成器交付：override_path / 'libclang.so.1'。
+# 表达式分流：prefix.exists()；真值与假值分支分别计算，不同时执行。
+# 生成器交付：win_dir / 'libclang.dll'。
+# 生成器交付：win_dir / 'clang.dll'。
+# 生成器交付：prefix / 'lib' / 'libclang.dylib'。
+# 生成器交付：prefix / 'lib' / 'libclang.so'。
+# 生成器交付：prefix / 'lib' / 'libclang.so.1'。
+# 生成器交付：prefix / 'lib64' / 'libclang.so'。
+# 生成器交付：prefix / 'lib64' / 'libclang.so.1'。
+# 生成器交付：Path(found)。
+# 生成器交付：llvm_lib / 'libclang.so'。
+# 生成器交付：llvm_lib / 'libclang.so.1'。
+# [/maint-note:beb43f6bbf72]
 def _iter_libclang_candidates():
     override = os.environ.get("LIBCLANG_PATH")
     if override:
@@ -67,6 +119,20 @@ def _iter_libclang_candidates():
             yield llvm_lib / "libclang.so.1"
 
 
+# [maint-note:855637cd96eb]
+# 维护导航：_configure_libclang；下列为本函数源码中的接口与路径索引。
+# 分支条件：cindex.Config.loaded。
+# 分支条件：candidate.exists() or not candidate.parent。
+# 遍历边界：candidate ← _iter_libclang_candidates()。
+# 返回路径：无返回值。
+# 显式抛出：RuntimeError(f"libclang not found. Checked under environment: {env_prefix}. Install the system libclang package (e.g. 'sudo apt install libclang1' or 'brew install libclang'), or set LIBCLANG_PATH to the full library path.")。
+# 捕获异常：OSError。
+# 直接调用：_iter_libclang_candidates。
+# 直接调用：candidate.exists。
+# 直接调用：cindex.Config.set_library_file。
+# 直接调用：str。
+# 直接调用：RuntimeError。
+# [/maint-note:855637cd96eb]
 def _configure_libclang():
     if cindex.Config.loaded:
         return
@@ -93,7 +159,18 @@ from clang.cindex import Index, CursorKind, TranslationUnit
 # 利用 libclang 解析 C 文件，提取文件中的函数、变量、结构体、typedef、include 等语法元素，
 # 并保存为结构化字典，方便后续做静态分析、代码索引、文档生成或知识图谱构建。
 
+# [maint-note:96cdb50e3d4c]
+# 数据与行为导航：CAstVisitor。
+# 继承接口：object。
+# [/maint-note:96cdb50e3d4c]
 class CAstVisitor(object):
+    # [maint-note:e2c049e3b325]
+    # 维护导航：__init__；下列为本函数源码中的接口与路径索引。
+    # 写入目标：self.node_info。
+    # 写入目标：self.source_code。
+    # 写入目标：self.file_path。
+    # 写入目标：self.COMMENT_KINDS。
+    # [/maint-note:e2c049e3b325]
     def __init__(self):
         self.node_info = {}
         # source code
@@ -103,21 +180,59 @@ class CAstVisitor(object):
         self.COMMENT_KINDS = {CursorKind.MACRO_DEFINITION, CursorKind.INCLUSION_DIRECTIVE}
     
 
+    # [maint-note:08aee88cd3fb]
+    # 维护导航：clear；下列为本函数源码中的接口与路径索引。
+    # 写入目标：self.node_info。
+    # 写入目标：self.source_code。
+    # 写入目标：self.file_path。
+    # [/maint-note:08aee88cd3fb]
     def clear(self):
         self.node_info = {}
         self.source_code = None
         self.file_path = None
 
 
+    # [maint-note:00b5e20a2b77]
+    # 维护导航：get_info；下列为本函数源码中的接口与路径索引。
+    # 返回路径：self.node_info。
+    # [/maint-note:00b5e20a2b77]
     def get_info(self):
         return self.node_info
     
     
+    # [maint-note:624ee74bd54b]
+    # 维护导航：set_code；下列为本函数源码中的接口与路径索引。
+    # 输入 source_code：类型由调用方与函数体约束。
+    # 输入 file_path：类型由调用方与函数体约束。
+    # 写入目标：self.source_code。
+    # 写入目标：self.file_path。
+    # [/maint-note:624ee74bd54b]
     def set_code(self, source_code, file_path):
         self.source_code = source_code
         self.file_path = file_path
 
 
+    # [maint-note:725b24fae47e]
+    # 维护导航：_get_code；下列为本函数源码中的接口与路径索引。
+    # 输入 start_location：类型由调用方与函数体约束。
+    # 输入 end_location：类型由调用方与函数体约束。
+    # 分支条件：not self.source_code。
+    # 分支条件：start_line >= len(lines)。
+    # 分支条件：start_line == end_line。
+    # 分支条件：end_col > len(lines[start_line])。
+    # 分支条件：line < len(lines)。
+    # 分支条件：end_line < len(lines)。
+    # 遍历边界：line ← range(start_line + 1, end_line)。
+    # 返回路径：''。
+    # 返回路径：lines[start_line][start_col:end_col]。
+    # 返回路径：'\n'.join(result)。
+    # 直接调用：self.source_code.decode('utf-8', errors='ignore').splitlines。
+    # 直接调用：self.source_code.decode。
+    # 直接调用：len。
+    # 直接调用：range。
+    # 直接调用：result.append。
+    # 直接调用：'\n'.join。
+    # [/maint-note:725b24fae47e]
     def _get_code(self, start_location, end_location):
         if not self.source_code:
             return ""
@@ -148,6 +263,18 @@ class CAstVisitor(object):
             return '\n'.join(result)
 
 
+    # [maint-note:e67181133ed5]
+    # 维护导航：_save_include_info；下列为本函数源码中的接口与路径索引。
+    # 输入 cursor：类型由调用方与函数体约束。
+    # 分支条件：is_system。
+    # 分支条件：header_base。
+    # 写入目标：self.node_info[header_base]。
+    # 直接调用：include_file.startswith。
+    # 直接调用：include_file.endswith。
+    # 直接调用：include_file.strip。
+    # 直接调用：os.path.splitext。
+    # 直接调用：os.path.basename。
+    # [/maint-note:e67181133ed5]
     def _save_include_info(self, cursor):
         lineno = cursor.location.line
         include_stmt = cursor.displayname
@@ -175,6 +302,46 @@ class CAstVisitor(object):
             }
 
 
+    # [maint-note:817bd63ea480]
+    # 维护导航：_get_docstring；下列为本函数源码中的接口与路径索引。
+    # 输入 cursor：类型由调用方与函数体约束。
+    # 分支条件：has_comment_support。
+    # 分支条件：hasattr(cursor.kind, 'is_comment')。
+    # 分支条件：c.kind.is_comment()。
+    # 分支条件：tokens。
+    # 分支条件：c.kind.is_comment() and c.location.line < first_token.location.line。
+    # 分支条件：hasattr(CursorKind, 'COMMENT')。
+    # 分支条件：c.kind == CursorKind.COMMENT。
+    # 分支条件：c.kind == CursorKind.COMMENT and c.location.line < first_token.location.line。
+    # 分支条件：comments。
+    # 分支条件：tokens and self.source_code。
+    # 分支条件：i < len(lines)。
+    # 分支条件：line.startswith('/*') or line.startswith('//')。
+    # 遍历边界：c ← cursor.get_children()。
+    # 遍历边界：c ← cursor.translation_unit.cursor.get_children()。
+    # 遍历边界：i ← range(line_no - 2, max(0, line_no - 5), -1)。
+    # 返回路径：'\n'.join(comments)。
+    # 返回路径：'\n'.join(reversed(comments))。
+    # 返回路径：None。
+    # 捕获异常：Exception。
+    # 直接调用：hasattr。
+    # 直接调用：cursor.get_children。
+    # 直接调用：c.kind.is_comment。
+    # 直接调用：comments.append。
+    # 直接调用：list。
+    # 直接调用：cursor.get_tokens。
+    # 直接调用：cursor.translation_unit.cursor.get_children。
+    # 直接调用：'\n'.join。
+    # 直接调用：self.source_code.decode('utf-8', errors='ignore').splitlines。
+    # 直接调用：self.source_code.decode。
+    # 直接调用：range。
+    # 直接调用：max。
+    # 直接调用：len。
+    # 直接调用：lines[i].strip。
+    # 直接调用：line.startswith。
+    # 直接调用：reversed。
+    # 直接调用：print。
+    # [/maint-note:817bd63ea480]
     def _get_docstring(self, cursor):
         try:
             has_comment_support = hasattr(CursorKind, 'COMMENT') or hasattr(cursor.kind, 'is_comment')
@@ -233,6 +400,16 @@ class CAstVisitor(object):
             return None
 
 
+    # [maint-note:4f892214d2c8]
+    # 维护导航：_get_all_identifiers；下列为本函数源码中的接口与路径索引。
+    # 输入 cursor：类型由调用方与函数体约束。
+    # 输入 save_set：类型由调用方与函数体约束。
+    # 分支条件：cursor.kind == CursorKind.DECL_REF_EXPR。
+    # 遍历边界：child ← cursor.get_children()。
+    # 直接调用：save_set.add。
+    # 直接调用：cursor.get_children。
+    # 直接调用：self._get_all_identifiers。
+    # [/maint-note:4f892214d2c8]
     def _get_all_identifiers(self, cursor, save_set):
         if cursor.kind == CursorKind.DECL_REF_EXPR:
             save_set.add(cursor.spelling)
@@ -241,6 +418,17 @@ class CAstVisitor(object):
             self._get_all_identifiers(child, save_set)
 
 
+    # [maint-note:5d355b83364a]
+    # 维护导航：_get_type_info；下列为本函数源码中的接口与路径索引。
+    # 输入 cursor：类型由调用方与函数体约束。
+    # 分支条件：cursor.type and cursor.type.spelling。
+    # 分支条件：part not in ('const', 'volatile', 'static', '*', '&')。
+    # 遍历边界：part ← parts。
+    # 返回路径：(type_name, type_set)。
+    # 直接调用：set。
+    # 直接调用：type_name.split。
+    # 直接调用：type_set.add。
+    # [/maint-note:5d355b83364a]
     def _get_type_info(self, cursor):
         type_name = None
         type_set = set()
@@ -255,6 +443,30 @@ class CAstVisitor(object):
         return type_name, type_set
 
 
+    # [maint-note:11e16216d774]
+    # 维护导航：_process_struct_declaration；下列为本函数源码中的接口与路径索引。
+    # 输入 cursor：类型由调用方与函数体约束。
+    # 输入 struct_type：类型由调用方与函数体约束。
+    # 分支条件：not struct_name。
+    # 分支条件：field.kind == CursorKind.FIELD_DECL。
+    # 分支条件：field_name。
+    # 分支条件：type_name。
+    # 分支条件：docstring。
+    # 分支条件：child.kind in (CursorKind.FIELD_DECL, CursorKind.CXX_METHOD, CursorKind.CONSTRUCTOR, CursorKind.DESTRUCTOR)。
+    # 分支条件：body_content。
+    # 遍历边界：field ← cursor.get_children()。
+    # 遍历边界：child ← cursor.get_children()。
+    # 返回路径：struct_name。
+    # 写入目标：self.node_info[qualified_name]。
+    # 写入目标：self.node_info[qualified_name]['rels']。
+    # 写入目标：self.node_info[struct_name]。
+    # 写入目标：self.node_info[struct_name]['docstring']。
+    # 写入目标：self.node_info[struct_name]['body']。
+    # 直接调用：self._get_code。
+    # 直接调用：self._get_docstring。
+    # 直接调用：cursor.get_children。
+    # 直接调用：self._get_type_info。
+    # [/maint-note:11e16216d774]
     def _process_struct_declaration(self, cursor, struct_type):
         struct_name = cursor.spelling
         if not struct_name:
@@ -303,6 +515,30 @@ class CAstVisitor(object):
         return struct_name
 
 
+    # [maint-note:e88796dfd517]
+    # 维护导航：_process_function_declaration；下列为本函数源码中的接口与路径索引。
+    # 输入 cursor：类型由调用方与函数体约束。
+    # 输入 has_body：类型由调用方与函数体约束；缺省表达式 False。
+    # 分支条件：not func_name。
+    # 分支条件：has_body。
+    # 分支条件：child.kind == CursorKind.COMPOUND_STMT。
+    # 分支条件：body_start。
+    # 分支条件：docstring。
+    # 分支条件：body_content。
+    # 分支条件：return_type and return_type != 'void'。
+    # 遍历边界：child ← cursor.get_children()。
+    # 返回路径：None。
+    # 返回路径：func_name。
+    # 写入目标：self.node_info[func_name]。
+    # 写入目标：self.node_info[func_name]['docstring']。
+    # 写入目标：self.node_info[func_name]['body']。
+    # 写入目标：self.node_info[func_name]['rels']。
+    # 直接调用：self._get_docstring。
+    # 直接调用：cursor.get_children。
+    # 直接调用：self._get_code。
+    # 直接调用：self._get_code(cursor.extent.start, body_start).rstrip。
+    # 直接调用：self._process_function_body。
+    # [/maint-note:e88796dfd517]
     def _process_function_declaration(self, cursor, has_body=False):
         func_name = cursor.spelling
         if not func_name:
@@ -360,10 +596,27 @@ class CAstVisitor(object):
         return func_name
 
 
+    # [maint-note:7f00738e9b72]
+    # 维护导航：_process_function_body；下列为本函数源码中的接口与路径索引。
+    # 输入 body_cursor：类型由调用方与函数体约束。
+    # 输入 func_name：类型由调用方与函数体约束。
+    # 直接调用：self._process_declarations_in_block。
+    # [/maint-note:7f00738e9b72]
     def _process_function_body(self, body_cursor, func_name):
         self._process_declarations_in_block(body_cursor, func_name)
 
 
+    # [maint-note:a976feeffcfa]
+    # 维护导航：_process_declarations_in_block；下列为本函数源码中的接口与路径索引。
+    # 输入 block_cursor：类型由调用方与函数体约束。
+    # 输入 func_name：类型由调用方与函数体约束。
+    # 分支条件：child.kind == CursorKind.VAR_DECL。
+    # 分支条件：child.kind == CursorKind.COMPOUND_STMT。
+    # 遍历边界：child ← block_cursor.get_children()。
+    # 直接调用：block_cursor.get_children。
+    # 直接调用：self._process_variable_declaration。
+    # 直接调用：self._process_declarations_in_block。
+    # [/maint-note:a976feeffcfa]
     def _process_declarations_in_block(self, block_cursor, func_name):
         for child in block_cursor.get_children():
             if child.kind == CursorKind.VAR_DECL:
@@ -372,6 +625,31 @@ class CAstVisitor(object):
                 self._process_declarations_in_block(child, func_name)
 
 
+    # [maint-note:a0eabf5413c3]
+    # 维护导航：_process_variable_declaration；下列为本函数源码中的接口与路径索引。
+    # 输入 cursor：类型由调用方与函数体约束。
+    # 输入 func_name：类型由调用方与函数体约束；缺省表达式 None。
+    # 分支条件：not var_name。
+    # 分支条件：func_name。
+    # 分支条件：type_name。
+    # 分支条件：child.kind == CursorKind.INTEGER_LITERAL or child.kind == CursorKind.FLOATING_LITERAL or child.kind == CursorKind.STRING_LITERAL。
+    # 分支条件：child.kind == CursorKind.INIT_LIST_EXPR。
+    # 分支条件：referred_ids。
+    # 分支条件：'rels' not in entry。
+    # 分支条件：ref_id != var_name。
+    # 遍历边界：child ← cursor.get_children()。
+    # 遍历边界：ref_id ← referred_ids。
+    # 返回路径：无返回值。
+    # 写入目标：entry['in_function']。
+    # 写入目标：entry['rels']。
+    # 写入目标：self.node_info[var_name]。
+    # 直接调用：self._get_code。
+    # 直接调用：self._get_type_info。
+    # 直接调用：cursor.get_children。
+    # 直接调用：set。
+    # 直接调用：self._get_all_identifiers。
+    # 直接调用：entry['rels'].append。
+    # [/maint-note:a0eabf5413c3]
     def _process_variable_declaration(self, cursor, func_name=None):
         var_name = cursor.spelling
         if not var_name:
@@ -413,6 +691,31 @@ class CAstVisitor(object):
         self.node_info[var_name] = entry
 
 
+    # [maint-note:9f8cccce60bd]
+    # 维护导航：_process_typedef；下列为本函数源码中的接口与路径索引。
+    # 输入 cursor：类型由调用方与函数体约束。
+    # 分支条件：not new_type_name。
+    # 分支条件：docstring。
+    # 分支条件：underlying_type and underlying_type != new_type_name。
+    # 分支条件：child.kind == CursorKind.STRUCT_DECL or child.kind == CursorKind.UNION_DECL or child.kind == CursorKind.ENUM_DECL。
+    # 分支条件：not child.spelling。
+    # 分支条件：field.kind == CursorKind.FIELD_DECL。
+    # 分支条件：field_name。
+    # 分支条件：field_type。
+    # 遍历边界：child ← cursor.get_children()。
+    # 遍历边界：field ← child.get_children()。
+    # 返回路径：无返回值。
+    # 写入目标：entry['docstring']。
+    # 写入目标：entry['rels']。
+    # 写入目标：self.node_info[new_type_name]。
+    # 写入目标：self.node_info[struct_name]。
+    # 写入目标：self.node_info[qualified_name]。
+    # 写入目标：self.node_info[qualified_name]['rels']。
+    # 直接调用：self._get_code。
+    # 直接调用：self._get_docstring。
+    # 直接调用：cursor.get_children。
+    # 直接调用：child.get_children。
+    # [/maint-note:9f8cccce60bd]
     def _process_typedef(self, cursor):
         new_type_name = cursor.spelling
         if not new_type_name:
@@ -469,6 +772,35 @@ class CAstVisitor(object):
                                     self.node_info[qualified_name]["rels"] = [[field_type, "Typeof"]]
 
 
+    # [maint-note:5bd1a1751d72]
+    # 维护导航：visit_root；下列为本函数源码中的接口与路径索引。
+    # 输入 cursor：类型由调用方与函数体约束。
+    # 分支条件：child.kind == CursorKind.MACRO_DEFINITION and child.location.file and (child.location.file.name == self.file_path)。
+    # 分支条件：tokens and tokens[0].spelling.startswith('/*')。
+    # 分支条件：not child.location.file or child.location.file.name != self.file_path。
+    # 分支条件：child.kind == CursorKind.INCLUSION_DIRECTIVE。
+    # 分支条件：child.kind == CursorKind.VAR_DECL。
+    # 分支条件：child.kind == CursorKind.FUNCTION_DECL。
+    # 分支条件：child.kind == CursorKind.TYPEDEF_DECL。
+    # 分支条件：child.kind == CursorKind.STRUCT_DECL。
+    # 分支条件：child.kind == CursorKind.UNION_DECL。
+    # 分支条件：child.kind == CursorKind.ENUM_DECL。
+    # 遍历边界：child ← cursor.get_children()。
+    # 写入目标：self.node_info[file_path]。
+    # 写入目标：self.node_info[file_path]['docstring']。
+    # 直接调用：cursor.get_children。
+    # 直接调用：list。
+    # 直接调用：child.get_tokens。
+    # 直接调用：tokens[0].spelling.startswith。
+    # 直接调用：self._save_include_info。
+    # 直接调用：self._process_variable_declaration。
+    # 直接调用：any。
+    # 直接调用：child.get_children。
+    # 直接调用：self._process_function_declaration。
+    # 直接调用：self._process_typedef。
+    # 直接调用：self._process_struct_declaration。
+    # 集合派生：c 来自 child.get_children()。
+    # [/maint-note:5bd1a1751d72]
     def visit_root(self, cursor):
         file_path = ""  
         self.node_info[file_path] = {"type": "Module"}
@@ -507,16 +839,55 @@ class CAstVisitor(object):
                 self._process_struct_declaration(child, 'Enum')
 
 
+# [maint-note:b25541085ea9]
+# 数据与行为导航：CParser。
+# 继承接口：object。
+# [/maint-note:b25541085ea9]
 class CParser(object):
+    # [maint-note:2126e5d4a70d]
+    # 维护导航：__init__；下列为本函数源码中的接口与路径索引。
+    # 写入目标：self.index。
+    # 写入目标：self.visitor。
+    # 写入目标：self.file_path。
+    # 直接调用：Index.create。
+    # 直接调用：CAstVisitor。
+    # [/maint-note:2126e5d4a70d]
     def __init__(self):
         
         self.index = Index.create()
         self.visitor = CAstVisitor()
         self.file_path = None
     
+    # [maint-note:fb9dc67509cf]
+    # 维护导航：set_file_path；下列为本函数源码中的接口与路径索引。
+    # 输入 file_path：类型由调用方与函数体约束。
+    # 写入目标：self.file_path。
+    # [/maint-note:fb9dc67509cf]
     def set_file_path(self, file_path):
         self.file_path = file_path
     
+    # [maint-note:c9d06bc9d55f]
+    # 维护导航：parse；下列为本函数源码中的接口与路径索引。
+    # 输入 c_file：类型由调用方与函数体约束。
+    # 分支条件：not tu。
+    # 分支条件：'' in file_info。
+    # 返回路径：{}。
+    # 返回路径：file_info。
+    # 捕获异常：Exception。
+    # 写入目标：file_info['']['file_path']。
+    # 直接调用：open。
+    # 直接调用：f.read。
+    # 直接调用：self.index.parse。
+    # 直接调用：source_code.decode。
+    # 直接调用：print。
+    # 直接调用：self.visitor.clear。
+    # 直接调用：self.visitor.set_code。
+    # 直接调用：self.visitor.visit_root。
+    # 直接调用：self.visitor.get_info。
+    # 直接调用：os.path.abspath。
+    # 直接调用：traceback.print_exc。
+    # 资源作用域：open(c_file, 'rb')；退出该 with 时调用对应上下文清理。
+    # [/maint-note:c9d06bc9d55f]
     def parse(self, c_file):
         try:
             with open(c_file, 'rb') as f:

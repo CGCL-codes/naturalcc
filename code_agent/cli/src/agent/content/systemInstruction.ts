@@ -1,7 +1,18 @@
+// [maint-note:dde142b12e52]
+// 数据契约导航：SystemInstructionCapabilities；字段含义以消费端校验为准。
+// 成员 gitChangesAvailable（可省略）：boolean。
+// [/maint-note:dde142b12e52]
 export interface SystemInstructionCapabilities {
   gitChangesAvailable?: boolean
 }
 
+// [maint-note:7433e99438fe]
+// 维护导航：getSystemInstruction；下列为本函数源码中的接口与路径索引。
+// 输入 capabilities：SystemInstructionCapabilities；缺省表达式 {}。
+// 返回契约：string。
+// 返回路径：[ '你是命令行里的编码助手。', '先检查相关文件和现状，再提出最小必要修改。', '修改后必须运行适当的验证（例如测试、类型检查或构建），并如实报告结果。', '不得编造文件内容、命令输出、测试结果或已完成的修改。', '方法失败后先读取并分析错误、检查假设，再采取不同修正；不要在没有新证据时盲目重复同一操作，也不要因一次失败就放弃仍可行的方法。', '需要读取或搜索项目时优先使用只读文件工具；运行命令或修改文件前遵守审批结果。', '文件发现、枚举、内容搜索和计数优先使。
+// 直接调用：[ '你是命令行里的编码助手。', '先检查相关文件和现状，再提出最小必要修改。', '修改后必须运行适当的验证（例如测试、类型检查或构建），并如实报告结果。', '不得编造文件内容、命令输出、测试结果或已完成的修改。', '方法失败后先读取并分析错误、检查假设，再采取不同修正；不要在没有新证据时盲目重复同一操作，也不要因一次失败就放弃仍可行的方法。', '需要读取或搜索项目时优先使用只读文件工具；运行命令或修改文件前遵守审批结果。', '文件发现、枚举、内容搜索和计数优先使。
+// [/maint-note:7433e99438fe]
 export function getSystemInstruction(capabilities: SystemInstructionCapabilities = {}): string {
   return [
     '你是命令行里的编码助手。',

@@ -12,6 +12,19 @@ STATIC_IMPORT_RE = re.compile(r"^\s*import\s+static\s+([a-zA-Z0-9_$.]+)\s*;\s*$"
 IMPORT_RE = re.compile(r"^\s*import\s+([a-zA-Z0-9_$.]+)\s*;\s*$", re.MULTILINE)
 
 
+# [maint-note:1450240aaaa2]
+# 维护导航：collect_graph_identifiers；下列为本函数源码中的接口与路径索引。
+# 输入 graph_data：dict。
+# 返回契约：set[str]。
+# 分支条件：isinstance(file_info, dict)。
+# 遍历边界：(_, file_info) ← graph_data.items()。
+# 返回路径：idents。
+# 直接调用：set。
+# 直接调用：graph_data.items。
+# 直接调用：isinstance。
+# 直接调用：idents.update。
+# 直接调用：file_info.keys。
+# [/maint-note:1450240aaaa2]
 def collect_graph_identifiers(graph_data: dict) -> set[str]:
     idents = set()
     for _, file_info in graph_data.items():
@@ -20,6 +33,21 @@ def collect_graph_identifiers(graph_data: dict) -> set[str]:
     return idents
 
 
+# [maint-note:ce42efe9b14f]
+# 维护导航：build_repo_java_index；下列为本函数源码中的接口与路径索引。
+# 输入 repo_path：str。
+# 返回契约：tuple[dict[str, str], dict[str, list[str]]]。
+# 遍历边界：(root, _, files) ← os.walk(repo_path)。
+# 遍历边界：fname ← files。
+# 返回路径：(by_rel_suffix, by_basename)。
+# 写入目标：by_rel_suffix[rel]。
+# 直接调用：defaultdict。
+# 直接调用：os.walk。
+# 直接调用：os.path.join。
+# 直接调用：os.path.relpath(full, repo_path).replace。
+# 直接调用：os.path.relpath。
+# 直接调用：by_basename[fname].append。
+# [/maint-note:ce42efe9b14f]
 def build_repo_java_index(repo_path: str) -> tuple[dict[str, str], dict[str, list[str]]]:
     """构建 Java 文件索引，避免每个样本重复 os.walk。"""
     by_rel_suffix: dict[str, str] = {}
@@ -33,6 +61,24 @@ def build_repo_java_index(repo_path: str) -> tuple[dict[str, str], dict[str, lis
     return by_rel_suffix, by_basename
 
 
+# [maint-note:e8cfe844f9ed]
+# 维护导航：find_java_file_for_fqcn_in_index；下列为本函数源码中的接口与路径索引。
+# 输入 fqcn：str。
+# 输入 by_rel_suffix：dict[str, str]。
+# 输入 by_basename：dict[str, list[str]]。
+# 返回契约：str | None。
+# 分支条件：repo_rel.endswith(rel)。
+# 分支条件：cands。
+# 遍历边界：(repo_rel, full) ← by_rel_suffix.items()。
+# 返回路径：full。
+# 返回路径：cands[0]。
+# 返回路径：None。
+# 直接调用：fqcn.replace。
+# 直接调用：os.path.basename。
+# 直接调用：by_rel_suffix.items。
+# 直接调用：repo_rel.endswith。
+# 直接调用：by_basename.get。
+# [/maint-note:e8cfe844f9ed]
 def find_java_file_for_fqcn_in_index(
     fqcn: str,
     by_rel_suffix: dict[str, str],
@@ -51,6 +97,31 @@ def find_java_file_for_fqcn_in_index(
     return None
 
 
+# [maint-note:b840801d3fa7]
+# 维护导航：extract_static_import_defs_from_file；下列为本函数源码中的接口与路径索引。
+# 输入 java_path：str。
+# 输入 import_specs：set[str]。
+# 返回契约：list[str]。
+# 分支条件：not java_path or not os.path.isfile(java_path)。
+# 分支条件：member == '*'。
+# 遍历边界：spec ← sorted(import_specs)。
+# 遍历边界：pat ← (field_pat, method_pat)。
+# 遍历边界：match ← pat.finditer(content)。
+# 返回路径：[]。
+# 返回路径：defs。
+# 捕获异常：OSError。
+# 直接调用：os.path.isfile。
+# 直接调用：Path(java_path).read_text。
+# 直接调用：Path。
+# 直接调用：sorted。
+# 直接调用：spec.rsplit。
+# 直接调用：re.compile。
+# 直接调用：re.escape。
+# 直接调用：pat.finditer。
+# 直接调用：defs.append。
+# 直接调用：match.group(1).rstrip。
+# 直接调用：match.group。
+# [/maint-note:b840801d3fa7]
 def extract_static_import_defs_from_file(java_path: str, import_specs: set[str]) -> list[str]:
     if not java_path or not os.path.isfile(java_path):
         return []
@@ -81,6 +152,41 @@ def extract_static_import_defs_from_file(java_path: str, import_specs: set[str])
     return defs
 
 
+# [maint-note:271860093251]
+# 维护导航：extract_missing_static_imports；下列为本函数源码中的接口与路径索引。
+# 输入 input_code：str。
+# 输入 pkg：str。
+# 输入 repo_dir：str。
+# 输入 graph_data：dict。
+# 输入 repo_index_cache：dict。
+# 返回契约：str。
+# 分支条件：not static_imports。
+# 分支条件：pkg not in repo_index_cache。
+# 分支条件：not java_path。
+# 分支条件：item in seen。
+# 分支条件：member_name != '*' and member_name in graph_idents。
+# 分支条件：not out。
+# 遍历边界：spec ← sorted(static_imports)。
+# 遍历边界：item ← defs。
+# 返回路径：''。
+# 返回路径：'// Static import definitions from sources:\n' + '\n\n'.join(out)。
+# 写入目标：repo_index_cache[pkg]。
+# 直接调用：set。
+# 直接调用：STATIC_IMPORT_RE.findall。
+# 直接调用：collect_graph_identifiers。
+# 直接调用：os.path.join。
+# 直接调用：build_repo_java_index。
+# 直接调用：sorted。
+# 直接调用：spec.endswith。
+# 直接调用：spec.rsplit。
+# 直接调用：find_java_file_for_fqcn_in_index。
+# 直接调用：extract_static_import_defs_from_file。
+# 直接调用：seen.add。
+# 直接调用：out.append。
+# 直接调用：'\n\n'.join。
+# 表达式分流：graph_data；真值与假值分支分别计算，不同时执行。
+# 表达式分流：spec.endswith('.*')；真值与假值分支分别计算，不同时执行。
+# [/maint-note:271860093251]
 def extract_missing_static_imports(
     input_code: str,
     pkg: str,
@@ -122,6 +228,22 @@ def extract_missing_static_imports(
     return '// Static import definitions from sources:\n' + '\n\n'.join(out)
 
 
+# [maint-note:a47a31a1d615]
+# 维护导航：build_oracle_prompt；下列为本函数源码中的接口与路径索引。
+# 输入 graph_prompt_text：str。
+# 输入 supplement：str。
+# 返回契约：str。
+# 分支条件：not supplement。
+# 分支条件：len(parts) >= 3。
+# 返回路径：graph_prompt_text。
+# 返回路径：'<s>'.join(parts)。
+# 返回路径：'<s> ' + supplement + '\n' + graph_prompt_text。
+# 写入目标：parts[1]。
+# 直接调用：graph_prompt_text.split。
+# 直接调用：len。
+# 直接调用：parts[1].rstrip。
+# 直接调用：'<s>'.join。
+# [/maint-note:a47a31a1d615]
 def build_oracle_prompt(graph_prompt_text: str, supplement: str) -> str:
     if not supplement:
         return graph_prompt_text
@@ -133,6 +255,51 @@ def build_oracle_prompt(graph_prompt_text: str, supplement: str) -> str:
     return '<s> ' + supplement + '\n' + graph_prompt_text
 
 
+# [maint-note:5500d915a627]
+# 维护导航：main；下列为本函数源码中的接口与路径索引。
+# 分支条件：os.path.abspath(args.graph_prompt) == os.path.abspath(args.output)。
+# 分支条件：gf.suffix == '.json'。
+# 分支条件：supplement。
+# 分支条件：args.progress_every > 0 and (i % args.progress_every == 0 or i == total)。
+# 遍历边界：line ← f。
+# 遍历边界：gf ← sorted(Path(args.graph_dir).iterdir())。
+# 遍历边界：(i, sid) ← enumerate(sorted_ids, start=1)。
+# 遍历边界：item ← results。
+# 显式抛出：ValueError('--graph_prompt 和 --output 不能是同一路径，请使用新的输出文件路径')。
+# 写入目标：samples[obj['id']]。
+# 写入目标：graph_prompts[obj['id']]。
+# 写入目标：all_graphs[gf.stem]。
+# 写入目标：stats['total']。
+# 写入目标：stats['supplemented']。
+# 直接调用：argparse.ArgumentParser。
+# 直接调用：parser.add_argument。
+# 直接调用：parser.parse_args。
+# 直接调用：os.path.abspath。
+# 直接调用：ValueError。
+# 直接调用：open。
+# 直接调用：json.loads。
+# 直接调用：sorted。
+# 直接调用：Path(args.graph_dir).iterdir。
+# 直接调用：Path。
+# 直接调用：json.load。
+# 直接调用：samples.keys。
+# 直接调用：len。
+# 直接调用：enumerate。
+# 直接调用：all_graphs.get。
+# 直接调用：extract_missing_static_imports。
+# 直接调用：build_oracle_prompt。
+# 直接调用：graph_prompts.get。
+# 直接调用：results.append。
+# 直接调用：print。
+# 直接调用：max。
+# 直接调用：output_path.parent.mkdir。
+# 直接调用：f.write。
+# 直接调用：json.dumps。
+# 资源作用域：open(args.metadata, encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 资源作用域：open(args.graph_prompt, encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 资源作用域：open(gf, encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 资源作用域：open(output_path, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:5500d915a627]
 def main():
     parser = argparse.ArgumentParser(description='在 Java graph_prompt 基础上补充 static import 定义，生成 Oracle prompt')
     parser.add_argument('--metadata', required=True)

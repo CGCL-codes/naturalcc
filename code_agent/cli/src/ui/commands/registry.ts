@@ -1,11 +1,20 @@
 import type {Ctx} from '../types/ctx.js'
 import {help_info} from '../utils/help-info.js'
 
+// [maint-note:6a00938efdb2]
+// 数据契约导航：SlashCommandDef；字段含义以消费端校验为准。
+// 成员 name：string。
+// 成员 description：string。
+// [/maint-note:6a00938efdb2]
 export interface SlashCommandDef {
   name: string
   description: string
 }
 
+// [maint-note:ffbdff42b091]
+// 数据契约导航：SlashCommand；字段含义以消费端校验为准。
+// 成员 run：(ctx: Ctx, rawArguments: string) => void | Promise<void>。
+// [/maint-note:ffbdff42b091]
 interface SlashCommand extends SlashCommandDef {
   run: (ctx: Ctx, rawArguments: string) => void | Promise<void>
 }
@@ -28,6 +37,24 @@ const slashCommands: Record<string, SlashCommand['run']> = Object.fromEntries(
   slashCommandEntries.map((command) => [command.name, command.run]),
 )
 
+// [maint-note:87f8df5ea151]
+// 维护导航：dispatch；下列为本函数源码中的接口与路径索引。
+// 输入 input：string。
+// 输入 ctx：Ctx。
+// 返回契约：Promise<boolean>。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：first.startsWith('/')。
+// 分支条件：handler。
+// 返回路径：true。
+// 返回路径：ctx.execute(trimmed)。
+// 直接调用：input.trim。
+// 直接调用：trimmed.search。
+// 直接调用：trimmed.slice。
+// 直接调用：trimmed.slice(separator).trim。
+// 直接调用：first.startsWith。
+// 直接调用：handler。
+// 直接调用：ctx.execute。
+// [/maint-note:87f8df5ea151]
 export async function dispatch(input: string, ctx: Ctx): Promise<boolean> {
   const trimmed = input.trim()
   const separator = trimmed.search(/\s/)

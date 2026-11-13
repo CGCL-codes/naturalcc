@@ -1,6 +1,22 @@
 import { Box, Text } from 'ink'
 import { sanitizeTerminalText, truncateDisplayText } from '../terminal/index.js'
 
+// [maint-note:4e4cbcc4aafd]
+// 数据契约导航：DetailViewerPanelProps；字段含义以消费端校验为准。
+// 成员 recordOrdinal：number。
+// 成员 recordCount：number。
+// 成员 label：string。
+// 成员 lines：readonly string[]。
+// 成员 start：number。
+// 成员 end：number。
+// 成员 totalVisual：number。
+// 成员 totalLogical：number。
+// 成员 sourceTruncated：boolean。
+// 成员 evicted：boolean。
+// 成员 width：number。
+// 成员 height：number。
+// 成员 compact（可省略）：boolean。
+// [/maint-note:4e4cbcc4aafd]
 export interface DetailViewerPanelProps {
   /** 1-based record ordinal (1..n) among viewable records. */
   recordOrdinal: number
@@ -31,6 +47,19 @@ export interface DetailViewerPanelProps {
  * size. Long logical lines arrive pre-wrapped, so every retained line is
  * reachable by paging instead of being sideways-truncated forever.
  */
+// [maint-note:99e2d59277de]
+// 维护导航：DetailViewerPanel；下列为本函数源码中的接口与路径索引。
+// 输入 { recordOrdinal, recordCount, label, lines, start, end, totalVisual, totalLogical, sourceTruncated, evicted, width, height, compact = false, }：DetailViewerPanelProps。
+// 分支条件：compact。
+// 返回路径：( <Box flexDirection="column" width={safeWidth} height={rows}> {compactLines.map((line, index) => ( <Text key={index} color={evicted ? 'yellow' : undefined} wrap="wrap"> {sanitizeTerminalText(line)} </Text> ))} </Box> )。
+// 返回路径：( <Box flexDirection="column" width={safeWidth} borderStyle="round" borderColor="gray"> <Text color="gray" wrap="truncate">{header}</Text> {evicted ? ( <Text color="yellow">details no longer retained</Text> ) : ( <Box flexDirection="column"。
+// 直接调用：Math.max。
+// 直接调用：truncateDisplayText。
+// 直接调用：`record ${recordOrdinal}/${recordCount} · ${label}`.replace。
+// 直接调用：lines.slice。
+// 直接调用：compactLines.map。
+// 直接调用：lines.map。
+// [/maint-note:99e2d59277de]
 export function DetailViewerPanel({
   recordOrdinal, recordCount, label, lines, start, end, totalVisual, totalLogical,
   sourceTruncated, evicted, width, height, compact = false,

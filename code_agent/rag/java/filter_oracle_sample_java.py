@@ -8,6 +8,24 @@ from pathlib import Path
 MARKER = '// Static import definitions from sources:'
 
 
+# [maint-note:40eb1a123840]
+# 维护导航：load_jsonl_map；下列为本函数源码中的接口与路径索引。
+# 输入 path：Path。
+# 返回契约：dict[int, dict]。
+# 分支条件：not line。
+# 分支条件：sample_id is None。
+# 遍历边界：(line_no, line) ← enumerate(f, start=1)。
+# 返回路径：items。
+# 显式抛出：ValueError(f'{path}:{line_no} 缺少 id 字段')。
+# 写入目标：items[sample_id]。
+# 直接调用：path.open。
+# 直接调用：enumerate。
+# 直接调用：line.strip。
+# 直接调用：json.loads。
+# 直接调用：obj.get。
+# 直接调用：ValueError。
+# 资源作用域：path.open('r', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:40eb1a123840]
 def load_jsonl_map(path: Path) -> dict[int, dict]:
     items = {}
     with path.open('r', encoding='utf-8') as f:
@@ -23,6 +41,24 @@ def load_jsonl_map(path: Path) -> dict[int, dict]:
     return items
 
 
+# [maint-note:bfc7f033529d]
+# 维护导航：load_id_order；下列为本函数源码中的接口与路径索引。
+# 输入 path：Path。
+# 返回契约：list[int]。
+# 分支条件：not line。
+# 分支条件：sample_id is None。
+# 遍历边界：(line_no, line) ← enumerate(f, start=1)。
+# 返回路径：ids。
+# 显式抛出：ValueError(f'{path}:{line_no} 缺少 id 字段')。
+# 直接调用：path.open。
+# 直接调用：enumerate。
+# 直接调用：line.strip。
+# 直接调用：json.loads。
+# 直接调用：obj.get。
+# 直接调用：ValueError。
+# 直接调用：ids.append。
+# 资源作用域：path.open('r', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:bfc7f033529d]
 def load_id_order(path: Path) -> list[int]:
     ids = []
     with path.open('r', encoding='utf-8') as f:
@@ -38,10 +74,46 @@ def load_id_order(path: Path) -> list[int]:
     return ids
 
 
+# [maint-note:a6949b146b0a]
+# 维护导航：has_static_import_supplement；下列为本函数源码中的接口与路径索引。
+# 输入 prompt：str。
+# 返回契约：bool。
+# 返回路径：MARKER in prompt。
+# [/maint-note:a6949b146b0a]
 def has_static_import_supplement(prompt: str) -> bool:
     return MARKER in prompt
 
 
+# [maint-note:ea991d5cc0b8]
+# 维护导航：main；下列为本函数源码中的接口与路径索引。
+# 分支条件：missing_ids。
+# 遍历边界：item ← selected_items。
+# 显式抛出：ValueError(f'有 {len(missing_ids)} 个 id 在 Oracle prompt 中不存在，例如: {preview}')。
+# 直接调用：argparse.ArgumentParser。
+# 直接调用：parser.add_argument。
+# 直接调用：parser.parse_args。
+# 直接调用：load_id_order。
+# 直接调用：Path。
+# 直接调用：load_jsonl_map。
+# 直接调用：', '.join。
+# 直接调用：str。
+# 直接调用：ValueError。
+# 直接调用：len。
+# 直接调用：sum。
+# 直接调用：has_static_import_supplement。
+# 直接调用：item.get。
+# 直接调用：output_path.parent.mkdir。
+# 直接调用：output_path.open。
+# 直接调用：f.write。
+# 直接调用：json.dumps。
+# 直接调用：print。
+# 集合派生：sample_id 来自 sample_ids；过滤 sample_id not in oracle_items。
+# 集合派生：x 来自 missing_ids[:10]。
+# 集合派生：sample_id 来自 sample_ids。
+# 集合派生：item 来自 selected_items；过滤 has_static_import_supplement(item.get('prompt', ''))。
+# 资源作用域：output_path.open('w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 表达式分流：total_count；真值与假值分支分别计算，不同时执行。
+# [/maint-note:ea991d5cc0b8]
 def main():
     parser = argparse.ArgumentParser(description='按 sample prompt 的 id 过滤 Java Oracle prompt，并统计 static import 补充占比')
     parser.add_argument('--sample_ids', required=True)

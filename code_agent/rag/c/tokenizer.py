@@ -11,6 +11,19 @@ import attridict
 
 
 class CModelTokenizer:
+    # [maint-note:ac2190ab5410]
+    # 维护导航：__init__；下列为本函数源码中的接口与路径索引。
+    # 输入 model：类型由调用方与函数体约束。
+    # 写入目标：self.model。
+    # 写入目标：self.config。
+    # 直接调用：os.path.join。
+    # 直接调用：os.path.dirname。
+    # 直接调用：open。
+    # 直接调用：attridict。
+    # 直接调用：yaml.load。
+    # 直接调用：self._set_tokenizer。
+    # 资源作用域：open(config_path, 'r', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+    # [/maint-note:ac2190ab5410]
     def __init__(self, model):
         self.model = model
         config_path = os.path.join(os.path.dirname(__file__), "config.yaml")
@@ -20,6 +33,32 @@ class CModelTokenizer:
             )
         self._set_tokenizer()
 
+    # [maint-note:6c6505db2132]
+    # 维护导航：_set_tokenizer；下列为本函数源码中的接口与路径索引。
+    # 分支条件：self.model == 'codegen'。
+    # 分支条件：self.model == 'codegen25'。
+    # 分支条件：self.model == 'santacoder'。
+    # 分支条件：self.model == 'starcoder'。
+    # 分支条件：self.model == 'starcoder2'。
+    # 分支条件：self.model == 'codellama7b'。
+    # 分支条件：self.model == 'deepseekcoder'。
+    # 分支条件：self.model == 'qwencoder'。
+    # 分支条件：self.model == 'qwen3'。
+    # 分支条件：self.model == 'llama3'。
+    # 分支条件：self.model.startswith('gpt')。
+    # 分支条件：self.model == 'gpt35'。
+    # 分支条件：self.model == 'gpt4'。
+    # 显式抛出：ValueError(f'未知GPT模型标识: {self.model}')。
+    # 显式抛出：ValueError(f'不支持的模型类型: {self.model}')。
+    # 写入目标：self.tokenizer。
+    # 写入目标：self.max_input_length。
+    # 写入目标：os.environ['TIKTOKEN_CACHE_DIR']。
+    # 写入目标：self.task_desc。
+    # 直接调用：AutoTokenizer.from_pretrained。
+    # 直接调用：self.model.startswith。
+    # 直接调用：tiktoken.get_encoding。
+    # 直接调用：ValueError。
+    # [/maint-note:6c6505db2132]
     def _set_tokenizer(self):
         if self.model == "codegen":
             self.tokenizer = AutoTokenizer.from_pretrained(self.config.codegen350m_repo)
@@ -108,6 +147,24 @@ class CModelTokenizer:
         else:
             raise ValueError(f"不支持的模型类型: {self.model}")
 
+    # [maint-note:a0cd14c3226f]
+    # 维护导航：cal_token_nums；下列为本函数源码中的接口与路径索引。
+    # 输入 text：类型由调用方与函数体约束。
+    # 分支条件：self.model.startswith('codegen') or self.model == 'codellama7b' or self.model == 'deepseekcoder' or (self.model == 'qwencoder') or (self.model == 'qwen3') or (self.model == 'llama3')。
+    # 分支条件：self.model.startswith('gpt')。
+    # 返回路径：int(self.tokenizer(text, return_tensors='pt').attention_mask.sum().item())。
+    # 返回路径：len(self.tokenizer.encode(text, disallowed_special=()))。
+    # 返回路径：int(self.tokenizer.encode(text, return_tensors='pt').flatten().size(0))。
+    # 直接调用：self.model.startswith。
+    # 直接调用：int。
+    # 直接调用：self.tokenizer(text, return_tensors='pt').attention_mask.sum().item。
+    # 直接调用：self.tokenizer(text, return_tensors='pt').attention_mask.sum。
+    # 直接调用：self.tokenizer。
+    # 直接调用：len。
+    # 直接调用：self.tokenizer.encode。
+    # 直接调用：self.tokenizer.encode(text, return_tensors='pt').flatten().size。
+    # 直接调用：self.tokenizer.encode(text, return_tensors='pt').flatten。
+    # [/maint-note:a0cd14c3226f]
     def cal_token_nums(self, text):
         if (
             self.model.startswith("codegen")
@@ -126,6 +183,16 @@ class CModelTokenizer:
             # santacoder / starcoder / starcoder2
             return int(self.tokenizer.encode(text, return_tensors="pt").flatten().size(0))
 
+    # [maint-note:75a3a4252ebd]
+    # 维护导航：cal_prompt_max_length；下列为本函数源码中的接口与路径索引。
+    # 输入 program：类型由调用方与函数体约束。
+    # 输入 suffix：类型由调用方与函数体约束。
+    # 分支条件：program_len >= half_length。
+    # 返回路径：half_length - suffix_len。
+    # 返回路径：self.max_input_length - program_len - suffix_len。
+    # 直接调用：self.cal_token_nums。
+    # 直接调用：int。
+    # [/maint-note:75a3a4252ebd]
     def cal_prompt_max_length(self, program, suffix):
         """
         Return the maximum length for prompt
@@ -141,6 +208,15 @@ class CModelTokenizer:
         else:
             return self.max_input_length - program_len - suffix_len
 
+    # [maint-note:5a961f70fe51]
+    # 维护导航：judge_prompt；下列为本函数源码中的接口与路径索引。
+    # 输入 prompt：类型由调用方与函数体约束。
+    # 输入 max_length：类型由调用方与函数体约束。
+    # 分支条件：self.model.startswith('gpt')。
+    # 返回路径：self.cal_token_nums(prompt) <= max_length。
+    # 直接调用：self.model.startswith。
+    # 直接调用：self.cal_token_nums。
+    # [/maint-note:5a961f70fe51]
     def judge_prompt(self, prompt, max_length):
         """
         True: fine
@@ -153,6 +229,20 @@ class CModelTokenizer:
 
         return self.cal_token_nums(prompt) <= max_length
 
+    # [maint-note:57a115326a06]
+    # 维护导航：truncate_concat；下列为本函数源码中的接口与路径索引。
+    # 输入 program：类型由调用方与函数体约束。
+    # 输入 prompt：类型由调用方与函数体约束。
+    # 输入 suffix：类型由调用方与函数体约束。
+    # 分支条件：self.model.startswith('codegen') or self.model == 'codellama7b' or self.model == 'deepseekcoder' or (self.model == 'qwencoder') or (self.model == 'qwen3') or (self.model == 'llama3')。
+    # 分支条件：self.model == 'santacoder' or self.model == 'starcoder' or self.model == 'starcoder2'。
+    # 分支条件：self.model.startswith('gpt')。
+    # 返回路径：truncated_prompt。
+    # 直接调用：self.model.startswith。
+    # 直接调用：self.codegen_truncate_concat。
+    # 直接调用：self.coder_truncate_concat。
+    # 直接调用：self.gpt_truncate_concat。
+    # [/maint-note:57a115326a06]
     def truncate_concat(self, program, prompt, suffix):
         truncated_prompt = None
 
@@ -178,6 +268,29 @@ class CModelTokenizer:
 
         return truncated_prompt
 
+    # [maint-note:0612e0282a4f]
+    # 维护导航：codegen_truncate_concat；下列为本函数源码中的接口与路径索引。
+    # 输入 program：类型由调用方与函数体约束。
+    # 输入 prompt：类型由调用方与函数体约束。
+    # 输入 suffix：类型由调用方与函数体约束。
+    # 分支条件：program_len <= 0.5 * max_input_length。
+    # 分支条件：prompt_wo_suffix_len > length4prompt。
+    # 分支条件：prompt_len <= 0.5 * max_input_length。
+    # 分支条件：program_len > length4program。
+    # 返回路径：(prompts, input_cut_flag, prompt_cut_flag)。
+    # 写入目标：self.tokenizer.truncation_side。
+    # 直接调用：getattr。
+    # 直接调用：self.tokenizer。
+    # 直接调用：int。
+    # 直接调用：program_token.attention_mask.sum().item。
+    # 直接调用：program_token.attention_mask.sum。
+    # 直接调用：prompt_token.attention_mask.sum().item。
+    # 直接调用：prompt_token.attention_mask.sum。
+    # 直接调用：suffix_token.attention_mask.sum().item。
+    # 直接调用：suffix_token.attention_mask.sum。
+    # 直接调用：torch.concat。
+    # 直接调用：self.tokenizer.decode。
+    # [/maint-note:0612e0282a4f]
     def codegen_truncate_concat(self, program, prompt, suffix):
         input_cut_flag = False
         prompt_cut_flag = False
@@ -269,6 +382,28 @@ class CModelTokenizer:
         prompts = self.tokenizer.decode(concat_tokens)
         return prompts, input_cut_flag, prompt_cut_flag
 
+    # [maint-note:a704a5f94dbe]
+    # 维护导航：coder_truncate_concat；下列为本函数源码中的接口与路径索引。
+    # 输入 program：类型由调用方与函数体约束。
+    # 输入 prompt：类型由调用方与函数体约束。
+    # 输入 suffix：类型由调用方与函数体约束。
+    # 分支条件：program_len <= 0.5 * max_input_length。
+    # 分支条件：prompt_wo_suffix_len > length4prompt。
+    # 分支条件：prompt_len <= 0.5 * max_input_length。
+    # 分支条件：program_len > length4program。
+    # 返回路径：(prompts, input_cut_flag, prompt_cut_flag)。
+    # 写入目标：self.tokenizer.truncation_side。
+    # 直接调用：self.tokenizer.encode。
+    # 直接调用：int。
+    # 直接调用：program_token.flatten().size。
+    # 直接调用：program_token.flatten。
+    # 直接调用：suffix_token.flatten().size。
+    # 直接调用：suffix_token.flatten。
+    # 直接调用：prompt_token.flatten().size。
+    # 直接调用：prompt_token.flatten。
+    # 直接调用：torch.concat。
+    # 直接调用：self.tokenizer.decode。
+    # [/maint-note:a704a5f94dbe]
     def coder_truncate_concat(self, program, prompt, suffix):
         input_cut_flag = False
         prompt_cut_flag = False
@@ -346,6 +481,24 @@ class CModelTokenizer:
         prompts = self.tokenizer.decode(concat_tokens)
         return prompts, input_cut_flag, prompt_cut_flag
 
+    # [maint-note:c8423b018819]
+    # 维护导航：gpt_truncate_concat；下列为本函数源码中的接口与路径索引。
+    # 输入 program：类型由调用方与函数体约束。
+    # 输入 prompt：类型由调用方与函数体约束。
+    # 输入 suffix：类型由调用方与函数体约束。
+    # 分支条件：prompt is None and suffix is None。
+    # 分支条件：program_len > max_program_length。
+    # 分支条件：program_len <= 0.5 * max_input_length。
+    # 分支条件：prompt_wo_suffix_len > length4prompt。
+    # 分支条件：prompt_len <= 0.5 * max_input_length。
+    # 分支条件：program_len > length4program。
+    # 返回路径：(self.task_desc + program, input_cut_flag, prompt_cut_flag)。
+    # 返回路径：(concat_message, input_cut_flag, prompt_cut_flag)。
+    # 直接调用：len。
+    # 直接调用：self.tokenizer.encode。
+    # 直接调用：self.tokenizer.decode。
+    # 直接调用：int。
+    # [/maint-note:c8423b018819]
     def gpt_truncate_concat(self, program, prompt, suffix):
         input_cut_flag = False
         prompt_cut_flag = False

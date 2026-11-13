@@ -1,6 +1,17 @@
 import { ToolDiagnosticError } from '../../types.js'
 import { toolDiagnostic } from '../../diagnostics.js'
 
+// [maint-note:f2a104e045c7]
+// 数据契约导航：RipgrepRequest；字段含义以消费端校验为准。
+// 成员 args：readonly string[]。
+// 成员 cwd：string。
+// 成员 signal（可省略）：AbortSignal。
+// 成员 timeoutMs（可省略）：number。
+// 成员 maxOutputBytes：number。
+// 成员 stdoutRecordDelimiter（可省略）：0 | 10。
+// 成员 onStdoutRecord（可省略）：(record: Buffer) => boolean。
+// 成员 stdoutRecordRetention（可省略）：'retain' | 'discard'。
+// [/maint-note:f2a104e045c7]
 export interface RipgrepRequest {
   args: readonly string[]
   cwd: string
@@ -19,6 +30,18 @@ export interface RipgrepRequest {
   stdoutRecordRetention?: 'retain' | 'discard'
 }
 
+// [maint-note:43e99f040f57]
+// 数据契约导航：RipgrepResult；字段含义以消费端校验为准。
+// 成员 stdout：string。
+// 成员 stderr：string。
+// 成员 exitCode：number。
+// 成员 truncated：boolean。
+// 成员 timedOut：boolean。
+// 成员 interrupted：boolean。
+// 成员 outputBytes：number。
+// 成员 stoppedEarly（可省略）：boolean。
+// 成员 terminationReason（可省略）：'output' | 'consumer' | 'timeout' | 'abort' | 'callback'。
+// [/maint-note:43e99f040f57]
 export interface RipgrepResult {
   stdout: string
   stderr: string
@@ -31,6 +54,11 @@ export interface RipgrepResult {
   terminationReason?: 'output' | 'consumer' | 'timeout' | 'abort' | 'callback'
 }
 
+// [maint-note:a82ce87c3cc0]
+// 数据契约导航：RipgrepRunner；字段含义以消费端校验为准。
+// 成员 run：Promise<RipgrepResult>。
+// 成员 healthCheck：Promise<void>。
+// [/maint-note:a82ce87c3cc0]
 export interface RipgrepRunner {
   run(request: RipgrepRequest): Promise<RipgrepResult>
   healthCheck(signal?: AbortSignal): Promise<void>
@@ -39,6 +67,15 @@ export interface RipgrepRunner {
 export class RipgrepError extends ToolDiagnosticError {
   readonly code: 'unavailable' | 'timeout' | 'interrupted' | 'failed'
 
+  // [maint-note:0312a0de3586]
+  // 维护导航：constructor；下列为本函数源码中的接口与路径索引。
+  // 输入 message：string。
+  // 输入 code：'unavailable' | 'timeout' | 'interrupted' | 'failed'。
+  // 写入目标：this.name。
+  // 写入目标：this.code。
+  // 直接调用：super。
+  // 直接调用：toolDiagnostic。
+  // [/maint-note:0312a0de3586]
   constructor(
     message: string,
     code: 'unavailable' | 'timeout' | 'interrupted' | 'failed',

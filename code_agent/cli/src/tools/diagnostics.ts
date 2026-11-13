@@ -38,6 +38,14 @@ const descriptions: Record<string, readonly [string, string]> = {
   unknown_error: ['The tool failed without a trusted diagnostic.', 'Inspect the workspace before retrying; effects may be unknown.'],
 }
 
+// [maint-note:d2f027af1759]
+// 维护导航：toolDiagnostic；下列为本函数源码中的接口与路径索引。
+// 输入 reason：string。
+// 输入 detail：Partial<Omit<ToolDiagnostic, 'reason'>>；缺省表达式 {}。
+// 返回契约：ToolDiagnostic。
+// 返回路径：{ reason, message: detail.message ?? defaults[0], hint: detail.hint ?? defaults[1], ...(detail.field === undefined ? {} : { field: detail.field }), ...(detail.expected === undefined ? {} : { expected: detail.expected }) }。
+// 直接调用：Object.hasOwn。
+// [/maint-note:d2f027af1759]
 export function toolDiagnostic(reason: string, detail: Partial<Omit<ToolDiagnostic, 'reason'>> = {}): ToolDiagnostic {
   const defaults = Object.hasOwn(descriptions, reason) ? descriptions[reason]! : descriptions.unknown_error!
   return { reason, message: detail.message ?? defaults[0], hint: detail.hint ?? defaults[1],
@@ -45,19 +53,60 @@ export function toolDiagnostic(reason: string, detail: Partial<Omit<ToolDiagnost
     ...(detail.expected === undefined ? {} : { expected: detail.expected }) }
 }
 
+// [maint-note:68ad69cdc633]
+// 维护导航：inputError；下列为本函数源码中的接口与路径索引。
+// 输入 message：string。
+// 输入 reason：string。
+// 输入 field：string（可省略）。
+// 输入 expected：string（可省略）。
+// 输入 hint：string（可省略）。
+// 返回契约：ToolInputError。
+// 返回路径：new ToolInputError(message, toolDiagnostic(reason, { field, expected, hint }))。
+// 直接调用：toolDiagnostic。
+// [/maint-note:68ad69cdc633]
 export function inputError(message: string, reason: string, field?: string, expected?: string, hint?: string): ToolInputError {
   return new ToolInputError(message, toolDiagnostic(reason, { field, expected, hint }))
 }
 
+// [maint-note:75ff632c162f]
+// 维护导航：operationError；下列为本函数源码中的接口与路径索引。
+// 输入 message：string。
+// 输入 reason：string。
+// 输入 detail：Partial<Omit<ToolDiagnostic, 'reason'>>；缺省表达式 {}。
+// 返回契约：ToolDiagnosticError。
+// 返回路径：new ToolDiagnosticError(message, toolDiagnostic(reason, detail))。
+// 直接调用：toolDiagnostic。
+// [/maint-note:75ff632c162f]
 export function operationError(message: string, reason: string, detail: Partial<Omit<ToolDiagnostic, 'reason'>> = {}): ToolDiagnosticError {
   return new ToolDiagnosticError(message, toolDiagnostic(reason, detail))
 }
 
+// [maint-note:15fcb7936a3d]
+// 维护导航：errorDiagnostic；下列为本函数源码中的接口与路径索引。
+// 输入 error：unknown。
+// 返回契约：ToolDiagnostic | undefined。
+// 返回路径：error instanceof ToolDiagnosticError ? error.diagnostic : undefined。
+// 返回路径：undefined。
+// [/maint-note:15fcb7936a3d]
 export function errorDiagnostic(error: unknown): ToolDiagnostic | undefined {
   try { return error instanceof ToolDiagnosticError ? error.diagnostic : undefined } catch { return undefined }
 }
 
 /** Called only around owned filesystem operations, after existing workspace authorization. */
+// [maint-note:3db54a692bc5]
+// 维护导航：withFileDiagnostics；下列为本函数源码中的接口与路径索引。
+// 输入 run：() => Promise<T>。
+// 返回契约：Promise<T>。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：error instanceof Error && error.name === 'AbortError'。
+// 分支条件：error instanceof ToolDiagnosticError。
+// 分支条件：!reason。
+// 返回路径：await run()。
+// 显式抛出：error。
+// 显式抛出：operationError(error instanceof Error ? error.message : 'File operation failed', reason)。
+// 直接调用：run。
+// 直接调用：operationError。
+// [/maint-note:3db54a692bc5]
 export async function withFileDiagnostics<T>(run: () => Promise<T>): Promise<T> {
   try { return await run() } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') throw error
@@ -70,6 +119,23 @@ export async function withFileDiagnostics<T>(run: () => Promise<T>): Promise<T> 
   }
 }
 
+// [maint-note:22e1883c40e9]
+// 维护导航：safeText；下列为本函数源码中的接口与路径索引。
+// 输入 value：string。
+// 输入 limit：类型由调用方与函数体约束；缺省表达式 1024。
+// 返回契约：string。
+// 分支条件：text.length + point.length > limit。
+// 遍历边界：const point ← value。
+// 返回路径：truncated ? clipped(safe, limit - ' …omitted'.length) + ' …omitted' : safe。
+// 写入目标：text。
+// 直接调用：point.codePointAt。
+// 直接调用：redactSensitiveAssignments(text.replace(/\x1b\[[0-?]*[ -/]*[@-~]/gu, '') .replace(/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069\u2028\u2029]/gu, ' ') ) .replace(/\b(?:sk-|sk_|ghp_)[a-z0-9_-]+/giu, '[redacted]') .replace。
+// 直接调用：redactSensitiveAssignments(text.replace(/\x1b\[[0-?]*[ -/]*[@-~]/gu, '') .replace(/[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069\u2028\u2029]/gu, ' ') ) .replace。
+// 直接调用：redactSensitiveAssignments。
+// 直接调用：text.replace(/\x1b\[[0-?]*[ -/]*[@-~]/gu, '') .replace。
+// 直接调用：text.replace。
+// 直接调用：clipped。
+// [/maint-note:22e1883c40e9]
 function safeText(value: string, limit = 1024): string {
   let text = ''
   for (const point of value) {
@@ -87,6 +153,29 @@ function safeText(value: string, limit = 1024): string {
 }
 
 /** Scan only the capped diagnostic prefix; an unfinished quoted value ends at the cap. */
+// [maint-note:0458a5695dad]
+// 维护导航：redactSensitiveAssignments；下列为本函数源码中的接口与路径索引。
+// 输入 text：string。
+// 返回契约：string。
+// 分支条件：bearer。
+// 分支条件：quote === '"' || quote === "'"。
+// 分支条件：text[end] === '\\'。
+// 分支条件：text[end++] === quote。
+// 遍历边界：let match = assignment.exec(text); match; match = assignment.exec(text)。
+// 遍历边界：end < text.length。
+// 遍历边界：end < text.length && !/[\s,;}\]]/u.test(text[end]!)。
+// 返回路径：result + text.slice(retainedUntil)。
+// 写入目标：match。
+// 写入目标：end。
+// 写入目标：result。
+// 写入目标：retainedUntil。
+// 写入目标：assignment.lastIndex。
+// 直接调用：assignment.exec。
+// 直接调用：/^Bearer\s+/iu.exec。
+// 直接调用：text.slice。
+// 直接调用：Math.min。
+// 直接调用：/[\s,;}\]]/u.test。
+// [/maint-note:0458a5695dad]
 function redactSensitiveAssignments(text: string): string {
   const assignment = /(?<![\w-])(["']?)(?:api[_-]?key|authorization|password|secret|token)\1\s*[:=]\s*/giu
   let result = '', retainedUntil = 0
@@ -114,6 +203,16 @@ function redactSensitiveAssignments(text: string): string {
   return result + text.slice(retainedUntil)
 }
 
+// [maint-note:edcbb19d2acd]
+// 维护导航：clipped；下列为本函数源码中的接口与路径索引。
+// 输入 text：string。
+// 输入 max：number。
+// 返回契约：string。
+// 分支条件：result.length + point.length > max。
+// 遍历边界：const point ← text。
+// 返回路径：result。
+// 写入目标：result。
+// [/maint-note:edcbb19d2acd]
 function clipped(text: string, max: number): string {
   let result = ''
   for (const point of text) {
@@ -124,6 +223,29 @@ function clipped(text: string, max: number): string {
 }
 
 /** One final text serializer for framework, validation and thrown execution failures. */
+// [maint-note:c01ac4e20422]
+// 维护导航：formatToolError；下列为本函数源码中的接口与路径索引。
+// 输入 code：string。
+// 输入 message：string。
+// 输入 maxOutputChars：类型由调用方与函数体约束；缺省表达式 8000。
+// 输入 diagnostic：ToolDiagnostic（可省略）。
+// 返回契约：string。
+// 分支条件：base.length > budget。
+// 分支条件：typeof value !== 'string'。
+// 分支条件：label === 'Field' && !/^(?:path|query|mode|scope|cursor|command|reason|patch|startLine|endLine|maxLines|includePagePlan|recursive|maxDepth|limit|pattern|caseSensitive|includeIgnored|includeHidden|regex|operation|revision|snapshotId|sourceOf。
+// 分支条件：result.length + part.length <= budget。
+// 遍历边界：const [label, value] ← [ ['Field', diagnostic?.field], ['Expected', diagnostic?.expected], ['Hint', diagnostic?.hint], ]。
+// 返回路径：clipped(base, budget - ' …omitted'.length) + ' …omitted'。
+// 返回路径：result。
+// 返回路径：clipped(prefix + 'Error details unavailable.', budget)。
+// 写入目标：result。
+// 直接调用：Number.isSafeInteger。
+// 直接调用：/^[a-z][a-z0-9_]{0,63}$/u.test。
+// 直接调用：Object.hasOwn。
+// 直接调用：safeText。
+// 直接调用：clipped。
+// 直接调用：/^(?:path|query|mode|scope|cursor|command|reason|patch|startLine|endLine|maxLines|includePagePlan|recursive|maxDepth|limit|pattern|caseSensitive|includeIgnored|includeHidden|regex|operation|revision|snapshotId|sourceOffset|sourceLimit|maxOu。
+// [/maint-note:c01ac4e20422]
 export function formatToolError(code: string, message: string, maxOutputChars = 8000, diagnostic?: ToolDiagnostic): string {
   const budget = Number.isSafeInteger(maxOutputChars) && maxOutputChars >= 96 ? maxOutputChars : 96
   const safeCode = typeof code === 'string' && /^[a-z][a-z0-9_]{0,63}$/u.test(code) ? code : 'tool_execution_error'
@@ -150,6 +272,36 @@ export function formatToolError(code: string, message: string, maxOutputChars = 
 }
 
 /** Native JSON failures keep their envelope. Shrink optional details before the cause. */
+// [maint-note:2771f0c05037]
+// 维护导航：formatToolErrorJson；下列为本函数源码中的接口与路径索引。
+// 输入 error：Record<string, unknown>。
+// 输入 maxOutputChars：类型由调用方与函数体约束；缺省表达式 8000。
+// 输入 envelope：Record<string, unknown>；缺省表达式 { ok: false }。
+// 返回契约：string。
+// 分支条件：typeof error.code === 'string' && /^[a-z][a-z0-9_]{0,63}$/u.test(error.code)。
+// 分支条件：typeof fields[key] === 'string'。
+// 分支条件：serialize().length <= budget。
+// 分支条件：typeof fields.message === 'string'。
+// 遍历边界：const key ← ['message', 'hint', 'expected', 'field']。
+// 遍历边界：const key ← ['hint', 'expected', 'field']。
+// 遍历边界：low < high。
+// 返回路径：serialize()。
+// 返回路径：JSON.stringify({ ...envelope, error: { code: fallbackCode } })。
+// 写入目标：fallbackCode。
+// 写入目标：fields[key]。
+// 写入目标：fields.message。
+// 写入目标：low。
+// 写入目标：high。
+// 直接调用：Number.isSafeInteger。
+// 直接调用：/^[a-z][a-z0-9_]{0,63}$/u.test。
+// 直接调用：safeText。
+// 直接调用：serialize。
+// 直接调用：Math.ceil。
+// 直接调用：points.slice(0, mid).join。
+// 直接调用：points.slice。
+// 直接调用：points.slice(0, low).join。
+// 直接调用：JSON.stringify。
+// [/maint-note:2771f0c05037]
 export function formatToolErrorJson(
   error: Record<string, unknown>,
   maxOutputChars = 8000,
@@ -165,6 +317,10 @@ export function formatToolErrorJson(
     for (const key of ['message', 'hint', 'expected', 'field']) {
       if (typeof fields[key] === 'string') fields[key] = safeText(fields[key] as string)
     }
+    // [maint-note:3c4d3573b735]
+    // 维护导航：serialize；下列为本函数源码中的接口与路径索引。
+    // 直接调用：JSON.stringify。
+    // [/maint-note:3c4d3573b735]
     const serialize = () => JSON.stringify({ ...envelope, error: fields })
     if (serialize().length <= budget) return serialize()
     for (const key of ['hint', 'expected', 'field']) {
@@ -196,6 +352,22 @@ export function formatToolErrorJson(
 }
 
 /** Older tools keep their canonical error schema; oversized errors get a safe bounded fallback. */
+// [maint-note:67d5851d83e7]
+// 维护导航：boundedErrorContent；下列为本函数源码中的接口与路径索引。
+// 输入 content：string。
+// 输入 code：string。
+// 输入 budget：类型由调用方与函数体约束；缺省表达式 8000。
+// 返回契约：string。
+// 分支条件：content.length <= budget。
+// 分支条件：compact.length <= budget。
+// 返回路径：content。
+// 返回路径：compact。
+// 返回路径：formatToolError(code, '', budget, toolDiagnostic('output_limit'))。
+// 直接调用：JSON.parse。
+// 直接调用：JSON.stringify。
+// 直接调用：formatToolError。
+// 直接调用：toolDiagnostic。
+// [/maint-note:67d5851d83e7]
 export function boundedErrorContent(content: string, code: string, budget = 8000): string {
   if (content.length <= budget) return content
   try {

@@ -14,6 +14,14 @@ import { reduceReplInputChunk } from '../state/replInput.js'
 import type { ReplCtrlCAction } from '../state/replCtrlC.js'
 import type { DecodedKeyboardInput, KeyboardKey } from '../state/keyboardInput.js'
 
+// [maint-note:bcc2627c1f37]
+// 数据契约导航：InputLineHandle；字段含义以消费端校验为准。
+// 成员 handleInput：(input: string, key: KeyboardKey) => void。
+// 成员 handleInputBatch：(events: readonly DecodedKeyboardInput[]) => void。
+// 成员 resetInput：(value: string, resetGeneration?: number) => void。
+// 成员 snapshotInputState：() => { value: string; cursor: number; dropdownOpen: boolean; selectedIndex: number }。
+// 成员 restoreInputState：(snapshot: { value: string; cursor: number; dropdownOpen: boolean; selectedIndex: number }) => void。
+// [/maint-note:bcc2627c1f37]
 export interface InputLineHandle {
   handleInput: (input: string, key: KeyboardKey) => void
   handleInputBatch: (events: readonly DecodedKeyboardInput[]) => void
@@ -33,6 +41,23 @@ export interface InputLineHandle {
   restoreInputState: (snapshot: { value: string; cursor: number; dropdownOpen: boolean; selectedIndex: number }) => void
 }
 
+// [maint-note:c08234ff3578]
+// 数据契约导航：InputLineProps；字段含义以消费端校验为准。
+// 成员 value：string。
+// 成员 onChange：(value: string) => void。
+// 成员 onSubmit：(value: string) => void。
+// 成员 placeholder（可省略）：string。
+// 成员 allowEmptySubmit（可省略）：boolean。
+// 成员 onInputSubscriptionChange（可省略）：(attached: boolean) => void。
+// 成员 onDropdownChange（可省略）：(open: boolean) => void。
+// 成员 resetGeneration（可省略）：number。
+// 成员 onControlC（可省略）：(inputLength: number, exitArmed: boolean) => ReplCtrlCAction。
+// 成员 exitArmed（可省略）：boolean。
+// 成员 renderMarker（可省略）：string。
+// 成员 width：number。
+// 成员 hidden（可省略）：boolean。
+// 成员 initialEditingState（可省略）：{ value: string; cursor: number; dropdownOpen: boolean; selectedIndex: number }。
+// [/maint-note:c08234ff3578]
 export interface InputLineProps {
   /** Parent mirror of the live edit; external replacement increments resetGeneration. */
   value: string
@@ -62,6 +87,13 @@ export interface InputLineProps {
   initialEditingState?: { value: string; cursor: number; dropdownOpen: boolean; selectedIndex: number }
 }
 
+// [maint-note:6f3fe4f9f6e5]
+// 数据契约导航：CompletionItem；字段含义以消费端校验为准。
+// 成员 kind：'slash'。
+// 成员 value：string。
+// 成员 label：string。
+// 成员 description（可省略）：string。
+// [/maint-note:6f3fe4f9f6e5]
 interface CompletionItem {
   kind: 'slash'
   value: string
@@ -69,6 +101,19 @@ interface CompletionItem {
   description?: string
 }
 
+// [maint-note:fdc78ceb6689]
+// 维护导航：parseSlashCommand；下列为本函数源码中的接口与路径索引。
+// 输入 value：string。
+// 输入 cursorPos：number。
+// 返回契约：{ filter: string } | null。
+// 分支条件：!textBeforeCursor.startsWith('/')。
+// 分支条件：textBeforeCursor.includes(' ')。
+// 返回路径：null。
+// 返回路径：{ filter: textBeforeCursor }。
+// 直接调用：value.slice。
+// 直接调用：textBeforeCursor.startsWith。
+// 直接调用：textBeforeCursor.includes。
+// [/maint-note:fdc78ceb6689]
 function parseSlashCommand(value: string, cursorPos: number): { filter: string } | null {
   const textBeforeCursor = value.slice(0, cursorPos)
   if (!textBeforeCursor.startsWith('/')) return null
@@ -76,6 +121,19 @@ function parseSlashCommand(value: string, cursorPos: number): { filter: string }
   return { filter: textBeforeCursor }
 }
 
+// [maint-note:bca9bd5f2d3e]
+// 维护导航：completionItemsFor；下列为本函数源码中的接口与路径索引。
+// 输入 value：string。
+// 输入 cursorPos：number。
+// 返回契约：CompletionItem[] | null。
+// 分支条件：!slashInfo。
+// 返回路径：null。
+// 返回路径：slashCommandDefs .filter(command => command.name.toLowerCase().startsWith(filter)) .map(command => ({ kind: 'slash' as const, value: command.name, label: command.name, description: command.description, }))。
+// 直接调用：parseSlashCommand。
+// 直接调用：slashInfo.filter.toLowerCase。
+// 直接调用：slashCommandDefs .filter(command => command.name.toLowerCase().startsWith(filter)) .map。
+// 直接调用：slashCommandDefs .filter。
+// [/maint-note:bca9bd5f2d3e]
 function completionItemsFor(value: string, cursorPos: number): CompletionItem[] | null {
   const slashInfo = parseSlashCommand(value, cursorPos)
   if (!slashInfo) return null
@@ -92,6 +150,12 @@ function completionItemsFor(value: string, cursorPos: number): CompletionItem[] 
 
 const MAX_DROPDOWN_ITEMS = 10
 
+// [maint-note:0f3de2d35e56]
+// 数据契约导航：InputLineProjection；字段含义以消费端校验为准。
+// 成员 before：string。
+// 成员 at：string。
+// 成员 after：string。
+// [/maint-note:0f3de2d35e56]
 interface InputLineProjection {
   before: string
   at: string
@@ -99,6 +163,49 @@ interface InputLineProjection {
 }
 
 /** Keep the editable row to one physical terminal line, even for a paste. */
+// [maint-note:b2845b07cfda]
+// 维护导航：projectInputLine；下列为本函数源码中的接口与路径索引。
+// 输入 value：string。
+// 输入 cursorPos：number。
+// 输入 width：number。
+// 输入 placeholder：类型由调用方与函数体约束；缺省表达式 ''。
+// 返回契约：InputLineProjection。
+// 分支条件：characters.length > 0 && sourceWidth(0, characters.length) + 1 > safeWidth。
+// 分支条件：cursor - start >= end - cursor && start < cursor。
+// 分支条件：end > cursor。
+// 分支条件：visibleSourceWidth + (showPrefix ? ellipsisWidth : 0) + (showSuffix ? ellipsisWidth : 0) > safeWidth。
+// 分支条件：showPrefix && showSuffix。
+// 分支条件：start >= characters.length - end。
+// 分支条件：showPrefix。
+// 分支条件：showSuffix。
+// 遍历边界：let index = 0; index < characterWidths.length; index += 1。
+// 遍历边界：projectedWidth() > safeWidth && (start < cursor || end > cursor)。
+// 返回路径：{ before: prefix + characters.slice(start, cursor).join(''), at: truncateDisplayText(characters[cursor] ?? ' ', Math.max(1, safeWidth)), after: characters.length === 0 ? truncateDisplayText(emptyPlaceholder, Math.max(0, safeWidth - 1)) : ch。
+// 写入目标：index。
+// 写入目标：widthPrefix[index + 1]。
+// 写入目标：start。
+// 写入目标：end。
+// 写入目标：showSuffix。
+// 写入目标：showPrefix。
+// 直接调用：calculateContentWidth。
+// 直接调用：sanitizeTerminalText(value).replace。
+// 直接调用：sanitizeTerminalText。
+// 直接调用：splitDisplayGraphemes。
+// 直接调用：sanitizeTerminalText(value.slice(0, Math.max(0, cursorPos))).replace。
+// 直接调用：value.slice。
+// 直接调用：Math.max。
+// 直接调用：Math.min。
+// 直接调用：characters.map。
+// 直接调用：new Array<number>(characterWidths.length + 1).fill。
+// 直接调用：displayLineWidth。
+// 直接调用：sourceWidth。
+// 直接调用：projectedWidth。
+// 直接调用：visibleContentWidth。
+// 直接调用：characters.slice(start, cursor).join。
+// 直接调用：characters.slice。
+// 直接调用：truncateDisplayText。
+// 直接调用：characters.slice(cursor + 1, end).join。
+// [/maint-note:b2845b07cfda]
 export function projectInputLine(value: string, cursorPos: number, width: number, placeholder = ''): InputLineProjection {
   const safeWidth = calculateContentWidth({ terminalWidth: width, prefixWidth: 2, minWidth: 1 })
   // Newlines can arrive in a paste chunk. They are editable data, but the
@@ -112,6 +219,12 @@ export function projectInputLine(value: string, cursorPos: number, width: number
   for (let index = 0; index < characterWidths.length; index += 1) {
     widthPrefix[index + 1] = widthPrefix[index]! + characterWidths[index]!
   }
+  // [maint-note:44f906471d09]
+  // 维护导航：sourceWidth；下列为本函数源码中的接口与路径索引。
+  // 输入 from：number。
+  // 输入 to：number。
+  // 返回契约：number。
+  // [/maint-note:44f906471d09]
   const sourceWidth = (from: number, to: number): number => widthPrefix[to]! - widthPrefix[from]!
   const ellipsisWidth = displayLineWidth('…')
   let start = 0
@@ -127,10 +240,21 @@ export function projectInputLine(value: string, cursorPos: number, width: number
     end = Math.min(characters.length, cursor + radius)
   }
 
+  // [maint-note:0df4d212a52c]
+  // 维护导航：visibleContentWidth；下列为本函数源码中的接口与路径索引。
+  // 返回契约：number。
+  // 直接调用：sourceWidth。
+  // 直接调用：Math.min。
+  // [/maint-note:0df4d212a52c]
   const visibleContentWidth = (): number =>
     sourceWidth(start, cursor) +
     (cursor < characters.length ? characterWidths[cursor]! : 1) +
     sourceWidth(Math.min(cursor + 1, end), end)
+  // [maint-note:a4efa814ccba]
+  // 维护导航：projectedWidth；下列为本函数源码中的接口与路径索引。
+  // 返回契约：number。
+  // 直接调用：visibleContentWidth。
+  // [/maint-note:a4efa814ccba]
   const projectedWidth = (): number =>
     (start > 0 ? ellipsisWidth : 0) +
     visibleContentWidth() +
@@ -255,6 +379,27 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(function In
     onDropdownChange?.(dropdownOpen)
   }, [dropdownOpen])
 
+  // [maint-note:d3bc252775a6]
+  // 维护导航：installEditingState；下列为本函数源码中的接口与路径索引。
+  // 输入 nextValue：string。
+  // 输入 nextCursor：number。
+  // 返回契约：void。
+  // 分支条件：batchModeRef.current。
+  // 分支条件：completionFilterRef.current !== nextFilter。
+  // 写入目标：editingStateRef.current。
+  // 写入目标：completionFilterRef.current。
+  // 写入目标：selectedIndexRef.current。
+  // 写入目标：batchCompletionItemsRef.current。
+  // 写入目标：dropdownOpenRef.current。
+  // 写入目标：matchCount.current。
+  // 直接调用：Math.max。
+  // 直接调用：Math.min。
+  // 直接调用：setEditingState。
+  // 直接调用：completionItemsFor。
+  // 直接调用：parseSlashCommand。
+  // 直接调用：setSelectedIndex。
+  // 直接调用：setScrollOffset。
+  // [/maint-note:d3bc252775a6]
   const installEditingState = (nextValue: string, nextCursor: number): void => {
     const next = {
       value: nextValue,
@@ -278,10 +423,24 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(function In
     }
   }
 
+  // [maint-note:1c5eea7eb6b3]
+  // 维护导航：setCursor；下列为本函数源码中的接口与路径索引。
+  // 输入 next：number。
+  // 返回契约：void。
+  // 直接调用：installEditingState。
+  // [/maint-note:1c5eea7eb6b3]
   const setCursor = (next: number): void => {
     installEditingState(editingStateRef.current.value, next)
   }
 
+  // [maint-note:fadd1d835f7a]
+  // 维护导航：commitEdit；下列为本函数源码中的接口与路径索引。
+  // 输入 nextValue：string。
+  // 输入 nextCursor：number。
+  // 返回契约：void。
+  // 直接调用：installEditingState。
+  // 直接调用：onChange。
+  // [/maint-note:fadd1d835f7a]
   const commitEdit = (nextValue: string, nextCursor: number): void => {
     // Publish the complete edit snapshot before invoking the controlled
     // parent. A synchronous callback/commit can therefore never observe a
@@ -290,6 +449,19 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(function In
     onChange(nextValue)
   }
 
+  // [maint-note:bf5541b33838]
+  // 维护导航：resetInput；下列为本函数源码中的接口与路径索引。
+  // 输入 next：string。
+  // 输入 generation：number（可省略）。
+  // 返回契约：void。
+  // 分支条件：generation !== undefined。
+  // 分支条件：generation <= resetGenerationRef.current。
+  // 返回路径：无返回值。
+  // 写入目标：resetGenerationRef.current。
+  // 写入目标：dropdownOpenRef.current。
+  // 写入目标：selectedIndexRef.current。
+  // 直接调用：installEditingState。
+  // [/maint-note:bf5541b33838]
   const resetInput = (next: string, generation?: number): void => {
     if (generation !== undefined) {
       if (generation <= resetGenerationRef.current) return
@@ -300,6 +472,10 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(function In
     selectedIndexRef.current = 0
   }
 
+  // [maint-note:695975b69aeb]
+  // 维护导航：snapshotInputState；下列为本函数源码中的接口与路径索引。
+  // 返回契约：{ value: string; cursor: number; dropdownOpen: boolean; selectedIndex: number }。
+  // [/maint-note:695975b69aeb]
   const snapshotInputState = (): { value: string; cursor: number; dropdownOpen: boolean; selectedIndex: number } => ({
     value: editingStateRef.current.value,
     cursor: editingStateRef.current.cursor,
@@ -307,6 +483,13 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(function In
     selectedIndex: selectedIndexRef.current,
   })
 
+  // [maint-note:4c53fe126b70]
+  // 维护导航：restoreInputState；下列为本函数源码中的接口与路径索引。
+  // 输入 snapshot：{ value: string; cursor: number; dropdownOpen: boolean; selectedIndex: number }。
+  // 返回契约：void。
+  // 写入目标：selectedIndexRef.current。
+  // 直接调用：installEditingState。
+  // [/maint-note:4c53fe126b70]
   const restoreInputState = (snapshot: { value: string; cursor: number; dropdownOpen: boolean; selectedIndex: number }): void => {
     // The parent keeps the controlled value while the viewer is open, so the
     // restore mainly returns the CURSOR (and completion state) the user had;
@@ -317,6 +500,16 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(function In
     selectedIndexRef.current = snapshot.dropdownOpen ? snapshot.selectedIndex : 0
   }
 
+  // [maint-note:c37649f8eb43]
+  // 维护导航：handlePastedInput；下列为本函数源码中的接口与路径索引。
+  // 输入 input：string。
+  // 返回契约：void。
+  // 分支条件：!safeInput。
+  // 返回路径：无返回值。
+  // 直接调用：sanitizeTerminalText。
+  // 直接调用：currentValue.slice。
+  // 直接调用：commitEdit。
+  // [/maint-note:c37649f8eb43]
   const handlePastedInput = (input: string): void => {
     const safeInput = sanitizeTerminalText(input)
     if (!safeInput) return
@@ -326,6 +519,54 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(function In
     commitEdit(nextValue, currentCursor + safeInput.length)
   }
 
+  // [maint-note:573731f7a410]
+  // 维护导航：handleInput；下列为本函数源码中的接口与路径索引。
+  // 输入 input：string。
+  // 输入 key：KeyboardKey。
+  // 返回契约：void。
+  // 分支条件：chunkActions.some(action => action.type === 'ctrlC')。
+  // 分支条件：action.type === 'text'。
+  // 分支条件：!decision。
+  // 分支条件：decision === 'clearAndArmExit'。
+  // 分支条件：decision === 'armExit'。
+  // 分支条件：decision === 'exit' || decision === 'interruptTurn' || decision === 'dismissSelection' || decision === 'ignore'。
+  // 分支条件：currentDropdownOpen。
+  // 分支条件：key.upArrow。
+  // 分支条件：key.downArrow || key.tab。
+  // 分支条件：key.return && liveCompletionItems。
+  // 分支条件：selected?.kind === 'slash' && selected.value === currentValue.trim()。
+  // 分支条件：selected?.kind === 'slash'。
+  // 分支条件：key.escape。
+  // 分支条件：parseSlashCommand(currentValue, currentCursor)。
+  // 分支条件：key.return。
+  // 分支条件：!currentDropdownOpen && (currentValue.trim() || allowEmptySubmit)。
+  // 分支条件：key.backspace || key.delete。
+  // 分支条件：currentCursor > 0。
+  // 分支条件：key.leftArrow。
+  // 分支条件：!currentDropdownOpen && currentCursor > 0。
+  // 分支条件：key.rightArrow。
+  // 分支条件：!currentDropdownOpen && currentCursor < currentValue.length。
+  // 分支条件：key.home。
+  // 分支条件：key.end。
+  // 分支条件：input && !key.ctrl && !key.meta && !key.return && !key.escape。
+  // 遍历边界：const action ← chunkActions。
+  // 返回路径：无返回值。
+  // 写入目标：nextValue。
+  // 写入目标：nextCursor。
+  // 写入目标：nextExitArmed。
+  // 写入目标：selectedIndexRef.current。
+  // 直接调用：reduceReplInputChunk。
+  // 直接调用：chunkActions.some。
+  // 直接调用：nextValue.slice。
+  // 直接调用：commitEdit。
+  // 直接调用：onControlC。
+  // 直接调用：setCursor。
+  // 直接调用：setSelectedIndex。
+  // 直接调用：currentValue.trim。
+  // 直接调用：onSubmit。
+  // 直接调用：currentValue.slice。
+  // 直接调用：parseSlashCommand。
+  // [/maint-note:573731f7a410]
   const handleInput = (input: string, key: KeyboardKey): void => {
     const chunkActions = reduceReplInputChunk(input, key.ctrl)
     if (chunkActions.some(action => action.type === 'ctrlC')) {
@@ -446,6 +687,22 @@ export const InputLine = forwardRef<InputLineHandle, InputLineProps>(function In
 
   }
 
+  // [maint-note:1258ba6916a5]
+  // 维护导航：handleInputBatch；下列为本函数源码中的接口与路径索引。
+  // 输入 events：readonly DecodedKeyboardInput[]。
+  // 返回契约：void。
+  // 分支条件：event.paste。
+  // 遍历边界：const event ← events。
+  // 写入目标：batchModeRef.current。
+  // 写入目标：completionFilterRef.current。
+  // 写入目标：batchCompletionItemsRef.current。
+  // 写入目标：dropdownOpenRef.current。
+  // 写入目标：matchCount.current。
+  // 直接调用：completionItemsFor。
+  // 直接调用：parseSlashCommand。
+  // 直接调用：handlePastedInput。
+  // 直接调用：handleInput。
+  // [/maint-note:1258ba6916a5]
   const handleInputBatch = (events: readonly DecodedKeyboardInput[]): void => {
     batchModeRef.current = true
     const initialItems = completionItemsFor(editingStateRef.current.value, editingStateRef.current.cursor)

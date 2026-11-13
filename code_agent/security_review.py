@@ -118,6 +118,48 @@ _CONVERSION = re.compile(
 )
 
 
+# [maint-note:711345d8c94a]
+# 候选筛选：仅处理字面量格式串，动态格式需要后续语义审查。
+# 跳过注释后分词，避免把示例代码或注释中的 scanf 当作调用。
+# %s 与 %[ 缺少宽度时提示容量风险，抑制赋值的转换不写入目标。
+# %c 不自动追加 NUL，不能按字符串转换的规则机械套用。
+# 返回候选行号，不单凭格式串认定真实漏洞。
+# 维护导航：unbounded_scanf_lines；下列为本函数源码中的接口与路径索引。
+# 输入 source：str。
+# 返回契约：set[int]。
+# 分支条件：name not in {'scanf', 'fscanf', 'sscanf'} or tokens[i + 1][0] != '('。
+# 分支条件：token == ')' and depth == 0。
+# 分支条件：token == ',' and depth == 0。
+# 分支条件：token in {'(', '[', '{'}。
+# 分支条件：token in {')', ']', '}'}。
+# 分支条件：len(arguments) <= format_index。
+# 分支条件：not parts or not all((t.startswith('"') and t.endswith('"') for t in parts))。
+# 分支条件：(kind == 's' or kind.startswith('[')) and (not (conversion['suppress'] or conversion['width']))。
+# 遍历边界：(i, (name, offset)) ← enumerate(tokens[:-1])。
+# 遍历边界：(token, _) ← tokens[i + 2:]。
+# 遍历边界：conversion ← _CONVERSION.finditer(fmt)。
+# 返回路径：result。
+# 直接调用：m.group。
+# 直接调用：m.start。
+# 直接调用：_C_TOKEN.finditer。
+# 直接调用：m.group().startswith。
+# 直接调用：set。
+# 直接调用：enumerate。
+# 直接调用：arguments.append。
+# 直接调用：current.append。
+# 直接调用：len。
+# 直接调用：all。
+# 直接调用：t.startswith。
+# 直接调用：t.endswith。
+# 直接调用：''.join。
+# 直接调用：_CONVERSION.finditer。
+# 直接调用：kind.startswith。
+# 直接调用：result.add。
+# 直接调用：source.count。
+# 集合派生：m 来自 _C_TOKEN.finditer(source)；过滤 not m.group().startswith(('//', '/*'))。
+# 表达式分流：name == 'scanf'；真值与假值分支分别计算，不同时执行。
+# 集合派生：t 来自 parts。
+# [/maint-note:711345d8c94a]
 def unbounded_scanf_lines(source: str) -> set[int]:
     """Find unbounded string/scanset assignments in literal scanf-family formats.
 

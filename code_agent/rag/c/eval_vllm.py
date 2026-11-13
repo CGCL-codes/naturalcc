@@ -18,12 +18,33 @@ from vllm import LLM, SamplingParams
 from .utils import DS_FILE, PT_FILE, EVAL_FILE, RESULT_FILE, MODEL, IMP_FILE
 
 
+# [maint-note:9997bcd94fdf]
+# 维护导航：load_config；下列为本函数源码中的接口与路径索引。
+# 返回路径：config。
+# 直接调用：open。
+# 直接调用：os.path.join。
+# 直接调用：os.path.dirname。
+# 直接调用：yaml.safe_load。
+# 资源作用域：open(os.path.join(os.path.dirname(__file__), 'config.yaml'), 'r', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:9997bcd94fdf]
 def load_config():
     with open(os.path.join(os.path.dirname(__file__), "config.yaml"), "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
     return config
 
 
+# [maint-note:2545af371895]
+# 维护导航：load_jsonl；下列为本函数源码中的接口与路径索引。
+# 输入 file_path：类型由调用方与函数体约束。
+# 分支条件：not line。
+# 遍历边界：line ← f。
+# 返回路径：data。
+# 直接调用：open。
+# 直接调用：line.strip。
+# 直接调用：data.append。
+# 直接调用：json.loads。
+# 资源作用域：open(file_path, 'r', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:2545af371895]
 def load_jsonl(file_path):
     data = []
     with open(file_path, "r", encoding="utf-8") as f:
@@ -34,6 +55,39 @@ def load_jsonl(file_path):
             data.append(json.loads(line))
     return data
 
+# [maint-note:37514f48b227]
+# 维护导航：process_c_completion；下列为本函数源码中的接口与路径索引。
+# 输入 completion：类型由调用方与函数体约束。
+# 输入 add_log：类型由调用方与函数体约束；缺省表达式 False。
+# 分支条件：not completion。
+# 分支条件：escaped。
+# 分支条件：ch == '\\' and (in_string or in_char)。
+# 分支条件：in_line_comment。
+# 分支条件：ch == '\n'。
+# 分支条件：add_log and len(result) < len(original)。
+# 分支条件：in_block_comment。
+# 分支条件：ch == '*' and nxt == '/'。
+# 分支条件：in_string。
+# 分支条件：ch == '"' and (not escaped)。
+# 分支条件：in_char。
+# 分支条件：ch == "'" and (not escaped)。
+# 分支条件：ch == '/' and nxt == '/'。
+# 分支条件：ch == '/' and nxt == '*'。
+# 分支条件：ch == '"'。
+# 分支条件：ch == "'"。
+# 分支条件：ch == ';'。
+# 遍历边界：(i, ch) ← enumerate(completion)。
+# 返回路径：''。
+# 返回路径：result。
+# 返回路径：original。
+# 直接调用：completion.strip。
+# 直接调用：enumerate。
+# 直接调用：len。
+# 直接调用：completion[:i].strip。
+# 直接调用：print。
+# 直接调用：completion[:i + 1].strip。
+# 表达式分流：i + 1 < len(completion)；真值与假值分支分别计算，不同时执行。
+# [/maint-note:37514f48b227]
 def process_c_completion(completion, add_log=False):
     """
     单行补全版后处理（适合 C/Java 风格单行语句补全）：
@@ -125,6 +179,22 @@ def process_c_completion(completion, add_log=False):
     return original
 
 
+# [maint-note:80cdf739cefc]
+# 维护导航：generate_completion_batch_vllm；下列为本函数源码中的接口与路径索引。
+# 输入 llm：类型由调用方与函数体约束。
+# 输入 sampling_params：类型由调用方与函数体约束。
+# 输入 prompts：类型由调用方与函数体约束。
+# 分支条件：not prompts。
+# 遍历边界：out ← outputs。
+# 遍历边界：prompt ← prompts。
+# 返回路径：[]。
+# 返回路径：generations。
+# 捕获异常：Exception。
+# 直接调用：llm.generate。
+# 直接调用：process_c_completion。
+# 直接调用：generations.append。
+# 直接调用：print。
+# [/maint-note:80cdf739cefc]
 def generate_completion_batch_vllm(llm, sampling_params, prompts):
     """
     使用 vLLM 对一批 prompts 做生成
@@ -158,10 +228,32 @@ def generate_completion_batch_vllm(llm, sampling_params, prompts):
         return generations
 
 
+# [maint-note:502328d8774c]
+# 维护导航：compute_exact_match；下列为本函数源码中的接口与路径索引。
+# 输入 prediction：类型由调用方与函数体约束。
+# 输入 ground_truth：类型由调用方与函数体约束。
+# 返回路径：1 if prediction.strip() == ground_truth.strip() else 0。
+# 直接调用：prediction.strip。
+# 直接调用：ground_truth.strip。
+# 表达式分流：prediction.strip() == ground_truth.strip()；真值与假值分支分别计算，不同时执行。
+# [/maint-note:502328d8774c]
 def compute_exact_match(prediction, ground_truth):
     return 1 if prediction.strip() == ground_truth.strip() else 0
 
 
+# [maint-note:864a2956da82]
+# 维护导航：compute_edit_similarity；下列为本函数源码中的接口与路径索引。
+# 输入 prediction：类型由调用方与函数体约束。
+# 输入 ground_truth：类型由调用方与函数体约束。
+# 分支条件：max_len == 0。
+# 返回路径：1.0。
+# 返回路径：similarity。
+# 直接调用：prediction.strip。
+# 直接调用：ground_truth.strip。
+# 直接调用：Levenshtein.distance。
+# 直接调用：max。
+# 直接调用：len。
+# [/maint-note:864a2956da82]
 def compute_edit_similarity(prediction, ground_truth):
     p = prediction.strip()
     g = ground_truth.strip()
@@ -175,6 +267,73 @@ def compute_edit_similarity(prediction, ground_truth):
     return similarity
 
 
+# [maint-note:5b77c2e1b5ec]
+# 维护导航：main；下列为本函数源码中的接口与路径索引。
+# 分支条件：not os.path.exists(DS_FILE)。
+# 分支条件：not os.path.exists(PT_FILE)。
+# 分支条件：valid_prompts。
+# 分支条件：printed_samples < max_print_samples。
+# 分支条件：prompt_pred。
+# 分支条件：raw_em == 0 and prompt_em == 1。
+# 分支条件：directory and (not os.path.exists(directory))。
+# 分支条件：improved_samples。
+# 遍历边界：i ← tqdm(range(0, num_samples, batch_size), desc='处理批次')。
+# 遍历边界：(idx, id_) ← enumerate(valid_ids)。
+# 遍历边界：(j, sample_id) ← enumerate(batch_ids)。
+# 遍历边界：path ← [RESULT_FILE, EVAL_FILE, IMP_FILE]。
+# 返回路径：无返回值。
+# 写入目标：prompt_preds_map[id_]。
+# 直接调用：argparse.ArgumentParser。
+# 直接调用：parser.add_argument。
+# 直接调用：parser.parse_args。
+# 直接调用：load_config。
+# 直接调用：print。
+# 直接调用：os.path.exists。
+# 直接调用：load_jsonl。
+# 直接调用：item.get。
+# 直接调用：MODEL.lower。
+# 直接调用：SamplingParams。
+# 直接调用：LLM。
+# 直接调用：len。
+# 直接调用：tqdm。
+# 直接调用：range。
+# 直接调用：sample.get。
+# 直接调用：prompt_dict.get。
+# 直接调用：generate_completion_batch_vllm。
+# 直接调用：enumerate。
+# 直接调用：prompt_preds_map.get。
+# 直接调用：compute_exact_match。
+# 直接调用：compute_edit_similarity。
+# 直接调用：raw_exact_matches.append。
+# 直接调用：raw_edit_similarities.append。
+# 直接调用：dataset_dict.get。
+# 直接调用：sample_data.get。
+# 直接调用：improved_samples.append。
+# 直接调用：prompt_exact_matches.append。
+# 直接调用：prompt_edit_similarities.append。
+# 直接调用：results.append。
+# 直接调用：float。
+# 直接调用：np.mean。
+# 直接调用：os.path.dirname。
+# 直接调用：os.makedirs。
+# 直接调用：open。
+# 直接调用：json.dump。
+# 直接调用：f.write。
+# 集合派生：item 来自 prompts。
+# 集合派生：item 来自 dataset。
+# 集合派生：sample 来自 current_batch。
+# 集合派生：id_ 来自 batch_ids。
+# 集合派生：p 来自 batch_prompts；过滤 p。
+# 集合派生：(idx, p) 来自 enumerate(batch_prompts)；过滤 p。
+# 集合派生：idx 来自 valid_indices。
+# 表达式分流：raw_exact_matches；真值与假值分支分别计算，不同时执行。
+# 表达式分流：raw_edit_similarities；真值与假值分支分别计算，不同时执行。
+# 表达式分流：prompt_exact_matches；真值与假值分支分别计算，不同时执行。
+# 表达式分流：prompt_edit_similarities；真值与假值分支分别计算，不同时执行。
+# 资源作用域：open(RESULT_FILE, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 资源作用域：open(EVAL_FILE, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# 资源作用域：open(IMP_FILE, 'w', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:5b77c2e1b5ec]
 def main():
     parser = argparse.ArgumentParser(description=f"评估{MODEL}模型的代码补全性能（vLLM版）")
     parser.add_argument("--batch_size", type=int, default=8, help="批处理大小")

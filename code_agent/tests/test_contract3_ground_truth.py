@@ -21,6 +21,7 @@ def test_ground_truth_loads_with_product_loader(tmp_path, suite, project):
     path = GT / suite / project / "ground_truth.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     assert data["schema_version"] == 1 and data["scan_type"] == "frequent_defects"
+    assert data["dataset_revision"] == independent.DATASET_REVISION
     # Regenerate the fixtures exactly as the exporter and Web runner name them.
     for category in MANIFEST["categories"]:
         independent.inject_fixture(tmp_path, project, [category],
@@ -30,6 +31,10 @@ def test_ground_truth_loads_with_product_loader(tmp_path, suite, project):
     loaded = load_ground_truth(tmp_path, "ground_truth.json", "frequent_defects", scanned)
     cases = loaded["cases"]
     assert len(cases) == 120 and sum(case["expected"] == "defect" for case in cases) == 60
+    # Every shape retains a matching safe control after the mix is changed.
+    from collections import Counter
+    assert Counter((c["category"], c["variant_kind"], c["variant"]) for c in cases if c["expected"] == "defect") == Counter(
+        (c["category"], c["variant_kind"], c["variant"]) for c in cases if c["expected"] == "control")
     assert {case["file"] for case in cases} == set(data["source_sha256"])
     assert data["line_totals"]["upstream_detection_files"] >= 10_000
     assert len(data["detection_files"]) == len({item["path"] for item in data["detection_files"]})

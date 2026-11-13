@@ -39,24 +39,17 @@ static int contract3_independent_array_oob_case_04(void)
 static int contract3_independent_array_oob_case_05(void)
 {
     int values[3] = {1, 2, 3};
-    int *cursor = values + 3;
-    return *cursor;
-}
-
-static int contract3_independent_array_oob_case_06(void)
-{
-    int values[3] = {1, 2, 3};
     return values[3];
 }
 
-static int contract3_independent_array_oob_case_07(void)
+static int contract3_independent_array_oob_case_06(void)
 {
     int values[3] = {1, 2, 3};
     int index = 3;
     return values[index];
 }
 
-static int contract3_independent_array_oob_case_08(void)
+static int contract3_independent_array_oob_case_07(void)
 {
     int values[3] = {1, 2, 3};
     int total = 0;
@@ -64,69 +57,55 @@ static int contract3_independent_array_oob_case_08(void)
     return total;
 }
 
-static int contract3_independent_array_oob_case_09(void)
+static int contract3_independent_array_oob_case_08(void)
 {
     int values[3] = {1, 2, 3};
     int index = contract3_identity(3);
     return values[index];
 }
 
-static int contract3_independent_array_oob_case_10(void)
-{
-    int values[3] = {1, 2, 3};
-    int *cursor = values + 3;
-    return *cursor;
-}
-
-static int contract3_independent_array_oob_case_11(void)
+static int contract3_independent_array_oob_case_09(void)
 {
     int values[3] = {1, 2, 3};
     return values[3];
 }
 
-static int contract3_independent_array_oob_case_12(void)
+static int contract3_independent_array_oob_case_10(void)
 {
     int values[3] = {1, 2, 3};
     int index = 3;
+    return values[index];
+}
+
+static int contract3_independent_array_oob_case_11(void)
+{
+    int values[3] = {1, 2, 3};
+    int total = 0;
+    for (int index = 0; index <= 3; ++index) total += values[index];
+    return total;
+}
+
+static int contract3_independent_array_oob_case_12(void)
+{
+    int values[3] = {1, 2, 3};
+    int index = contract3_identity(3);
     return values[index];
 }
 
 static int contract3_independent_array_oob_case_13(void)
 {
     int values[3] = {1, 2, 3};
-    int total = 0;
-    for (int index = 0; index <= 3; ++index) total += values[index];
-    return total;
-}
-
-static int contract3_independent_array_oob_case_14(void)
-{
-    int values[3] = {1, 2, 3};
-    int index = contract3_identity(3);
-    return values[index];
-}
-
-static int contract3_independent_array_oob_case_15(void)
-{
-    int values[3] = {1, 2, 3};
-    int *cursor = values + 3;
-    return *cursor;
-}
-
-static int contract3_independent_array_oob_case_16(void)
-{
-    int values[3] = {1, 2, 3};
     return values[3];
 }
 
-static int contract3_independent_array_oob_case_17(void)
+static int contract3_independent_array_oob_case_14(void)
 {
     int values[3] = {1, 2, 3};
     int index = 3;
     return values[index];
 }
 
-static int contract3_independent_array_oob_case_18(void)
+static int contract3_independent_array_oob_case_15(void)
 {
     int values[3] = {1, 2, 3};
     int total = 0;
@@ -134,11 +113,31 @@ static int contract3_independent_array_oob_case_18(void)
     return total;
 }
 
-static int contract3_independent_array_oob_case_19(void)
+static int contract3_independent_array_oob_case_16(void)
 {
     int values[3] = {1, 2, 3};
     int index = contract3_identity(3);
     return values[index];
+}
+
+static int contract3_independent_array_oob_case_17(void)
+{
+    int values[3] = {1, 2, 3};
+    return values[3];
+}
+
+static int contract3_independent_array_oob_case_18(void)
+{
+    int values[3] = {1, 2, 3};
+    int *cursor = values + 3;
+    return *cursor;
+}
+
+static int contract3_independent_array_oob_case_19(void)
+{
+    int values[3] = {1, 2, 3};
+    int *cursor = values + 3;
+    return *cursor;
 }
 
 static int contract3_independent_array_oob_case_20(void)
@@ -179,24 +178,17 @@ static int contract3_independent_array_oob_case_24(void)
 static int contract3_independent_array_oob_case_25(void)
 {
     int values[3] = {1, 2, 3};
-    int *cursor = values + 2;
-    return *cursor;
-}
-
-static int contract3_independent_array_oob_case_26(void)
-{
-    int values[3] = {1, 2, 3};
     return values[2];
 }
 
-static int contract3_independent_array_oob_case_27(void)
+static int contract3_independent_array_oob_case_26(void)
 {
     int values[3] = {1, 2, 3};
     int index = 2;
     return values[index];
 }
 
-static int contract3_independent_array_oob_case_28(void)
+static int contract3_independent_array_oob_case_27(void)
 {
     int values[3] = {1, 2, 3};
     int total = 0;
@@ -204,69 +196,55 @@ static int contract3_independent_array_oob_case_28(void)
     return total;
 }
 
-static int contract3_independent_array_oob_case_29(void)
+static int contract3_independent_array_oob_case_28(void)
 {
     int values[3] = {1, 2, 3};
     int index = contract3_identity(2);
     return values[index];
 }
 
-static int contract3_independent_array_oob_case_30(void)
-{
-    int values[3] = {1, 2, 3};
-    int *cursor = values + 2;
-    return *cursor;
-}
-
-static int contract3_independent_array_oob_case_31(void)
+static int contract3_independent_array_oob_case_29(void)
 {
     int values[3] = {1, 2, 3};
     return values[2];
 }
 
-static int contract3_independent_array_oob_case_32(void)
+static int contract3_independent_array_oob_case_30(void)
 {
     int values[3] = {1, 2, 3};
     int index = 2;
+    return values[index];
+}
+
+static int contract3_independent_array_oob_case_31(void)
+{
+    int values[3] = {1, 2, 3};
+    int total = 0;
+    for (int index = 0; index < 3; ++index) total += values[index];
+    return total;
+}
+
+static int contract3_independent_array_oob_case_32(void)
+{
+    int values[3] = {1, 2, 3};
+    int index = contract3_identity(2);
     return values[index];
 }
 
 static int contract3_independent_array_oob_case_33(void)
 {
     int values[3] = {1, 2, 3};
-    int total = 0;
-    for (int index = 0; index < 3; ++index) total += values[index];
-    return total;
-}
-
-static int contract3_independent_array_oob_case_34(void)
-{
-    int values[3] = {1, 2, 3};
-    int index = contract3_identity(2);
-    return values[index];
-}
-
-static int contract3_independent_array_oob_case_35(void)
-{
-    int values[3] = {1, 2, 3};
-    int *cursor = values + 2;
-    return *cursor;
-}
-
-static int contract3_independent_array_oob_case_36(void)
-{
-    int values[3] = {1, 2, 3};
     return values[2];
 }
 
-static int contract3_independent_array_oob_case_37(void)
+static int contract3_independent_array_oob_case_34(void)
 {
     int values[3] = {1, 2, 3};
     int index = 2;
     return values[index];
 }
 
-static int contract3_independent_array_oob_case_38(void)
+static int contract3_independent_array_oob_case_35(void)
 {
     int values[3] = {1, 2, 3};
     int total = 0;
@@ -274,11 +252,31 @@ static int contract3_independent_array_oob_case_38(void)
     return total;
 }
 
-static int contract3_independent_array_oob_case_39(void)
+static int contract3_independent_array_oob_case_36(void)
 {
     int values[3] = {1, 2, 3};
     int index = contract3_identity(2);
     return values[index];
+}
+
+static int contract3_independent_array_oob_case_37(void)
+{
+    int values[3] = {1, 2, 3};
+    return values[2];
+}
+
+static int contract3_independent_array_oob_case_38(void)
+{
+    int values[3] = {1, 2, 3};
+    int *cursor = values + 2;
+    return *cursor;
+}
+
+static int contract3_independent_array_oob_case_39(void)
+{
+    int values[3] = {1, 2, 3};
+    int *cursor = values + 2;
+    return *cursor;
 }
 
 static int contract3_independent_array_oob_case_40(void)

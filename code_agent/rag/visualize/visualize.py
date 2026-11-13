@@ -49,6 +49,19 @@ _MAX_LABEL_LEN = 120
 _Control_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 
+# [maint-note:fda7ebdbfe2e]
+# 维护导航：_sanitize；下列为本函数源码中的接口与路径索引。
+# 输入 text：Any。
+# 输入 max_len：int；缺省表达式 _MAX_LABEL_LEN。
+# 返回契约：str。
+# 分支条件：text is None。
+# 分支条件：len(s) > max_len。
+# 返回路径：''。
+# 返回路径：s。
+# 直接调用：_Control_RE.sub。
+# 直接调用：str。
+# 直接调用：len。
+# [/maint-note:fda7ebdbfe2e]
 def _sanitize(text: Any, max_len: int = _MAX_LABEL_LEN) -> str:
     if text is None:
         return ""
@@ -58,6 +71,14 @@ def _sanitize(text: Any, max_len: int = _MAX_LABEL_LEN) -> str:
     return s
 
 
+# [maint-note:6911b539d53a]
+# 维护导航：_js_safe；下列为本函数源码中的接口与路径索引。
+# 输入 obj：Any。
+# 返回契约：str。
+# 返回路径：json.dumps(obj, ensure_ascii=False).replace('</', '<\\/')。
+# 直接调用：json.dumps(obj, ensure_ascii=False).replace。
+# 直接调用：json.dumps。
+# [/maint-note:6911b539d53a]
 def _js_safe(obj: Any) -> str:
     """转义 </script>，防止嵌入 JSON 时破坏 <script> 标签。"""
     return json.dumps(obj, ensure_ascii=False).replace("</", "<\\/")
@@ -67,6 +88,11 @@ def _js_safe(obj: Any) -> str:
 # 3. HTML 模板（从 graphify/export.py 提取并简化）
 # ---------------------------------------------------------------------------
 
+# [maint-note:8f75065a007b]
+# 维护导航：_html_styles；下列为本函数源码中的接口与路径索引。
+# 返回契约：str。
+# 返回路径：'<style>\n * { box-sizing: border-box; margin: 0; padding: 0; }\n body { background: #f3f4f6; color: #111827; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; flex-direction: column; height: 100vh; over。
+# [/maint-note:8f75065a007b]
 def _html_styles() -> str:
     """Light-theme CSS injected around the Pyvis container."""
     return """<style>
@@ -114,6 +140,14 @@ def _html_styles() -> str:
 </style>"""
 
 
+# [maint-note:b6151f65f57d]
+# 维护导航：_html_script；下列为本函数源码中的接口与路径索引。
+# 输入 nodes_json：str。
+# 输入 edges_json：str。
+# 输入 legend_json：str。
+# 返回契约：str。
+# 返回路径：f"""<script>\nconst RAW_NODES = {nodes_json};\nconst RAW_EDGES = {edges_json};\nconst LEGEND = {legend_json};\n\nfunction esc(s) {{\n return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').re。
+# [/maint-note:b6151f65f57d]
 def _html_script(nodes_json: str, edges_json: str, legend_json: str) -> str:
     """Sidebar script — drives the Pyvis network via the global `network` variable."""
     return f"""<script>
@@ -272,10 +306,32 @@ LEGEND.forEach(g => {{
 # 4. RAG JSON -> vis.js 数据
 # ---------------------------------------------------------------------------
 
+# [maint-note:9e6a606ea179]
+# 维护导航：_norm_path；下列为本函数源码中的接口与路径索引。
+# 输入 p：str。
+# 返回契约：str。
+# 返回路径：str(p).replace('\\', '/')。
+# 直接调用：str(p).replace。
+# 直接调用：str。
+# [/maint-note:9e6a606ea179]
 def _norm_path(p: str) -> str:
     return str(p).replace("\\", "/")
 
 
+# [maint-note:18e638ff73db]
+# 维护导航：load_rag_graph；下列为本函数源码中的接口与路径索引。
+# 输入 path：Path。
+# 返回契约：Dict[str, Dict[str, Any]]。
+# 分支条件：not isinstance(data, dict)。
+# 返回路径：data。
+# 显式抛出：ValueError(f'RAG graph 必须是 dict，实际为 {type(data).__name__}')。
+# 直接调用：open。
+# 直接调用：json.load。
+# 直接调用：isinstance。
+# 直接调用：ValueError。
+# 直接调用：type。
+# 资源作用域：open(path, 'r', encoding='utf-8')；退出该 with 时调用对应上下文清理。
+# [/maint-note:18e638ff73db]
 def load_rag_graph(path: Path) -> Dict[str, Dict[str, Any]]:
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -284,6 +340,15 @@ def load_rag_graph(path: Path) -> Dict[str, Dict[str, Any]]:
     return data
 
 
+# [maint-note:d4f43ec82054]
+# 维护导航：_group_for_type；下列为本函数源码中的接口与路径索引。
+# 输入 node_type：str。
+# 返回契约：str。
+# 返回路径：mapping.get(t, t)。
+# 直接调用：str(node_type or 'Other').strip。
+# 直接调用：str。
+# 直接调用：mapping.get。
+# [/maint-note:d4f43ec82054]
 def _group_for_type(node_type: str) -> str:
     """按节点类型归并到可读的分组名。"""
     t = str(node_type or "Other").strip()
@@ -306,6 +371,20 @@ def _group_for_type(node_type: str) -> str:
     return mapping.get(t, t)
 
 
+# [maint-note:1f8a63624e44]
+# 维护导航：_color_for_group；下列为本函数源码中的接口与路径索引。
+# 输入 group：str。
+# 输入 palette：List[str]。
+# 返回契约：str。
+# 分支条件：idx is None。
+# 返回路径：palette[idx]。
+# 直接调用：mapping.get。
+# 直接调用：sum。
+# 直接调用：ord。
+# 直接调用：max。
+# 直接调用：len。
+# 集合派生：c 来自 group。
+# [/maint-note:1f8a63624e44]
 def _color_for_group(group: str, palette: List[str]) -> str:
     # 显式 group -> palette 下标，保证节点颜色与图例一致
     mapping = {
@@ -332,6 +411,120 @@ def _color_for_group(group: str, palette: List[str]) -> str:
     return palette[idx]
 
 
+# [maint-note:8d09f3a354b2]
+# 维护导航：rag_to_vis；下列为本函数源码中的接口与路径索引。
+# 输入 rag：Dict[str, Dict[str, Any]]。
+# 返回契约：Tuple[List[dict], List[dict], List[dict], str]。
+# 分支条件：nid in node_ids。
+# 分支条件：meta。
+# 分支条件：meta.get('type')。
+# 分支条件：meta.get('sline') is not None。
+# 分支条件：not module。
+# 分支条件：not isinstance(mod_info, dict)。
+# 分支条件：pkg。
+# 分支条件：not name or name == module。
+# 分支条件：not isinstance(info, dict)。
+# 分支条件：target_path in module_ids。
+# 分支条件：candidates。
+# 分支条件：eid not in node_ids。
+# 分支条件：not target_name。
+# 分支条件：target_name in node_ids。
+# 分支条件：qualified in node_ids。
+# 分支条件：same_module。
+# 分支条件：mod。
+# 分支条件：not name。
+# 分支条件：sid not in node_ids。
+# 分支条件：includes。
+# 分支条件：isinstance(includes, list)。
+# 分支条件：not inc。
+# 分支条件：target。
+# 分支条件：isinstance(rels, list)。
+# 分支条件：not isinstance(r, (list, tuple))。
+# 分支条件：len(r) >= 3。
+# 分支条件：len(r) == 2。
+# 分支条件：not target_name or not rel_type。
+# 分支条件：src == tgt。
+# 分支条件：key in seen_edges。
+# 分支条件：grp == 'External'。
+# 遍历边界：(module, file_info) ← rag.items()。
+# 遍历边界：(name, info) ← file_info.items()。
+# 遍历边界：inc ← includes。
+# 遍历边界：r ← rels。
+# 遍历边界：(src, tgt, rel) ← raw_edges。
+# 遍历边界：n ← vis_nodes。
+# 遍历边界：(grp, count) ← sorted(group_counter.items(), key=lambda x: -x[1])。
+# 返回路径：无返回值。
+# 返回路径：target_path。
+# 返回路径：sorted(candidates, key=lambda x: len(x))[0]。
+# 返回路径：None。
+# 返回路径：eid。
+# 返回路径：ensure_external('?')。
+# 返回路径：target_name。
+# 返回路径：qualified。
+# 返回路径：same_module[0]。
+# 返回路径：candidates[0]。
+# 返回路径：mod。
+# 返回路径：ensure_external(target_name)。
+# 返回路径：(vis_nodes, vis_edges, legend_data, stats)。
+# 写入目标：group_counter[group]。
+# 写入目标：module_to_package[module]。
+# 写入目标：degree[src]。
+# 写入目标：degree[tgt]。
+# 写入目标：n['degree']。
+# 写入目标：n['color']。
+# 写入目标：n['size']。
+# 写入目标：n['font']['size']。
+# 直接调用：set。
+# 直接调用：defaultdict。
+# 直接调用：Counter。
+# 直接调用：node_ids.add。
+# 直接调用：meta.get。
+# 直接调用：title_parts.append。
+# 直接调用：_html.escape。
+# 直接调用：'\n'.join。
+# 直接调用：vis_nodes.append。
+# 直接调用：_sanitize。
+# 直接调用：label_to_ids[_sanitize(label)].append。
+# 直接调用：rag.items。
+# 直接调用：_norm_path。
+# 直接调用：file_info.get。
+# 直接调用：isinstance。
+# 直接调用：add_node。
+# 直接调用：Path。
+# 直接调用：mod_info.get。
+# 直接调用：file_info.items。
+# 直接调用：_group_for_type。
+# 直接调用：info.get。
+# 直接调用：label_to_ids[fqcn].append。
+# 直接调用：m.endswith。
+# 直接调用：sorted。
+# 直接调用：external_ids.add。
+# 直接调用：str(target_name or '').strip。
+# 直接调用：str。
+# 直接调用：ensure_external。
+# 直接调用：label_to_ids.get。
+# 直接调用：c.startswith。
+# 直接调用：resolve_module。
+# 直接调用：raw_edges.append。
+# 直接调用：len。
+# 直接调用：resolve_target。
+# 直接调用：str(rel_type).lower。
+# 直接调用：seen_edges.add。
+# 直接调用：vis_edges.append。
+# 直接调用：max。
+# 直接调用：degree.values。
+# 直接调用：_color_for_group。
+# 直接调用：degree.get。
+# 直接调用：group_color.get。
+# 直接调用：round。
+# 直接调用：group_counter.items。
+# 直接调用：legend_data.append。
+# 集合派生：n 来自 vis_nodes；过滤 n['group'] == 'Module'。
+# 表达式分流：name == module；真值与假值分支分别计算，不同时执行。
+# 表达式分流：edge_index % 2 == 0；真值与假值分支分别计算，不同时执行。
+# 集合派生：g 来自 group_counter。
+# 表达式分流：deg >= max_deg * 0.12；真值与假值分支分别计算，不同时执行。
+# [/maint-note:8d09f3a354b2]
 def rag_to_vis(rag: Dict[str, Dict[str, Any]]) -> Tuple[List[dict], List[dict], List[dict], str]:
     """把 RAG parse_res 转换成 vis.js 需要的 nodes/edges/legend/stats。"""
 
@@ -342,6 +535,28 @@ def rag_to_vis(rag: Dict[str, Dict[str, Any]]) -> Tuple[List[dict], List[dict], 
 
     group_counter: Counter = Counter()
 
+    # [maint-note:35e643deec9f]
+    # 维护导航：add_node；下列为本函数源码中的接口与路径索引。
+    # 输入 nid：str。
+    # 输入 label：str。
+    # 输入 source_file：str。
+    # 输入 group：str。
+    # 输入 meta：Dict[str, Any] | None；缺省表达式 None。
+    # 分支条件：nid in node_ids。
+    # 分支条件：meta。
+    # 分支条件：meta.get('type')。
+    # 分支条件：meta.get('sline') is not None。
+    # 返回路径：无返回值。
+    # 写入目标：group_counter[group]。
+    # 直接调用：node_ids.add。
+    # 直接调用：meta.get。
+    # 直接调用：title_parts.append。
+    # 直接调用：_html.escape。
+    # 直接调用：'\n'.join。
+    # 直接调用：vis_nodes.append。
+    # 直接调用：_sanitize。
+    # 直接调用：label_to_ids[_sanitize(label)].append。
+    # [/maint-note:35e643deec9f]
     def add_node(nid: str, label: str, source_file: str, group: str, meta: Dict[str, Any] | None = None):
         if nid in node_ids:
             return
@@ -406,6 +621,22 @@ def rag_to_vis(rag: Dict[str, Dict[str, Any]]) -> Tuple[List[dict], List[dict], 
 
     module_ids = {n["id"] for n in vis_nodes if n["group"] == "Module"}
 
+    # [maint-note:b7cf633cb372]
+    # 维护导航：resolve_module；下列为本函数源码中的接口与路径索引。
+    # 输入 target_path：str。
+    # 返回契约：str | None。
+    # 分支条件：target_path in module_ids。
+    # 分支条件：candidates。
+    # 返回路径：target_path。
+    # 返回路径：sorted(candidates, key=lambda x: len(x))[0]。
+    # 返回路径：None。
+    # 直接调用：_norm_path。
+    # 直接调用：m.endswith。
+    # 直接调用：sorted。
+    # 直接调用：Path。
+    # 集合派生：m 来自 module_ids；过滤 m.endswith(target_path)。
+    # 集合派生：m 来自 module_ids；过滤 Path(m).name == base。
+    # [/maint-note:b7cf633cb372]
     def resolve_module(target_path: str) -> str | None:
         target_path = _norm_path(target_path)
         if target_path in module_ids:
@@ -424,6 +655,16 @@ def rag_to_vis(rag: Dict[str, Dict[str, Any]]) -> Tuple[List[dict], List[dict], 
 
     external_ids: set = set()
 
+    # [maint-note:a76586bd01ba]
+    # 维护导航：ensure_external；下列为本函数源码中的接口与路径索引。
+    # 输入 target_name：str。
+    # 返回契约：str。
+    # 分支条件：eid not in node_ids。
+    # 返回路径：eid。
+    # 直接调用：_sanitize。
+    # 直接调用：add_node。
+    # 直接调用：external_ids.add。
+    # [/maint-note:a76586bd01ba]
     def ensure_external(target_name: str) -> str:
         eid = f"external::{_sanitize(target_name, max_len=80)}"
         if eid not in node_ids:
@@ -431,6 +672,32 @@ def rag_to_vis(rag: Dict[str, Dict[str, Any]]) -> Tuple[List[dict], List[dict], 
             external_ids.add(eid)
         return eid
 
+    # [maint-note:81fb76b8d3a5]
+    # 维护导航：resolve_target；下列为本函数源码中的接口与路径索引。
+    # 输入 target_name：str。
+    # 输入 source_module：str。
+    # 返回契约：str。
+    # 分支条件：not target_name。
+    # 分支条件：target_name in node_ids。
+    # 分支条件：qualified in node_ids。
+    # 分支条件：same_module。
+    # 分支条件：candidates。
+    # 分支条件：mod。
+    # 返回路径：ensure_external('?')。
+    # 返回路径：target_name。
+    # 返回路径：qualified。
+    # 返回路径：same_module[0]。
+    # 返回路径：candidates[0]。
+    # 返回路径：mod。
+    # 返回路径：ensure_external(target_name)。
+    # 直接调用：str(target_name or '').strip。
+    # 直接调用：str。
+    # 直接调用：ensure_external。
+    # 直接调用：label_to_ids.get。
+    # 直接调用：c.startswith。
+    # 直接调用：resolve_module。
+    # 集合派生：c 来自 candidates；过滤 c.startswith(source_module + '::')。
+    # [/maint-note:81fb76b8d3a5]
     def resolve_target(target_name: str, source_module: str) -> str:
         target_name = str(target_name or "").strip()
         if not target_name:
@@ -586,6 +853,11 @@ def rag_to_vis(rag: Dict[str, Dict[str, Any]]) -> Tuple[List[dict], List[dict], 
 # 5. 生成完整 HTML
 # ---------------------------------------------------------------------------
 
+# [maint-note:7562ce30817f]
+# 维护导航：_pyvis_light_options；下列为本函数源码中的接口与路径索引。
+# 返回契约：dict。
+# 返回路径：{'interaction': {'hover': True, 'tooltipDelay': 120, 'navigationButtons': True, 'keyboard': {'enabled': True, 'bindToWindow': False}, 'multiselect': True, 'dragNodes': True, 'hideEdgesOnDrag': True}, 'physics': {'enabled': True, 'solver': '。
+# [/maint-note:7562ce30817f]
 def _pyvis_light_options() -> dict:
     """Light-theme Pyvis options tuned for a code-knowledge-graph layout."""
     return {
@@ -645,6 +917,35 @@ def _pyvis_light_options() -> dict:
     }
 
 
+# [maint-note:7a9700d46df5]
+# 维护导航：generate_html；下列为本函数源码中的接口与路径索引。
+# 输入 vis_nodes：List[dict]。
+# 输入 vis_edges：List[dict]。
+# 输入 legend_data：List[dict]。
+# 输入 stats：str。
+# 输入 title：str；缺省表达式 'RAG Knowledge Graph'。
+# 返回契约：str。
+# 遍历边界：node ← vis_nodes。
+# 遍历边界：edge ← vis_edges。
+# 返回路径：pyvis_html。
+# 直接调用：_js_safe。
+# 直接调用：_html.escape。
+# 直接调用：Network。
+# 直接调用：net.set_options。
+# 直接调用：json.dumps。
+# 直接调用：_pyvis_light_options。
+# 直接调用：node.get。
+# 直接调用：color_obj.get。
+# 直接调用：net.add_node。
+# 直接调用：edge.get。
+# 直接调用：net.add_edge。
+# 直接调用：edge_color_obj.get。
+# 直接调用：net.generate_html。
+# 直接调用：pyvis_html.replace。
+# 直接调用：re.sub。
+# 直接调用：_html_styles。
+# 直接调用：_html_script。
+# [/maint-note:7a9700d46df5]
 def generate_html(vis_nodes: List[dict], vis_edges: List[dict], legend_data: List[dict],
                   stats: str, title: str = "RAG Knowledge Graph") -> str:
     """Build a self-contained interactive HTML knowledge graph using Pyvis.
@@ -799,6 +1100,25 @@ def generate_html(vis_nodes: List[dict], vis_edges: List[dict], legend_data: Lis
 # 6. CLI
 # ---------------------------------------------------------------------------
 
+# [maint-note:8f696b71b1f9]
+# 维护导航：main；下列为本函数源码中的接口与路径索引。
+# 返回契约：None。
+# 直接调用：argparse.ArgumentParser。
+# 直接调用：parser.add_argument。
+# 直接调用：parser.parse_args。
+# 直接调用：Path(args.input).expanduser().resolve。
+# 直接调用：Path(args.input).expanduser。
+# 直接调用：Path。
+# 直接调用：Path(args.output).expanduser().resolve。
+# 直接调用：Path(args.output).expanduser。
+# 直接调用：load_rag_graph。
+# 直接调用：rag_to_vis。
+# 直接调用：generate_html。
+# 直接调用：output_path.parent.mkdir。
+# 直接调用：output_path.write_text。
+# 直接调用：print。
+# 直接调用：len。
+# [/maint-note:8f696b71b1f9]
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="将 RAG 项目级 parse_res JSON 转换成可交互的 HTML 知识图谱"

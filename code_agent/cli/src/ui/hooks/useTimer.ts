@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react'
 
+// [maint-note:cb952167b9ee]
+// 维护导航：useTimer；下列为本函数源码中的接口与路径索引。
+// 输入 loading：boolean。
+// 返回路径：{ elapsed, dots } as const。
+// 直接调用：useState。
+// 直接调用：useEffect。
+// [/maint-note:cb952167b9ee]
 export function useTimer(loading: boolean) {
   const [elapsed, setElapsed] = useState(0)
   const [dots, setDots] = useState('.')

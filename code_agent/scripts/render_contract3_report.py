@@ -265,7 +265,38 @@ def ground_truth_section() -> list[str]:
             "`scan_roots` 相对这些目录（如 Zephyr 扫描 `artifacts/contract3/projects/zephyr/kernel/`）。", "",
             "| 工程（扫描范围） | 检测文件数 | 检测文件合计行数 |", "|---|---:|---:|", *rows, "",
             "JSON 和清单都由 [export_contract3_ground_truth.py](scripts/export_contract3_ground_truth.py) 生成（`uv run python scripts/export_contract3_ground_truth.py`），"
-            "测试文件与 Web 评测时逐字节一致；平衡集、压力集、平衡加难三套的标签已与对应 Web checkpoint 逐条核对一致。", ""]
+            "当前为 teaching-v2 配比，不能与旧版 Web checkpoint 的函数标签或分数混用；新版静态结果见报告首节。", ""]
+
+
+def teaching_section() -> list[str]:
+    teaching = load(DATA / "teaching-v2/static-teaching.json")
+    reference = load(DATA / "teaching-v2/static-reference.json")
+    if not teaching:
+        return []
+    lines = ["## 当前教学题集：逐类静态实测", "",
+             f"题集版本：`{teaching['dataset_revision']}`；关闭开关：`{', '.join(teaching['switches_off'])}`。",
+             "三个工程分别扫描其实际交付 fixture 并通过 GT 哈希验证；每类每工程 20 正例 + 20 安全对照。以下是静态教学基线，不是 Web 模型成绩或整个上游工程的检测率。", "",
+             "| 测试集 | 工程 | 数组越界 | 字符串溢出 | 空指针调用 | 总体检出率 | 总体误报率 |",
+             "|---|---|---:|---:|---:|---:|---:|"]
+    for row in teaching["results"]:
+        metrics = row["statistics"]
+        rates = [f"{metrics['by_category'][c]['tp']}/20（{percent(metrics['by_category'][c]['detection_rate'])}）" for c in NAMES]
+        lines.append(f"| {row['suite']} | {row['project']} | " + " | ".join(rates) +
+                     f" | {percent(metrics['overall']['detection_rate'])} | {percent(metrics['overall']['false_positive_rate'])} |")
+    if reference and reference["dataset_revision"] == teaching["dataset_revision"]:
+        metrics = [m for row in reference["results"] for m in row["statistics"]["by_category"].values()]
+        lines += ["", f"完整参考实现：{len(reference['results'])} 个工程×题集组合，逐类检出率范围 "
+                  f"{percent(min(m['detection_rate'] for m in metrics))}–{percent(max(m['detection_rate'] for m in metrics))}；"
+                  f"误报率范围 {percent(min(m['false_positive_rate'] for m in metrics))}–{percent(max(m['false_positive_rate'] for m in metrics))}。"]
+    lines += ["", "教师配置、学习任务和复现命令见 [静态分析难度指南](合同-3-静态分析难度调节指南.md)。",
+              "原始逐例证据：`artifacts/contract3/teaching-v2/static-teaching.json` 与 `static-reference.json`。",
+              "旧版 RTOS Web 数值保留在下面的历史区；新题集的 Web 模型成绩尚未测量。", ""]
+    for suite in ("balanced", "independent", "balanced-hard", "independent-hard"):
+        artifact = f"web-sonnet45-{suite}-{teaching['dataset_revision']}"
+        checkpoint = load(DATA / artifact / "checkpoint.json")
+        if checkpoint:
+            lines += web_section(f"新版 {suite} Web", checkpoint, f"artifacts/contract3/{artifact}")
+    return lines
 
 
 def render() -> str:
@@ -289,7 +320,10 @@ def render() -> str:
              "指标 3 只评分数组越界、字符串溢出、空指针调用三类目标 Finding。CWE-398、CWE-563 等代码质量诊断，以及目标函数范围以外的所有 Finding，可作为额外诊断保留，但绝不参与 TP/FN/FP/TN、检出率或误报率。", "",
              "例如：数组越界正例只报告 CWE-563 未使用变量，不算 TP；数组安全对照只报告 CWE-398 风格问题，不算 FP。只有类别匹配且命中函数行范围的 Finding 才能改变当前指标统计。指标 5 应采用同样原则，只把缓冲区溢出、多线程竞争、内存泄漏和命令执行漏洞纳入其统计。", "",
              "- Web：每个任务调用 `vulnerability_detection` 时固定传入 `scan_type:\"frequent_defects\"`；不传 ground truth，真值始终留在评分脚本侧。工具的 `contract_statistics.status=not_evaluated` 不影响脚本按模型最终返回的 `prediction.findings` 评分。每个任务只接受与该任务类别相同的 `prediction.findings[].category`。Finding 的 `line` 必须落在对应真值函数的 `[line_start, line_end]` 内。类别不符的项写入 `out_of_scope_findings`，不评分；每个函数最终的匹配证据写入 `rows[].matched_findings`。", "- 本地 Cppcheck：此历史基准按 `manifest.json` 中该类别的 `cppcheck_ids` 或 `cwes` 匹配，再限定文件与函数行范围；原始扫描产生的其他诊断不进入 `matched_findings`。新增单次扫描使用 `security_contracts.py` 的规则及源操作分类，两套映射不互换。", ""]
-    lines += ["## 当前结果总览", "", "| 测试集 / 运行方式 | 完成状态 | 检出率 / 误报率 | 定位 |", "|---|---|---|---|"]
+    lines += teaching_section()
+    lines += ["## 历史结果总览（RTOS 数据对应旧版题集）", "",
+              "下列 RTOS Web 成绩使用调整前的形态配比，不能代表当前 teaching-v2；Juliet 保留原独立记录。", "",
+              "| 测试集 / 运行方式 | 完成状态 | 检出率 / 误报率 | 定位 |", "|---|---|---|---|"]
     balanced_local = "—" if not balanced else f"{percent(balanced['metrics']['overall']['detection_rate'])} / {percent(balanced['metrics']['overall']['false_positive_rate'])}"
     independent_local = "—" if not independent else f"{percent(independent['metrics']['overall']['detection_rate'])} / {percent(independent['metrics']['overall']['false_positive_rate'])}"
     balanced_web_status, balanced_web_rate = web_summary(web_balanced)

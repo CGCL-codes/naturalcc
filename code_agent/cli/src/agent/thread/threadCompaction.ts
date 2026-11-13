@@ -31,6 +31,19 @@ import { serializedRequestChars } from '../compaction/viewSerializer.js'
  *   change, not identity change) and pending units invalidate as a whole.
  */
 
+// [maint-note:68aaa74bff0b]
+// 数据契约导航：FreezeReceipt；字段含义以消费端校验为准。
+// 成员 leaseId：string。
+// 成员 sourceVersion：number。
+// 成员 threadId：string。
+// 成员 generation：string。
+// 成员 runKey：string。
+// 成员 pendingCursor：number。
+// 成员 source：CompactionSource。
+// 成员 unitMessageCounts：readonly number[]。
+// 成员 protectedUnitIds：readonly string[]。
+// 成员 newUnitIds：readonly string[]。
+// [/maint-note:68aaa74bff0b]
 export interface FreezeReceipt {
   readonly leaseId: string
   /** Monotonic within one lease; a successful re-sign invalidates old candidates. */
@@ -52,6 +65,18 @@ export interface FreezeReceipt {
   readonly newUnitIds: readonly string[]
 }
 
+// [maint-note:5a3e7a9e9daf]
+// 数据契约导航：ThreadCompactionView；字段含义以消费端校验为准。
+// 成员 id：string。
+// 成员 generation：string。
+// 成员 compactionLease（可省略）：string。
+// 成员 receiptRegistry（可省略）：OwnerReceiptRegistry。
+// 成员 failedFrontiers（可省略）：readonly string[]。
+// 成员 messages：readonly ModelMessage[]。
+// 成员 completedRuns：ReadonlyArray<{ readonly runKey: string readonly start?: number readonly end?: number readonly revision?: number readonly source?: { readonly sourceId: string readonly start: number readonly end: number readonly revision: number } readonly 。
+// 成员 activeRun（可省略）：{ readonly runKey: string readonly savedCursor: number readonly prompt: string readonly nextExchangeOrdinal: number readonly exchangeRanges: ReadonlyArray<{ readonly exchangeId: string readonly start: number readonly end: number readonly re。
+// 成员 activeSummary（可省略）：CompactionSummary。
+// [/maint-note:5a3e7a9e9daf]
 export interface ThreadCompactionView {
   readonly id: string
   readonly generation: string
@@ -95,11 +120,75 @@ export interface ThreadCompactionView {
   readonly activeSummary?: CompactionSummary
 }
 
+// [maint-note:901c534bbf58]
+// 数据契约导航：ThreadCompactionMutableState；字段含义以消费端校验为准。
+// 成员 activeSummary（可省略）：CompactionSummary。
+// 成员 failedFrontiers（可省略）：readonly string[]。
+// [/maint-note:901c534bbf58]
 export interface ThreadCompactionMutableState extends ThreadCompactionView {
   activeSummary?: CompactionSummary
   failedFrontiers?: readonly string[]
 }
 
+// [maint-note:306720b1bdc8]
+// 维护导航：freezeCompactionSource；下列为本函数源码中的接口与路径索引。
+// 输入 state：ThreadCompactionView。
+// 输入 options：{ readonly pendingClosed?: readonly ModelMessage[] }；缺省表达式 {}。
+// 返回契约：FreezeReceipt。
+// 分支条件：activeRun。
+// 分支条件：pendingUnit。
+// 分支条件：run.start !== undefined && run.end !== undefined && run.revision !== undefined。
+// 分支条件：run.source。
+// 分支条件：occupied.has(index)。
+// 分支条件：message?.role === 'assistant' && toolCallsOf(message).length === 0。
+// 分支条件：picked.length >= COMPACTION_LIMITS.maxInputUnits。
+// 分支条件：pendingEntries.length > 0 && pending.length > 0。
+// 遍历边界：const range ← activeRun.exchangeRanges。
+// 遍历边界：const run ← [...state.completedRuns].reverse()。
+// 遍历边界：let index = run.source.start; index < run.source.end; index += 1。
+// 遍历边界：const range ← run.exchangeRanges。
+// 遍历边界：let index = range.start; index < range.end; index += 1。
+// 遍历边界：let index = run.end - 1; index >= run.start; index -= 1。
+// 遍历边界：const range ← [...run.exchangeRanges].reverse()。
+// 遍历边界：const entry ← priorityOrder。
+// 遍历边界：const entry ← ordered。
+// 返回路径：receipt。
+// 写入目标：index。
+// 直接调用：previousCoverage.map。
+// 直接调用：tryPush。
+// 直接调用：isClosedPendingExchange。
+// 直接调用：candidates.push。
+// 直接调用：newUnitIds.push。
+// 直接调用：[...state.completedRuns].reverse。
+// 直接调用：occupied.add。
+// 直接调用：occupied.has。
+// 直接调用：toolCallsOf。
+// 直接调用：[...run.exchangeRanges].reverse。
+// 直接调用：candidates.filter。
+// 直接调用：exchangeCandidates.reduce。
+// 直接调用：eligible .filter((entry) => entry.unit.kind === 'current_saved_exchange') .map(toCoord).sort。
+// 直接调用：eligible .filter((entry) => entry.unit.kind === 'current_saved_exchange') .map。
+// 直接调用：eligible .filter。
+// 直接调用：eligible .filter((entry) => entry.unit.kind === 'historical_exchange' || entry.unit.kind === 'historical_user' || entry.unit.kind === 'historical_terminal') .map(toCoord).sort。
+// 直接调用：eligible .filter((entry) => entry.unit.kind === 'historical_exchange' || entry.unit.kind === 'historical_user' || entry.unit.kind === 'historical_terminal') .map。
+// 直接调用：[...reReadRanges].sort。
+// 直接调用：[...reReadForPriority].reverse。
+// 直接调用：eligible.filter。
+// 直接调用：emit。
+// 直接调用：state.messages.slice。
+// 直接调用：[...picked].sort。
+// 直接调用：ordered.map。
+// 直接调用：canonicalCounts.push。
+// 直接调用：canonicalMessages.push。
+// 直接调用：deepFreeze。
+// 直接调用：randomUUID。
+// 直接调用：state.completedRuns.at。
+// 直接调用：Date.now。
+// 直接调用：Object.freeze。
+// 直接调用：newUnitIds.filter。
+// 直接调用：registerIssuedReceipt。
+// 直接调用：ownerReceiptRegistry。
+// [/maint-note:306720b1bdc8]
 export function freezeCompactionSource(
   state: ThreadCompactionView,
   options: {
@@ -122,6 +211,21 @@ export function freezeCompactionSource(
   const alreadyCovered = new Set(previousCoverage.map((unit) => unit.exchangeId))
   const newUnitIds: string[] = []
   const reReadRanges: Array<{ unit: CompactionSourceUnit; start: number; end: number }> = []
+  // [maint-note:862b59a44779]
+  // 维护导航：tryPush；下列为本函数源码中的接口与路径索引。
+  // 输入 kind：CompactionSourceUnit['kind']。
+  // 输入 runKey：string。
+  // 输入 range：{ start: number; end: number; revision: number; exchangeId: string }。
+  // 返回契约：void。
+  // 分支条件：alreadyCovered.has(range.exchangeId)。
+  // 分支条件：covered && covered.kind !== 'current_closed_pending_exchange' && range.end > range.start。
+  // 返回路径：无返回值。
+  // 直接调用：alreadyCovered.has。
+  // 直接调用：previousCoverage.find。
+  // 直接调用：reReadRanges.push。
+  // 直接调用：candidates.push。
+  // 直接调用：newUnitIds.push。
+  // [/maint-note:862b59a44779]
   const tryPush = (
     kind: CompactionSourceUnit['kind'],
     runKey: string,
@@ -250,6 +354,10 @@ export function freezeCompactionSource(
   // new eligible units enter FIRST, then new history newest-first, then
   // re-read old coverage fills the remainder; (3) only the SELECTED set is
   // serialized in canonical raw-chronological order.
+  // [maint-note:09c5cab31f0f]
+  // 维护导航：toCoord；下列为本函数源码中的接口与路径索引。
+  // 输入 entry：{ unit: CompactionSourceUnit; range: { start: number; end: number } }。
+  // [/maint-note:09c5cab31f0f]
   const toCoord = (entry: { unit: CompactionSourceUnit; range: { start: number; end: number } }) =>
     ({ unit: entry.unit, start: entry.range.start, end: entry.range.end })
   const newCurrent = eligible
@@ -270,6 +378,23 @@ export function freezeCompactionSource(
   const pendingEntries = eligible.filter((entry) => entry.unit.kind === 'current_closed_pending_exchange')
   const picked: Array<{ unit: CompactionSourceUnit; raw: readonly ModelMessage[] }> = []
   let charBudget = COMPACTION_LIMITS.maxInputChars
+  // [maint-note:2febe5d2e916]
+  // 维护导航：emit；下列为本函数源码中的接口与路径索引。
+  // 输入 unit：CompactionSourceUnit。
+  // 输入 raw：readonly ModelMessage[]。
+  // 返回契约：boolean。
+  // 分支条件：picked.length >= COMPACTION_LIMITS.maxInputUnits || chars > charBudget。
+  // 返回路径：false。
+  // 返回路径：true。
+  // 写入目标：charBudget。
+  // 直接调用：JSON.stringify。
+  // 直接调用：picked.push。
+  // 直接调用：deepFreeze。
+  // 直接调用：createHash('sha256').update(JSON.stringify(raw)).digest。
+  // 直接调用：createHash('sha256').update。
+  // 直接调用：createHash。
+  // 直接调用：deepFreezeMessages。
+  // [/maint-note:2febe5d2e916]
   const emit = (unit: CompactionSourceUnit, raw: readonly ModelMessage[]): boolean => {
     const chars = JSON.stringify(raw).length
     if (picked.length >= COMPACTION_LIMITS.maxInputUnits || chars > charBudget) return false
@@ -336,6 +461,52 @@ export function freezeCompactionSource(
  * exact JSON shape, sourceIds limited to the frozen unit ids, entry/char/
  * byte caps, and never all-empty.
  */
+// [maint-note:3162a4eb3dbb]
+// 维护导航：parseCompactionBody；下列为本函数源码中的接口与路径索引。
+// 输入 raw：string。
+// 输入 source：CompactionSource。
+// 返回契约：{ ok: true; body: CompactionBody } | { ok: false; reason: string }。
+// 分支条件：!parsed || typeof parsed !== 'object' || Array.isArray(parsed)。
+// 分支条件：!Array.isArray(value)。
+// 分支条件：value.length > COMPACTION_BODY_LIMITS.maxEntriesPerSection。
+// 分支条件：!item || typeof item !== 'object' || Array.isArray(item)。
+// 分支条件：typeof record.text !== 'string' || !record.text.trim()。
+// 分支条件：record.text.length > COMPACTION_BODY_LIMITS.maxEntryChars。
+// 分支条件：!Array.isArray(record.sourceIds)。
+// 分支条件：typeof id !== 'string' || !allowList.has(id)。
+// 分支条件：record.sourceIds.length === 0 && section !== 'suggestions' && section !== 'unknowns'。
+// 分支条件：entries === 0。
+// 分支条件：Buffer.byteLength(JSON.stringify(body), 'utf8') > COMPACTION_BODY_LIMITS.maxBodyBytes。
+// 遍历边界：const section ← ['facts', 'failures', 'unknowns', 'unfinished', 'suggestions'] as const。
+// 遍历边界：const item ← value。
+// 遍历边界：const id ← record.sourceIds。
+// 返回路径：{ ok: false, reason: 'The summary body is not valid JSON' }。
+// 返回路径：{ ok: false, reason: 'The summary body must be a JSON object' }。
+// 返回路径：{ ok: false, reason: `The summary body section "${section}" must be an array` }。
+// 返回路径：{ ok: false, reason: `The summary body section "${section}" exceeds the entry cap` }。
+// 返回路径：{ ok: false, reason: `Each "${section}" entry must be an object` }。
+// 返回路径：{ ok: false, reason: `Each "${section}" entry needs non-empty text` }。
+// 返回路径：{ ok: false, reason: `A "${section}" entry exceeds the character cap` }。
+// 返回路径：{ ok: false, reason: `Each "${section}" entry needs a sourceIds array` }。
+// 返回路径：{ ok: false, reason: `A "${section}" entry cites an unknown sourceId` }。
+// 返回路径：{ ok: false, reason: `A "${section}" entry must cite its evidence` }。
+// 返回路径：{ ok: false, reason: 'The summary body is entirely empty' }。
+// 返回路径：{ ok: false, reason: 'The summary body exceeds the byte cap' }。
+// 返回路径：{ ok: true, body }。
+// 写入目标：parsed。
+// 写入目标：entries。
+// 写入目标：sections[section]。
+// 直接调用：JSON.parse。
+// 直接调用：Array.isArray。
+// 直接调用：source.units.map。
+// 直接调用：record.text.trim。
+// 直接调用：allowList.has。
+// 直接调用：sectionEntries.push。
+// 直接调用：deepFreeze。
+// 直接调用：Object.freeze。
+// 直接调用：Buffer.byteLength。
+// 直接调用：JSON.stringify。
+// [/maint-note:3162a4eb3dbb]
 export function parseCompactionBody(
   raw: string,
   source: CompactionSource,
@@ -411,11 +582,21 @@ export function parseCompactionBody(
  * handle either misses the registry entirely or resolves to the ORIGINAL
  * unmodified record; caller-supplied receipt/summary fields are never read.
  */
+// [maint-note:cc4d8ab05df5]
+// 数据契约导航：SealedCompactionCandidate；字段含义以消费端校验为准。
+// 成员 kind：'core-compaction-candidate'。
+// 成员 handleId：string。
+// [/maint-note:cc4d8ab05df5]
 export interface SealedCompactionCandidate {
   readonly kind: 'core-compaction-candidate'
   readonly handleId: string
 }
 
+// [maint-note:cd01a0e36c70]
+// 数据契约导航：CoreCandidateRecord；字段含义以消费端校验为准。
+// 成员 receipt：FreezeReceipt。
+// 成员 summary：CompactionSummary。
+// [/maint-note:cd01a0e36c70]
 interface CoreCandidateRecord {
   readonly receipt: FreezeReceipt
   readonly summary: CompactionSummary
@@ -434,15 +615,39 @@ const candidateRegistry = new WeakMap<SealedCompactionCandidate, CoreCandidateRe
  * is per-owner, another Thread's freezes can never evict this Thread's
  * in-flight source records.
  */
+// [maint-note:40652649d871]
+// 数据契约导航：OwnerReceiptRegistry；字段含义以消费端校验为准。
+// 成员 entries：Map<string, FreezeReceipt>。
+// [/maint-note:40652649d871]
 export interface OwnerReceiptRegistry {
   readonly entries: Map<string, FreezeReceipt>
 }
 
+// [maint-note:51a32e19bc0d]
+// 维护导航：createOwnerReceiptRegistry；下列为本函数源码中的接口与路径索引。
+// 返回契约：OwnerReceiptRegistry。
+// 返回路径：{ entries: new Map() }。
+// [/maint-note:51a32e19bc0d]
 export function createOwnerReceiptRegistry(): OwnerReceiptRegistry {
   return { entries: new Map() }
 }
 
 /** Core-internal: register the isolated copy of a freshly frozen receipt. */
+// [maint-note:b9c48983e948]
+// 维护导航：registerIssuedReceipt；下列为本函数源码中的接口与路径索引。
+// 输入 owner：OwnerReceiptRegistry。
+// 输入 receipt：FreezeReceipt。
+// 返回契约：FreezeReceipt。
+// 分支条件：owner.entries.size > 16。
+// 分支条件：oldest !== undefined。
+// 返回路径：isolated。
+// 直接调用：deepFreeze。
+// 直接调用：structuredClone。
+// 直接调用：owner.entries.set。
+// 直接调用：owner.entries.keys().next。
+// 直接调用：owner.entries.keys。
+// 直接调用：owner.entries.delete。
+// [/maint-note:b9c48983e948]
 function registerIssuedReceipt(owner: OwnerReceiptRegistry, receipt: FreezeReceipt): FreezeReceipt {
   const isolated = deepFreeze(structuredClone(receipt))
   owner.entries.set(receipt.leaseId, isolated)
@@ -457,6 +662,17 @@ function registerIssuedReceipt(owner: OwnerReceiptRegistry, receipt: FreezeRecei
 /** Lazy per-view registry: keyed by the VIEW object, not the whole process. */
 const viewRegistries = new WeakMap<ThreadCompactionView, OwnerReceiptRegistry>()
 
+// [maint-note:c63595a0ed9f]
+// 维护导航：ownerReceiptRegistry；下列为本函数源码中的接口与路径索引。
+// 输入 view：ThreadCompactionView。
+// 返回契约：OwnerReceiptRegistry。
+// 分支条件：existing。
+// 返回路径：existing。
+// 返回路径：created。
+// 直接调用：viewRegistries.get。
+// 直接调用：createOwnerReceiptRegistry。
+// 直接调用：viewRegistries.set。
+// [/maint-note:c63595a0ed9f]
 function ownerReceiptRegistry(view: ThreadCompactionView): OwnerReceiptRegistry {
   const existing = view.receiptRegistry ?? viewRegistries.get(view)
   if (existing) return existing
@@ -465,6 +681,18 @@ function ownerReceiptRegistry(view: ThreadCompactionView): OwnerReceiptRegistry 
   return created
 }
 
+// [maint-note:67f5991fec85]
+// 维护导航：resolveIssuedReceipt；下列为本函数源码中的接口与路径索引。
+// 输入 owner：OwnerReceiptRegistry。
+// 输入 receipt：FreezeReceipt。
+// 返回契约：FreezeReceipt | undefined。
+// 分支条件：core === undefined。
+// 分支条件：JSON.stringify(core) !== JSON.stringify(receipt)。
+// 返回路径：undefined。
+// 返回路径：core。
+// 直接调用：owner.entries.get。
+// 直接调用：JSON.stringify。
+// [/maint-note:67f5991fec85]
 function resolveIssuedReceipt(owner: OwnerReceiptRegistry, receipt: FreezeReceipt): FreezeReceipt | undefined {
   // Only the CORE's own frozen copy is trusted; identity of the caller's
   // object is irrelevant and its payload is never re-read.
@@ -485,6 +713,37 @@ function resolveIssuedReceipt(owner: OwnerReceiptRegistry, receipt: FreezeReceip
  * and install all share. Callers can never hand-write messages/counts/hash
  * and ask the core to trust them.
  */
+// [maint-note:871a24e4157e]
+// 维护导航：finalizeIssuedReceiptTrim；下列为本函数源码中的接口与路径索引。
+// 输入 registry：OwnerReceiptRegistry。
+// 输入 original：FreezeReceipt。
+// 输入 selectedUnitIds：readonly string[]。
+// 返回契约：FreezeReceipt | undefined。
+// 分支条件：core === undefined。
+// 分支条件：selectedSet.has(issuedOrder[index]!)。
+// 分支条件：first === -1。
+// 分支条件：!selectedSet.has(issuedOrder[index]!)。
+// 分支条件：index >= first && index <= last。
+// 遍历边界：let index = 0; index < issuedOrder.length; index += 1。
+// 遍历边界：let index = first; index <= last; index += 1。
+// 遍历边界：let index = 0; index < core.source.units.length; index += 1。
+// 返回路径：undefined。
+// 返回路径：trimmed。
+// 写入目标：index。
+// 写入目标：first。
+// 写入目标：last。
+// 写入目标：cursor。
+// 直接调用：resolveIssuedReceipt。
+// 直接调用：core.source.units.map。
+// 直接调用：selectedSet.has。
+// 直接调用：core.source.units.slice。
+// 直接调用：counts.push。
+// 直接调用：messages.push。
+// 直接调用：core.source.messages.slice。
+// 直接调用：deepFreeze。
+// 直接调用：Object.freeze。
+// 直接调用：registry.entries.set。
+// [/maint-note:871a24e4157e]
 export function finalizeIssuedReceiptTrim(
   registry: OwnerReceiptRegistry,
   original: FreezeReceipt,
@@ -541,6 +800,16 @@ export function finalizeIssuedReceiptTrim(
  * IDs; this resolves the owner's own registry, finalizes the trim against the
  * core record and returns the FINAL core-issued receipt.
  */
+// [maint-note:4958337aa636]
+// 维护导航：finalizeCompactionReceiptTrim；下列为本函数源码中的接口与路径索引。
+// 输入 state：ThreadCompactionView。
+// 输入 original：FreezeReceipt。
+// 输入 selectedUnitIds：readonly string[]。
+// 返回契约：FreezeReceipt | undefined。
+// 返回路径：finalizeIssuedReceiptTrim(ownerReceiptRegistry(state), original, selectedUnitIds)。
+// 直接调用：finalizeIssuedReceiptTrim。
+// 直接调用：ownerReceiptRegistry。
+// [/maint-note:4958337aa636]
 export function finalizeCompactionReceiptTrim(
   state: ThreadCompactionView,
   original: FreezeReceipt,
@@ -550,6 +819,13 @@ export function finalizeCompactionReceiptTrim(
 }
 
 /** Bounded, core-computed measurement bound to the real candidate. */
+// [maint-note:01c3eac05cfe]
+// 数据契约导航：CandidateMeasurement；字段含义以消费端校验为准。
+// 成员 rawChars：number。
+// 成员 summaryEnvelopeChars：number。
+// 成员 currentRequestChars（可省略）：number。
+// 成员 candidateRequestChars（可省略）：number。
+// [/maint-note:01c3eac05cfe]
 export interface CandidateMeasurement {
   readonly rawChars: number
   readonly summaryEnvelopeChars: number
@@ -559,6 +835,17 @@ export interface CandidateMeasurement {
   readonly candidateRequestChars?: number
 }
 
+// [maint-note:b7f4da9d349f]
+// 维护导航：mintCandidate；下列为本函数源码中的接口与路径索引。
+// 输入 receipt：FreezeReceipt。
+// 输入 summary：CompactionSummary。
+// 返回契约：SealedCompactionCandidate。
+// 返回路径：handle。
+// 直接调用：Object.freeze。
+// 直接调用：candidateRegistry.set。
+// 直接调用：deepFreeze。
+// 直接调用：structuredClone。
+// [/maint-note:b7f4da9d349f]
 function mintCandidate(receipt: FreezeReceipt, summary: CompactionSummary): SealedCompactionCandidate {
   const handle: SealedCompactionCandidate = Object.freeze({
     kind: 'core-compaction-candidate',
@@ -580,6 +867,32 @@ function mintCandidate(receipt: FreezeReceipt, summary: CompactionSummary): Seal
  * returns a registry-backed opaque handle. The record is kept privately —
  * prepare runs INSIDE the core controller, so no live state escapes.
  */
+// [maint-note:432d3dbc88a7]
+// 维护导航：prepareCompactionCandidate；下列为本函数源码中的接口与路径索引。
+// 输入 state：ThreadCompactionView。
+// 输入 receipt：FreezeReceipt。
+// 输入 rawBody：string。
+// 输入 usage：CompactionUsage（可省略）。
+// 输入 requestOnlySections：readonly string[]；缺省表达式 []。
+// 返回契约：{ ok: true; candidate: SealedCompactionCandidate; measurement: CandidateMeasurement } | { ok: false; reason: string }。
+// 分支条件：issued === undefined。
+// 分支条件：!parsed.ok。
+// 分支条件：!validateAgainstView(state, issued, summary)。
+// 返回路径：{ ok: false, reason: 'The receipt was not issued by this thread core' }。
+// 返回路径：{ ok: false, reason: parsed.reason }。
+// 返回路径：{ ok: false, reason: error instanceof Error ? error.message : 'The summary envelope is not installable' }。
+// 返回路径：{ ok: false, reason: 'The receipt is no longer installable on this thread' }。
+// 返回路径：{ ok: true, candidate: mintCandidate(issued, summary), measurement }。
+// 写入目标：summary。
+// 直接调用：resolveIssuedReceipt。
+// 直接调用：ownerReceiptRegistry。
+// 直接调用：parseCompactionBody。
+// 直接调用：buildCompactionSummary。
+// 直接调用：validateAgainstView。
+// 直接调用：serializedRequestChars。
+// 直接调用：summaryViewMessage。
+// 直接调用：mintCandidate。
+// [/maint-note:432d3dbc88a7]
 export function prepareCompactionCandidate(
   state: ThreadCompactionView,
   receipt: FreezeReceipt,
@@ -624,17 +937,56 @@ export function prepareCompactionCandidate(
 }
 
 /** Registry lookup — the only way install obtains the trusted record. */
+// [maint-note:718c7ea3527c]
+// 维护导航：resolveCandidate；下列为本函数源码中的接口与路径索引。
+// 输入 handle：SealedCompactionCandidate。
+// 返回契约：CoreCandidateRecord | undefined。
+// 分支条件：handle === null || typeof handle !== 'object'。
+// 返回路径：undefined。
+// 返回路径：candidateRegistry.get(handle)。
+// 直接调用：candidateRegistry.get。
+// [/maint-note:718c7ea3527c]
 function resolveCandidate(handle: SealedCompactionCandidate): CoreCandidateRecord | undefined {
   if (handle === null || typeof handle !== 'object') return undefined
   return candidateRegistry.get(handle)
 }
 
 /** @internal Isolated candidate projection used by the owning AgentThread. */
+// [maint-note:2132ad09eb80]
+// 维护导航：compactionCandidateSummary；下列为本函数源码中的接口与路径索引。
+// 输入 handle：SealedCompactionCandidate。
+// 返回契约：CompactionSummary | undefined。
+// 返回路径：resolved ? deepFreeze(structuredClone(resolved.summary)) : undefined。
+// 直接调用：resolveCandidate。
+// 直接调用：deepFreeze。
+// 直接调用：structuredClone。
+// [/maint-note:2132ad09eb80]
 export function compactionCandidateSummary(handle: SealedCompactionCandidate): CompactionSummary | undefined {
   const resolved = resolveCandidate(handle)
   return resolved ? deepFreeze(structuredClone(resolved.summary)) : undefined
 }
 
+// [maint-note:7457bb7a6c5e]
+// 维护导航：validateAgainstView；下列为本函数源码中的接口与路径索引。
+// 输入 state：ThreadCompactionView。
+// 输入 receipt：FreezeReceipt。
+// 输入 summary：CompactionSummary。
+// 返回契约：boolean。
+// 分支条件：state.compactionLease !== receipt.leaseId。
+// 分支条件：resolveIssuedReceipt(ownerReceiptRegistry(state), receipt) === undefined。
+// 分支条件：receipt.threadId !== state.id || receipt.generation !== state.generation。
+// 分支条件：!state.activeRun || receipt.runKey !== state.activeRun.runKey。
+// 分支条件：receipt.pendingCursor !== state.activeRun.savedCursor。
+// 分支条件：summary.threadId !== state.id || summary.generation !== state.generation。
+// 分支条件：summary.verification !== 'schema_and_source_valid'。
+// 分支条件：Buffer.byteLength(JSON.stringify(summary), 'utf8') > COMPACTION_LIMITS.maxSummaryBytes。
+// 返回路径：false。
+// 返回路径：true。
+// 直接调用：resolveIssuedReceipt。
+// 直接调用：ownerReceiptRegistry。
+// 直接调用：Buffer.byteLength。
+// 直接调用：JSON.stringify。
+// [/maint-note:7457bb7a6c5e]
 function validateAgainstView(
   state: ThreadCompactionView,
   receipt: FreezeReceipt,
@@ -656,6 +1008,20 @@ function validateAgainstView(
 }
 
 /** The core-rebuilt envelope: identity/coverage/verification are ours. */
+// [maint-note:fef98604c7de]
+// 维护导航：buildCompactionSummary；下列为本函数源码中的接口与路径索引。
+// 输入 receipt：FreezeReceipt。
+// 输入 body：CompactionBody。
+// 输入 usage：CompactionUsage（可省略）。
+// 返回契约：CompactionSummary。
+// 分支条件：Buffer.byteLength(JSON.stringify(summary), 'utf8') > COMPACTION_LIMITS.maxSummaryBytes。
+// 返回路径：deepFreeze(summary)。
+// 显式抛出：new Error('The rebuilt summary exceeds the envelope byte cap')。
+// 直接调用：Date.now。
+// 直接调用：JSON.stringify。
+// 直接调用：Buffer.byteLength。
+// 直接调用：deepFreeze。
+// [/maint-note:fef98604c7de]
 export function buildCompactionSummary(
   receipt: FreezeReceipt,
   body: CompactionBody,
@@ -677,6 +1043,27 @@ export function buildCompactionSummary(
   return deepFreeze(summary)
 }
 
+// [maint-note:14dc369cac92]
+// 维护导航：installCompactionSummary；下列为本函数源码中的接口与路径索引。
+// 输入 state：ThreadCompactionMutableState & { readonly compactionLease?: string }。
+// 输入 receiptOrCandidate：FreezeReceipt | SealedCompactionCandidate。
+// 输入 maybeSummary：CompactionSummary（可省略）。
+// 输入 options：{ readonly pendingClosed?: readonly ModelMessage[] }；缺省表达式 {}。
+// 返回契约：boolean。
+// 分支条件：resolved === undefined。
+// 分支条件：!validateAgainstView(state, sealed.receipt, sealed.summary)。
+// 分支条件：!validateSummaryUnits(state, sealed.summary, options.pendingClosed ?? [])。
+// 分支条件：previous && !isStrictSuperset(sealed.summary.coveredUnits, previous.coveredUnits)。
+// 返回路径：false。
+// 返回路径：true。
+// 写入目标：state.activeSummary。
+// 直接调用：resolveCandidate。
+// 直接调用：validateAgainstView。
+// 直接调用：validateSummaryUnits。
+// 直接调用：isStrictSuperset。
+// 直接调用：deepFreeze。
+// 直接调用：structuredClone。
+// [/maint-note:14dc369cac92]
 export function installCompactionSummary(
   state: ThreadCompactionMutableState & { readonly compactionLease?: string },
   receiptOrCandidate: FreezeReceipt | SealedCompactionCandidate,
@@ -707,6 +1094,16 @@ export function installCompactionSummary(
   return true
 }
 
+// [maint-note:d145b8139aaf]
+// 维护导航：summaryStillValid；下列为本函数源码中的接口与路径索引。
+// 输入 state：ThreadCompactionView。
+// 输入 options：{ readonly pendingClosed?: readonly ModelMessage[] }；缺省表达式 {}。
+// 返回契约：boolean。
+// 分支条件：!summary。
+// 返回路径：true。
+// 返回路径：validateSummaryUnits(state, summary, options.pendingClosed ?? [])。
+// 直接调用：validateSummaryUnits。
+// [/maint-note:d145b8139aaf]
 export function summaryStillValid(
   state: ThreadCompactionView,
   options: {
@@ -718,11 +1115,30 @@ export function summaryStillValid(
   return validateSummaryUnits(state, summary, options.pendingClosed ?? [])
 }
 
+// [maint-note:369c6be029bd]
+// 维护导航：frontierKey；下列为本函数源码中的接口与路径索引。
+// 输入 units：readonly CompactionSourceUnit[]。
+// 返回契约：string。
+// 返回路径：units.map((unit) => unit.exchangeId).join('\u0000')。
+// 直接调用：units.map((unit) => unit.exchangeId).join。
+// 直接调用：units.map。
+// [/maint-note:369c6be029bd]
 export function frontierKey(units: readonly CompactionSourceUnit[]): string {
   // Delimiter-joined stable identity; bounded by the unit cap.
   return units.map((unit) => unit.exchangeId).join('\u0000')
 }
 
+// [maint-note:5ebca995ad9a]
+// 维护导航：rememberFailedFrontier；下列为本函数源码中的接口与路径索引。
+// 输入 state：ThreadCompactionMutableState。
+// 输入 key：string。
+// 返回契约：void。
+// 分支条件：existing.includes(key)。
+// 返回路径：无返回值。
+// 写入目标：state.failedFrontiers。
+// 直接调用：existing.includes。
+// 直接调用：existing.slice。
+// [/maint-note:5ebca995ad9a]
 export function rememberFailedFrontier(state: ThreadCompactionMutableState, key: string): void {
   const existing = state.failedFrontiers ?? []
   if (existing.includes(key)) return
@@ -730,10 +1146,32 @@ export function rememberFailedFrontier(state: ThreadCompactionMutableState, key:
   state.failedFrontiers = [...existing.slice(-7), key]
 }
 
+// [maint-note:76845ada9a1f]
+// 维护导航：hasFailedFrontier；下列为本函数源码中的接口与路径索引。
+// 输入 state：ThreadCompactionView。
+// 输入 key：string。
+// 返回契约：boolean。
+// 返回路径：(state.failedFrontiers ?? []).includes(key)。
+// 直接调用：(state.failedFrontiers ?? []).includes。
+// [/maint-note:76845ada9a1f]
 export function hasFailedFrontier(state: ThreadCompactionView, key: string): boolean {
   return (state.failedFrontiers ?? []).includes(key)
 }
 
+// [maint-note:ebd3804031cc]
+// 维护导航：isStrictSuperset；下列为本函数源码中的接口与路径索引。
+// 输入 next：readonly CompactionSourceUnit[]。
+// 输入 previous：readonly CompactionSourceUnit[]。
+// 返回契约：boolean。
+// 分支条件：nextIds.size <= previousIds.size。
+// 分支条件：!nextIds.has(id)。
+// 遍历边界：const id ← previousIds。
+// 返回路径：false。
+// 返回路径：true。
+// 直接调用：previous.map。
+// 直接调用：next.map。
+// 直接调用：nextIds.has。
+// [/maint-note:ebd3804031cc]
 export function isStrictSuperset(
   next: readonly CompactionSourceUnit[],
   previous: readonly CompactionSourceUnit[],
@@ -747,6 +1185,47 @@ export function isStrictSuperset(
   return true
 }
 
+// [maint-note:ee77dd3bfe69]
+// 维护导航：validateSummaryUnits；下列为本函数源码中的接口与路径索引。
+// 输入 state：ThreadCompactionView。
+// 输入 summary：CompactionSummary。
+// 输入 pendingClosed：readonly ModelMessage[]。
+// 返回契约：boolean。
+// 分支条件：unit.threadId !== state.id || unit.generation !== state.generation。
+// 分支条件：unit.kind === 'current_closed_pending_exchange'。
+// 分支条件：unit.start !== -1 || unit.end !== -1。
+// 分支条件：!run || run.runKey !== unit.runKey。
+// 分支条件：usedPending || pendingClosed.length === 0。
+// 分支条件：!isClosedPendingExchange(run, pendingClosed)。
+// 分支条件：hash !== unit.contentHash。
+// 分支条件：unit.kind === 'historical_user'。
+// 分支条件：!source || source.sourceId !== unit.exchangeId || source.start !== unit.start || source.end !== unit.end || source.revision !== unit.revision。
+// 分支条件：slice.length !== 1 || slice[0]?.role !== 'user'。
+// 分支条件：unit.kind === 'historical_terminal'。
+// 分支条件：!run || run.revision !== unit.revision || unit.exchangeId !== `${unit.runKey}:terminal`。
+// 分支条件：unit.start < (run.start ?? 0) || unit.end !== unit.start + 1 || unit.end > (run.end ?? 0)。
+// 分支条件：message?.role !== 'assistant' || toolCallsOf(message).length > 0。
+// 分支条件：unit.start < 0 || unit.end <= unit.start || unit.end > state.messages.length。
+// 分支条件：!activeRange && !completedRange。
+// 遍历边界：const unit ← summary.coveredUnits。
+// 返回路径：false。
+// 返回路径：true。
+// 写入目标：usedPending。
+// 直接调用：isClosedPendingExchange。
+// 直接调用：createHash('sha256').update(JSON.stringify(pendingClosed)).digest。
+// 直接调用：createHash('sha256').update。
+// 直接调用：createHash。
+// 直接调用：JSON.stringify。
+// 直接调用：state.completedRuns.find。
+// 直接调用：state.messages.slice。
+// 直接调用：createHash('sha256').update(JSON.stringify(slice)).digest。
+// 直接调用：toolCallsOf。
+// 直接调用：createHash('sha256').update(JSON.stringify([message])).digest。
+// 直接调用：active.exchangeRanges.find。
+// 直接调用：state.completedRuns .filter((run) => run.runKey === unit.runKey) .flatMap((run) => run.exchangeRanges) .find。
+// 直接调用：state.completedRuns .filter((run) => run.runKey === unit.runKey) .flatMap。
+// 直接调用：state.completedRuns .filter。
+// [/maint-note:ee77dd3bfe69]
 function validateSummaryUnits(
   state: ThreadCompactionView,
   summary: CompactionSummary,
@@ -806,6 +1285,13 @@ function validateSummaryUnits(
   return true
 }
 
+// [maint-note:fb69d990ef16]
+// 维护导航：matchesRange；下列为本函数源码中的接口与路径索引。
+// 输入 candidate：{ exchangeId: string; start: number; end: number; revision: number }。
+// 输入 unit：CompactionSourceUnit。
+// 返回契约：boolean。
+// 返回路径：candidate.exchangeId === unit.exchangeId && candidate.start === unit.start && candidate.end === unit.end && candidate.revision === unit.revision。
+// [/maint-note:fb69d990ef16]
 function matchesRange(
   candidate: { exchangeId: string; start: number; end: number; revision: number },
   unit: CompactionSourceUnit,
@@ -816,6 +1302,22 @@ function matchesRange(
     candidate.revision === unit.revision
 }
 
+// [maint-note:8b08c429af8f]
+// 维护导航：isClosedPendingExchange；下列为本函数源码中的接口与路径索引。
+// 输入 run：{ savedCursor: number; prompt: string }。
+// 输入 pending：readonly ModelMessage[]。
+// 返回契约：boolean。
+// 分支条件：run.savedCursor === 0。
+// 分支条件：!user || user.role !== 'user' || userTextOf(user) !== run.prompt。
+// 分支条件：exchange.length < 2 || exchange[0]?.role !== 'assistant'。
+// 返回路径：false。
+// 返回路径：calls.length > 0 && results.length === calls.length && results.every((message, index) => ( message.role === 'toolResult' && message.toolCallId === calls[index]?.id && message.toolName === calls[index]?.name ))。
+// 直接调用：pending.slice。
+// 直接调用：userTextOf。
+// 直接调用：toolCallsOf。
+// 直接调用：exchange.slice。
+// 直接调用：results.every。
+// [/maint-note:8b08c429af8f]
 export function isClosedPendingExchange(
   run: { savedCursor: number; prompt: string },
   pending: readonly ModelMessage[],
@@ -836,6 +1338,13 @@ export function isClosedPendingExchange(
 }
 
 /** The derived summary message injected into the request view. */
+// [maint-note:53d35d8cec96]
+// 维护导航：summaryViewMessage；下列为本函数源码中的接口与路径索引。
+// 输入 summary：CompactionSummary。
+// 返回契约：ModelUserMessage。
+// 返回路径：{ role: 'user', content: [{ type: 'text', text: [ '[Framework note: the following DERIVED summary replaces earlier complete exchanges that were compacted. Raw evidence remains retained by the framework; entries cite their sources and sugges。
+// 直接调用：[ '[Framework note: the following DERIVED summary replaces earlier complete exchanges that were compacted. Raw evidence remains retained by the framework; entries cite their sources and suggestions are marked inference.]', summary.text, ].j。
+// [/maint-note:53d35d8cec96]
 export function summaryViewMessage(summary: CompactionSummary): ModelUserMessage {
   return {
     role: 'user',
@@ -849,16 +1358,48 @@ export function summaryViewMessage(summary: CompactionSummary): ModelUserMessage
   }
 }
 
+// [maint-note:c30df4b17090]
+// 维护导航：deepFreezeMessages；下列为本函数源码中的接口与路径索引。
+// 输入 messages：readonly ModelMessage[]。
+// 返回契约：ModelMessage[]。
+// 返回路径：deepFreeze(structuredClone(messages)) as ModelMessage[]。
+// 直接调用：deepFreeze。
+// 直接调用：structuredClone。
+// [/maint-note:c30df4b17090]
 function deepFreezeMessages(messages: readonly ModelMessage[]): ModelMessage[] {
   return deepFreeze(structuredClone(messages)) as ModelMessage[]
 }
 
+// [maint-note:97f52502c7f9]
+// 维护导航：deepFreeze；下列为本函数源码中的接口与路径索引。
+// 输入 value：T。
+// 返回契约：T。
+// 分支条件：!value || typeof value !== 'object' || Object.isFrozen(value)。
+// 遍历边界：const child ← Object.values(value as Record<string, unknown>)。
+// 返回路径：value。
+// 返回路径：Object.freeze(value)。
+// 直接调用：Object.isFrozen。
+// 直接调用：Object.values。
+// 直接调用：deepFreeze。
+// 直接调用：Object.freeze。
+// [/maint-note:97f52502c7f9]
 function deepFreeze<T>(value: T): T {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value
   for (const child of Object.values(value as Record<string, unknown>)) deepFreeze(child)
   return Object.freeze(value)
 }
 
+// [maint-note:98effe837155]
+// 维护导航：userTextOf；下列为本函数源码中的接口与路径索引。
+// 输入 message：ModelMessage。
+// 返回契约：string。
+// 分支条件：message.role !== 'user'。
+// 返回路径：''。
+// 返回路径：message.content .filter((block): block is { type: 'text'; text: string } => block.type === 'text') .map((block) => block.text) .join('')。
+// 直接调用：message.content .filter((block): block is { type: 'text'; text: string } => block.type === 'text') .map((block) => block.text) .join。
+// 直接调用：message.content .filter((block): block is { type: 'text'; text: string } => block.type === 'text') .map。
+// 直接调用：message.content .filter。
+// [/maint-note:98effe837155]
 function userTextOf(message: ModelMessage): string {
   if (message.role !== 'user') return ''
   return message.content

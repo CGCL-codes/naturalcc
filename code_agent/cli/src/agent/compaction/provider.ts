@@ -57,6 +57,13 @@ export const COMPACTION_MODEL_RESPONSE_LIMITS: ModelResponseLimits = Object.free
  * provider's own peak allocation (documented first-version boundary).
  */
 /** Request shape of one maintenance call (mirrors CompactionProvider). */
+// [maint-note:29c9003b9d3e]
+// 数据契约导航：CompactionRequest；字段含义以消费端校验为准。
+// 成员 source：CompactionSource。
+// 成员 requestMessages：readonly ModelMessage[]。
+// 成员 signal（可省略）：AbortSignal。
+// 成员 deadlineMs：number。
+// [/maint-note:29c9003b9d3e]
 export interface CompactionRequest {
   readonly source: CompactionSource
   readonly requestMessages: readonly ModelMessage[]
@@ -64,6 +71,11 @@ export interface CompactionRequest {
   readonly deadlineMs: number
 }
 
+// [maint-note:374f1283324c]
+// 维护导航：createModelCompactionProvider；下列为本函数源码中的接口与路径索引。
+// 输入 options：{ readonly modelClient: ModelClient readonly model: string readonly requestBudget?: ModelRequest['budget'] }。
+// 返回路径：{ budgetCapabilities: options.modelClient.budgetCapabilities, compact: (request: CompactionRequest) => runCompaction(options, request), prepare: options.modelClient.prepare ? (request: CompactionRequest) => prepareCompaction(options, reques。
+// [/maint-note:374f1283324c]
 export function createModelCompactionProvider(options: {
   readonly modelClient: ModelClient
   readonly model: string
@@ -81,6 +93,65 @@ export function createModelCompactionProvider(options: {
 
 
 
+// [maint-note:b60ca912113e]
+// 维护导航：runCompaction；下列为本函数源码中的接口与路径索引。
+// 输入 options：{ readonly modelClient: ModelClient readonly model: string readonly requestBudget?: ModelRequest['budget'] }。
+// 输入 request：CompactionRequest。
+// 输入 preprepared：{ readonly controller: AbortController readonly model: PreparedModelDispatch }（可省略）。
+// 返回契约：Promise<ProviderBodyResult>。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：request.signal?.aborted。
+// 分支条件：options.modelClient.stream。
+// 分支条件：!isAsyncIterable<ModelStreamEvent>(stream)。
+// 分支条件：step.done。
+// 分支条件：step.value.type === 'text_delta'。
+// 分支条件：outputChars > COMPACTION_LIMITS.maxOutputChars。
+// 分支条件：firstCause === undefined。
+// 分支条件：validatedUsage。
+// 分支条件：!validated.ok。
+// 分支条件：isAsyncIterable(sent)。
+// 分支条件：isAbortError(error)。
+// 分支条件：error instanceof ModelProtocolError || error instanceof ModelResponseLimitError。
+// 分支条件：!controller.signal.aborted。
+// 分支条件：firstCause !== undefined。
+// 分支条件：body === undefined || !body.trim()。
+// 遍历边界：true。
+// 返回路径：{ ok: false, kind: 'aborted', message: 'The maintenance request was aborted before dispatch' }。
+// 返回路径：{ ok: false, kind: firstCause as never, message: describeSealed(firstCause), ...usageFields(usage), ...(body !== undefined ? { body } : {}) }。
+// 返回路径：{ ok: false, kind: 'invalid_output', message: 'The maintenance response was empty', ...usageFields(usage) }。
+// 返回路径：{ ok: true, body, ...usageFields(usage) }。
+// 显式抛出：new ModelProtocolError('Prepared maintenance stream returned a response')。
+// 显式抛出：new ModelProtocolError('Prepared maintenance completion returned a stream')。
+// 写入目标：outputChars。
+// 写入目标：firstCause。
+// 写入目标：usage.inputTokens。
+// 写入目标：usage.outputTokens。
+// 写入目标：usage.totalTokens。
+// 写入目标：body。
+// 直接调用：request.signal?.addEventListener。
+// 直接调用：setTimeout。
+// 直接调用：Math.max。
+// 直接调用：request.requestMessages.map。
+// 直接调用：preprepared?.model.send。
+// 直接调用：options.modelClient.stream。
+// 直接调用：isAsyncIterable。
+// 直接调用：stream[Symbol.asyncIterator]。
+// 直接调用：raceWithAbort。
+// 直接调用：iterator.next。
+// 直接调用：controller.abort。
+// 直接调用：accumulator.push。
+// 直接调用：accumulator.usageSnapshot。
+// 直接调用：boundedIteratorClose。
+// 直接调用：accumulator.finish。
+// 直接调用：validateMaintenanceResponse。
+// 直接调用：options.modelClient.complete。
+// 直接调用：isAbortError。
+// 直接调用：clearTimeout。
+// 直接调用：request.signal?.removeEventListener。
+// 直接调用：describeSealed。
+// 直接调用：usageFields。
+// 直接调用：body.trim。
+// [/maint-note:b60ca912113e]
 async function runCompaction(
   options: {
     readonly modelClient: ModelClient
@@ -99,6 +170,12 @@ async function runCompaction(
 
   const controller = preprepared?.controller ?? new AbortController()
   let firstCause: string | undefined
+  // [maint-note:e5f8ce3d349c]
+  // 维护导航：externalAbort；下列为本函数源码中的接口与路径索引。
+  // 分支条件：firstCause === undefined。
+  // 写入目标：firstCause。
+  // 直接调用：controller.abort。
+  // [/maint-note:e5f8ce3d349c]
   const externalAbort = () => {
     if (firstCause === undefined) firstCause = 'aborted'
     controller.abort()
@@ -216,6 +293,15 @@ async function runCompaction(
   return { ok: true, body, ...usageFields(usage) }
 }
 
+// [maint-note:0bcd6180d419]
+// 维护导航：prepareCompaction；下列为本函数源码中的接口与路径索引。
+// 输入 options：{ readonly modelClient: ModelClient readonly model: string readonly requestBudget?: ModelRequest['budget'] }。
+// 输入 request：CompactionRequest。
+// 返回路径：Object.freeze({ measurement: model.measurement, dispatch: () => runCompaction(options, request, { controller, model }), })。
+// 直接调用：request.requestMessages.map。
+// 直接调用：options.modelClient.prepare!。
+// 直接调用：Object.freeze。
+// [/maint-note:0bcd6180d419]
 function prepareCompaction(
   options: {
     readonly modelClient: ModelClient
@@ -240,11 +326,27 @@ function prepareCompaction(
   })
 }
 
+// [maint-note:3d77749b3537]
+// 维护导航：isAsyncIterable；下列为本函数源码中的接口与路径索引。
+// 输入 value：unknown。
+// 返回契约：value is AsyncIterable<T>。
+// 返回路径：Boolean(value && typeof (value as AsyncIterable<T>)[Symbol.asyncIterator] === 'function')。
+// 直接调用：Boolean。
+// [/maint-note:3d77749b3537]
 function isAsyncIterable<T>(value: unknown): value is AsyncIterable<T> {
   return Boolean(value && typeof (value as AsyncIterable<T>)[Symbol.asyncIterator] === 'function')
 }
 
 /** Pre-dispatch measurement: the real outbound shell, JSON escaping included. */
+// [maint-note:25d10f87d5dd]
+// 维护导航：maintenanceRequestMessages；下列为本函数源码中的接口与路径索引。
+// 输入 source：CompactionSource。
+// 返回契约：ModelMessage[]。
+// 返回路径：[ { role: 'system', content: [{ type: 'text', text: SUMMARY_SYSTEM_PROMPT }] }, { role: 'user', content: [{ type: 'text', text: [ `Source units (${source.units.length}):`, ...source.units.map((unit) => `- ${unit.exchangeId} (${unit.kind})`)。
+// 直接调用：[ `Source units (${source.units.length}):`, ...source.units.map((unit) => `- ${unit.exchangeId} (${unit.kind})`), 'TRANSCRIPT (JSON; cite the unit ids above in sourceIds):', JSON.stringify(source.messages), ].join。
+// 直接调用：source.units.map。
+// 直接调用：JSON.stringify。
+// [/maint-note:25d10f87d5dd]
 export function maintenanceRequestMessages(source: CompactionSource): ModelMessage[] {
   return [
     { role: 'system', content: [{ type: 'text', text: SUMMARY_SYSTEM_PROMPT }] },
@@ -271,6 +373,25 @@ const MAX_REJECTED_BODY_CHARS = 2_000
  * the validation diagnostics — the model sees exactly what failed and why,
  * on the SAME frozen source, within a bounded addition to the shell.
  */
+// [maint-note:91f33f6a1f78]
+// 维护导航：repairRequestMessages；下列为本函数源码中的接口与路径索引。
+// 输入 source：CompactionSource。
+// 输入 rejectedBody：string。
+// 输入 diagnostics：string。
+// 返回契约：ModelMessage[] | undefined。
+// 分支条件：JSON.stringify(build(0)).length > COMPACTION_LIMITS.maxInputChars。
+// 分支条件：JSON.stringify(build(middle)).length <= COMPACTION_LIMITS.maxInputChars。
+// 遍历边界：low < high。
+// 返回路径：undefined。
+// 返回路径：build(low)。
+// 写入目标：low。
+// 写入目标：high。
+// 直接调用：maintenanceRequestMessages。
+// 直接调用：Math.min。
+// 直接调用：JSON.stringify。
+// 直接调用：build。
+// 直接调用：Math.ceil。
+// [/maint-note:91f33f6a1f78]
 export function repairRequestMessages(
   source: CompactionSource,
   rejectedBody: string,
@@ -279,6 +400,15 @@ export function repairRequestMessages(
   const base = maintenanceRequestMessages(source)
   const sourceChars = [...rejectedBody]
   const excerptLimit = Math.min(sourceChars.length, MAX_REJECTED_BODY_CHARS)
+  // [maint-note:a5dff7787981]
+  // 维护导航：build；下列为本函数源码中的接口与路径索引。
+  // 输入 keep：number。
+  // 返回契约：ModelMessage[]。
+  // 返回路径：[ ...base, { role: 'user', content: [{ type: 'text', text: [ 'Your previous reply was rejected by schema/source validation.', `Diagnostics: ${diagnostics}`, 'Fix ONLY the reported problem and reply again with ONE JSON object matching the sc。
+  // 直接调用：sourceChars.slice(0, keep).join。
+  // 直接调用：sourceChars.slice。
+  // 直接调用：[ 'Your previous reply was rejected by schema/source validation.', `Diagnostics: ${diagnostics}`, 'Fix ONLY the reported problem and reply again with ONE JSON object matching the schema, citing only the supplied unit ids. The rejected reply。
+  // [/maint-note:a5dff7787981]
   const build = (keep: number): ModelMessage[] => {
     const omitted = keep < sourceChars.length
     const excerpt = keep > 0
@@ -316,6 +446,21 @@ export function repairRequestMessages(
   return build(low)
 }
 
+// [maint-note:064fe77ebf8f]
+// 维护导航：validateMaintenanceResponse；下列为本函数源码中的接口与路径索引。
+// 输入 response：ModelResponse。
+// 返回契约：| { readonly ok: true; readonly response: ModelResponse } | { readonly ok: false readonly failure: 'invalid_output' | 'output_overflow' /** Present only when the base response, including usage, was validated. */ readonly response?: ModelRes。
+// 分支条件：canonical.stopReason !== 'stop'。
+// 分支条件：canonical.toolCalls.length > 0。
+// 分支条件：detectToolControlEnvelope(canonical.content)。
+// 返回路径：{ ok: false, failure: error instanceof ModelResponseLimitError && /text character limit/i.test(error.message) ? 'output_overflow' : 'invalid_output', }。
+// 返回路径：{ ok: false, failure: 'invalid_output', response: canonical }。
+// 返回路径：{ ok: true, response: canonical }。
+// 写入目标：canonical。
+// 直接调用：validateModelResponse。
+// 直接调用：/text character limit/i.test。
+// 直接调用：detectToolControlEnvelope。
+// [/maint-note:064fe77ebf8f]
 function validateMaintenanceResponse(response: ModelResponse):
   | { readonly ok: true; readonly response: ModelResponse }
   | {
@@ -341,8 +486,21 @@ function validateMaintenanceResponse(response: ModelResponse):
   return { ok: true, response: canonical }
 }
 
+// [maint-note:0de5e9c5e7a7]
+// 维护导航：raceWithAbort；下列为本函数源码中的接口与路径索引。
+// 输入 promise：Promise<T>。
+// 输入 signal：AbortSignal。
+// 返回契约：Promise<T>。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 返回路径：new Promise<T>((resolve, reject) => { const onAbort = () => reject(abortError()) if (signal.aborted) { reject(abortError()) return } signal.addEventListener('abort', onAbort, { once: true }) promise.then( (value) => { signal.removeEventList。
+// [/maint-note:0de5e9c5e7a7]
 async function raceWithAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   return new Promise<T>((resolve, reject) => {
+    // [maint-note:2a02d1f773d6]
+    // 维护导航：onAbort；下列为本函数源码中的接口与路径索引。
+    // 直接调用：reject。
+    // 直接调用：abortError。
+    // [/maint-note:2a02d1f773d6]
     const onAbort = () => reject(abortError())
     if (signal.aborted) {
       reject(abortError())
@@ -364,6 +522,18 @@ async function raceWithAbort<T>(promise: Promise<T>, signal: AbortSignal): Promi
   })
 }
 
+// [maint-note:05337da643ae]
+// 维护导航：boundedIteratorClose；下列为本函数源码中的接口与路径索引。
+// 输入 iterator：AsyncIterator<unknown>。
+// 输入 deadlineMs：number。
+// 返回契约：Promise<void>。
+// 异步边界：调用方需等待 Promise；拒绝路径由调用方或上层捕获。
+// 分支条件：!close。
+// 返回路径：无返回值。
+// 直接调用：Math.min。
+// 直接调用：Math.max。
+// 直接调用：iterator.return。
+// [/maint-note:05337da643ae]
 async function boundedIteratorClose(iterator: AsyncIterator<unknown>, deadlineMs: number): Promise<void> {
   // cleanup uses only the REMAINING attempt time (never a fresh
   // full grace window once the deadline already passed); late rejections are
@@ -390,6 +560,14 @@ async function boundedIteratorClose(iterator: AsyncIterator<unknown>, deadlineMs
   }
 }
 
+// [maint-note:cc83843948e7]
+// 维护导航：usageFields；下列为本函数源码中的接口与路径索引。
+// 输入 usage：{ inputTokens?: number; outputTokens?: number; totalTokens?: number }。
+// 返回契约：{ usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number; usageComplete: boolean } }。
+// 分支条件：usage.inputTokens === undefined && usage.outputTokens === undefined && usage.totalTokens === undefined。
+// 返回路径：{}。
+// 返回路径：{ usage: { ...usage, usageComplete: complete } }。
+// [/maint-note:cc83843948e7]
 function usageFields(usage: { inputTokens?: number; outputTokens?: number; totalTokens?: number }):
   { usage?: { inputTokens?: number; outputTokens?: number; totalTokens?: number; usageComplete: boolean } } {
   if (usage.inputTokens === undefined && usage.outputTokens === undefined && usage.totalTokens === undefined) return {}
@@ -399,16 +577,43 @@ function usageFields(usage: { inputTokens?: number; outputTokens?: number; total
   return { usage: { ...usage, usageComplete: complete } }
 }
 
+// [maint-note:40bc088c497d]
+// 维护导航：isAbortError；下列为本函数源码中的接口与路径索引。
+// 输入 error：unknown。
+// 返回契约：boolean。
+// 返回路径：error instanceof Error && error.name === 'AbortError'。
+// [/maint-note:40bc088c497d]
 function isAbortError(error: unknown): boolean {
   return error instanceof Error && error.name === 'AbortError'
 }
 
+// [maint-note:41bbc75841dd]
+// 维护导航：abortError；下列为本函数源码中的接口与路径索引。
+// 返回契约：Error。
+// 返回路径：error。
+// 写入目标：error.name。
+// [/maint-note:41bbc75841dd]
 function abortError(): Error {
   const error = new Error('maintenance aborted')
   error.name = 'AbortError'
   return error
 }
 
+// [maint-note:78b444e4dc27]
+// 维护导航：describeSealed；下列为本函数源码中的接口与路径索引。
+// 输入 kind：string。
+// 返回契约：string。
+// 分支条件：switch kind。
+// 分支条件：case 'aborted'。
+// 分支条件：case 'timeout'。
+// 分支条件：case 'output_overflow'。
+// 分支条件：case 'invalid_output'。
+// 返回路径：'The maintenance request was aborted'。
+// 返回路径：'The maintenance request exceeded its deadline'。
+// 返回路径：`The compaction output exceeded ${COMPACTION_LIMITS.maxOutputChars} characters`。
+// 返回路径：'The compaction response violated the model response or control-envelope protocol'。
+// 返回路径：'The maintenance request failed at the transport boundary'。
+// [/maint-note:78b444e4dc27]
 function describeSealed(kind: string): string {
   switch (kind) {
     case 'aborted': return 'The maintenance request was aborted'

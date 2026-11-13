@@ -12,8 +12,7 @@ static int *contract3_select(int *pointer, int key) { return key > 0 ? pointer :
 static int contract3_independent_null_pointer_case_01(void)
 {
     int value = 7;
-    struct contract3_box box = {&value};
-    return *box.pointer;
+    return contract3_read(&value);
 }
 
 static int contract3_independent_null_pointer_case_02(void)
@@ -149,8 +148,7 @@ static int contract3_independent_null_pointer_case_19(void)
 static int contract3_independent_null_pointer_case_20(void)
 {
     int value = 7;
-    struct contract3_box box = {0};
-    return *box.pointer;
+    return contract3_read(0);
 }
 
 static int contract3_independent_null_pointer_case_21(void)

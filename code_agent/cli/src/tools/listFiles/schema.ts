@@ -12,8 +12,23 @@ import {
 
 export const DEFAULT_MAX_DEPTH = 64
 
+// [maint-note:f1db2b66858e]
+// 数据契约导航：ListFilesMode；字段含义以消费端校验为准。
+// 类型组合：'list' | 'count'。
+// [/maint-note:f1db2b66858e]
 export type ListFilesMode = 'list' | 'count'
 
+// [maint-note:d2a40ae0cb06]
+// 数据契约导航：ListFilesInput；字段含义以消费端校验为准。
+// 成员 path：string。
+// 成员 pattern（可省略）：string。
+// 成员 recursive：boolean。
+// 成员 maxDepth：number。
+// 成员 limit（可省略）：number。
+// 成员 includeIgnored：boolean。
+// 成员 includeHidden：boolean。
+// 成员 mode：ListFilesMode。
+// [/maint-note:d2a40ae0cb06]
 export interface ListFilesInput {
   path: string
   pattern?: string
@@ -56,6 +71,22 @@ export const listFilesSchema: ToolSchema = {
   },
 }
 
+// [maint-note:869bae13c4cb]
+// 维护导航：parseListFilesInput；下列为本函数源码中的接口与路径索引。
+// 输入 input：Record<string, unknown>。
+// 返回契约：ListFilesInput。
+// 分支条件：mode === 'count' && input.limit !== undefined。
+// 返回路径：{ path: optionalString(input, 'path', '.'), pattern: input.pattern === undefined ? undefined : optionalString(input, 'pattern', ''), recursive: optionalBoolean(input, 'recursive', true), maxDepth: optionalPositiveInteger(input, 'maxDepth', 。
+// 显式抛出：inputError('limit is not valid when mode is "count"', 'conflicting_fields', 'limit', 'omit limit in count mode')。
+// 直接调用：assertObject。
+// 直接调用：assertKnownKeys。
+// 直接调用：optionalMode。
+// 直接调用：inputError。
+// 直接调用：optionalString。
+// 直接调用：optionalBoolean。
+// 直接调用：optionalPositiveInteger。
+// 直接调用：optionalLimit。
+// [/maint-note:869bae13c4cb]
 export function parseListFilesInput(input: Record<string, unknown>): ListFilesInput {
   assertObject(input)
   assertKnownKeys(input, [
@@ -77,6 +108,17 @@ export function parseListFilesInput(input: Record<string, unknown>): ListFilesIn
   }
 }
 
+// [maint-note:fc9f2295acab]
+// 维护导航：optionalMode；下列为本函数源码中的接口与路径索引。
+// 输入 input：Record<string, unknown>。
+// 返回契约：ListFilesMode。
+// 分支条件：input.mode === undefined。
+// 分支条件：input.mode === 'list' || input.mode === 'count'。
+// 返回路径：'list'。
+// 返回路径：input.mode。
+// 显式抛出：inputError('mode must be "list" or "count"', 'invalid_value', 'mode', 'list or count')。
+// 直接调用：inputError。
+// [/maint-note:fc9f2295acab]
 function optionalMode(input: Record<string, unknown>): ListFilesMode {
   if (input.mode === undefined) return 'list'
   if (input.mode === 'list' || input.mode === 'count') return input.mode

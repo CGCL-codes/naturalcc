@@ -18,6 +18,23 @@ import {
 import type { ApprovalPresentation } from '../../tools/approval.js'
 import { StreamingMarkdownRenderer, renderMarkdown } from '../markdown/renderer.js'
 
+// [maint-note:70319c098eca]
+// 数据契约导航：ActiveTurnProps；字段含义以消费端校验为准。
+// 成员 messages：readonly Message[]。
+// 成员 loading：boolean。
+// 成员 streaming：boolean。
+// 成员 streamingContent（可省略）：string。
+// 成员 durationMs：number。
+// 成员 approvalPaused：boolean。
+// 成员 approvalPending：ApprovalRequest | null。
+// 成员 width：number。
+// 成员 onApprovalDecision：(requestId: string, approved: boolean) => void。
+// 成员 onApprovalCancel：() => void。
+// 成员 onRegisterApprovalKeyboard（可省略）：(handler: KeyboardInputHandler | null) => void。
+// 成员 availableRows（可省略）：number。
+// 成员 streamGeneration（可省略）：number。
+// 成员 layoutGeneration（可省略）：number。
+// [/maint-note:70319c098eca]
 export interface ActiveTurnProps {
   messages: readonly Message[]
   loading: boolean
@@ -50,6 +67,14 @@ export interface ActiveTurnProps {
  * Its own chrome is counted here so message records cannot push a long tool
  * result or approval prompt through the terminal height.
  */
+// [maint-note:f23d5451d802]
+// 维护导航：messageBodySource；下列为本函数源码中的接口与路径索引。
+// 输入 message：Message。
+// 返回契约：string。
+// 分支条件：message.role === 'tool' && message.toolPresentation。
+// 返回路径：message.toolPresentation.plainText || message.content。
+// 返回路径：message.content。
+// [/maint-note:f23d5451d802]
 function messageBodySource(message: Message): string {
   if (message.role === 'tool' && message.toolPresentation) {
     return message.toolPresentation.plainText || message.content
@@ -57,11 +82,45 @@ function messageBodySource(message: Message): string {
   return message.content
 }
 
+// [maint-note:c0a99761d946]
+// 数据契约导航：ProjectedActiveMessage；字段含义以消费端校验为准。
+// 成员 message：Message。
+// 成员 assistantRows（可省略）：readonly MarkdownVisualRow[]。
+// [/maint-note:c0a99761d946]
 interface ProjectedActiveMessage {
   readonly message: Message
   readonly assistantRows?: readonly MarkdownVisualRow[]
 }
 
+// [maint-note:0574eaa179a1]
+// 维护导航：projectMessageToRows；下列为本函数源码中的接口与路径索引。
+// 输入 message：Message。
+// 输入 width：number。
+// 输入 maxRows：number。
+// 输入 assistantRows：readonly MarkdownVisualRow[]（可省略）。
+// 返回契约：ProjectedActiveMessage | null。
+// 分支条件：message.role === 'assistant' && assistantRows。
+// 分支条件：bodyBudget < 1。
+// 分支条件：baseRows > maxRows。
+// 分支条件：countMessageRows(projected, width) <= maxRows。
+// 遍历边界：let count = Math.min(bodyBudget, wrapped.length); count >= 1; count -= 1。
+// 返回路径：null。
+// 返回路径：{ message, assistantRows: assistantRows.slice(-bodyBudget) }。
+// 返回路径：{ message: projected }。
+// 写入目标：count。
+// 直接调用：countMessageRows。
+// 直接调用：assistantRows.slice。
+// 直接调用：Math.max。
+// 直接调用：sanitizeTerminalText。
+// 直接调用：messageBodySource。
+// 直接调用：calculateContentWidth。
+// 直接调用：wrapDisplayLines。
+// 直接调用：Math.min。
+// 直接调用：wrapped.slice(-count).join。
+// 直接调用：wrapped.slice。
+// 直接调用：candidate.startsWith。
+// 直接调用：candidate.slice。
+// [/maint-note:0574eaa179a1]
 function projectMessageToRows(
   message: Message,
   width: number,
@@ -100,6 +159,46 @@ function projectMessageToRows(
  * kept message) are dropped with a bounded notice; the frozen stable region
  * still receives every record in full when the run terminalizes.
  */
+// [maint-note:0ed72a151c02]
+// 维护导航：planActiveViewport；下列为本函数源码中的接口与路径索引。
+// 输入 messages：readonly Message[]。
+// 输入 width：number。
+// 输入 rows：number。
+// 输入 options：{ reservedRows?: number assistantRows?: ReadonlyMap<string, readonly MarkdownVisualRow[]> noticeInReservedChrome?: boolean }；缺省表达式 {}。
+// 返回契约：{ kept: readonly Message[] hiddenLines: number notice: string | null assistantRows: ReadonlyMap<string, readonly MarkdownVisualRow[]> }。
+// 分支条件：message.role !== 'assistant' || projectedAssistantRows.has(message.id)。
+// 分支条件：counts.reduce((total, count) => total + count, 0) <= available。
+// 分支条件：!message。
+// 分支条件：count <= remaining。
+// 分支条件：rowsForMessage。
+// 分支条件：projected。
+// 分支条件：projected.assistantRows。
+// 分支条件：hiddenLines === 0 && kept.length === messages.length。
+// 遍历边界：const message ← messages。
+// 遍历边界：let index = messages.length - 1; index >= 0; index -= 1。
+// 遍历边界：let older = index - 1; older >= 0; older -= 1。
+// 返回路径：{ kept: messages, hiddenLines: 0, notice: null, assistantRows: projectedAssistantRows }。
+// 返回路径：{ kept, hiddenLines, notice, assistantRows: keptAssistantRows }。
+// 写入目标：index。
+// 写入目标：remaining。
+// 写入目标：hiddenLines。
+// 写入目标：older。
+// 直接调用：calculateContentWidth。
+// 直接调用：projectedAssistantRows.has。
+// 直接调用：new StreamingMarkdownRenderer({ maxWidth: contentWidth }).push。
+// 直接调用：renderMarkdown。
+// 直接调用：projectedAssistantRows.set。
+// 直接调用：buildMarkdownVisualRows。
+// 直接调用：messages.map。
+// 直接调用：Math.max。
+// 直接调用：Math.floor。
+// 直接调用：counts.reduce。
+// 直接调用：countMessageRows。
+// 直接调用：kept.unshift。
+// 直接调用：projectedAssistantRows.get。
+// 直接调用：keptAssistantRows.set。
+// 直接调用：projectMessageToRows。
+// [/maint-note:0ed72a151c02]
 export function planActiveViewport(
   messages: readonly Message[],
   width: number,
@@ -171,6 +270,19 @@ export function planActiveViewport(
   return { kept, hiddenLines, notice, assistantRows: keptAssistantRows }
 }
 
+// [maint-note:6399dab7f781]
+// 维护导航：ActiveTurn；下列为本函数源码中的接口与路径索引。
+// 输入 { messages, loading, streaming, durationMs, approvalPaused, approvalPending, width, onApprovalDecision, onApprovalCancel, onRegisterApprovalKeyboard, availableRows, streamGeneration = 0, layoutGeneration = 0, }：ActiveTurnProps。
+// 返回路径：( <Box flexDirection="column" width={Math.max(1, width)}> {bounded.map((message) => ( <MessageColumn key={message.id} message={message} width={width} assistantRows={plan.assistantRows.get(message.id)} /> ))} {plan.notice && !streaming ? <Te。
+// 直接调用：useStdout。
+// 直接调用：boundApprovalPresentation。
+// 直接调用：Math.max。
+// 直接调用：countActiveChromeRows。
+// 直接调用：useStreamingAssistantRows。
+// 直接调用：planActiveViewport。
+// 直接调用：bounded.map。
+// 直接调用：truncateDisplayText。
+// [/maint-note:6399dab7f781]
 export function ActiveTurn({
   messages, loading, streaming, durationMs, approvalPaused,
   approvalPending, width, onApprovalDecision, onApprovalCancel, onRegisterApprovalKeyboard, availableRows,
@@ -225,6 +337,36 @@ export function ActiveTurn({
 }
 
 /** Internal read-only projection seam used by ActiveTurn and its lifecycle tests. */
+// [maint-note:fb6552e918cb]
+// 维护导航：useStreamingAssistantRows；下列为本函数源码中的接口与路径索引。
+// 输入 messages：readonly Message[]。
+// 输入 width：number。
+// 输入 streamGeneration：number。
+// 输入 layoutGeneration：number。
+// 返回契约：ReadonlyMap<string, readonly MarkdownVisualRow[]>。
+// 分支条件：!draft。
+// 分支条件：!state || state.owner !== owner || state.width !== contentWidth || state.layoutGeneration !== layoutGeneration。
+// 分支条件：!draft.content.startsWith(state.inputSource)。
+// 分支条件：delta.length > 0。
+// 分支条件：needsProjection。
+// 返回路径：new Map()。
+// 返回路径：state.rowMap。
+// 写入目标：stateRef.current。
+// 写入目标：state。
+// 写入目标：needsProjection。
+// 写入目标：state.inputSource。
+// 写入目标：state.rows。
+// 写入目标：state.rowMap。
+// 直接调用：messages.findLast。
+// 直接调用：useRef。
+// 直接调用：calculateContentWidth。
+// 直接调用：draft.content.startsWith。
+// 直接调用：state.renderer.reset。
+// 直接调用：draft.content.slice。
+// 直接调用：state.renderer.append。
+// 直接调用：state.renderer.snapshot。
+// 直接调用：buildMarkdownVisualRows。
+// [/maint-note:fb6552e918cb]
 export function useStreamingAssistantRows(
   messages: readonly Message[],
   width: number,
@@ -282,6 +424,12 @@ export function useStreamingAssistantRows(
   return state.rowMap
 }
 
+// [maint-note:81076523902b]
+// 维护导航：ApprovalPrompt；下列为本函数源码中的接口与路径索引。
+// 输入 { request, presentation, width, onDecision, onCancel, onRegisterKeyboard, }：{ request: ApprovalRequest presentation: ApprovalPresentation width: number onDecision: (requestId: string, approved: boolean) => void onCancel: () => void onRegisterKeyboard?: (handler: KeyboardInputHandler | null) => void }。
+// 返回路径：( <SelectMenu menuId={request.requestId} title={presentation.title} sections={sections} width={width} options={options} selected={selected} active={active} onChange={setSelected} onConfirm={(choice) => { setActive(false) onDecision(request.。
+// 直接调用：useState。
+// [/maint-note:81076523902b]
 function ApprovalPrompt({
   request,
   presentation,

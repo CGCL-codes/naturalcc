@@ -104,6 +104,7 @@ def render_listing(results: list[dict[str, Any]]) -> str:
         "> 本文由 [scripts/export_contract3_ground_truth.py](scripts/export_contract3_ground_truth.py) 自动生成，请勿手改；"
         "重新生成：`uv run python scripts/export_contract3_ground_truth.py`。", "",
         "## 1. 概览", "",
+        f"- **题集版本**：`{independent.DATASET_REVISION}`，教师校准后的检测器优化题；旧版 Web 成绩不能直接作为此版本成绩。",
         "- **工程**：3 套固定版本的公开 RTOS 源码。每套工程的“检测文件”合计不少于 10,000 行，见第 3 节。",
         "- **缺陷**：每套工程按类别（数组越界、字符串溢出、空指针调用）各注入一个测试文件，"
         "每个文件 40 个函数：20 个正例（真实缺陷）+ 20 个同类安全对照。上游源码本身不改动。",
@@ -118,6 +119,15 @@ def render_listing(results: list[dict[str, Any]]) -> str:
         *[f"| {SUITE_NAMES[r['suite']]} | " + " | ".join(
             f"[{p['id']}/ground_truth.json](artifacts/contract3/ground_truth/{r['suite']}/{p['id']}/ground_truth.json)"
             for p in r["projects"]) + " |" for r in results], "",
+        "### 1.1 三套工程与四套 GT 的区别", "",
+        "三个工程分别来自 FreeRTOS、Zephyr、RT-Thread，上游源码不同；同一工程的四套 GT 共用同一份固定版本上游源码。",
+        "每套 GT 只选择自己对应的三个 fixture 文件计分，文件名、函数范围和 SHA-256 必须一起匹配，不能只换标签而复用不匹配的文件。",
+        "普通平衡集和压力集的同一套 fixture 在三个工程间逐字节相同；加难版仍复用缺陷模板，但按工程固定种子打乱函数顺序。",
+        "因此这里验证的是相同缺陷模板在三个工程容器中的检测表现，不能称为三个独立的真实业务缺陷集合。", "",
+        "### 1.2 检出率读取口径", "",
+        "本清单记录真值，不记录检出率。旧版题集和旧配置 A/C/E/F 关闭时，平衡集字符串检出 13/20（65%），",
+        "平衡加难和压力加难各为 15/20（75%）；对应总体是 88.3%、91.7%、91.7%。总体超过 85% 不代表每类超过 85%。",
+        "新版形态配比与 A/B/C/E/F/G 教学配置的逐类实测见 [难度指南](合同-3-静态分析难度调节指南.md)。完整规则是参考答案；静态实测与历史 Web 模型结果分开记录。", "",
         "## 2. 缺陷写法（正例与对照）", "",
         "“正例代码”与“对照代码”是注入函数的函数体；对照与正例写法相近，但实际安全。"
         "`base-N` 用于平衡集、压力集，加难版另加 `hard-N`（差一错误与看似危险的安全写法）。", "",
@@ -222,6 +232,7 @@ def export_suite(manifest: dict[str, Any], workspace: Path, suite: str) -> dict[
         })
     return {
         "suite": suite,
+        "dataset_revision": independent.DATASET_REVISION,
         "title": "合同指标 3：RTOS 注入测试集 ground truth",
         "line_rule": f"每个工程的上游检测文件（detection_files）合计不少于 {MIN_LINES} 行；行数按文件实际行数统计。",
         "scoring_rule": "只有 fixtures 中的注入函数参与计分：expected=defect 为正例、expected=control 为同类安全对照，"
@@ -246,6 +257,7 @@ def loader_document(result: dict[str, Any], project: dict[str, Any]) -> dict[str
     hashes = {item["path"]: item["sha256"] for item in project["fixtures"]}
     return {
         "schema_version": 1,
+        "dataset_revision": independent.DATASET_REVISION,
         "scan_type": "frequent_defects",
         "source_sha256": hashes,
         "cases": cases,

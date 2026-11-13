@@ -14,6 +14,25 @@ from code_agent.security_exam import switch_off
 C_EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp"}
 
 
+# [maint-note:3f2c732431dc]
+# 维护导航：_cppcheck_flags；下列为本函数源码中的接口与路径索引。
+# 输入 flags：list[str]。
+# 返回契约：list[str]。
+# 分支条件：flag in {'-I', '-iquote'} and index + 1 < len(flags)。
+# 分支条件：flag in {'-isystem', '-idirafter'} and index + 1 < len(flags)。
+# 分支条件：flag == '-include' and index + 1 < len(flags)。
+# 分支条件：flag == '-imacros' and index + 1 < len(flags)。
+# 分支条件：flag.startswith(('-D', '-U'))。
+# 分支条件：flag.startswith('-std=')。
+# 分支条件：re.fullmatch('c(89|99|11|17|23)', standard)。
+# 遍历边界：index < len(flags)。
+# 返回路径：[*regular, *later, *other]。
+# 直接调用：len。
+# 直接调用：other.append。
+# 直接调用：flag.startswith。
+# 直接调用：re.sub。
+# 直接调用：re.fullmatch。
+# [/maint-note:3f2c732431dc]
 def _cppcheck_flags(flags: list[str]) -> list[str]:
     """Translate compile flags to Cppcheck's options.
 
@@ -47,6 +66,104 @@ def _cppcheck_flags(flags: list[str]) -> list[str]:
     return [*regular, *later, *other]
 
 
+# [maint-note:ccd28525fba0]
+# 执行边界：调用静态分析器读取源文件，不运行被检测程序。
+# 不同编译上下文分组调用，避免把一个目录的宏错误地套给另一目录。
+# 剩余时间按待扫描文件比例分配，超时文件进入失败清单。
+# 缺少引擎时明确返回 unavailable，不将空告警解释为检测通过。
+# 诊断保留引擎版本与编译上下文，便于部署机复现。
+# 维护导航：cppcheck_scan；下列为本函数源码中的接口与路径索引。
+# 输入 files：list[str]。
+# 输入 project_dir：str。
+# 输入 context_lines：int。
+# 输入 timeout_seconds：int；缺省表达式 120。
+# 输入 build_context：类型由调用方与函数体约束；缺省表达式 None。
+# 分支条件：not targets。
+# 分支条件：executable is None。
+# 分支条件：left <= 1。
+# 分支条件：result.returncode != 0。
+# 分支条件：identifier in {'syntaxError', 'internalError', 'cppcheckError', 'missingInclude', 'missingIncludeSystem'}。
+# 分支条件：identifier in {'syntaxError', 'internalError', 'cppcheckError'}。
+# 分支条件：not locations。
+# 分支条件：not path.is_absolute()。
+# 分支条件：failures。
+# 遍历边界：target ← targets。
+# 遍历边界：(flags, members) ← groups.items()。
+# 遍历边界：error ← document.findall('.//error')。
+# 遍历边界：location ← locations。
+# 遍历边界：location ← error.findall('location')[:1]。
+# 返回路径：([], {'engine': 'cppcheck', 'status': 'not_applicable'})。
+# 返回路径：([], {'engine': 'cppcheck', 'status': 'unavailable', 'message': 'Install Cppcheck and add it to the backend service PATH; bounds/null/leak analysis was not run.'})。
+# 返回路径：(findings, report)。
+# 捕获异常：(OSError, subprocess.TimeoutExpired, ET.ParseError)。
+# 捕获异常：ValueError。
+# 捕获异常：(ValueError, OSError)。
+# 写入目标：report['message']。
+# 直接调用：str。
+# 直接调用：Path(p).resolve。
+# 直接调用：Path。
+# 直接调用：Path(p).suffix.lower。
+# 直接调用：shutil.which。
+# 直接调用：Path(project_dir).resolve。
+# 直接调用：Path(target).relative_to(root).as_posix。
+# 直接调用：Path(target).relative_to。
+# 直接调用：build_context.flags_for。
+# 直接调用：groups.setdefault(tuple(_cppcheck_flags(flags)), []).append。
+# 直接调用：groups.setdefault。
+# 直接调用：tuple。
+# 直接调用：_cppcheck_flags。
+# 直接调用：set。
+# 直接调用：len。
+# 直接调用：groups.items。
+# 直接调用：failures.append。
+# 直接调用：failed_files.update。
+# 直接调用：Path(p).relative_to(root).as_posix。
+# 直接调用：Path(p).relative_to。
+# 直接调用：time.monotonic。
+# 直接调用：subprocess.run。
+# 直接调用：min。
+# 直接调用：max。
+# 直接调用：ET.fromstring。
+# 直接调用：document.find。
+# 直接调用：version.get。
+# 直接调用：document.findall。
+# 直接调用：error.get。
+# 直接调用：diagnostics.append。
+# 直接调用：error.findall。
+# 直接调用：(root / location.get('file', '')).resolve。
+# 直接调用：location.get。
+# 直接调用：failed_files.add。
+# 直接调用：path.relative_to(root).as_posix。
+# 直接调用：path.relative_to。
+# 直接调用：path.is_absolute。
+# 直接调用：path.resolve().relative_to(root).as_posix。
+# 直接调用：path.resolve().relative_to。
+# 直接调用：path.resolve。
+# 直接调用：path.read_text(encoding='utf-8', errors='replace').splitlines。
+# 直接调用：path.read_text。
+# 直接调用：int。
+# 直接调用：findings.append。
+# 直接调用：lines[line - 1].strip。
+# 直接调用：''.join。
+# 直接调用：range。
+# 直接调用：build_context.describe。
+# 直接调用：sorted。
+# 直接调用：isinstance。
+# 集合派生：p 来自 files；过滤 Path(p).suffix.lower() in C_EXTENSIONS。
+# 表达式分流：build_context is not None；真值与假值分支分别计算，不同时执行。
+# 集合派生：p 来自 members。
+# 清理边界：本函数含 finally；正常返回和异常展开都经过清理块。
+# 表达式分流：version is not None；真值与假值分支分别计算，不同时执行。
+# 表达式分流：cwe and cwe != '0'；真值与假值分支分别计算，不同时执行。
+# 表达式分流：error.get('severity') == 'error'；真值与假值分支分别计算，不同时执行。
+# 表达式分流：error.get('inconclusive') == 'true'；真值与假值分支分别计算，不同时执行。
+# 表达式分流：line <= len(lines)；真值与假值分支分别计算，不同时执行。
+# 集合派生：i 来自 range(max(0, line - 1 - context_lines), min(len(lines), line + context_lines))。
+# 表达式分流：all_failed；真值与假值分支分别计算，不同时执行。
+# 表达式分流：diagnostics or failures；真值与假值分支分别计算，不同时执行。
+# 表达式分流：described['source'] != 'default'；真值与假值分支分别计算，不同时执行。
+# 表达式分流：isinstance(failures[0], str)；真值与假值分支分别计算，不同时执行。
+# [/maint-note:ccd28525fba0]
 def cppcheck_scan(files: list[str], project_dir: str, context_lines: int, timeout_seconds: int = 120,
                   build_context=None):
     targets = [str(Path(p).resolve()) for p in files if Path(p).suffix.lower() in C_EXTENSIONS]
@@ -152,6 +269,28 @@ CLANG_CWE = {"core.NullDereference": 476, "alpha.security.ArrayBoundV2": 119, "a
              "alpha.unix.cstring.OutOfBounds": 787}
 
 
+# [maint-note:8a0e57c43372]
+# 维护导航：_clang_analyze；下列为本函数源码中的接口与路径索引。
+# 输入 executable：str。
+# 输入 unit：Path。
+# 输入 root：Path。
+# 输入 output：Path。
+# 输入 timeout：float。
+# 输入 analyze_included：bool。
+# 输入 flags：tuple[str, ...] | list[str]；缺省表达式 ()。
+# 分支条件：result.returncode != 0 or not output.exists()。
+# 返回路径：plistlib.loads(output.read_bytes())。
+# 显式抛出：RuntimeError(result.stderr[-1500:] or 'Clang produced no report')。
+# 直接调用：output.unlink。
+# 直接调用：subprocess.run。
+# 直接调用：str。
+# 直接调用：','.join。
+# 直接调用：output.exists。
+# 直接调用：RuntimeError。
+# 直接调用：plistlib.loads。
+# 直接调用：output.read_bytes。
+# 表达式分流：analyze_included；真值与假值分支分别计算，不同时执行。
+# [/maint-note:8a0e57c43372]
 def _clang_analyze(executable: str, unit: Path, root: Path, output: Path, timeout: float, analyze_included: bool,
                    flags: tuple[str, ...] | list[str] = ()):
     output.unlink(missing_ok=True)
@@ -168,6 +307,113 @@ def _clang_analyze(executable: str, unit: Path, root: Path, output: Path, timeou
     return plistlib.loads(output.read_bytes())
 
 
+# [maint-note:2df4fd6312fd]
+# 跨文件分析先尝试同上下文的 unity 单元；失败后退回逐文件分析。
+# 不同语言后缀或编译参数不能直接拼成一个翻译单元。
+# 同一文件、行与检查器组成去重键，避免多条路径重复报同一位置。
+# 调用处归因保留 callee_location，不丢失原始缺陷所在函数。
+# 实验性边界检查器可能误报；completed 只说明扫描完成，不说明无缺陷。
+# 总体时间耗尽与单文件编译失败均保留，不静默跳过为安全。
+# 维护导航：clang_scan；下列为本函数源码中的接口与路径索引。
+# 输入 files：list[str]。
+# 输入 project_dir：str。
+# 输入 context_lines：int。
+# 输入 timeout_seconds：int；缺省表达式 120。
+# 输入 build_context：类型由调用方与函数体约束；缺省表达式 None。
+# 分支条件：not targets。
+# 分支条件：executable is None。
+# 分支条件：len(sources) > 1 and len({t.suffix.lower() for t in sources}) == 1 and (len({flags_of(t) for t in sources}) == 1)。
+# 分支条件：mode == 'per_file'。
+# 分支条件：remaining <= 0。
+# 分支条件：(file, line, checker) in seen。
+# 分支条件：checker == 'unix.Malloc' and diagnostic['type'] == 'Memory leak'。
+# 分支条件：not switch_off('B') and calls and any((step.get('depth', 0) > 0 for step in diagnostic.get('path', []) if step.get('kind') == 'event'))。
+# 分支条件：call_file and (call_file, call['line'], checker) not in seen。
+# 分支条件：missing。
+# 遍历边界：(index, target) ← enumerate(targets)。
+# 遍历边界：document ← documents。
+# 遍历边界：diagnostic ← document.get('diagnostics', [])。
+# 返回路径：([], {'engine': 'clang', 'status': 'not_applicable'})。
+# 返回路径：([], {'engine': 'clang', 'status': 'unavailable', 'message': 'Comprehensive analysis requires clang on the backend PATH (validated with LLVM 18).'})。
+# 返回路径：tuple(build_context.flags_for(path.relative_to(root).as_posix())) if build_context is not None else ()。
+# 返回路径：(findings, report)。
+# 捕获异常：(OSError, RuntimeError, subprocess.TimeoutExpired, plistlib.InvalidFileException)。
+# 捕获异常：(ValueError, OSError)。
+# 捕获异常：(ValueError, OSError, IndexError)。
+# 写入目标：report['hint']。
+# 直接调用：Path(p).resolve。
+# 直接调用：Path。
+# 直接调用：Path(p).suffix.lower。
+# 直接调用：shutil.which。
+# 直接调用：Path(project_dir).resolve。
+# 直接调用：set。
+# 直接调用：time.monotonic。
+# 直接调用：t.suffix.lower。
+# 直接调用：tuple。
+# 直接调用：build_context.flags_for。
+# 直接调用：path.relative_to(root).as_posix。
+# 直接调用：path.relative_to。
+# 直接调用：tempfile.TemporaryDirectory。
+# 直接调用：len。
+# 直接调用：flags_of。
+# 直接调用：sources[0].suffix.lower。
+# 直接调用：unity.write_text。
+# 直接调用：''.join。
+# 直接调用：documents.append。
+# 直接调用：_clang_analyze。
+# 直接调用：max。
+# 直接调用：min。
+# 直接调用：enumerate。
+# 直接调用：target.relative_to(root).as_posix。
+# 直接调用：target.relative_to。
+# 直接调用：failures.extend。
+# 直接调用：p.relative_to(root).as_posix。
+# 直接调用：p.relative_to。
+# 直接调用：failures.append。
+# 直接调用：str。
+# 直接调用：versions.add。
+# 直接调用：document.get。
+# 直接调用：Path(document['files'][location['file']]).resolve。
+# 直接调用：source.relative_to(root).as_posix。
+# 直接调用：source.relative_to。
+# 直接调用：source.read_text(encoding='utf-8', errors='replace').splitlines。
+# 直接调用：source.read_text。
+# 直接调用：seen.add。
+# 直接调用：CLANG_CWE.get。
+# 直接调用：step.get。
+# 直接调用：diagnostic.get。
+# 直接调用：'\n'.join。
+# 直接调用：range。
+# 直接调用：findings.append。
+# 直接调用：str(step.get('message', '')).startswith。
+# 直接调用：switch_off。
+# 直接调用：any。
+# 直接调用：Path(document['files'][call['file']]).resolve。
+# 直接调用：call_source.relative_to(root).as_posix。
+# 直接调用：call_source.relative_to。
+# 直接调用：call_source.read_text(encoding='utf-8', errors='replace').splitlines。
+# 直接调用：call_source.read_text。
+# 直接调用：build_context.describe。
+# 直接调用：sorted。
+# 集合派生：p 来自 files；过滤 Path(p).suffix.lower() in C_EXTENSIONS。
+# 集合派生：t 来自 targets；过滤 t.suffix.lower() in {'.c', '.cc', '.cpp', '.cxx'}。
+# 资源作用域：tempfile.TemporaryDirectory(prefix='naturalcc-clang-')；退出该 with 时调用对应上下文清理。
+# 集合派生：t 来自 sources。
+# 集合派生：p 来自 targets[index:]。
+# 集合派生：step 来自 diagnostic.get('path', [])；过滤 step.get('kind') == 'event'。
+# 表达式分流：cwe；真值与假值分支分别计算，不同时执行。
+# 表达式分流：line <= len(lines)；真值与假值分支分别计算，不同时执行。
+# 集合派生：i 来自 range(max(0, line - 1 - context_lines), min(len(lines), line + context_lines))。
+# 集合派生：step 来自 diagnostic.get('path', [])；过滤 step.get('kind') == 'event' and step.get('depth', 0) == 0 and str(step.get('message', '')).startswith('Calling ')。
+# 表达式分流：call_line <= len(call_lines)；真值与假值分支分别计算，不同时执行。
+# 集合派生：i 来自 range(max(0, call_line - 1 - context_lines), min(len(call_lines), call_line + context_lines))。
+# 表达式分流：build_context is not None；真值与假值分支分别计算，不同时执行。
+# 表达式分流：len(failures) == len(targets)；真值与假值分支分别计算，不同时执行。
+# 表达式分流：failures；真值与假值分支分别计算，不同时执行。
+# 集合派生：f 来自 failures。
+# 表达式分流：described['source'] != 'default'；真值与假值分支分别计算，不同时执行。
+# 集合派生：f 来自 failures；过滤 'file not found' in f['message']。
+# [/maint-note:2df4fd6312fd]
 def clang_scan(files: list[str], project_dir: str, context_lines: int, timeout_seconds: int = 120,
                build_context=None):
     """Opt-in comprehensive profile. Never compile/link/run the target program.
@@ -186,6 +432,17 @@ def clang_scan(files: list[str], project_dir: str, context_lines: int, timeout_s
     deadline = time.monotonic() + timeout_seconds
     sources = [t for t in targets if t.suffix.lower() in {".c", ".cc", ".cpp", ".cxx"}]
 
+    # [maint-note:da8f39f71aeb]
+    # 维护导航：flags_of；下列为本函数源码中的接口与路径索引。
+    # 输入 path：Path。
+    # 返回契约：tuple[str, ...]。
+    # 返回路径：tuple(build_context.flags_for(path.relative_to(root).as_posix())) if build_context is not None else ()。
+    # 直接调用：tuple。
+    # 直接调用：build_context.flags_for。
+    # 直接调用：path.relative_to(root).as_posix。
+    # 直接调用：path.relative_to。
+    # 表达式分流：build_context is not None；真值与假值分支分别计算，不同时执行。
+    # [/maint-note:da8f39f71aeb]
     def flags_of(path: Path) -> tuple[str, ...]:
         return tuple(build_context.flags_for(path.relative_to(root).as_posix())) if build_context is not None else ()
 
@@ -282,6 +539,44 @@ def clang_scan(files: list[str], project_dir: str, context_lines: int, timeout_s
     return findings, report
 
 
+# [maint-note:a130ee2d277f]
+# 数据来源：这里只读取用户提供的运行日志，不自行运行 TSan。
+# 日志中的运行时错误应标为 failed，不能当作零竞争的成功结果。
+# 只接受工作区内的源栈帧，运行库帧不作为业务缺陷位置。
+# 未匹配到源位置的竞争块计入 unmatched_race_blocks。
+# 日志未验证来源版本和真实性；无告警也不是无线程竞争的证明。
+# 维护导航：import_tsan_report；下列为本函数源码中的接口与路径索引。
+# 输入 project_dir：str。
+# 输入 report_path：str。
+# 分支条件：path.stat().st_size > 2000000。
+# 分支条件：re.search('FATAL: ThreadSanitizer|ThreadSanitizer: (?:CHECK failed|unexpected memory mapping)', text)。
+# 分支条件：not match。
+# 遍历边界：block ← text.split('WARNING: ThreadSanitizer: data race')[1:]。
+# 遍历边界：frame ← block.splitlines()。
+# 返回路径：([], {'engine': 'tsan-import', 'status': 'failed', 'message': 'ThreadSanitizer runtime failed; this log is not a clean race test.', 'diagnostics': text[-2000:]})。
+# 返回路径：(findings, {'engine': 'tsan-import', 'status': 'partial' if warnings > len(findings) else 'imported', 'findings': len(findings), 'unmatched_race_blocks': warnings - len(findings), 'limitations': 'Only imported logs are inspected. No instrum。
+# 显式抛出：ValueError('sanitizer report exceeds 2 MB')。
+# 捕获异常：ValueError。
+# 直接调用：Path(project_dir).resolve。
+# 直接调用：Path。
+# 直接调用：(root / report_path).resolve。
+# 直接调用：path.relative_to。
+# 直接调用：path.stat。
+# 直接调用：ValueError。
+# 直接调用：path.read_text。
+# 直接调用：re.search。
+# 直接调用：text.split。
+# 直接调用：block.splitlines。
+# 直接调用：(root / match[1]).resolve。
+# 直接调用：source.relative_to(root).as_posix。
+# 直接调用：source.relative_to。
+# 直接调用：findings.append。
+# 直接调用：int。
+# 直接调用：frame.strip。
+# 直接调用：text.count。
+# 直接调用：len。
+# 表达式分流：warnings > len(findings)；真值与假值分支分别计算，不同时执行。
+# [/maint-note:a130ee2d277f]
 def import_tsan_report(project_dir: str, report_path: str):
     root = Path(project_dir).resolve()
     path = (root / report_path).resolve()

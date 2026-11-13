@@ -1,10 +1,11 @@
 {
   "schema_version": 1,
+  "dataset_revision": "teaching-v2-20261113",
   "scan_type": "frequent_defects",
   "source_sha256": {
-    "contract3_independent_hard_web_array_oob.c": "55cb6869eb9645360c9d71fa1b782033f2763d03091e47dbb77841641beb4508",
-    "contract3_independent_hard_web_string_overflow.c": "29593f48f1947f44ae051719181d531ac6152e76cbc6cdfa16ed5020990f6450",
-    "contract3_independent_hard_web_null_pointer.c": "814c1dc01deb152fe4c852de01c355dbb3c2905ed63f8dd4d89ac01c55228324"
+    "contract3_independent_hard_web_array_oob.c": "59062124022a007179ce85a2eb42c3bd141683ce8cf1858b2c9fdc13e5b4bd88",
+    "contract3_independent_hard_web_string_overflow.c": "5cde447e58ff9284a75e4deb71b9ff2b1ba4f362e228b3033799bf900a7ed84b",
+    "contract3_independent_hard_web_null_pointer.c": "64db96dd6f9d005b642a896e5d12d1d8e5ee441d5a4af20c196bd803ffedc271"
   },
   "cases": [
     {
@@ -15,10 +16,10 @@
       "line_start": 12,
       "line_end": 18,
       "expected": "defect",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 17,
-      "defect_code": "return values[index];"
+      "defect_line": 16,
+      "defect_code": "for (int index = 3; index >= 0; --index) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-20",
@@ -26,128 +27,128 @@
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_02",
       "line_start": 20,
-      "line_end": 24,
+      "line_end": 25,
       "expected": "defect",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 23,
-      "defect_code": "return values[4];"
+      "defect_line": 24,
+      "defect_code": "return end[0];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-14",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_03",
-      "line_start": 26,
-      "line_end": 31,
+      "line_start": 27,
+      "line_end": 33,
       "expected": "defect",
-      "variant": 3,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 30,
-      "defect_code": "return end[0];"
+      "defect_line": 32,
+      "defect_code": "return values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-03",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_04",
-      "line_start": 33,
-      "line_end": 39,
+      "line_start": 35,
+      "line_end": 41,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 38,
-      "defect_code": "return total;"
+      "defect_line": 39,
+      "defect_code": "for (int index = 0; index <= 3; ++index) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-09",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_05",
-      "line_start": 41,
-      "line_end": 46,
+      "line_start": 43,
+      "line_end": 47,
       "expected": "control",
-      "variant": 3,
+      "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 45,
-      "defect_code": "return end[-1];"
+      "defect_line": 46,
+      "defect_code": "return values[3];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-12",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_06",
-      "line_start": 48,
-      "line_end": 54,
+      "line_start": 49,
+      "line_end": 53,
       "expected": "defect",
-      "variant": 1,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 53,
-      "defect_code": "return total;"
+      "defect_line": 52,
+      "defect_code": "return values[sizeof(values) / sizeof(values[0])];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-18",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_07",
-      "line_start": 56,
-      "line_end": 60,
+      "line_start": 55,
+      "line_end": 61,
       "expected": "defect",
-      "variant": 2,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 59,
-      "defect_code": "return values[sizeof(values) / sizeof(values[0])];"
+      "defect_line": 60,
+      "defect_code": "return values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-11",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_08",
-      "line_start": 62,
-      "line_end": 68,
+      "line_start": 63,
+      "line_end": 69,
       "expected": "control",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
       "defect_line": 67,
-      "defect_code": "return values[index];"
+      "defect_code": "for (int index = 3; index-- > 0;) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-19",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_09",
-      "line_start": 70,
-      "line_end": 75,
+      "line_start": 71,
+      "line_end": 77,
       "expected": "control",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 74,
-      "defect_code": "return end[-1];"
+      "defect_line": 75,
+      "defect_code": "for (int index = 3; index-- > 0;) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-20",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_10",
-      "line_start": 77,
-      "line_end": 81,
+      "line_start": 79,
+      "line_end": 84,
       "expected": "control",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 80,
-      "defect_code": "return values[3];"
+      "defect_line": 83,
+      "defect_code": "return end[-1];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-06",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_11",
-      "line_start": 83,
-      "line_end": 89,
+      "line_start": 86,
+      "line_end": 92,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 88,
+      "defect_line": 91,
       "defect_code": "return values[index];"
     },
     {
@@ -155,64 +156,64 @@
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_12",
-      "line_start": 91,
-      "line_end": 97,
+      "line_start": 94,
+      "line_end": 100,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 96,
-      "defect_code": "return total;"
+      "defect_line": 98,
+      "defect_code": "for (int index = 3; index >= 0; --index) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-09",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_13",
-      "line_start": 99,
-      "line_end": 104,
+      "line_start": 102,
+      "line_end": 106,
       "expected": "defect",
-      "variant": 3,
+      "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 103,
-      "defect_code": "return end[0];"
+      "defect_line": 105,
+      "defect_code": "return values[4];"
     },
     {
       "case_id": "rt_thread-array_oob-control-07",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_14",
-      "line_start": 106,
-      "line_end": 112,
+      "line_start": 108,
+      "line_end": 114,
       "expected": "control",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 111,
-      "defect_code": "return total;"
+      "defect_line": 112,
+      "defect_code": "for (int index = 3; index-- > 0;) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-03",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_15",
-      "line_start": 114,
-      "line_end": 120,
+      "line_start": 116,
+      "line_end": 122,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 119,
-      "defect_code": "return total;"
+      "defect_line": 120,
+      "defect_code": "for (int index = 0; index < 3; ++index) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-05",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_16",
-      "line_start": 122,
-      "line_end": 127,
+      "line_start": 124,
+      "line_end": 129,
       "expected": "defect",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 126,
+      "defect_line": 128,
       "defect_code": "return *cursor;"
     },
     {
@@ -220,12 +221,12 @@
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_17",
-      "line_start": 129,
-      "line_end": 133,
+      "line_start": 131,
+      "line_end": 135,
       "expected": "control",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 132,
+      "defect_line": 134,
       "defect_code": "return values[sizeof(values) / sizeof(values[0]) - 1];"
     },
     {
@@ -233,12 +234,12 @@
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_18",
-      "line_start": 135,
-      "line_end": 139,
+      "line_start": 137,
+      "line_end": 141,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 138,
+      "defect_line": 140,
       "defect_code": "return values[3];"
     },
     {
@@ -246,39 +247,39 @@
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_19",
-      "line_start": 141,
-      "line_end": 145,
+      "line_start": 143,
+      "line_end": 149,
       "expected": "defect",
-      "variant": 4,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 144,
-      "defect_code": "return values[4];"
+      "defect_line": 147,
+      "defect_code": "for (int index = 3; index >= 0; --index) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-16",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_20",
-      "line_start": 147,
-      "line_end": 153,
+      "line_start": 151,
+      "line_end": 155,
       "expected": "defect",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 152,
-      "defect_code": "return values[index];"
+      "defect_line": 154,
+      "defect_code": "return values[sizeof(values) / sizeof(values[0])];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-17",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_21",
-      "line_start": 155,
+      "line_start": 157,
       "line_end": 161,
       "expected": "defect",
-      "variant": 1,
+      "variant": 4,
       "variant_kind": "hard",
       "defect_line": 160,
-      "defect_code": "return total;"
+      "defect_code": "return values[4];"
     },
     {
       "case_id": "rt_thread-array_oob-control-12",
@@ -286,25 +287,25 @@
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_22",
       "line_start": 163,
-      "line_end": 169,
+      "line_end": 167,
       "expected": "control",
-      "variant": 1,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 168,
-      "defect_code": "return total;"
+      "defect_line": 166,
+      "defect_code": "return values[sizeof(values) / sizeof(values[0]) - 1];"
     },
     {
       "case_id": "rt_thread-array_oob-control-15",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_23",
-      "line_start": 171,
+      "line_start": 169,
       "line_end": 175,
       "expected": "control",
-      "variant": 4,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 174,
-      "defect_code": "return values[3];"
+      "defect_line": 173,
+      "defect_code": "for (int index = 3; index-- > 0;) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-04",
@@ -351,63 +352,63 @@
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_27",
       "line_start": 199,
-      "line_end": 204,
+      "line_end": 205,
       "expected": "defect",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
       "defect_line": 203,
-      "defect_code": "return end[0];"
+      "defect_code": "for (int index = 3; index >= 0; --index) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-13",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_28",
-      "line_start": 206,
-      "line_end": 210,
+      "line_start": 207,
+      "line_end": 211,
       "expected": "control",
-      "variant": 2,
+      "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 209,
-      "defect_code": "return values[sizeof(values) / sizeof(values[0]) - 1];"
+      "defect_line": 210,
+      "defect_code": "return values[3];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-10",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_29",
-      "line_start": 212,
-      "line_end": 216,
+      "line_start": 213,
+      "line_end": 219,
       "expected": "defect",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 215,
-      "defect_code": "return values[4];"
+      "defect_line": 218,
+      "defect_code": "return values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-17",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_30",
-      "line_start": 218,
-      "line_end": 224,
+      "line_start": 221,
+      "line_end": 225,
       "expected": "control",
-      "variant": 1,
+      "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 223,
-      "defect_code": "return total;"
+      "defect_line": 224,
+      "defect_code": "return values[3];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-02",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_31",
-      "line_start": 226,
-      "line_end": 231,
+      "line_start": 227,
+      "line_end": 232,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 230,
+      "defect_line": 231,
       "defect_code": "return values[index];"
     },
     {
@@ -415,26 +416,26 @@
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_32",
-      "line_start": 233,
-      "line_end": 239,
+      "line_start": 234,
+      "line_end": 238,
       "expected": "control",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 238,
-      "defect_code": "return values[index];"
+      "defect_line": 237,
+      "defect_code": "return values[sizeof(values) / sizeof(values[0]) - 1];"
     },
     {
       "case_id": "rt_thread-array_oob-control-14",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_33",
-      "line_start": 241,
+      "line_start": 240,
       "line_end": 246,
       "expected": "control",
-      "variant": 3,
+      "variant": 0,
       "variant_kind": "hard",
       "defect_line": 245,
-      "defect_code": "return end[-1];"
+      "defect_code": "return values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-10",
@@ -442,37 +443,37 @@
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_34",
       "line_start": 248,
-      "line_end": 252,
+      "line_end": 254,
       "expected": "control",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 251,
-      "defect_code": "return values[3];"
+      "defect_line": 253,
+      "defect_code": "return values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-18",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_35",
-      "line_start": 254,
-      "line_end": 258,
+      "line_start": 256,
+      "line_end": 262,
       "expected": "control",
-      "variant": 2,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 257,
-      "defect_code": "return values[sizeof(values) / sizeof(values[0]) - 1];"
+      "defect_line": 261,
+      "defect_code": "return values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-05",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_36",
-      "line_start": 260,
-      "line_end": 265,
+      "line_start": 264,
+      "line_end": 269,
       "expected": "control",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 264,
+      "defect_line": 268,
       "defect_code": "return *cursor;"
     },
     {
@@ -480,12 +481,12 @@
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_37",
-      "line_start": 267,
-      "line_end": 272,
+      "line_start": 271,
+      "line_end": 276,
       "expected": "defect",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 271,
+      "defect_line": 275,
       "defect_code": "return values[index];"
     },
     {
@@ -493,12 +494,12 @@
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_38",
-      "line_start": 274,
-      "line_end": 278,
+      "line_start": 278,
+      "line_end": 282,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 277,
+      "defect_line": 281,
       "defect_code": "return values[2];"
     },
     {
@@ -506,25 +507,25 @@
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_39",
-      "line_start": 280,
-      "line_end": 284,
+      "line_start": 284,
+      "line_end": 288,
       "expected": "defect",
-      "variant": 2,
+      "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 283,
-      "defect_code": "return values[sizeof(values) / sizeof(values[0])];"
+      "defect_line": 287,
+      "defect_code": "return values[4];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-08",
       "category": "array_oob",
       "file": "contract3_independent_hard_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_40",
-      "line_start": 286,
-      "line_end": 290,
+      "line_start": 290,
+      "line_end": 294,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 289,
+      "defect_line": 293,
       "defect_code": "return values[sizeof(values) / sizeof(values[0])];"
     },
     {
@@ -535,10 +536,10 @@
       "line_start": 12,
       "line_end": 17,
       "expected": "defect",
-      "variant": 1,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 16,
-      "defect_code": "return target[0];"
+      "defect_line": 15,
+      "defect_code": "strncpy(target, \"ABCDEFGH\", 8);"
     },
     {
       "case_id": "rt_thread-string_overflow-control-08",
@@ -550,8 +551,8 @@
       "expected": "control",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 24,
-      "defect_code": "return target[0];"
+      "defect_line": 22,
+      "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
     },
     {
       "case_id": "rt_thread-string_overflow-control-05",
@@ -563,8 +564,8 @@
       "expected": "control",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 31,
-      "defect_code": "return target[0];"
+      "defect_line": 30,
+      "defect_code": "contract3_copy(target, \"ABC\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-10",
@@ -574,10 +575,10 @@
       "line_start": 34,
       "line_end": 39,
       "expected": "defect",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 38,
-      "defect_code": "return target[0];"
+      "defect_line": 37,
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-19",
@@ -587,10 +588,10 @@
       "line_start": 41,
       "line_end": 46,
       "expected": "defect",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 45,
-      "defect_code": "return target[0];"
+      "defect_line": 44,
+      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-06",
@@ -602,8 +603,8 @@
       "expected": "control",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 52,
-      "defect_code": "return target[0];"
+      "defect_line": 51,
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-03",
@@ -615,8 +616,8 @@
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 59,
-      "defect_code": "return target[0];"
+      "defect_line": 58,
+      "defect_code": "strcat(target, \"BC\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-16",
@@ -624,25 +625,25 @@
       "file": "contract3_independent_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_08",
       "line_start": 62,
-      "line_end": 67,
+      "line_end": 68,
       "expected": "control",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 66,
-      "defect_code": "return target[0];"
+      "defect_line": 65,
+      "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
     },
     {
       "case_id": "rt_thread-string_overflow-control-13",
       "category": "string_overflow",
       "file": "contract3_independent_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_09",
-      "line_start": 69,
+      "line_start": 70,
       "line_end": 75,
       "expected": "control",
-      "variant": 2,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 74,
-      "defect_code": "return target[0];"
+      "defect_line": 73,
+      "defect_code": "strcat(target, \"DEFG\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-17",
@@ -652,10 +653,10 @@
       "line_start": 77,
       "line_end": 82,
       "expected": "control",
-      "variant": 1,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 81,
-      "defect_code": "return target[0];"
+      "defect_line": 80,
+      "defect_code": "strcat(target, \"DEFG\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-09",
@@ -667,8 +668,8 @@
       "expected": "control",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 88,
-      "defect_code": "return target[0];"
+      "defect_line": 87,
+      "defect_code": "strcat(target, \"DEFG\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-07",
@@ -680,8 +681,8 @@
       "expected": "defect",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 95,
-      "defect_code": "return target[0];"
+      "defect_line": 94,
+      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-11",
@@ -691,10 +692,10 @@
       "line_start": 98,
       "line_end": 103,
       "expected": "defect",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 102,
-      "defect_code": "return target[0];"
+      "defect_line": 101,
+      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-02",
@@ -706,8 +707,8 @@
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 109,
-      "defect_code": "return target[0];"
+      "defect_line": 108,
+      "defect_code": "sprintf(target, \"%s\", \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-04",
@@ -719,8 +720,8 @@
       "expected": "defect",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 116,
-      "defect_code": "return target[0];"
+      "defect_line": 115,
+      "defect_code": "memcpy(target, \"ABCDE\", 6);"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-17",
@@ -730,10 +731,10 @@
       "line_start": 119,
       "line_end": 124,
       "expected": "defect",
-      "variant": 1,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 123,
-      "defect_code": "return target[0];"
+      "defect_line": 122,
+      "defect_code": "strcat(target, \"DEFGH\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-15",
@@ -743,10 +744,10 @@
       "line_start": 126,
       "line_end": 131,
       "expected": "control",
-      "variant": 4,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 130,
-      "defect_code": "return target[0];"
+      "defect_line": 129,
+      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-02",
@@ -758,8 +759,8 @@
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 137,
-      "defect_code": "return target[0];"
+      "defect_line": 136,
+      "defect_code": "sprintf(target, \"%s\", \"ABC\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-04",
@@ -771,8 +772,8 @@
       "expected": "control",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 144,
-      "defect_code": "return target[0];"
+      "defect_line": 143,
+      "defect_code": "memcpy(target, \"ABCDE\", 3);"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-06",
@@ -784,8 +785,8 @@
       "expected": "defect",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 151,
-      "defect_code": "return target[0];"
+      "defect_line": 150,
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-14",
@@ -795,10 +796,10 @@
       "line_start": 154,
       "line_end": 159,
       "expected": "defect",
-      "variant": 3,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 158,
-      "defect_code": "return target[0];"
+      "defect_line": 157,
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-13",
@@ -808,10 +809,10 @@
       "line_start": 161,
       "line_end": 166,
       "expected": "defect",
-      "variant": 2,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 165,
-      "defect_code": "return target[0];"
+      "defect_line": 164,
+      "defect_code": "strcat(target, \"DEFGH\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-20",
@@ -823,8 +824,8 @@
       "expected": "defect",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 172,
-      "defect_code": "return target[0];"
+      "defect_line": 171,
+      "defect_code": "memcpy(target, \"ABCDE\", sizeof(\"ABCDE\"));"
     },
     {
       "case_id": "rt_thread-string_overflow-control-19",
@@ -834,10 +835,10 @@
       "line_start": 175,
       "line_end": 180,
       "expected": "control",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 179,
-      "defect_code": "return target[0];"
+      "defect_line": 178,
+      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-09",
@@ -849,8 +850,8 @@
       "expected": "defect",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 186,
-      "defect_code": "return target[0];"
+      "defect_line": 185,
+      "defect_code": "strcat(target, \"DEFGH\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-01",
@@ -862,8 +863,8 @@
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 193,
-      "defect_code": "return target[0];"
+      "defect_line": 192,
+      "defect_code": "strcpy(target, \"ABC\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-18",
@@ -873,10 +874,10 @@
       "line_start": 196,
       "line_end": 201,
       "expected": "defect",
-      "variant": 2,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 200,
-      "defect_code": "return target[0];"
+      "defect_line": 199,
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-20",
@@ -888,8 +889,8 @@
       "expected": "control",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 207,
-      "defect_code": "return target[0];"
+      "defect_line": 206,
+      "defect_code": "memcpy(target, \"ABCDE\", sizeof(target));"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-01",
@@ -901,8 +902,8 @@
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 214,
-      "defect_code": "return target[0];"
+      "defect_line": 213,
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-16",
@@ -912,10 +913,10 @@
       "line_start": 217,
       "line_end": 222,
       "expected": "defect",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 221,
-      "defect_code": "return target[0];"
+      "defect_line": 220,
+      "defect_code": "strncpy(target, \"ABCDEFGH\", 8);"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-08",
@@ -927,8 +928,8 @@
       "expected": "defect",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 228,
-      "defect_code": "return target[0];"
+      "defect_line": 227,
+      "defect_code": "strncpy(target, \"ABCDEFGH\", 8);"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-05",
@@ -940,8 +941,8 @@
       "expected": "defect",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 235,
-      "defect_code": "return target[0];"
+      "defect_line": 234,
+      "defect_code": "contract3_copy(target, \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-15",
@@ -951,10 +952,10 @@
       "line_start": 238,
       "line_end": 243,
       "expected": "defect",
-      "variant": 4,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 242,
-      "defect_code": "return target[0];"
+      "defect_line": 241,
+      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-10",
@@ -964,10 +965,10 @@
       "line_start": 245,
       "line_end": 250,
       "expected": "control",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 249,
-      "defect_code": "return target[0];"
+      "defect_line": 248,
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-11",
@@ -977,10 +978,10 @@
       "line_start": 252,
       "line_end": 257,
       "expected": "control",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 256,
-      "defect_code": "return target[0];"
+      "defect_line": 255,
+      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-14",
@@ -990,10 +991,10 @@
       "line_start": 259,
       "line_end": 264,
       "expected": "control",
-      "variant": 3,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 263,
-      "defect_code": "return target[0];"
+      "defect_line": 262,
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-12",
@@ -1001,51 +1002,51 @@
       "file": "contract3_independent_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_37",
       "line_start": 266,
-      "line_end": 271,
+      "line_end": 272,
       "expected": "control",
-      "variant": 1,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 270,
-      "defect_code": "return target[0];"
+      "defect_line": 269,
+      "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
     },
     {
       "case_id": "rt_thread-string_overflow-control-07",
       "category": "string_overflow",
       "file": "contract3_independent_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_38",
-      "line_start": 273,
-      "line_end": 278,
+      "line_start": 274,
+      "line_end": 279,
       "expected": "control",
       "variant": 1,
       "variant_kind": "hard",
       "defect_line": 277,
-      "defect_code": "return target[0];"
+      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-03",
       "category": "string_overflow",
       "file": "contract3_independent_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_39",
-      "line_start": 280,
-      "line_end": 285,
+      "line_start": 281,
+      "line_end": 286,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
       "defect_line": 284,
-      "defect_code": "return target[0];"
+      "defect_code": "strcat(target, \"BCDEFGH\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-18",
       "category": "string_overflow",
       "file": "contract3_independent_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_40",
-      "line_start": 287,
+      "line_start": 288,
       "line_end": 293,
       "expected": "control",
-      "variant": 2,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 292,
-      "defect_code": "return target[0];"
+      "defect_line": 291,
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "rt_thread-null_pointer-control-04",
@@ -1053,24 +1054,24 @@
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_01",
       "line_start": 12,
-      "line_end": 17,
+      "line_end": 16,
       "expected": "control",
-      "variant": 3,
+      "variant": 2,
       "variant_kind": "base",
-      "defect_line": 16,
-      "defect_code": "return *box.pointer;"
+      "defect_line": 15,
+      "defect_code": "return contract3_read(&value);"
     },
     {
       "case_id": "rt_thread-null_pointer-positive-09",
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_02",
-      "line_start": 19,
-      "line_end": 24,
+      "line_start": 18,
+      "line_end": 23,
       "expected": "defect",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 23,
+      "defect_line": 22,
       "defect_code": "return *pointer;"
     },
     {
@@ -1078,12 +1079,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_03",
-      "line_start": 26,
-      "line_end": 30,
+      "line_start": 25,
+      "line_end": 29,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 29,
+      "defect_line": 28,
       "defect_code": "return contract3_read(0);"
     },
     {
@@ -1091,12 +1092,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_04",
-      "line_start": 32,
-      "line_end": 38,
+      "line_start": 31,
+      "line_end": 37,
       "expected": "control",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 37,
+      "defect_line": 36,
       "defect_code": "return *box.pointer;"
     },
     {
@@ -1104,12 +1105,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_05",
-      "line_start": 40,
-      "line_end": 45,
+      "line_start": 39,
+      "line_end": 44,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 44,
+      "defect_line": 43,
       "defect_code": "return *pointer;"
     },
     {
@@ -1117,12 +1118,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_06",
-      "line_start": 47,
-      "line_end": 51,
+      "line_start": 46,
+      "line_end": 50,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 50,
+      "defect_line": 49,
       "defect_code": "return *pointer;"
     },
     {
@@ -1130,12 +1131,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_07",
-      "line_start": 53,
-      "line_end": 59,
+      "line_start": 52,
+      "line_end": 58,
       "expected": "control",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 58,
+      "defect_line": 57,
       "defect_code": "return *pointer;"
     },
     {
@@ -1143,12 +1144,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_08",
-      "line_start": 61,
-      "line_end": 67,
+      "line_start": 60,
+      "line_end": 66,
       "expected": "control",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 66,
+      "defect_line": 65,
       "defect_code": "return *pointer;"
     },
     {
@@ -1156,12 +1157,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_09",
-      "line_start": 69,
-      "line_end": 73,
+      "line_start": 68,
+      "line_end": 72,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 72,
+      "defect_line": 71,
       "defect_code": "return contract3_read(&value);"
     },
     {
@@ -1169,12 +1170,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_10",
-      "line_start": 75,
-      "line_end": 81,
+      "line_start": 74,
+      "line_end": 80,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 80,
+      "defect_line": 79,
       "defect_code": "return *pointer;"
     },
     {
@@ -1182,12 +1183,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_11",
-      "line_start": 83,
-      "line_end": 88,
+      "line_start": 82,
+      "line_end": 87,
       "expected": "control",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 87,
+      "defect_line": 86,
       "defect_code": "return pointer ? *pointer : 0;"
     },
     {
@@ -1195,12 +1196,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_12",
-      "line_start": 90,
-      "line_end": 96,
+      "line_start": 89,
+      "line_end": 95,
       "expected": "control",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 95,
+      "defect_line": 94,
       "defect_code": "return *pointer;"
     },
     {
@@ -1208,12 +1209,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_13",
-      "line_start": 98,
-      "line_end": 104,
+      "line_start": 97,
+      "line_end": 103,
       "expected": "control",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 103,
+      "defect_line": 102,
       "defect_code": "return *box.pointer;"
     },
     {
@@ -1221,12 +1222,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_14",
-      "line_start": 106,
-      "line_end": 110,
+      "line_start": 105,
+      "line_end": 109,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 109,
+      "defect_line": 108,
       "defect_code": "return value;"
     },
     {
@@ -1234,12 +1235,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_15",
-      "line_start": 112,
-      "line_end": 117,
+      "line_start": 111,
+      "line_end": 116,
       "expected": "control",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 116,
+      "defect_line": 115,
       "defect_code": "return *pointer;"
     },
     {
@@ -1247,12 +1248,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_16",
-      "line_start": 119,
-      "line_end": 125,
+      "line_start": 118,
+      "line_end": 124,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 124,
+      "defect_line": 123,
       "defect_code": "return *pointer;"
     },
     {
@@ -1260,12 +1261,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_17",
-      "line_start": 127,
-      "line_end": 133,
+      "line_start": 126,
+      "line_end": 132,
       "expected": "control",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 132,
+      "defect_line": 131,
       "defect_code": "return *pointer + value;"
     },
     {
@@ -1273,12 +1274,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_18",
-      "line_start": 135,
-      "line_end": 140,
+      "line_start": 134,
+      "line_end": 139,
       "expected": "control",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 139,
+      "defect_line": 138,
       "defect_code": "return pointer ? *pointer : 0;"
     },
     {
@@ -1286,12 +1287,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_19",
-      "line_start": 142,
-      "line_end": 147,
+      "line_start": 141,
+      "line_end": 146,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 146,
+      "defect_line": 145,
       "defect_code": "return *pointer;"
     },
     {
@@ -1299,25 +1300,25 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_20",
-      "line_start": 149,
-      "line_end": 154,
+      "line_start": 148,
+      "line_end": 152,
       "expected": "defect",
-      "variant": 3,
+      "variant": 2,
       "variant_kind": "base",
-      "defect_line": 153,
-      "defect_code": "return *box.pointer;"
+      "defect_line": 151,
+      "defect_code": "return contract3_read(0);"
     },
     {
       "case_id": "rt_thread-null_pointer-positive-19",
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_21",
-      "line_start": 156,
-      "line_end": 161,
+      "line_start": 154,
+      "line_end": 159,
       "expected": "defect",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 160,
+      "defect_line": 158,
       "defect_code": "return *pointer;"
     },
     {
@@ -1325,12 +1326,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_22",
-      "line_start": 163,
-      "line_end": 168,
+      "line_start": 161,
+      "line_end": 166,
       "expected": "defect",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 167,
+      "defect_line": 165,
       "defect_code": "return *pointer;"
     },
     {
@@ -1338,12 +1339,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_23",
-      "line_start": 170,
-      "line_end": 175,
+      "line_start": 168,
+      "line_end": 173,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 174,
+      "defect_line": 172,
       "defect_code": "return *pointer;"
     },
     {
@@ -1351,12 +1352,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_24",
-      "line_start": 177,
-      "line_end": 183,
+      "line_start": 175,
+      "line_end": 181,
       "expected": "defect",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 182,
+      "defect_line": 180,
       "defect_code": "return *pointer;"
     },
     {
@@ -1364,12 +1365,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_25",
-      "line_start": 185,
-      "line_end": 191,
+      "line_start": 183,
+      "line_end": 189,
       "expected": "control",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 190,
+      "defect_line": 188,
       "defect_code": "return *box.pointer;"
     },
     {
@@ -1377,12 +1378,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_26",
-      "line_start": 193,
-      "line_end": 198,
+      "line_start": 191,
+      "line_end": 196,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 197,
+      "defect_line": 195,
       "defect_code": "return *pointer;"
     },
     {
@@ -1390,12 +1391,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_27",
-      "line_start": 200,
-      "line_end": 206,
+      "line_start": 198,
+      "line_end": 204,
       "expected": "defect",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 205,
+      "defect_line": 203,
       "defect_code": "return *box.pointer;"
     },
     {
@@ -1403,12 +1404,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_28",
-      "line_start": 208,
-      "line_end": 213,
+      "line_start": 206,
+      "line_end": 211,
       "expected": "control",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 212,
+      "defect_line": 210,
       "defect_code": "return *pointer;"
     },
     {
@@ -1416,12 +1417,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_29",
-      "line_start": 215,
-      "line_end": 220,
+      "line_start": 213,
+      "line_end": 218,
       "expected": "control",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 219,
+      "defect_line": 217,
       "defect_code": "return *pointer;"
     },
     {
@@ -1429,12 +1430,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_30",
-      "line_start": 222,
-      "line_end": 228,
+      "line_start": 220,
+      "line_end": 226,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 227,
+      "defect_line": 225,
       "defect_code": "return *pointer;"
     },
     {
@@ -1442,12 +1443,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_31",
-      "line_start": 230,
-      "line_end": 235,
+      "line_start": 228,
+      "line_end": 233,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 234,
+      "defect_line": 232,
       "defect_code": "return *pointer;"
     },
     {
@@ -1455,12 +1456,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_32",
-      "line_start": 237,
-      "line_end": 243,
+      "line_start": 235,
+      "line_end": 241,
       "expected": "control",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 242,
+      "defect_line": 240,
       "defect_code": "return *pointer + value;"
     },
     {
@@ -1468,12 +1469,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_33",
-      "line_start": 245,
-      "line_end": 251,
+      "line_start": 243,
+      "line_end": 249,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 250,
+      "defect_line": 248,
       "defect_code": "return *pointer + value;"
     },
     {
@@ -1481,12 +1482,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_34",
-      "line_start": 253,
-      "line_end": 259,
+      "line_start": 251,
+      "line_end": 257,
       "expected": "control",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 258,
+      "defect_line": 256,
       "defect_code": "return *pointer;"
     },
     {
@@ -1494,12 +1495,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_35",
-      "line_start": 261,
-      "line_end": 267,
+      "line_start": 259,
+      "line_end": 265,
       "expected": "control",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 266,
+      "defect_line": 264,
       "defect_code": "return *pointer + value;"
     },
     {
@@ -1507,12 +1508,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_36",
-      "line_start": 269,
-      "line_end": 274,
+      "line_start": 267,
+      "line_end": 272,
       "expected": "control",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 273,
+      "defect_line": 271,
       "defect_code": "return pointer ? *pointer : 0;"
     },
     {
@@ -1520,12 +1521,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_37",
-      "line_start": 276,
-      "line_end": 282,
+      "line_start": 274,
+      "line_end": 280,
       "expected": "defect",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 281,
+      "defect_line": 279,
       "defect_code": "return *box.pointer;"
     },
     {
@@ -1533,12 +1534,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_38",
-      "line_start": 284,
-      "line_end": 290,
+      "line_start": 282,
+      "line_end": 288,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 289,
+      "defect_line": 287,
       "defect_code": "return *pointer + value;"
     },
     {
@@ -1546,12 +1547,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_39",
-      "line_start": 292,
-      "line_end": 298,
+      "line_start": 290,
+      "line_end": 296,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 297,
+      "defect_line": 295,
       "defect_code": "return *pointer + value;"
     },
     {
@@ -1559,12 +1560,12 @@
       "category": "null_pointer",
       "file": "contract3_independent_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_40",
-      "line_start": 300,
-      "line_end": 306,
+      "line_start": 298,
+      "line_end": 304,
       "expected": "defect",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 305,
+      "defect_line": 303,
       "defect_code": "return *box.pointer;"
     }
   ],
@@ -1585,27 +1586,27 @@
   },
   "line_totals": {
     "upstream_detection_files": 20545,
-    "fixtures": 892,
-    "all_detection_files": 21437
+    "fixtures": 894,
+    "all_detection_files": 21439
   },
   "fixtures": [
     {
       "path": "contract3_independent_hard_web_array_oob.c",
       "category": "array_oob",
-      "lines": 291,
-      "sha256": "55cb6869eb9645360c9d71fa1b782033f2763d03091e47dbb77841641beb4508"
+      "lines": 295,
+      "sha256": "59062124022a007179ce85a2eb42c3bd141683ce8cf1858b2c9fdc13e5b4bd88"
     },
     {
       "path": "contract3_independent_hard_web_string_overflow.c",
       "category": "string_overflow",
       "lines": 294,
-      "sha256": "29593f48f1947f44ae051719181d531ac6152e76cbc6cdfa16ed5020990f6450"
+      "sha256": "5cde447e58ff9284a75e4deb71b9ff2b1ba4f362e228b3033799bf900a7ed84b"
     },
     {
       "path": "contract3_independent_hard_web_null_pointer.c",
       "category": "null_pointer",
-      "lines": 307,
-      "sha256": "814c1dc01deb152fe4c852de01c355dbb3c2905ed63f8dd4d89ac01c55228324"
+      "lines": 305,
+      "sha256": "64db96dd6f9d005b642a896e5d12d1d8e5ee441d5a4af20c196bd803ffedc271"
     }
   ],
   "detection_files": [
