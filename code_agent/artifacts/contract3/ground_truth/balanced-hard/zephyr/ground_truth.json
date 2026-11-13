@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "dataset_revision": "teaching-v2-20261113",
+  "dataset_revision": "teaching-v3-20261113",
   "scan_type": "frequent_defects",
   "source_sha256": {
-    "contract3_balanced_hard_web_array_oob.c": "2d1ade07e6d2661636c67fa0e0ec5f7243ff13048dbdf0b09d8b52a7b79bafe1",
-    "contract3_balanced_hard_web_string_overflow.c": "d79b1ce94eabfb8503779b1e9050ce541c1812e8258dcfa1da84797022a1fd1b",
-    "contract3_balanced_hard_web_null_pointer.c": "90e6c8b8fa0675f1dea76acf43d005b89444e54e5eb02bd3e2ebc5870ab8c15e"
+    "contract3_balanced_hard_web_array_oob.c": "51d9b7608a053d1ea48ccbdbeeb77726c95fd71154f4abb77a4e4f105b9499c7",
+    "contract3_balanced_hard_web_string_overflow.c": "92f4c5d2d4ec19bc83e2d018129e2c5f74c995b1e16533ddcb20383427ab45fc",
+    "contract3_balanced_hard_web_null_pointer.c": "1699dd87b4acf226c17d55a7e9e38c68f30eb7afa4ea2d18f1bb636ba97e1a0d"
   },
   "cases": [
     {
@@ -328,10 +328,10 @@
       "line_start": 177,
       "line_end": 183,
       "expected": "defect",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 182,
-      "defect_code": "return values[index];"
+      "defect_line": 181,
+      "defect_code": "for (int index = 3; index >= 0; --index) total += values[index];"
     },
     {
       "case_id": "zephyr-array_oob-positive-13",
@@ -354,10 +354,10 @@
       "line_start": 191,
       "line_end": 197,
       "expected": "control",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 196,
-      "defect_code": "return values[index];"
+      "defect_line": 195,
+      "defect_code": "for (int index = 3; index-- > 0;) total += values[index];"
     },
     {
       "case_id": "zephyr-array_oob-control-03",
@@ -549,10 +549,10 @@
       "line_start": 19,
       "line_end": 24,
       "expected": "defect",
-      "variant": 1,
+      "variant": 3,
       "variant_kind": "hard",
       "defect_line": 22,
-      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
+      "defect_code": "strcat(target, \"DEFGH\");"
     },
     {
       "case_id": "zephyr-string_overflow-control-05",
@@ -578,7 +578,7 @@
       "variant": 0,
       "variant_kind": "base",
       "defect_line": 36,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "zephyr-string_overflow-control-16",
@@ -640,10 +640,10 @@
       "line_start": 68,
       "line_end": 73,
       "expected": "control",
-      "variant": 4,
+      "variant": 1,
       "variant_kind": "hard",
       "defect_line": 71,
-      "defect_code": "memcpy(target, \"ABCDE\", sizeof(target));"
+      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "zephyr-string_overflow-positive-11",
@@ -666,10 +666,10 @@
       "line_start": 82,
       "line_end": 87,
       "expected": "control",
-      "variant": 1,
+      "variant": 3,
       "variant_kind": "hard",
       "defect_line": 85,
-      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
+      "defect_code": "strcat(target, \"DEFG\");"
     },
     {
       "case_id": "zephyr-string_overflow-control-14",
@@ -679,10 +679,10 @@
       "line_start": 89,
       "line_end": 94,
       "expected": "control",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
       "defect_line": 92,
-      "defect_code": "strcat(target, \"DEFG\");"
+      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "zephyr-string_overflow-positive-13",
@@ -692,10 +692,10 @@
       "line_start": 96,
       "line_end": 101,
       "expected": "defect",
-      "variant": 2,
+      "variant": 4,
       "variant_kind": "hard",
       "defect_line": 99,
-      "defect_code": "strncpy(target, \"ABCDEFGH\", 8);"
+      "defect_code": "memcpy(target, \"ABCDE\", sizeof(\"ABCDE\"));"
     },
     {
       "case_id": "zephyr-string_overflow-control-09",
@@ -718,10 +718,10 @@
       "line_start": 110,
       "line_end": 115,
       "expected": "control",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
       "defect_line": 113,
-      "defect_code": "strcat(target, \"DEFG\");"
+      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "zephyr-string_overflow-positive-17",
@@ -757,10 +757,10 @@
       "line_start": 131,
       "line_end": 136,
       "expected": "defect",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
       "defect_line": 134,
-      "defect_code": "strcpy(target, \"ABCDE\");"
+      "defect_code": "strncpy(target, \"ABCDEFGH\", 8);"
     },
     {
       "case_id": "zephyr-string_overflow-positive-20",
@@ -770,10 +770,10 @@
       "line_start": 138,
       "line_end": 143,
       "expected": "defect",
-      "variant": 4,
+      "variant": 1,
       "variant_kind": "hard",
       "defect_line": 141,
-      "defect_code": "memcpy(target, \"ABCDE\", sizeof(\"ABCDE\"));"
+      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "zephyr-string_overflow-control-15",
@@ -781,25 +781,25 @@
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_20",
       "line_start": 145,
-      "line_end": 150,
+      "line_end": 151,
       "expected": "control",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
       "defect_line": 148,
-      "defect_code": "strcpy(target, \"ABCDE\");"
+      "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
     },
     {
       "case_id": "zephyr-string_overflow-control-13",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_21",
-      "line_start": 152,
+      "line_start": 153,
       "line_end": 158,
       "expected": "control",
-      "variant": 2,
+      "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 155,
-      "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
+      "defect_line": 156,
+      "defect_code": "memcpy(target, \"ABCDE\", sizeof(target));"
     },
     {
       "case_id": "zephyr-string_overflow-control-06",
@@ -851,7 +851,7 @@
       "variant": 0,
       "variant_kind": "base",
       "defect_line": 184,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "zephyr-string_overflow-control-08",
@@ -898,24 +898,24 @@
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_29",
       "line_start": 209,
-      "line_end": 214,
+      "line_end": 215,
       "expected": "control",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
       "defect_line": 212,
-      "defect_code": "strcpy(target, \"ABCDE\");"
+      "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
     },
     {
       "case_id": "zephyr-string_overflow-positive-04",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_30",
-      "line_start": 216,
-      "line_end": 221,
+      "line_start": 217,
+      "line_end": 222,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 219,
+      "defect_line": 220,
       "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
@@ -923,12 +923,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_31",
-      "line_start": 223,
-      "line_end": 228,
+      "line_start": 224,
+      "line_end": 229,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 226,
+      "defect_line": 227,
       "defect_code": "strcat(target, \"BC\");"
     },
     {
@@ -936,12 +936,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_32",
-      "line_start": 230,
-      "line_end": 236,
+      "line_start": 231,
+      "line_end": 237,
       "expected": "control",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 233,
+      "defect_line": 234,
       "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
     },
     {
@@ -949,25 +949,25 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_33",
-      "line_start": 238,
-      "line_end": 243,
+      "line_start": 239,
+      "line_end": 244,
       "expected": "defect",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 241,
-      "defect_code": "strcat(target, \"DEFGH\");"
+      "defect_line": 242,
+      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "zephyr-string_overflow-positive-03",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_34",
-      "line_start": 245,
-      "line_end": 250,
+      "line_start": 246,
+      "line_end": 251,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 248,
+      "defect_line": 249,
       "defect_code": "strcat(target, \"BCDEFGH\");"
     },
     {
@@ -975,25 +975,25 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_35",
-      "line_start": 252,
-      "line_end": 257,
+      "line_start": 253,
+      "line_end": 258,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 255,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_line": 256,
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "zephyr-string_overflow-positive-02",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_36",
-      "line_start": 259,
-      "line_end": 264,
+      "line_start": 260,
+      "line_end": 265,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 262,
+      "defect_line": 263,
       "defect_code": "sprintf(target, \"%s\", \"ABCDE\");"
     },
     {
@@ -1001,12 +1001,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_37",
-      "line_start": 266,
-      "line_end": 271,
+      "line_start": 267,
+      "line_end": 272,
       "expected": "control",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 269,
+      "defect_line": 270,
       "defect_code": "memcpy(target, \"ABCDE\", 3);"
     },
     {
@@ -1014,38 +1014,38 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_38",
-      "line_start": 273,
-      "line_end": 278,
+      "line_start": 274,
+      "line_end": 279,
       "expected": "defect",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 276,
-      "defect_code": "strcat(target, \"DEFGH\");"
+      "defect_line": 277,
+      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "zephyr-string_overflow-positive-19",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_39",
-      "line_start": 280,
-      "line_end": 285,
+      "line_start": 281,
+      "line_end": 286,
       "expected": "defect",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 283,
-      "defect_code": "strcpy(target, \"ABCDE\");"
+      "defect_line": 284,
+      "defect_code": "strncpy(target, \"ABCDEFGH\", 8);"
     },
     {
       "case_id": "zephyr-string_overflow-control-11",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_40",
-      "line_start": 287,
-      "line_end": 292,
+      "line_start": 288,
+      "line_end": 293,
       "expected": "control",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 290,
+      "defect_line": 291,
       "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
@@ -1054,24 +1054,24 @@
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_01",
       "line_start": 12,
-      "line_end": 18,
+      "line_end": 17,
       "expected": "defect",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 17,
-      "defect_code": "return *pointer;"
+      "defect_line": 16,
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "zephyr-null_pointer-control-04",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_02",
-      "line_start": 20,
-      "line_end": 24,
+      "line_start": 19,
+      "line_end": 23,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 23,
+      "defect_line": 22,
       "defect_code": "return value;"
     },
     {
@@ -1079,13 +1079,13 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_03",
-      "line_start": 26,
+      "line_start": 25,
       "line_end": 31,
       "expected": "control",
-      "variant": 3,
+      "variant": 0,
       "variant_kind": "hard",
       "defect_line": 30,
-      "defect_code": "return *pointer;"
+      "defect_code": "return *pointer + value;"
     },
     {
       "case_id": "zephyr-null_pointer-positive-17",
@@ -1093,11 +1093,11 @@
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_04",
       "line_start": 33,
-      "line_end": 38,
+      "line_end": 39,
       "expected": "defect",
-      "variant": 1,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 37,
+      "defect_line": 38,
       "defect_code": "return *pointer;"
     },
     {
@@ -1105,12 +1105,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_05",
-      "line_start": 40,
-      "line_end": 45,
+      "line_start": 41,
+      "line_end": 47,
       "expected": "defect",
-      "variant": 1,
+      "variant": 4,
       "variant_kind": "base",
-      "defect_line": 44,
+      "defect_line": 46,
       "defect_code": "return *pointer;"
     },
     {
@@ -1118,12 +1118,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_06",
-      "line_start": 47,
-      "line_end": 53,
+      "line_start": 49,
+      "line_end": 55,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 52,
+      "defect_line": 54,
       "defect_code": "return *pointer + value;"
     },
     {
@@ -1131,12 +1131,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_07",
-      "line_start": 55,
-      "line_end": 59,
+      "line_start": 57,
+      "line_end": 61,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 58,
+      "defect_line": 60,
       "defect_code": "return *pointer;"
     },
     {
@@ -1144,25 +1144,25 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_08",
-      "line_start": 61,
-      "line_end": 67,
+      "line_start": 63,
+      "line_end": 68,
       "expected": "defect",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 66,
-      "defect_code": "return *pointer + value;"
+      "defect_line": 67,
+      "defect_code": "return *pointer;"
     },
     {
       "case_id": "zephyr-null_pointer-control-10",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_09",
-      "line_start": 69,
-      "line_end": 73,
+      "line_start": 70,
+      "line_end": 74,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 72,
+      "defect_line": 73,
       "defect_code": "return contract3_read(&value);"
     },
     {
@@ -1170,13 +1170,13 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_10",
-      "line_start": 75,
+      "line_start": 76,
       "line_end": 81,
       "expected": "defect",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "base",
       "defect_line": 80,
-      "defect_code": "return *pointer;"
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "zephyr-null_pointer-control-01",
@@ -1210,24 +1210,24 @@
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_13",
       "line_start": 95,
-      "line_end": 100,
+      "line_end": 101,
       "expected": "control",
-      "variant": 1,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 99,
-      "defect_code": "return pointer ? *pointer : 0;"
+      "defect_line": 100,
+      "defect_code": "return *pointer;"
     },
     {
       "case_id": "zephyr-null_pointer-positive-13",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_14",
-      "line_start": 102,
-      "line_end": 108,
+      "line_start": 103,
+      "line_end": 109,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 107,
+      "defect_line": 108,
       "defect_code": "return *pointer;"
     },
     {
@@ -1235,12 +1235,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_15",
-      "line_start": 110,
-      "line_end": 114,
+      "line_start": 111,
+      "line_end": 115,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 113,
+      "defect_line": 114,
       "defect_code": "return contract3_read(0);"
     },
     {
@@ -1248,12 +1248,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_16",
-      "line_start": 116,
-      "line_end": 121,
+      "line_start": 117,
+      "line_end": 122,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 120,
+      "defect_line": 121,
       "defect_code": "return *pointer;"
     },
     {
@@ -1261,12 +1261,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_17",
-      "line_start": 123,
-      "line_end": 128,
+      "line_start": 124,
+      "line_end": 129,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 127,
+      "defect_line": 128,
       "defect_code": "return *pointer;"
     },
     {
@@ -1274,25 +1274,25 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_18",
-      "line_start": 130,
-      "line_end": 136,
+      "line_start": 131,
+      "line_end": 137,
       "expected": "control",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 135,
-      "defect_code": "return *box.pointer;"
+      "defect_line": 136,
+      "defect_code": "return *pointer + value;"
     },
     {
       "case_id": "zephyr-null_pointer-control-11",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_19",
-      "line_start": 138,
-      "line_end": 144,
+      "line_start": 139,
+      "line_end": 145,
       "expected": "control",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 143,
+      "defect_line": 144,
       "defect_code": "return *pointer + value;"
     },
     {
@@ -1300,12 +1300,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_20",
-      "line_start": 146,
-      "line_end": 151,
+      "line_start": 147,
+      "line_end": 152,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 150,
+      "defect_line": 151,
       "defect_code": "return *pointer;"
     },
     {
@@ -1313,12 +1313,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_21",
-      "line_start": 153,
-      "line_end": 158,
+      "line_start": 154,
+      "line_end": 159,
       "expected": "defect",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 157,
+      "defect_line": 158,
       "defect_code": "return *pointer;"
     },
     {
@@ -1326,13 +1326,13 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_22",
-      "line_start": 160,
+      "line_start": 161,
       "line_end": 166,
       "expected": "control",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
       "defect_line": 165,
-      "defect_code": "return *pointer + value;"
+      "defect_code": "return pointer ? *pointer : 0;"
     },
     {
       "case_id": "zephyr-null_pointer-control-13",
@@ -1379,11 +1379,11 @@
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_26",
       "line_start": 191,
-      "line_end": 196,
+      "line_end": 197,
       "expected": "control",
-      "variant": 1,
+      "variant": 4,
       "variant_kind": "base",
-      "defect_line": 195,
+      "defect_line": 196,
       "defect_code": "return *pointer;"
     },
     {
@@ -1391,12 +1391,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_27",
-      "line_start": 198,
-      "line_end": 203,
+      "line_start": 199,
+      "line_end": 204,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 202,
+      "defect_line": 203,
       "defect_code": "return *pointer;"
     },
     {
@@ -1404,12 +1404,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_28",
-      "line_start": 205,
-      "line_end": 209,
+      "line_start": 206,
+      "line_end": 210,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 208,
+      "defect_line": 209,
       "defect_code": "return *pointer;"
     },
     {
@@ -1417,13 +1417,13 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_29",
-      "line_start": 211,
+      "line_start": 212,
       "line_end": 217,
       "expected": "control",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "base",
       "defect_line": 216,
-      "defect_code": "return *pointer;"
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "zephyr-null_pointer-control-14",
@@ -1457,11 +1457,11 @@
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_32",
       "line_start": 233,
-      "line_end": 239,
+      "line_end": 238,
       "expected": "control",
-      "variant": 2,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 238,
+      "defect_line": 237,
       "defect_code": "return *pointer;"
     },
     {
@@ -1469,12 +1469,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_33",
-      "line_start": 241,
-      "line_end": 245,
+      "line_start": 240,
+      "line_end": 244,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 244,
+      "defect_line": 243,
       "defect_code": "return value;"
     },
     {
@@ -1482,38 +1482,38 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_34",
-      "line_start": 247,
-      "line_end": 253,
+      "line_start": 246,
+      "line_end": 252,
       "expected": "defect",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 252,
-      "defect_code": "return *box.pointer;"
+      "defect_line": 251,
+      "defect_code": "return *pointer + value;"
     },
     {
       "case_id": "zephyr-null_pointer-control-03",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_35",
-      "line_start": 255,
-      "line_end": 261,
+      "line_start": 254,
+      "line_end": 259,
       "expected": "control",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 260,
-      "defect_code": "return *pointer;"
+      "defect_line": 258,
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "zephyr-null_pointer-control-09",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_36",
-      "line_start": 263,
-      "line_end": 267,
+      "line_start": 261,
+      "line_end": 265,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 266,
+      "defect_line": 264,
       "defect_code": "return contract3_read(&value);"
     },
     {
@@ -1521,12 +1521,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_37",
-      "line_start": 269,
-      "line_end": 275,
+      "line_start": 267,
+      "line_end": 272,
       "expected": "defect",
-      "variant": 2,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 274,
+      "defect_line": 271,
       "defect_code": "return *pointer;"
     },
     {
@@ -1534,12 +1534,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_38",
-      "line_start": 277,
-      "line_end": 281,
+      "line_start": 274,
+      "line_end": 278,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 280,
+      "defect_line": 277,
       "defect_code": "return contract3_read(0);"
     },
     {
@@ -1547,25 +1547,25 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_39",
-      "line_start": 283,
-      "line_end": 288,
+      "line_start": 280,
+      "line_end": 286,
       "expected": "defect",
-      "variant": 3,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 287,
-      "defect_code": "return *pointer;"
+      "defect_line": 285,
+      "defect_code": "return *pointer + value;"
     },
     {
       "case_id": "zephyr-null_pointer-control-20",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_40",
-      "line_start": 290,
-      "line_end": 296,
+      "line_start": 288,
+      "line_end": 294,
       "expected": "control",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 295,
+      "defect_line": 293,
       "defect_code": "return *box.pointer;"
     }
   ],
@@ -1586,27 +1586,27 @@
   },
   "line_totals": {
     "upstream_detection_files": 17050,
-    "fixtures": 881,
-    "all_detection_files": 17931
+    "fixtures": 880,
+    "all_detection_files": 17930
   },
   "fixtures": [
     {
       "path": "contract3_balanced_hard_web_array_oob.c",
       "category": "array_oob",
       "lines": 291,
-      "sha256": "2d1ade07e6d2661636c67fa0e0ec5f7243ff13048dbdf0b09d8b52a7b79bafe1"
+      "sha256": "51d9b7608a053d1ea48ccbdbeeb77726c95fd71154f4abb77a4e4f105b9499c7"
     },
     {
       "path": "contract3_balanced_hard_web_string_overflow.c",
       "category": "string_overflow",
-      "lines": 293,
-      "sha256": "d79b1ce94eabfb8503779b1e9050ce541c1812e8258dcfa1da84797022a1fd1b"
+      "lines": 294,
+      "sha256": "92f4c5d2d4ec19bc83e2d018129e2c5f74c995b1e16533ddcb20383427ab45fc"
     },
     {
       "path": "contract3_balanced_hard_web_null_pointer.c",
       "category": "null_pointer",
-      "lines": 297,
-      "sha256": "90e6c8b8fa0675f1dea76acf43d005b89444e54e5eb02bd3e2ebc5870ab8c15e"
+      "lines": 295,
+      "sha256": "1699dd87b4acf226c17d55a7e9e38c68f30eb7afa4ea2d18f1bb636ba97e1a0d"
     }
   ],
   "detection_files": [

@@ -115,7 +115,7 @@ static int contract3_independent_string_overflow_case_15(void)
 
 static int contract3_independent_string_overflow_case_16(void)
 {
-    char target[4] = {0};
+    char target[5] = {0};
     strcpy(target, "ABCDE");
     return target[0];
 }
@@ -151,7 +151,7 @@ static int contract3_independent_string_overflow_case_20(void)
 static int contract3_independent_string_overflow_case_21(void)
 {
     char target[4] = {0};
-    strcpy(target, "ABC");
+    strcpy(target, "AB");
     return target[0];
 }
 
@@ -172,7 +172,7 @@ static int contract3_independent_string_overflow_case_23(void)
 static int contract3_independent_string_overflow_case_24(void)
 {
     char target[4] = {0};
-    strcpy(target, "ABC");
+    strcpy(target, "AB");
     return target[0];
 }
 
@@ -193,7 +193,7 @@ static int contract3_independent_string_overflow_case_26(void)
 static int contract3_independent_string_overflow_case_27(void)
 {
     char target[4] = {0};
-    strcpy(target, "ABC");
+    strcpy(target, "AB");
     return target[0];
 }
 
@@ -214,7 +214,7 @@ static int contract3_independent_string_overflow_case_29(void)
 static int contract3_independent_string_overflow_case_30(void)
 {
     char target[4] = {0};
-    strcpy(target, "ABC");
+    strcpy(target, "AB");
     return target[0];
 }
 
@@ -235,7 +235,7 @@ static int contract3_independent_string_overflow_case_32(void)
 static int contract3_independent_string_overflow_case_33(void)
 {
     char target[4] = {0};
-    strcpy(target, "ABC");
+    strcpy(target, "AB");
     return target[0];
 }
 
@@ -255,8 +255,8 @@ static int contract3_independent_string_overflow_case_35(void)
 
 static int contract3_independent_string_overflow_case_36(void)
 {
-    char target[4] = {0};
-    strcpy(target, "ABC");
+    char target[6] = {0};
+    strcpy(target, "ABCDE");
     return target[0];
 }
 

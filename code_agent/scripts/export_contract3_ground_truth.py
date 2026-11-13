@@ -42,6 +42,8 @@ SUITE_NAMES = {"balanced": "平衡验收集", "independent": "独立压力集",
 CATEGORY_NAMES = {"array_oob": "数组越界", "string_overflow": "字符串溢出", "null_pointer": "空指针调用"}
 # What each injected form tests; the code itself comes from the generator below.
 FORMS = {
+    ("array_oob", "base", 5): "边界守卫：正例 > 漏拦截，对照 >= 提前返回",
+    ("string_overflow", "base", 5): "字符串含 NUL：正例少一字节，对照刚好容纳",
     ("array_oob", "base", 0): "常量下标越界：`values[3]` 访问 3 元素数组",
     ("array_oob", "base", 1): "下标经局部变量传入后越界",
     ("array_oob", "base", 2): "循环边界写成 `<=`，最后一轮越界",
@@ -127,7 +129,7 @@ def render_listing(results: list[dict[str, Any]]) -> str:
         "### 1.2 检出率读取口径", "",
         "本清单记录真值，不记录检出率。旧版题集和旧配置 A/C/E/F 关闭时，平衡集字符串检出 13/20（65%），",
         "平衡加难和压力加难各为 15/20（75%）；对应总体是 88.3%、91.7%、91.7%。总体超过 85% 不代表每类超过 85%。",
-        "新版形态配比与 A/B/C/E/F/G 教学配置的逐类实测见 [难度指南](合同-3-静态分析难度调节指南.md)。完整规则是参考答案；静态实测与历史 Web 模型结果分开记录。", "",
+        "新版形态配比与 A/B/C/E/F/G/H/I 教学配置的逐类实测见 [难度指南](合同-3-静态分析难度调节指南.md)。完整规则是参考答案；静态实测与历史 Web 模型结果分开记录。", "",
         "## 2. 缺陷写法（正例与对照）", "",
         "“正例代码”与“对照代码”是注入函数的函数体；对照与正例写法相近，但实际安全。"
         "`base-N` 用于平衡集、压力集，加难版另加 `hard-N`（差一错误与看似危险的安全写法）。", "",
@@ -135,7 +137,7 @@ def render_listing(results: list[dict[str, Any]]) -> str:
     for category, name in CATEGORY_NAMES.items():
         lines += [f"### {name}（`{category}`）", "", "| 写法 | 测试点 | 正例代码 | 对照代码 |", "|---|---|---|---|"]
         for kind in ("base", "hard"):
-            for variant in range(5):
+            for variant in sorted(v for c, k, v in FORMS if c == category and k == kind):
                 lines.append(f"| `{kind}-{variant}` | {FORMS[(category, kind, variant)]} | "
                              f"{cell(form_code(category, kind, variant, True))} | {cell(form_code(category, kind, variant, False))} |")
         lines.append("")

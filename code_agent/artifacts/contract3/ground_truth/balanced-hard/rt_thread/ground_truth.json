@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "dataset_revision": "teaching-v2-20261113",
+  "dataset_revision": "teaching-v3-20261113",
   "scan_type": "frequent_defects",
   "source_sha256": {
-    "contract3_balanced_hard_web_array_oob.c": "97f7d275a5cb3154bf850bd9dc23f416e20e7155678f56530e52bcd2e03d251f",
-    "contract3_balanced_hard_web_string_overflow.c": "a5fd319bc0d3118329e67c83a675945f17f58839e24154b5f58da59da6bcff85",
-    "contract3_balanced_hard_web_null_pointer.c": "dc6dd1eed6328f240746a955fd866cfa8b8108002eb6ddbf22e93e2b6b8a3a4c"
+    "contract3_balanced_hard_web_array_oob.c": "ae48f76498ef409e88f28ac0e363f40f63824388fc129acc4b8479b7c58541ec",
+    "contract3_balanced_hard_web_string_overflow.c": "8a04d64f4ad59d9098617c344af0a9596cfacbd353593dbbcf8a244b961c48de",
+    "contract3_balanced_hard_web_null_pointer.c": "c450c098a3936ae5d4775334e360273d4e54a5dc4a79bdb9a192f419238808a0"
   },
   "cases": [
     {
@@ -68,10 +68,10 @@
       "line_start": 39,
       "line_end": 45,
       "expected": "control",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 44,
-      "defect_code": "return values[index];"
+      "defect_line": 43,
+      "defect_code": "for (int index = 3; index-- > 0;) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-positive-07",
@@ -328,10 +328,10 @@
       "line_start": 179,
       "line_end": 185,
       "expected": "defect",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 184,
-      "defect_code": "return values[index];"
+      "defect_line": 183,
+      "defect_code": "for (int index = 3; index >= 0; --index) total += values[index];"
     },
     {
       "case_id": "rt_thread-array_oob-control-18",
@@ -536,10 +536,10 @@
       "line_start": 12,
       "line_end": 17,
       "expected": "control",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
       "defect_line": 15,
-      "defect_code": "strcat(target, \"DEFG\");"
+      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-02",
@@ -562,10 +562,10 @@
       "line_start": 26,
       "line_end": 31,
       "expected": "defect",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
       "defect_line": 29,
-      "defect_code": "strcpy(target, \"ABCDE\");"
+      "defect_code": "strncpy(target, \"ABCDEFGH\", 8);"
     },
     {
       "case_id": "rt_thread-string_overflow-control-03",
@@ -586,24 +586,24 @@
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_05",
       "line_start": 40,
-      "line_end": 45,
+      "line_end": 46,
       "expected": "control",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
       "defect_line": 43,
-      "defect_code": "strcpy(target, \"ABCDE\");"
+      "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-05",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_06",
-      "line_start": 47,
-      "line_end": 52,
+      "line_start": 48,
+      "line_end": 53,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 50,
+      "defect_line": 51,
       "defect_code": "sprintf(target, \"%s\", \"ABCDE\");"
     },
     {
@@ -611,12 +611,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_07",
-      "line_start": 54,
-      "line_end": 59,
+      "line_start": 55,
+      "line_end": 60,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 57,
+      "defect_line": 58,
       "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
@@ -624,25 +624,25 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_08",
-      "line_start": 61,
-      "line_end": 66,
+      "line_start": 62,
+      "line_end": 67,
       "expected": "control",
-      "variant": 1,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 64,
-      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
+      "defect_line": 65,
+      "defect_code": "strcat(target, \"DEFG\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-11",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_09",
-      "line_start": 68,
-      "line_end": 73,
+      "line_start": 69,
+      "line_end": 74,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 71,
+      "defect_line": 72,
       "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
@@ -650,12 +650,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_10",
-      "line_start": 75,
-      "line_end": 80,
+      "line_start": 76,
+      "line_end": 81,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 78,
+      "defect_line": 79,
       "defect_code": "strcat(target, \"BC\");"
     },
     {
@@ -663,12 +663,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_11",
-      "line_start": 82,
-      "line_end": 87,
+      "line_start": 83,
+      "line_end": 88,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 85,
+      "defect_line": 86,
       "defect_code": "strcat(target, \"BC\");"
     },
     {
@@ -676,39 +676,39 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_12",
-      "line_start": 89,
-      "line_end": 94,
+      "line_start": 90,
+      "line_end": 95,
       "expected": "control",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 92,
-      "defect_code": "strcat(target, \"DEFG\");"
+      "defect_line": 93,
+      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-14",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_13",
-      "line_start": 96,
-      "line_end": 101,
+      "line_start": 97,
+      "line_end": 102,
       "expected": "defect",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 99,
-      "defect_code": "strcat(target, \"DEFGH\");"
+      "defect_line": 100,
+      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-13",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_14",
-      "line_start": 103,
+      "line_start": 104,
       "line_end": 109,
       "expected": "control",
-      "variant": 2,
+      "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 106,
-      "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
+      "defect_line": 107,
+      "defect_code": "memcpy(target, \"ABCDE\", sizeof(target));"
     },
     {
       "case_id": "rt_thread-string_overflow-control-04",
@@ -721,7 +721,7 @@
       "variant": 0,
       "variant_kind": "base",
       "defect_line": 114,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-17",
@@ -742,24 +742,24 @@
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_17",
       "line_start": 125,
-      "line_end": 130,
+      "line_end": 131,
       "expected": "control",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
       "defect_line": 128,
-      "defect_code": "strcpy(target, \"ABCDE\");"
+      "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
     },
     {
       "case_id": "rt_thread-string_overflow-control-05",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_18",
-      "line_start": 132,
-      "line_end": 137,
+      "line_start": 133,
+      "line_end": 138,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 135,
+      "defect_line": 136,
       "defect_code": "sprintf(target, \"%s\", \"ABC\");"
     },
     {
@@ -767,12 +767,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_19",
-      "line_start": 139,
-      "line_end": 144,
+      "line_start": 140,
+      "line_end": 145,
       "expected": "control",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 142,
+      "defect_line": 143,
       "defect_code": "memcpy(target, \"ABCDE\", 3);"
     },
     {
@@ -780,25 +780,25 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_20",
-      "line_start": 146,
-      "line_end": 151,
+      "line_start": 147,
+      "line_end": 152,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 149,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_line": 150,
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-07",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_21",
-      "line_start": 153,
-      "line_end": 158,
+      "line_start": 154,
+      "line_end": 159,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 156,
+      "defect_line": 157,
       "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
@@ -806,38 +806,38 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_22",
-      "line_start": 160,
-      "line_end": 165,
+      "line_start": 161,
+      "line_end": 166,
       "expected": "defect",
-      "variant": 4,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 163,
-      "defect_code": "memcpy(target, \"ABCDE\", sizeof(\"ABCDE\"));"
+      "defect_line": 164,
+      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-19",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_23",
-      "line_start": 167,
-      "line_end": 172,
+      "line_start": 168,
+      "line_end": 173,
       "expected": "defect",
-      "variant": 0,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 170,
-      "defect_code": "strcpy(target, \"ABCDE\");"
+      "defect_line": 171,
+      "defect_code": "strncpy(target, \"ABCDEFGH\", 8);"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-16",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_24",
-      "line_start": 174,
-      "line_end": 179,
+      "line_start": 175,
+      "line_end": 180,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 177,
+      "defect_line": 178,
       "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
@@ -845,12 +845,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_25",
-      "line_start": 181,
-      "line_end": 187,
+      "line_start": 182,
+      "line_end": 188,
       "expected": "control",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 184,
+      "defect_line": 185,
       "defect_code": "strncpy(target, \"ABCDEFGH\", sizeof(target) - 1);"
     },
     {
@@ -858,12 +858,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_26",
-      "line_start": 189,
-      "line_end": 194,
+      "line_start": 190,
+      "line_end": 195,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 192,
+      "defect_line": 193,
       "defect_code": "strcat(target, \"BCDEFGH\");"
     },
     {
@@ -871,12 +871,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_27",
-      "line_start": 196,
-      "line_end": 201,
+      "line_start": 197,
+      "line_end": 202,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 199,
+      "defect_line": 200,
       "defect_code": "strcat(target, \"BCDEFGH\");"
     },
     {
@@ -884,38 +884,38 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_28",
-      "line_start": 203,
-      "line_end": 208,
+      "line_start": 204,
+      "line_end": 209,
       "expected": "defect",
-      "variant": 1,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 206,
-      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
+      "defect_line": 207,
+      "defect_code": "strcat(target, \"DEFGH\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-01",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_29",
-      "line_start": 210,
-      "line_end": 215,
+      "line_start": 211,
+      "line_end": 216,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 213,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_line": 214,
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-10",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_30",
-      "line_start": 217,
-      "line_end": 222,
+      "line_start": 218,
+      "line_end": 223,
       "expected": "defect",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 220,
+      "defect_line": 221,
       "defect_code": "memcpy(target, \"ABCDE\", 6);"
     },
     {
@@ -923,12 +923,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_31",
-      "line_start": 224,
-      "line_end": 229,
+      "line_start": 225,
+      "line_end": 230,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 227,
+      "defect_line": 228,
       "defect_code": "sprintf(target, \"%s\", \"ABCDE\");"
     },
     {
@@ -936,25 +936,25 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_32",
-      "line_start": 231,
-      "line_end": 236,
+      "line_start": 232,
+      "line_end": 237,
       "expected": "defect",
-      "variant": 2,
+      "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 234,
-      "defect_code": "strncpy(target, \"ABCDEFGH\", 8);"
+      "defect_line": 235,
+      "defect_code": "memcpy(target, \"ABCDE\", sizeof(\"ABCDE\"));"
     },
     {
       "case_id": "rt_thread-string_overflow-control-16",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_33",
-      "line_start": 238,
-      "line_end": 243,
+      "line_start": 239,
+      "line_end": 244,
       "expected": "control",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 241,
+      "defect_line": 242,
       "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
@@ -962,12 +962,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_34",
-      "line_start": 245,
-      "line_end": 250,
+      "line_start": 246,
+      "line_end": 251,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 248,
+      "defect_line": 249,
       "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
@@ -975,25 +975,25 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_35",
-      "line_start": 252,
-      "line_end": 257,
+      "line_start": 253,
+      "line_end": 258,
       "expected": "defect",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 255,
-      "defect_code": "strcat(target, \"DEFGH\");"
+      "defect_line": 256,
+      "defect_code": "snprintf(target, 16, \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-positive-08",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_36",
-      "line_start": 259,
-      "line_end": 264,
+      "line_start": 260,
+      "line_end": 265,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 262,
+      "defect_line": 263,
       "defect_code": "sprintf(target, \"%s\", \"ABCDE\");"
     },
     {
@@ -1001,12 +1001,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_37",
-      "line_start": 266,
-      "line_end": 271,
+      "line_start": 267,
+      "line_end": 272,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 269,
+      "defect_line": 270,
       "defect_code": "sprintf(target, \"%s\", \"ABC\");"
     },
     {
@@ -1014,12 +1014,12 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_38",
-      "line_start": 273,
-      "line_end": 278,
+      "line_start": 274,
+      "line_end": 279,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 276,
+      "defect_line": 277,
       "defect_code": "strcat(target, \"BCDEFGH\");"
     },
     {
@@ -1027,25 +1027,25 @@
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_39",
-      "line_start": 280,
-      "line_end": 285,
+      "line_start": 281,
+      "line_end": 286,
       "expected": "control",
-      "variant": 4,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 283,
-      "defect_code": "memcpy(target, \"ABCDE\", sizeof(target));"
+      "defect_line": 284,
+      "defect_code": "snprintf(target, sizeof(target), \"%s\", \"ABCDEFGHIJ\");"
     },
     {
       "case_id": "rt_thread-string_overflow-control-11",
       "category": "string_overflow",
       "file": "contract3_balanced_hard_web_string_overflow.c",
       "function": "contract3_independent_string_overflow_case_40",
-      "line_start": 287,
-      "line_end": 292,
+      "line_start": 288,
+      "line_end": 293,
       "expected": "control",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 290,
+      "defect_line": 291,
       "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
@@ -1067,25 +1067,25 @@
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_02",
       "line_start": 18,
-      "line_end": 24,
+      "line_end": 23,
       "expected": "control",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 23,
-      "defect_code": "return *pointer;"
+      "defect_line": 22,
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "rt_thread-null_pointer-control-19",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_03",
-      "line_start": 26,
+      "line_start": 25,
       "line_end": 31,
       "expected": "control",
-      "variant": 3,
+      "variant": 0,
       "variant_kind": "hard",
       "defect_line": 30,
-      "defect_code": "return *pointer;"
+      "defect_code": "return *pointer + value;"
     },
     {
       "case_id": "rt_thread-null_pointer-control-08",
@@ -1093,11 +1093,11 @@
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_04",
       "line_start": 33,
-      "line_end": 38,
+      "line_end": 39,
       "expected": "control",
-      "variant": 1,
+      "variant": 4,
       "variant_kind": "base",
-      "defect_line": 37,
+      "defect_line": 38,
       "defect_code": "return *pointer;"
     },
     {
@@ -1105,12 +1105,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_05",
-      "line_start": 40,
-      "line_end": 44,
+      "line_start": 41,
+      "line_end": 45,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 43,
+      "defect_line": 44,
       "defect_code": "return contract3_read(&value);"
     },
     {
@@ -1118,12 +1118,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_06",
-      "line_start": 46,
-      "line_end": 51,
+      "line_start": 47,
+      "line_end": 52,
       "expected": "control",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 50,
+      "defect_line": 51,
       "defect_code": "return pointer ? *pointer : 0;"
     },
     {
@@ -1131,12 +1131,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_07",
-      "line_start": 53,
-      "line_end": 57,
+      "line_start": 54,
+      "line_end": 58,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 56,
+      "defect_line": 57,
       "defect_code": "return value;"
     },
     {
@@ -1144,12 +1144,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_08",
-      "line_start": 59,
-      "line_end": 64,
+      "line_start": 60,
+      "line_end": 66,
       "expected": "defect",
-      "variant": 1,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 63,
+      "defect_line": 65,
       "defect_code": "return *pointer;"
     },
     {
@@ -1157,12 +1157,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_09",
-      "line_start": 66,
-      "line_end": 72,
+      "line_start": 68,
+      "line_end": 74,
       "expected": "control",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 71,
+      "defect_line": 73,
       "defect_code": "return *pointer + value;"
     },
     {
@@ -1170,12 +1170,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_10",
-      "line_start": 74,
-      "line_end": 79,
+      "line_start": 76,
+      "line_end": 81,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 78,
+      "defect_line": 80,
       "defect_code": "return *pointer;"
     },
     {
@@ -1183,12 +1183,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_11",
-      "line_start": 81,
-      "line_end": 85,
+      "line_start": 83,
+      "line_end": 87,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 84,
+      "defect_line": 86,
       "defect_code": "return *pointer;"
     },
     {
@@ -1196,12 +1196,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_12",
-      "line_start": 87,
-      "line_end": 92,
+      "line_start": 89,
+      "line_end": 94,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 91,
+      "defect_line": 93,
       "defect_code": "return *pointer;"
     },
     {
@@ -1209,12 +1209,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_13",
-      "line_start": 94,
-      "line_end": 100,
+      "line_start": 96,
+      "line_end": 101,
       "expected": "defect",
-      "variant": 2,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 99,
+      "defect_line": 100,
       "defect_code": "return *pointer;"
     },
     {
@@ -1222,12 +1222,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_14",
-      "line_start": 102,
-      "line_end": 106,
+      "line_start": 103,
+      "line_end": 107,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 105,
+      "defect_line": 106,
       "defect_code": "return contract3_read(0);"
     },
     {
@@ -1235,12 +1235,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_15",
-      "line_start": 108,
-      "line_end": 112,
+      "line_start": 109,
+      "line_end": 113,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 111,
+      "defect_line": 112,
       "defect_code": "return contract3_read(&value);"
     },
     {
@@ -1248,25 +1248,25 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_16",
-      "line_start": 114,
-      "line_end": 119,
+      "line_start": 115,
+      "line_end": 121,
       "expected": "defect",
-      "variant": 3,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 118,
-      "defect_code": "return *pointer;"
+      "defect_line": 120,
+      "defect_code": "return *pointer + value;"
     },
     {
       "case_id": "rt_thread-null_pointer-positive-11",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_17",
-      "line_start": 121,
-      "line_end": 127,
+      "line_start": 123,
+      "line_end": 129,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 126,
+      "defect_line": 128,
       "defect_code": "return *pointer + value;"
     },
     {
@@ -1274,25 +1274,25 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_18",
-      "line_start": 129,
-      "line_end": 135,
+      "line_start": 131,
+      "line_end": 136,
       "expected": "defect",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 134,
-      "defect_code": "return *pointer;"
+      "defect_line": 135,
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "rt_thread-null_pointer-positive-09",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_19",
-      "line_start": 137,
-      "line_end": 141,
+      "line_start": 138,
+      "line_end": 142,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 140,
+      "defect_line": 141,
       "defect_code": "return contract3_read(0);"
     },
     {
@@ -1300,12 +1300,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_20",
-      "line_start": 143,
-      "line_end": 149,
+      "line_start": 144,
+      "line_end": 150,
       "expected": "control",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 148,
+      "defect_line": 149,
       "defect_code": "return *pointer;"
     },
     {
@@ -1313,12 +1313,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_21",
-      "line_start": 151,
-      "line_end": 156,
+      "line_start": 152,
+      "line_end": 158,
       "expected": "defect",
-      "variant": 1,
+      "variant": 4,
       "variant_kind": "base",
-      "defect_line": 155,
+      "defect_line": 157,
       "defect_code": "return *pointer;"
     },
     {
@@ -1326,12 +1326,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_22",
-      "line_start": 158,
-      "line_end": 163,
+      "line_start": 160,
+      "line_end": 165,
       "expected": "defect",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 162,
+      "defect_line": 164,
       "defect_code": "return *pointer;"
     },
     {
@@ -1339,12 +1339,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_23",
-      "line_start": 165,
-      "line_end": 169,
+      "line_start": 167,
+      "line_end": 171,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 168,
+      "defect_line": 170,
       "defect_code": "return value;"
     },
     {
@@ -1352,12 +1352,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_24",
-      "line_start": 171,
-      "line_end": 177,
+      "line_start": 173,
+      "line_end": 178,
       "expected": "control",
-      "variant": 2,
+      "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 176,
+      "defect_line": 177,
       "defect_code": "return *pointer;"
     },
     {
@@ -1365,13 +1365,13 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_25",
-      "line_start": 179,
+      "line_start": 180,
       "line_end": 185,
       "expected": "defect",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "base",
       "defect_line": 184,
-      "defect_code": "return *pointer;"
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "rt_thread-null_pointer-control-03",
@@ -1379,24 +1379,24 @@
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_26",
       "line_start": 187,
-      "line_end": 193,
+      "line_end": 192,
       "expected": "control",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 192,
-      "defect_code": "return *pointer;"
+      "defect_line": 191,
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "rt_thread-null_pointer-positive-20",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_27",
-      "line_start": 195,
-      "line_end": 201,
+      "line_start": 194,
+      "line_end": 200,
       "expected": "defect",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 200,
+      "defect_line": 199,
       "defect_code": "return *box.pointer;"
     },
     {
@@ -1404,12 +1404,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_28",
-      "line_start": 203,
-      "line_end": 207,
+      "line_start": 202,
+      "line_end": 206,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 206,
+      "defect_line": 205,
       "defect_code": "return value;"
     },
     {
@@ -1417,25 +1417,25 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_29",
-      "line_start": 209,
-      "line_end": 215,
+      "line_start": 208,
+      "line_end": 213,
       "expected": "control",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 214,
-      "defect_code": "return *pointer + value;"
+      "defect_line": 212,
+      "defect_code": "return pointer ? *pointer : 0;"
     },
     {
       "case_id": "rt_thread-null_pointer-control-05",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_30",
-      "line_start": 217,
-      "line_end": 222,
+      "line_start": 215,
+      "line_end": 220,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 221,
+      "defect_line": 219,
       "defect_code": "return *pointer;"
     },
     {
@@ -1443,12 +1443,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_31",
-      "line_start": 224,
-      "line_end": 229,
+      "line_start": 222,
+      "line_end": 227,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 228,
+      "defect_line": 226,
       "defect_code": "return *pointer;"
     },
     {
@@ -1456,12 +1456,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_32",
-      "line_start": 231,
-      "line_end": 235,
+      "line_start": 229,
+      "line_end": 233,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 234,
+      "defect_line": 232,
       "defect_code": "return *pointer;"
     },
     {
@@ -1469,38 +1469,38 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_33",
-      "line_start": 237,
-      "line_end": 243,
+      "line_start": 235,
+      "line_end": 241,
       "expected": "defect",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 242,
-      "defect_code": "return *box.pointer;"
+      "defect_line": 240,
+      "defect_code": "return *pointer + value;"
     },
     {
       "case_id": "rt_thread-null_pointer-positive-16",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_34",
-      "line_start": 245,
-      "line_end": 251,
+      "line_start": 243,
+      "line_end": 248,
       "expected": "defect",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "hard",
-      "defect_line": 250,
-      "defect_code": "return *pointer + value;"
+      "defect_line": 247,
+      "defect_code": "return *pointer;"
     },
     {
       "case_id": "rt_thread-null_pointer-positive-13",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_35",
-      "line_start": 253,
-      "line_end": 259,
+      "line_start": 250,
+      "line_end": 256,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 258,
+      "defect_line": 255,
       "defect_code": "return *pointer;"
     },
     {
@@ -1508,12 +1508,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_36",
-      "line_start": 261,
-      "line_end": 267,
+      "line_start": 258,
+      "line_end": 264,
       "expected": "control",
       "variant": 4,
       "variant_kind": "hard",
-      "defect_line": 266,
+      "defect_line": 263,
       "defect_code": "return *box.pointer;"
     },
     {
@@ -1521,25 +1521,25 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_37",
-      "line_start": 269,
-      "line_end": 275,
+      "line_start": 266,
+      "line_end": 272,
       "expected": "control",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "hard",
-      "defect_line": 274,
-      "defect_code": "return *box.pointer;"
+      "defect_line": 271,
+      "defect_code": "return *pointer + value;"
     },
     {
       "case_id": "rt_thread-null_pointer-positive-02",
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_38",
-      "line_start": 277,
-      "line_end": 282,
+      "line_start": 274,
+      "line_end": 279,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 281,
+      "defect_line": 278,
       "defect_code": "return *pointer;"
     },
     {
@@ -1547,12 +1547,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_39",
-      "line_start": 284,
-      "line_end": 289,
+      "line_start": 281,
+      "line_end": 286,
       "expected": "control",
       "variant": 3,
       "variant_kind": "hard",
-      "defect_line": 288,
+      "defect_line": 285,
       "defect_code": "return *pointer;"
     },
     {
@@ -1560,13 +1560,13 @@
       "category": "null_pointer",
       "file": "contract3_balanced_hard_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_40",
-      "line_start": 291,
-      "line_end": 296,
+      "line_start": 288,
+      "line_end": 294,
       "expected": "control",
-      "variant": 1,
+      "variant": 2,
       "variant_kind": "hard",
-      "defect_line": 295,
-      "defect_code": "return pointer ? *pointer : 0;"
+      "defect_line": 293,
+      "defect_code": "return *pointer;"
     }
   ],
   "suite": "balanced-hard",
@@ -1586,27 +1586,27 @@
   },
   "line_totals": {
     "upstream_detection_files": 20545,
-    "fixtures": 881,
-    "all_detection_files": 21426
+    "fixtures": 880,
+    "all_detection_files": 21425
   },
   "fixtures": [
     {
       "path": "contract3_balanced_hard_web_array_oob.c",
       "category": "array_oob",
       "lines": 291,
-      "sha256": "97f7d275a5cb3154bf850bd9dc23f416e20e7155678f56530e52bcd2e03d251f"
+      "sha256": "ae48f76498ef409e88f28ac0e363f40f63824388fc129acc4b8479b7c58541ec"
     },
     {
       "path": "contract3_balanced_hard_web_string_overflow.c",
       "category": "string_overflow",
-      "lines": 293,
-      "sha256": "a5fd319bc0d3118329e67c83a675945f17f58839e24154b5f58da59da6bcff85"
+      "lines": 294,
+      "sha256": "8a04d64f4ad59d9098617c344af0a9596cfacbd353593dbbcf8a244b961c48de"
     },
     {
       "path": "contract3_balanced_hard_web_null_pointer.c",
       "category": "null_pointer",
-      "lines": 297,
-      "sha256": "dc6dd1eed6328f240746a955fd866cfa8b8108002eb6ddbf22e93e2b6b8a3a4c"
+      "lines": 295,
+      "sha256": "c450c098a3936ae5d4775334e360273d4e54a5dc4a79bdb9a192f419238808a0"
     }
   ],
   "detection_files": [

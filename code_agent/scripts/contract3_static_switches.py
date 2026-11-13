@@ -1,4 +1,4 @@
-"""Toggle the seven Contract-3 static-analysis switches (A-G) for exercise design.
+"""Toggle the nine Contract-3 static-analysis switches (A-I) for exercise design.
 
 The switches apply only while Contract 3 is evaluated: the vulnerability_detection
 plugin with scan_type="frequent_defects" and scripts/measure_contract3_static.py.
@@ -31,6 +31,8 @@ LINE = re.compile(r"^CONTRACT3_OFF = frozenset\((?:\{(?P<names>[^}]*)\})?\)$", r
 
 # name: (file holding the switch, description)
 SWITCHES = {
+    "H": ("security_c_rules.py", "respect early-return array index guards (off: ignore guards)"),
+    "I": ("security_c_rules.py", "accept exact-fit string copies including NUL (off: boundary false positive)"),
     "G": ("security_contracts.py", "classify pointer-offset dereferences/subscripts as array bounds findings"),
     "A": ("security_contracts.py", "memcpy/memmove with a string-literal source counts as string overflow"),
     "B": ("security_analysis.py", "Clang: also report a callee fault at the outermost call site"),
@@ -46,7 +48,7 @@ def read_off() -> set[str]:
     match = LINE.search(EXAM.read_text(encoding="utf-8"))
     if len(matches) != 1 or match is None:
         raise SystemExit("security_exam.py: expected exactly one line 'CONTRACT3_OFF = frozenset({...})'")
-    return set(re.findall(r'"([A-G])"', match.group("names") or ""))
+    return set(re.findall(r'"([A-I])"', match.group("names") or ""))
 
 
 def write_off(names: set[str]) -> None:
@@ -70,12 +72,12 @@ def print_status() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command", choices=("status", "on", "off", "only", "reset"))
-    parser.add_argument("switches", nargs="*", type=str.upper, help="Switch names A-G")
+    parser.add_argument("switches", nargs="*", type=str.upper, help="Switch names A-I")
     parser.add_argument("--measure", action="store_true", help="Run scripts/measure_contract3_static.py on the four RTOS suites afterwards")
     args = parser.parse_args()
     unknown = [name for name in args.switches if name not in SWITCHES]
     if unknown:
-        raise SystemExit(f"Unknown switch: {', '.join(unknown)} (use A-G)")
+        raise SystemExit(f"Unknown switch: {', '.join(unknown)} (use A-I)")
     if args.command in {"on", "off", "only"} and not args.switches:
         raise SystemExit(f"'{args.command}' needs at least one switch name")
     before = read_off()

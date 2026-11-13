@@ -1,6 +1,6 @@
 """Versioned Contract-3 teaching fixtures and the historical Cppcheck runner.
 
-Revision 2 calibrates source-shape counts for the detector-optimization exercise;
+Revision 3 calibrates source-shape counts for the detector-optimization exercise;
 it is no longer a held-out generalization benchmark. Labels stay outside model
 workspaces. Use measure_contract3_static.py for the comprehensive teaching score.
 """
@@ -26,34 +26,33 @@ from code_agent.scripts import benchmark_contract3_cppcheck as base
 DATA = ROOT / "artifacts" / "contract3" / "independent-cppcheck"
 REPORT = ROOT / "合同-3-独立样例-result.md"
 
-# Revision 2 is a teacher-calibrated exercise, not a held-out capability score.
+# Revision 3 is a teacher-calibrated exercise, not a held-out capability score.
 # Keep 20 defects and 20 matching safe controls per category. Rule gaps are
 # distributed by source shape, never by a case ID or an expected result label.
-DATASET_REVISION = "teaching-v2-20261113"
+DATASET_REVISION = "teaching-v3-20261113"
 BALANCED_VARIANTS = {
-    "array_oob": [0, 1, 2, 3] * 4 + [0, 1, 4, 4],
-    "string_overflow": [0, 1, 2] * 6 + [3, 4],
-    "null_pointer": [0, 1, 3, 4] * 4 + [0, 1, 4, 2],
+    "array_oob": [0, 1, 2, 3] * 3 + [1, 2, 3, 5, 0, 5, 4, 4],
+    "string_overflow": [0, 1, 2] * 5 + [1, 5, 5, 3, 4],
+    "null_pointer": [0, 1, 3] * 5 + [0, 1, 4, 4, 2],
 }
 INDEPENDENT_VARIANTS = {
-    "array_oob": [0, 1, 2, 3] * 4 + [0, 4, 4, 4],
-    "string_overflow": [0, 1, 2] * 5 + [0, 1, 3, 3, 4],
-    "null_pointer": [0, 1, 3, 4] * 4 + [0, 1, 2, 2],
+    "array_oob": [0, 1, 2, 3] * 3 + [1, 2, 5, 5, 5, 4, 4, 4],
+    "string_overflow": [0, 1, 2] * 5 + [5, 1, 3, 3, 4],
+    "null_pointer": [0, 1, 3] * 5 + [0, 4, 4, 2, 2],
 }
 
-# Hard profiles: ("base", n) reuses case_lines, ("hard", n) uses hard_case_lines.
-# Controls include safe look-alikes, and all 40 functions are shuffled so the
-# label cannot be inferred from position.
+# Paired safe and defective shapes exercise guard, capacity and null-flow gaps.
+# Counts calibrate this teaching material, not generalization to unseen programs.
 _HARD_MIXES = {
     "balanced-hard": {
-        "array_oob": ([0, 1, 2, 3] * 2 + [0, 1], [0, 1, 2, 4] * 2 + [0, 3]),
-        "string_overflow": ([0, 1, 2] * 3 + [3], [0, 1, 2, 3] * 2 + [0, 4]),
-        "null_pointer": ([0, 1, 4] * 2 + [0, 1, 2, 2], list(range(5)) * 2),
+        "array_oob": ([0, 1, 2, 3] * 2 + [0, 1], [0, 1, 2, 4] * 2 + [1, 3]),
+        "string_overflow": ([0, 1, 2] * 3 + [3], [0, 3, 4] + [1, 2, 1, 2, 1, 2, 1]),
+        "null_pointer": ([0, 1, 3] * 2 + [0, 4, 2, 2], [0, 1, 2, 3] * 2 + [0, 4]),
     },
     "independent-hard": {
-        "array_oob": (list(range(5)), [0, 1, 2, 4] * 3 + [0, 1, 3]),
-        "string_overflow": (list(range(5)), [0, 1, 2, 3] * 3 + [0, 1, 4]),
-        "null_pointer": ([0, 1, 2, 2, 4], list(range(5)) * 3),
+        "array_oob": (list(range(5)), [1, 2, 4] * 4 + [0, 1, 3]),
+        "string_overflow": (list(range(5)), [0, 0, 3, 4] + [1, 2] * 5 + [1]),
+        "null_pointer": ([0, 1, 2, 2, 4], [0, 1, 2, 3] * 3 + [0, 4, 4]),
     },
 }
 HARD_PROFILES = {
@@ -80,6 +79,9 @@ def write_json(path: Path, value: Any) -> None:
 def case_lines(category: str, variant: int, vulnerable: bool) -> list[str]:
     """Return a genuine defect or a near-neighbour safe control; no label text."""
     if category == "array_oob":
+        if variant == 5:
+            return ["    int values[3] = {1, 2, 3};", "    int index = 3;",
+                    f"    if (index {'>' if vulnerable else '>='} 3) return 0;", "    return values[index];"]
         if variant == 0:
             return ["    int values[3] = {1, 2, 3};", f"    return values[{3 if vulnerable else 2}];"]
         if variant == 1:
@@ -92,8 +94,10 @@ def case_lines(category: str, variant: int, vulnerable: bool) -> list[str]:
             return ["    int values[3] = {1, 2, 3};", f"    int index = contract3_identity({3 if vulnerable else 2});", "    return values[index];"]
         return ["    int values[3] = {1, 2, 3};", f"    int *cursor = values + {3 if vulnerable else 2};", "    return *cursor;"]
     if category == "string_overflow":
+        if variant == 5:
+            return [f"    char target[{5 if vulnerable else 6}] = {{0}};", '    strcpy(target, "ABCDE");', "    return target[0];"]
         if variant == 0:
-            return ["    char target[4] = {0};", f"    strcpy(target, \"{'ABCDE' if vulnerable else 'ABC'}\");", "    return target[0];"]
+            return ["    char target[4] = {0};", f"    strcpy(target, \"{'ABCDE' if vulnerable else 'AB'}\");", "    return target[0];"]
         if variant == 1:
             return ["    char target[4] = {0};", f"    sprintf(target, \"%s\", \"{'ABCDE' if vulnerable else 'ABC'}\");", "    return target[0];"]
         if variant == 2:
@@ -119,7 +123,7 @@ def hard_case_lines(category: str, variant: int, vulnerable: bool) -> list[str]:
     """Off-by-one defects and safe look-alikes; each control is truly safe."""
     if category == "array_oob":
         if variant == 0:
-            return ["    int values[3] = {1, 2, 3};", "    int index = contract3_identity(3);",
+            return ["    int values[3] = {1, 2, 3};", "    int index = 3;",
                     f"    if (index {'>' if vulnerable else '>='} 3) return 0;", "    return values[index];"]
         if variant == 1:
             loop = "int index = 3; index >= 0; --index" if vulnerable else "int index = 3; index-- > 0;"

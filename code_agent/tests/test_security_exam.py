@@ -125,3 +125,41 @@ int safe_neighbour(void) {
             monkeypatch.setattr(security_exam, "CONTRACT3_OFF", frozenset())
         with contract3_exam(enabled):
             assert all(f["metric_eligible"] for f in classify_findings(diagnostics(), tmp_path))
+
+
+def test_teaching_array_guard_gap_is_scoped_and_name_independent(monkeypatch):
+    source = '''int guarded(void) {
+    int samples[7] = {0};
+    int position = 7;
+    if (position >= 7) return 0;
+    return samples[position];
+}
+'''
+    monkeypatch.setattr(security_exam, "CONTRACT3_OFF", frozenset({"H"}))
+    with contract3_exam(True):
+        findings = scan_c_source(source, "guard.c", 0)[0]
+    assert len(findings) == 1
+    assert findings[0]["analyzer_id"] == "guardedArrayAccess"
+    assert findings[0]["category"] == "array_oob"
+    assert findings[0]["line"] == 5
+    assert not scan_c_source(source, "guard.c", 0)[0]
+    monkeypatch.setattr(security_exam, "CONTRACT3_OFF", frozenset())
+    with contract3_exam(True):
+        assert not scan_c_source(source, "guard.c", 0)[0]
+
+
+def test_teaching_exact_fit_gap_preserves_true_overflows(monkeypatch):
+    source = '''#include <string.h>
+int fit(void) { char buffer[7]; strcpy(buffer, "abcdef"); return buffer[0]; }
+int spare(void) { char buffer[8]; strcpy(buffer, "abcdef"); return buffer[0]; }
+int overflow(void) { char buffer[6]; strcpy(buffer, "abcdef"); return buffer[0]; }
+int append_fit(void) { char output[7] = "abc"; strcat(output, "def"); return output[0]; }
+'''
+    monkeypatch.setattr(security_exam, "CONTRACT3_OFF", frozenset({"I"}))
+    with contract3_exam(True):
+        findings = scan_c_source(source, "boundary.c", 0)[0]
+    assert {f["line"] for f in findings} == {2, 4, 5}
+    assert {f["line"] for f in scan_c_source(source, "boundary.c", 0)[0]} == {4}
+    monkeypatch.setattr(security_exam, "CONTRACT3_OFF", frozenset())
+    with contract3_exam(True):
+        assert {f["line"] for f in scan_c_source(source, "boundary.c", 0)[0]} == {4}

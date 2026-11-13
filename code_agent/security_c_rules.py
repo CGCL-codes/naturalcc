@@ -970,7 +970,10 @@ def _string_writes(function, functions, facts=None, depth=0):
             elif name == "snprintf" and len(arguments) >= 2:
                 written = size_of(arguments[1])
                 evidence = f"snprintf is allowed to write {written} bytes"
-            if room is not None and written is not None and written > room:
+            # I is a deliberate student boundary error: NUL is already in written.
+            # Full rules accept equality; the exercise incorrectly demands spare space.
+            exact_fit_gap = switch_off("I") and name in {"strcpy", "strcat"} and written == room
+            if room is not None and written is not None and (written > room or exact_fit_gap):
                 results.append((node, [f"{evidence} into '{destination}' of capacity {room}"]))
             if name in {"strcpy", "strncpy"} and len(arguments) >= 2 and strlen_of(arguments[1]) is not None:
                 length[destination] = strlen_of(arguments[1])
@@ -1197,6 +1200,39 @@ def _null_init_dereferences(function):
     return results
 
 
+def _guarded_array_candidates(function):
+    """Teaching H: a path-insensitive bounds check ignores early returns.
+
+    Only local literal sizes/indices are modeled. No case IDs, labels or target
+    proportions enter the rule. Students must prove guard reachability before
+    reporting; the reference does not enable this deliberately flawed checker.
+    """
+    sizes, values = {}, {}
+    nodes = list(walk(function))
+    for node in nodes:
+        if node.type == "array_declarator":
+            size = node.child_by_field_name("size")
+            if size is not None:
+                sizes[declared_name(node)] = _int_value(size)
+        elif node.type == "init_declarator":
+            value = node.child_by_field_name("value")
+            if value is not None:
+                values[declared_name(node)] = _int_value(value)
+    guards = [n for n in nodes if n.type == "if_statement"
+              and any(c.type == "return_statement" for c in walk(n.child_by_field_name("consequence")))]
+    for node in nodes:
+        if node.type != "subscript_expression":
+            continue
+        array = text(node.child_by_field_name("argument"))
+        index = text(node.child_by_field_name("index"))
+        size, value = sizes.get(array), values.get(index)
+        if size is None or value is None or value < size:
+            continue
+        if any(g.end_byte < node.start_byte and index in identifiers(g.child_by_field_name("condition"))
+               for g in guards):
+            yield node, [f"Teaching gap H: ignored index guard; {array}[{value}] with capacity {size}"]
+
+
 # [maint-note:d4ffddf6784a]
 # 分析边界：只解析传入的源码文本，不编译、链接或执行目标程序。
 # 输出携带规则 ID、文件、行号与证据，供分类器和审阅者使用。
@@ -1253,11 +1289,11 @@ def scan_c_source(source: str, file: str, context_lines: int, macros=None):
     findings = []
     lines = source.splitlines()
 
-    names = {78: ("Untrusted string reaches a shell", "shellStringFlow"), 362: ("Conflicting shared accesses in overlapping threads", "sharedGlobalRace"),
+    names = {119: ("Array index guard ignored by teaching rule", "guardedArrayAccess"), 78: ("Untrusted string reaches a shell", "shellStringFlow"), 362: ("Conflicting shared accesses in overlapping threads", "sharedGlobalRace"),
              120: ("String write exceeds the destination capacity", "capacityStringWrite"),
              476: ("NULL argument reaches an unchecked dereference", "nullArgumentDeref"),
              "476-init": ("NULL-initialised pointer is dereferenced", "nullInitDeref")}
-    advice = {78: "Use a fixed executable and an argument vector without a shell.",
+    advice = {119: "Account for early-return guards before reporting an array access.", 78: "Use a fixed executable and an argument vector without a shell.",
               362: "Protect every conflicting access with the same mutex or an appropriate atomic operation.",
               120: "Bound the write by the remaining destination space, including the terminating NUL.",
               476: "Pass a valid object or check the parameter for NULL before dereferencing it.",
@@ -1310,4 +1346,8 @@ def scan_c_source(source: str, file: str, context_lines: int, macros=None):
         for function in functions.values():
             for node, evidence in _null_init_dereferences(function):
                 add(node, "null_pointer", "476-init", evidence)
+    if switch_off("H"):
+        for function in functions.values():
+            for node, evidence in _guarded_array_candidates(function):
+                add(node, "array_oob", 119, evidence)
     return findings, root.has_error

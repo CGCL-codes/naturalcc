@@ -644,7 +644,7 @@ Required tests use scripted models and fixture workspaces; they do not need an A
 
 ### Contract-3 detector-optimization teaching exercise
 
-The current dataset is `teaching-v2-20261113`. Its four existing profiles retain three pinned RTOS projects and 20 defects plus 20 paired safe controls per category. Shape counts are calibrated for teaching, so these are not held-out generalization benchmarks. The default disables A/B/C/E/F/G while keeping D enabled; ordinary scans and Contract-5 retain full rules.
+The current dataset is `teaching-v3-20261113`. Its four existing profiles retain three pinned RTOS projects and 20 defects plus 20 paired safe controls per category. Shape counts are calibrated for teaching, so these are not held-out generalization benchmarks. The default disables A/B/C/E/F/G/H/I while keeping D enabled; ordinary scans and Contract-5 retain full rules.
 
 With Cppcheck and Clang on PATH, reproduce the shipped-fixture results without a model:
 
@@ -653,9 +653,9 @@ uv run python scripts/measure_contract3_static.py --delivered
 uv run python scripts/measure_contract3_static.py --delivered --reference
 ```
 
-The first command uses the student baseline; the second uses the complete reference implementation only in that process. Every category in every project/profile currently scores 85%–95% under the student baseline, and 100% under the reference. Detailed counts, false positives and engine versions are in [合同-3-result.md](合同-3-result.md). The [teacher guide](合同-3-静态分析难度调节指南.md) contains solutions and should not be given to students.
+The first command uses the student baseline; the second uses the complete reference implementation only in that process. Every category in every project/profile currently has 85%–95% recall and 5%–15% false-positive rate under the student baseline; the reference has 100% recall and 0% false positives. H exercises early-return array guards; I exercises exact-fit string capacity. Detailed counts, false positives and engine versions are in [合同-3-result.md](合同-3-result.md). The [teacher guide](合同-3-静态分析难度调节指南.md) contains solutions and should not be given to students.
 
-Optional Web runs still use `scripts/benchmark_contract3_web.py --suite balanced` (and the other profiles), with the Contract-5 Web backend configuration. New checkpoints live in `artifacts/contract3/web-sonnet45-<suite>-teaching-v2-20261113/`. Legacy model checkpoints remain historical evidence; they cannot be resumed against revised fixtures. This revision has not been evaluated with a real Web model. The historical Cppcheck-only adapter remains available, but its single-engine scores are separate from the comprehensive teaching measurement.
+Optional Web runs still use `scripts/benchmark_contract3_web.py --suite balanced` (and the other profiles), with the Contract-5 Web backend configuration. New checkpoints live in `artifacts/contract3/web-sonnet45-<suite>-teaching-v3-20261113/`. Legacy model checkpoints remain historical evidence; they cannot be resumed against revised fixtures. This revision has not been evaluated with a real Web model. The historical Cppcheck-only adapter remains available, but its single-engine scores are separate from the comprehensive teaching measurement.
 
 ### Contract-5 detection rules
 

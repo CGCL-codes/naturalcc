@@ -1,0 +1,21 @@
+{
+  "dataset_revision": "teaching-v3-20261113",
+  "previous_dataset_git_commit": "bdeab1c78113e5aa6710e6d966f0b1e1f0766134",
+  "previous_dataset_paths": [
+    "code_agent/artifacts/contract3/ground_truth",
+    "code_agent/artifacts/contract3/projects"
+  ],
+  "purpose": "Detector optimization teaching; calibrated source-shape mix, not held-out generalization",
+  "student_switches_off": [
+    "A",
+    "B",
+    "C",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I"
+  ],
+  "reference_switches_off": [],
+  "historical_web_checkpoints": "Unmodified legacy web-sonnet45-<suite> directories; new runs use revision suffixes"
+}

@@ -30,14 +30,13 @@ static int contract3_independent_null_pointer_case_03(void)
 
 static int contract3_independent_null_pointer_case_04(void)
 {
-    int value = 7;
     int *pointer = 0;
-    if (value < 0) pointer = &value;
     return *pointer;
 }
 
 static int contract3_independent_null_pointer_case_05(void)
 {
+    int value = 7;
     int *pointer = 0;
     return *pointer;
 }
@@ -45,34 +44,32 @@ static int contract3_independent_null_pointer_case_05(void)
 static int contract3_independent_null_pointer_case_06(void)
 {
     int value = 7;
-    int *pointer = 0;
-    return *pointer;
+    struct contract3_box box = {0};
+    return *box.pointer;
 }
 
 static int contract3_independent_null_pointer_case_07(void)
 {
-    int value = 7;
-    struct contract3_box box = {0};
-    return *box.pointer;
+    int *pointer = 0;
+    return *pointer;
 }
 
 static int contract3_independent_null_pointer_case_08(void)
 {
     int value = 7;
     int *pointer = 0;
-    if (value < 0) pointer = &value;
     return *pointer;
 }
 
 static int contract3_independent_null_pointer_case_09(void)
 {
-    int *pointer = 0;
-    return *pointer;
+    int value = 7;
+    struct contract3_box box = {0};
+    return *box.pointer;
 }
 
 static int contract3_independent_null_pointer_case_10(void)
 {
-    int value = 7;
     int *pointer = 0;
     return *pointer;
 }
@@ -80,16 +77,15 @@ static int contract3_independent_null_pointer_case_10(void)
 static int contract3_independent_null_pointer_case_11(void)
 {
     int value = 7;
-    struct contract3_box box = {0};
-    return *box.pointer;
+    int *pointer = 0;
+    return *pointer;
 }
 
 static int contract3_independent_null_pointer_case_12(void)
 {
     int value = 7;
-    int *pointer = 0;
-    if (value < 0) pointer = &value;
-    return *pointer;
+    struct contract3_box box = {0};
+    return *box.pointer;
 }
 
 static int contract3_independent_null_pointer_case_13(void)
@@ -114,14 +110,13 @@ static int contract3_independent_null_pointer_case_15(void)
 
 static int contract3_independent_null_pointer_case_16(void)
 {
-    int value = 7;
     int *pointer = 0;
-    if (value < 0) pointer = &value;
     return *pointer;
 }
 
 static int contract3_independent_null_pointer_case_17(void)
 {
+    int value = 7;
     int *pointer = 0;
     return *pointer;
 }
@@ -130,6 +125,7 @@ static int contract3_independent_null_pointer_case_18(void)
 {
     int value = 7;
     int *pointer = 0;
+    if (value < 0) pointer = &value;
     return *pointer;
 }
 
@@ -170,65 +166,61 @@ static int contract3_independent_null_pointer_case_23(void)
 static int contract3_independent_null_pointer_case_24(void)
 {
     int value = 7;
-    int *pointer = 0;
-    if (value > 0) pointer = &value;
-    return *pointer;
-}
-
-static int contract3_independent_null_pointer_case_25(void)
-{
-    int value = 7;
     return value;
 }
 
-static int contract3_independent_null_pointer_case_26(void)
+static int contract3_independent_null_pointer_case_25(void)
 {
     int value = 7;
     int *pointer = &value;
     return *pointer;
 }
 
-static int contract3_independent_null_pointer_case_27(void)
+static int contract3_independent_null_pointer_case_26(void)
 {
     int value = 7;
     struct contract3_box box = {&value};
     return *box.pointer;
 }
 
+static int contract3_independent_null_pointer_case_27(void)
+{
+    int value = 7;
+    return value;
+}
+
 static int contract3_independent_null_pointer_case_28(void)
 {
     int value = 7;
-    int *pointer = 0;
-    if (value > 0) pointer = &value;
+    int *pointer = &value;
     return *pointer;
 }
 
 static int contract3_independent_null_pointer_case_29(void)
 {
     int value = 7;
-    return value;
+    struct contract3_box box = {&value};
+    return *box.pointer;
 }
 
 static int contract3_independent_null_pointer_case_30(void)
+{
+    int value = 7;
+    return value;
+}
+
+static int contract3_independent_null_pointer_case_31(void)
 {
     int value = 7;
     int *pointer = &value;
     return *pointer;
 }
 
-static int contract3_independent_null_pointer_case_31(void)
+static int contract3_independent_null_pointer_case_32(void)
 {
     int value = 7;
     struct contract3_box box = {&value};
     return *box.pointer;
-}
-
-static int contract3_independent_null_pointer_case_32(void)
-{
-    int value = 7;
-    int *pointer = 0;
-    if (value > 0) pointer = &value;
-    return *pointer;
 }
 
 static int contract3_independent_null_pointer_case_33(void)
@@ -254,21 +246,21 @@ static int contract3_independent_null_pointer_case_35(void)
 static int contract3_independent_null_pointer_case_36(void)
 {
     int value = 7;
-    int *pointer = 0;
-    if (value > 0) pointer = &value;
-    return *pointer;
+    return value;
 }
 
 static int contract3_independent_null_pointer_case_37(void)
 {
     int value = 7;
-    return value;
+    int *pointer = &value;
+    return *pointer;
 }
 
 static int contract3_independent_null_pointer_case_38(void)
 {
     int value = 7;
-    int *pointer = &value;
+    int *pointer = 0;
+    if (value > 0) pointer = &value;
     return *pointer;
 }
 

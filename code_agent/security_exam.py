@@ -1,6 +1,6 @@
 """Contract-3 exam difficulty: rule switches that apply only while Contract 3 is evaluated.
 
-The switches A-G (see 合同-3-静态分析难度调节指南.md) lower detection or raise false
+The switches A-I (see 合同-3-静态分析难度调节指南.md) lower detection or raise false
 positives on the Contract-3 test sets. They take effect only inside
 ``contract3_exam(True)``, which the vulnerability_detection plugin enters for
 ``scan_type="frequent_defects"`` scans (the Contract-3 metric) and the Contract-3
@@ -14,9 +14,9 @@ from contextvars import ContextVar
 
 # Switches turned off during Contract-3 evaluation. Edited by
 # scripts/contract3_static_switches.py; an empty set means full rules everywhere.
-CONTRACT3_OFF = frozenset({"A", "B", "C", "E", "F", "G"})
+CONTRACT3_OFF = frozenset({"A", "B", "C", "E", "F", "G", "H", "I"})
 
-SWITCH_NAMES = ("A", "B", "C", "D", "E", "F", "G")
+SWITCH_NAMES = ("A", "B", "C", "D", "E", "F", "G", "H", "I")
 _ACTIVE: ContextVar[frozenset] = ContextVar("contract3_exam_off", default=frozenset())
 
 

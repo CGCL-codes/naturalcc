@@ -121,7 +121,7 @@ def classify_findings(findings, project_dir):
         engine = finding.get("analyzer")
         if engine == "c-source":
             category = {"shellStringFlow": "command_execution", "sharedGlobalRace": "data_race",
-                        "capacityStringWrite": "string_overflow", "nullArgumentDeref": "null_pointer",
+                        "guardedArrayAccess": "array_oob", "capacityStringWrite": "string_overflow", "nullArgumentDeref": "null_pointer",
                         "nullInitDeref": "null_pointer",
                         # RTOS-aware rules (security_rtos_rules), one per high-risk category.
                         "shellCommandBuild": "command_execution", "lockScopeEscape": "data_race",

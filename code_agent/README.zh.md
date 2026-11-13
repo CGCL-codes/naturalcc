@@ -711,18 +711,18 @@ code_agent/
 
 ## 17. 合同指标 3：检测器优化教学题
 
-当前题集版本为 `teaching-v2-20261113`，直接调整原四套题集的形态配比，仍保留三个固定版本 RTOS 工程、每类 20 正例和 20 同形态安全对照。该版为教师校准题，不称为独立泛化测试。
+当前题集版本为 `teaching-v3-20261113`，直接调整原四套题集的形态配比，仍保留三个固定版本 RTOS 工程、每类 20 正例和 20 同形态安全对照。该版为教师校准题，不称为独立泛化测试。
 
-默认 A/B/C/E/F/G 关闭、D 开启，仅在合同 3 中生效。Cppcheck 和 Clang 在 PATH 时可离线复测，不调用模型：
+默认 A/B/C/E/F/G/H/I 关闭、D 开启，仅在合同 3 中生效。Cppcheck 和 Clang 在 PATH 时可离线复测，不调用模型：
 
 ```bash
 uv run python scripts/measure_contract3_static.py --delivered
 uv run python scripts/measure_contract3_static.py --delivered --reference
 ```
 
-第一条使用学生基线，第二条只在进程内开启完整参考答案，不修改默认设置。每个工程、每套题集的各类检出率均为 85%–95%；参考答案各类为 100%。逐类计数、误报率和引擎版本见[总报告](合同-3-result.md)。[难度指南](合同-3-静态分析难度调节指南.md)包含教师答案，不发给学生。
+第一条使用学生基线，第二条只在进程内开启完整参考答案，不修改默认设置。每个工程、每套题集的各类检出率均为 85%–95%，误报率均为 5%–15%；参考答案各类为 100% 检出、0% 误报。H 对应数组提前返回守卫，I 对应字符串恰好容纳边界。逐类计数、误报率和引擎版本见[总报告](合同-3-result.md)。[难度指南](合同-3-静态分析难度调节指南.md)包含教师答案，不发给学生。
 
-可选 Web 模式仍使用 `scripts/benchmark_contract3_web.py --suite balanced` 等命令及合同 5 的 Web 后端配置。新版 checkpoint 目录为 `artifacts/contract3/web-sonnet45-<suite>-teaching-v2-20261113/`，避免复用旧版函数标签。旧模型记录保留为历史成绩；新版尚未做真实 Web 模型评测。历史 Cppcheck 单引擎脚本保留，但其成绩与综合静态教学链路分开。
+可选 Web 模式仍使用 `scripts/benchmark_contract3_web.py --suite balanced` 等命令及合同 5 的 Web 后端配置。新版 checkpoint 目录为 `artifacts/contract3/web-sonnet45-<suite>-teaching-v3-20261113/`，避免复用旧版函数标签。旧模型记录保留为历史成绩；新版尚未做真实 Web 模型评测。历史 Cppcheck 单引擎脚本保留，但其成绩与综合静态教学链路分开。
 
 ### 合同 5 检测规则
 

@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "dataset_revision": "teaching-v2-20261113",
+  "dataset_revision": "teaching-v3-20261113",
   "scan_type": "frequent_defects",
   "source_sha256": {
-    "contract3_balanced_web_array_oob.c": "edc08433a765b8b47721282734787c2cbb36ac4234fa53e10ac7e06ccec099ca",
-    "contract3_balanced_web_string_overflow.c": "58ef0d53afa7ec62f661a91826faa81f8ab0ae243e215d9091b6539453e0e11c",
-    "contract3_balanced_web_null_pointer.c": "56815801f5e5333b30537a8809bc96dc72a33bcd40c276b070be2c8fd602e26f"
+    "contract3_balanced_web_array_oob.c": "a5d7bba684a1020edc600cafb44096f458d88eb73639f8e77c9d1fe9b418edeb",
+    "contract3_balanced_web_string_overflow.c": "14da6069e4d1ae2b72221e0e561be6d87ea3fcd98e16456ca3bbfb4182be7711",
+    "contract3_balanced_web_null_pointer.c": "be5a71a7e33ef1e37616b1c7d80ba4da37ae5381d4b6f867b7937b016ecf1ab1"
   },
   "cases": [
     {
@@ -170,50 +170,50 @@
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_13",
       "line_start": 95,
-      "line_end": 99,
+      "line_end": 100,
       "expected": "defect",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "base",
-      "defect_line": 98,
-      "defect_code": "return values[3];"
+      "defect_line": 99,
+      "defect_code": "return values[index];"
     },
     {
       "case_id": "freertos_kernel-array_oob-positive-14",
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_14",
-      "line_start": 101,
-      "line_end": 106,
+      "line_start": 102,
+      "line_end": 108,
       "expected": "defect",
-      "variant": 1,
+      "variant": 2,
       "variant_kind": "base",
-      "defect_line": 105,
-      "defect_code": "return values[index];"
+      "defect_line": 106,
+      "defect_code": "for (int index = 0; index <= 3; ++index) total += values[index];"
     },
     {
       "case_id": "freertos_kernel-array_oob-positive-15",
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_15",
-      "line_start": 108,
-      "line_end": 114,
+      "line_start": 110,
+      "line_end": 115,
       "expected": "defect",
-      "variant": 2,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 112,
-      "defect_code": "for (int index = 0; index <= 3; ++index) total += values[index];"
+      "defect_line": 114,
+      "defect_code": "return values[index];"
     },
     {
       "case_id": "freertos_kernel-array_oob-positive-16",
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_16",
-      "line_start": 116,
-      "line_end": 121,
+      "line_start": 117,
+      "line_end": 123,
       "expected": "defect",
-      "variant": 3,
+      "variant": 5,
       "variant_kind": "base",
-      "defect_line": 120,
+      "defect_line": 122,
       "defect_code": "return values[index];"
     },
     {
@@ -221,12 +221,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_17",
-      "line_start": 123,
-      "line_end": 127,
+      "line_start": 125,
+      "line_end": 129,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 126,
+      "defect_line": 128,
       "defect_code": "return values[3];"
     },
     {
@@ -234,12 +234,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_18",
-      "line_start": 129,
-      "line_end": 134,
+      "line_start": 131,
+      "line_end": 137,
       "expected": "defect",
-      "variant": 1,
+      "variant": 5,
       "variant_kind": "base",
-      "defect_line": 133,
+      "defect_line": 136,
       "defect_code": "return values[index];"
     },
     {
@@ -247,12 +247,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_19",
-      "line_start": 136,
-      "line_end": 141,
+      "line_start": 139,
+      "line_end": 144,
       "expected": "defect",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 140,
+      "defect_line": 143,
       "defect_code": "return *cursor;"
     },
     {
@@ -260,12 +260,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_20",
-      "line_start": 143,
-      "line_end": 148,
+      "line_start": 146,
+      "line_end": 151,
       "expected": "defect",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 147,
+      "defect_line": 150,
       "defect_code": "return *cursor;"
     },
     {
@@ -273,12 +273,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_21",
-      "line_start": 150,
-      "line_end": 154,
+      "line_start": 153,
+      "line_end": 157,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 153,
+      "defect_line": 156,
       "defect_code": "return values[2];"
     },
     {
@@ -286,12 +286,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_22",
-      "line_start": 156,
-      "line_end": 161,
+      "line_start": 159,
+      "line_end": 164,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 160,
+      "defect_line": 163,
       "defect_code": "return values[index];"
     },
     {
@@ -299,12 +299,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_23",
-      "line_start": 163,
-      "line_end": 169,
+      "line_start": 166,
+      "line_end": 172,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 167,
+      "defect_line": 170,
       "defect_code": "for (int index = 0; index < 3; ++index) total += values[index];"
     },
     {
@@ -312,12 +312,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_24",
-      "line_start": 171,
-      "line_end": 176,
+      "line_start": 174,
+      "line_end": 179,
       "expected": "control",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 175,
+      "defect_line": 178,
       "defect_code": "return values[index];"
     },
     {
@@ -325,12 +325,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_25",
-      "line_start": 178,
-      "line_end": 182,
+      "line_start": 181,
+      "line_end": 185,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 181,
+      "defect_line": 184,
       "defect_code": "return values[2];"
     },
     {
@@ -338,12 +338,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_26",
-      "line_start": 184,
-      "line_end": 189,
+      "line_start": 187,
+      "line_end": 192,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 188,
+      "defect_line": 191,
       "defect_code": "return values[index];"
     },
     {
@@ -351,12 +351,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_27",
-      "line_start": 191,
-      "line_end": 197,
+      "line_start": 194,
+      "line_end": 200,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 195,
+      "defect_line": 198,
       "defect_code": "for (int index = 0; index < 3; ++index) total += values[index];"
     },
     {
@@ -364,12 +364,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_28",
-      "line_start": 199,
-      "line_end": 204,
+      "line_start": 202,
+      "line_end": 207,
       "expected": "control",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 203,
+      "defect_line": 206,
       "defect_code": "return values[index];"
     },
     {
@@ -377,12 +377,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_29",
-      "line_start": 206,
-      "line_end": 210,
+      "line_start": 209,
+      "line_end": 213,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 209,
+      "defect_line": 212,
       "defect_code": "return values[2];"
     },
     {
@@ -390,12 +390,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_30",
-      "line_start": 212,
-      "line_end": 217,
+      "line_start": 215,
+      "line_end": 220,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 216,
+      "defect_line": 219,
       "defect_code": "return values[index];"
     },
     {
@@ -403,12 +403,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_31",
-      "line_start": 219,
-      "line_end": 225,
+      "line_start": 222,
+      "line_end": 228,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 223,
+      "defect_line": 226,
       "defect_code": "for (int index = 0; index < 3; ++index) total += values[index];"
     },
     {
@@ -416,12 +416,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_32",
-      "line_start": 227,
-      "line_end": 232,
+      "line_start": 230,
+      "line_end": 235,
       "expected": "control",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 231,
+      "defect_line": 234,
       "defect_code": "return values[index];"
     },
     {
@@ -429,51 +429,51 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_33",
-      "line_start": 234,
-      "line_end": 238,
+      "line_start": 237,
+      "line_end": 242,
       "expected": "control",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "base",
-      "defect_line": 237,
-      "defect_code": "return values[2];"
+      "defect_line": 241,
+      "defect_code": "return values[index];"
     },
     {
       "case_id": "freertos_kernel-array_oob-control-14",
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_34",
-      "line_start": 240,
-      "line_end": 245,
+      "line_start": 244,
+      "line_end": 250,
       "expected": "control",
-      "variant": 1,
+      "variant": 2,
       "variant_kind": "base",
-      "defect_line": 244,
-      "defect_code": "return values[index];"
+      "defect_line": 248,
+      "defect_code": "for (int index = 0; index < 3; ++index) total += values[index];"
     },
     {
       "case_id": "freertos_kernel-array_oob-control-15",
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_35",
-      "line_start": 247,
-      "line_end": 253,
+      "line_start": 252,
+      "line_end": 257,
       "expected": "control",
-      "variant": 2,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 251,
-      "defect_code": "for (int index = 0; index < 3; ++index) total += values[index];"
+      "defect_line": 256,
+      "defect_code": "return values[index];"
     },
     {
       "case_id": "freertos_kernel-array_oob-control-16",
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_36",
-      "line_start": 255,
-      "line_end": 260,
+      "line_start": 259,
+      "line_end": 265,
       "expected": "control",
-      "variant": 3,
+      "variant": 5,
       "variant_kind": "base",
-      "defect_line": 259,
+      "defect_line": 264,
       "defect_code": "return values[index];"
     },
     {
@@ -481,12 +481,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_37",
-      "line_start": 262,
-      "line_end": 266,
+      "line_start": 267,
+      "line_end": 271,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 265,
+      "defect_line": 270,
       "defect_code": "return values[2];"
     },
     {
@@ -494,12 +494,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_38",
-      "line_start": 268,
-      "line_end": 273,
+      "line_start": 273,
+      "line_end": 279,
       "expected": "control",
-      "variant": 1,
+      "variant": 5,
       "variant_kind": "base",
-      "defect_line": 272,
+      "defect_line": 278,
       "defect_code": "return values[index];"
     },
     {
@@ -507,12 +507,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_39",
-      "line_start": 275,
-      "line_end": 280,
+      "line_start": 281,
+      "line_end": 286,
       "expected": "control",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 279,
+      "defect_line": 285,
       "defect_code": "return *cursor;"
     },
     {
@@ -520,12 +520,12 @@
       "category": "array_oob",
       "file": "contract3_balanced_web_array_oob.c",
       "function": "contract3_independent_array_oob_case_40",
-      "line_start": 282,
-      "line_end": 287,
+      "line_start": 288,
+      "line_end": 293,
       "expected": "control",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 286,
+      "defect_line": 292,
       "defect_code": "return *cursor;"
     },
     {
@@ -731,10 +731,10 @@
       "line_start": 116,
       "line_end": 121,
       "expected": "defect",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "base",
       "defect_line": 119,
-      "defect_code": "strcpy(target, \"ABCDE\");"
+      "defect_code": "sprintf(target, \"%s\", \"ABCDE\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-positive-17",
@@ -744,10 +744,10 @@
       "line_start": 123,
       "line_end": 128,
       "expected": "defect",
-      "variant": 1,
+      "variant": 5,
       "variant_kind": "base",
       "defect_line": 126,
-      "defect_code": "sprintf(target, \"%s\", \"ABCDE\");"
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-positive-18",
@@ -757,10 +757,10 @@
       "line_start": 130,
       "line_end": 135,
       "expected": "defect",
-      "variant": 2,
+      "variant": 5,
       "variant_kind": "base",
       "defect_line": 133,
-      "defect_code": "strcat(target, \"BCDEFGH\");"
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-positive-19",
@@ -799,7 +799,7 @@
       "variant": 0,
       "variant_kind": "base",
       "defect_line": 154,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-control-02",
@@ -838,7 +838,7 @@
       "variant": 0,
       "variant_kind": "base",
       "defect_line": 175,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-control-05",
@@ -877,7 +877,7 @@
       "variant": 0,
       "variant_kind": "base",
       "defect_line": 196,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-control-08",
@@ -916,7 +916,7 @@
       "variant": 0,
       "variant_kind": "base",
       "defect_line": 217,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-control-11",
@@ -955,7 +955,7 @@
       "variant": 0,
       "variant_kind": "base",
       "defect_line": 238,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_code": "strcpy(target, \"AB\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-control-14",
@@ -991,10 +991,10 @@
       "line_start": 256,
       "line_end": 261,
       "expected": "control",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "base",
       "defect_line": 259,
-      "defect_code": "strcpy(target, \"ABC\");"
+      "defect_code": "sprintf(target, \"%s\", \"ABC\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-control-17",
@@ -1004,10 +1004,10 @@
       "line_start": 263,
       "line_end": 268,
       "expected": "control",
-      "variant": 1,
+      "variant": 5,
       "variant_kind": "base",
       "defect_line": 266,
-      "defect_code": "sprintf(target, \"%s\", \"ABC\");"
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-control-18",
@@ -1017,10 +1017,10 @@
       "line_start": 270,
       "line_end": 275,
       "expected": "control",
-      "variant": 2,
+      "variant": 5,
       "variant_kind": "base",
       "defect_line": 273,
-      "defect_code": "strcat(target, \"BC\");"
+      "defect_code": "strcpy(target, \"ABCDE\");"
     },
     {
       "case_id": "freertos_kernel-string_overflow-control-19",
@@ -1093,11 +1093,11 @@
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_04",
       "line_start": 31,
-      "line_end": 37,
+      "line_end": 35,
       "expected": "defect",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "base",
-      "defect_line": 36,
+      "defect_line": 34,
       "defect_code": "return *pointer;"
     },
     {
@@ -1105,12 +1105,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_05",
-      "line_start": 39,
-      "line_end": 43,
+      "line_start": 37,
+      "line_end": 42,
       "expected": "defect",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "base",
-      "defect_line": 42,
+      "defect_line": 41,
       "defect_code": "return *pointer;"
     },
     {
@@ -1118,38 +1118,38 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_06",
-      "line_start": 45,
-      "line_end": 50,
+      "line_start": 44,
+      "line_end": 49,
       "expected": "defect",
-      "variant": 1,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 49,
-      "defect_code": "return *pointer;"
+      "defect_line": 48,
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-positive-07",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_07",
-      "line_start": 52,
-      "line_end": 57,
+      "line_start": 51,
+      "line_end": 55,
       "expected": "defect",
-      "variant": 3,
+      "variant": 0,
       "variant_kind": "base",
-      "defect_line": 56,
-      "defect_code": "return *box.pointer;"
+      "defect_line": 54,
+      "defect_code": "return *pointer;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-positive-08",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_08",
-      "line_start": 59,
-      "line_end": 65,
+      "line_start": 57,
+      "line_end": 62,
       "expected": "defect",
-      "variant": 4,
+      "variant": 1,
       "variant_kind": "base",
-      "defect_line": 64,
+      "defect_line": 61,
       "defect_code": "return *pointer;"
     },
     {
@@ -1157,25 +1157,25 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_09",
-      "line_start": 67,
-      "line_end": 71,
+      "line_start": 64,
+      "line_end": 69,
       "expected": "defect",
-      "variant": 0,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 70,
-      "defect_code": "return *pointer;"
+      "defect_line": 68,
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-positive-10",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_10",
-      "line_start": 73,
-      "line_end": 78,
+      "line_start": 71,
+      "line_end": 75,
       "expected": "defect",
-      "variant": 1,
+      "variant": 0,
       "variant_kind": "base",
-      "defect_line": 77,
+      "defect_line": 74,
       "defect_code": "return *pointer;"
     },
     {
@@ -1183,38 +1183,38 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_11",
-      "line_start": 80,
-      "line_end": 85,
+      "line_start": 77,
+      "line_end": 82,
       "expected": "defect",
-      "variant": 3,
+      "variant": 1,
       "variant_kind": "base",
-      "defect_line": 84,
-      "defect_code": "return *box.pointer;"
+      "defect_line": 81,
+      "defect_code": "return *pointer;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-positive-12",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_12",
-      "line_start": 87,
-      "line_end": 93,
+      "line_start": 84,
+      "line_end": 89,
       "expected": "defect",
-      "variant": 4,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 92,
-      "defect_code": "return *pointer;"
+      "defect_line": 88,
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-positive-13",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_13",
-      "line_start": 95,
-      "line_end": 99,
+      "line_start": 91,
+      "line_end": 95,
       "expected": "defect",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 98,
+      "defect_line": 94,
       "defect_code": "return *pointer;"
     },
     {
@@ -1222,12 +1222,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_14",
-      "line_start": 101,
-      "line_end": 106,
+      "line_start": 97,
+      "line_end": 102,
       "expected": "defect",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 105,
+      "defect_line": 101,
       "defect_code": "return *pointer;"
     },
     {
@@ -1235,12 +1235,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_15",
-      "line_start": 108,
-      "line_end": 113,
+      "line_start": 104,
+      "line_end": 109,
       "expected": "defect",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 112,
+      "defect_line": 108,
       "defect_code": "return *box.pointer;"
     },
     {
@@ -1248,12 +1248,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_16",
-      "line_start": 115,
-      "line_end": 121,
+      "line_start": 111,
+      "line_end": 115,
       "expected": "defect",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "base",
-      "defect_line": 120,
+      "defect_line": 114,
       "defect_code": "return *pointer;"
     },
     {
@@ -1261,12 +1261,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_17",
-      "line_start": 123,
-      "line_end": 127,
+      "line_start": 117,
+      "line_end": 122,
       "expected": "defect",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "base",
-      "defect_line": 126,
+      "defect_line": 121,
       "defect_code": "return *pointer;"
     },
     {
@@ -1274,12 +1274,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_18",
-      "line_start": 129,
-      "line_end": 134,
+      "line_start": 124,
+      "line_end": 130,
       "expected": "defect",
-      "variant": 1,
+      "variant": 4,
       "variant_kind": "base",
-      "defect_line": 133,
+      "defect_line": 129,
       "defect_code": "return *pointer;"
     },
     {
@@ -1287,12 +1287,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_19",
-      "line_start": 136,
-      "line_end": 142,
+      "line_start": 132,
+      "line_end": 138,
       "expected": "defect",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 141,
+      "defect_line": 137,
       "defect_code": "return *pointer;"
     },
     {
@@ -1300,12 +1300,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_20",
-      "line_start": 144,
-      "line_end": 148,
+      "line_start": 140,
+      "line_end": 144,
       "expected": "defect",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 147,
+      "defect_line": 143,
       "defect_code": "return contract3_read(0);"
     },
     {
@@ -1313,12 +1313,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_21",
-      "line_start": 150,
-      "line_end": 154,
+      "line_start": 146,
+      "line_end": 150,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 153,
+      "defect_line": 149,
       "defect_code": "return value;"
     },
     {
@@ -1326,12 +1326,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_22",
-      "line_start": 156,
-      "line_end": 161,
+      "line_start": 152,
+      "line_end": 157,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 160,
+      "defect_line": 156,
       "defect_code": "return *pointer;"
     },
     {
@@ -1339,12 +1339,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_23",
-      "line_start": 163,
-      "line_end": 168,
+      "line_start": 159,
+      "line_end": 164,
       "expected": "control",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 167,
+      "defect_line": 163,
       "defect_code": "return *box.pointer;"
     },
     {
@@ -1352,64 +1352,64 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_24",
-      "line_start": 170,
-      "line_end": 176,
+      "line_start": 166,
+      "line_end": 170,
       "expected": "control",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "base",
-      "defect_line": 175,
-      "defect_code": "return *pointer;"
+      "defect_line": 169,
+      "defect_code": "return value;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-control-05",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_25",
-      "line_start": 178,
-      "line_end": 182,
+      "line_start": 172,
+      "line_end": 177,
       "expected": "control",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "base",
-      "defect_line": 181,
-      "defect_code": "return value;"
+      "defect_line": 176,
+      "defect_code": "return *pointer;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-control-06",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_26",
-      "line_start": 184,
-      "line_end": 189,
+      "line_start": 179,
+      "line_end": 184,
       "expected": "control",
-      "variant": 1,
+      "variant": 3,
       "variant_kind": "base",
-      "defect_line": 188,
-      "defect_code": "return *pointer;"
+      "defect_line": 183,
+      "defect_code": "return *box.pointer;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-control-07",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_27",
-      "line_start": 191,
-      "line_end": 196,
+      "line_start": 186,
+      "line_end": 190,
       "expected": "control",
-      "variant": 3,
+      "variant": 0,
       "variant_kind": "base",
-      "defect_line": 195,
-      "defect_code": "return *box.pointer;"
+      "defect_line": 189,
+      "defect_code": "return value;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-control-08",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_28",
-      "line_start": 198,
-      "line_end": 204,
+      "line_start": 192,
+      "line_end": 197,
       "expected": "control",
-      "variant": 4,
+      "variant": 1,
       "variant_kind": "base",
-      "defect_line": 203,
+      "defect_line": 196,
       "defect_code": "return *pointer;"
     },
     {
@@ -1417,6 +1417,19 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_29",
+      "line_start": 199,
+      "line_end": 204,
+      "expected": "control",
+      "variant": 3,
+      "variant_kind": "base",
+      "defect_line": 203,
+      "defect_code": "return *box.pointer;"
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-control-10",
+      "category": "null_pointer",
+      "file": "contract3_balanced_web_null_pointer.c",
+      "function": "contract3_independent_null_pointer_case_30",
       "line_start": 206,
       "line_end": 210,
       "expected": "control",
@@ -1426,10 +1439,10 @@
       "defect_code": "return value;"
     },
     {
-      "case_id": "freertos_kernel-null_pointer-control-10",
+      "case_id": "freertos_kernel-null_pointer-control-11",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
-      "function": "contract3_independent_null_pointer_case_30",
+      "function": "contract3_independent_null_pointer_case_31",
       "line_start": 212,
       "line_end": 217,
       "expected": "control",
@@ -1439,10 +1452,10 @@
       "defect_code": "return *pointer;"
     },
     {
-      "case_id": "freertos_kernel-null_pointer-control-11",
+      "case_id": "freertos_kernel-null_pointer-control-12",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
-      "function": "contract3_independent_null_pointer_case_31",
+      "function": "contract3_independent_null_pointer_case_32",
       "line_start": 219,
       "line_end": 224,
       "expected": "control",
@@ -1452,29 +1465,16 @@
       "defect_code": "return *box.pointer;"
     },
     {
-      "case_id": "freertos_kernel-null_pointer-control-12",
-      "category": "null_pointer",
-      "file": "contract3_balanced_web_null_pointer.c",
-      "function": "contract3_independent_null_pointer_case_32",
-      "line_start": 226,
-      "line_end": 232,
-      "expected": "control",
-      "variant": 4,
-      "variant_kind": "base",
-      "defect_line": 231,
-      "defect_code": "return *pointer;"
-    },
-    {
       "case_id": "freertos_kernel-null_pointer-control-13",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_33",
-      "line_start": 234,
-      "line_end": 238,
+      "line_start": 226,
+      "line_end": 230,
       "expected": "control",
       "variant": 0,
       "variant_kind": "base",
-      "defect_line": 237,
+      "defect_line": 229,
       "defect_code": "return value;"
     },
     {
@@ -1482,12 +1482,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_34",
-      "line_start": 240,
-      "line_end": 245,
+      "line_start": 232,
+      "line_end": 237,
       "expected": "control",
       "variant": 1,
       "variant_kind": "base",
-      "defect_line": 244,
+      "defect_line": 236,
       "defect_code": "return *pointer;"
     },
     {
@@ -1495,12 +1495,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_35",
-      "line_start": 247,
-      "line_end": 252,
+      "line_start": 239,
+      "line_end": 244,
       "expected": "control",
       "variant": 3,
       "variant_kind": "base",
-      "defect_line": 251,
+      "defect_line": 243,
       "defect_code": "return *box.pointer;"
     },
     {
@@ -1508,38 +1508,38 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_36",
-      "line_start": 254,
-      "line_end": 260,
+      "line_start": 246,
+      "line_end": 250,
       "expected": "control",
-      "variant": 4,
+      "variant": 0,
       "variant_kind": "base",
-      "defect_line": 259,
-      "defect_code": "return *pointer;"
+      "defect_line": 249,
+      "defect_code": "return value;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-control-17",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_37",
-      "line_start": 262,
-      "line_end": 266,
+      "line_start": 252,
+      "line_end": 257,
       "expected": "control",
-      "variant": 0,
+      "variant": 1,
       "variant_kind": "base",
-      "defect_line": 265,
-      "defect_code": "return value;"
+      "defect_line": 256,
+      "defect_code": "return *pointer;"
     },
     {
       "case_id": "freertos_kernel-null_pointer-control-18",
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_38",
-      "line_start": 268,
-      "line_end": 273,
+      "line_start": 259,
+      "line_end": 265,
       "expected": "control",
-      "variant": 1,
+      "variant": 4,
       "variant_kind": "base",
-      "defect_line": 272,
+      "defect_line": 264,
       "defect_code": "return *pointer;"
     },
     {
@@ -1547,12 +1547,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_39",
-      "line_start": 275,
-      "line_end": 281,
+      "line_start": 267,
+      "line_end": 273,
       "expected": "control",
       "variant": 4,
       "variant_kind": "base",
-      "defect_line": 280,
+      "defect_line": 272,
       "defect_code": "return *pointer;"
     },
     {
@@ -1560,12 +1560,12 @@
       "category": "null_pointer",
       "file": "contract3_balanced_web_null_pointer.c",
       "function": "contract3_independent_null_pointer_case_40",
-      "line_start": 283,
-      "line_end": 287,
+      "line_start": 275,
+      "line_end": 279,
       "expected": "control",
       "variant": 2,
       "variant_kind": "base",
-      "defect_line": 286,
+      "defect_line": 278,
       "defect_code": "return contract3_read(&value);"
     }
   ],
@@ -1586,27 +1586,27 @@
   },
   "line_totals": {
     "upstream_detection_files": 186067,
-    "fixtures": 866,
-    "all_detection_files": 186933
+    "fixtures": 864,
+    "all_detection_files": 186931
   },
   "fixtures": [
     {
       "path": "contract3_balanced_web_array_oob.c",
       "category": "array_oob",
-      "lines": 288,
-      "sha256": "edc08433a765b8b47721282734787c2cbb36ac4234fa53e10ac7e06ccec099ca"
+      "lines": 294,
+      "sha256": "a5d7bba684a1020edc600cafb44096f458d88eb73639f8e77c9d1fe9b418edeb"
     },
     {
       "path": "contract3_balanced_web_string_overflow.c",
       "category": "string_overflow",
       "lines": 290,
-      "sha256": "58ef0d53afa7ec62f661a91826faa81f8ab0ae243e215d9091b6539453e0e11c"
+      "sha256": "14da6069e4d1ae2b72221e0e561be6d87ea3fcd98e16456ca3bbfb4182be7711"
     },
     {
       "path": "contract3_balanced_web_null_pointer.c",
       "category": "null_pointer",
-      "lines": 288,
-      "sha256": "56815801f5e5333b30537a8809bc96dc72a33bcd40c276b070be2c8fd602e26f"
+      "lines": 280,
+      "sha256": "be5a71a7e33ef1e37616b1c7d80ba4da37ae5381d4b6f867b7937b016ecf1ab1"
     }
   ],
   "detection_files": [

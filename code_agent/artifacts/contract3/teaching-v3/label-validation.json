@@ -1,0 +1,584 @@
+{
+  "dataset_revision": "teaching-v3-20261113",
+  "method": "Compile each base/hard shape separately at -O0 with -fsanitize=address,undefined -fno-sanitize-recover=all; call the function from main; controls must exit 0, defects must have a sanitizer diagnostic and nonzero exit",
+  "compiler": "gcc (Ubuntu 12.3.0-1ubuntu1~22.04.3) 12.3.0",
+  "shapes": [
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 0,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 0,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 1,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 1,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 2,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 2,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 3,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 3,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 4,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 4,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 5,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "base",
+      "variant": 5,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "hard",
+      "variant": 0,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "hard",
+      "variant": 0,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "hard",
+      "variant": 1,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "hard",
+      "variant": 1,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "hard",
+      "variant": 2,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "hard",
+      "variant": 2,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "hard",
+      "variant": 3,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "hard",
+      "variant": 3,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "hard",
+      "variant": 4,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "array_oob",
+      "kind": "hard",
+      "variant": 4,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 0,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 0,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 1,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 1,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 2,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 2,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 3,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 3,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 4,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 4,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 5,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "base",
+      "variant": 5,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "hard",
+      "variant": 0,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "hard",
+      "variant": 0,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "hard",
+      "variant": 1,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "hard",
+      "variant": 1,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "hard",
+      "variant": 2,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "hard",
+      "variant": 2,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "hard",
+      "variant": 3,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "hard",
+      "variant": 3,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "hard",
+      "variant": 4,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "string_overflow",
+      "kind": "hard",
+      "variant": 4,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "base",
+      "variant": 0,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "base",
+      "variant": 0,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "base",
+      "variant": 1,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "base",
+      "variant": 1,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "base",
+      "variant": 2,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "base",
+      "variant": 2,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "base",
+      "variant": 3,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "base",
+      "variant": 3,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "base",
+      "variant": 4,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "base",
+      "variant": 4,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "hard",
+      "variant": 0,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "hard",
+      "variant": 0,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "hard",
+      "variant": 1,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "hard",
+      "variant": 1,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "hard",
+      "variant": 2,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "hard",
+      "variant": 2,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "hard",
+      "variant": 3,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "hard",
+      "variant": 3,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "hard",
+      "variant": 4,
+      "expected": "control",
+      "exit_code": 0,
+      "sanitizer_diagnostic": false,
+      "valid": true
+    },
+    {
+      "category": "null_pointer",
+      "kind": "hard",
+      "variant": 4,
+      "expected": "defect",
+      "exit_code": 1,
+      "sanitizer_diagnostic": true,
+      "valid": true
+    }
+  ],
+  "passed": 64
+}
