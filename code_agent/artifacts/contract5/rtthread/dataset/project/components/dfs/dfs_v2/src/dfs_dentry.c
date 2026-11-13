@@ -26,6 +26,7 @@ struct dentry_hash_head
 };
 static struct dentry_hash_head hash_head;
 
+/* 按路径字符和挂载对象计算目录项哈希，使不同挂载点的同名路径进入各自的查找域。 */
 static uint32_t _dentry_hash(struct dfs_mnt *mnt, const char *path)
 {
     uint32_t val = 0;
@@ -40,6 +41,7 @@ static uint32_t _dentry_hash(struct dfs_mnt *mnt, const char *path)
     return (val ^ (unsigned long) mnt) & (DFS_DENTRY_HASH_NR - 1);
 }
 
+/* 创建目录项并保存所属挂载点；绝对路径先去掉挂载前缀，相对路径直接用于节点命名。 */
 static struct dfs_dentry *_dentry_create(struct dfs_mnt *mnt, char *path, rt_bool_t is_rela_path)
 {
     struct dfs_dentry *dentry = RT_NULL;
@@ -80,16 +82,19 @@ static struct dfs_dentry *_dentry_create(struct dfs_mnt *mnt, char *path, rt_boo
     return dentry;
 }
 
+/* 以完整路径创建目录项，路径相对化由内部创建函数处理。 */
 struct dfs_dentry *dfs_dentry_create(struct dfs_mnt *mnt, char *fullpath)
 {
     return _dentry_create(mnt, fullpath, RT_FALSE);
 }
 
+/* 以挂载点内的相对路径创建目录项，不再裁剪挂载前缀。 */
 struct dfs_dentry *dfs_dentry_create_rela(struct dfs_mnt *mnt, char *rela_path)
 {
     return _dentry_create(mnt, rela_path, RT_TRUE);;
 }
 
+/* 增加目录项引用；关联虚拟节点存在时同步增加其引用，供多个文件对象共享。 */
 struct dfs_dentry * dfs_dentry_ref(struct dfs_dentry *dentry)
 {
     if (dentry)
@@ -109,6 +114,7 @@ struct dfs_dentry * dfs_dentry_ref(struct dfs_dentry *dentry)
     return dentry;
 }
 
+/* 撤销目录项引用，引用归零时从哈希表移除，并处理关联的虚拟节点与挂载对象。 */
 struct dfs_dentry *dfs_dentry_unref(struct dfs_dentry *dentry)
 {
     rt_err_t ret = RT_EOK;
@@ -166,6 +172,7 @@ struct dfs_dentry *dfs_dentry_unref(struct dfs_dentry *dentry)
     return dentry;
 }
 
+/* 在挂载点与路径共同确定的桶中查找目录项，命中后持有引用再返回。 */
 static struct dfs_dentry *_dentry_hash_lookup(struct dfs_mnt *mnt, const char *path)
 {
     rt_err_t ret = RT_EOK;
@@ -190,6 +197,7 @@ static struct dfs_dentry *_dentry_hash_lookup(struct dfs_mnt *mnt, const char *p
     return RT_NULL;
 }
 
+/* 把目录项加入路径哈希表，并记录已入表状态，供后续查找及移除使用。 */
 void dfs_dentry_insert(struct dfs_dentry *dentry)
 {
     dfs_file_lock();
@@ -201,6 +209,7 @@ void dfs_dentry_insert(struct dfs_dentry *dentry)
 /*
  * lookup a dentry, return this dentry and increase refcount if exist, otherwise return NULL
  */
+/* 先利用目录项缓存查找路径，再通过文件系统接口取得对应节点。 */
 struct dfs_dentry *dfs_dentry_lookup(struct dfs_mnt *mnt, const char *path, uint32_t flags)
 {
     struct dfs_dentry *dentry;

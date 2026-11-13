@@ -26,6 +26,7 @@
 #include "lwp.h"
 #endif /* RT_USING_SMART */
 
+/* 从脚本文件逐字节读取一行，跳过开头的换行符并返回本次读取的字符数。 */
 static int msh_readline(int fd, char *line_buf, int size)
 {
     char ch;
@@ -66,6 +67,7 @@ static int msh_readline(int fd, char *line_buf, int size)
     return index;
 }
 
+/* 从命令行提取脚本名，尝试打开脚本并逐行交给命令解释器处理。 */
 int msh_exec_script(const char *cmd_line, int size)
 {
     int ret;
@@ -161,6 +163,7 @@ int msh_exec_script(const char *cmd_line, int size)
     extern char working_directory[];
 #endif
 
+/* 解析目录列出请求，将指定路径交给文件系统目录显示接口。 */
 static int cmd_ls(int argc, char **argv)
 {
     extern void ls(const char *pathname);
@@ -226,6 +229,7 @@ static int cmd_link(int argc, char **argv)
 MSH_CMD_EXPORT_ALIAS(cmd_link, link, Make link between files);
 #endif
 
+/* 处理复制命令参数，连接命令行输入与文件系统复制入口。 */
 static int cmd_cp(int argc, char **argv)
 {
     void copy(const char *src, const char *dst);
@@ -244,6 +248,7 @@ static int cmd_cp(int argc, char **argv)
 }
 MSH_CMD_EXPORT_ALIAS(cmd_cp, cp, Copy SOURCE to DEST.);
 
+/* 处理移动或重命名请求，使用源路径和目标路径调用文件系统操作。 */
 static int cmd_mv(int argc, char **argv)
 {
     if (argc != 3)
@@ -303,6 +308,7 @@ static int cmd_mv(int argc, char **argv)
 }
 MSH_CMD_EXPORT_ALIAS(cmd_mv, mv, Rename SOURCE to DEST.);
 
+/* 按命令行给出的文件路径输出文件内容，供终端查看文本。 */
 static int cmd_cat(int argc, char **argv)
 {
     int index;
@@ -324,6 +330,7 @@ static int cmd_cat(int argc, char **argv)
 }
 MSH_CMD_EXPORT_ALIAS(cmd_cat, cat, Concatenate FILE(s));
 
+/* 遍历待删除目录，递归处理子目录并按选项控制删除提示。 */
 static void directory_delete_for_msh(const char *pathname, char f, char v)
 {
     DIR *dir = NULL;
@@ -475,6 +482,7 @@ static int cmd_rm(int argc, char **argv)
 MSH_CMD_EXPORT_ALIAS(cmd_rm, rm, Remove(unlink) the FILE(s).);
 
 #ifdef DFS_USING_WORKDIR
+/* 切换命令行会话的工作目录，使后续相对路径按新目录解析。 */
 static int cmd_cd(int argc, char **argv)
 {
     if (argc == 1)
@@ -501,6 +509,7 @@ static int cmd_pwd(int argc, char **argv)
 MSH_CMD_EXPORT_ALIAS(cmd_pwd, pwd, Print the name of the current working directory.);
 #endif
 
+/* 根据命令参数创建目录，并把创建结果反馈到终端。 */
 static int cmd_mkdir(int argc, char **argv)
 {
     if (argc == 1)
@@ -557,6 +566,7 @@ MSH_CMD_EXPORT_ALIAS(cmd_mkfs, mkfs, format disk with file system);
  * argv[2]: mountpoint path
  * argv[3]: filesystem type
  */
+/* 解析设备、目录及文件系统参数，发起文件系统挂载请求。 */
 static int cmd_mount(int argc, char **argv)
 {
     if (argc == 1)
@@ -639,6 +649,7 @@ static int cmd_mount(int argc, char **argv)
 MSH_CMD_EXPORT_ALIAS(cmd_mount, mount, mount <device> <mountpoint> <fstype>);
 
 /* unmount the filesystem from the specified mountpoint */
+/* 按给定挂载路径发起卸载请求，输出执行结果。 */
 static int cmd_umount(int argc, char **argv)
 {
 #ifndef RT_USING_DFS_V2
@@ -748,6 +759,7 @@ static int cmd_echo(int argc, char **argv)
 }
 MSH_CMD_EXPORT_ALIAS(cmd_echo, echo, echo string to file);
 
+/* 从文件尾部选择需要显示的内容，用于查看日志或文本末尾。 */
 static int cmd_tail(int argc, char **argv)
 {
     int fd;

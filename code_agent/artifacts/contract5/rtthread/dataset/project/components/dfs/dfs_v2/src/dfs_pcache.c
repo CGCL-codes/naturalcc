@@ -124,6 +124,7 @@ static int dfs_aspace_gc(struct dfs_aspace *aspace, int count)
     return count - cnt;
 }
 
+/* 按回收需求扫描页缓存，以减少缓存占用并为后续分配提供空间。 */
 void dfs_pcache_release(size_t count)
 {
     rt_list_t *node = RT_NULL;
@@ -196,6 +197,7 @@ static void _pcache_clean(struct dfs_mnt *mnt, int (*cb)(struct dfs_aspace *aspa
     dfs_pcache_unlock();
 }
 
+/* 在卸载挂载点时处理其关联的页缓存，使缓存退出与挂载生命周期衔接。 */
 void dfs_pcache_unmount(struct dfs_mnt *mnt)
 {
     _pcache_clean(mnt, dfs_aspace_release);
@@ -498,6 +500,7 @@ static struct dfs_aspace *_dfs_aspace_create(struct dfs_dentry *dentry,
     return aspace;
 }
 
+/* 为文件目录项建立缓存地址空间，将页面操作表与文件关联。 */
 struct dfs_aspace *dfs_aspace_create(struct dfs_dentry *dentry,
                                      struct dfs_vnode *vnode,
                                      const struct dfs_aspace_ops *ops)
@@ -524,6 +527,7 @@ struct dfs_aspace *dfs_aspace_create(struct dfs_dentry *dentry,
     return aspace;
 }
 
+/* 处理缓存地址空间的销毁请求，协调关联页面和地址空间状态。 */
 int dfs_aspace_destroy(struct dfs_aspace *aspace)
 {
     int ret = -EINVAL;
@@ -546,6 +550,7 @@ int dfs_aspace_destroy(struct dfs_aspace *aspace)
     return ret;
 }
 
+/* 处理地址空间退出时的缓存状态与关联对象，是页缓存生命周期的收尾路径。 */
 static int dfs_aspace_release(struct dfs_aspace *aspace)
 {
     int ret = -1;
@@ -1086,6 +1091,7 @@ static struct dfs_page *dfs_page_lookup(struct dfs_file *file, off_t pos)
     return page;
 }
 
+/* 按文件偏移定位缓存页，分段复制所需数据并推进读取位置。 */
 int dfs_aspace_read(struct dfs_file *file, void *buf, size_t count, off_t *pos)
 {
     int ret = -EINVAL;
@@ -1147,6 +1153,7 @@ int dfs_aspace_read(struct dfs_file *file, void *buf, size_t count, off_t *pos)
     return ret;
 }
 
+/* 将输入数据分段写入缓存页，更新写入位置及页面状态。 */
 int dfs_aspace_write(struct dfs_file *file, const void *buf, size_t count, off_t *pos)
 {
     int ret = -EINVAL;
@@ -1223,6 +1230,7 @@ int dfs_aspace_write(struct dfs_file *file, const void *buf, size_t count, off_t
     return ret;
 }
 
+/* 遍历地址空间中的待写回页面，将缓存修改提交给底层存储。 */
 int dfs_aspace_flush(struct dfs_aspace *aspace)
 {
     if (aspace)
@@ -1294,6 +1302,7 @@ int dfs_aspace_clean(struct dfs_aspace *aspace)
     return 0;
 }
 
+/* 为文件映射建立缓存页面与虚拟地址的对应关系。 */
 void *dfs_aspace_mmap(struct dfs_file *file, struct rt_varea *varea, void *vaddr)
 {
     void *ret = RT_NULL;
@@ -1489,11 +1498,13 @@ int dfs_aspace_page_dirty(struct dfs_file *file, struct rt_varea *varea, void *v
     return 0;
 }
 
+/* 将映射区域中的虚拟地址换算为文件偏移，供缺页及映射访问使用。 */
 off_t dfs_aspace_fpos(struct rt_varea *varea, void *vaddr)
 {
     return (off_t)(intptr_t)vaddr - (off_t)(intptr_t)varea->start + varea->offset * ARCH_PAGE_SIZE;
 }
 
+/* 将文件偏移换算为映射区域内的虚拟地址，与偏移计算接口配套。 */
 void *dfs_aspace_vaddr(struct rt_varea *varea, off_t fpos)
 {
     return varea->start + fpos - varea->offset * ARCH_PAGE_SIZE;

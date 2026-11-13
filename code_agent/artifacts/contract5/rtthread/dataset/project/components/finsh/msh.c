@@ -148,6 +148,7 @@ MSH_CMD_EXPORT_ALIAS(cmd_bind, bind, Binding thread to core);
 
 #endif /* MSH_USING_BUILT_IN_COMMANDS */
 
+/* 原地拆分命令行并填充参数指针数组，返回解析出的参数数量。 */
 static int msh_split(char *cmd, rt_size_t length, char *argv[FINSH_ARG_MAX])
 {
     char *ptr;
@@ -327,6 +328,7 @@ int msh_exec_module(const char *cmd_line, int size)
 }
 #endif
 
+/* 根据命令名查找内置命令入口，解析参数后调用并传回执行结果。 */
 static int _msh_exec_cmd(char *cmd, rt_size_t length, int *retp)
 {
     int argc;
@@ -544,6 +546,7 @@ found_program:
 #endif
 
 
+/* 作为命令行执行入口选择命令处理路径，连接输入文本与具体命令实现。 */
 int msh_exec(char *cmd, rt_size_t length)
 {
     int cmd_ret = 0;
@@ -633,6 +636,7 @@ static int str_common(const char *str1, const char *str2)
 }
 
 #ifdef DFS_USING_POSIX
+/* 从文件系统中查找路径前缀匹配项，供终端补全路径使用。 */
 void msh_auto_complete_path(char *path)
 {
     DIR *dir = RT_NULL;
@@ -779,6 +783,7 @@ void msh_auto_complete_path(char *path)
 }
 #endif /* DFS_USING_POSIX */
 
+/* 按输入前缀查找可补全的命令，更新终端中的候选内容。 */
 void msh_auto_complete(char *prefix)
 {
     int length, min_length;

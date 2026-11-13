@@ -38,6 +38,7 @@ RT_OBJECT_HOOKLIST_DEFINE(dfs_mnt_umnt);
  *
  */
 
+/* 建立挂载对象并保存路径，供目录项查找和文件系统挂载树使用。 */
 struct dfs_mnt *dfs_mnt_create(const char *path)
 {
     struct dfs_mnt *mnt = rt_calloc(1, sizeof(struct dfs_mnt));
@@ -59,6 +60,7 @@ struct dfs_mnt *dfs_mnt_create(const char *path)
     return mnt;
 }
 
+/* 将子挂载点接入挂载层次，使后续路径解析能够找到嵌套挂载。 */
 int dfs_mnt_insert(struct dfs_mnt* mnt, struct dfs_mnt* child)
 {
     if (child)
@@ -113,6 +115,7 @@ int dfs_mnt_insert(struct dfs_mnt* mnt, struct dfs_mnt* child)
 }
 
 /* remove mnt from mnt_tree */
+/* 从挂载层次移除指定节点，更新其与父级挂载点的关联。 */
 int dfs_mnt_remove(struct dfs_mnt* mnt)
 {
     int ret = -RT_ERROR;
@@ -191,6 +194,7 @@ struct dfs_mnt *dfs_mnt_dev_lookup(rt_device_t dev_id)
  * @return the found file system or NULL if no file system mounted on
  * specified path
  */
+/* 按完整路径选择对应挂载点，为文件操作确定所属文件系统。 */
 struct dfs_mnt *dfs_mnt_lookup(const char *fullpath)
 {
     struct dfs_mnt *mnt = _root_mnt;
@@ -236,6 +240,7 @@ struct dfs_mnt *dfs_mnt_lookup(const char *fullpath)
     return mnt;
 }
 
+/* 增加挂载对象引用，使持有者使用期间可追踪对象的共享状态。 */
 struct dfs_mnt* dfs_mnt_ref(struct dfs_mnt* mnt)
 {
     if (mnt)
@@ -247,6 +252,7 @@ struct dfs_mnt* dfs_mnt_ref(struct dfs_mnt* mnt)
     return mnt;
 }
 
+/* 撤销挂载对象引用，并在引用耗尽时进入挂载对象的收尾流程。 */
 int dfs_mnt_unref(struct dfs_mnt *mnt)
 {
     rt_err_t ret = RT_EOK;
@@ -427,6 +433,7 @@ static struct dfs_mnt* _mnt_cmp_path(struct dfs_mnt* mnt, void *parameter)
     return ret;
 }
 
+/* 检查指定路径范围内是否存在子挂载点，供目录与挂载管理判断使用。 */
 rt_bool_t dfs_mnt_has_child_mnt(struct dfs_mnt *mnt, const char* fullpath)
 {
     int ret = RT_FALSE;

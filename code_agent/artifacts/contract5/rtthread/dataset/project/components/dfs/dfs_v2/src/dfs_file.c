@@ -186,6 +186,7 @@ void dfs_file_set_fpos(struct dfs_file *file, off_t fpos)
     }
 }
 
+/* 初始化文件对象，为后续打开路径和建立目录项关联准备对象状态。 */
 void dfs_file_init(struct dfs_file *file)
 {
     if (file)
@@ -197,6 +198,7 @@ void dfs_file_init(struct dfs_file *file)
     }
 }
 
+/* 结束文件对象的使用周期，处理对象关联状态；与关闭底层文件的操作配合使用。 */
 void dfs_file_deinit(struct dfs_file *file)
 {
     if (file)
@@ -250,6 +252,7 @@ static void dfs_file_unref(struct dfs_file *file)
  *
  * @return new path.
  */
+/* 沿路径解析符号链接，并按解析结果调整所属挂载点；mode 控制路径解析方式。 */
 char *dfs_file_realpath(struct dfs_mnt **mnt, const char *fullpath, int mode)
 {
     int path_len = 0, index = 0;
@@ -406,6 +409,7 @@ _ERR_RET:
  *
  * @return 0 on successful, -1 on failed.
  */
+/* 将路径、打开标志和创建权限转换为文件对象，并通过所属文件系统完成打开。 */
 int dfs_file_open(struct dfs_file *file, const char *path, int oflags, mode_t mode)
 {
     int ret = -RT_ERROR;
@@ -667,6 +671,7 @@ _ERR_RET:
     return ret;
 }
 
+/* 关闭已打开的文件，通过文件操作表处理底层关闭，再处理对象引用。 */
 int dfs_file_close(struct dfs_file *file)
 {
     int ret = -RT_ERROR;
@@ -711,6 +716,7 @@ int dfs_file_close(struct dfs_file *file)
     return ret;
 }
 
+/* 从指定偏移读取数据，供需要显式定位的调用使用；返回实际读取量或错误码。 */
 ssize_t dfs_file_pread(struct dfs_file *file, void *buf, size_t len, off_t offset)
 {
     ssize_t ret = -EBADF;
@@ -759,6 +765,7 @@ ssize_t dfs_file_pread(struct dfs_file *file, void *buf, size_t len, off_t offse
     return ret;
 }
 
+/* 按文件当前位置读取数据，读写位置与实际完成的数据长度关联。 */
 ssize_t dfs_file_read(struct dfs_file *file, void *buf, size_t len)
 {
     ssize_t ret = -EBADF;
@@ -810,6 +817,7 @@ ssize_t dfs_file_read(struct dfs_file *file, void *buf, size_t len)
     return ret;
 }
 
+/* 向指定偏移写入数据，将写入结果交回调用者处理。 */
 ssize_t dfs_file_pwrite(struct dfs_file *file, const void *buf, size_t len, off_t offset)
 {
     ssize_t ret = -EBADF;
@@ -866,6 +874,7 @@ ssize_t dfs_file_pwrite(struct dfs_file *file, const void *buf, size_t len, off_
     return ret;
 }
 
+/* 按文件当前位置提交写入，具体存储操作由文件节点的操作表实现。 */
 ssize_t dfs_file_write(struct dfs_file *file, const void *buf, size_t len)
 {
     ssize_t ret = -EBADF;
@@ -937,6 +946,7 @@ ssize_t dfs_file_write(struct dfs_file *file, const void *buf, size_t len)
     return ret;
 }
 
+/* 根据起点、当前位置或文件末尾计算目标偏移，提供通用文件定位实现。 */
 off_t generic_dfs_lseek(struct dfs_file *file, off_t offset, int whence)
 {
     off_t foffset;
@@ -953,6 +963,7 @@ off_t generic_dfs_lseek(struct dfs_file *file, off_t offset, int whence)
     return foffset;
 }
 
+/* 处理文件偏移调整请求，使用文件操作表提供的定位能力。 */
 off_t dfs_file_lseek(struct dfs_file *file, off_t offset, int wherece)
 {
     off_t retval = -EINVAL;
@@ -976,6 +987,7 @@ off_t dfs_file_lseek(struct dfs_file *file, off_t offset, int wherece)
     return retval;
 }
 
+/* 按路径查询文件属性，解析后的目录项用于调用所属文件系统的属性接口。 */
 int dfs_file_stat(const char *path, struct stat *buf)
 {
     int ret = -ENOENT;
@@ -1026,6 +1038,7 @@ int dfs_file_stat(const char *path, struct stat *buf)
     return ret;
 }
 
+/* 查询路径自身的属性，用于需要区分符号链接与链接目标的场景。 */
 int dfs_file_lstat(const char *path, struct stat *buf)
 {
     int ret = -ENOENT;
@@ -1082,6 +1095,7 @@ int dfs_file_lstat(const char *path, struct stat *buf)
     return ret;
 }
 
+/* 从已打开的文件对象查询属性，避免调用者重新提供文件路径。 */
 int dfs_file_fstat(struct dfs_file *file, struct stat *buf)
 {
     size_t ret = -EBADF;
@@ -1155,6 +1169,7 @@ int dfs_file_setattr(const char *path, struct dfs_attr *attr)
     return ret;
 }
 
+/* 把控制命令和参数传给文件操作接口，具体命令含义由底层实现定义。 */
 int dfs_file_ioctl(struct dfs_file *file, int cmd, void *args)
 {
     size_t ret = 0;
@@ -1250,6 +1265,7 @@ int dfs_file_fcntl(int fd, int cmd, unsigned long arg)
     return ret;
 }
 
+/* 请求同步文件数据，让所属文件系统执行其同步操作。 */
 int dfs_file_fsync(struct dfs_file *file)
 {
     int ret = -EBADF;
@@ -1278,6 +1294,7 @@ int dfs_file_fsync(struct dfs_file *file)
     return ret;
 }
 
+/* 解析待删除路径并请求文件系统移除目录项，返回该操作的执行状态。 */
 int dfs_file_unlink(const char *path)
 {
     int ret = -RT_ERROR;
@@ -1366,6 +1383,7 @@ int dfs_file_unlink(const char *path)
     return ret;
 }
 
+/* 为已有路径创建硬链接，通过文件系统的链接操作关联新旧名称。 */
 int dfs_file_link(const char *oldname, const char *newname)
 {
     int ret = -1;
@@ -1452,6 +1470,7 @@ int dfs_file_link(const char *oldname, const char *newname)
 }
 
 /* symlink creates a symbolic link named `linkpath` which contains the string `target`. */
+/* 创建保存目标路径的符号链接，目标字符串与链接所在路径分别传入。 */
 int dfs_file_symlink(const char *target, const char *linkpath)
 {
     int ret = -RT_ERROR;
@@ -1580,6 +1599,7 @@ int dfs_file_symlink(const char *target, const char *linkpath)
     return ret;
 }
 
+/* 读取符号链接保存的目标字符串，输出缓冲区及容量由调用者提供。 */
 int dfs_file_readlink(const char *path, char *buf, int bufsize)
 {
     int ret = -RT_ERROR;
@@ -1647,6 +1667,7 @@ int dfs_file_readlink(const char *path, char *buf, int bufsize)
     return ret;
 }
 
+/* 解析源路径和目标路径，再将重命名请求交给对应文件系统。 */
 int dfs_file_rename(const char *old_file, const char *new_file)
 {
     int ret = -1;
@@ -1734,6 +1755,7 @@ int dfs_file_rename(const char *old_file, const char *new_file)
     return ret;
 }
 
+/* 请求将已打开文件调整到指定长度，实际存储调整由文件操作接口执行。 */
 int dfs_file_ftruncate(struct dfs_file *file, off_t length)
 {
     int ret = 0;
@@ -1806,6 +1828,7 @@ int dfs_file_flush(struct dfs_file *file)
     return ret;
 }
 
+/* 读取目录记录到调用者缓冲区，nbytes 指定本次可用空间。 */
 int dfs_file_getdents(struct dfs_file *file, struct dirent *dirp, size_t nbytes)
 {
     int ret = -RT_ERROR;
@@ -1844,6 +1867,7 @@ int dfs_file_getdents(struct dfs_file *file, struct dirent *dirp, size_t nbytes)
  *
  * @return 0 on is dir, -1 on not dir.
  */
+/* 查询路径对应节点的类型，供需要区分文件和目录的操作使用。 */
 int dfs_file_isdir(const char *path)
 {
     int ret = -RT_ERROR;
@@ -2191,6 +2215,7 @@ void cat(const char *filename)
 }
 
 #define BUF_SZ  4096
+/* 打开源文件和目标文件，使用中转缓冲区分块复制内容，并报告打开或传输错误。 */
 static void copyfile(const char *src, const char *dst)
 {
     int ret;
@@ -2253,6 +2278,7 @@ static void copyfile(const char *src, const char *dst)
 }
 
 extern int mkdir(const char *path, mode_t mode);
+/* 遍历源目录中的条目，为目录复制组织目标路径并递归处理子目录。 */
 static void copydir(const char *src, const char *dst)
 {
     struct dirent dirent;
@@ -2331,6 +2357,7 @@ static const char *_get_path_lastname(const char *path)
     return ++ptr;
 }
 
+/* 作为复制入口区分源路径类型，再选择文件复制或目录复制流程。 */
 void copy(const char *src, const char *dst)
 {
 #define FLAG_SRC_TYPE      0x03
