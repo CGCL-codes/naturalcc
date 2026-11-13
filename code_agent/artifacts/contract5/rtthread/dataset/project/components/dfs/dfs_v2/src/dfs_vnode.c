@@ -18,7 +18,6 @@
 #define DBG_LVL    DBG_WARNING
 #include <rtdbg.h>
 
-/* 初始化调用者提供的虚拟节点，记录节点类型和操作表，初始引用计数设为一。 */
 int dfs_vnode_init(struct dfs_vnode *vnode, int type, const struct dfs_file_ops *fops)
 {
     if (vnode)
@@ -34,7 +33,6 @@ int dfs_vnode_init(struct dfs_vnode *vnode, int type, const struct dfs_file_ops 
     return 0;
 }
 
-/* 为虚拟节点分配清零的存储，并建立初始引用；分配失败返回空指针。 */
 struct dfs_vnode *dfs_vnode_create(void)
 {
     struct dfs_vnode *vnode = rt_calloc(1, sizeof(struct dfs_vnode));
@@ -51,7 +49,6 @@ struct dfs_vnode *dfs_vnode_create(void)
     return vnode;
 }
 
-/* 在仅剩初始引用时处理节点销毁；有其他引用时保留节点供共享者继续使用。 */
 int dfs_vnode_destroy(struct dfs_vnode* vnode)
 {
     rt_err_t ret = RT_EOK;
@@ -94,7 +91,6 @@ int dfs_vnode_destroy(struct dfs_vnode* vnode)
     return 0;
 }
 
-/* 增加虚拟节点引用并返回原对象，便于调用者保存共享节点。 */
 struct dfs_vnode *dfs_vnode_ref(struct dfs_vnode *vnode)
 {
     if (vnode)
@@ -107,7 +103,6 @@ struct dfs_vnode *dfs_vnode_ref(struct dfs_vnode *vnode)
     return vnode;
 }
 
-/* 减少节点引用并处理页缓存关联；引用归零时调用文件系统回调并释放节点。 */
 void dfs_vnode_unref(struct dfs_vnode *vnode)
 {
     rt_err_t ret = RT_EOK;

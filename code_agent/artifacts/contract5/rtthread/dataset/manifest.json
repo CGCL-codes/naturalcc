@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_utc": "2026-11-13T09:28:06.265042+00:00",
+  "generated_utc": "2026-11-03T14:09:03.621367+00:00",
   "upstream": {
     "id": "rt-thread",
     "name": "RT-Thread",
@@ -9,14 +9,14 @@
     "commit": "97893c004c65760c638fd7eb571a08fc987a55e5",
     "license": "Apache-2.0"
   },
-  "dataset_spec_sha256": "42f194520e8e145b0630c032790a05f2b5355ca79632fcc5c12f737d015fb7b9",
+  "dataset_spec_sha256": "e9b884c63f6db3643b4873cb72f4507a51f418bd5c6a766616b9526cd4ed600f",
   "injection_sha256": {
     "buffer_overflow": "115de24bb9b69b3c7e01d08ed2a65005e442c302e72e590db8473a1b2c2c8bf4",
     "data_race": "b2590b9c2f099dc179464fb434e38930594787c04f52415c5ca5be8757c099e8",
     "memory_leak": "78da2ebe959c58128079d2ac0824b96ea060fc76b6fc23452cbb0ebc21082a3b",
     "command_execution": "ba9c3b6af747e18ba66cce87cbea32b1be9fd0499e0076b71b4081240b36c37b"
   },
-  "ground_truth_sha256": "c585eeec1a69cd5342b543ee2102d36fa3573cd2c9751db2b57d5da0a07143cf",
+  "ground_truth_sha256": "dfb53590a386d65e0280ddb1e297af4271ccc616d314ae3dc2f4f4b5ce2a528b",
   "project_files": [
     {
       "file": "Kconfig",
@@ -411,12 +411,12 @@
     },
     {
       "file": "components/dfs/dfs_v2/src/dfs_dentry.c",
-      "sha256": "8fcef18e93f71697212cc7766c52db82d19025d5032e37bf4433e302a1a44960",
+      "sha256": "dc5f717aeb8071b78faf4abf285884919ad7d384cbf687f8f8601aaa4ea0581b",
       "modified": true
     },
     {
       "file": "components/dfs/dfs_v2/src/dfs_file.c",
-      "sha256": "7d3d3ad46777c030a03753516ed62f924dffc79b4aee06cdf0dcd448fb760614",
+      "sha256": "c3eefa32b3e8839b2cca08512106f5e13bd523504f802d24f87664c37488e0d0",
       "modified": true
     },
     {
@@ -431,12 +431,12 @@
     },
     {
       "file": "components/dfs/dfs_v2/src/dfs_mnt.c",
-      "sha256": "f3decb0f1619cd3fc4d8cfdb54fbdc7d5d1e242af61693cb7760527f49d52d3c",
+      "sha256": "7c229e1c05450ed897a8c64cfb49a788b76e0ee07f60cd2cf62545acf979bea5",
       "modified": true
     },
     {
       "file": "components/dfs/dfs_v2/src/dfs_pcache.c",
-      "sha256": "e33f27a4e7b8fe14b04d418bf826f2f629f380af2ec014ec699685097b667c30",
+      "sha256": "eb657305903468923c3b94bbaa0dbba9ce15c454732ab400d0ae5935254232d3",
       "modified": true
     },
     {
@@ -451,13 +451,13 @@
     },
     {
       "file": "components/dfs/dfs_v2/src/dfs_seq_file.c",
-      "sha256": "5819ab7c22aade1fb91caf0f7ca9b686884432d17e11f62dfac35e052114dddb",
+      "sha256": "7e42745fcf3282281246032a9b72c2756feb5f39a18cd8cec7b0e8b0ae95963d",
       "modified": true
     },
     {
       "file": "components/dfs/dfs_v2/src/dfs_vnode.c",
-      "sha256": "4f0f9f43a0dfbb947f588844b3d019072b1265045b4eed36f1a431b59963a07a",
-      "modified": true
+      "sha256": "564d74c58a0d26fde79edfb5074fb233061d5678b7bfb39a73f0a904677631b1",
+      "modified": false
     },
     {
       "file": "components/drivers/core/Kconfig",
@@ -1116,7 +1116,7 @@
     },
     {
       "file": "components/finsh/msh.c",
-      "sha256": "f467bf2cd61a1ce1e91f35c41775937e4b532866154ce0f391c83e6180874f10",
+      "sha256": "f6ab3b1818e166951e8c047a10644e2dbf1ec0a2200b801c1925d1fea8821ddd",
       "modified": true
     },
     {
@@ -1126,7 +1126,7 @@
     },
     {
       "file": "components/finsh/msh_file.c",
-      "sha256": "ad8430e2df5d1e69068f41d9b3ba8835e5be0a91de2dfe8a57e0809c2536c1b8",
+      "sha256": "4317cd7297925804ce8464deb0610c764a08ba2195cc7cf655677c78c9d2bdba",
       "modified": true
     },
     {
@@ -1700,7 +1700,6 @@
     "components/dfs/dfs_v2/src/dfs_pcache.c",
     "components/dfs/dfs_v2/src/dfs_posix.c",
     "components/dfs/dfs_v2/src/dfs_seq_file.c",
-    "components/dfs/dfs_v2/src/dfs_vnode.c",
     "components/drivers/ipc/ringbuffer.c",
     "components/drivers/ipc/workqueue.c",
     "components/drivers/serial/dev_serial.c",

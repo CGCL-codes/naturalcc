@@ -237,21 +237,6 @@ def resolve(upstream_root: Path, spec: dict[str, Any], injections: dict[str, dic
             errors.append(f"{category}: need at least {SITES_PER_CATEGORY} controls")
         sites.extend({**s, "category": category} for s in raw_sites)
 
-    # Add neutral API documentation after injections, before resolving line numbers.
-    for relative, notes in spec.get("function_comments", {}).items():
-        text = text_of(relative)
-        if text is None:
-            continue
-        for name, note in notes.items():
-            ranges = function_ranges(text, name)
-            if len(ranges) != 1:
-                errors.append(f"{relative}: comment target {name} has {len(ranges)} definitions")
-                continue
-            lines = text.splitlines(keepends=True)
-            lines.insert(ranges[0][0] - 1, f"/* {note} */\n")
-            text = "".join(lines)
-        contents[relative] = text
-
     # Second pass: ranges and markers are resolved on the fully patched text.
     resolved: list[dict[str, Any]] = []
     for site in sites:
@@ -614,10 +599,8 @@ def write_archive() -> Path:
     archive = DATA / "contract5.zip"
     extras = [(GROUND_TRUTH, "ground_truth.json"), (MANIFEST, "manifest.json"),
               (DATA / "prompt.md", "prompt.md"), (SPEC, "dataset_spec.json"),
-              (DATA / "使用说明.md", "使用说明.md"),
-              (DATA / "comment_coverage.json", "comment_coverage.json")]
-    scripts = ("build_contract5_dataset.py", "benchmark_contract5_web.py", "measure_contract5_static.py",
-               "measure_contract5_comments.py")
+              (DATA / "使用说明.md", "使用说明.md")]
+    scripts = ("build_contract5_dataset.py", "benchmark_contract5_web.py", "measure_contract5_static.py")
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as bundle:
         for path in sorted(p for p in PROJECT.rglob("*") if p.is_file()
                            and not any(part in SKIP_NAMES for part in p.relative_to(PROJECT).parts)):
@@ -627,9 +610,6 @@ def write_archive() -> Path:
                 bundle.write(path, f"contract5/{name}")
         for path in sorted(INJECTIONS.glob("*.json")):
             bundle.write(path, f"contract5/injections/{path.name}")
-        for path in sorted(OVERLAY.glob("*")):
-            if path.is_file():
-                bundle.write(path, f"contract5/overlay/{path.name}")
         for name in scripts:
             path = ROOT / "scripts" / name
             if path.exists():

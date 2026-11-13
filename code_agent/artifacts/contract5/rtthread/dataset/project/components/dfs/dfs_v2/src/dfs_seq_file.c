@@ -18,19 +18,16 @@
 #define PAGE_SIZE 4096
 #endif
 
-/* 把已用计数设置到容量位置，向后续输出逻辑表示缓冲区已满。 */
 static void dfs_seq_overflow(struct dfs_seq_file *seq)
 {
     seq->count = seq->size;
 }
 
-/* 为序列文件分配清零缓冲区，供按需生成文本记录时使用。 */
 static void *dfs_seq_alloc(unsigned long size)
 {
     return rt_calloc(1, size);
 }
 
-/* 建立序列文件上下文，将遍历操作表及文件对象关联起来，并初始化访问互斥量。 */
 int dfs_seq_open(struct dfs_file *file, const struct dfs_seq_ops *ops)
 {
     struct dfs_seq_file *seq;
@@ -60,7 +57,6 @@ int dfs_seq_open(struct dfs_file *file, const struct dfs_seq_ops *ops)
     return 0;
 }
 
-/* 从序列起点遍历生成记录，直到找到指定字节偏移对应的读取位置。 */
 static int dfs_seq_traverse(struct dfs_seq_file *seq, off_t offset)
 {
     off_t pos = 0;
@@ -115,7 +111,6 @@ Eoverflow:
     return !seq->buf ? -ENOMEM : -EAGAIN;
 }
 
-/* 通过序列操作表生成内容，再按请求长度从内部缓冲区复制给读取者。 */
 ssize_t dfs_seq_read(struct dfs_file *file, void *buf, size_t size, off_t *pos)
 {
     struct dfs_seq_file *seq = file->data;
@@ -261,7 +256,6 @@ Enomem:
     goto Done;
 }
 
-/* 将文件偏移请求转换为序列遍历位置，以支持重新读取或跳过已有内容。 */
 off_t dfs_seq_lseek(struct dfs_file *file, off_t offset, int whence)
 {
     struct dfs_seq_file *seq = file->data;
@@ -301,7 +295,6 @@ off_t dfs_seq_lseek(struct dfs_file *file, off_t offset, int whence)
     return retval;
 }
 
-/* 结束序列文件上下文的使用，处理互斥量和上下文对象的退出流程。 */
 int dfs_seq_release(struct dfs_file *file)
 {
     struct dfs_seq_file *seq = file->data;
@@ -317,7 +310,6 @@ int dfs_seq_release(struct dfs_file *file)
     return 0;
 }
 
-/* 将可变参数格式化到序列缓冲区，输出受当前剩余容量约束。 */
 void dfs_seq_vprintf(struct dfs_seq_file *seq, const char *f, va_list args)
 {
     int len;
@@ -346,7 +338,6 @@ void dfs_seq_printf(struct dfs_seq_file *seq, const char *f, ...)
 /**
  * write char to buffer
  */
-/* 向序列输出追加一个字符，并更新已用长度或缓冲区满状态。 */
 void dfs_seq_putc(struct dfs_seq_file *seq, char c)
 {
     if (seq->count < seq->size)
@@ -358,7 +349,6 @@ void dfs_seq_putc(struct dfs_seq_file *seq, char c)
 /**
  * write string to buffer
  */
-/* 把字符串追加到序列输出，容量不足时记录满状态供上层处理。 */
 void dfs_seq_puts(struct dfs_seq_file *seq, const char *s)
 {
     int len = strlen(s);
@@ -375,7 +365,6 @@ void dfs_seq_puts(struct dfs_seq_file *seq, const char *s)
 /**
  * write arbitrary data to buffer
  */
-/* 追加指定长度的原始数据，适用于输出不以空字符结尾的记录。 */
 int dfs_seq_write(struct dfs_seq_file *seq, const void *data, size_t len)
 {
     if (seq->count + len < seq->size)
