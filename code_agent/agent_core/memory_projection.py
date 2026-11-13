@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 
+# 枚举值属于内部协议，中文标签只用于展示，不能反向作为存储键。
 OPERATION_LABELS = {
     "create": "新增记忆",
     "update": "更新记忆",
@@ -89,6 +90,7 @@ def project_memory_review(
     target_memory: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Project the internal protocol into a stable, user-facing review DTO."""
+    # 复制警告列表后再追加展示提示，避免修改调用者持有的提案记录。
     status = proposal["status"]
     warnings = list(proposal.get("warnings") or [])
     conflicts = list(proposal.get("conflicts") or [])
@@ -98,6 +100,7 @@ def project_memory_review(
         warnings.append("该建议可信度较低，请核对证据。")
 
     allowed_actions: list[str] = []
+    # 展示层只为仍可审阅的状态提供动作；最终写入仍需后端校验版本和状态。
     if status in {"review_ready", "deferred"}:
         allowed_actions = ["approve", "edit", "reject", "defer"]
     impact = {
@@ -126,6 +129,7 @@ def project_memory_review(
         "durability_label": DURABILITY_LABELS[proposal["durability"]],
         "expires_at": proposal.get("expires_at"),
         "impact": impact,
+        # 展示预览和定位信息，供用户核对来源，不暴露内部完整证据载荷。
         "evidence": [
             {
                 "ref": item["evidence_ref"],

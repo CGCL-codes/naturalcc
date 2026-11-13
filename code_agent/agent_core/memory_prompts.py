@@ -4,6 +4,8 @@ import json
 from typing import Any
 
 
+# 分析与提案是两个独立协议版本，便于回溯记忆候选的生成过程。
+# 本模块只组装消息和结构约束，激活记忆由存储及审批流程负责。
 MEMORY_ANALYZER_PROMPT_VERSION = "memory-analyzer-v4"
 MEMORY_COMPOSER_PROMPT_VERSION = "memory-composer-v3"
 
@@ -19,6 +21,8 @@ MEMORY_COMPOSER_PROMPT_VERSION = "memory-composer-v3"
 def build_recall_messages(
     goal: str, candidates: list[dict[str, Any]]
 ) -> list[dict[str, str]]:
+    # 召回仅从既有候选中选择 ID，不能让模型凭空生成一条新记忆。
+    # 查询和候选作为 JSON 数据传入，跨语言匹配不改变它们的证据等级。
     return [
         {
             "role": "system",
@@ -38,6 +42,8 @@ def build_recall_messages(
     ]
 
 
+# 第一阶段输出证据判断而非可直接入库的记忆正文。
+# abstain 显式表达没有值得持久化的内容，避免每轮都强行产生记忆。
 ANALYZER_RESPONSE_FORMAT: dict[str, Any] = {
     "type": "json_schema",
     "json_schema": {
@@ -69,6 +75,10 @@ ANALYZER_RESPONSE_FORMAT: dict[str, Any] = {
 }
 
 
+# 第二阶段产出候选操作；create、update 等只是建议，尚未修改存储。
+# evidence_refs 把每个候选绑定到本轮允许引用的证据。
+# target_memory_id 用于更新已有条目；创建新条目时协议要求为空。
+# scope 与 durability 分别描述生效范围和保存期限，不能互相替代。
 COMPOSER_RESPONSE_FORMAT: dict[str, Any] = {
     "type": "json_schema",
     "json_schema": {
@@ -137,6 +147,9 @@ COMPOSER_RESPONSE_FORMAT: dict[str, Any] = {
 # 集合派生：item 来自 evidence。
 # [/maint-note:dcd8cf2f49cd]
 def _evidence_payload(evidence: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    # 只投影模型分析所需字段，不把完整数据库记录交给模型。
+    # model_content 是上游准备的内容；此函数不重新读取可变的原始来源。
+    # ref 原样保留，后续候选需要用它关联冻结证据。
     return [
         {
             "ref": item["ref"],
@@ -163,6 +176,8 @@ def _evidence_payload(evidence: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def build_analyzer_messages(
     evidence: list[dict[str, Any]], direct_refs: set[str] | None = None
 ) -> list[dict[str, str]]:
+    # None 表示未指定直接证据筛选；空集合表示没有可支持新结论的直接证据。
+    # 两种情况不能用真假值判断合并，否则会把空集合误当成无限制。
     automatic_rules = (
         {
             "direct_evidence_refs": sorted(direct_refs),
@@ -221,10 +236,14 @@ def build_composer_messages(
     existing_memories: list[dict[str, Any]] | None = None,
     direct_refs: set[str] | None = None,
 ) -> list[dict[str, str]]:
+    # 从冻结证据中计算可引用 ID，模型只能在这个集合内为新结论举证。
+    # 上下文证据可辅助理解，但不能绕过 direct_refs 成为新事实的来源。
     allowed_refs = [
         item["ref"] for item in evidence if direct_refs is None or item["ref"] in direct_refs
     ]
     automatic_context: dict[str, Any] = {}
+    # 显式传入空列表也表示启用自动提取模式，只是目前没有已有记忆。
+    # 已有条目用于去重和判断更新目标，不作为新结论的独立证据。
     if existing_memories is not None:
         automatic_context = {
             "existing_memories": existing_memories,
@@ -325,6 +344,8 @@ def build_repair_messages(
     validation_error: str,
     required_schema: dict[str, Any],
 ) -> list[dict[str, str]]:
+    # 失败输出与校验错误都放在数据消息中，防止其中的文字改写修复规则。
+    # 调用方决定重试次数；消息构造函数自身不触发模型调用或重试。
     return [
         {
             "role": "system",
