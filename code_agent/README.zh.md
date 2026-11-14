@@ -142,6 +142,14 @@ codegraph --version
 
 ## 4. 快速开始
 
+平台纯模型漏洞检测：`POST /api/vulnerability/model`，或继续使用 `/api/run` 并设置
+`feature="vulnerability_detection"`、`feature_config.detection_mode="model"`。
+支持整个项目、指定多个文件以及可选 GT 评分，返回原 Pipeline 风格的 NDJSON 和
+`findings/coverage/contract_statistics`。此模式只调用配置的模型，不运行内置规则、Cppcheck、Clang 或 Aider；
+GT 标签不发给模型。长文件按 Token 预算分段，覆盖不完整或模型失败时不输出正式指标。
+模型配置使用 `runtime_model_config`（省略则使用服务默认值），不使用旧 Pipeline 的顶层 `model`。
+详见[纯模型检测接入教程](模型辅助漏洞检测接入教程.md)。未设置 `detection_mode` 的旧静态请求保持原行为。
+
 ### 4.1 API Key 使用方式
 
 **Agent Runtime 支持 DeepSeek、OpenRouter 云 API，以及本机 Ollama。** 通过 `CODE_AGENT_PROVIDER` 显式选择渠道，通过 `CODE_AGENT_MODEL` 选择模型；系统不会按 Key 或模型名称推断渠道。DeepSeek 和 OpenRouter 使用对应云 API Key；Ollama 走本机 loopback HTTP API，不需要云 Key。通过 OpenRouter 调用 Claude 等模型时，仍使用 OpenRouter Key，而不是模型厂商的官方 Key。离线部署步骤见[平台指标 1/3/5 离线指南](OFFLINE_PLATFORM_1_3_5.md)。

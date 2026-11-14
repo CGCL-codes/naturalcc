@@ -11,6 +11,7 @@ Common tasks: code completion, small project-aware edits/refactors, code summari
 ## Active Entry Points
 
 - `agent_web_api.py`: FastAPI backend, bundled UI server, workspace scan/browse, prompt preview, NDJSON Aider streaming.
+- `model_vulnerability_scan.py`, `api/model_scan_routes.py`: tool-free model audits via `/api/vulnerability/model` or `/api/run` with `feature=vulnerability_detection`, `feature_config.detection_mode=model`. Supports project/multiple-file scopes, tokenizer-bounded overlapping source chunks, streamed model deltas, source-hashed GT scoring outside model prompts, and Pipeline-compatible artifacts. No static analyzers/Aider; failed or incomplete audits never publish GT rates. See `模型辅助漏洞检测接入教程.md`; the existing Contract-5 Agent benchmark remains a separate protocol.
 - `api/agent_routes.py`: durable `/api/agent/*` conversation, run, context, budget, approval, event, cancellation, and memory routes.
 - `agent_core/run_engine.py`: persisted autonomous run state machine.
 - `agent_core/contracts.py`, `tool_registry.py`, `policy.py`: trusted tool contracts and permission boundary.
