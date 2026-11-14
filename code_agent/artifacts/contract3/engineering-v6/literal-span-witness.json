@@ -1,0 +1,13 @@
+{
+  "purpose": "Separate minimal witness of the literal-span mutation; not execution of any RTOS target or model.",
+  "source": "#include <string.h>\n#include <stdint.h>\nstruct Obj { int value; };\nint main(void) { struct Obj *p = (struct Obj *)(uintptr_t)strspn(\"x\", \"y\"); return p->value; }\n",
+  "compiler": "gcc (Ubuntu 12.3.0-1ubuntu1~22.04.3) 12.3.0",
+  "flags": [
+    "-O0",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-sanitize-recover=all"
+  ],
+  "returncode": 1,
+  "diagnostics": "<witness>/fault.c:4:85: runtime error: member access within null pointer of type 'struct Obj'\n"
+}

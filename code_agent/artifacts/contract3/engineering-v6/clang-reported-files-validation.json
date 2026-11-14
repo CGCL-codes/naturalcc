@@ -1,0 +1,703 @@
+{
+  "scope": "Reported atomic/banner errors plus calibrated native init file; real Clang, no model or target execution.",
+  "results": [
+    {
+      "suite": "balanced",
+      "files": [
+        "kernel/atomic_c.c",
+        "kernel/banner.c",
+        "kernel/init.c"
+      ],
+      "build_context": {
+        "source": "compile_commands",
+        "database": "compile_commands.json",
+        "files_with_entries": 206,
+        "include_dirs": 10,
+        "macros": 4,
+        "dropped": [],
+        "dropped_count": 0
+      },
+      "manifest_sha256": "2ef3e91a02395210f47defdef3ee605305e629f54c709cf0137bd43e1c71ef3c",
+      "evidence": {
+        "engine": "clang",
+        "status": "completed",
+        "mode": "per_file",
+        "versions": [
+          "clang version 18.1.8 (https://github.com/conda-forge/clangdev-feedstock 3c15221e001c9fe87fcc807876aa06d599616b01)"
+        ],
+        "failed_files": [],
+        "diagnostics": [],
+        "experimental_checkers": [
+          "alpha.security.ArrayBoundV2",
+          "alpha.security.ArrayBound",
+          "alpha.unix.cstring.OutOfBounds",
+          "alpha.security.taint.TaintPropagation"
+        ],
+        "build_context": {
+          "source": "compile_commands",
+          "database": "compile_commands.json",
+          "files_with_entries": 206,
+          "include_dirs": 10,
+          "macros": 4,
+          "dropped": [],
+          "dropped_count": 0
+        },
+        "limitations": "Compile context from compile_commands. Multiple sources are analysed as one unity unit when they share a compile context and compile together. Bounds and taint checkers are LLVM experimental rules and can produce false positives. No target program was executed."
+      },
+      "findings": [
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Access to field 'init_thread' results in a dereference of a null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 69,
+          "snippet": "\t\t\t((__typeof__(thread_data))0)->init_thread,",
+          "context": "69: \t\t\t((__typeof__(thread_data))0)->init_thread,",
+          "evidence": [
+            "Calling 'z_init_static_threads'",
+            "Entered call from 'bg_thread_main'",
+            "Entering loop body",
+            "Access to field 'init_thread' results in a dereference of a null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Access to field 'init_thread' results in a dereference of a null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        },
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Access to field 'init_thread' results in a dereference of a null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 442,
+          "snippet": "\tz_init_static_threads();",
+          "context": "442: \tz_init_static_threads();",
+          "evidence": [
+            "Calling 'z_init_static_threads'",
+            "Entered call from 'bg_thread_main'",
+            "Entering loop body",
+            "Access to field 'init_thread' results in a dereference of a null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Access to field 'init_thread' results in a dereference of a null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ],
+          "attribution": "call_site",
+          "callee_location": {
+            "file": "kernel/init.c",
+            "line": 69
+          }
+        },
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Dereference of null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 308,
+          "snippet": "\tconst struct device *dev = ((__typeof__(entry))0)->dev;",
+          "context": "308: \tconst struct device *dev = ((__typeof__(entry))0)->dev;",
+          "evidence": [
+            "Assuming 'dev' is not equal to NULL",
+            "Entering loop body",
+            "Assuming 'dev' is equal to field 'dev'",
+            "Calling 'do_device_init'",
+            "Entered call from 'z_impl_device_init'",
+            "Dereference of null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Dereference of null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        },
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Dereference of null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 387,
+          "snippet": "\t\t\treturn do_device_init(entry);",
+          "context": "387: \t\t\treturn do_device_init(entry);",
+          "evidence": [
+            "Assuming 'dev' is not equal to NULL",
+            "Entering loop body",
+            "Assuming 'dev' is equal to field 'dev'",
+            "Calling 'do_device_init'",
+            "Entered call from 'z_impl_device_init'",
+            "Dereference of null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Dereference of null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ],
+          "attribution": "call_site",
+          "callee_location": {
+            "file": "kernel/init.c",
+            "line": 308
+          }
+        },
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Dereference of null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 365,
+          "snippet": "\t\tconst struct device *dev = ((__typeof__(entry))0)->dev;",
+          "context": "365: \t\tconst struct device *dev = ((__typeof__(entry))0)->dev;",
+          "evidence": [
+            "Calling 'z_sys_init_run_level'",
+            "Entered call from 'z_cstart'",
+            "Entering loop body",
+            "Dereference of null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Dereference of null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        },
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Dereference of null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 651,
+          "snippet": "\tz_sys_init_run_level(INIT_LEVEL_EARLY);",
+          "context": "651: \tz_sys_init_run_level(INIT_LEVEL_EARLY);",
+          "evidence": [
+            "Calling 'z_sys_init_run_level'",
+            "Entered call from 'z_cstart'",
+            "Entering loop body",
+            "Dereference of null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Dereference of null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ],
+          "attribution": "call_site",
+          "callee_location": {
+            "file": "kernel/init.c",
+            "line": 365
+          }
+        },
+        {
+          "rule_id": "clang-deadcode.DeadStores",
+          "rule_name": "Value stored to 'result' is never read",
+          "analyzer": "clang",
+          "analyzer_id": "deadcode.DeadStores",
+          "diagnostic_type": "Dead assignment",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 370,
+          "snippet": "\t\t\tresult = do_device_init(entry);",
+          "context": "370: \t\t\tresult = do_device_init(entry);",
+          "evidence": [
+            "Value stored to 'result' is never read"
+          ],
+          "pattern": "deadcode.DeadStores",
+          "recommendation": "Value stored to 'result' is never read",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        },
+        {
+          "rule_id": "clang-deadcode.DeadStores",
+          "rule_name": "Value stored to 'result' is never read",
+          "analyzer": "clang",
+          "analyzer_id": "deadcode.DeadStores",
+          "diagnostic_type": "Dead assignment",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 372,
+          "snippet": "\t\t\tresult = entry->init_fn.sys();",
+          "context": "372: \t\t\tresult = entry->init_fn.sys();",
+          "evidence": [
+            "Value stored to 'result' is never read"
+          ],
+          "pattern": "deadcode.DeadStores",
+          "recommendation": "Value stored to 'result' is never read",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        }
+      ]
+    },
+    {
+      "suite": "independent",
+      "files": [
+        "kernel/atomic_c.c",
+        "kernel/banner.c",
+        "kernel/init.c"
+      ],
+      "build_context": {
+        "source": "compile_commands",
+        "database": "compile_commands.json",
+        "files_with_entries": 206,
+        "include_dirs": 10,
+        "macros": 4,
+        "dropped": [],
+        "dropped_count": 0
+      },
+      "manifest_sha256": "d50b8a381b15c822e8e801c1a95cdb1cf7fe95c408a304fb18bb5cb33a2de626",
+      "evidence": {
+        "engine": "clang",
+        "status": "completed",
+        "mode": "per_file",
+        "versions": [
+          "clang version 18.1.8 (https://github.com/conda-forge/clangdev-feedstock 3c15221e001c9fe87fcc807876aa06d599616b01)"
+        ],
+        "failed_files": [],
+        "diagnostics": [],
+        "experimental_checkers": [
+          "alpha.security.ArrayBoundV2",
+          "alpha.security.ArrayBound",
+          "alpha.unix.cstring.OutOfBounds",
+          "alpha.security.taint.TaintPropagation"
+        ],
+        "build_context": {
+          "source": "compile_commands",
+          "database": "compile_commands.json",
+          "files_with_entries": 206,
+          "include_dirs": 10,
+          "macros": 4,
+          "dropped": [],
+          "dropped_count": 0
+        },
+        "limitations": "Compile context from compile_commands. Multiple sources are analysed as one unity unit when they share a compile context and compile together. Bounds and taint checkers are LLVM experimental rules and can produce false positives. No target program was executed."
+      },
+      "findings": [
+        {
+          "rule_id": "clang-deadcode.DeadStores",
+          "rule_name": "Value stored to 'result' is never read",
+          "analyzer": "clang",
+          "analyzer_id": "deadcode.DeadStores",
+          "diagnostic_type": "Dead assignment",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 370,
+          "snippet": "\t\t\tresult = do_device_init(entry);",
+          "context": "370: \t\t\tresult = do_device_init(entry);",
+          "evidence": [
+            "Value stored to 'result' is never read"
+          ],
+          "pattern": "deadcode.DeadStores",
+          "recommendation": "Value stored to 'result' is never read",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        },
+        {
+          "rule_id": "clang-deadcode.DeadStores",
+          "rule_name": "Value stored to 'result' is never read",
+          "analyzer": "clang",
+          "analyzer_id": "deadcode.DeadStores",
+          "diagnostic_type": "Dead assignment",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 372,
+          "snippet": "\t\t\tresult = entry->init_fn.sys();",
+          "context": "372: \t\t\tresult = entry->init_fn.sys();",
+          "evidence": [
+            "Value stored to 'result' is never read"
+          ],
+          "pattern": "deadcode.DeadStores",
+          "recommendation": "Value stored to 'result' is never read",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        }
+      ]
+    },
+    {
+      "suite": "balanced-hard",
+      "files": [
+        "kernel/atomic_c.c",
+        "kernel/banner.c",
+        "kernel/init.c"
+      ],
+      "build_context": {
+        "source": "compile_commands",
+        "database": "compile_commands.json",
+        "files_with_entries": 206,
+        "include_dirs": 10,
+        "macros": 4,
+        "dropped": [],
+        "dropped_count": 0
+      },
+      "manifest_sha256": "6a1ba61912b02deff55334c909b0938fb5f027b863355bb0fbc13c90e625730e",
+      "evidence": {
+        "engine": "clang",
+        "status": "completed",
+        "mode": "per_file",
+        "versions": [
+          "clang version 18.1.8 (https://github.com/conda-forge/clangdev-feedstock 3c15221e001c9fe87fcc807876aa06d599616b01)"
+        ],
+        "failed_files": [],
+        "diagnostics": [],
+        "experimental_checkers": [
+          "alpha.security.ArrayBoundV2",
+          "alpha.security.ArrayBound",
+          "alpha.unix.cstring.OutOfBounds",
+          "alpha.security.taint.TaintPropagation"
+        ],
+        "build_context": {
+          "source": "compile_commands",
+          "database": "compile_commands.json",
+          "files_with_entries": 206,
+          "include_dirs": 10,
+          "macros": 4,
+          "dropped": [],
+          "dropped_count": 0
+        },
+        "limitations": "Compile context from compile_commands. Multiple sources are analysed as one unity unit when they share a compile context and compile together. Bounds and taint checkers are LLVM experimental rules and can produce false positives. No target program was executed."
+      },
+      "findings": [
+        {
+          "rule_id": "clang-deadcode.DeadStores",
+          "rule_name": "Value stored to 'result' is never read",
+          "analyzer": "clang",
+          "analyzer_id": "deadcode.DeadStores",
+          "diagnostic_type": "Dead assignment",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 370,
+          "snippet": "\t\t\tresult = do_device_init(entry);",
+          "context": "370: \t\t\tresult = do_device_init(entry);",
+          "evidence": [
+            "Value stored to 'result' is never read"
+          ],
+          "pattern": "deadcode.DeadStores",
+          "recommendation": "Value stored to 'result' is never read",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        },
+        {
+          "rule_id": "clang-deadcode.DeadStores",
+          "rule_name": "Value stored to 'result' is never read",
+          "analyzer": "clang",
+          "analyzer_id": "deadcode.DeadStores",
+          "diagnostic_type": "Dead assignment",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 372,
+          "snippet": "\t\t\tresult = entry->init_fn.sys();",
+          "context": "372: \t\t\tresult = entry->init_fn.sys();",
+          "evidence": [
+            "Value stored to 'result' is never read"
+          ],
+          "pattern": "deadcode.DeadStores",
+          "recommendation": "Value stored to 'result' is never read",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        }
+      ]
+    },
+    {
+      "suite": "independent-hard",
+      "files": [
+        "kernel/atomic_c.c",
+        "kernel/banner.c",
+        "kernel/init.c"
+      ],
+      "build_context": {
+        "source": "compile_commands",
+        "database": "compile_commands.json",
+        "files_with_entries": 206,
+        "include_dirs": 10,
+        "macros": 4,
+        "dropped": [],
+        "dropped_count": 0
+      },
+      "manifest_sha256": "aeb38c13d84383dfd7749ea4fe4540b0d0ad7c5c80d7b71f06fb67677bd51c10",
+      "evidence": {
+        "engine": "clang",
+        "status": "completed",
+        "mode": "per_file",
+        "versions": [
+          "clang version 18.1.8 (https://github.com/conda-forge/clangdev-feedstock 3c15221e001c9fe87fcc807876aa06d599616b01)"
+        ],
+        "failed_files": [],
+        "diagnostics": [],
+        "experimental_checkers": [
+          "alpha.security.ArrayBoundV2",
+          "alpha.security.ArrayBound",
+          "alpha.unix.cstring.OutOfBounds",
+          "alpha.security.taint.TaintPropagation"
+        ],
+        "build_context": {
+          "source": "compile_commands",
+          "database": "compile_commands.json",
+          "files_with_entries": 206,
+          "include_dirs": 10,
+          "macros": 4,
+          "dropped": [],
+          "dropped_count": 0
+        },
+        "limitations": "Compile context from compile_commands. Multiple sources are analysed as one unity unit when they share a compile context and compile together. Bounds and taint checkers are LLVM experimental rules and can produce false positives. No target program was executed."
+      },
+      "findings": [
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Access to field 'init_thread' results in a dereference of a null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 69,
+          "snippet": "\t\t\t((__typeof__(thread_data))0)->init_thread,",
+          "context": "69: \t\t\t((__typeof__(thread_data))0)->init_thread,",
+          "evidence": [
+            "Calling 'z_init_static_threads'",
+            "Entered call from 'bg_thread_main'",
+            "Entering loop body",
+            "Access to field 'init_thread' results in a dereference of a null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Access to field 'init_thread' results in a dereference of a null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        },
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Access to field 'init_thread' results in a dereference of a null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 442,
+          "snippet": "\tz_init_static_threads();",
+          "context": "442: \tz_init_static_threads();",
+          "evidence": [
+            "Calling 'z_init_static_threads'",
+            "Entered call from 'bg_thread_main'",
+            "Entering loop body",
+            "Access to field 'init_thread' results in a dereference of a null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Access to field 'init_thread' results in a dereference of a null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ],
+          "attribution": "call_site",
+          "callee_location": {
+            "file": "kernel/init.c",
+            "line": 69
+          }
+        },
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Dereference of null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 308,
+          "snippet": "\tconst struct device *dev = ((__typeof__(entry))0)->dev;",
+          "context": "308: \tconst struct device *dev = ((__typeof__(entry))0)->dev;",
+          "evidence": [
+            "Assuming 'dev' is not equal to NULL",
+            "Entering loop body",
+            "Assuming 'dev' is equal to field 'dev'",
+            "Calling 'do_device_init'",
+            "Entered call from 'z_impl_device_init'",
+            "Dereference of null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Dereference of null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        },
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Dereference of null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 387,
+          "snippet": "\t\t\treturn do_device_init(entry);",
+          "context": "387: \t\t\treturn do_device_init(entry);",
+          "evidence": [
+            "Assuming 'dev' is not equal to NULL",
+            "Entering loop body",
+            "Assuming 'dev' is equal to field 'dev'",
+            "Calling 'do_device_init'",
+            "Entered call from 'z_impl_device_init'",
+            "Dereference of null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Dereference of null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ],
+          "attribution": "call_site",
+          "callee_location": {
+            "file": "kernel/init.c",
+            "line": 308
+          }
+        },
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Dereference of null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 365,
+          "snippet": "\t\tconst struct device *dev = ((__typeof__(entry))0)->dev;",
+          "context": "365: \t\tconst struct device *dev = ((__typeof__(entry))0)->dev;",
+          "evidence": [
+            "Calling 'z_sys_init_run_level'",
+            "Entered call from 'z_cstart'",
+            "Entering loop body",
+            "Dereference of null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Dereference of null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        },
+        {
+          "rule_id": "cwe-476",
+          "rule_name": "Dereference of null pointer",
+          "analyzer": "clang",
+          "analyzer_id": "core.NullDereference",
+          "diagnostic_type": "Dereference of null pointer",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 651,
+          "snippet": "\tz_sys_init_run_level(INIT_LEVEL_EARLY);",
+          "context": "651: \tz_sys_init_run_level(INIT_LEVEL_EARLY);",
+          "evidence": [
+            "Calling 'z_sys_init_run_level'",
+            "Entered call from 'z_cstart'",
+            "Entering loop body",
+            "Dereference of null pointer"
+          ],
+          "pattern": "core.NullDereference",
+          "recommendation": "Dereference of null pointer",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ],
+          "attribution": "call_site",
+          "callee_location": {
+            "file": "kernel/init.c",
+            "line": 365
+          }
+        },
+        {
+          "rule_id": "clang-deadcode.DeadStores",
+          "rule_name": "Value stored to 'result' is never read",
+          "analyzer": "clang",
+          "analyzer_id": "deadcode.DeadStores",
+          "diagnostic_type": "Dead assignment",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 370,
+          "snippet": "\t\t\tresult = do_device_init(entry);",
+          "context": "370: \t\t\tresult = do_device_init(entry);",
+          "evidence": [
+            "Value stored to 'result' is never read"
+          ],
+          "pattern": "deadcode.DeadStores",
+          "recommendation": "Value stored to 'result' is never read",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        },
+        {
+          "rule_id": "clang-deadcode.DeadStores",
+          "rule_name": "Value stored to 'result' is never read",
+          "analyzer": "clang",
+          "analyzer_id": "deadcode.DeadStores",
+          "diagnostic_type": "Dead assignment",
+          "severity": "high",
+          "confidence": "medium",
+          "experimental": false,
+          "file": "kernel/init.c",
+          "line": 372,
+          "snippet": "\t\t\tresult = entry->init_fn.sys();",
+          "context": "372: \t\t\tresult = entry->init_fn.sys();",
+          "evidence": [
+            "Value stored to 'result' is never read"
+          ],
+          "pattern": "deadcode.DeadStores",
+          "recommendation": "Value stored to 'result' is never read",
+          "references": [
+            "https://clang.llvm.org/docs/analyzer/checkers.html"
+          ]
+        }
+      ]
+    }
+  ]
+}

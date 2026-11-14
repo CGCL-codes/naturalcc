@@ -111,4 +111,4 @@ uv run python aider_runner.py -dir /path/to/project -f src/foo.c -i "补全 foo 
 - Never pass workspace roots, API keys, artifact roots, or permissions through model-generated tool arguments.
 - The legacy `/api/run` Pipeline and the durable `/api/agent/*` Runtime must remain independently usable.
 
-Contract-3 v6 Clang audit: see `合同-3-v6-Clang复核.md` and `artifacts/contract3/clang-v6-review/`. Released v6 still reproduces Zephyr configuration failures. The external context-only candidate is not promoted: two null detection rates become 100%, and Clang remains partial. Preserve source/GT/metrics distinctions; do not report the candidate as a compliant delivery.
+Contract-3 v6 Clang repair: `scripts/export_contract3_zephyr_context.py` exports real native64/atomic-C headers into the v6 overlay; the builder includes them with hashes. Literal strspn zero-result modeling (engineering-source-v3) is a scoped E exercise, without GT-based filtering. Reported atomic/banner files pass; full Clang remains partial. See `合同-3-v6-Clang复核.md` and context-recipes/README.md. Historical unpromoted evidence stays under clang-v6-review/.

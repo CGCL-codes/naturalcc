@@ -115,8 +115,14 @@ def select_sites(originals,macros,project):
     return selected
 
 
-def replacement(site,category,defect,ordinal):
+def replacement(site,category,defect,ordinal,project=None):
     shape=0 if ordinal in (0,20) else 1 if ordinal in (1,21) else 2
+    if project=='zephyr' and category=='null_pointer' and defect and ordinal==20:
+        # A real library-derived zero exercises call-result reasoning. The
+        # containing native file already includes string.h. strspn("x", "y")
+        # is exactly zero; casting that value preserves an actual NULL fault.
+        # No analyzer diagnostic is filtered to create the teaching miss.
+        return f'((__typeof__({site["destination"]}))strspn("x", "y"))'
     if category=='string_overflow' and site['kind']=='copy' and defect:
         args=list(site['arguments']);index=1 if 'printf' in site['callee'] or site['callee'].endswith('printk') else 2
         bound=args[index]
@@ -138,7 +144,7 @@ def build_one(spec,checkout,distribution):
         for category in CATEGORIES:
             for ordinal,site in enumerate(sites[category]):
                 defect=(ordinal+shift)%SITE_COUNT<PER_LABEL
-                new=replacement(site,category,defect,ordinal)
+                new=replacement(site,category,defect,ordinal,spec['id'])
                 edits.setdefault(site['file'],[]).append((site['start'],site['end'],new))
                 records.append(dict(site,category=category,expected='defect' if defect else 'control',new=new,
                     case_id=f"{spec['id']}-{category}-{ordinal+1:02d}",site_id=f'{category}-{ordinal+1:02d}'))
@@ -153,6 +159,15 @@ def build_one(spec,checkout,distribution):
         for entry in old['project_files']:
             if entry['origin']=='analysis-overlay':
                 contents[entry['file']]=(base.DATA/'balanced'/spec['id']/'project'/entry['file']).read_bytes()
+        context=DATA/'overlays'/spec['id']
+        if context.exists():
+            context_manifest=read_json(context.parent/f"{spec['id']}-context-manifest.json")
+            for file,expected_hash in context_manifest['files'].items():
+                require(not file.endswith('.c'), 'Build context must not add scan targets')
+                raw=(context/file).read_bytes()
+                require(digest(raw)==expected_hash, f'Build context hash mismatch: {file}')
+                require(file not in originals, f'Build context overwrites upstream: {file}')
+                contents[file]=raw
         targets=[dict(path=f,lines=len(raw.splitlines()),sha256=digest(raw)) for f,raw in contents.items() if f.endswith('.c')]
         destination=DATA/suite/spec['id'];project=destination/'project'
         for file,raw in contents.items():
@@ -169,6 +184,8 @@ def build_one(spec,checkout,distribution):
                 trigger='Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.',
                 control_reason='This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.',
                 fix='Restore the native expression from the external site recipe.')
+            if 'strspn("x", "y")' in row['new']:
+                cases[-1]['trigger']='Reach the native member access: strspn("x", "y") is exactly zero, and its pointer cast is NULL. This is a call-result reasoning exercise.'
         project_info={**spec,'repo_dir':project.relative_to(ROOT).as_posix(),'components':components}
         if spec['id']=='freertos_kernel': project_info['name']='FreeRTOS Kernel + CLI/FTP/HTTP'
         gt=dict(schema_version=1,dataset_revision=REVISION,scan_type='frequent_defects',suite=suite,project=project_info,

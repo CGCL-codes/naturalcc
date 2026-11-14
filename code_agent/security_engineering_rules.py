@@ -13,7 +13,7 @@ import re
 from code_agent.security_c_rules import parse_source, walk, text, call_parts
 from code_agent.security_exam import switch_off
 
-VERSION = 'engineering-source-v2'
+VERSION = 'engineering-source-v3'
 
 
 def compact(value):
@@ -56,6 +56,16 @@ def zero(node):
     if node.type=='call_expression' and '__typeof__(' in compact(text(node.child_by_field_name('function'))):
         args=node.child_by_field_name('arguments').named_children
         return len(args)==1 and zero(args[0])
+    if node.type=='call_expression':
+        name,args=call_parts(node)
+        if name=='strspn' and len(args)==2:
+            # Model only plain ASCII literals: C escapes, concatenations and
+            # dynamic input require a stronger string evaluator. A disjoint
+            # first character (or empty input) makes the span exactly zero.
+            literals=[re.fullmatch(r'"([A-Za-z0-9 ]*)"',text(arg)) for arg in args]
+            if all(literals):
+                source,accepted=(match.group(1) for match in literals)
+                return not source or source[0] not in accepted
     if node.type=='number_literal': return bool(re.fullmatch(r'0[uUlL]*',text(node)))
     left,op,right=binary(node)
     return op in ('+','|','^') and zero(left) and zero(right)

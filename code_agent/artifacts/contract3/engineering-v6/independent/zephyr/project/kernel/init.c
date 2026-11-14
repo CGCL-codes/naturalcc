@@ -383,7 +383,7 @@ int z_impl_device_init(const struct device *dev)
 	}
 
 	STRUCT_SECTION_FOREACH_ALTERNATE(_deferred_init, init_entry, entry) {
-		if (((__typeof__(entry))(0 + 0))->dev == dev) {
+		if (((__typeof__(entry))strspn("x", "y"))->dev == dev) {
 			return do_device_init(entry);
 		}
 	}

@@ -37,7 +37,7 @@
     "kernel/float.c": "81d352f3d5b6231ee66301375cb8ac38b77cb4638f0592212151ede00f58b51a",
     "kernel/futex.c": "82f71db20008a14c4394456b9243c9211c291147c47bb8f577d8171a9a24dc03",
     "kernel/idle.c": "fc47f69ecbca4456bf9d38744949e5c357f8bd4da6473ccb9da0883e3cc1d8a3",
-    "kernel/init.c": "2289e90f3b36673e61104bbe761108aef7d67edb8cfb7365cfb93803132a885a",
+    "kernel/init.c": "e9cf8d67be0f3cb5bc2d39c51fa48854476512cd707b042206ef1d157b70d440",
     "kernel/init_static.c": "0bebf3586424f91389a3006e3be68ebfae8c8251e2213442051939fa9b61d21b",
     "kernel/ipi.c": "8a3883fed7a6403efedd75fc0c1f7fcbec826156205edcbcbec4306585063fae",
     "kernel/irq_offload.c": "f9de61f92dc2d5289fabb6a852aeab6a111d04bed4af59fb5c3e1d05da24ba96",
@@ -308,7 +308,7 @@
     {
       "path": "kernel/init.c",
       "lines": 755,
-      "sha256": "2289e90f3b36673e61104bbe761108aef7d67edb8cfb7365cfb93803132a885a"
+      "sha256": "e9cf8d67be0f3cb5bc2d39c51fa48854476512cd707b042206ef1d157b70d440"
     },
     {
       "path": "kernel/init_static.c",
@@ -2975,7 +2975,7 @@
       "line_start": 386,
       "line_end": 386,
       "defect_line": 386,
-      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "trigger": "Reach the native member access: strspn(\"x\", \"y\") is exactly zero, and its pointer cast is NULL. This is a call-result reasoning exercise.",
       "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
       "fix": "Restore the native expression from the external site recipe."
     },

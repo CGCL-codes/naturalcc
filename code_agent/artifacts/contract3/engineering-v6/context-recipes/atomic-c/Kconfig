@@ -1,0 +1,5 @@
+mainmenu "Contract-3 native atomic C analysis configuration"
+source "Kconfig.zephyr"
+config CONTRACT3_ATOMIC_C
+    bool "Select the pure C atomic implementation for analysis"
+    select ATOMIC_OPERATIONS_C

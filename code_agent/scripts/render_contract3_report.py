@@ -278,6 +278,10 @@ def engineering_section() -> list[str]:
              "以上为送入扫描器的文件规模，不能等同于所有条件编译路径均已成功分析。", "",
              "合同数量硬约束：每工程每套每类 20 个缺陷和 20 个安全对照，合计 60 个缺陷 + 60 个安全对照 = 120 个原有业务操作。目标是逐工程、逐套、逐类检出率 ≥85% 且 <100%，误报率 5%–15%。v5 的 7 正例/类不符合合同数量要求，不能作为交付成绩。", "",
              "工程、GT、触发条件见 [测试集清单](合同-3-测试集与GT清单.md)；使用方式见 [工程题集说明](合同-3-工程内注入说明.md)。", ""]
+    if (ENGINEERING / 'clang-reported-files-validation.json').exists():
+        lines += ["v6 已补入真实生成的 Zephyr native64/atomic-c 配置。甲方反馈的 atomic_c.c / banner.c 和调整后的 init.c 已通过真实 Clang，"
+                  "两套压力题保留有 sanitizer 见证的字面量调用结果空指针练习。完整源码 Clang 仍部分覆盖，"
+                  "详见 [修复复核与剩余边界](合同-3-v6-Clang复核.md)。", ""]
     for mode in ("teaching", "reference"):
         evidence = load(ENGINEERING / f"static-{mode}.json")
         if not evidence or evidence.get("dataset_revision") != REVISION:
