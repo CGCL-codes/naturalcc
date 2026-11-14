@@ -717,33 +717,22 @@ code_agent/
 
 ---
 
-## 17. 合同指标 3：检测器优化教学题
+## 17. 合同指标 3：工程内注入教学题
 
-当前题集版本为 `teaching-v3-20261113`，直接调整原四套题集的形态配比，仍保留三个固定版本 RTOS 工程、每类 20 正例和 20 同形态安全对照。该版为教师校准题，不称为独立泛化测试。
+当前默认版本为 `engineering-v5-20261114`。三工程 × 四套分别提供工程源码快照、外置 GT 和哈希清单，缺陷修改原有业务操作，不再新增三个独立样例文件。每工程每套每类为 7 个缺陷与 7 个安全对照；按实际操作行计分，逐类目标为检出率 ≥85% 且 <100%、误报率 5%–15%。旧 v3 的成绩不混用。 2026-11-14 实测 36/36 项达标，均为检出率 85.71%、误报率 14.29%；验证记录见[复核说明](合同-3-复核说明.md)。
 
-默认 A/B/C/E/F/G/H/I 关闭、D 开启，仅在合同 3 中生效。Cppcheck 和 Clang 在 PATH 时可离线复测，不调用模型：
-
-```bash
-uv run python scripts/measure_contract3_static.py --delivered
-uv run python scripts/measure_contract3_static.py --delivered --reference
-```
-
-第一条使用学生基线，第二条只在进程内开启完整参考答案，不修改默认设置。每个工程、每套题集的各类检出率均为 85%–95%，误报率均为 5%–15%；参考答案各类为 100% 检出、0% 误报。H 对应数组提前返回守卫，I 对应字符串恰好容纳边界。逐类计数、误报率和引擎版本见[总报告](合同-3-result.md)。[难度指南](合同-3-静态分析难度调节指南.md)包含教师答案，不发给学生。
-
-可选 Web 模式仍使用 `scripts/benchmark_contract3_web.py --suite balanced` 等命令及合同 5 的 Web 后端配置。新版 checkpoint 目录为 `artifacts/contract3/web-sonnet45-<suite>-teaching-v3-20261113/`，避免复用旧版函数标签。旧模型记录保留为历史成绩；新版尚未做真实 Web 模型评测。历史 Cppcheck 单引擎脚本保留，但其成绩与综合静态教学链路分开。
-
-### 合同 5 检测规则
-
-`security_rtos_rules.py` 为四类高危代码增加了面向 RTOS 的检查。原有的 `security_c_rules.py` 只认 libc 写法（`memcpy`、`pthread_mutex_lock`），且只跟踪普通全局标量；而在 RTOS 内核里同样的操作写作 `rt_memcpy`、`rt_spin_lock_irqsave`，共享状态位于通过对象指针访问的字段上，因此原规则在本数据集上一条都报不出来。新模块还能容忍 RT-Thread 宏（`rt_weak`、`rt_inline`）造成的解析错误——改为逐个校验匹配到的构造，而不是丢弃整个函数。
-
-单独评估静态层（不调模型、不联网）：
+实际送检 C 文件数为 FreeRTOS 7、Zephyr 124、RT-Thread 77，行数分别约为 1.66 万、3.19 万、6.61 万。成功解析和条件编译覆盖另行报告，不能把送检规模当作全部成功覆盖。真实插件按标注操作的覆盖证据计分，无关函数解析错误不再否决已覆盖用例；未覆盖操作保留在 unscored_cases，不计为漏检或正确对照。
 
 ```bash
-uv run python scripts/measure_contract5_static.py            # 汇总表
-uv run python scripts/measure_contract5_static.py --misses   # 逐条列出漏报与误报
+uv run --no-sync python scripts/build_contract3_engineering_v5.py --verify
+uv run --no-sync python scripts/measure_contract3_static.py --delivered
+uv run --no-sync python scripts/measure_contract3_static.py --delivered --reference
+uv run --no-sync python scripts/benchmark_contract3_web.py --suite balanced --project freertos_kernel --print-prompts --limit 1
 ```
 
-与合同 3 的边界：这些告警的 `rule_id` 为 `cwe-787`，而合同 3 的本地口径按 CWE 号匹配，因此若告警落在合同 3 的真值函数内会被计为其"字符串溢出"类；合同 3 的 Web 模式只对模型自身按类别受限的预测计分，不受影响。
+真实 Web 运行另需 `--model` 与后端一致，每个真实 C 文件一个 Run，完整快照作为工作区，GT 不交给模型。本版未进行真实 Web 模型评测。旧小样例入口须显式加 `--legacy-fixtures`。
+
+详见[工程题集说明与配置边界](合同-3-工程内注入说明.md)、[逐套源码与 GT](合同-3-测试集与GT清单.md)、[新旧结果分开的总报告](合同-3-result.md)。
 
 ## 18. 合同第 5 项：操作系统底层程序数据集与 Web Agent 测试
 

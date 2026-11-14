@@ -18,6 +18,11 @@ CONTRACT3_OFF = frozenset({"A", "B", "C", "E", "F", "G", "H", "I"})
 
 SWITCH_NAMES = ("A", "B", "C", "D", "E", "F", "G", "H", "I")
 _ACTIVE: ContextVar[frozenset] = ContextVar("contract3_exam_off", default=frozenset())
+_ENABLED: ContextVar[bool] = ContextVar("contract3_exam_enabled", default=False)
+
+
+def contract3_active() -> bool:
+    return _ENABLED.get()
 
 
 # [maint-note:40f90f061d13]
@@ -59,7 +64,9 @@ def active_switches_off() -> frozenset:
 def contract3_exam(enabled: bool = True):
     """Apply CONTRACT3_OFF for the enclosed synchronous block (no-op when not enabled)."""
     token = _ACTIVE.set(CONTRACT3_OFF if enabled else frozenset())
+    enabled_token = _ENABLED.set(enabled)
     try:
         yield
     finally:
+        _ENABLED.reset(enabled_token)
         _ACTIVE.reset(token)

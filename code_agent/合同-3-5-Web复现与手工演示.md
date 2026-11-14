@@ -1,5 +1,17 @@
 # 合同指标 3、5：Web 复现与手工演示
 
+> 2026-11-14 更新：合同三默认改为工程内注入版。当前用法见 [工程题集说明](合同-3-工程内注入说明.md)。下文“9 个工程×类别组”和 fixture 手工演示仅保留为旧版复现，命令已加 `--legacy-fixtures`；合同五流程不变。
+
+当前合同三先选择 `artifacts/contract3/engineering-v5/<suite>/<project>/project/` 作为工作区，GT 保存在其外层。Web 评测按完整 C 文件逐个运行，而非按三个小样例文件运行。可离线预览：
+
+```bash
+uv run --no-sync python scripts/benchmark_contract3_web.py \
+  --suite balanced --project freertos_kernel --print-prompts --limit 1
+```
+
+实际 Web 运行另需提供 `--model`，并与后端运行时模型一致；本版尚无真实 Web 模型成绩。以下为历史流程说明。
+
+
 本文说明合同指标 3 与指标 5 的 Web Agent 复现方式，以及在网页中手工演示静态漏洞检测的操作步骤。
 
 ## 1. 两种运行方式
@@ -62,7 +74,7 @@ curl --silent --show-error --proxy http://127.0.0.1:7899 \
 成功时会显示 HTTP 200。实际模型请求时，Clash 日志应出现 `openrouter.ai:443` 并显示其选中的节点。若之前因 403 中断指标 3，代理生效后先只补跑失败组：
 
 ```bash
-uv run python scripts/benchmark_contract3_web.py --suite balanced --retry-failed
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite balanced --retry-failed
 ```
 
 ## 3. 正式复现
@@ -74,10 +86,10 @@ cd /home/sub4-wy/wangchen/ncc/naturalcc/code_agent
 source ~/.bashrc  # 仅当前终端未自动加载凭据时需要
 
 # 指标 3：Web 平衡验收集
-uv run python scripts/benchmark_contract3_web.py --suite balanced
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite balanced
 
 # 指标 3：Web 独立复杂压力集
-uv run python scripts/benchmark_contract3_web.py --suite independent
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite independent
 
 # 指标 5：Web Agent 测试（先 --print-prompts 检查提示词，再 --limit 2 冒烟，最后全量）
 uv run python scripts/benchmark_contract5_web.py --print-prompts
@@ -94,18 +106,18 @@ uv run python scripts/render_contract3_report.py
 指标 3 的 Web 脚本会在终端逐组打印“排队/运行/已保存”状态；如果结果已存在，也会明确打印“跳过（已有结果）”。结束时会打印各类别 TP/FN/FP/TN、检出率、误报率、判定以及报告和 checkpoint 路径，因此无需只打开 Markdown 才能查看结果。使用 `--report-only` 时不调用模型，只打印已有结果摘要：
 
 ```bash
-uv run python scripts/benchmark_contract3_web.py --suite balanced --report-only
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite balanced --report-only
 ```
 
 如需重新请求模型并产生一轮新的指标 3 Web 结果，服务和密钥均已配置时使用 `--force-rerun`。该选项会对选中的组创建新 Run、保留旧 Run 记录，并以本轮完整完成的结果更新当前统计；会消耗模型额度。
 
 ```bash
 # 9 组完整平衡验收集，结束时输出本轮新的完整得分
-uv run python scripts/benchmark_contract3_web.py --suite balanced --force-rerun
-uv run python scripts/benchmark_contract3_web.py --suite independent  --force-rerun
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite balanced --force-rerun
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite independent  --force-rerun
 
 # --limit 1 仅作连通性冒烟，不能作为完整新得分
-uv run python scripts/benchmark_contract3_web.py --suite balanced --limit 1 --force-rerun
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite balanced --limit 1 --force-rerun
 ```
 
 指标 5 的数据集说明见 [合同-5-数据集说明.md](合同-5-数据集说明.md)；离线刷新已有结果：

@@ -1,0 +1,467 @@
+{
+  "schema_version": 1,
+  "dataset_revision": "engineering-v4-20261114",
+  "scan_type": "frequent_defects",
+  "suite": "independent-hard",
+  "project": {
+    "id": "freertos_kernel",
+    "name": "FreeRTOS Kernel",
+    "url": "https://github.com/FreeRTOS/FreeRTOS-Kernel.git",
+    "ref": "V11.1.0",
+    "commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0",
+    "scan_roots": [
+      "."
+    ],
+    "repo_dir": "artifacts/contract3/engineering-v4/independent-hard/freertos_kernel/project"
+  },
+  "source_sha256": {
+    "croutine.c": "678405d57f2f911c8d91864a068cb88fa842d05788303ec20ae17e7dfe46cac7",
+    "event_groups.c": "8b73abf191b85376ede593e6127b036f823e9ea7484454a5629ddb70742be6a9",
+    "list.c": "e0a4d7a061e86ccb8ee4e08b0c1229c51d8c0a7a6f1c51c45083314f2e42b297",
+    "queue.c": "bf2e956e3ec3a1988666635cf43651b89d6d7e68ad2b30ad628f49661f740759",
+    "stream_buffer.c": "f2041618919a475c1438309013149105e5145acac4cdc57f79ee1a6dbe3b98a4",
+    "tasks.c": "d20d9ff6982a19173f98f00069f34f9ab4e0c24f725980c8a26bd67bfc5d4c67",
+    "timers.c": "d49d94ac3dfea9b7d353ff457d52552f6f2f52e8f631bc0dc268fb848eb2e133"
+  },
+  "cases": [
+    {
+      "case_id": "freertos_kernel-array_oob-01",
+      "site_id": "array_oob-01",
+      "category": "array_oob",
+      "file": "queue.c",
+      "function": "vQueueAddToRegistry",
+      "line_start": 3009,
+      "line_end": 3053,
+      "defect_line": 3023,
+      "expected": "control",
+      "trigger": "队列注册表已满或查询不存在的句柄，遍历抵达容量下标，下一次访问 xQueueRegistry[ux] 越界。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        3009,
+        3053
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-02",
+      "site_id": "array_oob-02",
+      "category": "array_oob",
+      "file": "queue.c",
+      "function": "pcQueueGetName",
+      "line_start": 3060,
+      "line_end": 3088,
+      "defect_line": 3072,
+      "expected": "control",
+      "trigger": "队列注册表已满或查询不存在的句柄，遍历抵达容量下标，下一次访问 xQueueRegistry[ux] 越界。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        3060,
+        3088
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-03",
+      "site_id": "array_oob-03",
+      "category": "array_oob",
+      "file": "queue.c",
+      "function": "vQueueUnregisterQueue",
+      "line_start": 3095,
+      "line_end": 3125,
+      "defect_line": 3105,
+      "expected": "control",
+      "trigger": "队列注册表已满或查询不存在的句柄，遍历抵达容量下标，下一次访问 xQueueRegistry[ux] 越界。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        3095,
+        3125
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-04",
+      "site_id": "array_oob-04",
+      "category": "array_oob",
+      "file": "tasks.c",
+      "function": "ulTaskGenericNotifyTake",
+      "line_start": 7614,
+      "line_end": 7710,
+      "defect_line": 7636,
+      "expected": "defect",
+      "trigger": "传入合法的最后一个通知槽下标（容量减一）；实际数组访问额外加一导致越界。读取旧值的分支需传非空输出指针。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        7614,
+        7710
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-05",
+      "site_id": "array_oob-05",
+      "category": "array_oob",
+      "file": "tasks.c",
+      "function": "xTaskGenericNotify",
+      "line_start": 7832,
+      "line_end": 7945,
+      "defect_line": 7852,
+      "expected": "defect",
+      "trigger": "传入合法的最后一个通知槽下标（容量减一）；实际数组访问额外加一导致越界。读取旧值的分支需传非空输出指针。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        7832,
+        7945
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-array_oob-06",
+      "site_id": "array_oob-06",
+      "category": "array_oob",
+      "file": "tasks.c",
+      "function": "xTaskGenericNotifyStateClear",
+      "line_start": 8234,
+      "line_end": 8265,
+      "defect_line": 8250,
+      "expected": "defect",
+      "trigger": "传入合法的最后一个通知槽下标（容量减一）；实际数组访问额外加一导致越界。读取旧值的分支需传非空输出指针。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        8234,
+        8265
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-01",
+      "site_id": "string_overflow-01",
+      "category": "string_overflow",
+      "file": "tasks.c",
+      "function": "prvInitialiseNewTask",
+      "line_start": 1793,
+      "line_end": 2014,
+      "defect_line": 1884,
+      "expected": "control",
+      "trigger": "创建有名称的任务时，结尾 NUL 写到任务名称缓冲区容量下标。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        1793,
+        2014
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-02",
+      "site_id": "string_overflow-02",
+      "category": "string_overflow",
+      "file": "tasks.c",
+      "function": "prvCreateIdleTasks",
+      "line_start": 3511,
+      "line_end": 3661,
+      "defect_line": 3572,
+      "expected": "control",
+      "trigger": "多核空闲任务名添加核心编号后，结尾 NUL 写出名称数组。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        3511,
+        3661
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-03",
+      "site_id": "string_overflow-03",
+      "category": "string_overflow",
+      "file": "tasks.c",
+      "function": "prvWriteNameToBuffer",
+      "line_start": 7186,
+      "line_end": 7206,
+      "defect_line": 7202,
+      "expected": "control",
+      "trigger": "任务统计名称输出区恰好剩 configMAX_TASK_NAME_LEN 字节时，填充到倒数一字节后，结尾 NUL 越界一字节。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        7186,
+        7206
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-04",
+      "site_id": "string_overflow-04",
+      "category": "string_overflow",
+      "file": "tasks.c",
+      "function": "vTaskListTasks",
+      "line_start": 7325,
+      "line_end": 7326,
+      "defect_line": 7325,
+      "expected": "control",
+      "trigger": "统计输出指针已向后移动且剩余缓冲较小时，格式化长度超过剩余容量；需选择包含此 snprintf 分支的编译配置和足够长的数值输出。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        7213,
+        7376
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-05",
+      "site_id": "string_overflow-05",
+      "category": "string_overflow",
+      "file": "tasks.c",
+      "function": "vTaskListTasks",
+      "line_start": 7337,
+      "line_end": 7338,
+      "defect_line": 7337,
+      "expected": "defect",
+      "trigger": "统计输出指针已向后移动且剩余缓冲较小时，格式化长度超过剩余容量；需选择包含此 snprintf 分支的编译配置和足够长的数值输出。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        7213,
+        7376
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-06",
+      "site_id": "string_overflow-06",
+      "category": "string_overflow",
+      "file": "tasks.c",
+      "function": "vTaskGetRunTimeStatistics",
+      "line_start": 7479,
+      "line_end": 7480,
+      "defect_line": 7479,
+      "expected": "defect",
+      "trigger": "统计输出指针已向后移动且剩余缓冲较小时，格式化长度超过剩余容量；需选择包含此 snprintf 分支的编译配置和足够长的数值输出。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        7383,
+        7564
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-07",
+      "site_id": "string_overflow-07",
+      "category": "string_overflow",
+      "file": "tasks.c",
+      "function": "vTaskGetRunTimeStatistics",
+      "line_start": 7492,
+      "line_end": 7493,
+      "defect_line": 7492,
+      "expected": "defect",
+      "trigger": "统计输出指针已向后移动且剩余缓冲较小时，格式化长度超过剩余容量；需选择包含此 snprintf 分支的编译配置和足够长的数值输出。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        7383,
+        7564
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-08",
+      "site_id": "string_overflow-08",
+      "category": "string_overflow",
+      "file": "tasks.c",
+      "function": "vTaskGetRunTimeStatistics",
+      "line_start": 7509,
+      "line_end": 7510,
+      "defect_line": 7509,
+      "expected": "defect",
+      "trigger": "统计输出指针已向后移动且剩余缓冲较小时，格式化长度超过剩余容量；需选择包含此 snprintf 分支的编译配置和足够长的数值输出。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        7383,
+        7564
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-string_overflow-09",
+      "site_id": "string_overflow-09",
+      "category": "string_overflow",
+      "file": "tasks.c",
+      "function": "vTaskGetRunTimeStatistics",
+      "line_start": 7521,
+      "line_end": 7522,
+      "defect_line": 7521,
+      "expected": "defect",
+      "trigger": "统计输出指针已向后移动且剩余缓冲较小时，格式化长度超过剩余容量；需选择包含此 snprintf 分支的编译配置和足够长的数值输出。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        7383,
+        7564
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-01",
+      "site_id": "null_pointer-01",
+      "category": "null_pointer",
+      "file": "queue.c",
+      "function": "xQueueGenericCreate",
+      "line_start": 502,
+      "line_end": 561,
+      "defect_line": 528,
+      "expected": "control",
+      "trigger": "队列创建分配失败后仍进入队列初始化并解引用空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        502,
+        561
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-02",
+      "site_id": "null_pointer-02",
+      "category": "null_pointer",
+      "file": "queue.c",
+      "function": "prvInitialiseMutex",
+      "line_start": 614,
+      "line_end": 637,
+      "defect_line": 616,
+      "expected": "control",
+      "trigger": "互斥量底层队列分配失败，prvInitialiseMutex 收到 NULL；错误进入互斥量成员初始化。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        614,
+        637
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-03",
+      "site_id": "null_pointer-03",
+      "category": "null_pointer",
+      "file": "event_groups.c",
+      "function": "xEventGroupCreateStatic",
+      "line_start": 86,
+      "line_end": 138,
+      "defect_line": 111,
+      "expected": "control",
+      "trigger": "启用静态分配、禁用 configASSERT；事件组创建传入 NULL 存储后错误进入成员初始化。原实现的运行时 guard 会跳过该初始化。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        86,
+        138
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-04",
+      "site_id": "null_pointer-04",
+      "category": "null_pointer",
+      "file": "event_groups.c",
+      "function": "xEventGroupCreate",
+      "line_start": 145,
+      "line_end": 180,
+      "defect_line": 156,
+      "expected": "defect",
+      "trigger": "事件组内存分配失败时进入初始化分支，解引用空指针。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        145,
+        180
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-05",
+      "site_id": "null_pointer-05",
+      "category": "null_pointer",
+      "file": "timers.c",
+      "function": "xTimerCreate",
+      "line_start": 336,
+      "line_end": 363,
+      "defect_line": 351,
+      "expected": "defect",
+      "trigger": "动态定时器分配失败后进入 prvInitialiseNewTimer 并写空对象成员。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        336,
+        363
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-06",
+      "site_id": "null_pointer-06",
+      "category": "null_pointer",
+      "file": "timers.c",
+      "function": "xTimerCreateStatic",
+      "line_start": 370,
+      "line_end": 412,
+      "defect_line": 399,
+      "expected": "defect",
+      "trigger": "静态定时器传入空存储且断言禁用时进入初始化，空对象被解引用。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        370,
+        412
+      ]
+    },
+    {
+      "case_id": "freertos_kernel-null_pointer-07",
+      "site_id": "null_pointer-07",
+      "category": "null_pointer",
+      "file": "queue.c",
+      "function": "vQueueAddToRegistry",
+      "line_start": 3009,
+      "line_end": 3053,
+      "defect_line": 3043,
+      "expected": "defect",
+      "trigger": "注册表没有可写位置时 pxEntryToWrite 为空，进入分支写其成员。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        3009,
+        3053
+      ]
+    }
+  ],
+  "detection_files": [
+    {
+      "path": "croutine.c",
+      "lines": 405,
+      "sha256": "678405d57f2f911c8d91864a068cb88fa842d05788303ec20ae17e7dfe46cac7"
+    },
+    {
+      "path": "event_groups.c",
+      "lines": 884,
+      "sha256": "8b73abf191b85376ede593e6127b036f823e9ea7484454a5629ddb70742be6a9"
+    },
+    {
+      "path": "list.c",
+      "lines": 246,
+      "sha256": "e0a4d7a061e86ccb8ee4e08b0c1229c51d8c0a7a6f1c51c45083314f2e42b297"
+    },
+    {
+      "path": "queue.c",
+      "lines": 3364,
+      "sha256": "bf2e956e3ec3a1988666635cf43651b89d6d7e68ad2b30ad628f49661f740759"
+    },
+    {
+      "path": "stream_buffer.c",
+      "lines": 1718,
+      "sha256": "f2041618919a475c1438309013149105e5145acac4cdc57f79ee1a6dbe3b98a4"
+    },
+    {
+      "path": "tasks.c",
+      "lines": 8696,
+      "sha256": "d20d9ff6982a19173f98f00069f34f9ab4e0c24f725980c8a26bd67bfc5d4c67"
+    },
+    {
+      "path": "timers.c",
+      "lines": 1340,
+      "sha256": "d49d94ac3dfea9b7d353ff457d52552f6f2f52e8f631bc0dc268fb848eb2e133"
+    }
+  ],
+  "line_totals": {
+    "detection_files": 16653,
+    "project_source": 35109
+  },
+  "scoring_rule": "Category plus non-overlapping operation range; unlabelled findings remain unscored. Controls assert only the marked operation under its documented preconditions.",
+  "configuration_scope": "Source audit plus POSIX FreeRTOS / selected RT-Thread host parsing profiles. Zephyr has no generated board configuration. No complete OS build or boot is claimed; conditional-path coverage is reported separately."
+}

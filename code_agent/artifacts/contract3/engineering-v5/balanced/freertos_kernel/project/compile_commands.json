@@ -1,0 +1,93 @@
+[
+  {
+    "directory": ".",
+    "file": "croutine.c",
+    "arguments": [
+      "cc",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "croutine.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "event_groups.c",
+    "arguments": [
+      "cc",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "event_groups.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "list.c",
+    "arguments": [
+      "cc",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "list.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "queue.c",
+    "arguments": [
+      "cc",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "queue.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "stream_buffer.c",
+    "arguments": [
+      "cc",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "stream_buffer.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "tasks.c",
+    "arguments": [
+      "cc",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "tasks.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "timers.c",
+    "arguments": [
+      "cc",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "timers.c"
+    ]
+  }
+]

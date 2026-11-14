@@ -1,2178 +1,612 @@
-# 合同 3：RTOS 测试集与 Ground Truth 清单
-
-> 本文由 [scripts/export_contract3_ground_truth.py](scripts/export_contract3_ground_truth.py) 自动生成，请勿手改；重新生成：`uv run python scripts/export_contract3_ground_truth.py`。
-
-## 1. 概览
-
-- **题集版本**：`teaching-v3-20261113`，教师校准后的检测器优化题；旧版 Web 成绩不能直接作为此版本成绩。
-- **工程**：3 套固定版本的公开 RTOS 源码。每套工程的“检测文件”合计不少于 10,000 行，见第 3 节。
-- **缺陷**：每套工程按类别（数组越界、字符串溢出、空指针调用）各注入一个测试文件，每个文件 40 个函数：20 个正例（真实缺陷）+ 20 个同类安全对照。上游源码本身不改动。
-- **测试集**：`balanced`（平衡验收集）、`independent`（独立压力集）、`balanced-hard`（平衡验收集（加难版））、`independent-hard`（独立压力集（加难版））；每套 3 工程 × 3 类 × 40 = 360 个函数。各套的区别只在注入的写法（第 2 节）和函数顺序（加难版打乱）。
-- **计分**：只有注入函数参与计分。正例的告警落在函数行范围内（加难版按函数名）记 TP，否则 FN；对照被告警记 FP，否则 TN。上游源码文件里的告警不计分。
-- **机器可读 GT**：`artifacts/contract3/ground_truth/<测试集>/<工程>/ground_truth.json`，每套测试集每个工程一份，格式与产品 `load_ground_truth` 读取的一致（`schema_version=1`、`scan_type=frequent_defects`、`source_sha256`、平铺的 `cases[]`），放到工程根目录即可作为 `ground_truth_file` 直接评分。字段见第 5 节。
-
-| 测试集 | FreeRTOS Kernel | Zephyr RTOS | RT-Thread |
-|---|---|---|---|
-| 平衡验收集 | [freertos_kernel/ground_truth.json](artifacts/contract3/ground_truth/balanced/freertos_kernel/ground_truth.json) | [zephyr/ground_truth.json](artifacts/contract3/ground_truth/balanced/zephyr/ground_truth.json) | [rt_thread/ground_truth.json](artifacts/contract3/ground_truth/balanced/rt_thread/ground_truth.json) |
-| 独立压力集 | [freertos_kernel/ground_truth.json](artifacts/contract3/ground_truth/independent/freertos_kernel/ground_truth.json) | [zephyr/ground_truth.json](artifacts/contract3/ground_truth/independent/zephyr/ground_truth.json) | [rt_thread/ground_truth.json](artifacts/contract3/ground_truth/independent/rt_thread/ground_truth.json) |
-| 平衡验收集（加难版） | [freertos_kernel/ground_truth.json](artifacts/contract3/ground_truth/balanced-hard/freertos_kernel/ground_truth.json) | [zephyr/ground_truth.json](artifacts/contract3/ground_truth/balanced-hard/zephyr/ground_truth.json) | [rt_thread/ground_truth.json](artifacts/contract3/ground_truth/balanced-hard/rt_thread/ground_truth.json) |
-| 独立压力集（加难版） | [freertos_kernel/ground_truth.json](artifacts/contract3/ground_truth/independent-hard/freertos_kernel/ground_truth.json) | [zephyr/ground_truth.json](artifacts/contract3/ground_truth/independent-hard/zephyr/ground_truth.json) | [rt_thread/ground_truth.json](artifacts/contract3/ground_truth/independent-hard/rt_thread/ground_truth.json) |
-
-### 1.1 三套工程与四套 GT 的区别
-
-三个工程分别来自 FreeRTOS、Zephyr、RT-Thread，上游源码不同；同一工程的四套 GT 共用同一份固定版本上游源码。
-每套 GT 只选择自己对应的三个 fixture 文件计分，文件名、函数范围和 SHA-256 必须一起匹配，不能只换标签而复用不匹配的文件。
-普通平衡集和压力集的同一套 fixture 在三个工程间逐字节相同；加难版仍复用缺陷模板，但按工程固定种子打乱函数顺序。
-因此这里验证的是相同缺陷模板在三个工程容器中的检测表现，不能称为三个独立的真实业务缺陷集合。
-
-### 1.2 检出率读取口径
-
-本清单记录真值，不记录检出率。旧版题集和旧配置 A/C/E/F 关闭时，平衡集字符串检出 13/20（65%），
-平衡加难和压力加难各为 15/20（75%）；对应总体是 88.3%、91.7%、91.7%。总体超过 85% 不代表每类超过 85%。
-新版形态配比与 A/B/C/E/F/G/H/I 教学配置的逐类实测见 [难度指南](合同-3-静态分析难度调节指南.md)。完整规则是参考答案；静态实测与历史 Web 模型结果分开记录。
-
-## 2. 缺陷写法（正例与对照）
-
-“正例代码”与“对照代码”是注入函数的函数体；对照与正例写法相近，但实际安全。`base-N` 用于平衡集、压力集，加难版另加 `hard-N`（差一错误与看似危险的安全写法）。
-
-### 数组越界（`array_oob`）
-
-| 写法 | 测试点 | 正例代码 | 对照代码 |
-|---|---|---|---|
-| `base-0` | 常量下标越界：`values[3]` 访问 3 元素数组 | `int values[3] = {1, 2, 3};`<br>`return values[3];` | `int values[3] = {1, 2, 3};`<br>`return values[2];` |
-| `base-1` | 下标经局部变量传入后越界 | `int values[3] = {1, 2, 3};`<br>`int index = 3;`<br>`return values[index];` | `int values[3] = {1, 2, 3};`<br>`int index = 2;`<br>`return values[index];` |
-| `base-2` | 循环边界写成 `<=`，最后一轮越界 | `int values[3] = {1, 2, 3};`<br>`int total = 0;`<br>`for (int index = 0; index <= 3; ++index) total += values[index];`<br>`return total;` | `int values[3] = {1, 2, 3};`<br>`int total = 0;`<br>`for (int index = 0; index < 3; ++index) total += values[index];`<br>`return total;` |
-| `base-3` | 下标经辅助函数 `contract3_identity` 返回后越界（跨函数） | `int values[3] = {1, 2, 3};`<br>`int index = contract3_identity(3);`<br>`return values[index];` | `int values[3] = {1, 2, 3};`<br>`int index = contract3_identity(2);`<br>`return values[index];` |
-| `base-4` | 指针算术 `values + 3` 后解引用越界 | `int values[3] = {1, 2, 3};`<br>`int *cursor = values + 3;`<br>`return *cursor;` | `int values[3] = {1, 2, 3};`<br>`int *cursor = values + 2;`<br>`return *cursor;` |
-| `base-5` | 边界守卫：正例 > 漏拦截，对照 >= 提前返回 | `int values[3] = {1, 2, 3};`<br>`int index = 3;`<br>`if (index > 3) return 0;`<br>`return values[index];` | `int values[3] = {1, 2, 3};`<br>`int index = 3;`<br>`if (index >= 3) return 0;`<br>`return values[index];` |
-| `hard-0` | 守卫写成 `> 3`（应为 `>= 3`），差一越界 | `int values[3] = {1, 2, 3};`<br>`int index = 3;`<br>`if (index > 3) return 0;`<br>`return values[index];` | `int values[3] = {1, 2, 3};`<br>`int index = 3;`<br>`if (index >= 3) return 0;`<br>`return values[index];` |
-| `hard-1` | 倒序循环从下标 3 开始，差一越界 | `int values[3] = {1, 2, 3};`<br>`int total = 0;`<br>`for (int index = 3; index >= 0; --index) total += values[index];`<br>`return total;` | `int values[3] = {1, 2, 3};`<br>`int total = 0;`<br>`for (int index = 3; index-- > 0;) total += values[index];`<br>`return total;` |
-| `hard-2` | 用 `sizeof` 算出的元素个数直接当下标 | `int values[3] = {1, 2, 3};`<br>`return values[sizeof(values) / sizeof(values[0])];` | `int values[3] = {1, 2, 3};`<br>`return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `hard-3` | 尾指针 `end[0]` 越界 | `int values[3] = {1, 2, 3};`<br>`int *end = values + 3;`<br>`return end[0];` | `int values[3] = {1, 2, 3};`<br>`int *end = values + 3;`<br>`return end[-1];` |
-| `hard-4` | 4 元素数组访问 `values[4]` | `int values[4] = {1, 2, 3, 4};`<br>`return values[4];` | `int values[4] = {1, 2, 3, 4};`<br>`return values[3];` |
-
-### 字符串溢出（`string_overflow`）
-
-| 写法 | 测试点 | 正例代码 | 对照代码 |
-|---|---|---|---|
-| `base-0` | `strcpy` 写入超过目标容量的字面量 | `char target[4] = {0};`<br>`strcpy(target, "ABCDE");`<br>`return target[0];` | `char target[4] = {0};`<br>`strcpy(target, "AB");`<br>`return target[0];` |
-| `base-1` | `sprintf` 写入超过目标容量的字符串 | `char target[4] = {0};`<br>`sprintf(target, "%s", "ABCDE");`<br>`return target[0];` | `char target[4] = {0};`<br>`sprintf(target, "%s", "ABC");`<br>`return target[0];` |
-| `base-2` | `strcat` 拼接后超过目标容量 | `char target[8] = "A";`<br>`strcat(target, "BCDEFGH");`<br>`return target[0];` | `char target[8] = "A";`<br>`strcat(target, "BC");`<br>`return target[0];` |
-| `base-3` | `memcpy` 拷贝长度超过目标容量 | `char target[4] = {0};`<br>`memcpy(target, "ABCDE", 6);`<br>`return target[0];` | `char target[4] = {0};`<br>`memcpy(target, "ABCDE", 3);`<br>`return target[0];` |
-| `base-4` | 经辅助函数 `contract3_copy`（内部 `strcpy`）写入超长字符串（跨函数） | `char target[4] = {0};`<br>`contract3_copy(target, "ABCDE");`<br>`return target[0];` | `char target[4] = {0};`<br>`contract3_copy(target, "ABC");`<br>`return target[0];` |
-| `base-5` | 字符串含 NUL：正例少一字节，对照刚好容纳 | `char target[5] = {0};`<br>`strcpy(target, "ABCDE");`<br>`return target[0];` | `char target[6] = {0};`<br>`strcpy(target, "ABCDE");`<br>`return target[0];` |
-| `hard-0` | 目标数组恰好少 1 字节，放不下结尾 `\0` | `char target[5] = {0};`<br>`strcpy(target, "ABCDE");`<br>`return target[0];` | `char target[6] = {0};`<br>`strcpy(target, "ABCDE");`<br>`return target[0];` |
-| `hard-1` | `snprintf` 长度参数大于目标容量 | `char target[4] = {0};`<br>`snprintf(target, 16, "%s", "ABCDEFGHIJ");`<br>`return target[0];` | `char target[4] = {0};`<br>`snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");`<br>`return target[0];` |
-| `hard-2` | `strncpy` 长度参数大于目标容量 | `char target[4];`<br>`strncpy(target, "ABCDEFGH", 8);`<br>`return target[0];` | `char target[4];`<br>`strncpy(target, "ABCDEFGH", sizeof(target) - 1);`<br>`target[sizeof(target) - 1] = '\0';`<br>`return target[0];` |
-| `hard-3` | `strcat` 拼接后恰好多 1 字节 | `char target[8] = "ABC";`<br>`strcat(target, "DEFGH");`<br>`return target[0];` | `char target[8] = "ABC";`<br>`strcat(target, "DEFG");`<br>`return target[0];` |
-| `hard-4` | `memcpy` 长度取源串 `sizeof`，大于目标容量 | `char target[4];`<br>`memcpy(target, "ABCDE", sizeof("ABCDE"));`<br>`return target[0];` | `char target[4];`<br>`memcpy(target, "ABCDE", sizeof(target));`<br>`return target[0];` |
-
-### 空指针调用（`null_pointer`）
-
-| 写法 | 测试点 | 正例代码 | 对照代码 |
-|---|---|---|---|
-| `base-0` | 指针初始化为 0 后直接解引用 | `int *pointer = 0;`<br>`return *pointer;` | `int value = 7;`<br>`return value;` |
-| `base-1` | 指针赋值为 0 后解引用 | `int value = 7;`<br>`int *pointer = 0;`<br>`return *pointer;` | `int value = 7;`<br>`int *pointer = &value;`<br>`return *pointer;` |
-| `base-2` | 把 0 作为实参传给会解引用的辅助函数 `contract3_read`（跨函数） | `int value = 7;`<br>`return contract3_read(0);` | `int value = 7;`<br>`return contract3_read(&value);` |
-| `base-3` | 结构体成员指针为 0 后解引用 | `int value = 7;`<br>`struct contract3_box box = {0};`<br>`return *box.pointer;` | `int value = 7;`<br>`struct contract3_box box = {&value};`<br>`return *box.pointer;` |
-| `base-4` | 分支条件不成立，指针保持 0 后解引用 | `int value = 7;`<br>`int *pointer = 0;`<br>`if (value < 0) pointer = &value;`<br>`return *pointer;` | `int value = 7;`<br>`int *pointer = 0;`<br>`if (value > 0) pointer = &value;`<br>`return *pointer;` |
-| `hard-0` | 判空后未返回，继续解引用 | `int value = 7;`<br>`int *pointer = 0;`<br>`if (pointer == 0) value = -1;`<br>`return *pointer + value;` | `int value = 7;`<br>`int *pointer = 0;`<br>`if (pointer == 0) return -1;`<br>`return *pointer + value;` |
-| `hard-1` | 条件表达式选出空指针后直接解引用 | `int value = 7;`<br>`int *pointer = value < 0 ? &value : 0;`<br>`return *pointer;` | `int value = 7;`<br>`int *pointer = value < 0 ? &value : 0;`<br>`return pointer ? *pointer : 0;` |
-| `hard-2` | 指针先指向有效对象，又被重新赋值为 0 后解引用 | `int value = 7;`<br>`int *pointer = &value;`<br>`pointer = 0;`<br>`return *pointer;` | `int value = 7;`<br>`int *pointer = 0;`<br>`pointer = &value;`<br>`return *pointer;` |
-| `hard-3` | 辅助函数 `contract3_select` 按参数返回空指针后解引用（跨函数） | `int value = 7;`<br>`int *pointer = contract3_select(&value, 0);`<br>`return *pointer;` | `int value = 7;`<br>`int *pointer = contract3_select(&value, 1);`<br>`return *pointer;` |
-| `hard-4` | 判断条件写反，指针保持 0 后解引用 | `int value = 7;`<br>`struct contract3_box box = {0};`<br>`if (box.pointer != 0) box.pointer = &value;`<br>`return *box.pointer;` | `int value = 7;`<br>`struct contract3_box box = {0};`<br>`if (box.pointer == 0) box.pointer = &value;`<br>`return *box.pointer;` |
-
-## 3. 工程与检测文件
-
-三个工程的检测文件已随仓库提供，位于 [artifacts/contract3/projects/](artifacts/contract3/projects/)，每个工程一个目录，**目录结构与上游仓库一致**，无需另行下载：
-
-| 工程 | 版本 | 提交 | 仓库内目录（= 工程根目录） | `scan_roots` | 实际扫描目录 | 检测文件数 | 检测文件合计行数 |
-|---|---|---|---|---|---|---:|---:|
-| FreeRTOS Kernel | V11.1.0 | `dbf70559b27d` | [`artifacts/contract3/projects/freertos_kernel/`](artifacts/contract3/projects/freertos_kernel/) | `.` | [`artifacts/contract3/projects/freertos_kernel/`](artifacts/contract3/projects/freertos_kernel/) | 255 | 186,067 |
-| Zephyr RTOS | v3.7.0 | `36940db938a8` | [`artifacts/contract3/projects/zephyr/`](artifacts/contract3/projects/zephyr/) | `kernel` | [`artifacts/contract3/projects/zephyr/kernel/`](artifacts/contract3/projects/zephyr/kernel/) | 52 | 17,050 |
-| RT-Thread | v5.2.1 | `97893c004c65` | [`artifacts/contract3/projects/rt_thread/`](artifacts/contract3/projects/rt_thread/) | `src` | [`artifacts/contract3/projects/rt_thread/src/`](artifacts/contract3/projects/rt_thread/src/) | 32 | 20,545 |
-
-- **`scan_roots`** 是相对工程根目录的扫描范围，定义在 [artifacts/contract3/manifest.json](artifacts/contract3/manifest.json)：`.` 表示整个工程，`kernel` 表示工程根目录下的 `kernel/`。仓库内目录就是工程根目录，所以 Zephyr 的扫描范围是 `artifacts/contract3/projects/zephyr/kernel/`。
-- **检测文件** = `scan_roots` 下扩展名为 `.c`、`.cc`、`.cpp`、`.cxx` 的源文件，不含头文件，不含注入的 `contract3_*` 测试文件，并跳过隐藏目录与 `.git`、`.github`、`boards`、`build`、`doc`、`docs`、`example`、`examples`、`out`、`sample`、`samples`、`test`、`tests` 目录。规则见 `scripts/benchmark_contract3_cppcheck.py` 的 `source_files`。
-- 仓库内只放检测文件、注入的测试文件和上游 LICENSE，其余上游文件（头文件、构建脚本、文档等）不放。GT 的 `detection_files[].path` 与 `fixtures[].path` 都相对工程根目录，与仓库内文件一一对应，可按 `sha256` 逐个核对未被改动；完整上游仓库可按上表版本与提交号从 `manifest.json` 中的地址取得。
-- 注入的测试文件放在工程根目录，4 套测试集各 3 个（每类缺陷一个），文件名为 `contract3_<测试集>_web_<类别>.c`（测试集名中的 `-` 写作 `_`，如 `contract3_balanced_hard_web_array_oob.c`）。
-- **用 GT 评分**：把对应测试集的 `ground_truth.json` 复制到工程目录根下，以该目录为 `project_dir`、`ground_truth_file=ground_truth.json`、`scan_type=frequent_defects` 运行漏洞检测；扫描目标为 GT 中 `detection_files` 与 `fixtures` 列出的文件。
-
-<details><summary>FreeRTOS Kernel 检测文件（255 个）</summary>
-
-| 文件 | 行数 |
-|---|---:|
-| `croutine.c` | 405 |
-| `event_groups.c` | 884 |
-| `list.c` | 246 |
-| `portable/ARMv8M/non_secure/port.c` | 2,144 |
-| `portable/ARMv8M/non_secure/portable/GCC/ARM_CM23/mpu_wrappers_v2_asm.c` | 2,125 |
-| `portable/ARMv8M/non_secure/portable/GCC/ARM_CM23/portasm.c` | 604 |
-| `portable/ARMv8M/non_secure/portable/GCC/ARM_CM23_NTZ/mpu_wrappers_v2_asm.c` | 2,125 |
-| `portable/ARMv8M/non_secure/portable/GCC/ARM_CM23_NTZ/portasm.c` | 516 |
-| `portable/ARMv8M/non_secure/portable/GCC/ARM_CM33/mpu_wrappers_v2_asm.c` | 2,056 |
-| `portable/ARMv8M/non_secure/portable/GCC/ARM_CM33/portasm.c` | 577 |
-| `portable/ARMv8M/non_secure/portable/GCC/ARM_CM33_NTZ/mpu_wrappers_v2_asm.c` | 2,055 |
-| `portable/ARMv8M/non_secure/portable/GCC/ARM_CM33_NTZ/portasm.c` | 471 |
-| `portable/ARMv8M/secure/context/portable/GCC/ARM_CM23/secure_context_port.c` | 99 |
-| `portable/ARMv8M/secure/context/portable/GCC/ARM_CM33/secure_context_port.c` | 97 |
-| `portable/ARMv8M/secure/context/secure_context.c` | 354 |
-| `portable/ARMv8M/secure/heap/secure_heap.c` | 476 |
-| `portable/ARMv8M/secure/init/secure_init.c` | 106 |
-| `portable/BCC/16BitDOS/Flsh186/port.c` | 244 |
-| `portable/BCC/16BitDOS/PC/port.c` | 288 |
-| `portable/BCC/16BitDOS/common/portcomn.c` | 120 |
-| `portable/CCS/ARM_CM3/port.c` | 692 |
-| `portable/CCS/ARM_CM4F/port.c` | 717 |
-| `portable/CCS/ARM_Cortex-R4/port.c` | 312 |
-| `portable/CCS/MSP430X/port.c` | 188 |
-| `portable/CodeWarrior/ColdFire_V1/port.c` | 183 |
-| `portable/CodeWarrior/ColdFire_V2/port.c` | 147 |
-| `portable/CodeWarrior/HCS12/port.c` | 236 |
-| `portable/Common/mpu_wrappers.c` | 2,551 |
-| `portable/Common/mpu_wrappers_v2.c` | 5,267 |
-| `portable/GCC/ARM7_AT91FR40008/port.c` | 240 |
-| `portable/GCC/ARM7_AT91FR40008/portISR.c` | 233 |
-| `portable/GCC/ARM7_AT91SAM7S/lib_AT91SAM7X256.c` | 50 |
-| `portable/GCC/ARM7_AT91SAM7S/port.c` | 209 |
-| `portable/GCC/ARM7_AT91SAM7S/portISR.c` | 227 |
-| `portable/GCC/ARM7_LPC2000/port.c` | 222 |
-| `portable/GCC/ARM7_LPC2000/portISR.c` | 216 |
-| `portable/GCC/ARM7_LPC23xx/port.c` | 233 |
-| `portable/GCC/ARM7_LPC23xx/portISR.c` | 219 |
-| `portable/GCC/ARM_AARCH64/port.c` | 524 |
-| `portable/GCC/ARM_AARCH64_SRE/port.c` | 465 |
-| `portable/GCC/ARM_CA9/port.c` | 577 |
-| `portable/GCC/ARM_CM0/mpu_wrappers_v2_asm.c` | 2,217 |
-| `portable/GCC/ARM_CM0/port.c` | 1,665 |
-| `portable/GCC/ARM_CM0/portasm.c` | 523 |
-| `portable/GCC/ARM_CM23/non_secure/mpu_wrappers_v2_asm.c` | 2,125 |
-| `portable/GCC/ARM_CM23/non_secure/port.c` | 2,144 |
-| `portable/GCC/ARM_CM23/non_secure/portasm.c` | 604 |
-| `portable/GCC/ARM_CM23/secure/secure_context.c` | 354 |
-| `portable/GCC/ARM_CM23/secure/secure_context_port.c` | 99 |
-| `portable/GCC/ARM_CM23/secure/secure_heap.c` | 476 |
-| `portable/GCC/ARM_CM23/secure/secure_init.c` | 106 |
-| `portable/GCC/ARM_CM23_NTZ/non_secure/mpu_wrappers_v2_asm.c` | 2,125 |
-| `portable/GCC/ARM_CM23_NTZ/non_secure/port.c` | 2,144 |
-| `portable/GCC/ARM_CM23_NTZ/non_secure/portasm.c` | 516 |
-| `portable/GCC/ARM_CM3/port.c` | 824 |
-| `portable/GCC/ARM_CM33/non_secure/mpu_wrappers_v2_asm.c` | 2,056 |
-| `portable/GCC/ARM_CM33/non_secure/port.c` | 2,144 |
-| `portable/GCC/ARM_CM33/non_secure/portasm.c` | 577 |
-| `portable/GCC/ARM_CM33/secure/secure_context.c` | 354 |
-| `portable/GCC/ARM_CM33/secure/secure_context_port.c` | 97 |
-| `portable/GCC/ARM_CM33/secure/secure_heap.c` | 476 |
-| `portable/GCC/ARM_CM33/secure/secure_init.c` | 106 |
-| `portable/GCC/ARM_CM33_NTZ/non_secure/mpu_wrappers_v2_asm.c` | 2,055 |
-| `portable/GCC/ARM_CM33_NTZ/non_secure/port.c` | 2,144 |
-| `portable/GCC/ARM_CM33_NTZ/non_secure/portasm.c` | 471 |
-| `portable/GCC/ARM_CM35P/non_secure/mpu_wrappers_v2_asm.c` | 2,056 |
-| `portable/GCC/ARM_CM35P/non_secure/port.c` | 2,144 |
-| `portable/GCC/ARM_CM35P/non_secure/portasm.c` | 577 |
-| `portable/GCC/ARM_CM35P/secure/secure_context.c` | 354 |
-| `portable/GCC/ARM_CM35P/secure/secure_context_port.c` | 97 |
-| `portable/GCC/ARM_CM35P/secure/secure_heap.c` | 476 |
-| `portable/GCC/ARM_CM35P/secure/secure_init.c` | 106 |
-| `portable/GCC/ARM_CM35P_NTZ/non_secure/mpu_wrappers_v2_asm.c` | 2,055 |
-| `portable/GCC/ARM_CM35P_NTZ/non_secure/port.c` | 2,144 |
-| `portable/GCC/ARM_CM35P_NTZ/non_secure/portasm.c` | 471 |
-| `portable/GCC/ARM_CM3_MPU/mpu_wrappers_v2_asm.c` | 2,067 |
-| `portable/GCC/ARM_CM3_MPU/port.c` | 1,581 |
-| `portable/GCC/ARM_CM4F/port.c` | 909 |
-| `portable/GCC/ARM_CM4_MPU/mpu_wrappers_v2_asm.c` | 2,067 |
-| `portable/GCC/ARM_CM4_MPU/port.c` | 1,724 |
-| `portable/GCC/ARM_CM55/non_secure/mpu_wrappers_v2_asm.c` | 2,056 |
-| `portable/GCC/ARM_CM55/non_secure/port.c` | 2,144 |
-| `portable/GCC/ARM_CM55/non_secure/portasm.c` | 577 |
-| `portable/GCC/ARM_CM55/secure/secure_context.c` | 354 |
-| `portable/GCC/ARM_CM55/secure/secure_context_port.c` | 97 |
-| `portable/GCC/ARM_CM55/secure/secure_heap.c` | 476 |
-| `portable/GCC/ARM_CM55/secure/secure_init.c` | 106 |
-| `portable/GCC/ARM_CM55_NTZ/non_secure/mpu_wrappers_v2_asm.c` | 2,055 |
-| `portable/GCC/ARM_CM55_NTZ/non_secure/port.c` | 2,144 |
-| `portable/GCC/ARM_CM55_NTZ/non_secure/portasm.c` | 471 |
-| `portable/GCC/ARM_CM7/r0p1/port.c` | 899 |
-| `portable/GCC/ARM_CM85/non_secure/mpu_wrappers_v2_asm.c` | 2,056 |
-| `portable/GCC/ARM_CM85/non_secure/port.c` | 2,144 |
-| `portable/GCC/ARM_CM85/non_secure/portasm.c` | 577 |
-| `portable/GCC/ARM_CM85/secure/secure_context.c` | 354 |
-| `portable/GCC/ARM_CM85/secure/secure_context_port.c` | 97 |
-| `portable/GCC/ARM_CM85/secure/secure_heap.c` | 476 |
-| `portable/GCC/ARM_CM85/secure/secure_init.c` | 106 |
-| `portable/GCC/ARM_CM85_NTZ/non_secure/mpu_wrappers_v2_asm.c` | 2,055 |
-| `portable/GCC/ARM_CM85_NTZ/non_secure/port.c` | 2,144 |
-| `portable/GCC/ARM_CM85_NTZ/non_secure/portasm.c` | 471 |
-| `portable/GCC/ARM_CR5/port.c` | 691 |
-| `portable/GCC/ARM_CRx_MPU/port.c` | 845 |
-| `portable/GCC/ARM_CRx_No_GIC/port.c` | 324 |
-| `portable/GCC/ATMega323/port.c` | 428 |
-| `portable/GCC/AVR32_UC3/port.c` | 473 |
-| `portable/GCC/CORTUS_APS3/port.c` | 148 |
-| `portable/GCC/ColdFire_V2/port.c` | 133 |
-| `portable/GCC/H8S2329/port.c` | 304 |
-| `portable/GCC/HCS12/port.c` | 239 |
-| `portable/GCC/IA32_flat/port.c` | 686 |
-| `portable/GCC/MSP430F449/port.c` | 335 |
-| `portable/GCC/MicroBlaze/port.c` | 334 |
-| `portable/GCC/MicroBlazeV8/port.c` | 457 |
-| `portable/GCC/MicroBlazeV8/port_exceptions.c` | 278 |
-| `portable/GCC/MicroBlazeV9/port.c` | 545 |
-| `portable/GCC/MicroBlazeV9/port_exceptions.c` | 277 |
-| `portable/GCC/NiosII/port.c` | 216 |
-| `portable/GCC/PPC405_Xilinx/port.c` | 267 |
-| `portable/GCC/PPC440_Xilinx/port.c` | 267 |
-| `portable/GCC/RISC-V/port.c` | 208 |
-| `portable/GCC/RL78/port.c` | 213 |
-| `portable/GCC/RX100/port.c` | 714 |
-| `portable/GCC/RX200/port.c` | 445 |
-| `portable/GCC/RX600/port.c` | 399 |
-| `portable/GCC/RX600v2/port.c` | 442 |
-| `portable/GCC/RX700v3_DPFPU/port.c` | 619 |
-| `portable/GCC/STR75x/port.c` | 193 |
-| `portable/GCC/STR75x/portISR.c` | 178 |
-| `portable/GCC/TriCore_1782/port.c` | 547 |
-| `portable/GCC/TriCore_1782/porttrap.c` | 282 |
-| `portable/IAR/78K0R/port.c` | 227 |
-| `portable/IAR/ARM_CA5_No_GIC/port.c` | 304 |
-| `portable/IAR/ARM_CA9/port.c` | 446 |
-| `portable/IAR/ARM_CM0/port.c` | 543 |
-| `portable/IAR/ARM_CM23/non_secure/port.c` | 2,144 |
-| `portable/IAR/ARM_CM23/secure/secure_context.c` | 354 |
-| `portable/IAR/ARM_CM23/secure/secure_heap.c` | 476 |
-| `portable/IAR/ARM_CM23/secure/secure_init.c` | 106 |
-| `portable/IAR/ARM_CM23_NTZ/non_secure/port.c` | 2,144 |
-| `portable/IAR/ARM_CM3/port.c` | 732 |
-| `portable/IAR/ARM_CM33/non_secure/port.c` | 2,144 |
-| `portable/IAR/ARM_CM33/secure/secure_context.c` | 354 |
-| `portable/IAR/ARM_CM33/secure/secure_heap.c` | 476 |
-| `portable/IAR/ARM_CM33/secure/secure_init.c` | 106 |
-| `portable/IAR/ARM_CM33_NTZ/non_secure/port.c` | 2,144 |
-| `portable/IAR/ARM_CM35P/non_secure/port.c` | 2,144 |
-| `portable/IAR/ARM_CM35P/secure/secure_context.c` | 354 |
-| `portable/IAR/ARM_CM35P/secure/secure_heap.c` | 476 |
-| `portable/IAR/ARM_CM35P/secure/secure_init.c` | 106 |
-| `portable/IAR/ARM_CM35P_NTZ/non_secure/port.c` | 2,144 |
-| `portable/IAR/ARM_CM4F/port.c` | 776 |
-| `portable/IAR/ARM_CM4F_MPU/port.c` | 1,455 |
-| `portable/IAR/ARM_CM55/non_secure/port.c` | 2,144 |
-| `portable/IAR/ARM_CM55/secure/secure_context.c` | 354 |
-| `portable/IAR/ARM_CM55/secure/secure_heap.c` | 476 |
-| `portable/IAR/ARM_CM55/secure/secure_init.c` | 106 |
-| `portable/IAR/ARM_CM55_NTZ/non_secure/port.c` | 2,144 |
-| `portable/IAR/ARM_CM7/r0p1/port.c` | 764 |
-| `portable/IAR/ARM_CM85/non_secure/port.c` | 2,144 |
-| `portable/IAR/ARM_CM85/secure/secure_context.c` | 354 |
-| `portable/IAR/ARM_CM85/secure/secure_heap.c` | 476 |
-| `portable/IAR/ARM_CM85/secure/secure_init.c` | 106 |
-| `portable/IAR/ARM_CM85_NTZ/non_secure/port.c` | 2,144 |
-| `portable/IAR/ARM_CRx_No_GIC/port.c` | 321 |
-| `portable/IAR/ATMega323/port.c` | 340 |
-| `portable/IAR/AVR32_UC3/port.c` | 446 |
-| `portable/IAR/AVR32_UC3/read.c` | 129 |
-| `portable/IAR/AVR32_UC3/write.c` | 136 |
-| `portable/IAR/AVR_AVRDx/port.c` | 301 |
-| `portable/IAR/AVR_Mega0/port.c` | 299 |
-| `portable/IAR/AtmelSAM7S64/port.c` | 252 |
-| `portable/IAR/AtmelSAM9XE/port.c` | 253 |
-| `portable/IAR/LPC2000/port.c` | 314 |
-| `portable/IAR/MSP430/port.c` | 173 |
-| `portable/IAR/MSP430X/port.c` | 184 |
-| `portable/IAR/RISC-V/port.c` | 241 |
-| `portable/IAR/RL78/port.c` | 215 |
-| `portable/IAR/RX100/port.c` | 523 |
-| `portable/IAR/RX600/port.c` | 193 |
-| `portable/IAR/RX700v3_DPFPU/port.c` | 565 |
-| `portable/IAR/RXv2/port.c` | 201 |
-| `portable/IAR/STR71x/port.c` | 255 |
-| `portable/IAR/STR75x/port.c` | 234 |
-| `portable/IAR/STR91x/port.c` | 435 |
-| `portable/IAR/V850ES/port.c` | 184 |
-| `portable/MPLAB/PIC18F/port.c` | 615 |
-| `portable/MPLAB/PIC24_dsPIC/port.c` | 334 |
-| `portable/MPLAB/PIC32MEC14xx/port.c` | 341 |
-| `portable/MPLAB/PIC32MX/port.c` | 330 |
-| `portable/MPLAB/PIC32MZ/port.c` | 369 |
-| `portable/MSVC-MingW/port.c` | 728 |
-| `portable/MemMang/heap_1.c` | 165 |
-| `portable/MemMang/heap_2.c` | 401 |
-| `portable/MemMang/heap_3.c` | 106 |
-| `portable/MemMang/heap_4.c` | 626 |
-| `portable/MemMang/heap_5.c` | 730 |
-| `portable/MikroC/ARM_CM4F/port.c` | 915 |
-| `portable/Paradigm/Tern_EE/large_untested/port.c` | 233 |
-| `portable/Paradigm/Tern_EE/small/port.c` | 213 |
-| `portable/RVDS/ARM7_LPC21xx/port.c` | 292 |
-| `portable/RVDS/ARM_CA9/port.c` | 484 |
-| `portable/RVDS/ARM_CM0/port.c` | 622 |
-| `portable/RVDS/ARM_CM3/port.c` | 793 |
-| `portable/RVDS/ARM_CM4F/port.c` | 889 |
-| `portable/RVDS/ARM_CM4_MPU/mpu_wrappers_v2_asm.c` | 1,705 |
-| `portable/RVDS/ARM_CM4_MPU/port.c` | 1,721 |
-| `portable/RVDS/ARM_CM7/r0p1/port.c` | 875 |
-| `portable/Renesas/RX100/port.c` | 646 |
-| `portable/Renesas/RX200/port.c` | 322 |
-| `portable/Renesas/RX600/port.c` | 327 |
-| `portable/Renesas/RX600v2/port.c` | 362 |
-| `portable/Renesas/RX700v3_DPFPU/port.c` | 591 |
-| `portable/Renesas/SH2A_FPU/port.c` | 272 |
-| `portable/Rowley/MSP430F449/port.c` | 173 |
-| `portable/SDCC/Cygnal/port.c` | 421 |
-| `portable/Softune/MB91460/__STD_LIB_sbrk.c` | 55 |
-| `portable/Softune/MB91460/port.c` | 321 |
-| `portable/Softune/MB96340/__STD_LIB_sbrk.c` | 55 |
-| `portable/Softune/MB96340/port.c` | 509 |
-| `portable/Tasking/ARM_CM4F/port.c` | 275 |
-| `portable/ThirdParty/CDK/T-HEAD_CK802/port.c` | 168 |
-| `portable/ThirdParty/GCC/ARC_EM_HS/arc_freertos_exceptions.c` | 52 |
-| `portable/ThirdParty/GCC/ARC_EM_HS/freertos_tls.c` | 240 |
-| `portable/ThirdParty/GCC/ARC_EM_HS/port.c` | 293 |
-| `portable/ThirdParty/GCC/ARC_v1/arc_freertos_exceptions.c` | 52 |
-| `portable/ThirdParty/GCC/ARC_v1/port.c` | 288 |
-| `portable/ThirdParty/GCC/ARM_TFM/os_wrapper_freertos.c` | 112 |
-| `portable/ThirdParty/GCC/ATmega/port.c` | 779 |
-| `portable/ThirdParty/GCC/Posix/port.c` | 618 |
-| `portable/ThirdParty/GCC/Posix/utils/wait_for_event.c` | 104 |
-| `portable/ThirdParty/GCC/RP2040/port.c` | 1,184 |
-| `portable/ThirdParty/GCC/Xtensa_ESP32/FreeRTOS-openocd.c` | 27 |
-| `portable/ThirdParty/GCC/Xtensa_ESP32/port.c` | 572 |
-| `portable/ThirdParty/GCC/Xtensa_ESP32/port_common.c` | 167 |
-| `portable/ThirdParty/GCC/Xtensa_ESP32/port_systick.c` | 197 |
-| `portable/ThirdParty/GCC/Xtensa_ESP32/xtensa_init.c` | 76 |
-| `portable/ThirdParty/GCC/Xtensa_ESP32/xtensa_overlay_os_hook.c` | 76 |
-| `portable/ThirdParty/XCC/Xtensa/port.c` | 209 |
-| `portable/ThirdParty/XCC/Xtensa/portclib.c` | 230 |
-| `portable/ThirdParty/XCC/Xtensa/xtensa_init.c` | 70 |
-| `portable/ThirdParty/XCC/Xtensa/xtensa_intr.c` | 137 |
-| `portable/ThirdParty/XCC/Xtensa/xtensa_overlay_os_hook.c` | 76 |
-| `portable/ThirdParty/xClang/XCOREAI/port.c` | 262 |
-| `portable/WizC/PIC18/Drivers/Tick/Tick.c` | 139 |
-| `portable/WizC/PIC18/Drivers/Tick/isrTick.c` | 79 |
-| `portable/WizC/PIC18/port.c` | 318 |
-| `portable/oWatcom/16BitDOS/Flsh186/port.c` | 246 |
-| `portable/oWatcom/16BitDOS/PC/port.c` | 302 |
-| `portable/oWatcom/16BitDOS/common/portcomn.c` | 141 |
-| `portable/template/port.c` | 82 |
-| `queue.c` | 3,364 |
-| `stream_buffer.c` | 1,718 |
-| `tasks.c` | 8,696 |
-| `timers.c` | 1,340 |
-
-</details>
-
-<details><summary>Zephyr RTOS 检测文件（52 个）</summary>
-
-| 文件 | 行数 |
-|---|---:|
-| `kernel/atomic_c.c` | 414 |
-| `kernel/banner.c` | 48 |
-| `kernel/busy_wait.c` | 56 |
-| `kernel/compiler_stack_protect.c` | 64 |
-| `kernel/condvar.c` | 158 |
-| `kernel/cpu_mask.c` | 76 |
-| `kernel/device.c` | 196 |
-| `kernel/dynamic.c` | 181 |
-| `kernel/dynamic_disabled.c` | 25 |
-| `kernel/errno.c` | 57 |
-| `kernel/events.c` | 367 |
-| `kernel/fatal.c` | 178 |
-| `kernel/float.c` | 47 |
-| `kernel/futex.c` | 101 |
-| `kernel/idle.c` | 102 |
-| `kernel/init.c` | 755 |
-| `kernel/init_static.c` | 87 |
-| `kernel/ipi.c` | 108 |
-| `kernel/irq_offload.c` | 23 |
-| `kernel/kheap.c` | 161 |
-| `kernel/mailbox.c` | 461 |
-| `kernel/main_weak.c` | 30 |
-| `kernel/mem_domain.c` | 368 |
-| `kernel/mem_slab.c` | 334 |
-| `kernel/mempool.c` | 178 |
-| `kernel/mmu.c` | 1,680 |
-| `kernel/msg_q.c` | 442 |
-| `kernel/mutex.c` | 314 |
-| `kernel/nothread.c` | 52 |
-| `kernel/obj_core.c` | 327 |
-| `kernel/paging/statistics.c` | 251 |
-| `kernel/pipes.c` | 832 |
-| `kernel/poll.c` | 815 |
-| `kernel/priority_queues.c` | 30 |
-| `kernel/queue.c` | 480 |
-| `kernel/sched.c` | 1,602 |
-| `kernel/sem.c` | 231 |
-| `kernel/smp.c` | 250 |
-| `kernel/spinlock_validate.c` | 47 |
-| `kernel/stack.c` | 222 |
-| `kernel/system_work_q.c` | 37 |
-| `kernel/thread.c` | 1,109 |
-| `kernel/thread_monitor.c` | 85 |
-| `kernel/timeout.c` | 340 |
-| `kernel/timer.c` | 365 |
-| `kernel/timeslicing.c` | 131 |
-| `kernel/usage.c` | 485 |
-| `kernel/userspace.c` | 1,017 |
-| `kernel/userspace_handler.c` | 89 |
-| `kernel/version.c` | 21 |
-| `kernel/work.c` | 1,146 |
-| `kernel/xip.c` | 75 |
-
-</details>
-
-<details><summary>RT-Thread 检测文件（32 个）</summary>
-
-| 文件 | 行数 |
-|---|---:|
-| `src/clock.c` | 261 |
-| `src/components.c` | 286 |
-| `src/cpu_mp.c` | 236 |
-| `src/cpu_up.c` | 108 |
-| `src/defunct.c` | 178 |
-| `src/idle.c` | 219 |
-| `src/ipc.c` | 4,033 |
-| `src/irq.c` | 157 |
-| `src/klibc/kerrno.c` | 161 |
-| `src/klibc/kstdio.c` | 116 |
-| `src/klibc/kstring.c` | 559 |
-| `src/klibc/rt_vsnprintf_std.c` | 1,351 |
-| `src/klibc/rt_vsnprintf_tiny.c` | 611 |
-| `src/klibc/rt_vsscanf.c` | 700 |
-| `src/klibc/utest/TC_rt_memcmp.c` | 161 |
-| `src/klibc/utest/TC_rt_memcpy.c` | 108 |
-| `src/klibc/utest/TC_rt_memmove.c` | 108 |
-| `src/klibc/utest/TC_rt_memset.c` | 102 |
-| `src/klibc/utest/TC_rt_sprintf.c` | 1,065 |
-| `src/klibc/utest/TC_rt_sscanf.c` | 250 |
-| `src/kservice.c` | 1,162 |
-| `src/mem.c` | 667 |
-| `src/memheap.c` | 998 |
-| `src/mempool.c` | 411 |
-| `src/object.c` | 774 |
-| `src/scheduler_comm.c` | 309 |
-| `src/scheduler_mp.c` | 1,332 |
-| `src/scheduler_up.c` | 571 |
-| `src/signal.c` | 679 |
-| `src/slab.c` | 856 |
-| `src/thread.c` | 1,145 |
-| `src/timer.c` | 871 |
-
-</details>
-
-## 4. 逐例 Ground Truth
-
-测试文件放在各工程根目录。“缺陷行”是正例中触发缺陷的语句；对照列出的是同一位置的安全语句。
-
-### 平衡验收集（`balanced`）
-
-<details><summary>FreeRTOS Kernel · 数组越界 · <code>contract3_balanced_web_array_oob.c</code>（294 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_01` | 11–15 | 14 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_02` | 17–22 | 21 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_03` | 24–30 | 28 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_04` | 32–37 | 36 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_05` | 39–43 | 42 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_06` | 45–50 | 49 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_07` | 52–58 | 56 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_08` | 60–65 | 64 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_09` | 67–71 | 70 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_10` | 73–78 | 77 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_11` | 80–86 | 84 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_12` | 88–93 | 92 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_13` | 95–100 | 99 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_14` | 102–108 | 106 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_15` | 110–115 | 114 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_16` | 117–123 | 122 | `base-5` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_17` | 125–129 | 128 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_18` | 131–137 | 136 | `base-5` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_19` | 139–144 | 143 | `base-4` | `return *cursor;` |
-| `freertos_kernel-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_20` | 146–151 | 150 | `base-4` | `return *cursor;` |
-| `freertos_kernel-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_21` | 153–157 | 156 | `base-0` | `return values[2];` |
-| `freertos_kernel-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_22` | 159–164 | 163 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_23` | 166–172 | 170 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_24` | 174–179 | 178 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_25` | 181–185 | 184 | `base-0` | `return values[2];` |
-| `freertos_kernel-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_26` | 187–192 | 191 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_27` | 194–200 | 198 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_28` | 202–207 | 206 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_29` | 209–213 | 212 | `base-0` | `return values[2];` |
-| `freertos_kernel-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_30` | 215–220 | 219 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_31` | 222–228 | 226 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_32` | 230–235 | 234 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_33` | 237–242 | 241 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_34` | 244–250 | 248 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_35` | 252–257 | 256 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_36` | 259–265 | 264 | `base-5` | `return values[index];` |
-| `freertos_kernel-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_37` | 267–271 | 270 | `base-0` | `return values[2];` |
-| `freertos_kernel-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_38` | 273–279 | 278 | `base-5` | `return values[index];` |
-| `freertos_kernel-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_39` | 281–286 | 285 | `base-4` | `return *cursor;` |
-| `freertos_kernel-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_40` | 288–293 | 292 | `base-4` | `return *cursor;` |
-
-</details>
-
-<details><summary>FreeRTOS Kernel · 字符串溢出 · <code>contract3_balanced_web_string_overflow.c</code>（290 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_01` | 11–16 | 14 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_02` | 18–23 | 21 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_03` | 25–30 | 28 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_04` | 32–37 | 35 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_05` | 39–44 | 42 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_06` | 46–51 | 49 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_07` | 53–58 | 56 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_08` | 60–65 | 63 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_09` | 67–72 | 70 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_10` | 74–79 | 77 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_11` | 81–86 | 84 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_12` | 88–93 | 91 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_13` | 95–100 | 98 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_14` | 102–107 | 105 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_15` | 109–114 | 112 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_16` | 116–121 | 119 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_17` | 123–128 | 126 | `base-5` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_18` | 130–135 | 133 | `base-5` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_19` | 137–142 | 140 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `freertos_kernel-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_20` | 144–149 | 147 | `base-4` | `contract3_copy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_21` | 151–156 | 154 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_22` | 158–163 | 161 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_23` | 165–170 | 168 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_24` | 172–177 | 175 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_25` | 179–184 | 182 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_26` | 186–191 | 189 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_27` | 193–198 | 196 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_28` | 200–205 | 203 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_29` | 207–212 | 210 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_30` | 214–219 | 217 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_31` | 221–226 | 224 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_32` | 228–233 | 231 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_33` | 235–240 | 238 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_34` | 242–247 | 245 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_35` | 249–254 | 252 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_36` | 256–261 | 259 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_37` | 263–268 | 266 | `base-5` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_38` | 270–275 | 273 | `base-5` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_39` | 277–282 | 280 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `freertos_kernel-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_40` | 284–289 | 287 | `base-4` | `contract3_copy(target, "ABC");` |
-
-</details>
-
-<details><summary>FreeRTOS Kernel · 空指针调用 · <code>contract3_balanced_web_null_pointer.c</code>（280 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_01` | 11–15 | 14 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_02` | 17–22 | 21 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_03` | 24–29 | 28 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_04` | 31–35 | 34 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_05` | 37–42 | 41 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_06` | 44–49 | 48 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_07` | 51–55 | 54 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_08` | 57–62 | 61 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_09` | 64–69 | 68 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_10` | 71–75 | 74 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_11` | 77–82 | 81 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_12` | 84–89 | 88 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_13` | 91–95 | 94 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_14` | 97–102 | 101 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_15` | 104–109 | 108 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_16` | 111–115 | 114 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_17` | 117–122 | 121 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_18` | 124–130 | 129 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_19` | 132–138 | 137 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_20` | 140–144 | 143 | `base-2` | `return contract3_read(0);` |
-| `freertos_kernel-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_21` | 146–150 | 149 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_22` | 152–157 | 156 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_23` | 159–164 | 163 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_24` | 166–170 | 169 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_25` | 172–177 | 176 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_26` | 179–184 | 183 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_27` | 186–190 | 189 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_28` | 192–197 | 196 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_29` | 199–204 | 203 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_30` | 206–210 | 209 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_31` | 212–217 | 216 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_32` | 219–224 | 223 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_33` | 226–230 | 229 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_34` | 232–237 | 236 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_35` | 239–244 | 243 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_36` | 246–250 | 249 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_37` | 252–257 | 256 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_38` | 259–265 | 264 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_39` | 267–273 | 272 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_40` | 275–279 | 278 | `base-2` | `return contract3_read(&value);` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 数组越界 · <code>contract3_balanced_web_array_oob.c</code>（294 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_01` | 11–15 | 14 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_02` | 17–22 | 21 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_03` | 24–30 | 28 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_04` | 32–37 | 36 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_05` | 39–43 | 42 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_06` | 45–50 | 49 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_07` | 52–58 | 56 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_08` | 60–65 | 64 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_09` | 67–71 | 70 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_10` | 73–78 | 77 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_11` | 80–86 | 84 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_12` | 88–93 | 92 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_13` | 95–100 | 99 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_14` | 102–108 | 106 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_15` | 110–115 | 114 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_16` | 117–123 | 122 | `base-5` | `return values[index];` |
-| `zephyr-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_17` | 125–129 | 128 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_18` | 131–137 | 136 | `base-5` | `return values[index];` |
-| `zephyr-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_19` | 139–144 | 143 | `base-4` | `return *cursor;` |
-| `zephyr-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_20` | 146–151 | 150 | `base-4` | `return *cursor;` |
-| `zephyr-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_21` | 153–157 | 156 | `base-0` | `return values[2];` |
-| `zephyr-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_22` | 159–164 | 163 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_23` | 166–172 | 170 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_24` | 174–179 | 178 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_25` | 181–185 | 184 | `base-0` | `return values[2];` |
-| `zephyr-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_26` | 187–192 | 191 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_27` | 194–200 | 198 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_28` | 202–207 | 206 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_29` | 209–213 | 212 | `base-0` | `return values[2];` |
-| `zephyr-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_30` | 215–220 | 219 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_31` | 222–228 | 226 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_32` | 230–235 | 234 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_33` | 237–242 | 241 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_34` | 244–250 | 248 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_35` | 252–257 | 256 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_36` | 259–265 | 264 | `base-5` | `return values[index];` |
-| `zephyr-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_37` | 267–271 | 270 | `base-0` | `return values[2];` |
-| `zephyr-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_38` | 273–279 | 278 | `base-5` | `return values[index];` |
-| `zephyr-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_39` | 281–286 | 285 | `base-4` | `return *cursor;` |
-| `zephyr-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_40` | 288–293 | 292 | `base-4` | `return *cursor;` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 字符串溢出 · <code>contract3_balanced_web_string_overflow.c</code>（290 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_01` | 11–16 | 14 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_02` | 18–23 | 21 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_03` | 25–30 | 28 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_04` | 32–37 | 35 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_05` | 39–44 | 42 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_06` | 46–51 | 49 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_07` | 53–58 | 56 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_08` | 60–65 | 63 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_09` | 67–72 | 70 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_10` | 74–79 | 77 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_11` | 81–86 | 84 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_12` | 88–93 | 91 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_13` | 95–100 | 98 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_14` | 102–107 | 105 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_15` | 109–114 | 112 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_16` | 116–121 | 119 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_17` | 123–128 | 126 | `base-5` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_18` | 130–135 | 133 | `base-5` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_19` | 137–142 | 140 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `zephyr-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_20` | 144–149 | 147 | `base-4` | `contract3_copy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_21` | 151–156 | 154 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_22` | 158–163 | 161 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_23` | 165–170 | 168 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_24` | 172–177 | 175 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_25` | 179–184 | 182 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_26` | 186–191 | 189 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_27` | 193–198 | 196 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_28` | 200–205 | 203 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_29` | 207–212 | 210 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_30` | 214–219 | 217 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_31` | 221–226 | 224 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_32` | 228–233 | 231 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_33` | 235–240 | 238 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_34` | 242–247 | 245 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_35` | 249–254 | 252 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_36` | 256–261 | 259 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_37` | 263–268 | 266 | `base-5` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_38` | 270–275 | 273 | `base-5` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_39` | 277–282 | 280 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `zephyr-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_40` | 284–289 | 287 | `base-4` | `contract3_copy(target, "ABC");` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 空指针调用 · <code>contract3_balanced_web_null_pointer.c</code>（280 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_01` | 11–15 | 14 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_02` | 17–22 | 21 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_03` | 24–29 | 28 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_04` | 31–35 | 34 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_05` | 37–42 | 41 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_06` | 44–49 | 48 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_07` | 51–55 | 54 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_08` | 57–62 | 61 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_09` | 64–69 | 68 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_10` | 71–75 | 74 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_11` | 77–82 | 81 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_12` | 84–89 | 88 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_13` | 91–95 | 94 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_14` | 97–102 | 101 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_15` | 104–109 | 108 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_16` | 111–115 | 114 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_17` | 117–122 | 121 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_18` | 124–130 | 129 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_19` | 132–138 | 137 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_20` | 140–144 | 143 | `base-2` | `return contract3_read(0);` |
-| `zephyr-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_21` | 146–150 | 149 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_22` | 152–157 | 156 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_23` | 159–164 | 163 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_24` | 166–170 | 169 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_25` | 172–177 | 176 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_26` | 179–184 | 183 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_27` | 186–190 | 189 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_28` | 192–197 | 196 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_29` | 199–204 | 203 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_30` | 206–210 | 209 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_31` | 212–217 | 216 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_32` | 219–224 | 223 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_33` | 226–230 | 229 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_34` | 232–237 | 236 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_35` | 239–244 | 243 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_36` | 246–250 | 249 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_37` | 252–257 | 256 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_38` | 259–265 | 264 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_39` | 267–273 | 272 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_40` | 275–279 | 278 | `base-2` | `return contract3_read(&value);` |
-
-</details>
-
-<details><summary>RT-Thread · 数组越界 · <code>contract3_balanced_web_array_oob.c</code>（294 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_01` | 11–15 | 14 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_02` | 17–22 | 21 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_03` | 24–30 | 28 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_04` | 32–37 | 36 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_05` | 39–43 | 42 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_06` | 45–50 | 49 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_07` | 52–58 | 56 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_08` | 60–65 | 64 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_09` | 67–71 | 70 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_10` | 73–78 | 77 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_11` | 80–86 | 84 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_12` | 88–93 | 92 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_13` | 95–100 | 99 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_14` | 102–108 | 106 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_15` | 110–115 | 114 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_16` | 117–123 | 122 | `base-5` | `return values[index];` |
-| `rt_thread-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_17` | 125–129 | 128 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_18` | 131–137 | 136 | `base-5` | `return values[index];` |
-| `rt_thread-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_19` | 139–144 | 143 | `base-4` | `return *cursor;` |
-| `rt_thread-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_20` | 146–151 | 150 | `base-4` | `return *cursor;` |
-| `rt_thread-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_21` | 153–157 | 156 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_22` | 159–164 | 163 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_23` | 166–172 | 170 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_24` | 174–179 | 178 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_25` | 181–185 | 184 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_26` | 187–192 | 191 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_27` | 194–200 | 198 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_28` | 202–207 | 206 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_29` | 209–213 | 212 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_30` | 215–220 | 219 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_31` | 222–228 | 226 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_32` | 230–235 | 234 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_33` | 237–242 | 241 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_34` | 244–250 | 248 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_35` | 252–257 | 256 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_36` | 259–265 | 264 | `base-5` | `return values[index];` |
-| `rt_thread-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_37` | 267–271 | 270 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_38` | 273–279 | 278 | `base-5` | `return values[index];` |
-| `rt_thread-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_39` | 281–286 | 285 | `base-4` | `return *cursor;` |
-| `rt_thread-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_40` | 288–293 | 292 | `base-4` | `return *cursor;` |
-
-</details>
-
-<details><summary>RT-Thread · 字符串溢出 · <code>contract3_balanced_web_string_overflow.c</code>（290 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_01` | 11–16 | 14 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_02` | 18–23 | 21 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_03` | 25–30 | 28 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_04` | 32–37 | 35 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_05` | 39–44 | 42 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_06` | 46–51 | 49 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_07` | 53–58 | 56 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_08` | 60–65 | 63 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_09` | 67–72 | 70 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_10` | 74–79 | 77 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_11` | 81–86 | 84 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_12` | 88–93 | 91 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_13` | 95–100 | 98 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_14` | 102–107 | 105 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_15` | 109–114 | 112 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_16` | 116–121 | 119 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_17` | 123–128 | 126 | `base-5` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_18` | 130–135 | 133 | `base-5` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_19` | 137–142 | 140 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `rt_thread-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_20` | 144–149 | 147 | `base-4` | `contract3_copy(target, "ABCDE");` |
-| `rt_thread-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_21` | 151–156 | 154 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_22` | 158–163 | 161 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_23` | 165–170 | 168 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_24` | 172–177 | 175 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_25` | 179–184 | 182 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_26` | 186–191 | 189 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_27` | 193–198 | 196 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_28` | 200–205 | 203 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_29` | 207–212 | 210 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_30` | 214–219 | 217 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_31` | 221–226 | 224 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_32` | 228–233 | 231 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_33` | 235–240 | 238 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_34` | 242–247 | 245 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_35` | 249–254 | 252 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_36` | 256–261 | 259 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_37` | 263–268 | 266 | `base-5` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_38` | 270–275 | 273 | `base-5` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_39` | 277–282 | 280 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `rt_thread-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_40` | 284–289 | 287 | `base-4` | `contract3_copy(target, "ABC");` |
-
-</details>
-
-<details><summary>RT-Thread · 空指针调用 · <code>contract3_balanced_web_null_pointer.c</code>（280 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_01` | 11–15 | 14 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_02` | 17–22 | 21 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_03` | 24–29 | 28 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_04` | 31–35 | 34 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_05` | 37–42 | 41 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_06` | 44–49 | 48 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_07` | 51–55 | 54 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_08` | 57–62 | 61 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_09` | 64–69 | 68 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_10` | 71–75 | 74 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_11` | 77–82 | 81 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_12` | 84–89 | 88 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_13` | 91–95 | 94 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_14` | 97–102 | 101 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_15` | 104–109 | 108 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_16` | 111–115 | 114 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_17` | 117–122 | 121 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_18` | 124–130 | 129 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_19` | 132–138 | 137 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_20` | 140–144 | 143 | `base-2` | `return contract3_read(0);` |
-| `rt_thread-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_21` | 146–150 | 149 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_22` | 152–157 | 156 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_23` | 159–164 | 163 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_24` | 166–170 | 169 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_25` | 172–177 | 176 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_26` | 179–184 | 183 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_27` | 186–190 | 189 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_28` | 192–197 | 196 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_29` | 199–204 | 203 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_30` | 206–210 | 209 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_31` | 212–217 | 216 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_32` | 219–224 | 223 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_33` | 226–230 | 229 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_34` | 232–237 | 236 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_35` | 239–244 | 243 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_36` | 246–250 | 249 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_37` | 252–257 | 256 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_38` | 259–265 | 264 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_39` | 267–273 | 272 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_40` | 275–279 | 278 | `base-2` | `return contract3_read(&value);` |
-
-</details>
-
-### 独立压力集（`independent`）
-
-<details><summary>FreeRTOS Kernel · 数组越界 · <code>contract3_independent_web_array_oob.c</code>（298 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_01` | 11–15 | 14 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_02` | 17–22 | 21 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_03` | 24–30 | 28 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_04` | 32–37 | 36 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_05` | 39–43 | 42 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_06` | 45–50 | 49 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_07` | 52–58 | 56 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_08` | 60–65 | 64 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_09` | 67–71 | 70 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_10` | 73–78 | 77 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_11` | 80–86 | 84 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_12` | 88–93 | 92 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_13` | 95–100 | 99 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_14` | 102–108 | 106 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_15` | 110–116 | 115 | `base-5` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_16` | 118–124 | 123 | `base-5` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_17` | 126–132 | 131 | `base-5` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_18` | 134–139 | 138 | `base-4` | `return *cursor;` |
-| `freertos_kernel-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_19` | 141–146 | 145 | `base-4` | `return *cursor;` |
-| `freertos_kernel-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_20` | 148–153 | 152 | `base-4` | `return *cursor;` |
-| `freertos_kernel-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_21` | 155–159 | 158 | `base-0` | `return values[2];` |
-| `freertos_kernel-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_22` | 161–166 | 165 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_23` | 168–174 | 172 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_24` | 176–181 | 180 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_25` | 183–187 | 186 | `base-0` | `return values[2];` |
-| `freertos_kernel-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_26` | 189–194 | 193 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_27` | 196–202 | 200 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_28` | 204–209 | 208 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_29` | 211–215 | 214 | `base-0` | `return values[2];` |
-| `freertos_kernel-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_30` | 217–222 | 221 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_31` | 224–230 | 228 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_32` | 232–237 | 236 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_33` | 239–244 | 243 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_34` | 246–252 | 250 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_35` | 254–260 | 259 | `base-5` | `return values[index];` |
-| `freertos_kernel-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_36` | 262–268 | 267 | `base-5` | `return values[index];` |
-| `freertos_kernel-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_37` | 270–276 | 275 | `base-5` | `return values[index];` |
-| `freertos_kernel-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_38` | 278–283 | 282 | `base-4` | `return *cursor;` |
-| `freertos_kernel-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_39` | 285–290 | 289 | `base-4` | `return *cursor;` |
-| `freertos_kernel-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_40` | 292–297 | 296 | `base-4` | `return *cursor;` |
-
-</details>
-
-<details><summary>FreeRTOS Kernel · 字符串溢出 · <code>contract3_independent_web_string_overflow.c</code>（290 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_01` | 11–16 | 14 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_02` | 18–23 | 21 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_03` | 25–30 | 28 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_04` | 32–37 | 35 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_05` | 39–44 | 42 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_06` | 46–51 | 49 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_07` | 53–58 | 56 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_08` | 60–65 | 63 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_09` | 67–72 | 70 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_10` | 74–79 | 77 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_11` | 81–86 | 84 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_12` | 88–93 | 91 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_13` | 95–100 | 98 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_14` | 102–107 | 105 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_15` | 109–114 | 112 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_16` | 116–121 | 119 | `base-5` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_17` | 123–128 | 126 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_18` | 130–135 | 133 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `freertos_kernel-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_19` | 137–142 | 140 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `freertos_kernel-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_20` | 144–149 | 147 | `base-4` | `contract3_copy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_21` | 151–156 | 154 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_22` | 158–163 | 161 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_23` | 165–170 | 168 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_24` | 172–177 | 175 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_25` | 179–184 | 182 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_26` | 186–191 | 189 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_27` | 193–198 | 196 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_28` | 200–205 | 203 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_29` | 207–212 | 210 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_30` | 214–219 | 217 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_31` | 221–226 | 224 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_32` | 228–233 | 231 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_33` | 235–240 | 238 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_34` | 242–247 | 245 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_35` | 249–254 | 252 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_36` | 256–261 | 259 | `base-5` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_37` | 263–268 | 266 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_38` | 270–275 | 273 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `freertos_kernel-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_39` | 277–282 | 280 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `freertos_kernel-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_40` | 284–289 | 287 | `base-4` | `contract3_copy(target, "ABC");` |
-
-</details>
-
-<details><summary>FreeRTOS Kernel · 空指针调用 · <code>contract3_independent_web_null_pointer.c</code>（278 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_01` | 11–15 | 14 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_02` | 17–22 | 21 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_03` | 24–29 | 28 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_04` | 31–35 | 34 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_05` | 37–42 | 41 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_06` | 44–49 | 48 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_07` | 51–55 | 54 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_08` | 57–62 | 61 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_09` | 64–69 | 68 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_10` | 71–75 | 74 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_11` | 77–82 | 81 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_12` | 84–89 | 88 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_13` | 91–95 | 94 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_14` | 97–102 | 101 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_15` | 104–109 | 108 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_16` | 111–115 | 114 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_17` | 117–123 | 122 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_18` | 125–131 | 130 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_19` | 133–137 | 136 | `base-2` | `return contract3_read(0);` |
-| `freertos_kernel-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_20` | 139–143 | 142 | `base-2` | `return contract3_read(0);` |
-| `freertos_kernel-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_21` | 145–149 | 148 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_22` | 151–156 | 155 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_23` | 158–163 | 162 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_24` | 165–169 | 168 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_25` | 171–176 | 175 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_26` | 178–183 | 182 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_27` | 185–189 | 188 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_28` | 191–196 | 195 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_29` | 198–203 | 202 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_30` | 205–209 | 208 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_31` | 211–216 | 215 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_32` | 218–223 | 222 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_33` | 225–229 | 228 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_34` | 231–236 | 235 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_35` | 238–243 | 242 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_36` | 245–249 | 248 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_37` | 251–257 | 256 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_38` | 259–265 | 264 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_39` | 267–271 | 270 | `base-2` | `return contract3_read(&value);` |
-| `freertos_kernel-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_40` | 273–277 | 276 | `base-2` | `return contract3_read(&value);` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 数组越界 · <code>contract3_independent_web_array_oob.c</code>（298 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_01` | 11–15 | 14 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_02` | 17–22 | 21 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_03` | 24–30 | 28 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_04` | 32–37 | 36 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_05` | 39–43 | 42 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_06` | 45–50 | 49 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_07` | 52–58 | 56 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_08` | 60–65 | 64 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_09` | 67–71 | 70 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_10` | 73–78 | 77 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_11` | 80–86 | 84 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_12` | 88–93 | 92 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_13` | 95–100 | 99 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_14` | 102–108 | 106 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_15` | 110–116 | 115 | `base-5` | `return values[index];` |
-| `zephyr-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_16` | 118–124 | 123 | `base-5` | `return values[index];` |
-| `zephyr-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_17` | 126–132 | 131 | `base-5` | `return values[index];` |
-| `zephyr-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_18` | 134–139 | 138 | `base-4` | `return *cursor;` |
-| `zephyr-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_19` | 141–146 | 145 | `base-4` | `return *cursor;` |
-| `zephyr-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_20` | 148–153 | 152 | `base-4` | `return *cursor;` |
-| `zephyr-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_21` | 155–159 | 158 | `base-0` | `return values[2];` |
-| `zephyr-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_22` | 161–166 | 165 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_23` | 168–174 | 172 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_24` | 176–181 | 180 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_25` | 183–187 | 186 | `base-0` | `return values[2];` |
-| `zephyr-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_26` | 189–194 | 193 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_27` | 196–202 | 200 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_28` | 204–209 | 208 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_29` | 211–215 | 214 | `base-0` | `return values[2];` |
-| `zephyr-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_30` | 217–222 | 221 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_31` | 224–230 | 228 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_32` | 232–237 | 236 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_33` | 239–244 | 243 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_34` | 246–252 | 250 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_35` | 254–260 | 259 | `base-5` | `return values[index];` |
-| `zephyr-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_36` | 262–268 | 267 | `base-5` | `return values[index];` |
-| `zephyr-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_37` | 270–276 | 275 | `base-5` | `return values[index];` |
-| `zephyr-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_38` | 278–283 | 282 | `base-4` | `return *cursor;` |
-| `zephyr-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_39` | 285–290 | 289 | `base-4` | `return *cursor;` |
-| `zephyr-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_40` | 292–297 | 296 | `base-4` | `return *cursor;` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 字符串溢出 · <code>contract3_independent_web_string_overflow.c</code>（290 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_01` | 11–16 | 14 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_02` | 18–23 | 21 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_03` | 25–30 | 28 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_04` | 32–37 | 35 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_05` | 39–44 | 42 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_06` | 46–51 | 49 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_07` | 53–58 | 56 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_08` | 60–65 | 63 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_09` | 67–72 | 70 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_10` | 74–79 | 77 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_11` | 81–86 | 84 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_12` | 88–93 | 91 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_13` | 95–100 | 98 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_14` | 102–107 | 105 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_15` | 109–114 | 112 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_16` | 116–121 | 119 | `base-5` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_17` | 123–128 | 126 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_18` | 130–135 | 133 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `zephyr-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_19` | 137–142 | 140 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `zephyr-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_20` | 144–149 | 147 | `base-4` | `contract3_copy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_21` | 151–156 | 154 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_22` | 158–163 | 161 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_23` | 165–170 | 168 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_24` | 172–177 | 175 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_25` | 179–184 | 182 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_26` | 186–191 | 189 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_27` | 193–198 | 196 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_28` | 200–205 | 203 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_29` | 207–212 | 210 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_30` | 214–219 | 217 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_31` | 221–226 | 224 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_32` | 228–233 | 231 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_33` | 235–240 | 238 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_34` | 242–247 | 245 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_35` | 249–254 | 252 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_36` | 256–261 | 259 | `base-5` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_37` | 263–268 | 266 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_38` | 270–275 | 273 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `zephyr-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_39` | 277–282 | 280 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `zephyr-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_40` | 284–289 | 287 | `base-4` | `contract3_copy(target, "ABC");` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 空指针调用 · <code>contract3_independent_web_null_pointer.c</code>（278 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_01` | 11–15 | 14 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_02` | 17–22 | 21 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_03` | 24–29 | 28 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_04` | 31–35 | 34 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_05` | 37–42 | 41 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_06` | 44–49 | 48 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_07` | 51–55 | 54 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_08` | 57–62 | 61 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_09` | 64–69 | 68 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_10` | 71–75 | 74 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_11` | 77–82 | 81 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_12` | 84–89 | 88 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_13` | 91–95 | 94 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_14` | 97–102 | 101 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_15` | 104–109 | 108 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_16` | 111–115 | 114 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_17` | 117–123 | 122 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_18` | 125–131 | 130 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_19` | 133–137 | 136 | `base-2` | `return contract3_read(0);` |
-| `zephyr-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_20` | 139–143 | 142 | `base-2` | `return contract3_read(0);` |
-| `zephyr-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_21` | 145–149 | 148 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_22` | 151–156 | 155 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_23` | 158–163 | 162 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_24` | 165–169 | 168 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_25` | 171–176 | 175 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_26` | 178–183 | 182 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_27` | 185–189 | 188 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_28` | 191–196 | 195 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_29` | 198–203 | 202 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_30` | 205–209 | 208 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_31` | 211–216 | 215 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_32` | 218–223 | 222 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_33` | 225–229 | 228 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_34` | 231–236 | 235 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_35` | 238–243 | 242 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_36` | 245–249 | 248 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_37` | 251–257 | 256 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_38` | 259–265 | 264 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_39` | 267–271 | 270 | `base-2` | `return contract3_read(&value);` |
-| `zephyr-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_40` | 273–277 | 276 | `base-2` | `return contract3_read(&value);` |
-
-</details>
-
-<details><summary>RT-Thread · 数组越界 · <code>contract3_independent_web_array_oob.c</code>（298 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_01` | 11–15 | 14 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_02` | 17–22 | 21 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_03` | 24–30 | 28 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_04` | 32–37 | 36 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_05` | 39–43 | 42 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_06` | 45–50 | 49 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_07` | 52–58 | 56 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_08` | 60–65 | 64 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_09` | 67–71 | 70 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_10` | 73–78 | 77 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_11` | 80–86 | 84 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_12` | 88–93 | 92 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_13` | 95–100 | 99 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_14` | 102–108 | 106 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_15` | 110–116 | 115 | `base-5` | `return values[index];` |
-| `rt_thread-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_16` | 118–124 | 123 | `base-5` | `return values[index];` |
-| `rt_thread-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_17` | 126–132 | 131 | `base-5` | `return values[index];` |
-| `rt_thread-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_18` | 134–139 | 138 | `base-4` | `return *cursor;` |
-| `rt_thread-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_19` | 141–146 | 145 | `base-4` | `return *cursor;` |
-| `rt_thread-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_20` | 148–153 | 152 | `base-4` | `return *cursor;` |
-| `rt_thread-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_21` | 155–159 | 158 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_22` | 161–166 | 165 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_23` | 168–174 | 172 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_24` | 176–181 | 180 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_25` | 183–187 | 186 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_26` | 189–194 | 193 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_27` | 196–202 | 200 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_28` | 204–209 | 208 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_29` | 211–215 | 214 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_30` | 217–222 | 221 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_31` | 224–230 | 228 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_32` | 232–237 | 236 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_33` | 239–244 | 243 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_34` | 246–252 | 250 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_35` | 254–260 | 259 | `base-5` | `return values[index];` |
-| `rt_thread-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_36` | 262–268 | 267 | `base-5` | `return values[index];` |
-| `rt_thread-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_37` | 270–276 | 275 | `base-5` | `return values[index];` |
-| `rt_thread-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_38` | 278–283 | 282 | `base-4` | `return *cursor;` |
-| `rt_thread-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_39` | 285–290 | 289 | `base-4` | `return *cursor;` |
-| `rt_thread-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_40` | 292–297 | 296 | `base-4` | `return *cursor;` |
-
-</details>
-
-<details><summary>RT-Thread · 字符串溢出 · <code>contract3_independent_web_string_overflow.c</code>（290 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_01` | 11–16 | 14 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_02` | 18–23 | 21 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_03` | 25–30 | 28 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_04` | 32–37 | 35 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_05` | 39–44 | 42 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_06` | 46–51 | 49 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_07` | 53–58 | 56 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_08` | 60–65 | 63 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_09` | 67–72 | 70 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_10` | 74–79 | 77 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_11` | 81–86 | 84 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_12` | 88–93 | 91 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_13` | 95–100 | 98 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_14` | 102–107 | 105 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_15` | 109–114 | 112 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_16` | 116–121 | 119 | `base-5` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_17` | 123–128 | 126 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_18` | 130–135 | 133 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `rt_thread-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_19` | 137–142 | 140 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `rt_thread-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_20` | 144–149 | 147 | `base-4` | `contract3_copy(target, "ABCDE");` |
-| `rt_thread-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_21` | 151–156 | 154 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_22` | 158–163 | 161 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_23` | 165–170 | 168 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_24` | 172–177 | 175 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_25` | 179–184 | 182 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_26` | 186–191 | 189 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_27` | 193–198 | 196 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_28` | 200–205 | 203 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_29` | 207–212 | 210 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_30` | 214–219 | 217 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_31` | 221–226 | 224 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_32` | 228–233 | 231 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_33` | 235–240 | 238 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_34` | 242–247 | 245 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_35` | 249–254 | 252 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_36` | 256–261 | 259 | `base-5` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_37` | 263–268 | 266 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_38` | 270–275 | 273 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `rt_thread-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_39` | 277–282 | 280 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `rt_thread-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_40` | 284–289 | 287 | `base-4` | `contract3_copy(target, "ABC");` |
-
-</details>
-
-<details><summary>RT-Thread · 空指针调用 · <code>contract3_independent_web_null_pointer.c</code>（278 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_01` | 11–15 | 14 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_02` | 17–22 | 21 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_03` | 24–29 | 28 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_04` | 31–35 | 34 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_05` | 37–42 | 41 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_06` | 44–49 | 48 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_07` | 51–55 | 54 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_08` | 57–62 | 61 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_09` | 64–69 | 68 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_10` | 71–75 | 74 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_11` | 77–82 | 81 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_12` | 84–89 | 88 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_13` | 91–95 | 94 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_14` | 97–102 | 101 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_15` | 104–109 | 108 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_16` | 111–115 | 114 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_17` | 117–123 | 122 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_18` | 125–131 | 130 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_19` | 133–137 | 136 | `base-2` | `return contract3_read(0);` |
-| `rt_thread-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_20` | 139–143 | 142 | `base-2` | `return contract3_read(0);` |
-| `rt_thread-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_21` | 145–149 | 148 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_22` | 151–156 | 155 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_23` | 158–163 | 162 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_24` | 165–169 | 168 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_25` | 171–176 | 175 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_26` | 178–183 | 182 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_27` | 185–189 | 188 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_28` | 191–196 | 195 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_29` | 198–203 | 202 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_30` | 205–209 | 208 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_31` | 211–216 | 215 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_32` | 218–223 | 222 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_33` | 225–229 | 228 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_34` | 231–236 | 235 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_35` | 238–243 | 242 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_36` | 245–249 | 248 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_37` | 251–257 | 256 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_38` | 259–265 | 264 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_39` | 267–271 | 270 | `base-2` | `return contract3_read(&value);` |
-| `rt_thread-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_40` | 273–277 | 276 | `base-2` | `return contract3_read(&value);` |
-
-</details>
-
-### 平衡验收集（加难版）（`balanced-hard`）
-
-<details><summary>FreeRTOS Kernel · 数组越界 · <code>contract3_balanced_hard_web_array_oob.c</code>（291 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_01` | 12–16 | 15 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_02` | 18–23 | 22 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_03` | 25–30 | 29 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_04` | 32–38 | 36 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_05` | 40–45 | 44 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_06` | 47–53 | 51 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_07` | 55–59 | 58 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_08` | 61–65 | 64 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `freertos_kernel-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_09` | 67–73 | 71 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `freertos_kernel-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_10` | 75–79 | 78 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `freertos_kernel-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_11` | 81–85 | 84 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_12` | 87–91 | 90 | `base-0` | `return values[2];` |
-| `freertos_kernel-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_13` | 93–97 | 96 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `freertos_kernel-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_14` | 99–103 | 102 | `hard-4` | `return values[4];` |
-| `freertos_kernel-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_15` | 105–110 | 109 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_16` | 112–117 | 116 | `hard-3` | `return end[0];` |
-| `freertos_kernel-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_17` | 119–125 | 124 | `hard-0` | `return values[index];` |
-| `freertos_kernel-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_18` | 127–132 | 131 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_19` | 134–140 | 138 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_20` | 142–148 | 146 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_21` | 150–156 | 155 | `hard-0` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_22` | 158–164 | 162 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_23` | 166–172 | 170 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `freertos_kernel-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_24` | 174–180 | 178 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `freertos_kernel-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_25` | 182–186 | 185 | `hard-4` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_26` | 188–194 | 192 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_27` | 196–202 | 201 | `hard-0` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_28` | 204–209 | 208 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_29` | 211–216 | 215 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_30` | 218–222 | 221 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `freertos_kernel-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_31` | 224–228 | 227 | `hard-4` | `return values[3];` |
-| `freertos_kernel-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_32` | 230–235 | 234 | `hard-3` | `return end[-1];` |
-| `freertos_kernel-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_33` | 237–242 | 241 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_34` | 244–248 | 247 | `base-0` | `return values[2];` |
-| `freertos_kernel-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_35` | 250–254 | 253 | `hard-4` | `return values[4];` |
-| `freertos_kernel-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_36` | 256–261 | 260 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_37` | 263–268 | 267 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_38` | 270–276 | 274 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `freertos_kernel-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_39` | 278–284 | 283 | `hard-0` | `return values[index];` |
-| `freertos_kernel-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_40` | 286–290 | 289 | `base-0` | `return values[2];` |
-
-</details>
-
-<details><summary>FreeRTOS Kernel · 字符串溢出 · <code>contract3_balanced_hard_web_string_overflow.c</code>（294 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_01` | 12–17 | 15 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_02` | 19–24 | 22 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_03` | 26–31 | 29 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_04` | 33–38 | 36 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `freertos_kernel-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_05` | 40–45 | 43 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_06` | 47–52 | 50 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_07` | 54–59 | 57 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_08` | 61–66 | 64 | `hard-3` | `strcat(target, "DEFG");` |
-| `freertos_kernel-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_09` | 68–73 | 71 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_10` | 75–80 | 78 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_11` | 82–87 | 85 | `hard-4` | `memcpy(target, "ABCDE", sizeof("ABCDE"));` |
-| `freertos_kernel-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_12` | 89–95 | 92 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `freertos_kernel-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_13` | 97–102 | 100 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_14` | 104–109 | 107 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_15` | 111–116 | 114 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_16` | 118–123 | 121 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_17` | 125–130 | 128 | `base-0` | `strcpy(target, "AB");` |
-| `freertos_kernel-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_18` | 132–137 | 135 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `freertos_kernel-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_19` | 139–144 | 142 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_20` | 146–151 | 149 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_21` | 153–158 | 156 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `freertos_kernel-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_22` | 160–165 | 163 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_23` | 167–172 | 170 | `hard-3` | `strcat(target, "DEFGH");` |
-| `freertos_kernel-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_24` | 174–179 | 177 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_25` | 181–186 | 184 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_26` | 188–193 | 191 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `freertos_kernel-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_27` | 195–200 | 198 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_28` | 202–207 | 205 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_29` | 209–214 | 212 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_30` | 216–221 | 219 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_31` | 223–228 | 226 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_32` | 230–235 | 233 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `freertos_kernel-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_33` | 237–242 | 240 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_34` | 244–249 | 247 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_35` | 251–257 | 254 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `freertos_kernel-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_36` | 259–264 | 262 | `hard-4` | `memcpy(target, "ABCDE", sizeof(target));` |
-| `freertos_kernel-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_37` | 266–272 | 269 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `freertos_kernel-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_38` | 274–279 | 277 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_39` | 281–286 | 284 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_40` | 288–293 | 291 | `base-0` | `strcpy(target, "AB");` |
-
-</details>
-
-<details><summary>FreeRTOS Kernel · 空指针调用 · <code>contract3_balanced_hard_web_null_pointer.c</code>（295 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_01` | 12–16 | 15 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_02` | 18–22 | 21 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_03` | 24–30 | 29 | `hard-4` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_04` | 32–38 | 37 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_05` | 40–46 | 45 | `hard-4` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_06` | 48–53 | 52 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_07` | 55–60 | 59 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `freertos_kernel-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_08` | 62–67 | 66 | `hard-3` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_09` | 69–75 | 74 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_10` | 77–82 | 81 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_11` | 84–88 | 87 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_12` | 90–95 | 94 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_13` | 97–103 | 102 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_14` | 105–110 | 109 | `hard-3` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_15` | 112–117 | 116 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_16` | 119–123 | 122 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_17` | 125–129 | 128 | `base-2` | `return contract3_read(&value);` |
-| `freertos_kernel-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_18` | 131–136 | 135 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `freertos_kernel-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_19` | 138–143 | 142 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_20` | 145–151 | 150 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_21` | 153–159 | 158 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_22` | 161–165 | 164 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_23` | 167–173 | 172 | `hard-2` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_24` | 175–181 | 180 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_25` | 183–188 | 187 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_26` | 190–194 | 193 | `base-2` | `return contract3_read(0);` |
-| `freertos_kernel-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_27` | 196–200 | 199 | `base-2` | `return contract3_read(&value);` |
-| `freertos_kernel-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_28` | 202–207 | 206 | `hard-3` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_29` | 209–213 | 212 | `base-2` | `return contract3_read(0);` |
-| `freertos_kernel-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_30` | 215–219 | 218 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_31` | 221–227 | 226 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_32` | 229–235 | 234 | `hard-2` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_33` | 237–242 | 241 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_34` | 244–250 | 249 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_35` | 252–258 | 257 | `hard-2` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_36` | 260–265 | 264 | `hard-3` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_37` | 267–272 | 271 | `base-3` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_38` | 274–279 | 278 | `hard-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_39` | 281–287 | 286 | `hard-2` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_40` | 289–294 | 293 | `hard-1` | `return *pointer;` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 数组越界 · <code>contract3_balanced_hard_web_array_oob.c</code>（291 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_01` | 12–18 | 16 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `zephyr-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_02` | 20–24 | 23 | `hard-4` | `return values[4];` |
-| `zephyr-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_03` | 26–31 | 30 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_04` | 33–38 | 37 | `hard-3` | `return end[-1];` |
-| `zephyr-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_05` | 40–46 | 45 | `hard-0` | `return values[index];` |
-| `zephyr-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_06` | 48–53 | 52 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_07` | 55–59 | 58 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `zephyr-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_08` | 61–65 | 64 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `zephyr-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_09` | 67–71 | 70 | `base-0` | `return values[2];` |
-| `zephyr-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_10` | 73–78 | 77 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_11` | 80–86 | 85 | `hard-0` | `return values[index];` |
-| `zephyr-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_12` | 88–93 | 92 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_13` | 95–101 | 99 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `zephyr-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_14` | 103–108 | 107 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_15` | 110–115 | 114 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_16` | 117–121 | 120 | `base-0` | `return values[2];` |
-| `zephyr-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_17` | 123–127 | 126 | `hard-4` | `return values[3];` |
-| `zephyr-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_18` | 129–135 | 133 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_19` | 137–143 | 142 | `hard-0` | `return values[index];` |
-| `zephyr-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_20` | 145–149 | 148 | `hard-4` | `return values[3];` |
-| `zephyr-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_21` | 151–156 | 155 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_22` | 158–163 | 162 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_23` | 165–169 | 168 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_24` | 171–175 | 174 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_25` | 177–183 | 181 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `zephyr-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_26` | 185–189 | 188 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `zephyr-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_27` | 191–197 | 195 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `zephyr-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_28` | 199–205 | 203 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_29` | 207–212 | 211 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_30` | 214–218 | 217 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_31` | 220–224 | 223 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `zephyr-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_32` | 226–232 | 230 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `zephyr-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_33` | 234–239 | 238 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_34` | 241–247 | 245 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `zephyr-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_35` | 249–253 | 252 | `base-0` | `return values[2];` |
-| `zephyr-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_36` | 255–261 | 259 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `zephyr-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_37` | 263–269 | 268 | `hard-0` | `return values[index];` |
-| `zephyr-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_38` | 271–276 | 275 | `hard-3` | `return end[0];` |
-| `zephyr-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_39` | 278–282 | 281 | `hard-4` | `return values[4];` |
-| `zephyr-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_40` | 284–290 | 288 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 字符串溢出 · <code>contract3_balanced_hard_web_string_overflow.c</code>（294 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_01` | 12–17 | 15 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_02` | 19–24 | 22 | `hard-3` | `strcat(target, "DEFGH");` |
-| `zephyr-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_03` | 26–31 | 29 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_04` | 33–38 | 36 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_05` | 40–45 | 43 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_06` | 47–52 | 50 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `zephyr-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_07` | 54–59 | 57 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_08` | 61–66 | 64 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_09` | 68–73 | 71 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_10` | 75–80 | 78 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_11` | 82–87 | 85 | `hard-3` | `strcat(target, "DEFG");` |
-| `zephyr-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_12` | 89–94 | 92 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_13` | 96–101 | 99 | `hard-4` | `memcpy(target, "ABCDE", sizeof("ABCDE"));` |
-| `zephyr-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_14` | 103–108 | 106 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_15` | 110–115 | 113 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_16` | 117–122 | 120 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `zephyr-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_17` | 124–129 | 127 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_18` | 131–136 | 134 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `zephyr-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_19` | 138–143 | 141 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_20` | 145–151 | 148 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `zephyr-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_21` | 153–158 | 156 | `hard-4` | `memcpy(target, "ABCDE", sizeof(target));` |
-| `zephyr-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_22` | 160–165 | 163 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_23` | 167–172 | 170 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_24` | 174–179 | 177 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_25` | 181–186 | 184 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_26` | 188–193 | 191 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_27` | 195–200 | 198 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_28` | 202–207 | 205 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_29` | 209–215 | 212 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `zephyr-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_30` | 217–222 | 220 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_31` | 224–229 | 227 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_32` | 231–237 | 234 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `zephyr-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_33` | 239–244 | 242 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_34` | 246–251 | 249 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_35` | 253–258 | 256 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_36` | 260–265 | 263 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_37` | 267–272 | 270 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `zephyr-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_38` | 274–279 | 277 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_39` | 281–286 | 284 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `zephyr-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_40` | 288–293 | 291 | `hard-0` | `strcpy(target, "ABCDE");` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 空指针调用 · <code>contract3_balanced_hard_web_null_pointer.c</code>（295 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_01` | 12–17 | 16 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_02` | 19–23 | 22 | `base-0` | `return value;` |
-| `zephyr-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_03` | 25–31 | 30 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_04` | 33–39 | 38 | `hard-2` | `return *pointer;` |
-| `zephyr-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_05` | 41–47 | 46 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_06` | 49–55 | 54 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_07` | 57–61 | 60 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_08` | 63–68 | 67 | `hard-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_09` | 70–74 | 73 | `base-2` | `return contract3_read(&value);` |
-| `zephyr-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_10` | 76–81 | 80 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_11` | 83–87 | 86 | `base-0` | `return value;` |
-| `zephyr-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_12` | 89–93 | 92 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_13` | 95–101 | 100 | `hard-2` | `return *pointer;` |
-| `zephyr-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_14` | 103–109 | 108 | `hard-2` | `return *pointer;` |
-| `zephyr-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_15` | 111–115 | 114 | `base-2` | `return contract3_read(0);` |
-| `zephyr-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_16` | 117–122 | 121 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_17` | 124–129 | 128 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_18` | 131–137 | 136 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_19` | 139–145 | 144 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_20` | 147–152 | 151 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_21` | 154–159 | 158 | `hard-3` | `return *pointer;` |
-| `zephyr-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_22` | 161–166 | 165 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `zephyr-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_23` | 168–174 | 173 | `hard-2` | `return *pointer;` |
-| `zephyr-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_24` | 176–182 | 181 | `hard-4` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_25` | 184–189 | 188 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `zephyr-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_26` | 191–197 | 196 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_27` | 199–204 | 203 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_28` | 206–210 | 209 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_29` | 212–217 | 216 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_30` | 219–224 | 223 | `hard-3` | `return *pointer;` |
-| `zephyr-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_31` | 226–231 | 230 | `hard-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_32` | 233–238 | 237 | `hard-3` | `return *pointer;` |
-| `zephyr-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_33` | 240–244 | 243 | `base-0` | `return value;` |
-| `zephyr-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_34` | 246–252 | 251 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_35` | 254–259 | 258 | `base-3` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_36` | 261–265 | 264 | `base-2` | `return contract3_read(&value);` |
-| `zephyr-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_37` | 267–272 | 271 | `hard-3` | `return *pointer;` |
-| `zephyr-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_38` | 274–278 | 277 | `base-2` | `return contract3_read(0);` |
-| `zephyr-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_39` | 280–286 | 285 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_40` | 288–294 | 293 | `hard-4` | `return *box.pointer;` |
-
-</details>
-
-<details><summary>RT-Thread · 数组越界 · <code>contract3_balanced_hard_web_array_oob.c</code>（291 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_01` | 12–17 | 16 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_02` | 19–23 | 22 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_03` | 25–31 | 29 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_04` | 33–37 | 36 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `rt_thread-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_05` | 39–45 | 43 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `rt_thread-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_06` | 47–53 | 51 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_07` | 55–61 | 60 | `hard-0` | `return values[index];` |
-| `rt_thread-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_08` | 63–69 | 68 | `hard-0` | `return values[index];` |
-| `rt_thread-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_09` | 71–76 | 75 | `hard-3` | `return end[0];` |
-| `rt_thread-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_10` | 78–83 | 82 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_11` | 85–91 | 89 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `rt_thread-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_12` | 93–99 | 97 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `rt_thread-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_13` | 101–105 | 104 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_14` | 107–111 | 110 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_15` | 113–118 | 117 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_16` | 120–125 | 124 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_17` | 127–131 | 130 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_18` | 133–138 | 137 | `hard-3` | `return end[-1];` |
-| `rt_thread-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_19` | 140–145 | 144 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_20` | 147–151 | 150 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_21` | 153–157 | 156 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `rt_thread-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_22` | 159–164 | 163 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_23` | 166–171 | 170 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_24` | 173–177 | 176 | `hard-4` | `return values[3];` |
-| `rt_thread-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_25` | 179–185 | 183 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `rt_thread-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_26` | 187–191 | 190 | `hard-4` | `return values[3];` |
-| `rt_thread-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_27` | 193–197 | 196 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_28` | 199–204 | 203 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_29` | 206–212 | 210 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_30` | 214–219 | 218 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_31` | 221–227 | 225 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_32` | 229–233 | 232 | `hard-4` | `return values[4];` |
-| `rt_thread-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_33` | 235–241 | 240 | `hard-0` | `return values[index];` |
-| `rt_thread-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_34` | 243–249 | 248 | `hard-0` | `return values[index];` |
-| `rt_thread-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_35` | 251–255 | 254 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `rt_thread-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_36` | 257–261 | 260 | `hard-4` | `return values[4];` |
-| `rt_thread-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_37` | 263–269 | 267 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `rt_thread-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_38` | 271–275 | 274 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `rt_thread-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_39` | 277–282 | 281 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_40` | 284–290 | 288 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-
-</details>
-
-<details><summary>RT-Thread · 字符串溢出 · <code>contract3_balanced_hard_web_string_overflow.c</code>（294 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_01` | 12–17 | 15 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_02` | 19–24 | 22 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_03` | 26–31 | 29 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `rt_thread-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_04` | 33–38 | 36 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_05` | 40–46 | 43 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `rt_thread-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_06` | 48–53 | 51 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_07` | 55–60 | 58 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_08` | 62–67 | 65 | `hard-3` | `strcat(target, "DEFG");` |
-| `rt_thread-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_09` | 69–74 | 72 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_10` | 76–81 | 79 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_11` | 83–88 | 86 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_12` | 90–95 | 93 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_13` | 97–102 | 100 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_14` | 104–109 | 107 | `hard-4` | `memcpy(target, "ABCDE", sizeof(target));` |
-| `rt_thread-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_15` | 111–116 | 114 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_16` | 118–123 | 121 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `rt_thread-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_17` | 125–131 | 128 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `rt_thread-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_18` | 133–138 | 136 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_19` | 140–145 | 143 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `rt_thread-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_20` | 147–152 | 150 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_21` | 154–159 | 157 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_22` | 161–166 | 164 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_23` | 168–173 | 171 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `rt_thread-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_24` | 175–180 | 178 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_25` | 182–188 | 185 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `rt_thread-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_26` | 190–195 | 193 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_27` | 197–202 | 200 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_28` | 204–209 | 207 | `hard-3` | `strcat(target, "DEFGH");` |
-| `rt_thread-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_29` | 211–216 | 214 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_30` | 218–223 | 221 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `rt_thread-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_31` | 225–230 | 228 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_32` | 232–237 | 235 | `hard-4` | `memcpy(target, "ABCDE", sizeof("ABCDE"));` |
-| `rt_thread-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_33` | 239–244 | 242 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_34` | 246–251 | 249 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_35` | 253–258 | 256 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_36` | 260–265 | 263 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_37` | 267–272 | 270 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_38` | 274–279 | 277 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_39` | 281–286 | 284 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_40` | 288–293 | 291 | `hard-0` | `strcpy(target, "ABCDE");` |
-
-</details>
-
-<details><summary>RT-Thread · 空指针调用 · <code>contract3_balanced_hard_web_null_pointer.c</code>（295 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_01` | 12–16 | 15 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_02` | 18–23 | 22 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_03` | 25–31 | 30 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_04` | 33–39 | 38 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_05` | 41–45 | 44 | `base-2` | `return contract3_read(&value);` |
-| `rt_thread-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_06` | 47–52 | 51 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `rt_thread-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_07` | 54–58 | 57 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_08` | 60–66 | 65 | `hard-2` | `return *pointer;` |
-| `rt_thread-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_09` | 68–74 | 73 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_10` | 76–81 | 80 | `hard-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_11` | 83–87 | 86 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_12` | 89–94 | 93 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_13` | 96–101 | 100 | `hard-3` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_14` | 103–107 | 106 | `base-2` | `return contract3_read(0);` |
-| `rt_thread-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_15` | 109–113 | 112 | `base-2` | `return contract3_read(&value);` |
-| `rt_thread-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_16` | 115–121 | 120 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_17` | 123–129 | 128 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_18` | 131–136 | 135 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_19` | 138–142 | 141 | `base-2` | `return contract3_read(0);` |
-| `rt_thread-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_20` | 144–150 | 149 | `hard-2` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_21` | 152–158 | 157 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_22` | 160–165 | 164 | `hard-3` | `return *pointer;` |
-| `rt_thread-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_23` | 167–171 | 170 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_24` | 173–178 | 177 | `hard-3` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_25` | 180–185 | 184 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_26` | 187–192 | 191 | `base-3` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_27` | 194–200 | 199 | `hard-4` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_28` | 202–206 | 205 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_29` | 208–213 | 212 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `rt_thread-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_30` | 215–220 | 219 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_31` | 222–227 | 226 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_32` | 229–233 | 232 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_33` | 235–241 | 240 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_34` | 243–248 | 247 | `hard-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_35` | 250–256 | 255 | `hard-2` | `return *pointer;` |
-| `rt_thread-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_36` | 258–264 | 263 | `hard-4` | `return *box.pointer;` |
-| `rt_thread-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_37` | 266–272 | 271 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_38` | 274–279 | 278 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_39` | 281–286 | 285 | `hard-3` | `return *pointer;` |
-| `rt_thread-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_40` | 288–294 | 293 | `hard-2` | `return *pointer;` |
-
-</details>
-
-### 独立压力集（加难版）（`independent-hard`）
-
-<details><summary>FreeRTOS Kernel · 数组越界 · <code>contract3_independent_hard_web_array_oob.c</code>（287 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_01` | 12–16 | 15 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `freertos_kernel-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_02` | 18–24 | 23 | `hard-0` | `return values[index];` |
-| `freertos_kernel-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_03` | 26–31 | 30 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_04` | 33–37 | 36 | `hard-4` | `return values[4];` |
-| `freertos_kernel-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_05` | 39–43 | 42 | `hard-4` | `return values[3];` |
-| `freertos_kernel-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_06` | 45–49 | 48 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `freertos_kernel-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_07` | 51–56 | 55 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_08` | 58–62 | 61 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `freertos_kernel-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_09` | 64–68 | 67 | `hard-4` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_10` | 70–74 | 73 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `freertos_kernel-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_11` | 76–80 | 79 | `hard-4` | `return values[4];` |
-| `freertos_kernel-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_12` | 82–88 | 87 | `hard-0` | `return values[index];` |
-| `freertos_kernel-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_13` | 90–94 | 93 | `base-0` | `return values[2];` |
-| `freertos_kernel-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_14` | 96–100 | 99 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `freertos_kernel-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_15` | 102–106 | 105 | `hard-4` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_16` | 108–113 | 112 | `base-3` | `return values[index];` |
-| `freertos_kernel-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_17` | 115–121 | 119 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_18` | 123–129 | 127 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_19` | 131–137 | 135 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `freertos_kernel-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_20` | 139–144 | 143 | `hard-3` | `return end[-1];` |
-| `freertos_kernel-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_21` | 146–150 | 149 | `hard-4` | `return values[4];` |
-| `freertos_kernel-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_22` | 152–157 | 156 | `base-4` | `return *cursor;` |
-| `freertos_kernel-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_23` | 159–165 | 163 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `freertos_kernel-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_24` | 167–172 | 171 | `hard-3` | `return end[0];` |
-| `freertos_kernel-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_25` | 174–180 | 178 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `freertos_kernel-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_26` | 182–186 | 185 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `freertos_kernel-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_27` | 188–192 | 191 | `hard-4` | `return values[4];` |
-| `freertos_kernel-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_28` | 194–200 | 198 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `freertos_kernel-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_29` | 202–208 | 206 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `freertos_kernel-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_30` | 210–216 | 214 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `freertos_kernel-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_31` | 218–224 | 222 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `freertos_kernel-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_32` | 226–231 | 230 | `base-1` | `return values[index];` |
-| `freertos_kernel-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_33` | 233–237 | 236 | `hard-4` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_34` | 239–245 | 243 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_35` | 247–253 | 251 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_36` | 255–260 | 259 | `base-4` | `return *cursor;` |
-| `freertos_kernel-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_37` | 262–266 | 265 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `freertos_kernel-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_38` | 268–272 | 271 | `base-0` | `return values[3];` |
-| `freertos_kernel-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_39` | 274–280 | 278 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `freertos_kernel-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_40` | 282–286 | 285 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-
-</details>
-
-<details><summary>FreeRTOS Kernel · 字符串溢出 · <code>contract3_independent_hard_web_string_overflow.c</code>（296 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_01` | 12–17 | 15 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_02` | 19–25 | 22 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `freertos_kernel-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_03` | 27–33 | 30 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `freertos_kernel-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_04` | 35–40 | 38 | `hard-3` | `strcat(target, "DEFGH");` |
-| `freertos_kernel-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_05` | 42–47 | 45 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `freertos_kernel-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_06` | 49–54 | 52 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_07` | 56–61 | 59 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_08` | 63–68 | 66 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_09` | 70–75 | 73 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_10` | 77–82 | 80 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `freertos_kernel-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_11` | 84–89 | 87 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `freertos_kernel-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_12` | 91–96 | 94 | `base-2` | `strcat(target, "BC");` |
-| `freertos_kernel-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_13` | 98–103 | 101 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_14` | 105–110 | 108 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_15` | 112–117 | 115 | `hard-4` | `memcpy(target, "ABCDE", sizeof(target));` |
-| `freertos_kernel-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_16` | 119–124 | 122 | `base-4` | `contract3_copy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_17` | 126–131 | 129 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `freertos_kernel-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_18` | 133–138 | 136 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_19` | 140–146 | 143 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `freertos_kernel-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_20` | 148–153 | 151 | `base-4` | `contract3_copy(target, "ABC");` |
-| `freertos_kernel-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_21` | 155–160 | 158 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_22` | 162–167 | 165 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_23` | 169–174 | 172 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `freertos_kernel-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_24` | 176–182 | 179 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `freertos_kernel-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_25` | 184–189 | 187 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `freertos_kernel-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_26` | 191–196 | 194 | `hard-3` | `strcat(target, "DEFG");` |
-| `freertos_kernel-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_27` | 198–203 | 201 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_28` | 205–210 | 208 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_29` | 212–217 | 215 | `hard-4` | `memcpy(target, "ABCDE", sizeof("ABCDE"));` |
-| `freertos_kernel-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_30` | 219–224 | 222 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_31` | 226–231 | 229 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `freertos_kernel-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_32` | 233–239 | 236 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `freertos_kernel-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_33` | 241–246 | 244 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_34` | 248–253 | 251 | `base-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_35` | 255–260 | 258 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `freertos_kernel-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_36` | 262–267 | 265 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `freertos_kernel-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_37` | 269–274 | 272 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `freertos_kernel-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_38` | 276–281 | 279 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `freertos_kernel-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_39` | 283–288 | 286 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `freertos_kernel-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_40` | 290–295 | 293 | `base-0` | `strcpy(target, "AB");` |
-
-</details>
-
-<details><summary>FreeRTOS Kernel · 空指针调用 · <code>contract3_independent_hard_web_null_pointer.c</code>（305 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `freertos_kernel-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_01` | 12–18 | 17 | `hard-2` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_02` | 20–25 | 24 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_03` | 27–33 | 32 | `hard-2` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_04` | 35–41 | 40 | `hard-4` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_05` | 43–48 | 47 | `hard-3` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_06` | 50–56 | 55 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_07` | 58–64 | 63 | `hard-4` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_08` | 66–72 | 71 | `hard-4` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_09` | 74–80 | 79 | `hard-2` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_10` | 82–87 | 86 | `hard-3` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_11` | 89–94 | 93 | `hard-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_12` | 96–101 | 100 | `hard-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_13` | 103–109 | 108 | `hard-4` | `return *box.pointer;` |
-| `freertos_kernel-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_14` | 111–117 | 116 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_15` | 119–125 | 124 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_16` | 127–133 | 132 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_17` | 135–139 | 138 | `base-2` | `return contract3_read(0);` |
-| `freertos_kernel-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_18` | 141–147 | 146 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_19` | 149–153 | 152 | `base-0` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_20` | 155–160 | 159 | `hard-3` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_21` | 162–167 | 166 | `hard-3` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_22` | 169–174 | 173 | `hard-3` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_23` | 176–181 | 180 | `hard-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_24` | 183–189 | 188 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_25` | 191–196 | 195 | `base-1` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_26` | 198–203 | 202 | `hard-3` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_27` | 205–211 | 210 | `hard-2` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_28` | 213–218 | 217 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `freertos_kernel-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_29` | 220–224 | 223 | `base-2` | `return contract3_read(0);` |
-| `freertos_kernel-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_30` | 226–232 | 231 | `hard-2` | `return *pointer;` |
-| `freertos_kernel-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_31` | 234–240 | 239 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_32` | 242–248 | 247 | `base-4` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_33` | 250–256 | 255 | `hard-2` | `return *pointer;` |
-| `freertos_kernel-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_34` | 258–264 | 263 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_35` | 266–271 | 270 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `freertos_kernel-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_36` | 273–279 | 278 | `hard-0` | `return *pointer + value;` |
-| `freertos_kernel-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_37` | 281–285 | 284 | `base-2` | `return contract3_read(&value);` |
-| `freertos_kernel-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_38` | 287–291 | 290 | `base-2` | `return contract3_read(&value);` |
-| `freertos_kernel-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_39` | 293–297 | 296 | `base-0` | `return value;` |
-| `freertos_kernel-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_40` | 299–304 | 303 | `hard-1` | `return pointer ? *pointer : 0;` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 数组越界 · <code>contract3_independent_hard_web_array_oob.c</code>（287 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_01` | 12–16 | 15 | `hard-4` | `return values[3];` |
-| `zephyr-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_02` | 18–22 | 21 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `zephyr-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_03` | 24–30 | 28 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `zephyr-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_04` | 32–38 | 36 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `zephyr-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_05` | 40–46 | 44 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `zephyr-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_06` | 48–54 | 52 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `zephyr-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_07` | 56–60 | 59 | `hard-4` | `return values[4];` |
-| `zephyr-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_08` | 62–66 | 65 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `zephyr-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_09` | 68–72 | 71 | `hard-4` | `return values[4];` |
-| `zephyr-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_10` | 74–80 | 78 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `zephyr-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_11` | 82–88 | 87 | `hard-0` | `return values[index];` |
-| `zephyr-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_12` | 90–94 | 93 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `zephyr-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_13` | 96–102 | 100 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `zephyr-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_14` | 104–108 | 107 | `hard-4` | `return values[4];` |
-| `zephyr-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_15` | 110–114 | 113 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `zephyr-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_16` | 116–121 | 120 | `hard-3` | `return end[-1];` |
-| `zephyr-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_17` | 123–127 | 126 | `hard-4` | `return values[3];` |
-| `zephyr-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_18` | 129–133 | 132 | `hard-4` | `return values[3];` |
-| `zephyr-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_19` | 135–139 | 138 | `hard-4` | `return values[4];` |
-| `zephyr-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_20` | 141–147 | 145 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `zephyr-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_21` | 149–155 | 154 | `hard-0` | `return values[index];` |
-| `zephyr-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_22` | 157–161 | 160 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `zephyr-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_23` | 163–167 | 166 | `hard-4` | `return values[3];` |
-| `zephyr-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_24` | 169–174 | 173 | `base-4` | `return *cursor;` |
-| `zephyr-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_25` | 176–180 | 179 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `zephyr-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_26` | 182–186 | 185 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `zephyr-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_27` | 188–193 | 192 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_28` | 195–201 | 199 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `zephyr-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_29` | 203–208 | 207 | `base-3` | `return values[index];` |
-| `zephyr-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_30` | 210–216 | 214 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `zephyr-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_31` | 218–223 | 222 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_32` | 225–229 | 228 | `base-0` | `return values[3];` |
-| `zephyr-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_33` | 231–237 | 235 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `zephyr-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_34` | 239–245 | 243 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `zephyr-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_35` | 247–251 | 250 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `zephyr-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_36` | 253–258 | 257 | `base-4` | `return *cursor;` |
-| `zephyr-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_37` | 260–265 | 264 | `base-1` | `return values[index];` |
-| `zephyr-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_38` | 267–272 | 271 | `hard-3` | `return end[0];` |
-| `zephyr-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_39` | 274–280 | 278 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `zephyr-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_40` | 282–286 | 285 | `base-0` | `return values[2];` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 字符串溢出 · <code>contract3_independent_hard_web_string_overflow.c</code>（296 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_01` | 12–17 | 15 | `hard-4` | `memcpy(target, "ABCDE", sizeof(target));` |
-| `zephyr-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_02` | 19–24 | 22 | `hard-3` | `strcat(target, "DEFGH");` |
-| `zephyr-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_03` | 26–31 | 29 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_04` | 33–38 | 36 | `base-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_05` | 40–45 | 43 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_06` | 47–52 | 50 | `hard-4` | `memcpy(target, "ABCDE", sizeof("ABCDE"));` |
-| `zephyr-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_07` | 54–60 | 57 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `zephyr-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_08` | 62–67 | 65 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `zephyr-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_09` | 69–75 | 72 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `zephyr-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_10` | 77–82 | 80 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `zephyr-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_11` | 84–89 | 87 | `base-4` | `contract3_copy(target, "ABC");` |
-| `zephyr-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_12` | 91–96 | 94 | `base-4` | `contract3_copy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_13` | 98–104 | 101 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `zephyr-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_14` | 106–111 | 109 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_15` | 113–118 | 116 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_16` | 120–125 | 123 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `zephyr-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_17` | 127–132 | 130 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_18` | 134–139 | 137 | `base-2` | `strcat(target, "BC");` |
-| `zephyr-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_19` | 141–146 | 144 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_20` | 148–153 | 151 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `zephyr-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_21` | 155–160 | 158 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_22` | 162–168 | 165 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `zephyr-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_23` | 170–175 | 173 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `zephyr-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_24` | 177–182 | 180 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `zephyr-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_25` | 184–189 | 187 | `hard-3` | `strcat(target, "DEFG");` |
-| `zephyr-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_26` | 191–196 | 194 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `zephyr-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_27` | 198–203 | 201 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_28` | 205–210 | 208 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `zephyr-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_29` | 212–217 | 215 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_30` | 219–224 | 222 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_31` | 226–231 | 229 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_32` | 233–238 | 236 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `zephyr-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_33` | 240–245 | 243 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_34` | 247–253 | 250 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `zephyr-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_35` | 255–260 | 258 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `zephyr-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_36` | 262–267 | 265 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_37` | 269–274 | 272 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `zephyr-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_38` | 276–281 | 279 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `zephyr-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_39` | 283–288 | 286 | `base-0` | `strcpy(target, "AB");` |
-| `zephyr-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_40` | 290–295 | 293 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-
-</details>
-
-<details><summary>Zephyr RTOS · 空指针调用 · <code>contract3_independent_hard_web_null_pointer.c</code>（305 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `zephyr-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_01` | 12–16 | 15 | `base-0` | `return *pointer;` |
-| `zephyr-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_02` | 18–23 | 22 | `hard-3` | `return *pointer;` |
-| `zephyr-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_03` | 25–31 | 30 | `hard-2` | `return *pointer;` |
-| `zephyr-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_04` | 33–39 | 38 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_05` | 41–47 | 46 | `hard-4` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_06` | 49–55 | 54 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_07` | 57–63 | 62 | `hard-4` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_08` | 65–71 | 70 | `hard-2` | `return *pointer;` |
-| `zephyr-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_09` | 73–79 | 78 | `hard-2` | `return *pointer;` |
-| `zephyr-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_10` | 81–86 | 85 | `hard-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_11` | 88–93 | 92 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `zephyr-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_12` | 95–101 | 100 | `hard-2` | `return *pointer;` |
-| `zephyr-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_13` | 103–108 | 107 | `hard-1` | `return *pointer;` |
-| `zephyr-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_14` | 110–115 | 114 | `hard-3` | `return *pointer;` |
-| `zephyr-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_15` | 117–123 | 122 | `hard-2` | `return *pointer;` |
-| `zephyr-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_16` | 125–131 | 130 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_17` | 133–139 | 138 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_18` | 141–146 | 145 | `hard-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_19` | 148–152 | 151 | `base-2` | `return contract3_read(&value);` |
-| `zephyr-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_20` | 154–160 | 159 | `base-4` | `return *pointer;` |
-| `zephyr-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_21` | 162–166 | 165 | `base-2` | `return contract3_read(0);` |
-| `zephyr-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_22` | 168–174 | 173 | `hard-4` | `return *box.pointer;` |
-| `zephyr-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_23` | 176–182 | 181 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_24` | 184–190 | 189 | `hard-4` | `return *box.pointer;` |
-| `zephyr-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_25` | 192–197 | 196 | `hard-3` | `return *pointer;` |
-| `zephyr-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_26` | 199–205 | 204 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_27` | 207–212 | 211 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `zephyr-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_28` | 214–219 | 218 | `hard-3` | `return *pointer;` |
-| `zephyr-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_29` | 221–227 | 226 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_30` | 229–234 | 233 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `zephyr-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_31` | 236–240 | 239 | `base-2` | `return contract3_read(0);` |
-| `zephyr-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_32` | 242–247 | 246 | `hard-3` | `return *pointer;` |
-| `zephyr-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_33` | 249–255 | 254 | `hard-2` | `return *pointer;` |
-| `zephyr-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_34` | 257–263 | 262 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_35` | 265–269 | 268 | `base-0` | `return value;` |
-| `zephyr-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_36` | 271–276 | 275 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_37` | 278–284 | 283 | `hard-0` | `return *pointer + value;` |
-| `zephyr-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_38` | 286–291 | 290 | `base-1` | `return *pointer;` |
-| `zephyr-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_39` | 293–298 | 297 | `hard-3` | `return *pointer;` |
-| `zephyr-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_40` | 300–304 | 303 | `base-2` | `return contract3_read(&value);` |
-
-</details>
-
-<details><summary>RT-Thread · 数组越界 · <code>contract3_independent_hard_web_array_oob.c</code>（287 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-array_oob-positive-11` | **正例** | `contract3_independent_array_oob_case_01` | 12–16 | 15 | `hard-4` | `return values[4];` |
-| `rt_thread-array_oob-positive-20` | **正例** | `contract3_independent_array_oob_case_02` | 18–23 | 22 | `hard-3` | `return end[0];` |
-| `rt_thread-array_oob-positive-14` | **正例** | `contract3_independent_array_oob_case_03` | 25–29 | 28 | `hard-4` | `return values[4];` |
-| `rt_thread-array_oob-positive-03` | **正例** | `contract3_independent_array_oob_case_04` | 31–37 | 35 | `base-2` | `for (int index = 0; index <= 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-control-09` | 对照 | `contract3_independent_array_oob_case_05` | 39–45 | 43 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `rt_thread-array_oob-positive-12` | **正例** | `contract3_independent_array_oob_case_06` | 47–53 | 51 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `rt_thread-array_oob-positive-18` | **正例** | `contract3_independent_array_oob_case_07` | 55–61 | 60 | `hard-0` | `return values[index];` |
-| `rt_thread-array_oob-control-11` | 对照 | `contract3_independent_array_oob_case_08` | 63–67 | 66 | `hard-4` | `return values[3];` |
-| `rt_thread-array_oob-control-19` | 对照 | `contract3_independent_array_oob_case_09` | 69–75 | 73 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `rt_thread-array_oob-control-20` | 对照 | `contract3_independent_array_oob_case_10` | 77–82 | 81 | `hard-3` | `return end[-1];` |
-| `rt_thread-array_oob-positive-06` | **正例** | `contract3_independent_array_oob_case_11` | 84–90 | 88 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `rt_thread-array_oob-positive-07` | **正例** | `contract3_independent_array_oob_case_12` | 92–96 | 95 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `rt_thread-array_oob-positive-09` | **正例** | `contract3_independent_array_oob_case_13` | 98–104 | 102 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `rt_thread-array_oob-control-07` | 对照 | `contract3_independent_array_oob_case_14` | 106–110 | 109 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `rt_thread-array_oob-control-03` | 对照 | `contract3_independent_array_oob_case_15` | 112–118 | 116 | `base-2` | `for (int index = 0; index < 3; ++index) total += values[index];` |
-| `rt_thread-array_oob-positive-05` | **正例** | `contract3_independent_array_oob_case_16` | 120–125 | 124 | `base-4` | `return *cursor;` |
-| `rt_thread-array_oob-control-08` | 对照 | `contract3_independent_array_oob_case_17` | 127–131 | 130 | `hard-4` | `return values[3];` |
-| `rt_thread-array_oob-positive-01` | **正例** | `contract3_independent_array_oob_case_18` | 133–137 | 136 | `base-0` | `return values[3];` |
-| `rt_thread-array_oob-positive-15` | **正例** | `contract3_independent_array_oob_case_19` | 139–145 | 143 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `rt_thread-array_oob-positive-16` | **正例** | `contract3_independent_array_oob_case_20` | 147–151 | 150 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `rt_thread-array_oob-positive-17` | **正例** | `contract3_independent_array_oob_case_21` | 153–157 | 156 | `hard-4` | `return values[4];` |
-| `rt_thread-array_oob-control-12` | 对照 | `contract3_independent_array_oob_case_22` | 159–165 | 163 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `rt_thread-array_oob-control-15` | 对照 | `contract3_independent_array_oob_case_23` | 167–173 | 171 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `rt_thread-array_oob-control-04` | 对照 | `contract3_independent_array_oob_case_24` | 175–180 | 179 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-06` | 对照 | `contract3_independent_array_oob_case_25` | 182–188 | 186 | `hard-1` | `for (int index = 3; index-- > 0;) total += values[index];` |
-| `rt_thread-array_oob-control-02` | 对照 | `contract3_independent_array_oob_case_26` | 190–195 | 194 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-positive-19` | **正例** | `contract3_independent_array_oob_case_27` | 197–203 | 201 | `hard-1` | `for (int index = 3; index >= 0; --index) total += values[index];` |
-| `rt_thread-array_oob-control-13` | 对照 | `contract3_independent_array_oob_case_28` | 205–209 | 208 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `rt_thread-array_oob-positive-10` | **正例** | `contract3_independent_array_oob_case_29` | 211–215 | 214 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `rt_thread-array_oob-control-17` | 对照 | `contract3_independent_array_oob_case_30` | 217–221 | 220 | `hard-4` | `return values[3];` |
-| `rt_thread-array_oob-positive-02` | **正例** | `contract3_independent_array_oob_case_31` | 223–228 | 227 | `base-1` | `return values[index];` |
-| `rt_thread-array_oob-control-16` | 对照 | `contract3_independent_array_oob_case_32` | 230–234 | 233 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `rt_thread-array_oob-control-14` | 对照 | `contract3_independent_array_oob_case_33` | 236–240 | 239 | `hard-4` | `return values[3];` |
-| `rt_thread-array_oob-control-10` | 对照 | `contract3_independent_array_oob_case_34` | 242–246 | 245 | `hard-2` | `return values[sizeof(values) / sizeof(values[0]) - 1];` |
-| `rt_thread-array_oob-control-18` | 对照 | `contract3_independent_array_oob_case_35` | 248–254 | 253 | `hard-0` | `return values[index];` |
-| `rt_thread-array_oob-control-05` | 对照 | `contract3_independent_array_oob_case_36` | 256–261 | 260 | `base-4` | `return *cursor;` |
-| `rt_thread-array_oob-positive-04` | **正例** | `contract3_independent_array_oob_case_37` | 263–268 | 267 | `base-3` | `return values[index];` |
-| `rt_thread-array_oob-control-01` | 对照 | `contract3_independent_array_oob_case_38` | 270–274 | 273 | `base-0` | `return values[2];` |
-| `rt_thread-array_oob-positive-13` | **正例** | `contract3_independent_array_oob_case_39` | 276–280 | 279 | `hard-2` | `return values[sizeof(values) / sizeof(values[0])];` |
-| `rt_thread-array_oob-positive-08` | **正例** | `contract3_independent_array_oob_case_40` | 282–286 | 285 | `hard-4` | `return values[4];` |
-
-</details>
-
-<details><summary>RT-Thread · 字符串溢出 · <code>contract3_independent_hard_web_string_overflow.c</code>（296 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-string_overflow-positive-12` | **正例** | `contract3_independent_string_overflow_case_01` | 12–17 | 15 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-08` | 对照 | `contract3_independent_string_overflow_case_02` | 19–24 | 22 | `hard-3` | `strcat(target, "DEFG");` |
-| `rt_thread-string_overflow-control-05` | 对照 | `contract3_independent_string_overflow_case_03` | 26–31 | 29 | `base-4` | `contract3_copy(target, "ABC");` |
-| `rt_thread-string_overflow-positive-10` | **正例** | `contract3_independent_string_overflow_case_04` | 33–38 | 36 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-positive-19` | **正例** | `contract3_independent_string_overflow_case_05` | 40–45 | 43 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `rt_thread-string_overflow-control-06` | 对照 | `contract3_independent_string_overflow_case_06` | 47–52 | 50 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-control-03` | 对照 | `contract3_independent_string_overflow_case_07` | 54–59 | 57 | `base-2` | `strcat(target, "BC");` |
-| `rt_thread-string_overflow-control-16` | 对照 | `contract3_independent_string_overflow_case_08` | 61–66 | 64 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-13` | 对照 | `contract3_independent_string_overflow_case_09` | 68–74 | 71 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `rt_thread-string_overflow-control-17` | 对照 | `contract3_independent_string_overflow_case_10` | 76–82 | 79 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `rt_thread-string_overflow-control-09` | 对照 | `contract3_independent_string_overflow_case_11` | 84–89 | 87 | `hard-4` | `memcpy(target, "ABCDE", sizeof(target));` |
-| `rt_thread-string_overflow-positive-07` | **正例** | `contract3_independent_string_overflow_case_12` | 91–96 | 94 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-11` | **正例** | `contract3_independent_string_overflow_case_13` | 98–103 | 101 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `rt_thread-string_overflow-positive-02` | **正例** | `contract3_independent_string_overflow_case_14` | 105–110 | 108 | `base-1` | `sprintf(target, "%s", "ABCDE");` |
-| `rt_thread-string_overflow-positive-04` | **正例** | `contract3_independent_string_overflow_case_15` | 112–117 | 115 | `base-3` | `memcpy(target, "ABCDE", 6);` |
-| `rt_thread-string_overflow-positive-17` | **正例** | `contract3_independent_string_overflow_case_16` | 119–124 | 122 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `rt_thread-string_overflow-control-15` | 对照 | `contract3_independent_string_overflow_case_17` | 126–132 | 129 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `rt_thread-string_overflow-control-02` | 对照 | `contract3_independent_string_overflow_case_18` | 134–139 | 137 | `base-1` | `sprintf(target, "%s", "ABC");` |
-| `rt_thread-string_overflow-control-04` | 对照 | `contract3_independent_string_overflow_case_19` | 141–146 | 144 | `base-3` | `memcpy(target, "ABCDE", 3);` |
-| `rt_thread-string_overflow-positive-06` | **正例** | `contract3_independent_string_overflow_case_20` | 148–153 | 151 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-14` | **正例** | `contract3_independent_string_overflow_case_21` | 155–160 | 158 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-positive-13` | **正例** | `contract3_independent_string_overflow_case_22` | 162–167 | 165 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `rt_thread-string_overflow-positive-20` | **正例** | `contract3_independent_string_overflow_case_23` | 169–174 | 172 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-19` | 对照 | `contract3_independent_string_overflow_case_24` | 176–182 | 179 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `rt_thread-string_overflow-positive-09` | **正例** | `contract3_independent_string_overflow_case_25` | 184–189 | 187 | `hard-4` | `memcpy(target, "ABCDE", sizeof("ABCDE"));` |
-| `rt_thread-string_overflow-control-01` | 对照 | `contract3_independent_string_overflow_case_26` | 191–196 | 194 | `base-0` | `strcpy(target, "AB");` |
-| `rt_thread-string_overflow-positive-18` | **正例** | `contract3_independent_string_overflow_case_27` | 198–203 | 201 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-20` | 对照 | `contract3_independent_string_overflow_case_28` | 205–210 | 208 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-positive-01` | **正例** | `contract3_independent_string_overflow_case_29` | 212–217 | 215 | `base-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-16` | **正例** | `contract3_independent_string_overflow_case_30` | 219–224 | 222 | `hard-1` | `snprintf(target, 16, "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-positive-08` | **正例** | `contract3_independent_string_overflow_case_31` | 226–231 | 229 | `hard-3` | `strcat(target, "DEFGH");` |
-| `rt_thread-string_overflow-positive-05` | **正例** | `contract3_independent_string_overflow_case_32` | 233–238 | 236 | `base-4` | `contract3_copy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-15` | **正例** | `contract3_independent_string_overflow_case_33` | 240–245 | 243 | `hard-2` | `strncpy(target, "ABCDEFGH", 8);` |
-| `rt_thread-string_overflow-control-10` | 对照 | `contract3_independent_string_overflow_case_34` | 247–252 | 250 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-11` | 对照 | `contract3_independent_string_overflow_case_35` | 254–260 | 257 | `hard-2` | `strncpy(target, "ABCDEFGH", sizeof(target) - 1);` |
-| `rt_thread-string_overflow-control-14` | 对照 | `contract3_independent_string_overflow_case_36` | 262–267 | 265 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-12` | 对照 | `contract3_independent_string_overflow_case_37` | 269–274 | 272 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-| `rt_thread-string_overflow-control-07` | 对照 | `contract3_independent_string_overflow_case_38` | 276–281 | 279 | `hard-0` | `strcpy(target, "ABCDE");` |
-| `rt_thread-string_overflow-positive-03` | **正例** | `contract3_independent_string_overflow_case_39` | 283–288 | 286 | `base-2` | `strcat(target, "BCDEFGH");` |
-| `rt_thread-string_overflow-control-18` | 对照 | `contract3_independent_string_overflow_case_40` | 290–295 | 293 | `hard-1` | `snprintf(target, sizeof(target), "%s", "ABCDEFGHIJ");` |
-
-</details>
-
-<details><summary>RT-Thread · 空指针调用 · <code>contract3_independent_hard_web_null_pointer.c</code>（305 行，正例 20 / 对照 20）</summary>
-
-| 用例 | 标签 | 函数 | 行范围 | 缺陷行 | 写法 | 缺陷行代码 |
-|---|---|---|---|---:|---|---|
-| `rt_thread-null_pointer-control-04` | 对照 | `contract3_independent_null_pointer_case_01` | 12–16 | 15 | `base-2` | `return contract3_read(&value);` |
-| `rt_thread-null_pointer-positive-09` | **正例** | `contract3_independent_null_pointer_case_02` | 18–23 | 22 | `hard-3` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-03` | **正例** | `contract3_independent_null_pointer_case_03` | 25–29 | 28 | `base-2` | `return contract3_read(0);` |
-| `rt_thread-null_pointer-control-20` | 对照 | `contract3_independent_null_pointer_case_04` | 31–37 | 36 | `hard-4` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-02` | **正例** | `contract3_independent_null_pointer_case_05` | 39–44 | 43 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-01` | **正例** | `contract3_independent_null_pointer_case_06` | 46–50 | 49 | `base-0` | `return *pointer;` |
-| `rt_thread-null_pointer-control-13` | 对照 | `contract3_independent_null_pointer_case_07` | 52–57 | 56 | `hard-3` | `return *pointer;` |
-| `rt_thread-null_pointer-control-05` | 对照 | `contract3_independent_null_pointer_case_08` | 59–65 | 64 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-control-03` | 对照 | `contract3_independent_null_pointer_case_09` | 67–71 | 70 | `base-2` | `return contract3_read(&value);` |
-| `rt_thread-null_pointer-positive-18` | **正例** | `contract3_independent_null_pointer_case_10` | 73–79 | 78 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-control-17` | 对照 | `contract3_independent_null_pointer_case_11` | 81–86 | 85 | `hard-3` | `return *pointer;` |
-| `rt_thread-null_pointer-control-18` | 对照 | `contract3_independent_null_pointer_case_12` | 88–94 | 93 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-control-15` | 对照 | `contract3_independent_null_pointer_case_13` | 96–101 | 100 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `rt_thread-null_pointer-control-01` | 对照 | `contract3_independent_null_pointer_case_14` | 103–107 | 106 | `base-0` | `return value;` |
-| `rt_thread-null_pointer-control-19` | 对照 | `contract3_independent_null_pointer_case_15` | 109–115 | 114 | `hard-4` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-08` | **正例** | `contract3_independent_null_pointer_case_16` | 117–123 | 122 | `hard-2` | `return *pointer;` |
-| `rt_thread-null_pointer-control-06` | 对照 | `contract3_independent_null_pointer_case_17` | 125–131 | 130 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-control-12` | 对照 | `contract3_independent_null_pointer_case_18` | 133–139 | 138 | `hard-2` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-07` | **正例** | `contract3_independent_null_pointer_case_19` | 141–146 | 145 | `hard-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-04` | **正例** | `contract3_independent_null_pointer_case_20` | 148–152 | 151 | `base-2` | `return contract3_read(0);` |
-| `rt_thread-null_pointer-positive-19` | **正例** | `contract3_independent_null_pointer_case_21` | 154–160 | 159 | `hard-4` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-14` | **正例** | `contract3_independent_null_pointer_case_22` | 162–168 | 167 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-positive-17` | **正例** | `contract3_independent_null_pointer_case_23` | 170–175 | 174 | `hard-3` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-05` | **正例** | `contract3_independent_null_pointer_case_24` | 177–183 | 182 | `base-4` | `return *pointer;` |
-| `rt_thread-null_pointer-control-10` | 对照 | `contract3_independent_null_pointer_case_25` | 185–191 | 190 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-control-02` | 对照 | `contract3_independent_null_pointer_case_26` | 193–198 | 197 | `base-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-10` | **正例** | `contract3_independent_null_pointer_case_27` | 200–206 | 205 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-control-14` | 对照 | `contract3_independent_null_pointer_case_28` | 208–214 | 213 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-control-09` | 对照 | `contract3_independent_null_pointer_case_29` | 216–221 | 220 | `hard-3` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-13` | **正例** | `contract3_independent_null_pointer_case_30` | 223–228 | 227 | `hard-3` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-12` | **正例** | `contract3_independent_null_pointer_case_31` | 230–236 | 235 | `hard-2` | `return *pointer;` |
-| `rt_thread-null_pointer-control-11` | 对照 | `contract3_independent_null_pointer_case_32` | 238–243 | 242 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `rt_thread-null_pointer-positive-16` | **正例** | `contract3_independent_null_pointer_case_33` | 245–251 | 250 | `hard-2` | `return *pointer;` |
-| `rt_thread-null_pointer-control-08` | 对照 | `contract3_independent_null_pointer_case_34` | 253–259 | 258 | `hard-2` | `return *pointer;` |
-| `rt_thread-null_pointer-control-16` | 对照 | `contract3_independent_null_pointer_case_35` | 261–267 | 266 | `hard-2` | `return *pointer;` |
-| `rt_thread-null_pointer-control-07` | 对照 | `contract3_independent_null_pointer_case_36` | 269–274 | 273 | `hard-1` | `return pointer ? *pointer : 0;` |
-| `rt_thread-null_pointer-positive-20` | **正例** | `contract3_independent_null_pointer_case_37` | 276–282 | 281 | `hard-4` | `return *box.pointer;` |
-| `rt_thread-null_pointer-positive-11` | **正例** | `contract3_independent_null_pointer_case_38` | 284–289 | 288 | `hard-1` | `return *pointer;` |
-| `rt_thread-null_pointer-positive-06` | **正例** | `contract3_independent_null_pointer_case_39` | 291–297 | 296 | `hard-0` | `return *pointer + value;` |
-| `rt_thread-null_pointer-positive-15` | **正例** | `contract3_independent_null_pointer_case_40` | 299–304 | 303 | `hard-1` | `return *pointer;` |
-
-</details>
-
-## 5. GT JSON 字段
-
-每个 `ground_truth.json` 对应一套测试集里的一个工程，路径均相对该工程根目录。前四个字段是 `load_ground_truth` 读取的部分，其余为说明字段，加载时忽略。
-
-| 字段 | 含义 |
-|---|---|
-| `schema_version` | 固定为 `1` |
-| `scan_type` | 固定为 `frequent_defects`（数组越界、字符串溢出、空指针调用） |
-| `source_sha256` | 文件路径 → SHA-256：参与计分的注入测试文件（检测文件的哈希见 `detection_files`） |
-| `cases[]` | 逐函数标签：`case_id`、`category`、`file`、`function`、`line_start`、`line_end`、`expected`（`defect`/`control`）、`variant`（写法编号）；另有说明字段 `variant_kind`（`base`/`hard`）、`defect_line`、`defect_code` |
-| `suite`、`project`、`line_totals` | 测试集名、工程版本信息；`line_totals.upstream_detection_files` 为检测文件合计行数 |
-| `fixtures[]` | 注入的测试文件：`path`、`category`、`lines`、`sha256` |
-| `detection_files[]` | 要检测的上游源码文件：`path`、`lines`、`sha256` |
-
+# 合同三：工程教学 v5 测试集与 GT 清单
+
+版本：`engineering-v5-20261114`。三工程、四套独立源码快照；缺陷修改原有函数中的操作，不新增独立测试函数。GT、教师配方均在 project/ 外。
+
+每工程每套每类 7 个缺陷、7 个安全对照，共 42 个操作。四套是有关联的教师校准题集，不能称为独立泛化测试。实际统计见 [总报告](合同-3-result.md)。
+
+| 题集 | 工程 | 完整 C 文件数 | 送检行数 | 数组 正/负 | 字符串 正/负 | 空指针 正/负 |
+|---|---|---:|---:|---:|---:|---:|
+| balanced | freertos_kernel | 7 | 16642 | 7/7 | 7/7 | 7/7 |
+| balanced | zephyr | 124 | 31870 | 7/7 | 7/7 | 7/7 |
+| balanced | rt_thread | 77 | 66133 | 7/7 | 7/7 | 7/7 |
+| independent | freertos_kernel | 7 | 16637 | 7/7 | 7/7 | 7/7 |
+| independent | zephyr | 124 | 31871 | 7/7 | 7/7 | 7/7 |
+| independent | rt_thread | 77 | 66133 | 7/7 | 7/7 | 7/7 |
+| balanced-hard | freertos_kernel | 7 | 16643 | 7/7 | 7/7 | 7/7 |
+| balanced-hard | zephyr | 124 | 31871 | 7/7 | 7/7 | 7/7 |
+| balanced-hard | rt_thread | 77 | 66133 | 7/7 | 7/7 | 7/7 |
+| independent-hard | freertos_kernel | 7 | 16636 | 7/7 | 7/7 | 7/7 |
+| independent-hard | zephyr | 124 | 31870 | 7/7 | 7/7 | 7/7 |
+| independent-hard | rt_thread | 77 | 66133 | 7/7 | 7/7 | 7/7 |
+
+行数只累计送检的完整 C 文件；头文件不计入此表。源码审计覆盖不等于所有板级配置编译覆盖。安全标签只针对当前操作的边界/非空前提，不保证函数其他操作或整个工程没有其他问题。
+
+旧版 v3 小样例和初始 v4 工程题及原始结果保留在各自版本目录，不能混用源码、GT 或成绩。
+
+## balanced / FreeRTOS Kernel
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/balanced/freertos_kernel/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | defect | `vCoRoutineSchedule` | [`croutine.c:313`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/croutine.c) |
+| array_oob-02 | array_oob | defect | `prvInitialiseCoRoutineLists` | [`croutine.c:342`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/croutine.c) |
+| array_oob-03 | array_oob | defect | `vQueueAddToRegistry` | [`queue.c:3026`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/queue.c) |
+| array_oob-04 | array_oob | defect | `pcQueueGetName` | [`queue.c:3074`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/queue.c) |
+| array_oob-05 | array_oob | defect | `vQueueUnregisterQueue` | [`queue.c:3107`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/queue.c) |
+| array_oob-06 | array_oob | defect | `prvCheckForRunStateChange` | [`tasks.c:815`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| array_oob-07 | array_oob | defect | `prvYieldForTask` | [`tasks.c:901`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| array_oob-08 | array_oob | control | `prvSelectHighestPriorityTask` | [`tasks.c:1010`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| array_oob-09 | array_oob | control | `vTaskDelete` | [`tasks.c:2267`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| array_oob-10 | array_oob | control | `eTaskGetState` | [`tasks.c:2551`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| array_oob-11 | array_oob | control | `vTaskPrioritySet` | [`tasks.c:2907`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| array_oob-12 | array_oob | control | `vTaskSuspend` | [`tasks.c:3164`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| array_oob-13 | array_oob | control | `prvTaskIsTaskSuspended` | [`tasks.c:3317`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| array_oob-14 | array_oob | control | `xTaskResumeFromISR` | [`tasks.c:3465`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-01 | string_overflow | defect | `prvInitialiseNewTask` | [`tasks.c:1867`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-02 | string_overflow | defect | `prvWriteNameToBuffer` | [`tasks.c:7198`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-03 | string_overflow | defect | `prvCreateIdleTasks` | [`tasks.c:3567`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-04 | string_overflow | defect | `prvWriteNameToBuffer` | [`tasks.c:7192`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-05 | string_overflow | defect | `vTaskListTasks` | [`tasks.c:7325`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-06 | string_overflow | defect | `vTaskGetRunTimeStatistics` | [`tasks.c:7472`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-07 | string_overflow | defect | `prvCreateIdleTasks` | [`tasks.c:3572`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-08 | string_overflow | control | `prvCreateIdleTasks` | [`tasks.c:3521`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-09 | string_overflow | control | `prvInitialiseNewTask` | [`tasks.c:1884`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-10 | string_overflow | control | `prvWriteNameToBuffer` | [`tasks.c:7202`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-11 | string_overflow | control | `vTaskListTasks` | [`tasks.c:7330`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-12 | string_overflow | control | `vTaskGetRunTimeStatistics` | [`tasks.c:7481`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-13 | string_overflow | control | `vTaskGetRunTimeStatistics` | [`tasks.c:7498`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| string_overflow-14 | string_overflow | control | `vTaskGetRunTimeStatistics` | [`tasks.c:7510`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/tasks.c) |
+| null_pointer-01 | null_pointer | defect | `xCoRoutineCreate` | [`croutine.c:137`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/croutine.c) |
+| null_pointer-02 | null_pointer | defect | `vCoRoutineAddToDelayedList` | [`croutine.c:186`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/croutine.c) |
+| null_pointer-03 | null_pointer | defect | `xEventGroupSync` | [`event_groups.c:207`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/event_groups.c) |
+| null_pointer-04 | null_pointer | defect | `prvCheckDelayedList` | [`croutine.c:266`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/croutine.c) |
+| null_pointer-05 | null_pointer | defect | `xCoRoutineRemoveFromEventList` | [`croutine.c:367`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/croutine.c) |
+| null_pointer-06 | null_pointer | defect | `xEventGroupCreateStatic` | [`event_groups.c:113`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/event_groups.c) |
+| null_pointer-07 | null_pointer | defect | `xEventGroupCreate` | [`event_groups.c:158`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/event_groups.c) |
+| null_pointer-08 | null_pointer | control | `prvCheckPendingReadyList` | [`croutine.c:228`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/croutine.c) |
+| null_pointer-09 | null_pointer | control | `xEventGroupWaitBits` | [`event_groups.c:338`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/event_groups.c) |
+| null_pointer-10 | null_pointer | control | `xEventGroupClearBits` | [`event_groups.c:491`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/event_groups.c) |
+| null_pointer-11 | null_pointer | control | `xEventGroupGetBitsFromISR` | [`event_groups.c:537`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/event_groups.c) |
+| null_pointer-12 | null_pointer | control | `xEventGroupSetBits` | [`event_groups.c:565`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/event_groups.c) |
+| null_pointer-13 | null_pointer | control | `vEventGroupDelete` | [`event_groups.c:656`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/event_groups.c) |
+| null_pointer-14 | null_pointer | control | `xEventGroupGetStaticBuffer` | [`event_groups.c:712`](artifacts/contract3/engineering-v5/balanced/freertos_kernel/project/event_groups.c) |
+
+## balanced / Zephyr RTOS
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/balanced/zephyr/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | defect | `init_mbox_module` | [`kernel/mailbox.c:74`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/mailbox.c) |
+| array_oob-02 | array_oob | defect | `z_paging_histogram_inc` | [`kernel/paging/statistics.c:179`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/paging/statistics.c) |
+| array_oob-03 | array_oob | defect | `slice_timeout` | [`kernel/timeslicing.c:58`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/timeslicing.c) |
+| array_oob-04 | array_oob | defect | `z_reset_time_slice` | [`kernel/timeslicing.c:73`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/timeslicing.c) |
+| array_oob-05 | array_oob | defect | `z_time_slice` | [`kernel/timeslicing.c:117`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/timeslicing.c) |
+| array_oob-06 | array_oob | defect | `thread_idx_alloc` | [`kernel/userspace.c:275`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/userspace.c) |
+| array_oob-07 | array_oob | defect | `thread_idx_free` | [`kernel/userspace.c:314`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/userspace.c) |
+| array_oob-08 | array_oob | control | `pthread_barrier_pool_init` | [`lib/posix/options/barrier.c:204`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/barrier.c) |
+| array_oob-09 | array_oob | control | `posix_fs_alloc_obj` | [`lib/posix/options/fs.c:45`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/fs.c) |
+| array_oob-10 | array_oob | control | `acquire_mutex` | [`lib/posix/options/mutex.c:126`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/mutex.c) |
+| array_oob-11 | array_oob | control | `pthread_mutex_init` | [`lib/posix/options/mutex.c:229`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/mutex.c) |
+| array_oob-12 | array_oob | control | `pthread_setname_np` | [`lib/posix/options/pthread.c:1366`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/pthread.c) |
+| array_oob-13 | array_oob | control | `pthread_getname_np` | [`lib/posix/options/pthread.c:1395`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/pthread.c) |
+| array_oob-14 | array_oob | control | `pthread_spin_lock` | [`lib/posix/options/spinlock.c:126`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/spinlock.c) |
+| string_overflow-01 | string_overflow | defect | `z_impl_k_thread_name_set` | [`kernel/thread.c:146`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/thread.c) |
+| string_overflow-02 | string_overflow | defect | `readdir` | [`lib/posix/options/fs.c:313`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/fs.c) |
+| string_overflow-03 | string_overflow | defect | `z_impl_k_thread_name_set` | [`kernel/thread.c:145`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/thread.c) |
+| string_overflow-04 | string_overflow | defect | `z_impl_k_thread_name_copy` | [`kernel/thread.c:202`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/thread.c) |
+| string_overflow-05 | string_overflow | defect | `z_setup_new_thread` | [`kernel/thread.c:607`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/thread.c) |
+| string_overflow-06 | string_overflow | defect | `strerror_r` | [`lib/libc/minimal/source/string/strerror.c:56`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/libc/minimal/source/string/strerror.c) |
+| string_overflow-07 | string_overflow | defect | `mq_open` | [`lib/posix/options/mqueue.c:144`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/mqueue.c) |
+| string_overflow-08 | string_overflow | control | `z_setup_new_thread` | [`kernel/thread.c:609`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/thread.c) |
+| string_overflow-09 | string_overflow | control | `uname` | [`lib/posix/options/uname.c:50`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/uname.c) |
+| string_overflow-10 | string_overflow | control | `inet_ntoa` | [`lib/posix/options/net.c:82`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/net.c) |
+| string_overflow-11 | string_overflow | control | `sem_open` | [`lib/posix/options/semaphore.c:289`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/semaphore.c) |
+| string_overflow-12 | string_overflow | control | `strsignal` | [`lib/posix/options/signal.c:89`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/signal.c) |
+| string_overflow-13 | string_overflow | control | `uname` | [`lib/posix/options/uname.c:49`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/posix/options/uname.c) |
+| string_overflow-14 | string_overflow | control | `utf8_lcpy` | [`lib/utils/utf8.c:72`](artifacts/contract3/engineering-v5/balanced/zephyr/project/lib/utils/utf8.c) |
+| null_pointer-01 | null_pointer | defect | `z_impl_k_condvar_init` | [`kernel/condvar.c:23`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/condvar.c) |
+| null_pointer-02 | null_pointer | defect | `z_impl_k_condvar_signal` | [`kernel/condvar.c:50`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/condvar.c) |
+| null_pointer-03 | null_pointer | defect | `z_impl_k_condvar_broadcast` | [`kernel/condvar.c:87`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/condvar.c) |
+| null_pointer-04 | null_pointer | defect | `z_impl_k_condvar_wait` | [`kernel/condvar.c:120`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/condvar.c) |
+| null_pointer-05 | null_pointer | defect | `z_impl_device_get_binding` | [`kernel/device.c:44`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/device.c) |
+| null_pointer-06 | null_pointer | defect | `z_impl_device_get_by_dt_nodelabel` | [`kernel/device.c:105`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/device.c) |
+| null_pointer-07 | null_pointer | defect | `z_impl_device_is_ready` | [`kernel/device.c:152`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/device.c) |
+| null_pointer-08 | null_pointer | control | `dyn_cb` | [`kernel/dynamic.c:115`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/dynamic.c) |
+| null_pointer-09 | null_pointer | control | `z_impl_z_errno` | [`kernel/errno.c:39`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/errno.c) |
+| null_pointer-10 | null_pointer | control | `z_impl_k_event_init` | [`kernel/events.c:54`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/events.c) |
+| null_pointer-11 | null_pointer | control | `event_walk_op` | [`kernel/events.c:106`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/events.c) |
+| null_pointer-12 | null_pointer | control | `k_event_post_internal` | [`kernel/events.c:140`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/events.c) |
+| null_pointer-13 | null_pointer | control | `k_event_wait_internal` | [`kernel/events.c:261`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/events.c) |
+| null_pointer-14 | null_pointer | control | `z_fatal_error` | [`kernel/fatal.c:99`](artifacts/contract3/engineering-v5/balanced/zephyr/project/kernel/fatal.c) |
+
+## balanced / RT-Thread
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/balanced/rt_thread/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | defect | `rt_thread_idle_sethook` | [`src/idle.c:80`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/idle.c) |
+| array_oob-02 | array_oob | defect | `rt_thread_idle_delhook` | [`src/idle.c:111`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/idle.c) |
+| array_oob-03 | array_oob | defect | `idle_thread_entry` | [`src/idle.c:147`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/idle.c) |
+| array_oob-04 | array_oob | defect | `get_components` | [`src/klibc/rt_vsnprintf_std.c:553`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-05 | array_oob | defect | `get_normalized_components` | [`src/klibc/rt_vsnprintf_std.c:645`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-06 | array_oob | defect | `print_exponential_number` | [`src/klibc/rt_vsnprintf_std.c:850`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-07 | array_oob | defect | `memheaptrace` | [`src/memheap.c:984`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/memheap.c) |
+| array_oob-08 | array_oob | control | `rt_object_get_information` | [`src/object.c:255`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/object.c) |
+| array_oob-09 | array_oob | control | `_get_global_highest_ready_prio` | [`src/scheduler_mp.c:188`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-10 | array_oob | control | `_get_local_highest_ready_prio` | [`src/scheduler_mp.c:205`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-11 | array_oob | control | `_scheduler_get_highest_priority_thread` | [`src/scheduler_mp.c:246`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-12 | array_oob | control | `_sched_insert_thread_locked` | [`src/scheduler_mp.c:303`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-13 | array_oob | control | `_sched_remove_thread_locked` | [`src/scheduler_mp.c:368`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-14 | array_oob | control | `_scheduler_get_highest_priority_thread` | [`src/scheduler_up.c:98`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/scheduler_up.c) |
+| string_overflow-01 | string_overflow | defect | `print_integer` | [`src/klibc/rt_vsnprintf_std.c:499`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-02 | string_overflow | defect | `finsh_get_prompt` | [`components/finsh/shell.c:102`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/components/finsh/shell.c) |
+| string_overflow-03 | string_overflow | defect | `rt_thread_idle_init` | [`src/idle.c:185`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/idle.c) |
+| string_overflow-04 | string_overflow | defect | `rt_snprintf` | [`src/klibc/kstdio.c:34`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-05 | string_overflow | defect | `rt_vsprintf` | [`src/klibc/kstdio.c:54`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-06 | string_overflow | defect | `rt_vsnprintf` | [`src/klibc/kstdio.c:83`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-07 | string_overflow | defect | `rt_strncpy` | [`src/klibc/kstring.c:364`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/kstring.c) |
+| string_overflow-08 | string_overflow | control | `print_floating_point` | [`src/klibc/rt_vsnprintf_std.c:975`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-09 | string_overflow | control | `finsh_wait_auth` | [`components/finsh/shell.c:357`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/components/finsh/shell.c) |
+| string_overflow-10 | string_overflow | control | `rt_strcpy` | [`src/klibc/kstring.c:405`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/kstring.c) |
+| string_overflow-11 | string_overflow | control | `print_integer` | [`src/klibc/rt_vsnprintf_std.c:514`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-12 | string_overflow | control | `rt_kprintf` | [`src/kservice.c:373`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/kservice.c) |
+| string_overflow-13 | string_overflow | control | `rt_object_init` | [`src/object.c:393`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/object.c) |
+| string_overflow-14 | string_overflow | control | `rt_object_allocate` | [`src/object.c:494`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/object.c) |
+| null_pointer-01 | null_pointer | defect | `_update_process_times` | [`src/clock.c:110`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/clock.c) |
+| null_pointer-02 | null_pointer | defect | `rt_components_board_init` | [`src/components.c:93`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/components.c) |
+| null_pointer-03 | null_pointer | defect | `rt_components_init` | [`src/components.c:119`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/components.c) |
+| null_pointer-04 | null_pointer | defect | `rt_spin_lock_init` | [`src/cpu_mp.c:39`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-05 | null_pointer | defect | `rt_spin_lock` | [`src/cpu_mp.c:54`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-06 | null_pointer | defect | `rt_spin_unlock` | [`src/cpu_mp.c:68`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-07 | null_pointer | defect | `rt_spin_lock_irqsave` | [`src/cpu_mp.c:89`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-08 | null_pointer | control | `rt_spin_unlock_irqrestore` | [`src/cpu_mp.c:107`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-09 | null_pointer | control | `rt_cpus_lock` | [`src/cpu_mp.c:147`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-10 | null_pointer | control | `rt_cpus_unlock` | [`src/cpu_mp.c:180`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-11 | null_pointer | control | `rt_thread_defunct_dequeue` | [`src/defunct.c:56`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/defunct.c) |
+| null_pointer-12 | null_pointer | control | `rt_defunct_execute` | [`src/defunct.c:88`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/defunct.c) |
+| null_pointer-13 | null_pointer | control | `_ipc_object_init` | [`src/ipc.c:85`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/ipc.c) |
+| null_pointer-14 | null_pointer | control | `rt_susp_list_dequeue` | [`src/ipc.c:117`](artifacts/contract3/engineering-v5/balanced/rt_thread/project/src/ipc.c) |
+
+## independent / FreeRTOS Kernel
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/independent/freertos_kernel/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | control | `vCoRoutineSchedule` | [`croutine.c:313`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/croutine.c) |
+| array_oob-02 | array_oob | control | `prvInitialiseCoRoutineLists` | [`croutine.c:342`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/croutine.c) |
+| array_oob-03 | array_oob | control | `vQueueAddToRegistry` | [`queue.c:3026`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/queue.c) |
+| array_oob-04 | array_oob | control | `pcQueueGetName` | [`queue.c:3074`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/queue.c) |
+| array_oob-05 | array_oob | control | `vQueueUnregisterQueue` | [`queue.c:3107`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/queue.c) |
+| array_oob-06 | array_oob | control | `prvCheckForRunStateChange` | [`tasks.c:815`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| array_oob-07 | array_oob | control | `prvYieldForTask` | [`tasks.c:901`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| array_oob-08 | array_oob | defect | `prvSelectHighestPriorityTask` | [`tasks.c:1010`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| array_oob-09 | array_oob | defect | `vTaskDelete` | [`tasks.c:2267`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| array_oob-10 | array_oob | defect | `eTaskGetState` | [`tasks.c:2551`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| array_oob-11 | array_oob | defect | `vTaskPrioritySet` | [`tasks.c:2907`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| array_oob-12 | array_oob | defect | `vTaskSuspend` | [`tasks.c:3164`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| array_oob-13 | array_oob | defect | `prvTaskIsTaskSuspended` | [`tasks.c:3317`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| array_oob-14 | array_oob | defect | `xTaskResumeFromISR` | [`tasks.c:3465`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-01 | string_overflow | control | `prvInitialiseNewTask` | [`tasks.c:1867`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-02 | string_overflow | control | `prvWriteNameToBuffer` | [`tasks.c:7198`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-03 | string_overflow | control | `prvCreateIdleTasks` | [`tasks.c:3567`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-04 | string_overflow | control | `prvWriteNameToBuffer` | [`tasks.c:7192`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-05 | string_overflow | control | `vTaskListTasks` | [`tasks.c:7325`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-06 | string_overflow | control | `vTaskGetRunTimeStatistics` | [`tasks.c:7473`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-07 | string_overflow | control | `prvCreateIdleTasks` | [`tasks.c:3572`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-08 | string_overflow | defect | `prvCreateIdleTasks` | [`tasks.c:3521`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-09 | string_overflow | defect | `prvInitialiseNewTask` | [`tasks.c:1884`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-10 | string_overflow | defect | `prvWriteNameToBuffer` | [`tasks.c:7202`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-11 | string_overflow | defect | `vTaskListTasks` | [`tasks.c:7337`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-12 | string_overflow | defect | `vTaskGetRunTimeStatistics` | [`tasks.c:7486`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-13 | string_overflow | defect | `vTaskGetRunTimeStatistics` | [`tasks.c:7499`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| string_overflow-14 | string_overflow | defect | `vTaskGetRunTimeStatistics` | [`tasks.c:7508`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/tasks.c) |
+| null_pointer-01 | null_pointer | control | `xCoRoutineCreate` | [`croutine.c:137`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/croutine.c) |
+| null_pointer-02 | null_pointer | control | `vCoRoutineAddToDelayedList` | [`croutine.c:186`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/croutine.c) |
+| null_pointer-03 | null_pointer | control | `xEventGroupSync` | [`event_groups.c:207`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/event_groups.c) |
+| null_pointer-04 | null_pointer | control | `prvCheckDelayedList` | [`croutine.c:266`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/croutine.c) |
+| null_pointer-05 | null_pointer | control | `xCoRoutineRemoveFromEventList` | [`croutine.c:367`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/croutine.c) |
+| null_pointer-06 | null_pointer | control | `xEventGroupCreateStatic` | [`event_groups.c:113`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/event_groups.c) |
+| null_pointer-07 | null_pointer | control | `xEventGroupCreate` | [`event_groups.c:158`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/event_groups.c) |
+| null_pointer-08 | null_pointer | defect | `prvCheckPendingReadyList` | [`croutine.c:228`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/croutine.c) |
+| null_pointer-09 | null_pointer | defect | `xEventGroupWaitBits` | [`event_groups.c:338`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/event_groups.c) |
+| null_pointer-10 | null_pointer | defect | `xEventGroupClearBits` | [`event_groups.c:491`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/event_groups.c) |
+| null_pointer-11 | null_pointer | defect | `xEventGroupGetBitsFromISR` | [`event_groups.c:537`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/event_groups.c) |
+| null_pointer-12 | null_pointer | defect | `xEventGroupSetBits` | [`event_groups.c:565`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/event_groups.c) |
+| null_pointer-13 | null_pointer | defect | `vEventGroupDelete` | [`event_groups.c:656`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/event_groups.c) |
+| null_pointer-14 | null_pointer | defect | `xEventGroupGetStaticBuffer` | [`event_groups.c:712`](artifacts/contract3/engineering-v5/independent/freertos_kernel/project/event_groups.c) |
+
+## independent / Zephyr RTOS
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/independent/zephyr/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | control | `init_mbox_module` | [`kernel/mailbox.c:74`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/mailbox.c) |
+| array_oob-02 | array_oob | control | `z_paging_histogram_inc` | [`kernel/paging/statistics.c:179`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/paging/statistics.c) |
+| array_oob-03 | array_oob | control | `slice_timeout` | [`kernel/timeslicing.c:58`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/timeslicing.c) |
+| array_oob-04 | array_oob | control | `z_reset_time_slice` | [`kernel/timeslicing.c:73`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/timeslicing.c) |
+| array_oob-05 | array_oob | control | `z_time_slice` | [`kernel/timeslicing.c:117`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/timeslicing.c) |
+| array_oob-06 | array_oob | control | `thread_idx_alloc` | [`kernel/userspace.c:275`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/userspace.c) |
+| array_oob-07 | array_oob | control | `thread_idx_free` | [`kernel/userspace.c:314`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/userspace.c) |
+| array_oob-08 | array_oob | defect | `pthread_barrier_pool_init` | [`lib/posix/options/barrier.c:204`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/barrier.c) |
+| array_oob-09 | array_oob | defect | `posix_fs_alloc_obj` | [`lib/posix/options/fs.c:45`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/fs.c) |
+| array_oob-10 | array_oob | defect | `acquire_mutex` | [`lib/posix/options/mutex.c:126`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/mutex.c) |
+| array_oob-11 | array_oob | defect | `pthread_mutex_init` | [`lib/posix/options/mutex.c:229`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/mutex.c) |
+| array_oob-12 | array_oob | defect | `pthread_setname_np` | [`lib/posix/options/pthread.c:1366`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/pthread.c) |
+| array_oob-13 | array_oob | defect | `pthread_getname_np` | [`lib/posix/options/pthread.c:1395`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/pthread.c) |
+| array_oob-14 | array_oob | defect | `pthread_spin_lock` | [`lib/posix/options/spinlock.c:126`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/spinlock.c) |
+| string_overflow-01 | string_overflow | control | `z_impl_k_thread_name_set` | [`kernel/thread.c:146`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/thread.c) |
+| string_overflow-02 | string_overflow | control | `readdir` | [`lib/posix/options/fs.c:313`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/fs.c) |
+| string_overflow-03 | string_overflow | control | `z_impl_k_thread_name_set` | [`kernel/thread.c:145`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/thread.c) |
+| string_overflow-04 | string_overflow | control | `z_impl_k_thread_name_copy` | [`kernel/thread.c:202`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/thread.c) |
+| string_overflow-05 | string_overflow | control | `z_setup_new_thread` | [`kernel/thread.c:607`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/thread.c) |
+| string_overflow-06 | string_overflow | control | `strerror_r` | [`lib/libc/minimal/source/string/strerror.c:56`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/libc/minimal/source/string/strerror.c) |
+| string_overflow-07 | string_overflow | control | `mq_open` | [`lib/posix/options/mqueue.c:144`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/mqueue.c) |
+| string_overflow-08 | string_overflow | defect | `z_setup_new_thread` | [`kernel/thread.c:610`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/thread.c) |
+| string_overflow-09 | string_overflow | defect | `uname` | [`lib/posix/options/uname.c:50`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/uname.c) |
+| string_overflow-10 | string_overflow | defect | `inet_ntoa` | [`lib/posix/options/net.c:82`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/net.c) |
+| string_overflow-11 | string_overflow | defect | `sem_open` | [`lib/posix/options/semaphore.c:289`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/semaphore.c) |
+| string_overflow-12 | string_overflow | defect | `strsignal` | [`lib/posix/options/signal.c:89`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/signal.c) |
+| string_overflow-13 | string_overflow | defect | `uname` | [`lib/posix/options/uname.c:49`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/posix/options/uname.c) |
+| string_overflow-14 | string_overflow | defect | `utf8_lcpy` | [`lib/utils/utf8.c:72`](artifacts/contract3/engineering-v5/independent/zephyr/project/lib/utils/utf8.c) |
+| null_pointer-01 | null_pointer | control | `z_impl_k_condvar_init` | [`kernel/condvar.c:23`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/condvar.c) |
+| null_pointer-02 | null_pointer | control | `z_impl_k_condvar_signal` | [`kernel/condvar.c:50`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/condvar.c) |
+| null_pointer-03 | null_pointer | control | `z_impl_k_condvar_broadcast` | [`kernel/condvar.c:87`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/condvar.c) |
+| null_pointer-04 | null_pointer | control | `z_impl_k_condvar_wait` | [`kernel/condvar.c:120`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/condvar.c) |
+| null_pointer-05 | null_pointer | control | `z_impl_device_get_binding` | [`kernel/device.c:44`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/device.c) |
+| null_pointer-06 | null_pointer | control | `z_impl_device_get_by_dt_nodelabel` | [`kernel/device.c:105`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/device.c) |
+| null_pointer-07 | null_pointer | control | `z_impl_device_is_ready` | [`kernel/device.c:152`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/device.c) |
+| null_pointer-08 | null_pointer | defect | `dyn_cb` | [`kernel/dynamic.c:115`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/dynamic.c) |
+| null_pointer-09 | null_pointer | defect | `z_impl_z_errno` | [`kernel/errno.c:39`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/errno.c) |
+| null_pointer-10 | null_pointer | defect | `z_impl_k_event_init` | [`kernel/events.c:54`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/events.c) |
+| null_pointer-11 | null_pointer | defect | `event_walk_op` | [`kernel/events.c:106`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/events.c) |
+| null_pointer-12 | null_pointer | defect | `k_event_post_internal` | [`kernel/events.c:140`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/events.c) |
+| null_pointer-13 | null_pointer | defect | `k_event_wait_internal` | [`kernel/events.c:261`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/events.c) |
+| null_pointer-14 | null_pointer | defect | `z_fatal_error` | [`kernel/fatal.c:99`](artifacts/contract3/engineering-v5/independent/zephyr/project/kernel/fatal.c) |
+
+## independent / RT-Thread
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/independent/rt_thread/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | control | `rt_thread_idle_sethook` | [`src/idle.c:80`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/idle.c) |
+| array_oob-02 | array_oob | control | `rt_thread_idle_delhook` | [`src/idle.c:111`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/idle.c) |
+| array_oob-03 | array_oob | control | `idle_thread_entry` | [`src/idle.c:147`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/idle.c) |
+| array_oob-04 | array_oob | control | `get_components` | [`src/klibc/rt_vsnprintf_std.c:553`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-05 | array_oob | control | `get_normalized_components` | [`src/klibc/rt_vsnprintf_std.c:645`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-06 | array_oob | control | `print_exponential_number` | [`src/klibc/rt_vsnprintf_std.c:850`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-07 | array_oob | control | `memheaptrace` | [`src/memheap.c:984`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/memheap.c) |
+| array_oob-08 | array_oob | defect | `rt_object_get_information` | [`src/object.c:255`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/object.c) |
+| array_oob-09 | array_oob | defect | `_get_global_highest_ready_prio` | [`src/scheduler_mp.c:188`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-10 | array_oob | defect | `_get_local_highest_ready_prio` | [`src/scheduler_mp.c:205`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-11 | array_oob | defect | `_scheduler_get_highest_priority_thread` | [`src/scheduler_mp.c:246`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-12 | array_oob | defect | `_sched_insert_thread_locked` | [`src/scheduler_mp.c:303`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-13 | array_oob | defect | `_sched_remove_thread_locked` | [`src/scheduler_mp.c:368`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-14 | array_oob | defect | `_scheduler_get_highest_priority_thread` | [`src/scheduler_up.c:98`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/scheduler_up.c) |
+| string_overflow-01 | string_overflow | control | `print_integer` | [`src/klibc/rt_vsnprintf_std.c:499`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-02 | string_overflow | control | `finsh_get_prompt` | [`components/finsh/shell.c:102`](artifacts/contract3/engineering-v5/independent/rt_thread/project/components/finsh/shell.c) |
+| string_overflow-03 | string_overflow | control | `rt_thread_idle_init` | [`src/idle.c:185`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/idle.c) |
+| string_overflow-04 | string_overflow | control | `rt_snprintf` | [`src/klibc/kstdio.c:34`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-05 | string_overflow | control | `rt_vsprintf` | [`src/klibc/kstdio.c:54`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-06 | string_overflow | control | `rt_vsnprintf` | [`src/klibc/kstdio.c:83`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-07 | string_overflow | control | `rt_strncpy` | [`src/klibc/kstring.c:364`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/kstring.c) |
+| string_overflow-08 | string_overflow | defect | `print_floating_point` | [`src/klibc/rt_vsnprintf_std.c:975`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-09 | string_overflow | defect | `finsh_wait_auth` | [`components/finsh/shell.c:357`](artifacts/contract3/engineering-v5/independent/rt_thread/project/components/finsh/shell.c) |
+| string_overflow-10 | string_overflow | defect | `rt_strcpy` | [`src/klibc/kstring.c:405`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/kstring.c) |
+| string_overflow-11 | string_overflow | defect | `print_integer` | [`src/klibc/rt_vsnprintf_std.c:514`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-12 | string_overflow | defect | `rt_kprintf` | [`src/kservice.c:373`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/kservice.c) |
+| string_overflow-13 | string_overflow | defect | `rt_object_init` | [`src/object.c:393`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/object.c) |
+| string_overflow-14 | string_overflow | defect | `rt_object_allocate` | [`src/object.c:494`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/object.c) |
+| null_pointer-01 | null_pointer | control | `_update_process_times` | [`src/clock.c:110`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/clock.c) |
+| null_pointer-02 | null_pointer | control | `rt_components_board_init` | [`src/components.c:93`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/components.c) |
+| null_pointer-03 | null_pointer | control | `rt_components_init` | [`src/components.c:119`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/components.c) |
+| null_pointer-04 | null_pointer | control | `rt_spin_lock_init` | [`src/cpu_mp.c:39`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-05 | null_pointer | control | `rt_spin_lock` | [`src/cpu_mp.c:54`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-06 | null_pointer | control | `rt_spin_unlock` | [`src/cpu_mp.c:68`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-07 | null_pointer | control | `rt_spin_lock_irqsave` | [`src/cpu_mp.c:89`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-08 | null_pointer | defect | `rt_spin_unlock_irqrestore` | [`src/cpu_mp.c:107`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-09 | null_pointer | defect | `rt_cpus_lock` | [`src/cpu_mp.c:147`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-10 | null_pointer | defect | `rt_cpus_unlock` | [`src/cpu_mp.c:180`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-11 | null_pointer | defect | `rt_thread_defunct_dequeue` | [`src/defunct.c:56`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/defunct.c) |
+| null_pointer-12 | null_pointer | defect | `rt_defunct_execute` | [`src/defunct.c:88`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/defunct.c) |
+| null_pointer-13 | null_pointer | defect | `_ipc_object_init` | [`src/ipc.c:85`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/ipc.c) |
+| null_pointer-14 | null_pointer | defect | `rt_susp_list_dequeue` | [`src/ipc.c:117`](artifacts/contract3/engineering-v5/independent/rt_thread/project/src/ipc.c) |
+
+## balanced-hard / FreeRTOS Kernel
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | defect | `vCoRoutineSchedule` | [`croutine.c:313`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/croutine.c) |
+| array_oob-02 | array_oob | defect | `prvInitialiseCoRoutineLists` | [`croutine.c:342`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/croutine.c) |
+| array_oob-03 | array_oob | defect | `vQueueAddToRegistry` | [`queue.c:3026`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/queue.c) |
+| array_oob-04 | array_oob | defect | `pcQueueGetName` | [`queue.c:3074`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/queue.c) |
+| array_oob-05 | array_oob | control | `vQueueUnregisterQueue` | [`queue.c:3107`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/queue.c) |
+| array_oob-06 | array_oob | control | `prvCheckForRunStateChange` | [`tasks.c:815`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| array_oob-07 | array_oob | control | `prvYieldForTask` | [`tasks.c:901`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| array_oob-08 | array_oob | control | `prvSelectHighestPriorityTask` | [`tasks.c:1010`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| array_oob-09 | array_oob | control | `vTaskDelete` | [`tasks.c:2267`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| array_oob-10 | array_oob | control | `eTaskGetState` | [`tasks.c:2551`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| array_oob-11 | array_oob | control | `vTaskPrioritySet` | [`tasks.c:2907`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| array_oob-12 | array_oob | defect | `vTaskSuspend` | [`tasks.c:3164`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| array_oob-13 | array_oob | defect | `prvTaskIsTaskSuspended` | [`tasks.c:3317`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| array_oob-14 | array_oob | defect | `xTaskResumeFromISR` | [`tasks.c:3465`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-01 | string_overflow | defect | `prvInitialiseNewTask` | [`tasks.c:1867`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-02 | string_overflow | defect | `prvWriteNameToBuffer` | [`tasks.c:7198`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-03 | string_overflow | defect | `prvCreateIdleTasks` | [`tasks.c:3567`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-04 | string_overflow | defect | `prvWriteNameToBuffer` | [`tasks.c:7192`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-05 | string_overflow | control | `vTaskListTasks` | [`tasks.c:7325`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-06 | string_overflow | control | `vTaskGetRunTimeStatistics` | [`tasks.c:7479`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-07 | string_overflow | control | `prvCreateIdleTasks` | [`tasks.c:3572`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-08 | string_overflow | control | `prvCreateIdleTasks` | [`tasks.c:3521`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-09 | string_overflow | control | `prvInitialiseNewTask` | [`tasks.c:1884`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-10 | string_overflow | control | `prvWriteNameToBuffer` | [`tasks.c:7202`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-11 | string_overflow | control | `vTaskListTasks` | [`tasks.c:7337`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-12 | string_overflow | defect | `vTaskGetRunTimeStatistics` | [`tasks.c:7492`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-13 | string_overflow | defect | `vTaskGetRunTimeStatistics` | [`tasks.c:7505`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-14 | string_overflow | defect | `vTaskGetRunTimeStatistics` | [`tasks.c:7514`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/tasks.c) |
+| null_pointer-01 | null_pointer | defect | `xCoRoutineCreate` | [`croutine.c:137`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/croutine.c) |
+| null_pointer-02 | null_pointer | defect | `vCoRoutineAddToDelayedList` | [`croutine.c:186`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/croutine.c) |
+| null_pointer-03 | null_pointer | defect | `xEventGroupSync` | [`event_groups.c:207`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-04 | null_pointer | defect | `prvCheckDelayedList` | [`croutine.c:266`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/croutine.c) |
+| null_pointer-05 | null_pointer | control | `xCoRoutineRemoveFromEventList` | [`croutine.c:367`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/croutine.c) |
+| null_pointer-06 | null_pointer | control | `xEventGroupCreateStatic` | [`event_groups.c:113`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-07 | null_pointer | control | `xEventGroupCreate` | [`event_groups.c:158`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-08 | null_pointer | control | `prvCheckPendingReadyList` | [`croutine.c:228`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/croutine.c) |
+| null_pointer-09 | null_pointer | control | `xEventGroupWaitBits` | [`event_groups.c:338`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-10 | null_pointer | control | `xEventGroupClearBits` | [`event_groups.c:491`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-11 | null_pointer | control | `xEventGroupGetBitsFromISR` | [`event_groups.c:537`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-12 | null_pointer | defect | `xEventGroupSetBits` | [`event_groups.c:565`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-13 | null_pointer | defect | `vEventGroupDelete` | [`event_groups.c:656`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-14 | null_pointer | defect | `xEventGroupGetStaticBuffer` | [`event_groups.c:712`](artifacts/contract3/engineering-v5/balanced-hard/freertos_kernel/project/event_groups.c) |
+
+## balanced-hard / Zephyr RTOS
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/balanced-hard/zephyr/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | defect | `init_mbox_module` | [`kernel/mailbox.c:74`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/mailbox.c) |
+| array_oob-02 | array_oob | defect | `z_paging_histogram_inc` | [`kernel/paging/statistics.c:179`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/paging/statistics.c) |
+| array_oob-03 | array_oob | defect | `slice_timeout` | [`kernel/timeslicing.c:58`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/timeslicing.c) |
+| array_oob-04 | array_oob | defect | `z_reset_time_slice` | [`kernel/timeslicing.c:73`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/timeslicing.c) |
+| array_oob-05 | array_oob | control | `z_time_slice` | [`kernel/timeslicing.c:117`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/timeslicing.c) |
+| array_oob-06 | array_oob | control | `thread_idx_alloc` | [`kernel/userspace.c:275`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/userspace.c) |
+| array_oob-07 | array_oob | control | `thread_idx_free` | [`kernel/userspace.c:314`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/userspace.c) |
+| array_oob-08 | array_oob | control | `pthread_barrier_pool_init` | [`lib/posix/options/barrier.c:204`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/barrier.c) |
+| array_oob-09 | array_oob | control | `posix_fs_alloc_obj` | [`lib/posix/options/fs.c:45`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/fs.c) |
+| array_oob-10 | array_oob | control | `acquire_mutex` | [`lib/posix/options/mutex.c:126`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/mutex.c) |
+| array_oob-11 | array_oob | control | `pthread_mutex_init` | [`lib/posix/options/mutex.c:229`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/mutex.c) |
+| array_oob-12 | array_oob | defect | `pthread_setname_np` | [`lib/posix/options/pthread.c:1366`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/pthread.c) |
+| array_oob-13 | array_oob | defect | `pthread_getname_np` | [`lib/posix/options/pthread.c:1395`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/pthread.c) |
+| array_oob-14 | array_oob | defect | `pthread_spin_lock` | [`lib/posix/options/spinlock.c:126`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/spinlock.c) |
+| string_overflow-01 | string_overflow | defect | `z_impl_k_thread_name_set` | [`kernel/thread.c:146`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/thread.c) |
+| string_overflow-02 | string_overflow | defect | `readdir` | [`lib/posix/options/fs.c:313`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/fs.c) |
+| string_overflow-03 | string_overflow | defect | `z_impl_k_thread_name_set` | [`kernel/thread.c:145`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/thread.c) |
+| string_overflow-04 | string_overflow | defect | `z_impl_k_thread_name_copy` | [`kernel/thread.c:202`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/thread.c) |
+| string_overflow-05 | string_overflow | control | `z_setup_new_thread` | [`kernel/thread.c:607`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/thread.c) |
+| string_overflow-06 | string_overflow | control | `strerror_r` | [`lib/libc/minimal/source/string/strerror.c:56`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/libc/minimal/source/string/strerror.c) |
+| string_overflow-07 | string_overflow | control | `mq_open` | [`lib/posix/options/mqueue.c:144`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/mqueue.c) |
+| string_overflow-08 | string_overflow | control | `z_setup_new_thread` | [`kernel/thread.c:610`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/thread.c) |
+| string_overflow-09 | string_overflow | control | `uname` | [`lib/posix/options/uname.c:50`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/uname.c) |
+| string_overflow-10 | string_overflow | control | `inet_ntoa` | [`lib/posix/options/net.c:82`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/net.c) |
+| string_overflow-11 | string_overflow | control | `sem_open` | [`lib/posix/options/semaphore.c:289`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/semaphore.c) |
+| string_overflow-12 | string_overflow | defect | `strsignal` | [`lib/posix/options/signal.c:89`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/signal.c) |
+| string_overflow-13 | string_overflow | defect | `uname` | [`lib/posix/options/uname.c:49`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/posix/options/uname.c) |
+| string_overflow-14 | string_overflow | defect | `utf8_lcpy` | [`lib/utils/utf8.c:72`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/lib/utils/utf8.c) |
+| null_pointer-01 | null_pointer | defect | `z_impl_k_condvar_init` | [`kernel/condvar.c:23`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/condvar.c) |
+| null_pointer-02 | null_pointer | defect | `z_impl_k_condvar_signal` | [`kernel/condvar.c:50`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/condvar.c) |
+| null_pointer-03 | null_pointer | defect | `z_impl_k_condvar_broadcast` | [`kernel/condvar.c:87`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/condvar.c) |
+| null_pointer-04 | null_pointer | defect | `z_impl_k_condvar_wait` | [`kernel/condvar.c:120`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/condvar.c) |
+| null_pointer-05 | null_pointer | control | `z_impl_device_get_binding` | [`kernel/device.c:44`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/device.c) |
+| null_pointer-06 | null_pointer | control | `z_impl_device_get_by_dt_nodelabel` | [`kernel/device.c:105`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/device.c) |
+| null_pointer-07 | null_pointer | control | `z_impl_device_is_ready` | [`kernel/device.c:152`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/device.c) |
+| null_pointer-08 | null_pointer | control | `dyn_cb` | [`kernel/dynamic.c:115`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/dynamic.c) |
+| null_pointer-09 | null_pointer | control | `z_impl_z_errno` | [`kernel/errno.c:39`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/errno.c) |
+| null_pointer-10 | null_pointer | control | `z_impl_k_event_init` | [`kernel/events.c:54`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/events.c) |
+| null_pointer-11 | null_pointer | control | `event_walk_op` | [`kernel/events.c:106`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/events.c) |
+| null_pointer-12 | null_pointer | defect | `k_event_post_internal` | [`kernel/events.c:140`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/events.c) |
+| null_pointer-13 | null_pointer | defect | `k_event_wait_internal` | [`kernel/events.c:261`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/events.c) |
+| null_pointer-14 | null_pointer | defect | `z_fatal_error` | [`kernel/fatal.c:99`](artifacts/contract3/engineering-v5/balanced-hard/zephyr/project/kernel/fatal.c) |
+
+## balanced-hard / RT-Thread
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | defect | `rt_thread_idle_sethook` | [`src/idle.c:80`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/idle.c) |
+| array_oob-02 | array_oob | defect | `rt_thread_idle_delhook` | [`src/idle.c:111`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/idle.c) |
+| array_oob-03 | array_oob | defect | `idle_thread_entry` | [`src/idle.c:147`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/idle.c) |
+| array_oob-04 | array_oob | defect | `get_components` | [`src/klibc/rt_vsnprintf_std.c:553`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-05 | array_oob | control | `get_normalized_components` | [`src/klibc/rt_vsnprintf_std.c:645`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-06 | array_oob | control | `print_exponential_number` | [`src/klibc/rt_vsnprintf_std.c:850`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-07 | array_oob | control | `memheaptrace` | [`src/memheap.c:984`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/memheap.c) |
+| array_oob-08 | array_oob | control | `rt_object_get_information` | [`src/object.c:255`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/object.c) |
+| array_oob-09 | array_oob | control | `_get_global_highest_ready_prio` | [`src/scheduler_mp.c:188`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-10 | array_oob | control | `_get_local_highest_ready_prio` | [`src/scheduler_mp.c:205`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-11 | array_oob | control | `_scheduler_get_highest_priority_thread` | [`src/scheduler_mp.c:246`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-12 | array_oob | defect | `_sched_insert_thread_locked` | [`src/scheduler_mp.c:303`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-13 | array_oob | defect | `_sched_remove_thread_locked` | [`src/scheduler_mp.c:368`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-14 | array_oob | defect | `_scheduler_get_highest_priority_thread` | [`src/scheduler_up.c:98`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/scheduler_up.c) |
+| string_overflow-01 | string_overflow | defect | `print_integer` | [`src/klibc/rt_vsnprintf_std.c:499`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-02 | string_overflow | defect | `finsh_get_prompt` | [`components/finsh/shell.c:102`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/components/finsh/shell.c) |
+| string_overflow-03 | string_overflow | defect | `rt_thread_idle_init` | [`src/idle.c:185`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/idle.c) |
+| string_overflow-04 | string_overflow | defect | `rt_snprintf` | [`src/klibc/kstdio.c:34`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-05 | string_overflow | control | `rt_vsprintf` | [`src/klibc/kstdio.c:54`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-06 | string_overflow | control | `rt_vsnprintf` | [`src/klibc/kstdio.c:83`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-07 | string_overflow | control | `rt_strncpy` | [`src/klibc/kstring.c:364`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/kstring.c) |
+| string_overflow-08 | string_overflow | control | `print_floating_point` | [`src/klibc/rt_vsnprintf_std.c:975`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-09 | string_overflow | control | `finsh_wait_auth` | [`components/finsh/shell.c:357`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/components/finsh/shell.c) |
+| string_overflow-10 | string_overflow | control | `rt_strcpy` | [`src/klibc/kstring.c:405`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/kstring.c) |
+| string_overflow-11 | string_overflow | control | `print_integer` | [`src/klibc/rt_vsnprintf_std.c:514`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-12 | string_overflow | defect | `rt_kprintf` | [`src/kservice.c:373`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/kservice.c) |
+| string_overflow-13 | string_overflow | defect | `rt_object_init` | [`src/object.c:393`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/object.c) |
+| string_overflow-14 | string_overflow | defect | `rt_object_allocate` | [`src/object.c:494`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/object.c) |
+| null_pointer-01 | null_pointer | defect | `_update_process_times` | [`src/clock.c:110`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/clock.c) |
+| null_pointer-02 | null_pointer | defect | `rt_components_board_init` | [`src/components.c:93`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/components.c) |
+| null_pointer-03 | null_pointer | defect | `rt_components_init` | [`src/components.c:119`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/components.c) |
+| null_pointer-04 | null_pointer | defect | `rt_spin_lock_init` | [`src/cpu_mp.c:39`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-05 | null_pointer | control | `rt_spin_lock` | [`src/cpu_mp.c:54`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-06 | null_pointer | control | `rt_spin_unlock` | [`src/cpu_mp.c:68`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-07 | null_pointer | control | `rt_spin_lock_irqsave` | [`src/cpu_mp.c:89`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-08 | null_pointer | control | `rt_spin_unlock_irqrestore` | [`src/cpu_mp.c:107`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-09 | null_pointer | control | `rt_cpus_lock` | [`src/cpu_mp.c:147`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-10 | null_pointer | control | `rt_cpus_unlock` | [`src/cpu_mp.c:180`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-11 | null_pointer | control | `rt_thread_defunct_dequeue` | [`src/defunct.c:56`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/defunct.c) |
+| null_pointer-12 | null_pointer | defect | `rt_defunct_execute` | [`src/defunct.c:88`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/defunct.c) |
+| null_pointer-13 | null_pointer | defect | `_ipc_object_init` | [`src/ipc.c:85`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/ipc.c) |
+| null_pointer-14 | null_pointer | defect | `rt_susp_list_dequeue` | [`src/ipc.c:117`](artifacts/contract3/engineering-v5/balanced-hard/rt_thread/project/src/ipc.c) |
+
+## independent-hard / FreeRTOS Kernel
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | control | `vCoRoutineSchedule` | [`croutine.c:313`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/croutine.c) |
+| array_oob-02 | array_oob | control | `prvInitialiseCoRoutineLists` | [`croutine.c:342`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/croutine.c) |
+| array_oob-03 | array_oob | control | `vQueueAddToRegistry` | [`queue.c:3026`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/queue.c) |
+| array_oob-04 | array_oob | control | `pcQueueGetName` | [`queue.c:3074`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/queue.c) |
+| array_oob-05 | array_oob | defect | `vQueueUnregisterQueue` | [`queue.c:3107`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/queue.c) |
+| array_oob-06 | array_oob | defect | `prvCheckForRunStateChange` | [`tasks.c:815`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| array_oob-07 | array_oob | defect | `prvYieldForTask` | [`tasks.c:901`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| array_oob-08 | array_oob | defect | `prvSelectHighestPriorityTask` | [`tasks.c:1010`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| array_oob-09 | array_oob | defect | `vTaskDelete` | [`tasks.c:2267`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| array_oob-10 | array_oob | defect | `eTaskGetState` | [`tasks.c:2551`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| array_oob-11 | array_oob | defect | `vTaskPrioritySet` | [`tasks.c:2907`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| array_oob-12 | array_oob | control | `vTaskSuspend` | [`tasks.c:3164`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| array_oob-13 | array_oob | control | `prvTaskIsTaskSuspended` | [`tasks.c:3317`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| array_oob-14 | array_oob | control | `xTaskResumeFromISR` | [`tasks.c:3465`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-01 | string_overflow | control | `prvInitialiseNewTask` | [`tasks.c:1867`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-02 | string_overflow | control | `prvWriteNameToBuffer` | [`tasks.c:7198`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-03 | string_overflow | control | `prvCreateIdleTasks` | [`tasks.c:3567`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-04 | string_overflow | control | `prvWriteNameToBuffer` | [`tasks.c:7192`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-05 | string_overflow | defect | `vTaskListTasks` | [`tasks.c:7325`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-06 | string_overflow | defect | `vTaskGetRunTimeStatistics` | [`tasks.c:7466`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-07 | string_overflow | defect | `prvCreateIdleTasks` | [`tasks.c:3572`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-08 | string_overflow | defect | `prvCreateIdleTasks` | [`tasks.c:3521`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-09 | string_overflow | defect | `prvInitialiseNewTask` | [`tasks.c:1884`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-10 | string_overflow | defect | `prvWriteNameToBuffer` | [`tasks.c:7202`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-11 | string_overflow | defect | `vTaskListTasks` | [`tasks.c:7330`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-12 | string_overflow | control | `vTaskGetRunTimeStatistics` | [`tasks.c:7475`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-13 | string_overflow | control | `vTaskGetRunTimeStatistics` | [`tasks.c:7492`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| string_overflow-14 | string_overflow | control | `vTaskGetRunTimeStatistics` | [`tasks.c:7504`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/tasks.c) |
+| null_pointer-01 | null_pointer | control | `xCoRoutineCreate` | [`croutine.c:137`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/croutine.c) |
+| null_pointer-02 | null_pointer | control | `vCoRoutineAddToDelayedList` | [`croutine.c:186`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/croutine.c) |
+| null_pointer-03 | null_pointer | control | `xEventGroupSync` | [`event_groups.c:207`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-04 | null_pointer | control | `prvCheckDelayedList` | [`croutine.c:266`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/croutine.c) |
+| null_pointer-05 | null_pointer | defect | `xCoRoutineRemoveFromEventList` | [`croutine.c:367`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/croutine.c) |
+| null_pointer-06 | null_pointer | defect | `xEventGroupCreateStatic` | [`event_groups.c:113`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-07 | null_pointer | defect | `xEventGroupCreate` | [`event_groups.c:158`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-08 | null_pointer | defect | `prvCheckPendingReadyList` | [`croutine.c:228`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/croutine.c) |
+| null_pointer-09 | null_pointer | defect | `xEventGroupWaitBits` | [`event_groups.c:338`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-10 | null_pointer | defect | `xEventGroupClearBits` | [`event_groups.c:491`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-11 | null_pointer | defect | `xEventGroupGetBitsFromISR` | [`event_groups.c:537`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-12 | null_pointer | control | `xEventGroupSetBits` | [`event_groups.c:565`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-13 | null_pointer | control | `vEventGroupDelete` | [`event_groups.c:656`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/event_groups.c) |
+| null_pointer-14 | null_pointer | control | `xEventGroupGetStaticBuffer` | [`event_groups.c:712`](artifacts/contract3/engineering-v5/independent-hard/freertos_kernel/project/event_groups.c) |
+
+## independent-hard / Zephyr RTOS
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/independent-hard/zephyr/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | control | `init_mbox_module` | [`kernel/mailbox.c:74`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/mailbox.c) |
+| array_oob-02 | array_oob | control | `z_paging_histogram_inc` | [`kernel/paging/statistics.c:179`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/paging/statistics.c) |
+| array_oob-03 | array_oob | control | `slice_timeout` | [`kernel/timeslicing.c:58`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/timeslicing.c) |
+| array_oob-04 | array_oob | control | `z_reset_time_slice` | [`kernel/timeslicing.c:73`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/timeslicing.c) |
+| array_oob-05 | array_oob | defect | `z_time_slice` | [`kernel/timeslicing.c:117`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/timeslicing.c) |
+| array_oob-06 | array_oob | defect | `thread_idx_alloc` | [`kernel/userspace.c:275`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/userspace.c) |
+| array_oob-07 | array_oob | defect | `thread_idx_free` | [`kernel/userspace.c:314`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/userspace.c) |
+| array_oob-08 | array_oob | defect | `pthread_barrier_pool_init` | [`lib/posix/options/barrier.c:204`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/barrier.c) |
+| array_oob-09 | array_oob | defect | `posix_fs_alloc_obj` | [`lib/posix/options/fs.c:45`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/fs.c) |
+| array_oob-10 | array_oob | defect | `acquire_mutex` | [`lib/posix/options/mutex.c:126`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/mutex.c) |
+| array_oob-11 | array_oob | defect | `pthread_mutex_init` | [`lib/posix/options/mutex.c:229`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/mutex.c) |
+| array_oob-12 | array_oob | control | `pthread_setname_np` | [`lib/posix/options/pthread.c:1366`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/pthread.c) |
+| array_oob-13 | array_oob | control | `pthread_getname_np` | [`lib/posix/options/pthread.c:1395`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/pthread.c) |
+| array_oob-14 | array_oob | control | `pthread_spin_lock` | [`lib/posix/options/spinlock.c:126`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/spinlock.c) |
+| string_overflow-01 | string_overflow | control | `z_impl_k_thread_name_set` | [`kernel/thread.c:146`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/thread.c) |
+| string_overflow-02 | string_overflow | control | `readdir` | [`lib/posix/options/fs.c:313`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/fs.c) |
+| string_overflow-03 | string_overflow | control | `z_impl_k_thread_name_set` | [`kernel/thread.c:145`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/thread.c) |
+| string_overflow-04 | string_overflow | control | `z_impl_k_thread_name_copy` | [`kernel/thread.c:202`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/thread.c) |
+| string_overflow-05 | string_overflow | defect | `z_setup_new_thread` | [`kernel/thread.c:607`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/thread.c) |
+| string_overflow-06 | string_overflow | defect | `strerror_r` | [`lib/libc/minimal/source/string/strerror.c:56`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/libc/minimal/source/string/strerror.c) |
+| string_overflow-07 | string_overflow | defect | `mq_open` | [`lib/posix/options/mqueue.c:144`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/mqueue.c) |
+| string_overflow-08 | string_overflow | defect | `z_setup_new_thread` | [`kernel/thread.c:609`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/thread.c) |
+| string_overflow-09 | string_overflow | defect | `uname` | [`lib/posix/options/uname.c:50`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/uname.c) |
+| string_overflow-10 | string_overflow | defect | `inet_ntoa` | [`lib/posix/options/net.c:82`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/net.c) |
+| string_overflow-11 | string_overflow | defect | `sem_open` | [`lib/posix/options/semaphore.c:289`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/semaphore.c) |
+| string_overflow-12 | string_overflow | control | `strsignal` | [`lib/posix/options/signal.c:89`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/signal.c) |
+| string_overflow-13 | string_overflow | control | `uname` | [`lib/posix/options/uname.c:49`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/posix/options/uname.c) |
+| string_overflow-14 | string_overflow | control | `utf8_lcpy` | [`lib/utils/utf8.c:72`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/lib/utils/utf8.c) |
+| null_pointer-01 | null_pointer | control | `z_impl_k_condvar_init` | [`kernel/condvar.c:23`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/condvar.c) |
+| null_pointer-02 | null_pointer | control | `z_impl_k_condvar_signal` | [`kernel/condvar.c:50`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/condvar.c) |
+| null_pointer-03 | null_pointer | control | `z_impl_k_condvar_broadcast` | [`kernel/condvar.c:87`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/condvar.c) |
+| null_pointer-04 | null_pointer | control | `z_impl_k_condvar_wait` | [`kernel/condvar.c:120`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/condvar.c) |
+| null_pointer-05 | null_pointer | defect | `z_impl_device_get_binding` | [`kernel/device.c:44`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/device.c) |
+| null_pointer-06 | null_pointer | defect | `z_impl_device_get_by_dt_nodelabel` | [`kernel/device.c:105`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/device.c) |
+| null_pointer-07 | null_pointer | defect | `z_impl_device_is_ready` | [`kernel/device.c:152`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/device.c) |
+| null_pointer-08 | null_pointer | defect | `dyn_cb` | [`kernel/dynamic.c:115`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/dynamic.c) |
+| null_pointer-09 | null_pointer | defect | `z_impl_z_errno` | [`kernel/errno.c:39`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/errno.c) |
+| null_pointer-10 | null_pointer | defect | `z_impl_k_event_init` | [`kernel/events.c:54`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/events.c) |
+| null_pointer-11 | null_pointer | defect | `event_walk_op` | [`kernel/events.c:106`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/events.c) |
+| null_pointer-12 | null_pointer | control | `k_event_post_internal` | [`kernel/events.c:140`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/events.c) |
+| null_pointer-13 | null_pointer | control | `k_event_wait_internal` | [`kernel/events.c:261`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/events.c) |
+| null_pointer-14 | null_pointer | control | `z_fatal_error` | [`kernel/fatal.c:99`](artifacts/contract3/engineering-v5/independent-hard/zephyr/project/kernel/fatal.c) |
+
+## independent-hard / RT-Thread
+
+[源码、外置 GT 和哈希清单](artifacts/contract3/engineering-v5/independent-hard/rt_thread/)
+
+| 用例 | 类别 | 标签 | 原有函数 | 文件与操作行 |
+|---|---|---|---|---|
+| array_oob-01 | array_oob | control | `rt_thread_idle_sethook` | [`src/idle.c:80`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/idle.c) |
+| array_oob-02 | array_oob | control | `rt_thread_idle_delhook` | [`src/idle.c:111`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/idle.c) |
+| array_oob-03 | array_oob | control | `idle_thread_entry` | [`src/idle.c:147`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/idle.c) |
+| array_oob-04 | array_oob | control | `get_components` | [`src/klibc/rt_vsnprintf_std.c:553`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-05 | array_oob | defect | `get_normalized_components` | [`src/klibc/rt_vsnprintf_std.c:645`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-06 | array_oob | defect | `print_exponential_number` | [`src/klibc/rt_vsnprintf_std.c:850`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| array_oob-07 | array_oob | defect | `memheaptrace` | [`src/memheap.c:984`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/memheap.c) |
+| array_oob-08 | array_oob | defect | `rt_object_get_information` | [`src/object.c:255`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/object.c) |
+| array_oob-09 | array_oob | defect | `_get_global_highest_ready_prio` | [`src/scheduler_mp.c:188`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-10 | array_oob | defect | `_get_local_highest_ready_prio` | [`src/scheduler_mp.c:205`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-11 | array_oob | defect | `_scheduler_get_highest_priority_thread` | [`src/scheduler_mp.c:246`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-12 | array_oob | control | `_sched_insert_thread_locked` | [`src/scheduler_mp.c:303`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-13 | array_oob | control | `_sched_remove_thread_locked` | [`src/scheduler_mp.c:368`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/scheduler_mp.c) |
+| array_oob-14 | array_oob | control | `_scheduler_get_highest_priority_thread` | [`src/scheduler_up.c:98`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/scheduler_up.c) |
+| string_overflow-01 | string_overflow | control | `print_integer` | [`src/klibc/rt_vsnprintf_std.c:499`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-02 | string_overflow | control | `finsh_get_prompt` | [`components/finsh/shell.c:102`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/components/finsh/shell.c) |
+| string_overflow-03 | string_overflow | control | `rt_thread_idle_init` | [`src/idle.c:185`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/idle.c) |
+| string_overflow-04 | string_overflow | control | `rt_snprintf` | [`src/klibc/kstdio.c:34`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-05 | string_overflow | defect | `rt_vsprintf` | [`src/klibc/kstdio.c:54`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-06 | string_overflow | defect | `rt_vsnprintf` | [`src/klibc/kstdio.c:83`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/kstdio.c) |
+| string_overflow-07 | string_overflow | defect | `rt_strncpy` | [`src/klibc/kstring.c:364`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/kstring.c) |
+| string_overflow-08 | string_overflow | defect | `print_floating_point` | [`src/klibc/rt_vsnprintf_std.c:975`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-09 | string_overflow | defect | `finsh_wait_auth` | [`components/finsh/shell.c:357`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/components/finsh/shell.c) |
+| string_overflow-10 | string_overflow | defect | `rt_strcpy` | [`src/klibc/kstring.c:405`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/kstring.c) |
+| string_overflow-11 | string_overflow | defect | `print_integer` | [`src/klibc/rt_vsnprintf_std.c:514`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/klibc/rt_vsnprintf_std.c) |
+| string_overflow-12 | string_overflow | control | `rt_kprintf` | [`src/kservice.c:373`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/kservice.c) |
+| string_overflow-13 | string_overflow | control | `rt_object_init` | [`src/object.c:393`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/object.c) |
+| string_overflow-14 | string_overflow | control | `rt_object_allocate` | [`src/object.c:494`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/object.c) |
+| null_pointer-01 | null_pointer | control | `_update_process_times` | [`src/clock.c:110`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/clock.c) |
+| null_pointer-02 | null_pointer | control | `rt_components_board_init` | [`src/components.c:93`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/components.c) |
+| null_pointer-03 | null_pointer | control | `rt_components_init` | [`src/components.c:119`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/components.c) |
+| null_pointer-04 | null_pointer | control | `rt_spin_lock_init` | [`src/cpu_mp.c:39`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-05 | null_pointer | defect | `rt_spin_lock` | [`src/cpu_mp.c:54`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-06 | null_pointer | defect | `rt_spin_unlock` | [`src/cpu_mp.c:68`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-07 | null_pointer | defect | `rt_spin_lock_irqsave` | [`src/cpu_mp.c:89`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-08 | null_pointer | defect | `rt_spin_unlock_irqrestore` | [`src/cpu_mp.c:107`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-09 | null_pointer | defect | `rt_cpus_lock` | [`src/cpu_mp.c:147`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-10 | null_pointer | defect | `rt_cpus_unlock` | [`src/cpu_mp.c:180`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/cpu_mp.c) |
+| null_pointer-11 | null_pointer | defect | `rt_thread_defunct_dequeue` | [`src/defunct.c:56`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/defunct.c) |
+| null_pointer-12 | null_pointer | control | `rt_defunct_execute` | [`src/defunct.c:88`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/defunct.c) |
+| null_pointer-13 | null_pointer | control | `_ipc_object_init` | [`src/ipc.c:85`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/ipc.c) |
+| null_pointer-14 | null_pointer | control | `rt_susp_list_dequeue` | [`src/ipc.c:117`](artifacts/contract3/engineering-v5/independent-hard/rt_thread/project/src/ipc.c) |

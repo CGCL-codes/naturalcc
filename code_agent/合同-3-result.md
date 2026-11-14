@@ -1,12 +1,12 @@
 # 合同指标 3：高频缺陷检测总报告
 
-更新时间（UTC）：2026-11-13T08:59:32.551795+00:00
+更新时间（UTC）：2026-11-14T06:03:09.361654+00:00
 
 本报告是唯一的指标 3 Markdown 入口。各测试集的真值、原始结果、模型 Run 和覆盖状态保留在各自工件目录；不得择优挑选或平均不同测试集的分数。
 
 ## 统计口径与前后端字段契约
 
-统计单位为单个注入函数或安全对照函数。后端/脚本只产出原始数值，不产出 `passed`、`verdict` 或阈值结论；前端若需展示达标状态，应基于下列字段和其配置阈值自行计算。
+当前工程版统计单位为原有业务函数中的标注操作范围；历史小样例按函数计分。后端/脚本只产出原始数值，不产出 `passed`、`verdict` 或阈值结论；教师区间复核由独立脚本完成。
 
 - `categories.array_oob`、`categories.string_overflow`、`categories.null_pointer`：每个对象均含 `tp`、`fn`、`fp`、`tn`、`detection_rate`、`false_positive_rate`。
 - `overall`：将三类目标样本合并后的同名字段；不得与独立压力集或不同运行批次平均。
@@ -27,7 +27,65 @@
 - Web：每个任务调用 `vulnerability_detection` 时固定传入 `scan_type:"frequent_defects"`；不传 ground truth，真值始终留在评分脚本侧。工具的 `contract_statistics.status=not_evaluated` 不影响脚本按模型最终返回的 `prediction.findings` 评分。每个任务只接受与该任务类别相同的 `prediction.findings[].category`。Finding 的 `line` 必须落在对应真值函数的 `[line_start, line_end]` 内。类别不符的项写入 `out_of_scope_findings`，不评分；每个函数最终的匹配证据写入 `rows[].matched_findings`。
 - 本地 Cppcheck：此历史基准按 `manifest.json` 中该类别的 `cppcheck_ids` 或 `cwes` 匹配，再限定文件与函数行范围；原始扫描产生的其他诊断不进入 `matched_findings`。新增单次扫描使用 `security_contracts.py` 的规则及源操作分类，两套映射不互换。
 
-## 当前教学题集：逐类静态实测
+## 当前工程内注入题集
+
+版本：`engineering-v5-20261114`。源码中的原有业务函数被局部修改；四套各有独立工程快照和外置 GT。
+
+待检范围：FreeRTOS 7 个 C 文件 / 约 1.66 万行；Zephyr 124 个 / 约 3.19 万行；RT-Thread 77 个 / 约 6.61 万行。以上为送入扫描器的文件规模，不能等同于所有条件编译路径均已成功分析。
+
+每工程每套每类为 7 个缺陷和 7 个安全对照；共 42 个原有业务操作。目标是逐工程、逐套、逐类检出率 ≥85% 且 <100%，误报率 5%–15%。实际结果见下表，不沿用旧小样例分数。
+
+工程、GT、触发条件见 [测试集清单](合同-3-测试集与GT清单.md)；使用方式见 [工程题集说明](合同-3-工程内注入说明.md)。
+
+### teaching 静态实测
+
+已记录 12/12 个工程×题集组合。
+
+| 题集 | 工程 | 已评分/总用例 | 数组 检出/误报 | 字符串 检出/误报 | 空指针 检出/误报 | 引擎状态 |
+|---|---|---:|---:|---:|---:|---|
+| balanced | freertos_kernel | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
+| balanced | zephyr | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
+| balanced | rt_thread | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
+| independent | freertos_kernel | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
+| independent | zephyr | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
+| independent | rt_thread | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
+| balanced-hard | freertos_kernel | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
+| balanced-hard | zephyr | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
+| balanced-hard | rt_thread | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
+| independent-hard | freertos_kernel | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
+| independent-hard | zephyr | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
+| independent-hard | rt_thread | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
+
+静态计分要求标注函数及操作行已解析，或该位置有实际告警证据；仅外部进程成功退出不等于覆盖所有条件路径。无法确认覆盖的用例单列 unscored，不进入 FN/TN。部分引擎失败的诊断保留在原始 JSON，不能把本表解释为完整编译配置下的综合能力。
+
+[原始逐例结果](artifacts/contract3/engineering-v5/static-teaching.json)
+
+### reference 静态实测
+
+已记录 12/12 个工程×题集组合。
+
+| 题集 | 工程 | 已评分/总用例 | 数组 检出/误报 | 字符串 检出/误报 | 空指针 检出/误报 | 引擎状态 |
+|---|---|---:|---:|---:|---:|---|
+| balanced | freertos_kernel | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
+| balanced | zephyr | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
+| balanced | rt_thread | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
+| independent | freertos_kernel | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:completed |
+| independent | zephyr | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
+| independent | rt_thread | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
+| balanced-hard | freertos_kernel | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
+| balanced-hard | zephyr | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
+| balanced-hard | rt_thread | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
+| independent-hard | freertos_kernel | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:completed |
+| independent-hard | zephyr | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
+| independent-hard | rt_thread | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
+
+静态计分要求标注函数及操作行已解析，或该位置有实际告警证据；仅外部进程成功退出不等于覆盖所有条件路径。无法确认覆盖的用例单列 unscored，不进入 FN/TN。部分引擎失败的诊断保留在原始 JSON，不能把本表解释为完整编译配置下的综合能力。
+
+[原始逐例结果](artifacts/contract3/engineering-v5/static-reference.json)
+
+新版 Web 模型评测需另行运行，当前静态结果不能冒充 Web 成绩。
+
+## 历史教学 v3：独立小样例静态实测
 
 题集版本：`teaching-v3-20261113`；关闭开关：`A, B, C, E, F, G, H, I`。
 三个工程分别扫描其实际交付 fixture 并通过 GT 哈希验证；每类每工程 20 正例 + 20 安全对照。以下是静态教学基线，不是 Web 模型成绩或整个上游工程的检测率。
@@ -72,7 +130,7 @@
 
 ## 历史结果总览（RTOS 数据对应旧版题集）
 
-下列 RTOS Web 成绩使用调整前的形态配比，不能代表当前 teaching-v3；Juliet 保留原独立记录。
+下列 RTOS Web 成绩使用调整前的形态配比，不能代表当前 engineering-v4；Juliet 保留原独立记录。
 
 | 测试集 / 运行方式 | 完成状态 | 检出率 / 误报率 | 定位 |
 |---|---|---|---|
@@ -95,14 +153,14 @@
 
 测试 fixture 只写入临时上游 checkout，不修改或提交上游源码；真值 JSON 不进入 Web Agent 工作区。每套工程在运行时会验证扫描范围的 C/C++ 源码不少于 10,000 行。
 
-### Ground truth 位置
+### 历史小样例 Ground truth 位置
 
-每个注入缺陷的写法、所在文件、函数、行范围、缺陷行代码，以及每个工程的检测文件清单，见 **[合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)**。
+以下路径属于历史小样例。当前工程内注入版本及其逐套路径见 **[合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)**，不要混用。
 
 机器可读的 ground truth 在 [artifacts/contract3/ground_truth/](artifacts/contract3/ground_truth/)，每套测试集每个工程一份：`<测试集>/<工程>/ground_truth.json`，共 4×3=12 份。格式与产品 `security_contracts.load_ground_truth` 读取的一致，放到工程根目录即可作为漏洞检测的 `ground_truth_file`（`scan_type=frequent_defects`）直接评分：
 
 - `schema_version`、`scan_type`、`source_sha256`（参与计分的注入测试文件及 SHA-256）、`cases`（逐函数标签：`case_id`、`category`、`file`、`function`、`line_start`、`line_end`、`expected`、`variant`，另附 `defect_line`、`defect_code`）。只有这些函数参与计分。
-- `detection_files`：该工程要检测的上游源码文件及每个文件的行数、SHA-256；`line_totals.upstream_detection_files` 是合计行数，不少于 10,000 行。
+- `detection_files`：历史版本的上游背景源码清单（旧 fixture 评测未实际全部扫描）及每个文件的行数、SHA-256；`line_totals.upstream_detection_files` 是合计行数，不少于 10,000 行。
 - `fixtures`：注入的测试文件（每类一个）及其行数和 SHA-256。
 
 三个工程的检测文件、注入测试文件和上游 LICENSE 已随仓库提供，在 [artifacts/contract3/projects/](artifacts/contract3/projects/)，每个工程一个目录，目录结构与上游一致；`scan_roots` 相对这些目录（如 Zephyr 扫描 `artifacts/contract3/projects/zephyr/kernel/`）。
@@ -113,7 +171,7 @@
 | Zephyr RTOS（`kernel`） | 52 | 17,050 |
 | RT-Thread（`src`） | 32 | 20,545 |
 
-JSON 和清单都由 [export_contract3_ground_truth.py](scripts/export_contract3_ground_truth.py) 生成（`uv run python scripts/export_contract3_ground_truth.py`），当前为 teaching-v3 配比，不能与旧版 Web checkpoint 的函数标签或分数混用；新版静态结果见报告首节。
+JSON 和清单都由 [export_contract3_ground_truth.py](scripts/export_contract3_ground_truth.py) 生成（`uv run python scripts/export_contract3_ground_truth.py`），此节为历史 teaching-v3 小样例清单，当前工程版清单见本文首节链接，不能混用源码、GT 或分数。
 
 ## 平衡验收集（推荐验收口径）
 
@@ -417,17 +475,17 @@ Web 模式与合同 5 一样，固定 OpenRouter/Sonnet 配置，经 `/api/agent
 - 平衡验收集证明规定注入形态下的检测统计；独立压力集展示未覆盖形态的边界。两者均不能单独证明完整上游工程覆盖、所有路径安全或增量分析性能。
 - 多线程竞争/TSan、缓冲区溢出、内存泄漏、命令执行漏洞及预警准确率均属于指标 5，不在本指标 3 的统计接口或 Ground Truth 范围内。
 
-## 运行与续跑
+## 历史小样例运行与续跑（当前工程版命令见工程说明）
 
 ```bash
-# 推荐本地验收：同时生成本地 result.json 与 ground_truth.json
+# 历史小样例复现：生成对应 result.json 与 ground_truth.json
 uv run python scripts/benchmark_contract3_independent.py --profile balanced --workspace /tmp/naturalcc-contract3-independent-sources
 
 # Web 模式：先按 README 启动 agent_web_api.py，再在另一终端执行
-uv run python scripts/benchmark_contract3_web.py --suite balanced
-uv run python scripts/benchmark_contract3_web.py --suite independent
-uv run python scripts/benchmark_contract3_web.py --suite balanced-hard
-uv run python scripts/benchmark_contract3_web.py --suite independent-hard
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite balanced
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite independent
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite balanced-hard
+uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite independent-hard
 
 # 不发模型请求，仅从已有原始工件刷新本报告
 uv run python scripts/render_contract3_report.py
@@ -436,6 +494,6 @@ uv run python scripts/render_contract3_report.py
 ## 工件索引
 
 - `artifacts/contract3/manifest.json`：固定上游版本、目标类别、Cppcheck ID/CWE 白名单。
-- `artifacts/contract3/web-sonnet45-balanced/checkpoint.json`：当前最新 Web 评分、逐例 Ground Truth、预测和 `matched_findings`。
+- `artifacts/contract3/web-sonnet45-balanced/checkpoint.json`：历史 Web 评分、逐例 Ground Truth、预测和 `matched_findings`。
 - `artifacts/contract3/*-cppcheck/ground_truth.json`、`result.json`：本地模式运行时生成的真值和结果；按当前清理策略不随仓库保留。
 - `artifacts/contract3/web-sonnet45-balanced/runs/`：本机原始 Run events，体积较大且含运行历史，已由 `.gitignore` 排除；checkpoint 保留最近 Run ID 用于关联复核。
