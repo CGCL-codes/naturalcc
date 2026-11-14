@@ -11,14 +11,14 @@
   "method": "Count each line containing a Python COMMENT token once, including inline comments. Docstrings and all other string literals are excluded. Aggregate across the entire inventory; not a per-file threshold.",
   "formula": "comment_lines / nonblank_lines * 100",
   "threshold_percent_exclusive": 20,
-  "file_count": 85,
+  "file_count": 87,
   "totals": {
-    "physical_lines": 47444,
-    "nonblank_lines": 43964,
-    "comment_lines": 19025
+    "physical_lines": 47617,
+    "nonblank_lines": 44112,
+    "comment_lines": 19029
   },
-  "comment_percent": 43.274,
-  "comment_percent_including_blank_lines": 40.0999,
+  "comment_percent": 43.1379,
+  "comment_percent_including_blank_lines": 39.9626,
   "passes": true,
   "files": [
     {
@@ -324,9 +324,9 @@
     },
     {
       "path": "plugins/vulnerability_detection.py",
-      "sha256": "0e911ec6cb6c2a5cd64be3425a3b89c1eeebfcb2665f5740f4aaf84bc49672de",
-      "physical_lines": 1279,
-      "nonblank_lines": 1236,
+      "sha256": "a0cd6e3890bd202ed433f804c26e0aaf9ff543059edd042b5a63b4e24a2b8e04",
+      "physical_lines": 1289,
+      "nonblank_lines": 1246,
       "comment_lines": 508
     },
     {
@@ -576,23 +576,37 @@
     },
     {
       "path": "security_c_rules.py",
-      "sha256": "38313df930cab73e8d854f4382049bba77b8c301fc77fdccbc532f916c038129",
-      "physical_lines": 1353,
-      "nonblank_lines": 1284,
+      "sha256": "a6521c2a029ad0c841fcb48b9262bdc2cde720dbf1173292e8790d68f77f905e",
+      "physical_lines": 1358,
+      "nonblank_lines": 1289,
       "comment_lines": 755
     },
     {
+      "path": "security_case_coverage.py",
+      "sha256": "e7b9636f47a1db051a22ba7808cc439c8a915e0911a77a0443489d8ac71fb4ef",
+      "physical_lines": 33,
+      "nonblank_lines": 29,
+      "comment_lines": 0
+    },
+    {
       "path": "security_contracts.py",
-      "sha256": "13a0b3cb22af365b30cb7df88a8ad47547aa4021e6fcbb03c2cc79af1a63817a",
-      "physical_lines": 407,
-      "nonblank_lines": 393,
+      "sha256": "02ce0b7a3031a0b93447cd9ca318864ee5150f0c1f9c105b5526b76d9429cf5a",
+      "physical_lines": 409,
+      "nonblank_lines": 395,
       "comment_lines": 191
     },
     {
+      "path": "security_engineering_rules.py",
+      "sha256": "cf2b62a2ad7726eb9399ab7aabea00c0d484da6d96b57737b6e381cbdb5c530d",
+      "physical_lines": 116,
+      "nonblank_lines": 97,
+      "comment_lines": 4
+    },
+    {
       "path": "security_exam.py",
-      "sha256": "16450dfc75dda33b35a12ce2ebb5b869e10daf67264dbf19fd1d76ffaf360541",
-      "physical_lines": 65,
-      "nonblank_lines": 55,
+      "sha256": "f530019e6b6441f65172847f76d2bbe35f8875dadb7c059eeb319fa009141566",
+      "physical_lines": 72,
+      "nonblank_lines": 60,
       "comment_lines": 28
     },
     {
