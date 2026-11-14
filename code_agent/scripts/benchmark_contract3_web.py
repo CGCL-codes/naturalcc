@@ -1,5 +1,8 @@
 """Run Contract-3 through the same local HTTP Web Agent API as Contract-5.
 
+CLI defaults to engineering-v4. Pass --legacy-fixtures explicitly for the historical
+fixture helpers described below; their stored results remain unchanged.
+
 This is deliberately distinct from the deterministic local Cppcheck run.  It
 uses the configured Web Agent/model and permits only read-level tools, so it
 does not compile, execute, modify source, or auto-approve an execute tool.
@@ -357,6 +360,10 @@ def run(checkpoint: dict[str, Any], manifest: dict[str, Any], samples: list[dict
 
 
 def main() -> None:
+    if "--legacy-fixtures" not in sys.argv:
+        from code_agent.scripts.benchmark_contract3_engineering_web import main as engineering_main
+        return engineering_main()
+    sys.argv.remove("--legacy-fixtures")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:7860")
     parser.add_argument("--workspace", type=Path, default=Path("/tmp/naturalcc-contract3-web-sources"))

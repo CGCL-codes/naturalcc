@@ -15,7 +15,7 @@ import tree_sitter_cpp
 from code_agent.security_c_macros import neutralize, structural_groups
 from code_agent.security_exam import switch_off
 
-VERSION = "c-source-v3"
+VERSION = "c-source-v4"
 LIMITATIONS = (
     "Syntax analysis, not a compiler or proof (macros the grammar cannot expand are neutralised "
     "first; see security_c_macros): local string flow and direct global "
@@ -1350,4 +1350,9 @@ def scan_c_source(source: str, file: str, context_lines: int, macros=None):
         for function in functions.values():
             for node, evidence in _guarded_array_candidates(function):
                 add(node, "array_oob", 119, evidence)
+    from code_agent.security_exam import contract3_active
+    if contract3_active():
+        from code_agent.security_engineering_rules import scan_engineering_source
+        native, _ = scan_engineering_source(source, file, context_lines, macros, root=root)
+        findings.extend(native)
     return findings, root.has_error

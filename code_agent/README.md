@@ -642,20 +642,20 @@ npm --prefix code_agent/webui run build
 
 Required tests use scripted models and fixture workspaces; they do not need an API key or live Aider call.
 
-### Contract-3 detector-optimization teaching exercise
+### Contract-3 engineering datasets
 
-The current dataset is `teaching-v3-20261113`. Its four existing profiles retain three pinned RTOS projects and 20 defects plus 20 paired safe controls per category. Shape counts are calibrated for teaching, so these are not held-out generalization benchmarks. The default disables A/B/C/E/F/G/H/I while keeping D enabled; ordinary scans and Contract-5 retain full rules.
+The default Contract-3 dataset is `engineering-v5-20261114`: four separate snapshots of each pinned RTOS source subset. Defects modify existing business operations; no standalone teaching functions are added. Each snapshot has its own `project/`, external `ground_truth.json`, and hash manifest under `artifacts/contract3/engineering-v5/<suite>/<project>/`.
 
-With Cppcheck and Clang on PATH, reproduce the shipped-fixture results without a model:
+The scan target lists contain 7 / 124 / 77 complete C files (approximately 16.6k / 31.9k / 66.1k lines) for FreeRTOS / Zephyr / RT-Thread. Counts describe attempted source scope, not successful compilation or exhaustive coverage. Each category has seven defective and seven safe native operations per snapshot; check_contract3_teaching.py verifies the measured per-category teaching ranges. Previous fixture scores do not apply. The frozen teaching configuration was measured on 2026-11-14: all 36 project/suite/category results have 85.71% detection and 14.29% false positives over 504 scored operations. See [verification records](合同-3-复核说明.md) for tests and integration limits. Missing configuration, partial engines and unscored cases remain explicit. Frequent-defect GT scoring uses per-operation coverage (including in the real plugin), so an unrelated malformed function does not veto a covered case; uncovered cases never become false negatives or true negatives.
 
 ```bash
-uv run python scripts/measure_contract3_static.py --delivered
-uv run python scripts/measure_contract3_static.py --delivered --reference
+uv run --no-sync python scripts/build_contract3_engineering_v5.py --verify
+uv run --no-sync python scripts/measure_contract3_static.py --delivered
+uv run --no-sync python scripts/measure_contract3_static.py --delivered --reference
+uv run --no-sync python scripts/benchmark_contract3_web.py --suite balanced --project freertos_kernel --print-prompts --limit 1
 ```
 
-The first command uses the student baseline; the second uses the complete reference implementation only in that process. Every category in every project/profile currently has 85%–95% recall and 5%–15% false-positive rate under the student baseline; the reference has 100% recall and 0% false positives. H exercises early-return array guards; I exercises exact-fit string capacity. Detailed counts, false positives and engine versions are in [合同-3-result.md](合同-3-result.md). The [teacher guide](合同-3-静态分析难度调节指南.md) contains solutions and should not be given to students.
-
-Optional Web runs still use `scripts/benchmark_contract3_web.py --suite balanced` (and the other profiles), with the Contract-5 Web backend configuration. New checkpoints live in `artifacts/contract3/web-sonnet45-<suite>-teaching-v3-20261113/`. Legacy model checkpoints remain historical evidence; they cannot be resumed against revised fixtures. This revision has not been evaluated with a real Web model. The historical Cppcheck-only adapter remains available, but its single-engine scores are separate from the comprehensive teaching measurement.
+Actual Web runs require an explicit `--model` matching the backend, use one Run per real C file with the full snapshot as workspace, and exclude GT. No real Web run has been performed for this revision. Legacy fixture commands require `--legacy-fixtures`. See [engineering scope and limitations](合同-3-工程内注入说明.md), [source/GT listing](合同-3-测试集与GT清单.md), and [measured results](合同-3-result.md).
 
 ### Contract-5 detection rules
 

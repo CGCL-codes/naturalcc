@@ -1,0 +1,851 @@
+{
+  "schema_version": 1,
+  "dataset_revision": "engineering-v4-20261114",
+  "scan_type": "frequent_defects",
+  "suite": "balanced",
+  "project": {
+    "id": "rt_thread",
+    "name": "RT-Thread",
+    "url": "https://github.com/RT-Thread/rt-thread.git",
+    "ref": "v5.2.1",
+    "commit": "97893c004c65760c638fd7eb571a08fc987a55e5",
+    "scan_roots": [
+      "src"
+    ],
+    "repo_dir": "artifacts/contract3/engineering-v4/balanced/rt_thread/project"
+  },
+  "source_sha256": {
+    "components/dfs/dfs_v2/filesystems/cromfs/dfs_cromfs.c": "b748a52ea79d7468b8c921cb6bc53ec63ca084e8386de3d9815a30311b24fb2b",
+    "components/dfs/dfs_v2/filesystems/devfs/devfs.c": "deb917ff0937267cc669d8d40672677a58677c71cd3275f0c019dd941e84d008",
+    "components/dfs/dfs_v2/filesystems/devfs/devtmpfs.c": "a7e34dd6110a6d93e8db52a1d0d72b7d161c14e99b2bda907969a0f3bff72311",
+    "components/dfs/dfs_v2/filesystems/elmfat/dfs_elm.c": "b0a12bbf572fafb0a30fb540e6ca3e70a1f98517ea75cb402fa9a3df6c95908d",
+    "components/dfs/dfs_v2/filesystems/elmfat/ff.c": "2fa90bfcdbf0be424ce39a519fa61e1956c8c92f9f4786334788544181bf8c52",
+    "components/dfs/dfs_v2/filesystems/elmfat/ffunicode.c": "6cd4dc4a664386ebd108e56d367582c35f005fc20381486366b5d77ac58119bd",
+    "components/dfs/dfs_v2/filesystems/mqueue/dfs_mqueue.c": "a487725dde48fad07e8a1080b79026b51991672a496e0ad8e330d71916b4a24f",
+    "components/dfs/dfs_v2/filesystems/procfs/proc.c": "91db6a48a8ce5522b653a2228b1840b25d10d041b51cd46ce29da613ae8eb6f8",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_cmdline.c": "e26a7f58ef157e106062642aec545cbbfe2a1d2e901b4903c5f978815e39b20b",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_cpuinfo.c": "0e15081d294aabea6c45a8915fd52f7d7b4597c88aac176bed81dcd539a52bd0",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_devices.c": "3007e0c7478475e2bc7b3997d85295272e2ec1f8985cda83b94ed7e2e9eb2d9f",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_filesystems.c": "958bdda0bddbfe5675360fadd145eb1098ff9480bd61da07649a152c2eec688f",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_loadavg.c": "bff9b541a1bc429a889fcf439893487af9a10e7161cca601a42e8cc9a4976ff8",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_meminfo.c": "dc20196e6a63c8587fff47acf24d75c3d9df4074171a74931f0c821070945824",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_mounts.c": "e66736f915e432e0eeb9da3b0f40d8947d8cf5e0048829aff6d7b3dca58956b3",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_net.c": "a876660ceeb5eaea48387670ff733c2cc4f8d4f2ee9f675b3d98751ac75969ce",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_partitions.c": "ef602d19e932340e1113b436ecb5eef26d6a6c0184fc373adf6f088847fb9500",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_pid.c": "255af9afc9bda305c2c86df0952e70bac3858750eb17b5d86dbb6489aa179bda",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_self.c": "4c60d0df5d30ee2dacc33bcc3faa13ba1467611ee4502a36ab6c764b847e9b56",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_stat.c": "f310bcfb47717a7afc2e9797767d6399ae97d7780b5e3dfc823861d7f7a1250c",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_tty.c": "f8cd450b6e374a8b39707fe43a021a512f025d20196d646825ef6a4ba4072b70",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_uptime.c": "edccded1d9fc5167f762329e671dc928b938e6a84b30913e89d50da071407fce",
+    "components/dfs/dfs_v2/filesystems/procfs/proc_version.c": "96d2d639a21918c631c6442370f421b8061fabbf6f1f41954d1289b31e0bb826",
+    "components/dfs/dfs_v2/filesystems/procfs/procfs.c": "30833211864d7195b1110ee100ed4a508d02fc913f0489e1e4fe1720e89244db",
+    "components/dfs/dfs_v2/filesystems/ptyfs/ptyfs.c": "7cb73ccbfd1677644b811e430c367021182e1a4a097b6a74f300d19d423f8a8e",
+    "components/dfs/dfs_v2/filesystems/ramfs/dfs_ramfs.c": "7ca1cdceb288433e947eda0035b29a2c809075304275fd19f2df3cfe98083159",
+    "components/dfs/dfs_v2/filesystems/romfs/dfs_romfs.c": "1604a05cabe373370ac0f58a22f589e67c12467d165a7ef4db601370400c8404",
+    "components/dfs/dfs_v2/filesystems/romfs/romfs.c": "b68143594ed441772e419e1d73422613ccffa9600ee1eeb15f6e4cad39521941",
+    "components/dfs/dfs_v2/filesystems/skeleton/skeleton.c": "1df8e5ae7c1526f38c4e4913b532e10d522ae56b977e937a45b4e7d3eb21933f",
+    "components/dfs/dfs_v2/filesystems/tmpfs/dfs_tmpfs.c": "ca4431e56f7925884075b0ee966b97a83554de4a998160ce49bebea8a2185e12",
+    "components/dfs/dfs_v2/src/dfs.c": "51094cb94fde6c865840799b4baf934247f92316d4973932ab6b45609a535278",
+    "components/dfs/dfs_v2/src/dfs_dentry.c": "8bfc2da89f20c51aa0a8c746c7ebdb8b5a9be94edf0356bcf13f45a7fc5fac9d",
+    "components/dfs/dfs_v2/src/dfs_file.c": "16d26a2caa3e4b80f210c8f058d1dd198f0d8c2672460e4bf8359653d96e9e08",
+    "components/dfs/dfs_v2/src/dfs_file_mmap.c": "936d336f4818ffd62ae3a7888029c127b92b54fbd1df4c25742992e38d4ebcd2",
+    "components/dfs/dfs_v2/src/dfs_fs.c": "b5b707db1fa285006d88751c222932df3722786d1790bd3cb07928ca763499cf",
+    "components/dfs/dfs_v2/src/dfs_mnt.c": "01b43ace80af2c0c09078d28b9bbc544368d1d24bf626c14ecd383338589cf62",
+    "components/dfs/dfs_v2/src/dfs_pcache.c": "eb64e4ffd71d482534c75600c0946723ea43b261fe1eee0a12f6aad76b38c825",
+    "components/dfs/dfs_v2/src/dfs_posix.c": "78b12fb9f295fcb83b2484fe11b1c17d6525abe792ce2c2425b5c01940ad54b9",
+    "components/dfs/dfs_v2/src/dfs_seq_file.c": "88ffb14d49e0a5230ecb34c60031c24dad39766962548d1157150d4d2f502d13",
+    "components/dfs/dfs_v2/src/dfs_vnode.c": "564d74c58a0d26fde79edfb5074fb233061d5678b7bfb39a73f0a904677631b1",
+    "components/finsh/cmd.c": "5b6f64464e5c58ce35611ba54b300436267f47eda887abcdfd1b931cb9cda7e8",
+    "components/finsh/msh.c": "43ec23205136fc5bee6c1691cc7ca969ce5a72d93b01883a0ada08070cd75778",
+    "components/finsh/msh_file.c": "a428ac15147a71a62d314a434d597f9be9d25b1449b749fcd79aa333d343cb53",
+    "components/finsh/msh_parse.c": "b89f196d0a8db93fb013448f72ede91b07a63236847cffee0ddb9ccf3b634d5a",
+    "components/finsh/shell.c": "62c45600099df220d1f0ec647b0aa09813f44d5f077c06e8841a5334da27049f",
+    "src/clock.c": "c6a05ee3aa00f851c15feaee1f50d9bba17f06897cd9f1ab6ec8ab97425c5749",
+    "src/components.c": "16634283f5cb35e0123b81dce95373517092b394772907e30527ec93f9399483",
+    "src/cpu_mp.c": "a823c45c43866dddc7c8cea5c20b30f7db5302875cbbce696548be70b8ed7a93",
+    "src/cpu_up.c": "e3200fa3bc72dee07671f78afdb620bda3a1f8eece2b6f9ae040122835cb1fe1",
+    "src/defunct.c": "9fc70103971fe119243c8145a8392e04370dbb2113ade5d5ab99c01babb885bc",
+    "src/idle.c": "cd56bf8e567d59f2fe0d04dff628f94a4a67894d5e235d96cdb5fccd9edabefc",
+    "src/ipc.c": "b1369c563f23643f282239336f651abacd3d1fa935f5a85a35a15ab5c38bad87",
+    "src/irq.c": "ffebf19de3906206dd37edbb198b30865d77c103226fda04c10ffe1416f1c1bd",
+    "src/klibc/kerrno.c": "f90bdf2242de8120dd7449568864d3759f8a75e68a0917c1930107fdac1df827",
+    "src/klibc/kstdio.c": "5149522fe5a974198f0b3b78c3eb3079219ffd7f4a0863468e157553b39c0bdc",
+    "src/klibc/kstring.c": "81cb16ba6129f5cd9ac5a4f26d20474393a179da06ae6a287fc47963fa0e11ea",
+    "src/klibc/rt_vsnprintf_std.c": "bcc0b0627c95b3be859a5f0dcb17a9bc391bf1cea48c5bda6e86196ca7bde885",
+    "src/klibc/rt_vsnprintf_tiny.c": "b6d874596940045c99f09cd4e82e54fc17ff536227ed98c09fbfbe193ea4c436",
+    "src/klibc/rt_vsscanf.c": "524a03cb25db94a70a2e1245eae32f0c33b4cf416ad0b49c0df953715f0ea0ea",
+    "src/klibc/utest/TC_rt_memcmp.c": "591342c3b728a43e550c7bf64f2ec429e37bc4a6b72d63015d60b47117c47598",
+    "src/klibc/utest/TC_rt_memcpy.c": "59ecc0b48952bfbdfc249078509abd7d0447f47dfee94e72760e71b385e16378",
+    "src/klibc/utest/TC_rt_memmove.c": "09556042c59213d34e1d8370ca7b844950b66bbf29c072d44ff8d2e02106e006",
+    "src/klibc/utest/TC_rt_memset.c": "9d96221aa85cc5c4eecd1ca55d73153b9699c394a5966133c25904e18d77e369",
+    "src/klibc/utest/TC_rt_sprintf.c": "a461b6dda9bdf657def0208eeb5306b0bdc3b578cc7cf5ad44169bde23579c95",
+    "src/klibc/utest/TC_rt_sscanf.c": "75358cb288603f64a209c796079ce5a45fd5ddcd8d0e2ceed188fcf1b3d7ea2b",
+    "src/kservice.c": "e6e20298d864376f2c1a34fab575046b95df84569cae73aa85f0290f3a841fa0",
+    "src/mem.c": "133b7c202ea183c92e2fc8ca9f0ff4c8fb9cff958ea39d879f0daafd20ca66c8",
+    "src/memheap.c": "e6d9663b47f429a3499e5c9d40e2fc5ae2598778c6acbec5b6ba937804005346",
+    "src/mempool.c": "8849134991f207cece92e5d64f99c7ec8a7a06cf7728b4fee98f464c6a5d354b",
+    "src/object.c": "95dd5382d369cc5244787210a47835eea13ff362f696dffb9e4a957b9905a4c4",
+    "src/scheduler_comm.c": "1f8da0734c27059f13e6902fca6ba5726c990948b72ca30004fd5749c3a924c1",
+    "src/scheduler_mp.c": "7b02000c1bc3c93d85c53aae1b9857d4eb28d082d9ef76bf8c1c66bb387221c8",
+    "src/scheduler_up.c": "182c7ecaf8b65bb844e213dad1dbb293cf6210bd31be8b3ee00c036c786144f4",
+    "src/signal.c": "187ed75f1d74e5a0facf9c3d8a5c9d0c319c5f120ec8aa1fbb807e76628ea13b",
+    "src/slab.c": "f77f2de98d4a69fa8f5c535a54bc94bee1f3711b424f26e4e33ae717955b4a44",
+    "src/thread.c": "906ffb48e93561f769551fef4f2c20685ba722f822c20c475dbd39ec4e0001ae",
+    "src/timer.c": "08e5eca1d39073d7b948fe1e9c760742f37f575abf9fe089adfaf74673e1a8b1"
+  },
+  "cases": [
+    {
+      "case_id": "rt_thread-array_oob-01",
+      "site_id": "array_oob-01",
+      "category": "array_oob",
+      "file": "src/object.c",
+      "function": "rt_object_get_information",
+      "line_start": 247,
+      "line_end": 258,
+      "defect_line": 254,
+      "expected": "defect",
+      "trigger": "对象类型不在表中，检索循环访问 rt_object_container 的尾后一项。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        247,
+        258
+      ]
+    },
+    {
+      "case_id": "rt_thread-array_oob-02",
+      "site_id": "array_oob-02",
+      "category": "array_oob",
+      "file": "src/timer.c",
+      "function": "_timer_init",
+      "line_start": 131,
+      "line_end": 160,
+      "defect_line": 156,
+      "expected": "control",
+      "trigger": "定时器跳表操作访问 timer->row 的容量下标；对应功能及调试宏启用。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        131,
+        160
+      ]
+    },
+    {
+      "case_id": "rt_thread-array_oob-03",
+      "site_id": "array_oob-03",
+      "category": "array_oob",
+      "file": "src/timer.c",
+      "function": "_timer_remove",
+      "line_start": 191,
+      "line_end": 199,
+      "defect_line": 195,
+      "expected": "defect",
+      "trigger": "定时器跳表操作访问 timer->row 的容量下标；对应功能及调试宏启用。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        191,
+        199
+      ]
+    },
+    {
+      "case_id": "rt_thread-array_oob-04",
+      "site_id": "array_oob-04",
+      "category": "array_oob",
+      "file": "src/timer.c",
+      "function": "_timer_count_height",
+      "line_start": 209,
+      "line_end": 219,
+      "defect_line": 213,
+      "expected": "control",
+      "trigger": "定时器跳表操作访问 timer->row 的容量下标；对应功能及调试宏启用。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        209,
+        219
+      ]
+    },
+    {
+      "case_id": "rt_thread-array_oob-05",
+      "site_id": "array_oob-05",
+      "category": "array_oob",
+      "file": "src/timer.c",
+      "function": "_timer_start",
+      "line_start": 409,
+      "line_end": 479,
+      "defect_line": 426,
+      "expected": "defect",
+      "trigger": "定时器插入时遍历跳表层数多一层，访问 timer_list/row 数组越界。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        409,
+        479
+      ]
+    },
+    {
+      "case_id": "rt_thread-array_oob-06",
+      "site_id": "array_oob-06",
+      "category": "array_oob",
+      "file": "src/timer.c",
+      "function": "rt_system_timer_init",
+      "line_start": 823,
+      "line_end": 835,
+      "defect_line": 828,
+      "expected": "control",
+      "trigger": "系统定时器初始化多访问 _timer_list 的尾后一项。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        823,
+        835
+      ]
+    },
+    {
+      "case_id": "rt_thread-string_overflow-01",
+      "site_id": "string_overflow-01",
+      "category": "string_overflow",
+      "file": "src/object.c",
+      "function": "rt_object_init",
+      "line_start": 353,
+      "line_end": 415,
+      "defect_line": 393,
+      "expected": "defect",
+      "trigger": "对象初始化传入长度超过 RT_NAME_MAX 的名称，固定名称数组写溢出。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        353,
+        415
+      ]
+    },
+    {
+      "case_id": "rt_thread-string_overflow-02",
+      "site_id": "string_overflow-02",
+      "category": "string_overflow",
+      "file": "src/object.c",
+      "function": "rt_object_allocate",
+      "line_start": 460,
+      "line_end": 518,
+      "defect_line": 494,
+      "expected": "control",
+      "trigger": "动态对象创建传入过长名称，固定名称数组写溢出。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        460,
+        518
+      ]
+    },
+    {
+      "case_id": "rt_thread-string_overflow-03",
+      "site_id": "string_overflow-03",
+      "category": "string_overflow",
+      "file": "src/object.c",
+      "function": "rt_object_get_name",
+      "line_start": 706,
+      "line_end": 717,
+      "defect_line": 712,
+      "expected": "defect",
+      "trigger": "获取对象名的调用方缓冲小于对象名字符串长度加 NUL。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        706,
+        717
+      ]
+    },
+    {
+      "case_id": "rt_thread-string_overflow-04",
+      "site_id": "string_overflow-04",
+      "category": "string_overflow",
+      "file": "src/kservice.c",
+      "function": "rt_kprintf",
+      "line_start": 359,
+      "line_end": 385,
+      "defect_line": 373,
+      "expected": "control",
+      "trigger": "启用控制台，格式化输出长度超过 rt_log_buf 容量。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        359,
+        385
+      ]
+    },
+    {
+      "case_id": "rt_thread-string_overflow-05",
+      "site_id": "string_overflow-05",
+      "category": "string_overflow",
+      "file": "components/finsh/shell.c",
+      "function": "finsh_get_prompt",
+      "line_start": 95,
+      "line_end": 127,
+      "defect_line": 108,
+      "expected": "defect",
+      "trigger": "自定义命令提示符超过固定 finsh_prompt 缓冲容量。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        95,
+        127
+      ]
+    },
+    {
+      "case_id": "rt_thread-string_overflow-06",
+      "site_id": "string_overflow-06",
+      "category": "string_overflow",
+      "file": "components/dfs/dfs_v2/src/dfs.c",
+      "function": "dfs_normalize_path",
+      "line_start": 796,
+      "line_end": 934,
+      "defect_line": 826,
+      "expected": "control",
+      "trigger": "相对路径拼接分配少算结尾 NUL，后续 rt_snprintf 仍用原长度写入。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        796,
+        934
+      ]
+    },
+    {
+      "case_id": "rt_thread-null_pointer-01",
+      "site_id": "null_pointer-01",
+      "category": "null_pointer",
+      "file": "src/object.c",
+      "function": "rt_object_allocate",
+      "line_start": 460,
+      "line_end": 518,
+      "defect_line": 476,
+      "expected": "defect",
+      "trigger": "object 动态创建时内存分配失败，反转判空后绕过错误返回并初始化空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        460,
+        518
+      ]
+    },
+    {
+      "case_id": "rt_thread-null_pointer-02",
+      "site_id": "null_pointer-02",
+      "category": "null_pointer",
+      "file": "src/thread.c",
+      "function": "rt_thread_create",
+      "line_start": 523,
+      "line_end": 560,
+      "defect_line": 538,
+      "expected": "control",
+      "trigger": "thread 动态创建时内存分配失败，反转判空后绕过错误返回并初始化空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        523,
+        560
+      ]
+    },
+    {
+      "case_id": "rt_thread-null_pointer-03",
+      "site_id": "null_pointer-03",
+      "category": "null_pointer",
+      "file": "src/timer.c",
+      "function": "rt_timer_create",
+      "line_start": 345,
+      "line_end": 367,
+      "defect_line": 359,
+      "expected": "defect",
+      "trigger": "timer 动态创建时内存分配失败，反转判空后绕过错误返回并初始化空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        345,
+        367
+      ]
+    },
+    {
+      "case_id": "rt_thread-null_pointer-04",
+      "site_id": "null_pointer-04",
+      "category": "null_pointer",
+      "file": "src/ipc.c",
+      "function": "rt_sem_create",
+      "line_start": 467,
+      "line_end": 484,
+      "defect_line": 478,
+      "expected": "control",
+      "trigger": "sem 动态创建时内存分配失败，反转判空后绕过错误返回并初始化空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        467,
+        484
+      ]
+    },
+    {
+      "case_id": "rt_thread-null_pointer-05",
+      "site_id": "null_pointer-05",
+      "category": "null_pointer",
+      "file": "src/ipc.c",
+      "function": "rt_mutex_create",
+      "line_start": 1233,
+      "line_end": 1261,
+      "defect_line": 1244,
+      "expected": "defect",
+      "trigger": "mutex 动态创建时内存分配失败，反转判空后绕过错误返回并初始化空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        1233,
+        1261
+      ]
+    },
+    {
+      "case_id": "rt_thread-null_pointer-06",
+      "site_id": "null_pointer-06",
+      "category": "null_pointer",
+      "file": "src/ipc.c",
+      "function": "rt_event_create",
+      "line_start": 1878,
+      "line_end": 1902,
+      "defect_line": 1888,
+      "expected": "control",
+      "trigger": "event 动态创建时内存分配失败，反转判空后绕过错误返回并初始化空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        1878,
+        1902
+      ]
+    },
+    {
+      "case_id": "rt_thread-null_pointer-07",
+      "site_id": "null_pointer-07",
+      "category": "null_pointer",
+      "file": "src/ipc.c",
+      "function": "rt_mb_create",
+      "line_start": 2450,
+      "line_end": 2488,
+      "defect_line": 2460,
+      "expected": "defect",
+      "trigger": "mb 动态创建时内存分配失败，反转判空后绕过错误返回并初始化空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        2450,
+        2488
+      ]
+    },
+    {
+      "case_id": "rt_thread-null_pointer-08",
+      "site_id": "null_pointer-08",
+      "category": "null_pointer",
+      "file": "src/ipc.c",
+      "function": "rt_mq_create",
+      "line_start": 3229,
+      "line_end": 3292,
+      "defect_line": 3245,
+      "expected": "control",
+      "trigger": "mq 动态创建时内存分配失败，反转判空后绕过错误返回并初始化空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        3229,
+        3292
+      ]
+    }
+  ],
+  "detection_files": [
+    {
+      "path": "components/dfs/dfs_v2/filesystems/cromfs/dfs_cromfs.c",
+      "lines": 1382,
+      "sha256": "b748a52ea79d7468b8c921cb6bc53ec63ca084e8386de3d9815a30311b24fb2b"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/devfs/devfs.c",
+      "lines": 555,
+      "sha256": "deb917ff0937267cc669d8d40672677a58677c71cd3275f0c019dd941e84d008"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/devfs/devtmpfs.c",
+      "lines": 664,
+      "sha256": "a7e34dd6110a6d93e8db52a1d0d72b7d161c14e99b2bda907969a0f3bff72311"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/elmfat/dfs_elm.c",
+      "lines": 1279,
+      "sha256": "b0a12bbf572fafb0a30fb540e6ca3e70a1f98517ea75cb402fa9a3df6c95908d"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/elmfat/ff.c",
+      "lines": 7116,
+      "sha256": "2fa90bfcdbf0be424ce39a519fa61e1956c8c92f9f4786334788544181bf8c52"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/elmfat/ffunicode.c",
+      "lines": 15593,
+      "sha256": "6cd4dc4a664386ebd108e56d367582c35f005fc20381486366b5d77ac58119bd"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/mqueue/dfs_mqueue.c",
+      "lines": 241,
+      "sha256": "a487725dde48fad07e8a1080b79026b51991672a496e0ad8e330d71916b4a24f"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc.c",
+      "lines": 733,
+      "sha256": "91db6a48a8ce5522b653a2228b1840b25d10d041b51cd46ce29da613ae8eb6f8"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_cmdline.c",
+      "lines": 53,
+      "sha256": "e26a7f58ef157e106062642aec545cbbfe2a1d2e901b4903c5f978815e39b20b"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_cpuinfo.c",
+      "lines": 86,
+      "sha256": "0e15081d294aabea6c45a8915fd52f7d7b4597c88aac176bed81dcd539a52bd0"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_devices.c",
+      "lines": 307,
+      "sha256": "3007e0c7478475e2bc7b3997d85295272e2ec1f8985cda83b94ed7e2e9eb2d9f"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_filesystems.c",
+      "lines": 85,
+      "sha256": "958bdda0bddbfe5675360fadd145eb1098ff9480bd61da07649a152c2eec688f"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_loadavg.c",
+      "lines": 41,
+      "sha256": "bff9b541a1bc429a889fcf439893487af9a10e7161cca601a42e8cc9a4976ff8"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_meminfo.c",
+      "lines": 66,
+      "sha256": "dc20196e6a63c8587fff47acf24d75c3d9df4074171a74931f0c821070945824"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_mounts.c",
+      "lines": 101,
+      "sha256": "e66736f915e432e0eeb9da3b0f40d8947d8cf5e0048829aff6d7b3dca58956b3"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_net.c",
+      "lines": 109,
+      "sha256": "a876660ceeb5eaea48387670ff733c2cc4f8d4f2ee9f675b3d98751ac75969ce"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_partitions.c",
+      "lines": 215,
+      "sha256": "ef602d19e932340e1113b436ecb5eef26d6a6c0184fc373adf6f088847fb9500"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_pid.c",
+      "lines": 449,
+      "sha256": "255af9afc9bda305c2c86df0952e70bac3858750eb17b5d86dbb6489aa179bda"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_self.c",
+      "lines": 66,
+      "sha256": "4c60d0df5d30ee2dacc33bcc3faa13ba1467611ee4502a36ab6c764b847e9b56"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_stat.c",
+      "lines": 114,
+      "sha256": "f310bcfb47717a7afc2e9797767d6399ae97d7780b5e3dfc823861d7f7a1250c"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_tty.c",
+      "lines": 100,
+      "sha256": "f8cd450b6e374a8b39707fe43a021a512f025d20196d646825ef6a4ba4072b70"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_uptime.c",
+      "lines": 38,
+      "sha256": "edccded1d9fc5167f762329e671dc928b938e6a84b30913e89d50da071407fce"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/proc_version.c",
+      "lines": 45,
+      "sha256": "96d2d639a21918c631c6442370f421b8061fabbf6f1f41954d1289b31e0bb826"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/procfs/procfs.c",
+      "lines": 447,
+      "sha256": "30833211864d7195b1110ee100ed4a508d02fc913f0489e1e4fe1720e89244db"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/ptyfs/ptyfs.c",
+      "lines": 658,
+      "sha256": "7cb73ccbfd1677644b811e430c367021182e1a4a097b6a74f300d19d423f8a8e"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/ramfs/dfs_ramfs.c",
+      "lines": 479,
+      "sha256": "7ca1cdceb288433e947eda0035b29a2c809075304275fd19f2df3cfe98083159"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/romfs/dfs_romfs.c",
+      "lines": 398,
+      "sha256": "1604a05cabe373370ac0f58a22f589e67c12467d165a7ef4db601370400c8404"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/romfs/romfs.c",
+      "lines": 42,
+      "sha256": "b68143594ed441772e419e1d73422613ccffa9600ee1eeb15f6e4cad39521941"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/skeleton/skeleton.c",
+      "lines": 96,
+      "sha256": "1df8e5ae7c1526f38c4e4913b532e10d522ae56b977e937a45b4e7d3eb21933f"
+    },
+    {
+      "path": "components/dfs/dfs_v2/filesystems/tmpfs/dfs_tmpfs.c",
+      "lines": 899,
+      "sha256": "ca4431e56f7925884075b0ee966b97a83554de4a998160ce49bebea8a2185e12"
+    },
+    {
+      "path": "components/dfs/dfs_v2/src/dfs.c",
+      "lines": 1047,
+      "sha256": "51094cb94fde6c865840799b4baf934247f92316d4973932ab6b45609a535278"
+    },
+    {
+      "path": "components/dfs/dfs_v2/src/dfs_dentry.c",
+      "lines": 386,
+      "sha256": "8bfc2da89f20c51aa0a8c746c7ebdb8b5a9be94edf0356bcf13f45a7fc5fac9d"
+    },
+    {
+      "path": "components/dfs/dfs_v2/src/dfs_file.c",
+      "lines": 2414,
+      "sha256": "16d26a2caa3e4b80f210c8f058d1dd198f0d8c2672460e4bf8359653d96e9e08"
+    },
+    {
+      "path": "components/dfs/dfs_v2/src/dfs_file_mmap.c",
+      "lines": 474,
+      "sha256": "936d336f4818ffd62ae3a7888029c127b92b54fbd1df4c25742992e38d4ebcd2"
+    },
+    {
+      "path": "components/dfs/dfs_v2/src/dfs_fs.c",
+      "lines": 569,
+      "sha256": "b5b707db1fa285006d88751c222932df3722786d1790bd3cb07928ca763499cf"
+    },
+    {
+      "path": "components/dfs/dfs_v2/src/dfs_mnt.c",
+      "lines": 474,
+      "sha256": "01b43ace80af2c0c09078d28b9bbc544368d1d24bf626c14ecd383338589cf62"
+    },
+    {
+      "path": "components/dfs/dfs_v2/src/dfs_pcache.c",
+      "lines": 1539,
+      "sha256": "eb64e4ffd71d482534c75600c0946723ea43b261fe1eee0a12f6aad76b38c825"
+    },
+    {
+      "path": "components/dfs/dfs_v2/src/dfs_posix.c",
+      "lines": 1467,
+      "sha256": "78b12fb9f295fcb83b2484fe11b1c17d6525abe792ce2c2425b5c01940ad54b9"
+    },
+    {
+      "path": "components/dfs/dfs_v2/src/dfs_seq_file.c",
+      "lines": 404,
+      "sha256": "88ffb14d49e0a5230ecb34c60031c24dad39766962548d1157150d4d2f502d13"
+    },
+    {
+      "path": "components/dfs/dfs_v2/src/dfs_vnode.c",
+      "lines": 147,
+      "sha256": "564d74c58a0d26fde79edfb5074fb233061d5678b7bfb39a73f0a904677631b1"
+    },
+    {
+      "path": "components/finsh/cmd.c",
+      "lines": 1125,
+      "sha256": "5b6f64464e5c58ce35611ba54b300436267f47eda887abcdfd1b931cb9cda7e8"
+    },
+    {
+      "path": "components/finsh/msh.c",
+      "lines": 1011,
+      "sha256": "43ec23205136fc5bee6c1691cc7ca969ce5a72d93b01883a0ada08070cd75778"
+    },
+    {
+      "path": "components/finsh/msh_file.c",
+      "lines": 1144,
+      "sha256": "a428ac15147a71a62d314a434d597f9be9d25b1449b749fcd79aa333d343cb53"
+    },
+    {
+      "path": "components/finsh/msh_parse.c",
+      "lines": 96,
+      "sha256": "b89f196d0a8db93fb013448f72ede91b07a63236847cffee0ddb9ccf3b634d5a"
+    },
+    {
+      "path": "components/finsh/shell.c",
+      "lines": 834,
+      "sha256": "62c45600099df220d1f0ec647b0aa09813f44d5f077c06e8841a5334da27049f"
+    },
+    {
+      "path": "src/clock.c",
+      "lines": 261,
+      "sha256": "c6a05ee3aa00f851c15feaee1f50d9bba17f06897cd9f1ab6ec8ab97425c5749"
+    },
+    {
+      "path": "src/components.c",
+      "lines": 286,
+      "sha256": "16634283f5cb35e0123b81dce95373517092b394772907e30527ec93f9399483"
+    },
+    {
+      "path": "src/cpu_mp.c",
+      "lines": 236,
+      "sha256": "a823c45c43866dddc7c8cea5c20b30f7db5302875cbbce696548be70b8ed7a93"
+    },
+    {
+      "path": "src/cpu_up.c",
+      "lines": 108,
+      "sha256": "e3200fa3bc72dee07671f78afdb620bda3a1f8eece2b6f9ae040122835cb1fe1"
+    },
+    {
+      "path": "src/defunct.c",
+      "lines": 178,
+      "sha256": "9fc70103971fe119243c8145a8392e04370dbb2113ade5d5ab99c01babb885bc"
+    },
+    {
+      "path": "src/idle.c",
+      "lines": 219,
+      "sha256": "cd56bf8e567d59f2fe0d04dff628f94a4a67894d5e235d96cdb5fccd9edabefc"
+    },
+    {
+      "path": "src/ipc.c",
+      "lines": 4033,
+      "sha256": "b1369c563f23643f282239336f651abacd3d1fa935f5a85a35a15ab5c38bad87"
+    },
+    {
+      "path": "src/irq.c",
+      "lines": 157,
+      "sha256": "ffebf19de3906206dd37edbb198b30865d77c103226fda04c10ffe1416f1c1bd"
+    },
+    {
+      "path": "src/klibc/kerrno.c",
+      "lines": 161,
+      "sha256": "f90bdf2242de8120dd7449568864d3759f8a75e68a0917c1930107fdac1df827"
+    },
+    {
+      "path": "src/klibc/kstdio.c",
+      "lines": 116,
+      "sha256": "5149522fe5a974198f0b3b78c3eb3079219ffd7f4a0863468e157553b39c0bdc"
+    },
+    {
+      "path": "src/klibc/kstring.c",
+      "lines": 559,
+      "sha256": "81cb16ba6129f5cd9ac5a4f26d20474393a179da06ae6a287fc47963fa0e11ea"
+    },
+    {
+      "path": "src/klibc/rt_vsnprintf_std.c",
+      "lines": 1351,
+      "sha256": "bcc0b0627c95b3be859a5f0dcb17a9bc391bf1cea48c5bda6e86196ca7bde885"
+    },
+    {
+      "path": "src/klibc/rt_vsnprintf_tiny.c",
+      "lines": 611,
+      "sha256": "b6d874596940045c99f09cd4e82e54fc17ff536227ed98c09fbfbe193ea4c436"
+    },
+    {
+      "path": "src/klibc/rt_vsscanf.c",
+      "lines": 700,
+      "sha256": "524a03cb25db94a70a2e1245eae32f0c33b4cf416ad0b49c0df953715f0ea0ea"
+    },
+    {
+      "path": "src/klibc/utest/TC_rt_memcmp.c",
+      "lines": 161,
+      "sha256": "591342c3b728a43e550c7bf64f2ec429e37bc4a6b72d63015d60b47117c47598"
+    },
+    {
+      "path": "src/klibc/utest/TC_rt_memcpy.c",
+      "lines": 108,
+      "sha256": "59ecc0b48952bfbdfc249078509abd7d0447f47dfee94e72760e71b385e16378"
+    },
+    {
+      "path": "src/klibc/utest/TC_rt_memmove.c",
+      "lines": 108,
+      "sha256": "09556042c59213d34e1d8370ca7b844950b66bbf29c072d44ff8d2e02106e006"
+    },
+    {
+      "path": "src/klibc/utest/TC_rt_memset.c",
+      "lines": 102,
+      "sha256": "9d96221aa85cc5c4eecd1ca55d73153b9699c394a5966133c25904e18d77e369"
+    },
+    {
+      "path": "src/klibc/utest/TC_rt_sprintf.c",
+      "lines": 1065,
+      "sha256": "a461b6dda9bdf657def0208eeb5306b0bdc3b578cc7cf5ad44169bde23579c95"
+    },
+    {
+      "path": "src/klibc/utest/TC_rt_sscanf.c",
+      "lines": 250,
+      "sha256": "75358cb288603f64a209c796079ce5a45fd5ddcd8d0e2ceed188fcf1b3d7ea2b"
+    },
+    {
+      "path": "src/kservice.c",
+      "lines": 1162,
+      "sha256": "e6e20298d864376f2c1a34fab575046b95df84569cae73aa85f0290f3a841fa0"
+    },
+    {
+      "path": "src/mem.c",
+      "lines": 667,
+      "sha256": "133b7c202ea183c92e2fc8ca9f0ff4c8fb9cff958ea39d879f0daafd20ca66c8"
+    },
+    {
+      "path": "src/memheap.c",
+      "lines": 998,
+      "sha256": "e6d9663b47f429a3499e5c9d40e2fc5ae2598778c6acbec5b6ba937804005346"
+    },
+    {
+      "path": "src/mempool.c",
+      "lines": 411,
+      "sha256": "8849134991f207cece92e5d64f99c7ec8a7a06cf7728b4fee98f464c6a5d354b"
+    },
+    {
+      "path": "src/object.c",
+      "lines": 774,
+      "sha256": "95dd5382d369cc5244787210a47835eea13ff362f696dffb9e4a957b9905a4c4"
+    },
+    {
+      "path": "src/scheduler_comm.c",
+      "lines": 309,
+      "sha256": "1f8da0734c27059f13e6902fca6ba5726c990948b72ca30004fd5749c3a924c1"
+    },
+    {
+      "path": "src/scheduler_mp.c",
+      "lines": 1332,
+      "sha256": "7b02000c1bc3c93d85c53aae1b9857d4eb28d082d9ef76bf8c1c66bb387221c8"
+    },
+    {
+      "path": "src/scheduler_up.c",
+      "lines": 571,
+      "sha256": "182c7ecaf8b65bb844e213dad1dbb293cf6210bd31be8b3ee00c036c786144f4"
+    },
+    {
+      "path": "src/signal.c",
+      "lines": 679,
+      "sha256": "187ed75f1d74e5a0facf9c3d8a5c9d0c319c5f120ec8aa1fbb807e76628ea13b"
+    },
+    {
+      "path": "src/slab.c",
+      "lines": 856,
+      "sha256": "f77f2de98d4a69fa8f5c535a54bc94bee1f3711b424f26e4e33ae717955b4a44"
+    },
+    {
+      "path": "src/thread.c",
+      "lines": 1145,
+      "sha256": "906ffb48e93561f769551fef4f2c20685ba722f822c20c475dbd39ec4e0001ae"
+    },
+    {
+      "path": "src/timer.c",
+      "lines": 871,
+      "sha256": "08e5eca1d39073d7b948fe1e9c760742f37f575abf9fe089adfaf74673e1a8b1"
+    }
+  ],
+  "line_totals": {
+    "detection_files": 66133,
+    "project_source": 89689
+  },
+  "scoring_rule": "Category plus non-overlapping operation range; unlabelled findings remain unscored. Controls assert only the marked operation under its documented preconditions.",
+  "configuration_scope": "Source audit plus POSIX FreeRTOS / selected RT-Thread host parsing profiles. Zephyr has no generated board configuration. No complete OS build or boot is claimed; conditional-path coverage is reported separately."
+}

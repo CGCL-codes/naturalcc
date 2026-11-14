@@ -1,5 +1,8 @@
 """Static-only Contract-3 score: product analyzers, no model, no network.
 
+CLI defaults to engineering-v4. Pass --legacy-fixtures explicitly for the historical
+fixture helpers described below; their stored results remain unchanged.
+
 Runs the comprehensive engines (built-in C rules, Cppcheck, Clang) on the frozen
 test sets and scores them with the product classifier ``classify_findings``.
 
@@ -143,6 +146,11 @@ def delivered(suite: str) -> list[dict]:
 
 
 def main() -> None:
+    if "--legacy-fixtures" not in sys.argv and not any("juliet" in arg for arg in sys.argv):
+        from code_agent.scripts.measure_contract3_engineering import main as engineering_main
+        return engineering_main([arg for arg in sys.argv[1:] if arg != "--delivered"])
+    if "--legacy-fixtures" in sys.argv:
+        sys.argv.remove("--legacy-fixtures")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--suite", default=",".join(RTOS),
                         help=f"Comma-separated: {', '.join(RTOS + JULIET)} (default: all RTOS suites)")

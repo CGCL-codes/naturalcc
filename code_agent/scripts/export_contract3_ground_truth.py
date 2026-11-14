@@ -1,5 +1,8 @@
 """Export the Contract-3 RTOS ground truth with the files each project is checked over.
 
+CLI defaults to engineering-v4. Pass --legacy-fixtures explicitly for the historical
+fixture helpers described below; their stored results remain unchanged.
+
 For every suite and every pinned RTOS project this writes the upstream detection
 files (path and line count), the injected fixture files and the per-function
 labels into ``artifacts/contract3/ground_truth/<suite>/<project>/ground_truth.json``
@@ -291,6 +294,14 @@ def mirror_projects(manifest: dict[str, Any], workspace: Path, results: list[dic
 
 
 def main() -> None:
+    if "--legacy-fixtures" not in sys.argv:
+        from code_agent.scripts.build_contract3_engineering_v5 import main as engineering_main
+        sys.argv = [arg.replace("--workspace", "--upstream") for arg in sys.argv]
+        return engineering_main()
+    sys.argv.remove("--legacy-fixtures")
+    # Explicit legacy regeneration must not overwrite the current engineering listing.
+    global LISTING
+    LISTING = DATA / "teaching-v3" / "legacy-fixture-listing.md"
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--workspace", type=Path, default=Path("/tmp/naturalcc-contract3-web-sources"))
     parser.add_argument("--suite", default=",".join(SUITES))

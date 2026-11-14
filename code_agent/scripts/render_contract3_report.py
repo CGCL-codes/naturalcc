@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT.parent) not in sys.path:
+    sys.path.insert(0, str(ROOT.parent))
 DATA = ROOT / "artifacts" / "contract3"
 REPORT = ROOT / "合同-3-result.md"
 NAMES = {"array_oob": "数组越界", "string_overflow": "字符串溢出", "null_pointer": "空指针调用"}
@@ -254,18 +257,43 @@ def ground_truth_section() -> list[str]:
     docs = [json.loads(path.read_text(encoding="utf-8")) for path in paths]
     rows = [f"| {doc['project']['name']}（{', '.join(f'`{root}`' for root in doc['project']['scan_roots'])}） | {len(doc['detection_files'])} | "
             f"{doc['line_totals']['upstream_detection_files']:,} |" for doc in docs]
-    return ["### Ground truth 位置", "",
-            "每个注入缺陷的写法、所在文件、函数、行范围、缺陷行代码，以及每个工程的检测文件清单，见 **[合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)**。", "",
+    return ["### 历史小样例 Ground truth 位置", "",
+            "以下路径属于历史小样例。当前工程内注入版本及其逐套路径见 **[合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)**，不要混用。", "",
             "机器可读的 ground truth 在 [artifacts/contract3/ground_truth/](artifacts/contract3/ground_truth/)，每套测试集每个工程一份：`<测试集>/<工程>/ground_truth.json`，共 4×3=12 份。"
             "格式与产品 `security_contracts.load_ground_truth` 读取的一致，放到工程根目录即可作为漏洞检测的 `ground_truth_file`（`scan_type=frequent_defects`）直接评分：", "",
             "- `schema_version`、`scan_type`、`source_sha256`（参与计分的注入测试文件及 SHA-256）、`cases`（逐函数标签：`case_id`、`category`、`file`、`function`、`line_start`、`line_end`、`expected`、`variant`，另附 `defect_line`、`defect_code`）。只有这些函数参与计分。",
-            "- `detection_files`：该工程要检测的上游源码文件及每个文件的行数、SHA-256；`line_totals.upstream_detection_files` 是合计行数，不少于 10,000 行。",
+            "- `detection_files`：历史版本的上游背景源码清单（旧 fixture 评测未实际全部扫描）及每个文件的行数、SHA-256；`line_totals.upstream_detection_files` 是合计行数，不少于 10,000 行。",
             "- `fixtures`：注入的测试文件（每类一个）及其行数和 SHA-256。", "",
             "三个工程的检测文件、注入测试文件和上游 LICENSE 已随仓库提供，在 [artifacts/contract3/projects/](artifacts/contract3/projects/)，每个工程一个目录，目录结构与上游一致；"
             "`scan_roots` 相对这些目录（如 Zephyr 扫描 `artifacts/contract3/projects/zephyr/kernel/`）。", "",
             "| 工程（扫描范围） | 检测文件数 | 检测文件合计行数 |", "|---|---:|---:|", *rows, "",
             "JSON 和清单都由 [export_contract3_ground_truth.py](scripts/export_contract3_ground_truth.py) 生成（`uv run python scripts/export_contract3_ground_truth.py`），"
-            "当前为 teaching-v3 配比，不能与旧版 Web checkpoint 的函数标签或分数混用；新版静态结果见报告首节。", ""]
+            "此节为历史 teaching-v3 小样例清单，当前工程版清单见本文首节链接，不能混用源码、GT 或分数。", ""]
+
+
+def engineering_section() -> list[str]:
+    from code_agent.scripts.build_contract3_engineering_v5 import DATA as ENGINEERING, REVISION
+    lines = ["## 当前工程内注入题集", "", f"版本：`{REVISION}`。源码中的原有业务函数被局部修改；四套各有独立工程快照和外置 GT。", "",
+             "待检范围：FreeRTOS 7 个 C 文件 / 约 1.66 万行；Zephyr 124 个 / 约 3.19 万行；RT-Thread 77 个 / 约 6.61 万行。"
+             "以上为送入扫描器的文件规模，不能等同于所有条件编译路径均已成功分析。", "",
+             "每工程每套每类为 7 个缺陷和 7 个安全对照；共 42 个原有业务操作。目标是逐工程、逐套、逐类检出率 ≥85% 且 <100%，误报率 5%–15%。实际结果见下表，不沿用旧小样例分数。", "",
+             "工程、GT、触发条件见 [测试集清单](合同-3-测试集与GT清单.md)；使用方式见 [工程题集说明](合同-3-工程内注入说明.md)。", ""]
+    for mode in ("teaching", "reference"):
+        evidence = load(ENGINEERING / f"static-{mode}.json")
+        if not evidence or evidence.get("dataset_revision") != REVISION:
+            lines += [f"{mode}：尚无该版本静态测量记录。", ""]
+            continue
+        lines += [f"### {mode} 静态实测", "", f"已记录 {len(evidence['results'])}/12 个工程×题集组合。", "", "| 题集 | 工程 | 已评分/总用例 | 数组 检出/误报 | 字符串 检出/误报 | 空指针 检出/误报 | 引擎状态 |", "|---|---|---:|---:|---:|---:|---|"]
+        for row in evidence['results']:
+            categories = row['statistics'].get('by_category', {})
+            rates = [f"{percent(categories.get(c, {}).get('detection_rate'))} / {percent(categories.get(c, {}).get('false_positive_rate'))}" for c in NAMES]
+            states = ', '.join(f"{e['engine']}:{e['status']}" for e in row['engines'])
+            lines.append(f"| {row['suite']} | {row['project']} | {row['scored_cases']}/{row['total_cases']} | " + ' | '.join(rates) + f" | {states} |")
+        lines += ["", "静态计分要求标注函数及操作行已解析，或该位置有实际告警证据；仅外部进程成功退出不等于覆盖所有条件路径。无法确认覆盖的用例单列 unscored，不进入 FN/TN。"
+                  "部分引擎失败的诊断保留在原始 JSON，不能把本表解释为完整编译配置下的综合能力。", "",
+                  f"[原始逐例结果](artifacts/contract3/engineering-v5/static-{mode}.json)", ""]
+    lines += ["新版 Web 模型评测需另行运行，当前静态结果不能冒充 Web 成绩。", ""]
+    return lines
 
 
 def teaching_section() -> list[str]:
@@ -273,7 +301,7 @@ def teaching_section() -> list[str]:
     reference = load(DATA / "teaching-v3/static-reference.json")
     if not teaching:
         return []
-    lines = ["## 当前教学题集：逐类静态实测", "",
+    lines = ["## 历史教学 v3：独立小样例静态实测", "",
              f"题集版本：`{teaching['dataset_revision']}`；关闭开关：`{', '.join(teaching['switches_off'])}`。",
              "三个工程分别扫描其实际交付 fixture 并通过 GT 哈希验证；每类每工程 20 正例 + 20 安全对照。以下是静态教学基线，不是 Web 模型成绩或整个上游工程的检测率。", "",
              "| 测试集 | 工程 | 数组越界 | 字符串溢出 | 空指针调用 | 总体检出率 | 总体误报率 |",
@@ -318,7 +346,7 @@ def render() -> str:
     lines = ["# 合同指标 3：高频缺陷检测总报告", "", f"更新时间（UTC）：{datetime.now(timezone.utc).isoformat()}", "",
              "本报告是唯一的指标 3 Markdown 入口。各测试集的真值、原始结果、模型 Run 和覆盖状态保留在各自工件目录；不得择优挑选或平均不同测试集的分数。", "",
              "## 统计口径与前后端字段契约", "",
-             "统计单位为单个注入函数或安全对照函数。后端/脚本只产出原始数值，不产出 `passed`、`verdict` 或阈值结论；前端若需展示达标状态，应基于下列字段和其配置阈值自行计算。", "",
+             "当前工程版统计单位为原有业务函数中的标注操作范围；历史小样例按函数计分。后端/脚本只产出原始数值，不产出 `passed`、`verdict` 或阈值结论；教师区间复核由独立脚本完成。", "",
              "- `categories.array_oob`、`categories.string_overflow`、`categories.null_pointer`：每个对象均含 `tp`、`fn`、`fp`、`tn`、`detection_rate`、`false_positive_rate`。", "- `overall`：将三类目标样本合并后的同名字段；不得与独立压力集或不同运行批次平均。", "- `scored_groups`、`scored_functions`：有效评分组数和函数数；未完成、模型/API 失败、超时或无效 JSON 的组不进入 TP/FN/FP/TN。", "",
              "接口现状：上述 Web 基准统计由 `benchmark_contract3_web.py` 写入 checkpoint/本报告，尚未提供历史 Web 基准的聚合统计 HTTP 端点。单次漏洞扫描已可通过 `/api/run` 的 `artifacts.contract_statistics` 或 Agent 扫描工具的 `data.contract_statistics` 返回统计：需传入 `scan_type` 和 `ground_truth_file`，分类字段为 `by_category`，总体为 `overall`。这是独立的单次扫描接口，不能用其结果覆盖本报告的模型基准成绩；字段和用法见 [安全检测联调说明](SECURITY_ACCEPTANCE.md)。", "",
              "定义：TP=正例被至少一个目标类别 Finding 命中；FN=正例没有目标类别 Finding；FP=安全对照被目标类别 Finding 命中；TN=安全对照没有目标类别 Finding。检出率=`TP/(TP+FN)`；误报率=`FP/(FP+TN)`。本报告指标 3 表只展示检出率和误报率。单次扫描的统一结构还可返回 `warning_accuracy=TP/(TP+FP)`，供指标 5 的预警准确率展示使用，不能把它称为检出率。", "",
@@ -327,9 +355,10 @@ def render() -> str:
              "指标 3 只评分数组越界、字符串溢出、空指针调用三类目标 Finding。CWE-398、CWE-563 等代码质量诊断，以及目标函数范围以外的所有 Finding，可作为额外诊断保留，但绝不参与 TP/FN/FP/TN、检出率或误报率。", "",
              "例如：数组越界正例只报告 CWE-563 未使用变量，不算 TP；数组安全对照只报告 CWE-398 风格问题，不算 FP。只有类别匹配且命中函数行范围的 Finding 才能改变当前指标统计。指标 5 应采用同样原则，只把缓冲区溢出、多线程竞争、内存泄漏和命令执行漏洞纳入其统计。", "",
              "- Web：每个任务调用 `vulnerability_detection` 时固定传入 `scan_type:\"frequent_defects\"`；不传 ground truth，真值始终留在评分脚本侧。工具的 `contract_statistics.status=not_evaluated` 不影响脚本按模型最终返回的 `prediction.findings` 评分。每个任务只接受与该任务类别相同的 `prediction.findings[].category`。Finding 的 `line` 必须落在对应真值函数的 `[line_start, line_end]` 内。类别不符的项写入 `out_of_scope_findings`，不评分；每个函数最终的匹配证据写入 `rows[].matched_findings`。", "- 本地 Cppcheck：此历史基准按 `manifest.json` 中该类别的 `cppcheck_ids` 或 `cwes` 匹配，再限定文件与函数行范围；原始扫描产生的其他诊断不进入 `matched_findings`。新增单次扫描使用 `security_contracts.py` 的规则及源操作分类，两套映射不互换。", ""]
+    lines += engineering_section()
     lines += teaching_section()
     lines += ["## 历史结果总览（RTOS 数据对应旧版题集）", "",
-              "下列 RTOS Web 成绩使用调整前的形态配比，不能代表当前 teaching-v3；Juliet 保留原独立记录。", "",
+              "下列 RTOS Web 成绩使用调整前的形态配比，不能代表当前 engineering-v4；Juliet 保留原独立记录。", "",
               "| 测试集 / 运行方式 | 完成状态 | 检出率 / 误报率 | 定位 |", "|---|---|---|---|"]
     balanced_local = "—" if not balanced else f"{percent(balanced['metrics']['overall']['detection_rate'])} / {percent(balanced['metrics']['overall']['false_positive_rate'])}"
     independent_local = "—" if not independent else f"{percent(independent['metrics']['overall']['detection_rate'])} / {percent(independent['metrics']['overall']['false_positive_rate'])}"
@@ -379,8 +408,8 @@ def render() -> str:
                 lines += web_section(f"{name} Web", web_hard[suite], f"web-sonnet45-{suite}") + web_progress(web_hard[suite]) + [""]
                 lines += web_category_table(web_hard[suite]) + [""] + web_project_table(web_hard[suite]) + [""]
                 lines += hard_variant_table(web_hard[suite]) + [""]
-    lines += ["## 测试工程与 Ground Truth 交付状态", "", "当前可复现工程由三套固定版本的公开 RTOS 源码加运行时注入 fixture 组成：每套工程的三类各 20 个正例和 20 个同类安全对照，因此 Web 平衡验收集共 3×3=9 个任务、360 个函数。fixture、函数名、文件、行范围及预期标签由脚本固定生成，而不是由模型提供。", "", "- Ground truth 字段：`case_id`、`project`、`category`、`expected`、`function`、`file`、`line_start`、`line_end`、`defect_line`。Web 最新一轮位于 `artifacts/contract3/web-sonnet45-balanced/checkpoint.json` 的 `samples.*.rows[]`；该对象还含 `detected` 和 `matched_findings`，可供前端逐例展示。", "- 四套测试集的冻结 ground truth 已入库：[artifacts/contract3/ground_truth/](artifacts/contract3/ground_truth/)，按 `<测试集>/<工程>/ground_truth.json` 每工程一份，采用产品 `load_ground_truth` 格式，可读清单见 [合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)。本地 Cppcheck 运行另会生成 `artifacts/contract3/balanced-cppcheck/ground_truth.json` 与 `result.json`（未入库，字段口径相同）。", "- 这套冻结来源和生成器可用于本项目复现，但**不是** NaturalCC 上游或验收方正式提供的最终验收工程/ground truth 包。若最终验收必须与外部指定样本逐字节一致，仍需要验收方提供或书面确认该工程、版本、注入位置和真值清单。", "", "## 测试链路与适用边界", "", "- 本地：通过产品 `security_analysis.cppcheck_scan` 适配层调用 Cppcheck；不执行目标程序。", "- Web：与合同 5 共用本机 Web Agent API、线程、Run、events 和持久化引擎；固定 OpenRouter/Sonnet 配置，无模型 fallback。", "- Web 运行按固定顺序串行执行，避免并发的限流、超时重试及账单归因干扰；未完成、超时、API 故障或无效 JSON 不计为安全、正确或任一统计桶。", "- 平衡验收集证明规定注入形态下的检测统计；独立压力集展示未覆盖形态的边界。两者均不能单独证明完整上游工程覆盖、所有路径安全或增量分析性能。", "- 多线程竞争/TSan、缓冲区溢出、内存泄漏、命令执行漏洞及预警准确率均属于指标 5，不在本指标 3 的统计接口或 Ground Truth 范围内。", "", "## 运行与续跑", "", "```bash", "# 推荐本地验收：同时生成本地 result.json 与 ground_truth.json", "uv run python scripts/benchmark_contract3_independent.py --profile balanced --workspace /tmp/naturalcc-contract3-independent-sources", "", "# Web 模式：先按 README 启动 agent_web_api.py，再在另一终端执行", "uv run python scripts/benchmark_contract3_web.py --suite balanced", "uv run python scripts/benchmark_contract3_web.py --suite independent", "uv run python scripts/benchmark_contract3_web.py --suite balanced-hard", "uv run python scripts/benchmark_contract3_web.py --suite independent-hard", "", "# 不发模型请求，仅从已有原始工件刷新本报告", "uv run python scripts/render_contract3_report.py", "```", "",
-              "## 工件索引", "", "- `artifacts/contract3/manifest.json`：固定上游版本、目标类别、Cppcheck ID/CWE 白名单。", "- `artifacts/contract3/web-sonnet45-balanced/checkpoint.json`：当前最新 Web 评分、逐例 Ground Truth、预测和 `matched_findings`。", "- `artifacts/contract3/*-cppcheck/ground_truth.json`、`result.json`：本地模式运行时生成的真值和结果；按当前清理策略不随仓库保留。", "- `artifacts/contract3/web-sonnet45-balanced/runs/`：本机原始 Run events，体积较大且含运行历史，已由 `.gitignore` 排除；checkpoint 保留最近 Run ID 用于关联复核。"]
+    lines += ["## 测试工程与 Ground Truth 交付状态", "", "当前可复现工程由三套固定版本的公开 RTOS 源码加运行时注入 fixture 组成：每套工程的三类各 20 个正例和 20 个同类安全对照，因此 Web 平衡验收集共 3×3=9 个任务、360 个函数。fixture、函数名、文件、行范围及预期标签由脚本固定生成，而不是由模型提供。", "", "- Ground truth 字段：`case_id`、`project`、`category`、`expected`、`function`、`file`、`line_start`、`line_end`、`defect_line`。Web 最新一轮位于 `artifacts/contract3/web-sonnet45-balanced/checkpoint.json` 的 `samples.*.rows[]`；该对象还含 `detected` 和 `matched_findings`，可供前端逐例展示。", "- 四套测试集的冻结 ground truth 已入库：[artifacts/contract3/ground_truth/](artifacts/contract3/ground_truth/)，按 `<测试集>/<工程>/ground_truth.json` 每工程一份，采用产品 `load_ground_truth` 格式，可读清单见 [合同-3-测试集与GT清单.md](合同-3-测试集与GT清单.md)。本地 Cppcheck 运行另会生成 `artifacts/contract3/balanced-cppcheck/ground_truth.json` 与 `result.json`（未入库，字段口径相同）。", "- 这套冻结来源和生成器可用于本项目复现，但**不是** NaturalCC 上游或验收方正式提供的最终验收工程/ground truth 包。若最终验收必须与外部指定样本逐字节一致，仍需要验收方提供或书面确认该工程、版本、注入位置和真值清单。", "", "## 测试链路与适用边界", "", "- 本地：通过产品 `security_analysis.cppcheck_scan` 适配层调用 Cppcheck；不执行目标程序。", "- Web：与合同 5 共用本机 Web Agent API、线程、Run、events 和持久化引擎；固定 OpenRouter/Sonnet 配置，无模型 fallback。", "- Web 运行按固定顺序串行执行，避免并发的限流、超时重试及账单归因干扰；未完成、超时、API 故障或无效 JSON 不计为安全、正确或任一统计桶。", "- 平衡验收集证明规定注入形态下的检测统计；独立压力集展示未覆盖形态的边界。两者均不能单独证明完整上游工程覆盖、所有路径安全或增量分析性能。", "- 多线程竞争/TSan、缓冲区溢出、内存泄漏、命令执行漏洞及预警准确率均属于指标 5，不在本指标 3 的统计接口或 Ground Truth 范围内。", "", "## 历史小样例运行与续跑（当前工程版命令见工程说明）", "", "```bash", "# 历史小样例复现：生成对应 result.json 与 ground_truth.json", "uv run python scripts/benchmark_contract3_independent.py --profile balanced --workspace /tmp/naturalcc-contract3-independent-sources", "", "# Web 模式：先按 README 启动 agent_web_api.py，再在另一终端执行", "uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite balanced", "uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite independent", "uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite balanced-hard", "uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite independent-hard", "", "# 不发模型请求，仅从已有原始工件刷新本报告", "uv run python scripts/render_contract3_report.py", "```", "",
+              "## 工件索引", "", "- `artifacts/contract3/manifest.json`：固定上游版本、目标类别、Cppcheck ID/CWE 白名单。", "- `artifacts/contract3/web-sonnet45-balanced/checkpoint.json`：历史 Web 评分、逐例 Ground Truth、预测和 `matched_findings`。", "- `artifacts/contract3/*-cppcheck/ground_truth.json`、`result.json`：本地模式运行时生成的真值和结果；按当前清理策略不随仓库保留。", "- `artifacts/contract3/web-sonnet45-balanced/runs/`：本机原始 Run events，体积较大且含运行历史，已由 `.gitignore` 排除；checkpoint 保留最近 Run ID 用于关联复核。"]
     return "\n".join(lines) + "\n"
 
 

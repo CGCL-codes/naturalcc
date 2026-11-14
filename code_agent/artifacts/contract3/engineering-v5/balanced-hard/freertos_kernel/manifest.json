@@ -1,0 +1,218 @@
+{
+  "dataset_revision": "engineering-v5-20261114",
+  "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0",
+  "recipe_sha256": "0f48365b96693ce99bea299d07d46e8b87290345fb7c0e6036ae53d34e7a9c56",
+  "ground_truth_sha256": "b8dfa585299a9df71413e86afb86e5c556c6067f326e7f9fde02c5e03a62c02b",
+  "project_files": [
+    {
+      "file": "CMakeLists.txt",
+      "sha256": "6984a6460a385dc79ca5f09f4934051184713b9f241d3d27f536d149ced56bc7",
+      "upstream_sha256": "6984a6460a385dc79ca5f09f4934051184713b9f241d3d27f536d149ced56bc7",
+      "origin": "upstream"
+    },
+    {
+      "file": "LICENSE.md",
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "upstream_sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "origin": "upstream"
+    },
+    {
+      "file": "croutine.c",
+      "sha256": "cc77a1e7eeceeb0c989fa79dd8deedb3831aac1db8f821a1b925326740e4c32f",
+      "upstream_sha256": "678405d57f2f911c8d91864a068cb88fa842d05788303ec20ae17e7dfe46cac7",
+      "origin": "upstream"
+    },
+    {
+      "file": "event_groups.c",
+      "sha256": "cbde8f2f166648d42b07cb77bee3b373dbd272f3b9e5a724fa1b1580f0dc4c48",
+      "upstream_sha256": "b163f5ccf86f49a43f684b1dc96b710ae39d39eb40579a936d5c9796b73c8127",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/CMakeLists.txt",
+      "sha256": "03c610fd7c2096e43dba727fa265591b6f3992dfbe880bc02a94312504c15118",
+      "upstream_sha256": "03c610fd7c2096e43dba727fa265591b6f3992dfbe880bc02a94312504c15118",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/FreeRTOS.h",
+      "sha256": "189d9626143b76b1a948a612c051617052f16b3e193324cc96b20e0eb4b8a103",
+      "upstream_sha256": "189d9626143b76b1a948a612c051617052f16b3e193324cc96b20e0eb4b8a103",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/StackMacros.h",
+      "sha256": "129a0acee3ad207d64127e536ce87a9a3566e9268e05a108790a0c51b0e49891",
+      "upstream_sha256": "129a0acee3ad207d64127e536ce87a9a3566e9268e05a108790a0c51b0e49891",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/atomic.h",
+      "sha256": "499c8e2d4adec5c1f92d243be90b31f4ff9b74dffda2e9ab02ca47fcae9b96d6",
+      "upstream_sha256": "499c8e2d4adec5c1f92d243be90b31f4ff9b74dffda2e9ab02ca47fcae9b96d6",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/croutine.h",
+      "sha256": "2bb704db1951c9e97b3f3342d191038cb918aac8fee4f06f3ef35c4a651686d0",
+      "upstream_sha256": "2bb704db1951c9e97b3f3342d191038cb918aac8fee4f06f3ef35c4a651686d0",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/deprecated_definitions.h",
+      "sha256": "157c9b113297981d1944d37826e10955be95ae4158483ddfaf2f287d0e02e024",
+      "upstream_sha256": "157c9b113297981d1944d37826e10955be95ae4158483ddfaf2f287d0e02e024",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/event_groups.h",
+      "sha256": "fb936e87b90f351b9db324b917ed51c7c45ac9d53a585ad2b255351ab975762f",
+      "upstream_sha256": "fb936e87b90f351b9db324b917ed51c7c45ac9d53a585ad2b255351ab975762f",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/list.h",
+      "sha256": "e18c1bd8dffddc0608112f3e47f28962dc8df916984e68286bbc9a9fa4f83d7c",
+      "upstream_sha256": "e18c1bd8dffddc0608112f3e47f28962dc8df916984e68286bbc9a9fa4f83d7c",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/message_buffer.h",
+      "sha256": "e9a981c053ca946041adf3777eef48a8a79513efd4f2fb26d712d72c72ac25a0",
+      "upstream_sha256": "e9a981c053ca946041adf3777eef48a8a79513efd4f2fb26d712d72c72ac25a0",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/mpu_prototypes.h",
+      "sha256": "c2e3bb81be1bc582717a652d7a06e4de90ff947376d0bc8d3c1030be35fe82af",
+      "upstream_sha256": "c2e3bb81be1bc582717a652d7a06e4de90ff947376d0bc8d3c1030be35fe82af",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/mpu_syscall_numbers.h",
+      "sha256": "6701d2eac55e478e90d62ff2947b0d2c7f5157f3b344bcfec47ac80186c57816",
+      "upstream_sha256": "6701d2eac55e478e90d62ff2947b0d2c7f5157f3b344bcfec47ac80186c57816",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/mpu_wrappers.h",
+      "sha256": "b2dd748823dce76d42a15a7a00e1bad3140eaaf615487716d3eca4763e0ac9bc",
+      "upstream_sha256": "b2dd748823dce76d42a15a7a00e1bad3140eaaf615487716d3eca4763e0ac9bc",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/newlib-freertos.h",
+      "sha256": "fe93d3f7609f3897b8d429b7a2c335f03c4b96a47614973880c490a1c6a5152c",
+      "upstream_sha256": "fe93d3f7609f3897b8d429b7a2c335f03c4b96a47614973880c490a1c6a5152c",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/picolibc-freertos.h",
+      "sha256": "7c0640a34b316f53c6b59f97248474bc06f1d543165db9871889a0fd2c4b62b1",
+      "upstream_sha256": "7c0640a34b316f53c6b59f97248474bc06f1d543165db9871889a0fd2c4b62b1",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/portable.h",
+      "sha256": "973c26ded2da7465cc843cf888d88bfc4e5bf9bb4099b48b131082eb95d35222",
+      "upstream_sha256": "973c26ded2da7465cc843cf888d88bfc4e5bf9bb4099b48b131082eb95d35222",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/projdefs.h",
+      "sha256": "05308062697b6093618d4b7110dbf125c5b4839072680d3b7239bc2644082347",
+      "upstream_sha256": "05308062697b6093618d4b7110dbf125c5b4839072680d3b7239bc2644082347",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/queue.h",
+      "sha256": "acaf6a17c7eb7106cbf4f0c6ba1438fb881127f9f4dae8085582dea8467659c0",
+      "upstream_sha256": "acaf6a17c7eb7106cbf4f0c6ba1438fb881127f9f4dae8085582dea8467659c0",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/semphr.h",
+      "sha256": "454fae279911c48b3636b341c77ecd18a00abc8c50206b9e83cf7d4ae2bccd7f",
+      "upstream_sha256": "454fae279911c48b3636b341c77ecd18a00abc8c50206b9e83cf7d4ae2bccd7f",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/stack_macros.h",
+      "sha256": "022a341340eee8fbc21fc7fac1aafa3e6a9a720a24e91ea718af0b46fe843052",
+      "upstream_sha256": "022a341340eee8fbc21fc7fac1aafa3e6a9a720a24e91ea718af0b46fe843052",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/stdint.readme",
+      "sha256": "41e180ee47bba695a9e814ead2905452e42fbadbbe2ea33123411e9768d961fd",
+      "upstream_sha256": "41e180ee47bba695a9e814ead2905452e42fbadbbe2ea33123411e9768d961fd",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/stream_buffer.h",
+      "sha256": "7c9b13d0f5c52f3b797a791dfb2ef3573a145063b675925397122a056e7c9c44",
+      "upstream_sha256": "7c9b13d0f5c52f3b797a791dfb2ef3573a145063b675925397122a056e7c9c44",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/task.h",
+      "sha256": "f3a76f99198a537ffce4b7876566502e7156a4fbd5b57b56f213bb7884b772c9",
+      "upstream_sha256": "f3a76f99198a537ffce4b7876566502e7156a4fbd5b57b56f213bb7884b772c9",
+      "origin": "upstream"
+    },
+    {
+      "file": "include/timers.h",
+      "sha256": "14c35d6830037b75612ad1f60367bd7a8e80122d9c8612ff4eaebaf5917b9924",
+      "upstream_sha256": "14c35d6830037b75612ad1f60367bd7a8e80122d9c8612ff4eaebaf5917b9924",
+      "origin": "upstream"
+    },
+    {
+      "file": "list.c",
+      "sha256": "e0a4d7a061e86ccb8ee4e08b0c1229c51d8c0a7a6f1c51c45083314f2e42b297",
+      "upstream_sha256": "e0a4d7a061e86ccb8ee4e08b0c1229c51d8c0a7a6f1c51c45083314f2e42b297",
+      "origin": "upstream"
+    },
+    {
+      "file": "portable/ThirdParty/GCC/Posix/portmacro.h",
+      "sha256": "8afdbc8dcd4b0be6fba99c1e71453784cd9fd8b4b19eb1273be6cddb57d57b5e",
+      "upstream_sha256": "8afdbc8dcd4b0be6fba99c1e71453784cd9fd8b4b19eb1273be6cddb57d57b5e",
+      "origin": "upstream"
+    },
+    {
+      "file": "queue.c",
+      "sha256": "81009ee294769bf0942094c3e66909b583dd7f99efb8acb0578809dfd1093f11",
+      "upstream_sha256": "e66b73eb6dd7e6b2ccd121ab8d7345ab9698cd655b32171476643284e6dc4f4a",
+      "origin": "upstream"
+    },
+    {
+      "file": "stream_buffer.c",
+      "sha256": "f2041618919a475c1438309013149105e5145acac4cdc57f79ee1a6dbe3b98a4",
+      "upstream_sha256": "f2041618919a475c1438309013149105e5145acac4cdc57f79ee1a6dbe3b98a4",
+      "origin": "upstream"
+    },
+    {
+      "file": "tasks.c",
+      "sha256": "6eb1d446f926b58216543a9750b19daca0fe81ec0af51014cceb491cdb6451d3",
+      "upstream_sha256": "6a54883765441f12b45b7f2e36838727e8e0aa872054df30c814c473ee3e4149",
+      "origin": "upstream"
+    },
+    {
+      "file": "timers.c",
+      "sha256": "7f91da3b57555aa016c8bc91f90edd348268a8bca42d035d9d53c0e9cbdc40b3",
+      "upstream_sha256": "7f91da3b57555aa016c8bc91f90edd348268a8bca42d035d9d53c0e9cbdc40b3",
+      "origin": "upstream"
+    },
+    {
+      "file": "FreeRTOSConfig.h",
+      "sha256": "c05ec9155ab6f0a986f79dd452e051a49376522802a26f166a4cc9abac5a46a6",
+      "upstream_sha256": null,
+      "origin": "analysis-overlay"
+    },
+    {
+      "file": "compile_commands.json",
+      "sha256": "6ef77eb79198efe4d6020ae6430da49396a753c4f5f59feff02e3f8b1c417294",
+      "upstream_sha256": null,
+      "origin": "analysis-overlay"
+    }
+  ]
+}

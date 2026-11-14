@@ -1,0 +1,1061 @@
+{
+  "schema_version": 1,
+  "dataset_revision": "engineering-v4-20261114",
+  "scan_type": "frequent_defects",
+  "suite": "independent-hard",
+  "project": {
+    "id": "zephyr",
+    "name": "Zephyr RTOS",
+    "url": "https://github.com/zephyrproject-rtos/zephyr.git",
+    "ref": "v3.7.0",
+    "commit": "36940db938a8f4a1e919496793ed439850a221c2",
+    "scan_roots": [
+      "kernel"
+    ],
+    "repo_dir": "artifacts/contract3/engineering-v4/independent-hard/zephyr/project"
+  },
+  "source_sha256": {
+    "kernel/atomic_c.c": "cdeade908ca2ce57fdab5f5d3da5a9ff035a59474c8d251a0577108ed02fef01",
+    "kernel/banner.c": "2319b404a9dce5e3d26d692aab552f24a84429e3d2e6ae45365e5d391c9ab19a",
+    "kernel/busy_wait.c": "fa71ef2d8e936a4269744056b02d8690f39d8a0db76975985a3266fc6cdcd6dc",
+    "kernel/compiler_stack_protect.c": "3e10aa178322eccfdb15e4e8eddebc766b984bb8e39a76684315f23450b2fd31",
+    "kernel/condvar.c": "1c1137e0ba7628ad3baed456e0d051fc163f0371b2d4db20226e32fbd64a1aac",
+    "kernel/cpu_mask.c": "3d78c8f9a7ec32cf1854da3563d0e55c8272b8084f07a2cf2a03d224621d55fd",
+    "kernel/device.c": "7c30453686174c0a156b6d3b3c7ba4291649929d8edae5c983cd0e578422e535",
+    "kernel/dynamic.c": "f19ad0181a0dcb89b10e126eaccca1ee206ee2bce032e0bd9936cc4afa8ee831",
+    "kernel/dynamic_disabled.c": "7d2627bcb64f6eef6536d14f7458bca1db35ace85134782ef921d6bc989aa31a",
+    "kernel/errno.c": "89d530d6fb93571b0409e5a46d3a0c499cc77791aecd7cf726e67e631137f4c6",
+    "kernel/events.c": "51eeaabe518f47f2b5b98210d8faf2e9ea5168a9a897a684abc30233c0d5496d",
+    "kernel/fatal.c": "9ea53fac644879adddf5db54bdbce5b7988e798bdc7b25838648e47527b21305",
+    "kernel/float.c": "81d352f3d5b6231ee66301375cb8ac38b77cb4638f0592212151ede00f58b51a",
+    "kernel/futex.c": "ad917df35b646968ff81cc96bc123f0855e23111af25bd01cf63c0c3898f16a4",
+    "kernel/idle.c": "fc47f69ecbca4456bf9d38744949e5c357f8bd4da6473ccb9da0883e3cc1d8a3",
+    "kernel/init.c": "dd37a62f0502343740e23407560fbd87a8ab2d504f617091f71fb65750298a83",
+    "kernel/init_static.c": "0bebf3586424f91389a3006e3be68ebfae8c8251e2213442051939fa9b61d21b",
+    "kernel/ipi.c": "00c08db116d64efffc2b056f18c97641df18316fa72b2e35358a657b60ddfd5a",
+    "kernel/irq_offload.c": "f9de61f92dc2d5289fabb6a852aeab6a111d04bed4af59fb5c3e1d05da24ba96",
+    "kernel/kheap.c": "b7dcbc11a18ef7c797caf62e7583abc5ddeac234653a657f86e65f87d2cb44eb",
+    "kernel/mailbox.c": "1e68899bcd31ca25db98341dbe2ba373290aa33f6868ae55fe4779de68cce156",
+    "kernel/main_weak.c": "42fbf6062eaaf4e3787134f71327eb48ca5b263dda8e32e3e264d625595e91ae",
+    "kernel/mem_domain.c": "4a52d490c9e835327679f5cc5b143ee970f55e31e28dfc7277daf844957ae6c1",
+    "kernel/mem_slab.c": "a3a2e6dfe6b64d3dc73851a86724fd5875e95c13248b3d694a7a48b810b1f89e",
+    "kernel/mempool.c": "56ddcee2ae393928dc6475615bd5708db28828d05f5b0aef1d21aa599e6f2492",
+    "kernel/mmu.c": "51872f9b99616921df2f8237e5f44a8805b9a5e72dd113f63356f93c886fbcfa",
+    "kernel/msg_q.c": "a8b10f52ac595f0337359fe1c84f92ba38f25b6c9798b2a8fb637d783a0f9fe6",
+    "kernel/mutex.c": "cfff2ecfed5ed0b3976b49d4a1a368d82daa3a0c4c55d581d82dc471351e00f2",
+    "kernel/nothread.c": "4626658cb047937eb2a1ef9d1d62aec18dc4ac2c48bdb8abb442ca9f5427d407",
+    "kernel/obj_core.c": "451df414775122ba8fd9a838bcdb4d9084c14d07b27448375b91a3e7937a1bff",
+    "kernel/paging/statistics.c": "6de2c5cb46ed0ecb10033c8748c69f400c6ac3380d15a9ca422d1f346333f6e6",
+    "kernel/pipes.c": "b070e00167427858d51d20572e679da4a23c0aa115a073f6614bb97f7077ea3b",
+    "kernel/poll.c": "1db51e1cda1ff5b18f6b30b881f0f1943cd817b1c6252f31372fffb356802bbd",
+    "kernel/priority_queues.c": "01fef29611b2c43deefe75585c5cbe1c842b00307ec96780e92dd37b47a088ad",
+    "kernel/queue.c": "b8698cc4ac2970643ebbccf21cb8d81a2b5afdf71877626b66f081819eff6b29",
+    "kernel/sched.c": "3922c2dbcccc0f5ea8ed4b1926032c7298e274c926d4284e5430effc10643c90",
+    "kernel/sem.c": "77cb51518571b90a00b7ffb7f29678585ac7bdb982918a39a2aee3e6b9480fa0",
+    "kernel/smp.c": "14124194205f1a5c171fe320bb259c00943e3480d8ca9ae1325c1bb874e21af1",
+    "kernel/spinlock_validate.c": "7980d6708a7e72792ff6defe5e92c7b8a6cd6d2774a9a07e4fd4782828439bf0",
+    "kernel/stack.c": "bbcf461676853264d838d1c1f49a62c41048c7169fcca424781fb6654a4ddeb4",
+    "kernel/system_work_q.c": "ba05d4b60f7451377736b186ae1f237a1cb4ec0ec752df2f4b7f757bc571f61d",
+    "kernel/thread.c": "c6d71cb75be913413a995f38506ef29e17d5a4489af3995d79b4a8af7cdbb150",
+    "kernel/thread_monitor.c": "4e380e87f7a9c7dd87bd5d9fd4b980ceea7ccdee43f2a49fd8a828ba37f239eb",
+    "kernel/timeout.c": "1f594f1b609cf815786a104a0c74285f7303d71522249820b81bb0bbae7b3897",
+    "kernel/timer.c": "ced91dc3ce7f7ae0ead6056cf141bac5f05a86537b81d407b86cd0a649c94f9d",
+    "kernel/timeslicing.c": "fec3805eb62063e6c7694c2660e206df5ce46b437e4462f36e27bb71fa85c5a5",
+    "kernel/usage.c": "d8f55b55891561f72f0f5ed5b3e0f69d8682a443e06a447cb70a44e90091728a",
+    "kernel/userspace.c": "7192fd49fe733187214e022e72dec54f604423883b35350416c58867cd511596",
+    "kernel/userspace_handler.c": "e5204ac75cf966d025ed9924979ef98059382a40b92898bc86a629ad0c56cbba",
+    "kernel/version.c": "c03c0e0b32c550cd044490a6efa1ef0fc6b5b550cbdb191fc024a7a2c3cb0314",
+    "kernel/work.c": "6db1113c9967f9520c1063b065456dd996002794524575cc9450ec9e6a83c19f",
+    "kernel/xip.c": "a6091e5ed1e5036402c85d18087fda69caa332a26660819a6ac6ff1f6e02eee7",
+    "lib/libc/minimal/source/math/sqrt.c": "623fa4840e4e5a5539e66ffe53785ef6a5a3340e08bd5192f917d9efc2952b26",
+    "lib/libc/minimal/source/math/sqrtf.c": "9338f11aed1f433956172ff21697a4710d2ab68bd7403e72aa80e839ae8491fd",
+    "lib/libc/minimal/source/stdlib/atoi.c": "d22c5e68f0bf9b0835305ab54b4d1050e23cc1855f9072f7988dc0e437ea3ab6",
+    "lib/libc/minimal/source/stdlib/bsearch.c": "ca21a31e86d4c5f5d9a3a27dfa55961e950e56f45ef2a394c2d9d8c096c0cc35",
+    "lib/libc/minimal/source/stdlib/exit.c": "aadbe4382783a22f5d0fe295d3e395287a7a224de2e23af89933db2fdd588825",
+    "lib/libc/minimal/source/stdlib/qsort.c": "1738862040f18eb3c3ebcfea84e0124b36b72c1aa5a8de44dfdec0dbc67728b0",
+    "lib/libc/minimal/source/stdlib/rand.c": "2a0f13ac39e179846fb86b41e926dcc85703893a4bb494348a8ebad65ad5b278",
+    "lib/libc/minimal/source/stdlib/strtol.c": "aa6391e3ede6a562dba6d162a5677a114fe7452f9829b5db9593c3cabbe9f751",
+    "lib/libc/minimal/source/stdlib/strtoll.c": "c1d54d5fd1d4f7da64cbef0a8b47292ba0fa3654996f9449db1b94fa99b3ec27",
+    "lib/libc/minimal/source/stdlib/strtoul.c": "9f77d06e5d2b60b6e4c3bbdbadb49779cefd862bd44b83067ed97c182cd80a3f",
+    "lib/libc/minimal/source/stdlib/strtoull.c": "dc79f122f0d3f78f0954b1912afa8322fccca882a3482508a1b390b14222a8a7",
+    "lib/libc/minimal/source/stdout/fprintf.c": "7be71d5afdd733a2fb66ecfb55cab4c5e0c6add4b1622544fbc6368d8871c27a",
+    "lib/libc/minimal/source/stdout/sprintf.c": "566108e1d673549b10335f6fccd1d548c38052f1bdf6503ff9a54e077f4daebd",
+    "lib/libc/minimal/source/stdout/stdout_console.c": "d590fda19f2bef3f7e02432a5db4a09da4e7bb80cf124c2ff0182c1435f3a499",
+    "lib/libc/minimal/source/string/strerror.c": "794f5fb234a30f71769eed1b8dac607852b0acadc80b90d00c7e766a3d9bacc4",
+    "lib/libc/minimal/source/string/string.c": "af1d4c13ed369c1dca8036fa52525d0a5993e5201648f9a254551bfa610f1674",
+    "lib/libc/minimal/source/string/strncasecmp.c": "d556fd15e56c51cda6eb7c03a066738208236c191305d4c717244063f0918e68",
+    "lib/libc/minimal/source/string/strspn.c": "adeb339ba5b658185c81391f31173928a6a93baea9fa7c950bdd8db2f2275f9a",
+    "lib/libc/minimal/source/string/strstr.c": "3d6617fca85b64d97911dc3acc0acd3a042b47d1f881a43453455e5965b17557",
+    "lib/libc/minimal/source/time/gmtime.c": "9975d305bcea3883d51781ab63080acb1cd1144b734e821a602dadc9f9a07e54",
+    "lib/posix/options/aio.c": "aeff853ae4b2e7811a51589daa945fe22788123988ca0531b38ce9eb9437c2a4",
+    "lib/posix/options/barrier.c": "04bc543cdfe949fa1b07ff42c2741c75810e63fe938741c7bb2bfb0003997cde",
+    "lib/posix/options/clock.c": "fd12d58658aeae4c9d6ec845030a18cc751e5bd4e7a11d4181a671e8719047bf",
+    "lib/posix/options/cond.c": "55c8600dd3aaa089f4e03b51856d7658930bfb8342fbdab0e9d0f6dd48578f50",
+    "lib/posix/options/confstr.c": "85d7729ad4f86be791c5cb97ef7a5da6b2909856f3fc501af53344e14aaf0963",
+    "lib/posix/options/device_io.c": "ea446c652f58c867881d2d60cfbd881718388784d28ffb2dfea8dbe94085969b",
+    "lib/posix/options/env.c": "7c96f25ba9ec21a1546f6f3db563e6af91c6525b8f1d65cdd9740c7b5778bca0",
+    "lib/posix/options/eventfd.c": "54967513b8b5213ba03330663194b058d7e08be3b26305f819f1cd2e7098e00b",
+    "lib/posix/options/fd_mgmt.c": "f1a6b012ee0e06d9619c7bcb476da08670a99e8fc0672c84962e145883690aaf",
+    "lib/posix/options/fnmatch.c": "3c3efc604085464878b4bbe53cce4070ca30b22017c552bbafab5ee9f208b53e",
+    "lib/posix/options/fs.c": "397c2bb5b458e116953415dad11205522767204b768dc4e8ad803df20e9d55f4",
+    "lib/posix/options/fsync.c": "d3f3e6d5253c8d82d33643bbba4d05ad57ecc8caa2120abfb2c06ea99647d7ef",
+    "lib/posix/options/getentropy.c": "bcb824c2fbf67db6c4fa6557eef8366961fc3ae22981360fbb1689b17b0541a4",
+    "lib/posix/options/getopt/getopt.c": "17a189bff86a52743bbc6d44db9fc6053610f6c47f6ab3459af81ef03395758f",
+    "lib/posix/options/getopt/getopt_common.c": "937cd733e72935d77c70e8e5fb3d920361b52c767e385ac7f2e3c83742c7663b",
+    "lib/posix/options/getopt/getopt_long.c": "7614646ee7ececda7f8066066c294e83e3d63ec0543f7dd59869201495f1c3a0",
+    "lib/posix/options/key.c": "62219989bda0fbfa2f42f6d020b9af5c32b8f73304f153f6d5d94c3726d69164",
+    "lib/posix/options/mlock.c": "ab837630576a44055b277bb7e73682d00041df740e4f8309b558a84866c99813",
+    "lib/posix/options/mlockall.c": "06514c7870e8b5f7f39731d373358381986b8f1ae24979f32dc7e9cfa87af255",
+    "lib/posix/options/mmap.c": "1078190c85619607fcd44f64bdd2298fad55034a08a8acc75ab4cc9aba144a26",
+    "lib/posix/options/mprotect.c": "90f0728551119462689ceddbbe2d26e1695117656bcec9f7bdd930ddadbde38c",
+    "lib/posix/options/mqueue.c": "a72ebd5fc2dfc0f0c5a21e0c35afac09adedfc56c1119585230b170a2b906441",
+    "lib/posix/options/multi_process.c": "5ba85f23618b708f2ceeaf099bd13cca97b37ab8676ee14bff66bf4c802a297a",
+    "lib/posix/options/mutex.c": "7cf7ce63bcf7ba2a9098fa55da46d186e9980be768cfa569f540b91918cd6a97",
+    "lib/posix/options/net.c": "004e0347bead9904ab11d0ddb7a2b914c9b15ae50d5217faede6f692cf41740f",
+    "lib/posix/options/perror.c": "6316cdd343b3f1045f4eed97143a20bfe761b9d7aa81a25592ad55c56001ada6",
+    "lib/posix/options/pthread.c": "fb96a561eca7d4981aa569b76d91f773c08ec8f6672d70be4bcedbed5d4ba923",
+    "lib/posix/options/rwlock.c": "da4920406da3237db5891819dd55771aa30b22bc4ea3af48bc9bf8a579cee48c",
+    "lib/posix/options/sched.c": "cd4ddc8a88ccccbe4e8cc5014e2b3e2423d2b88888856b6b421db3ba96a3fc76",
+    "lib/posix/options/semaphore.c": "b3c6d8c8a9fcec56cf66cd8c9c00a0c44707e98cd63ee8b77a9fdf2b89aa9670",
+    "lib/posix/options/shm.c": "f474234500711051c9dbdc1a6807d40e3729a13678bfa7c94f752a1f34d81d80",
+    "lib/posix/options/signal.c": "59ceea72aaef52400fed9ad92e8c667294a098f8c8d46b8d05e1c9f3258b1331",
+    "lib/posix/options/sleep.c": "6e1513153c48e21696301a041024dfb73c4be42cf7fa4ceba2d69fc6b2eebb56",
+    "lib/posix/options/spinlock.c": "7effcd8f33f9267febbe7c02b0854714e76d77a6d17d6ca88e20ec663539d041",
+    "lib/posix/options/stropts.c": "5f8e82dc54b6d9180006d3065197ee0e85aeac138de9202ba0f0d17a5d0c394b",
+    "lib/posix/options/sysconf.c": "ba7f5b4e8230cdada4a32e14fbab71ff8850d86c757d8c82a27223d12636b0f3",
+    "lib/posix/options/syslog.c": "08ea62174b5d45205280f0c06728f87b75f26dd53a816f660fcdae0814d21b1b",
+    "lib/posix/options/timer.c": "f09ad8756ad130ca21b30b1c11cf73c34805bcbf1d7ec15544dd877b90a24fbd",
+    "lib/posix/options/timespec_to_timeout.c": "93caa3f64c343b32dc9de53c9d42eb9b499cf45358753a623fb110d15d9430a4",
+    "lib/posix/options/uname.c": "2b2c315072be48326979e90240300e4aee8ccec60cc917269a961d4a43e1bbed",
+    "lib/utils/base64.c": "5ea24b127ba8b4a6fc10930103543a841a488decd4bc4ac005510de1870e1f8a",
+    "lib/utils/bitarray.c": "a453a5883eb8ff9e809ea9962079a793082f2ad4d4a98d646c8f88596223670d",
+    "lib/utils/dec.c": "b6991d4a5dd46650e0b3a85ed0adcdb87842832bc4c5108fc0918f125316ade0",
+    "lib/utils/hex.c": "3500c88db0350a67e9c8e84d6ae71daa78d0792f71938773744946ab2e8c390d",
+    "lib/utils/json.c": "39f12e957022f9b1fa7e89fe9cd731af0dd5296efc156314e47892ac52d1c622",
+    "lib/utils/notify.c": "878e02b64f185cc5669bf87f5a3b8d502a4bcf8c05fe8ebdd25cce76a64c33dc",
+    "lib/utils/onoff.c": "c856b683caaacc42c85a82b55da84f44d73ee1ec5088f204d3c3d2bdc1dd2446",
+    "lib/utils/rb.c": "9ffd8e4d737a2a7f060f0c3a412895ddf5d093f41adbca6af301564ec319b961",
+    "lib/utils/ring_buffer.c": "df3ca1af333940e018a3f5b0e5dc0101e8ede2e200db8e8f5b8bd6f601747562",
+    "lib/utils/timeutil.c": "4c94e929f6c75a774bd3bfb91909839e50461bb56fae203c9e8edc01b38c9585",
+    "lib/utils/utf8.c": "fe6cd9ddf0fe4a63f19e372efb086ce7f073e35bf993653ca3cd2f66bb541f04",
+    "lib/utils/winstream.c": "39627582d82894505585f67e0ffe2530e21a5a8ec6d0660657f67be8fb1d1aef"
+  },
+  "cases": [
+    {
+      "case_id": "zephyr-array_oob-01",
+      "site_id": "array_oob-01",
+      "category": "array_oob",
+      "file": "kernel/mailbox.c",
+      "function": "init_mbox_module",
+      "line_start": 54,
+      "line_end": 81,
+      "defect_line": 73,
+      "expected": "control",
+      "trigger": "启用异步邮箱，初始化循环抵达 async_msg 数组容量下标。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        54,
+        81
+      ]
+    },
+    {
+      "case_id": "zephyr-array_oob-02",
+      "site_id": "array_oob-02",
+      "category": "array_oob",
+      "file": "kernel/sched.c",
+      "function": "init_ready_q",
+      "line_start": 1006,
+      "line_end": 1021,
+      "defect_line": 1015,
+      "expected": "control",
+      "trigger": "启用多队列调度器，初始化循环多访问一个队列数组元素。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        1006,
+        1021
+      ]
+    },
+    {
+      "case_id": "zephyr-array_oob-03",
+      "site_id": "array_oob-03",
+      "category": "array_oob",
+      "file": "kernel/sched.c",
+      "function": "z_sched_init",
+      "line_start": 1023,
+      "line_end": 1032,
+      "defect_line": 1026,
+      "expected": "defect",
+      "trigger": "启用相应 SMP 配置，CPU 初始化循环抵达 CPU 数组容量。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        1023,
+        1032
+      ]
+    },
+    {
+      "case_id": "zephyr-array_oob-04",
+      "site_id": "array_oob-04",
+      "category": "array_oob",
+      "file": "kernel/thread.c",
+      "function": "k_thread_runtime_stats_all_get",
+      "line_start": 967,
+      "line_end": 999,
+      "defect_line": 984,
+      "expected": "defect",
+      "trigger": "SMP 配置 num_cpus 等于 CPU 数组容量，扫描线程所属 CPU 时多访问一项。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        967,
+        999
+      ]
+    },
+    {
+      "case_id": "zephyr-string_overflow-01",
+      "site_id": "string_overflow-01",
+      "category": "string_overflow",
+      "file": "kernel/thread.c",
+      "function": "z_impl_k_thread_name_set",
+      "line_start": 138,
+      "line_end": 159,
+      "defect_line": 145,
+      "expected": "control",
+      "trigger": "启用线程命名，设置超过名称缓冲容量的名称。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        138,
+        159
+      ]
+    },
+    {
+      "case_id": "zephyr-string_overflow-02",
+      "site_id": "string_overflow-02",
+      "category": "string_overflow",
+      "file": "kernel/thread.c",
+      "function": "z_impl_k_thread_name_copy",
+      "line_start": 199,
+      "line_end": 210,
+      "defect_line": 202,
+      "expected": "control",
+      "trigger": "启用线程命名，输出缓冲 size 小于线程名称长度加结尾 NUL。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        199,
+        210
+      ]
+    },
+    {
+      "case_id": "zephyr-string_overflow-03",
+      "site_id": "string_overflow-03",
+      "category": "string_overflow",
+      "file": "kernel/thread.c",
+      "function": "z_setup_new_thread",
+      "line_start": 517,
+      "line_end": 654,
+      "defect_line": 610,
+      "expected": "control",
+      "trigger": "创建命名线程时结尾 NUL 写到名称缓冲容量下标。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        517,
+        654
+      ]
+    },
+    {
+      "case_id": "zephyr-string_overflow-04",
+      "site_id": "string_overflow-04",
+      "category": "string_overflow",
+      "file": "lib/utils/utf8.c",
+      "function": "utf8_lcpy",
+      "line_start": 69,
+      "line_end": 81,
+      "defect_line": 72,
+      "expected": "defect",
+      "trigger": "UTF-8 字符串复制的源长大于输出缓冲容量 n。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        69,
+        81
+      ]
+    },
+    {
+      "case_id": "zephyr-string_overflow-05",
+      "site_id": "string_overflow-05",
+      "category": "string_overflow",
+      "file": "lib/libc/minimal/source/stdout/sprintf.c",
+      "function": "snprintf",
+      "line_start": 28,
+      "line_end": 50,
+      "defect_line": 42,
+      "expected": "defect",
+      "trigger": "snprintf 目标容量 len，格式化内容至少 len 字符；回调消耗 len 字节后结尾 NUL 多写一字节。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        28,
+        50
+      ]
+    },
+    {
+      "case_id": "zephyr-string_overflow-06",
+      "site_id": "string_overflow-06",
+      "category": "string_overflow",
+      "file": "lib/libc/minimal/source/stdout/sprintf.c",
+      "function": "vsnprintf",
+      "line_start": 70,
+      "line_end": 88,
+      "defect_line": 82,
+      "expected": "defect",
+      "trigger": "vsnprintf 目标容量 len，格式化内容至少 len 字符；结尾 NUL 多写一字节。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        70,
+        88
+      ]
+    },
+    {
+      "case_id": "zephyr-null_pointer-01",
+      "site_id": "null_pointer-01",
+      "category": "null_pointer",
+      "file": "kernel/thread.c",
+      "function": "z_impl_k_thread_name_set",
+      "line_start": 138,
+      "line_end": 159,
+      "defect_line": 141,
+      "expected": "defect",
+      "trigger": "线程名称设置允许 NULL 表示当前线程；改后 NULL 不被替换，随后写 thread->name。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        138,
+        159
+      ]
+    },
+    {
+      "case_id": "zephyr-null_pointer-02",
+      "site_id": "null_pointer-02",
+      "category": "null_pointer",
+      "file": "kernel/thread.c",
+      "function": "k_thread_state_str",
+      "line_start": 222,
+      "line_end": 274,
+      "defect_line": 241,
+      "expected": "control",
+      "trigger": "传入 NULL 输出缓冲且 buf_size 非零，未提前返回，随后字符串构造写入空地址。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        222,
+        274
+      ]
+    },
+    {
+      "case_id": "zephyr-null_pointer-03",
+      "site_id": "null_pointer-03",
+      "category": "null_pointer",
+      "file": "kernel/msg_q.c",
+      "function": "z_impl_k_msgq_alloc_init",
+      "line_start": 65,
+      "line_end": 90,
+      "defect_line": 78,
+      "expected": "control",
+      "trigger": "消息队列申请内存失败仍以空缓冲初始化，后续队列发送访问空存储。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        65,
+        90
+      ]
+    },
+    {
+      "case_id": "zephyr-null_pointer-04",
+      "site_id": "null_pointer-04",
+      "category": "null_pointer",
+      "file": "kernel/queue.c",
+      "function": "queue_insert",
+      "line_start": 123,
+      "line_end": 176,
+      "defect_line": 152,
+      "expected": "defect",
+      "trigger": "队列节点动态分配失败时绕过失败返回，后续访问 anode 成员。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        123,
+        176
+      ]
+    },
+    {
+      "case_id": "zephyr-null_pointer-05",
+      "site_id": "null_pointer-05",
+      "category": "null_pointer",
+      "file": "kernel/mem_slab.c",
+      "function": "k_mem_slab_runtime_stats_get",
+      "line_start": 296,
+      "line_end": 317,
+      "defect_line": 298,
+      "expected": "defect",
+      "trigger": "slab 和 stats 仅其中一个为空，绕过参数检查后访问空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        296,
+        317
+      ]
+    },
+    {
+      "case_id": "zephyr-null_pointer-06",
+      "site_id": "null_pointer-06",
+      "category": "null_pointer",
+      "file": "kernel/mem_slab.c",
+      "function": "k_mem_slab_runtime_stats_reset_max",
+      "line_start": 320,
+      "line_end": 333,
+      "defect_line": 322,
+      "expected": "defect",
+      "trigger": "NULL slab 绕过失败返回，在统计复位时解引用空对象。",
+      "control_reason": "保留上游此处的边界或空值处理；仅断言本标注操作在所述调用前提下安全，不宣称整个函数或文件无其他缺陷。",
+      "fix": "恢复 old 中的原始边界或空值处理。",
+      "upstream_function_range": [
+        320,
+        333
+      ]
+    }
+  ],
+  "detection_files": [
+    {
+      "path": "kernel/atomic_c.c",
+      "lines": 414,
+      "sha256": "cdeade908ca2ce57fdab5f5d3da5a9ff035a59474c8d251a0577108ed02fef01"
+    },
+    {
+      "path": "kernel/banner.c",
+      "lines": 48,
+      "sha256": "2319b404a9dce5e3d26d692aab552f24a84429e3d2e6ae45365e5d391c9ab19a"
+    },
+    {
+      "path": "kernel/busy_wait.c",
+      "lines": 56,
+      "sha256": "fa71ef2d8e936a4269744056b02d8690f39d8a0db76975985a3266fc6cdcd6dc"
+    },
+    {
+      "path": "kernel/compiler_stack_protect.c",
+      "lines": 64,
+      "sha256": "3e10aa178322eccfdb15e4e8eddebc766b984bb8e39a76684315f23450b2fd31"
+    },
+    {
+      "path": "kernel/condvar.c",
+      "lines": 158,
+      "sha256": "1c1137e0ba7628ad3baed456e0d051fc163f0371b2d4db20226e32fbd64a1aac"
+    },
+    {
+      "path": "kernel/cpu_mask.c",
+      "lines": 76,
+      "sha256": "3d78c8f9a7ec32cf1854da3563d0e55c8272b8084f07a2cf2a03d224621d55fd"
+    },
+    {
+      "path": "kernel/device.c",
+      "lines": 196,
+      "sha256": "7c30453686174c0a156b6d3b3c7ba4291649929d8edae5c983cd0e578422e535"
+    },
+    {
+      "path": "kernel/dynamic.c",
+      "lines": 181,
+      "sha256": "f19ad0181a0dcb89b10e126eaccca1ee206ee2bce032e0bd9936cc4afa8ee831"
+    },
+    {
+      "path": "kernel/dynamic_disabled.c",
+      "lines": 25,
+      "sha256": "7d2627bcb64f6eef6536d14f7458bca1db35ace85134782ef921d6bc989aa31a"
+    },
+    {
+      "path": "kernel/errno.c",
+      "lines": 57,
+      "sha256": "89d530d6fb93571b0409e5a46d3a0c499cc77791aecd7cf726e67e631137f4c6"
+    },
+    {
+      "path": "kernel/events.c",
+      "lines": 367,
+      "sha256": "51eeaabe518f47f2b5b98210d8faf2e9ea5168a9a897a684abc30233c0d5496d"
+    },
+    {
+      "path": "kernel/fatal.c",
+      "lines": 178,
+      "sha256": "9ea53fac644879adddf5db54bdbce5b7988e798bdc7b25838648e47527b21305"
+    },
+    {
+      "path": "kernel/float.c",
+      "lines": 47,
+      "sha256": "81d352f3d5b6231ee66301375cb8ac38b77cb4638f0592212151ede00f58b51a"
+    },
+    {
+      "path": "kernel/futex.c",
+      "lines": 101,
+      "sha256": "ad917df35b646968ff81cc96bc123f0855e23111af25bd01cf63c0c3898f16a4"
+    },
+    {
+      "path": "kernel/idle.c",
+      "lines": 102,
+      "sha256": "fc47f69ecbca4456bf9d38744949e5c357f8bd4da6473ccb9da0883e3cc1d8a3"
+    },
+    {
+      "path": "kernel/init.c",
+      "lines": 755,
+      "sha256": "dd37a62f0502343740e23407560fbd87a8ab2d504f617091f71fb65750298a83"
+    },
+    {
+      "path": "kernel/init_static.c",
+      "lines": 87,
+      "sha256": "0bebf3586424f91389a3006e3be68ebfae8c8251e2213442051939fa9b61d21b"
+    },
+    {
+      "path": "kernel/ipi.c",
+      "lines": 108,
+      "sha256": "00c08db116d64efffc2b056f18c97641df18316fa72b2e35358a657b60ddfd5a"
+    },
+    {
+      "path": "kernel/irq_offload.c",
+      "lines": 23,
+      "sha256": "f9de61f92dc2d5289fabb6a852aeab6a111d04bed4af59fb5c3e1d05da24ba96"
+    },
+    {
+      "path": "kernel/kheap.c",
+      "lines": 161,
+      "sha256": "b7dcbc11a18ef7c797caf62e7583abc5ddeac234653a657f86e65f87d2cb44eb"
+    },
+    {
+      "path": "kernel/mailbox.c",
+      "lines": 461,
+      "sha256": "1e68899bcd31ca25db98341dbe2ba373290aa33f6868ae55fe4779de68cce156"
+    },
+    {
+      "path": "kernel/main_weak.c",
+      "lines": 30,
+      "sha256": "42fbf6062eaaf4e3787134f71327eb48ca5b263dda8e32e3e264d625595e91ae"
+    },
+    {
+      "path": "kernel/mem_domain.c",
+      "lines": 368,
+      "sha256": "4a52d490c9e835327679f5cc5b143ee970f55e31e28dfc7277daf844957ae6c1"
+    },
+    {
+      "path": "kernel/mem_slab.c",
+      "lines": 334,
+      "sha256": "a3a2e6dfe6b64d3dc73851a86724fd5875e95c13248b3d694a7a48b810b1f89e"
+    },
+    {
+      "path": "kernel/mempool.c",
+      "lines": 178,
+      "sha256": "56ddcee2ae393928dc6475615bd5708db28828d05f5b0aef1d21aa599e6f2492"
+    },
+    {
+      "path": "kernel/mmu.c",
+      "lines": 1680,
+      "sha256": "51872f9b99616921df2f8237e5f44a8805b9a5e72dd113f63356f93c886fbcfa"
+    },
+    {
+      "path": "kernel/msg_q.c",
+      "lines": 442,
+      "sha256": "a8b10f52ac595f0337359fe1c84f92ba38f25b6c9798b2a8fb637d783a0f9fe6"
+    },
+    {
+      "path": "kernel/mutex.c",
+      "lines": 314,
+      "sha256": "cfff2ecfed5ed0b3976b49d4a1a368d82daa3a0c4c55d581d82dc471351e00f2"
+    },
+    {
+      "path": "kernel/nothread.c",
+      "lines": 52,
+      "sha256": "4626658cb047937eb2a1ef9d1d62aec18dc4ac2c48bdb8abb442ca9f5427d407"
+    },
+    {
+      "path": "kernel/obj_core.c",
+      "lines": 327,
+      "sha256": "451df414775122ba8fd9a838bcdb4d9084c14d07b27448375b91a3e7937a1bff"
+    },
+    {
+      "path": "kernel/paging/statistics.c",
+      "lines": 251,
+      "sha256": "6de2c5cb46ed0ecb10033c8748c69f400c6ac3380d15a9ca422d1f346333f6e6"
+    },
+    {
+      "path": "kernel/pipes.c",
+      "lines": 832,
+      "sha256": "b070e00167427858d51d20572e679da4a23c0aa115a073f6614bb97f7077ea3b"
+    },
+    {
+      "path": "kernel/poll.c",
+      "lines": 815,
+      "sha256": "1db51e1cda1ff5b18f6b30b881f0f1943cd817b1c6252f31372fffb356802bbd"
+    },
+    {
+      "path": "kernel/priority_queues.c",
+      "lines": 30,
+      "sha256": "01fef29611b2c43deefe75585c5cbe1c842b00307ec96780e92dd37b47a088ad"
+    },
+    {
+      "path": "kernel/queue.c",
+      "lines": 480,
+      "sha256": "b8698cc4ac2970643ebbccf21cb8d81a2b5afdf71877626b66f081819eff6b29"
+    },
+    {
+      "path": "kernel/sched.c",
+      "lines": 1602,
+      "sha256": "3922c2dbcccc0f5ea8ed4b1926032c7298e274c926d4284e5430effc10643c90"
+    },
+    {
+      "path": "kernel/sem.c",
+      "lines": 231,
+      "sha256": "77cb51518571b90a00b7ffb7f29678585ac7bdb982918a39a2aee3e6b9480fa0"
+    },
+    {
+      "path": "kernel/smp.c",
+      "lines": 250,
+      "sha256": "14124194205f1a5c171fe320bb259c00943e3480d8ca9ae1325c1bb874e21af1"
+    },
+    {
+      "path": "kernel/spinlock_validate.c",
+      "lines": 47,
+      "sha256": "7980d6708a7e72792ff6defe5e92c7b8a6cd6d2774a9a07e4fd4782828439bf0"
+    },
+    {
+      "path": "kernel/stack.c",
+      "lines": 222,
+      "sha256": "bbcf461676853264d838d1c1f49a62c41048c7169fcca424781fb6654a4ddeb4"
+    },
+    {
+      "path": "kernel/system_work_q.c",
+      "lines": 37,
+      "sha256": "ba05d4b60f7451377736b186ae1f237a1cb4ec0ec752df2f4b7f757bc571f61d"
+    },
+    {
+      "path": "kernel/thread.c",
+      "lines": 1109,
+      "sha256": "c6d71cb75be913413a995f38506ef29e17d5a4489af3995d79b4a8af7cdbb150"
+    },
+    {
+      "path": "kernel/thread_monitor.c",
+      "lines": 85,
+      "sha256": "4e380e87f7a9c7dd87bd5d9fd4b980ceea7ccdee43f2a49fd8a828ba37f239eb"
+    },
+    {
+      "path": "kernel/timeout.c",
+      "lines": 340,
+      "sha256": "1f594f1b609cf815786a104a0c74285f7303d71522249820b81bb0bbae7b3897"
+    },
+    {
+      "path": "kernel/timer.c",
+      "lines": 365,
+      "sha256": "ced91dc3ce7f7ae0ead6056cf141bac5f05a86537b81d407b86cd0a649c94f9d"
+    },
+    {
+      "path": "kernel/timeslicing.c",
+      "lines": 131,
+      "sha256": "fec3805eb62063e6c7694c2660e206df5ce46b437e4462f36e27bb71fa85c5a5"
+    },
+    {
+      "path": "kernel/usage.c",
+      "lines": 485,
+      "sha256": "d8f55b55891561f72f0f5ed5b3e0f69d8682a443e06a447cb70a44e90091728a"
+    },
+    {
+      "path": "kernel/userspace.c",
+      "lines": 1017,
+      "sha256": "7192fd49fe733187214e022e72dec54f604423883b35350416c58867cd511596"
+    },
+    {
+      "path": "kernel/userspace_handler.c",
+      "lines": 89,
+      "sha256": "e5204ac75cf966d025ed9924979ef98059382a40b92898bc86a629ad0c56cbba"
+    },
+    {
+      "path": "kernel/version.c",
+      "lines": 21,
+      "sha256": "c03c0e0b32c550cd044490a6efa1ef0fc6b5b550cbdb191fc024a7a2c3cb0314"
+    },
+    {
+      "path": "kernel/work.c",
+      "lines": 1146,
+      "sha256": "6db1113c9967f9520c1063b065456dd996002794524575cc9450ec9e6a83c19f"
+    },
+    {
+      "path": "kernel/xip.c",
+      "lines": 75,
+      "sha256": "a6091e5ed1e5036402c85d18087fda69caa332a26660819a6ac6ff1f6e02eee7"
+    },
+    {
+      "path": "lib/libc/minimal/source/math/sqrt.c",
+      "lines": 56,
+      "sha256": "623fa4840e4e5a5539e66ffe53785ef6a5a3340e08bd5192f917d9efc2952b26"
+    },
+    {
+      "path": "lib/libc/minimal/source/math/sqrtf.c",
+      "lines": 56,
+      "sha256": "9338f11aed1f433956172ff21697a4710d2ab68bd7403e72aa80e839ae8491fd"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/atoi.c",
+      "lines": 59,
+      "sha256": "d22c5e68f0bf9b0835305ab54b4d1050e23cc1855f9072f7988dc0e437ea3ab6"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/bsearch.c",
+      "lines": 46,
+      "sha256": "ca21a31e86d4c5f5d9a3a27dfa55961e950e56f45ef2a394c2d9d8c096c0cc35"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/exit.c",
+      "lines": 16,
+      "sha256": "aadbe4382783a22f5d0fe295d3e395287a7a224de2e23af89933db2fdd588825"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/qsort.c",
+      "lines": 126,
+      "sha256": "1738862040f18eb3c3ebcfea84e0124b36b72c1aa5a8de44dfdec0dbc67728b0"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/rand.c",
+      "lines": 33,
+      "sha256": "2a0f13ac39e179846fb86b41e926dcc85703893a4bb494348a8ebad65ad5b278"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/strtol.c",
+      "lines": 128,
+      "sha256": "aa6391e3ede6a562dba6d162a5677a114fe7452f9829b5db9593c3cabbe9f751"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/strtoll.c",
+      "lines": 127,
+      "sha256": "c1d54d5fd1d4f7da64cbef0a8b47292ba0fa3654996f9449db1b94fa99b3ec27"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/strtoul.c",
+      "lines": 106,
+      "sha256": "9f77d06e5d2b60b6e4c3bbdbadb49779cefd862bd44b83067ed97c182cd80a3f"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/strtoull.c",
+      "lines": 105,
+      "sha256": "dc79f122f0d3f78f0954b1912afa8322fccca882a3482508a1b390b14222a8a7"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdout/fprintf.c",
+      "lines": 56,
+      "sha256": "7be71d5afdd733a2fb66ecfb55cab4c5e0c6add4b1622544fbc6368d8871c27a"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdout/sprintf.c",
+      "lines": 103,
+      "sha256": "566108e1d673549b10335f6fccd1d548c38052f1bdf6503ff9a54e077f4daebd"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdout/stdout_console.c",
+      "lines": 124,
+      "sha256": "d590fda19f2bef3f7e02432a5db4a09da4e7bb80cf124c2ff0182c1435f3a499"
+    },
+    {
+      "path": "lib/libc/minimal/source/string/strerror.c",
+      "lines": 64,
+      "sha256": "794f5fb234a30f71769eed1b8dac607852b0acadc80b90d00c7e766a3d9bacc4"
+    },
+    {
+      "path": "lib/libc/minimal/source/string/string.c",
+      "lines": 399,
+      "sha256": "af1d4c13ed369c1dca8036fa52525d0a5993e5201648f9a254551bfa610f1674"
+    },
+    {
+      "path": "lib/libc/minimal/source/string/strncasecmp.c",
+      "lines": 28,
+      "sha256": "d556fd15e56c51cda6eb7c03a066738208236c191305d4c717244063f0918e68"
+    },
+    {
+      "path": "lib/libc/minimal/source/string/strspn.c",
+      "lines": 32,
+      "sha256": "adeb339ba5b658185c81391f31173928a6a93baea9fa7c950bdd8db2f2275f9a"
+    },
+    {
+      "path": "lib/libc/minimal/source/string/strstr.c",
+      "lines": 60,
+      "sha256": "3d6617fca85b64d97911dc3acc0acd3a042b47d1f881a43453455e5965b17557"
+    },
+    {
+      "path": "lib/libc/minimal/source/time/gmtime.c",
+      "lines": 17,
+      "sha256": "9975d305bcea3883d51781ab63080acb1cd1144b734e821a602dadc9f9a07e54"
+    },
+    {
+      "path": "lib/posix/options/aio.c",
+      "lines": 82,
+      "sha256": "aeff853ae4b2e7811a51589daa945fe22788123988ca0531b38ce9eb9437c2a4"
+    },
+    {
+      "path": "lib/posix/options/barrier.c",
+      "lines": 212,
+      "sha256": "04bc543cdfe949fa1b07ff42c2741c75810e63fe938741c7bb2bfb0003997cde"
+    },
+    {
+      "path": "lib/posix/options/clock.c",
+      "lines": 320,
+      "sha256": "fd12d58658aeae4c9d6ec845030a18cc751e5bd4e7a11d4181a671e8719047bf"
+    },
+    {
+      "path": "lib/posix/options/cond.c",
+      "lines": 259,
+      "sha256": "55c8600dd3aaa089f4e03b51856d7658930bfb8342fbdab0e9d0f6dd48578f50"
+    },
+    {
+      "path": "lib/posix/options/confstr.c",
+      "lines": 21,
+      "sha256": "85d7729ad4f86be791c5cb97ef7a5da6b2909856f3fc501af53344e14aaf0963"
+    },
+    {
+      "path": "lib/posix/options/device_io.c",
+      "lines": 64,
+      "sha256": "ea446c652f58c867881d2d60cfbd881718388784d28ffb2dfea8dbe94085969b"
+    },
+    {
+      "path": "lib/posix/options/env.c",
+      "lines": 267,
+      "sha256": "7c96f25ba9ec21a1546f6f3db563e6af91c6525b8f1d65cdd9740c7b5778bca0"
+    },
+    {
+      "path": "lib/posix/options/eventfd.c",
+      "lines": 23,
+      "sha256": "54967513b8b5213ba03330663194b058d7e08be3b26305f819f1cd2e7098e00b"
+    },
+    {
+      "path": "lib/posix/options/fd_mgmt.c",
+      "lines": 50,
+      "sha256": "f1a6b012ee0e06d9619c7bcb476da08670a99e8fc0672c84962e145883690aaf"
+    },
+    {
+      "path": "lib/posix/options/fnmatch.c",
+      "lines": 261,
+      "sha256": "3c3efc604085464878b4bbe53cce4070ca30b22017c552bbafab5ee9f208b53e"
+    },
+    {
+      "path": "lib/posix/options/fs.c",
+      "lines": 430,
+      "sha256": "397c2bb5b458e116953415dad11205522767204b768dc4e8ad803df20e9d55f4"
+    },
+    {
+      "path": "lib/posix/options/fsync.c",
+      "lines": 18,
+      "sha256": "d3f3e6d5253c8d82d33643bbba4d05ad57ecc8caa2120abfb2c06ea99647d7ef"
+    },
+    {
+      "path": "lib/posix/options/getentropy.c",
+      "lines": 45,
+      "sha256": "bcb824c2fbf67db6c4fa6557eef8366961fc3ae22981360fbb1689b17b0541a4"
+    },
+    {
+      "path": "lib/posix/options/getopt/getopt.c",
+      "lines": 165,
+      "sha256": "17a189bff86a52743bbc6d44db9fc6053610f6c47f6ab3459af81ef03395758f"
+    },
+    {
+      "path": "lib/posix/options/getopt/getopt_common.c",
+      "lines": 68,
+      "sha256": "937cd733e72935d77c70e8e5fb3d920361b52c767e385ac7f2e3c83742c7663b"
+    },
+    {
+      "path": "lib/posix/options/getopt/getopt_long.c",
+      "lines": 626,
+      "sha256": "7614646ee7ececda7f8066066c294e83e3d63ec0543f7dd59869201495f1c3a0"
+    },
+    {
+      "path": "lib/posix/options/key.c",
+      "lines": 289,
+      "sha256": "62219989bda0fbfa2f42f6d020b9af5c32b8f73304f153f6d5d94c3726d69164"
+    },
+    {
+      "path": "lib/posix/options/mlock.c",
+      "lines": 24,
+      "sha256": "ab837630576a44055b277bb7e73682d00041df740e4f8309b558a84866c99813"
+    },
+    {
+      "path": "lib/posix/options/mlockall.c",
+      "lines": 25,
+      "sha256": "06514c7870e8b5f7f39731d373358381986b8f1ae24979f32dc7e9cfa87af255"
+    },
+    {
+      "path": "lib/posix/options/mmap.c",
+      "lines": 128,
+      "sha256": "1078190c85619607fcd44f64bdd2298fad55034a08a8acc75ab4cc9aba144a26"
+    },
+    {
+      "path": "lib/posix/options/mprotect.c",
+      "lines": 21,
+      "sha256": "90f0728551119462689ceddbbe2d26e1695117656bcec9f7bdd930ddadbde38c"
+    },
+    {
+      "path": "lib/posix/options/mqueue.c",
+      "lines": 527,
+      "sha256": "a72ebd5fc2dfc0f0c5a21e0c35afac09adedfc56c1119585230b170a2b906441"
+    },
+    {
+      "path": "lib/posix/options/multi_process.c",
+      "lines": 23,
+      "sha256": "5ba85f23618b708f2ceeaf099bd13cca97b37ab8676ee14bff66bf4c802a297a"
+    },
+    {
+      "path": "lib/posix/options/mutex.c",
+      "lines": 395,
+      "sha256": "7cf7ce63bcf7ba2a9098fa55da46d186e9980be768cfa569f540b91918cd6a97"
+    },
+    {
+      "path": "lib/posix/options/net.c",
+      "lines": 400,
+      "sha256": "004e0347bead9904ab11d0ddb7a2b914c9b15ae50d5217faede6f692cf41740f"
+    },
+    {
+      "path": "lib/posix/options/perror.c",
+      "lines": 18,
+      "sha256": "6316cdd343b3f1045f4eed97143a20bfe761b9d7aa81a25592ad55c56001ada6"
+    },
+    {
+      "path": "lib/posix/options/pthread.c",
+      "lines": 1467,
+      "sha256": "fb96a561eca7d4981aa569b76d91f773c08ec8f6672d70be4bcedbed5d4ba923"
+    },
+    {
+      "path": "lib/posix/options/rwlock.c",
+      "lines": 451,
+      "sha256": "da4920406da3237db5891819dd55771aa30b22bc4ea3af48bc9bf8a579cee48c"
+    },
+    {
+      "path": "lib/posix/options/sched.c",
+      "lines": 100,
+      "sha256": "cd4ddc8a88ccccbe4e8cc5014e2b3e2423d2b88888856b6b421db3ba96a3fc76"
+    },
+    {
+      "path": "lib/posix/options/semaphore.c",
+      "lines": 388,
+      "sha256": "b3c6d8c8a9fcec56cf66cd8c9c00a0c44707e98cd63ee8b77a9fdf2b89aa9670"
+    },
+    {
+      "path": "lib/posix/options/shm.c",
+      "lines": 396,
+      "sha256": "f474234500711051c9dbdc1a6807d40e3729a13678bfa7c94f752a1f34d81d80"
+    },
+    {
+      "path": "lib/posix/options/signal.c",
+      "lines": 120,
+      "sha256": "59ceea72aaef52400fed9ad92e8c667294a098f8c8d46b8d05e1c9f3258b1331"
+    },
+    {
+      "path": "lib/posix/options/sleep.c",
+      "lines": 25,
+      "sha256": "6e1513153c48e21696301a041024dfb73c4be42cf7fa4ceba2d69fc6b2eebb56"
+    },
+    {
+      "path": "lib/posix/options/spinlock.c",
+      "lines": 161,
+      "sha256": "7effcd8f33f9267febbe7c02b0854714e76d77a6d17d6ca88e20ec663539d041"
+    },
+    {
+      "path": "lib/posix/options/stropts.c",
+      "lines": 97,
+      "sha256": "5f8e82dc54b6d9180006d3065197ee0e85aeac138de9202ba0f0d17a5d0c394b"
+    },
+    {
+      "path": "lib/posix/options/sysconf.c",
+      "lines": 274,
+      "sha256": "ba7f5b4e8230cdada4a32e14fbab71ff8850d86c757d8c82a27223d12636b0f3"
+    },
+    {
+      "path": "lib/posix/options/syslog.c",
+      "lines": 93,
+      "sha256": "08ea62174b5d45205280f0c06728f87b75f26dd53a816f660fcdae0814d21b1b"
+    },
+    {
+      "path": "lib/posix/options/timer.c",
+      "lines": 342,
+      "sha256": "f09ad8756ad130ca21b30b1c11cf73c34805bcbf1d7ec15544dd877b90a24fbd"
+    },
+    {
+      "path": "lib/posix/options/timespec_to_timeout.c",
+      "lines": 31,
+      "sha256": "93caa3f64c343b32dc9de53c9d42eb9b499cf45358753a623fb110d15d9430a4"
+    },
+    {
+      "path": "lib/posix/options/uname.c",
+      "lines": 53,
+      "sha256": "2b2c315072be48326979e90240300e4aee8ccec60cc917269a961d4a43e1bbed"
+    },
+    {
+      "path": "lib/utils/base64.c",
+      "lines": 216,
+      "sha256": "5ea24b127ba8b4a6fc10930103543a841a488decd4bc4ac005510de1870e1f8a"
+    },
+    {
+      "path": "lib/utils/bitarray.c",
+      "lines": 784,
+      "sha256": "a453a5883eb8ff9e809ea9962079a793082f2ad4d4a98d646c8f88596223670d"
+    },
+    {
+      "path": "lib/utils/dec.c",
+      "lines": 33,
+      "sha256": "b6991d4a5dd46650e0b3a85ed0adcdb87842832bc4c5108fc0918f125316ade0"
+    },
+    {
+      "path": "lib/utils/hex.c",
+      "lines": 91,
+      "sha256": "3500c88db0350a67e9c8e84d6ae71daa78d0792f71938773744946ab2e8c390d"
+    },
+    {
+      "path": "lib/utils/json.c",
+      "lines": 1182,
+      "sha256": "39f12e957022f9b1fa7e89fe9cd731af0dd5296efc156314e47892ac52d1c622"
+    },
+    {
+      "path": "lib/utils/notify.c",
+      "lines": 84,
+      "sha256": "878e02b64f185cc5669bf87f5a3b8d502a4bcf8c05fe8ebdd25cce76a64c33dc"
+    },
+    {
+      "path": "lib/utils/onoff.c",
+      "lines": 655,
+      "sha256": "c856b683caaacc42c85a82b55da84f44d73ee1ec5088f204d3c3d2bdc1dd2446"
+    },
+    {
+      "path": "lib/utils/rb.c",
+      "lines": 606,
+      "sha256": "9ffd8e4d737a2a7f060f0c3a412895ddf5d093f41adbca6af301564ec319b961"
+    },
+    {
+      "path": "lib/utils/ring_buffer.c",
+      "lines": 270,
+      "sha256": "df3ca1af333940e018a3f5b0e5dc0101e8ede2e200db8e8f5b8bd6f601747562"
+    },
+    {
+      "path": "lib/utils/timeutil.c",
+      "lines": 190,
+      "sha256": "4c94e929f6c75a774bd3bfb91909839e50461bb56fae203c9e8edc01b38c9585"
+    },
+    {
+      "path": "lib/utils/utf8.c",
+      "lines": 81,
+      "sha256": "fe6cd9ddf0fe4a63f19e372efb086ce7f073e35bf993653ca3cd2f66bb541f04"
+    },
+    {
+      "path": "lib/utils/winstream.c",
+      "lines": 129,
+      "sha256": "39627582d82894505585f67e0ffe2530e21a5a8ec6d0660657f67be8fb1d1aef"
+    }
+  ],
+  "line_totals": {
+    "detection_files": 31871,
+    "project_source": 405248
+  },
+  "scoring_rule": "Category plus non-overlapping operation range; unlabelled findings remain unscored. Controls assert only the marked operation under its documented preconditions.",
+  "configuration_scope": "Source audit plus POSIX FreeRTOS / selected RT-Thread host parsing profiles. Zephyr has no generated board configuration. No complete OS build or boot is claimed; conditional-path coverage is reported separately."
+}

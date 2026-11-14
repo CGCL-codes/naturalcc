@@ -123,6 +123,8 @@ def classify_findings(findings, project_dir):
             category = {"shellStringFlow": "command_execution", "sharedGlobalRace": "data_race",
                         "guardedArrayAccess": "array_oob", "capacityStringWrite": "string_overflow", "nullArgumentDeref": "null_pointer",
                         "nullInitDeref": "null_pointer",
+                        "nativeArrayExtent": "array_oob", "nativeStringExtent": "string_overflow",
+                        "nativeNullFlow": "null_pointer",
                         # RTOS-aware rules (security_rtos_rules), one per high-risk category.
                         "shellCommandBuild": "command_execution", "lockScopeEscape": "data_race",
                         "ownershipLeak": "memory_leak", "capacityWriteOverflow": "buffer_overflow"}.get(identifier)
