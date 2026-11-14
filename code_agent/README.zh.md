@@ -723,6 +723,9 @@ code_agent/
 
 实际送检为 FreeRTOS 18 个完整 C 文件（约 2.3 万行）、Zephyr 206 个（约 7.2 万行）、RT-Thread 77 个（约 6.6 万行）。扩展使用上游工程已有的 CLI/FTP/HTTP、Shell/文件系统/日志等模块。解析、条件编译及未评分情况单独记录，不把送检行数等同于全部编译覆盖。
 
+2026-11-14 Clang 复核：刚补足 60 个缺陷的正式 v6 仍能复现 Zephyr 配置错误。配置修复候选虽解决两个已报文件，但引入两项空指针检出率 100%，且仍部分覆盖，因此没有替换正式数据。数量/教学比例通过不等于 Clang 完整覆盖。详见 [v6 Clang 复核](合同-3-v6-Clang复核.md)。
+
+
 ```bash
 uv run --no-sync python scripts/build_contract3_engineering_v6.py --verify
 uv run --no-sync python scripts/measure_contract3_static.py --delivered

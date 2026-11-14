@@ -1,0 +1,724 @@
+{
+  "dataset_revision": "engineering-v6-20261114",
+  "released_commit": "09096e72653408aaf55694aa3959a4413a9d8de4",
+  "status": "original-v6-reproduces-reported-clang-errors; candidate-not-promoted",
+  "candidate_directory": "/home/sub4-wy/wangchen/ncc/甲方/clang复核/v6候选",
+  "candidate_scope": "Only generated headers, analysis configuration and compilation database; all C source and GT bytes identical to released v6.",
+  "original_context": {
+    "source": "inferred",
+    "database": null,
+    "files_with_entries": 0,
+    "macros": 0
+  },
+  "reported_failures": [
+    "kernel/atomic_c.c: undefined CONFIG_MP_MAX_NUM_CPUS and atomic_get/atomic_ptr_get redefinition",
+    "kernel/banner.c: undefined CONFIG_MP_MAX_NUM_CPUS and missing zephyr/syscall_list.h"
+  ],
+  "candidate_reported_files_clang_status": "completed, including relocated-project regression",
+  "candidate_regression": {
+    "python_passed": 611,
+    "frontend_passed": 46,
+    "frontend_build": "passed"
+  },
+  "candidate_metrics_gate": {
+    "passed": 34,
+    "total": 36,
+    "failed": [
+      {
+        "suite": "independent",
+        "project": "zephyr",
+        "category": "null_pointer",
+        "tp": 20,
+        "fn": 0,
+        "fp": 1,
+        "tn": 19,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.05
+      },
+      {
+        "suite": "independent-hard",
+        "project": "zephyr",
+        "category": "null_pointer",
+        "tp": 20,
+        "fn": 0,
+        "fp": 1,
+        "tn": 19,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.05
+      }
+    ]
+  },
+  "source_and_gt_unchanged": true,
+  "syntax_coverage": [
+    {
+      "suite": "balanced",
+      "manifest_sha256": "2ef3e91a02395210f47defdef3ee605305e629f54c709cf0137bd43e1c71ef3c",
+      "build_context": {
+        "source": "compile_commands",
+        "database": "compile_commands.json",
+        "files_with_entries": 206,
+        "include_dirs": 10,
+        "macros": 4,
+        "dropped": [],
+        "dropped_count": 0
+      },
+      "total": 206,
+      "passed": 113
+    },
+    {
+      "suite": "independent",
+      "manifest_sha256": "32555982f152d2d11cffccf72d7a322e5afb3d0d9cae12553b02a91295db0611",
+      "build_context": {
+        "source": "compile_commands",
+        "database": "compile_commands.json",
+        "files_with_entries": 206,
+        "include_dirs": 10,
+        "macros": 4,
+        "dropped": [],
+        "dropped_count": 0
+      },
+      "total": 206,
+      "passed": 114
+    },
+    {
+      "suite": "balanced-hard",
+      "manifest_sha256": "6a1ba61912b02deff55334c909b0938fb5f027b863355bb0fbc13c90e625730e",
+      "build_context": {
+        "source": "compile_commands",
+        "database": "compile_commands.json",
+        "files_with_entries": 206,
+        "include_dirs": 10,
+        "macros": 4,
+        "dropped": [],
+        "dropped_count": 0
+      },
+      "total": 206,
+      "passed": 113
+    },
+    {
+      "suite": "independent-hard",
+      "manifest_sha256": "cce79a26ea1e75cef62933cd2e251e8be9553b85f0c70d5d5cf44eab9c04b5df",
+      "build_context": {
+        "source": "compile_commands",
+        "database": "compile_commands.json",
+        "files_with_entries": 206,
+        "include_dirs": 10,
+        "macros": 4,
+        "dropped": [],
+        "dropped_count": 0
+      },
+      "total": 206,
+      "passed": 114
+    }
+  ],
+  "changed_case_outcomes": [
+    {
+      "suite": "independent",
+      "project": "zephyr",
+      "previous_outcome": "fn",
+      "candidate_case": {
+        "file": "kernel/init.c",
+        "function": "z_impl_device_init",
+        "function_start": 379,
+        "function_end": 392,
+        "kind": "pointer",
+        "category": "null_pointer",
+        "expected": "defect",
+        "case_id": "zephyr-null_pointer-21",
+        "site_id": "null_pointer-21",
+        "line_start": 386,
+        "line_end": 386,
+        "defect_line": 386,
+        "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+        "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+        "fix": "Restore the native expression from the external site recipe.",
+        "detected": true,
+        "outcome": "tp",
+        "matched_findings": [
+          {
+            "file": "kernel/init.c",
+            "line": 386,
+            "analyzer": "clang",
+            "analyzer_id": "core.NullDereference",
+            "rule_id": "cwe-476"
+          }
+        ]
+      }
+    },
+    {
+      "suite": "independent-hard",
+      "project": "zephyr",
+      "previous_outcome": "fn",
+      "candidate_case": {
+        "file": "kernel/init.c",
+        "function": "z_impl_device_init",
+        "function_start": 379,
+        "function_end": 392,
+        "kind": "pointer",
+        "category": "null_pointer",
+        "expected": "defect",
+        "case_id": "zephyr-null_pointer-21",
+        "site_id": "null_pointer-21",
+        "line_start": 386,
+        "line_end": 386,
+        "defect_line": 386,
+        "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+        "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+        "fix": "Restore the native expression from the external site recipe.",
+        "detected": true,
+        "outcome": "tp",
+        "matched_findings": [
+          {
+            "file": "kernel/init.c",
+            "line": 386,
+            "analyzer": "clang",
+            "analyzer_id": "core.NullDereference",
+            "rule_id": "cwe-476"
+          }
+        ]
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "suite": "balanced",
+      "project": "freertos_kernel",
+      "candidate_manifest_sha256": "ec8c746a3d436d38ee8281d47e1774166ccb17a449d4a8e2204ebcfe8c6de407",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        }
+      }
+    },
+    {
+      "suite": "balanced",
+      "project": "zephyr",
+      "candidate_manifest_sha256": "2ef3e91a02395210f47defdef3ee605305e629f54c709cf0137bd43e1c71ef3c",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 2,
+          "tn": 18,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.9047619047619048,
+          "false_positive_rate": 0.1,
+          "false_discovery_rate": 0.09523809523809523,
+          "accuracy": 0.925
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        }
+      }
+    },
+    {
+      "suite": "balanced",
+      "project": "rt_thread",
+      "candidate_manifest_sha256": "395fc18f86dc133752644461fcec39afd5fefb8d1043d4730ef7ac9971695635",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        }
+      }
+    },
+    {
+      "suite": "independent",
+      "project": "freertos_kernel",
+      "candidate_manifest_sha256": "433c06ae8ed3f0ff278a121fab3be940543664a38f9387b3c7a3a43275a40636",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        }
+      }
+    },
+    {
+      "suite": "independent",
+      "project": "zephyr",
+      "candidate_manifest_sha256": "32555982f152d2d11cffccf72d7a322e5afb3d0d9cae12553b02a91295db0611",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 20,
+          "fn": 0,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 1.0,
+          "warning_accuracy": 0.9523809523809523,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.047619047619047616,
+          "accuracy": 0.975
+        }
+      }
+    },
+    {
+      "suite": "independent",
+      "project": "rt_thread",
+      "candidate_manifest_sha256": "f650b18f934ae4f3019335560c62c02d2e253e26db7dc261620e98ad93bb8288",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        }
+      }
+    },
+    {
+      "suite": "balanced-hard",
+      "project": "freertos_kernel",
+      "candidate_manifest_sha256": "5cf459fe1f28ac9f4c7e37775c58556b65b6e8f93161ab7586d8ef66c3f9c7f8",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        }
+      }
+    },
+    {
+      "suite": "balanced-hard",
+      "project": "zephyr",
+      "candidate_manifest_sha256": "6a1ba61912b02deff55334c909b0938fb5f027b863355bb0fbc13c90e625730e",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        }
+      }
+    },
+    {
+      "suite": "balanced-hard",
+      "project": "rt_thread",
+      "candidate_manifest_sha256": "3069835d32965f353ec4d5a2fcea46e9f8cfefe28d3059ea010540231b322763",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        }
+      }
+    },
+    {
+      "suite": "independent-hard",
+      "project": "freertos_kernel",
+      "candidate_manifest_sha256": "72702d0d76a2248657f95d50148f2351b8185b56d1910c39b58e8e49a8b57ce4",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        }
+      }
+    },
+    {
+      "suite": "independent-hard",
+      "project": "zephyr",
+      "candidate_manifest_sha256": "cce79a26ea1e75cef62933cd2e251e8be9553b85f0c70d5d5cf44eab9c04b5df",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 2,
+          "tn": 18,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.9047619047619048,
+          "false_positive_rate": 0.1,
+          "false_discovery_rate": 0.09523809523809523,
+          "accuracy": 0.925
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 20,
+          "fn": 0,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 1.0,
+          "warning_accuracy": 0.9523809523809523,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.047619047619047616,
+          "accuracy": 0.975
+        }
+      }
+    },
+    {
+      "suite": "independent-hard",
+      "project": "rt_thread",
+      "candidate_manifest_sha256": "f5240bf582868c6f082afdd0a4be8a7998e37a50d0f31cae93ea70fe7c920902",
+      "scored_cases": 120,
+      "total_cases": 120,
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 19,
+          "fn": 1,
+          "fp": 1,
+          "tn": 19,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.95,
+          "false_positive_rate": 0.05,
+          "false_discovery_rate": 0.05,
+          "accuracy": 0.95
+        }
+      }
+    }
+  ]
+}

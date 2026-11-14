@@ -1,0 +1,50 @@
+{
+  "scope": "Released v6, no candidate configuration applied",
+  "build_context": {
+    "source": "inferred",
+    "database": null,
+    "files_with_entries": 0,
+    "include_dirs": 1,
+    "macros": 0,
+    "dropped": [],
+    "dropped_count": 0
+  },
+  "findings": [],
+  "clang": {
+    "engine": "clang",
+    "status": "failed",
+    "mode": "per_file",
+    "versions": [],
+    "failed_files": [
+      "kernel/atomic_c.c",
+      "kernel/banner.c"
+    ],
+    "diagnostics": [
+      {
+        "file": "kernel/atomic_c.c",
+        "message": "  |                                                            ^\n<project>/include/zephyr/kernel_structs.h:203:19: error: use of undeclared identifier 'CONFIG_MP_MAX_NUM_CPUS'\n  203 |         struct _cpu cpus[CONFIG_MP_MAX_NUM_CPUS];\n      |                          ^\n<project>/kernel/atomic_c.c:220:14: error: redefinition of 'atomic_get'\n  220 | atomic_val_t atomic_get(const atomic_t *target)\n      |              ^\n<project>/include/zephyr/sys/atomic_builtin.h:59:28: note: previous definition is here\n   59 | static inline atomic_val_t atomic_get(const atomic_t *target)\n      |                            ^\n<project>/kernel/atomic_c.c:225:18: error: redefinition of 'atomic_ptr_get'\n  225 | atomic_ptr_val_t atomic_ptr_get(const atomic_ptr_t *target)\n      |                  ^\n<project>/include/zephyr/sys/atomic_builtin.h:64:32: note: previous definition is here\n   64 | static inline atomic_ptr_val_t atomic_ptr_get(const atomic_ptr_t *target)\n      |                                ^\n8 errors generated.\n"
+      },
+      {
+        "file": "kernel/banner.c",
+        "message": "AD_PRIO, BITS_PER_LONG))\n      |                                         ^\n<project>/include/zephyr/kernel_structs.h:35:60: note: expanded from macro 'K_NUM_THREAD_PRIO'\n   35 | #define K_NUM_THREAD_PRIO (CONFIG_NUM_PREEMPT_PRIORITIES + CONFIG_NUM_COOP_PRIORITIES + 1)\n      |                                                            ^\n<project>/include/zephyr/kernel_structs.h:203:19: error: use of undeclared identifier 'CONFIG_MP_MAX_NUM_CPUS'\n  203 |         struct _cpu cpus[CONFIG_MP_MAX_NUM_CPUS];\n      |                          ^\nIn file included from <project>/kernel/banner.c:7:\nIn file included from <project>/include/zephyr/kernel.h:17:\nIn file included from <project>/include/zephyr/kernel_includes.h:34:\n<project>/include/zephyr/syscall.h:11:10: fatal error: 'zephyr/syscall_list.h' file not found\n   11 | #include <zephyr/syscall_list.h>\n      |          ^~~~~~~~~~~~~~~~~~~~~~~\n7 errors generated.\n"
+      }
+    ],
+    "experimental_checkers": [
+      "alpha.security.ArrayBoundV2",
+      "alpha.security.ArrayBound",
+      "alpha.unix.cstring.OutOfBounds",
+      "alpha.security.taint.TaintPropagation"
+    ],
+    "build_context": {
+      "source": "inferred",
+      "database": null,
+      "files_with_entries": 0,
+      "include_dirs": 1,
+      "macros": 0,
+      "dropped": [],
+      "dropped_count": 0
+    },
+    "limitations": "Compile context from inferred. Multiple sources are analysed as one unity unit when they share a compile context and compile together. Bounds and taint checkers are LLVM experimental rules and can produce false positives. No target program was executed.",
+    "hint": "Headers could not be found. Provide compile_commands.json (or compile_flags.txt) in the project root, or pass include_dirs/defines in the feature config."
+  }
+}

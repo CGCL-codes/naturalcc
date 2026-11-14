@@ -110,3 +110,5 @@ uv run python aider_runner.py -dir /path/to/project -f src/foo.c -i "补全 foo 
 - The argv command policy allows `gcc`, `g++`, `c++`, and `clang++`, but is not an OS sandbox; use a container or restricted account for untrusted repositories.
 - Never pass workspace roots, API keys, artifact roots, or permissions through model-generated tool arguments.
 - The legacy `/api/run` Pipeline and the durable `/api/agent/*` Runtime must remain independently usable.
+
+Contract-3 v6 Clang audit: see `合同-3-v6-Clang复核.md` and `artifacts/contract3/clang-v6-review/`. Released v6 still reproduces Zephyr configuration failures. The external context-only candidate is not promoted: two null detection rates become 100%, and Clang remains partial. Preserve source/GT/metrics distinctions; do not report the candidate as a compliant delivery.
