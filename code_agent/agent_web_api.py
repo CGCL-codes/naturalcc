@@ -45,6 +45,8 @@ else:
     from .plugins.dispatcher import dispatcher, ndjson_event
     from .plugins.registry import registry
 
+from code_agent.api.model_scan_routes import ModelScanRequest, model_scan_response, router as model_scan_router
+
 
 MODELS = [
     "deepseek/deepseek-chat",
@@ -107,6 +109,7 @@ class AgentRequest(BaseModel):
     prefix: str = ""
     feature: str = Field(default="code_completion")
     feature_config: Dict[str, Any] = Field(default_factory=dict)
+    runtime_model_config: Optional[Dict[str, Any]] = None
 
 
 # [maint-note:6299a04844cb]
@@ -598,6 +601,7 @@ def ndjson_event(payload: Dict[str, Any]) -> str:
 
 
 app = FastAPI(title="NaturalCC Agent Web API")
+app.include_router(model_scan_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -898,6 +902,23 @@ async def _stream_with_context(context: ExecutionContext) -> AsyncIterable[str]:
 # 表达式分流：feature_config_raw；真值与假值分支分别计算，不同时执行。
 # 等待边界：request.json()；异常在此 await 返回给当前协程。
 # [/maint-note:5a973a581059]
+async def _model_scan_if_requested(payload: dict, request: Request):
+    # Keep the existing platform endpoint and payload usable. Selecting a model
+    # branch bypasses the plugin dispatcher entirely, including static rules.
+    if payload.get("feature") != "vulnerability_detection":
+        return None
+    mode = payload.get("feature_config", {}).get("detection_mode", "static")
+    if mode not in {"static", "model"}:
+        raise HTTPException(status_code=422, detail="detection_mode must be static or model")
+    if mode == "model":
+        try:
+            body = ModelScanRequest(**payload)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        return await model_scan_response(body, request)
+    return None
+
+
 @app.post("/api/run")
 async def run_agent(request: Request) -> StreamingResponse:
     content_type = request.headers.get("content-type", "")
@@ -914,6 +935,14 @@ async def run_agent(request: Request) -> StreamingResponse:
 
         target_files_list = json.loads(target_files_raw) if target_files_raw else []
         feature_config_dict = json.loads(feature_config_raw) if feature_config_raw else {}
+
+        model_response = await _model_scan_if_requested({
+            "project_dir": project_dir, "target_files": target_files_list, "feature": feature,
+            "feature_config": feature_config_dict, "api_key": api_key,
+            "runtime_model_config": json.loads(str(form.get("runtime_model_config", "null"))),
+        }, request)
+        if model_response is not None:
+            return model_response
 
         uploaded_files = {}
         for key in form:
@@ -939,6 +968,9 @@ async def run_agent(request: Request) -> StreamingResponse:
 
     # JSON fallback (backward compatible)
     body = await request.json()
+    model_response = await _model_scan_if_requested(body, request)
+    if model_response is not None:
+        return model_response
     agent_request = AgentRequest(**body)
     selected_files = sanitize_target_files(agent_request.target_files)
 

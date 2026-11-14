@@ -7,6 +7,20 @@ setup, incremental scanning, race analysis coverage and limitations.
 Vulnerability scans accept `scan_type=frequent_defects/high_risk` for seven-category
 reporting. Add `ground_truth_file` to calculate case-level TP/FN/FP/TN and rates
 before result truncation; missing labels never imply zero error rates.
+
+For **pure model detection**, use `POST /api/vulnerability/model`, or keep
+`POST /api/run` with `feature="vulnerability_detection"` and
+`feature_config.detection_mode="model"`. Both support project or multiple-file
+scopes and optional source-hashed GT scoring. Model requests have no tools and
+never invoke built-in scanners, Cppcheck, Clang or Aider. Labels stay outside
+prompts; long files are split with token-counted overlapping ranges. NDJSON
+retains Pipeline `start/log/done` events and `findings/coverage/contract_statistics`,
+with additional model reasoning/content deltas. Incomplete or failed tasks do
+not publish GT rates. Configure `runtime_model_config` or use server defaults;
+the legacy top-level `model` field does not select this route's model.
+See the [integration tutorial](模型辅助漏洞检测接入教程.md). Existing static requests
+remain unchanged; the Contract-5 Agent benchmark remains a separate protocol.
+
 `analyzer=comprehensive` combines Cppcheck and Clang (including experimental bounds
 checks). Built-in C/C++ rules track local strings into shell calls and direct shared
 global accesses in overlapping threads without requiring TSan.

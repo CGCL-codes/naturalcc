@@ -11,14 +11,14 @@
   "method": "Count each line containing a Python COMMENT token once, including inline comments. Docstrings and all other string literals are excluded. Aggregate across the entire inventory; not a per-file threshold.",
   "formula": "comment_lines / nonblank_lines * 100",
   "threshold_percent_exclusive": 20,
-  "file_count": 87,
+  "file_count": 89,
   "totals": {
-    "physical_lines": 47626,
-    "nonblank_lines": 44121,
-    "comment_lines": 19033
+    "physical_lines": 48075,
+    "nonblank_lines": 44537,
+    "comment_lines": 19068
   },
-  "comment_percent": 43.1382,
-  "comment_percent_including_blank_lines": 39.9635,
+  "comment_percent": 42.8138,
+  "comment_percent_including_blank_lines": 39.663,
   "passes": true,
   "files": [
     {
@@ -219,10 +219,10 @@
     },
     {
       "path": "agent_web_api.py",
-      "sha256": "93f1bd14d81b11bd150436094368d412549b3c8f6e24344759004796d46853db",
-      "physical_lines": 1043,
-      "nonblank_lines": 943,
-      "comment_lines": 437
+      "sha256": "e69e251e5376d54e76b906e021da458b3e48689425520b4c9c40b98a5dd3b817",
+      "physical_lines": 1075,
+      "nonblank_lines": 971,
+      "comment_lines": 439
     },
     {
       "path": "aider_runner.py",
@@ -246,6 +246,13 @@
       "comment_lines": 1098
     },
     {
+      "path": "api/model_scan_routes.py",
+      "sha256": "9c8475a08d6ba8bef1d2106bf376872bcb5fd522c59aa4d8c285842a6ae05d62",
+      "physical_lines": 65,
+      "nonblank_lines": 52,
+      "comment_lines": 6
+    },
+    {
       "path": "completion_prompt_agent.py",
       "sha256": "ecc12b0800238b156f13091c39b59b250574d657342d7ef7b4b8a216b15e8f78",
       "physical_lines": 1262,
@@ -258,6 +265,13 @@
       "physical_lines": 590,
       "nonblank_lines": 536,
       "comment_lines": 259
+    },
+    {
+      "path": "model_vulnerability_scan.py",
+      "sha256": "d868b2d8b12c4bfa0a27f38d8f1c40bd03826e77a1ccc4efbbd4f3e032a33cfc",
+      "physical_lines": 352,
+      "nonblank_lines": 336,
+      "comment_lines": 27
     },
     {
       "path": "plugins/__init__.py",
