@@ -693,6 +693,10 @@ uv run python scripts/benchmark_contract5_web.py --report-only     # rebuild 合
 
 
 
+## Backend comment coverage
+
+For backend comment coverage, run `python scripts/measure_backend_comments.py --json backend_comment_coverage.json` from `code_agent/`. The [report](backend_comment_coverage.json) lists tracked application and RAG Python files with hashes and line counts. Coverage counts only Python `#` comment lines divided by nonblank lines; docstrings and prompt strings are excluded. Dependencies, datasets, tests, frontend code and maintenance scripts are outside the inventory. The aggregate threshold is strictly greater than 20%, not a per-file requirement.
+
 ## Contract-3 teaching configuration
 
 Contract-3 intentionally leaves rule gaps for a detector-optimization exercise. Use the measured per-category results to calibrate student difficulty; reset enables the full reference solution. Contract-5 and ordinary scans keep full rules. See [教学难度指南](合同-3-静态分析难度调节指南.md) and [逐类复核说明](合同-3-复核说明.md).

@@ -72,6 +72,8 @@ Add a plugin by creating `plugins/my_feature.py`, inheriting `FeaturePlugin`, im
 
 ## Commands
 
+Backend comment coverage: `python scripts/measure_backend_comments.py --json backend_comment_coverage.json` counts Python `#` comment lines across tracked application and RAG modules, excluding dependencies, datasets, tests, frontend and maintenance scripts. Docstrings and prompt strings do not count; the aggregate must be strictly greater than 20%. Keep the report current when changing these annotations.
+
 ```bash
 uv sync
 uv run python scripts/install_deepseek_tokenizer.py

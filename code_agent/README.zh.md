@@ -755,6 +755,10 @@ uv run python scripts/benchmark_contract5_web.py --report-only     # 不联网�
 
 [MIT](LICENSE) © NaturalCC contributors
 
+## 后端代码注释率
+
+后端代码注释率可在 `code_agent/` 下运行 `python scripts/measure_backend_comments.py --json backend_comment_coverage.json` 复核。[统计结果](backend_comment_coverage.json) 包含受 Git 管理的应用模块及 RAG Python 代码清单、文件哈希和逐文件行数。口径为 `#` 注释行数 / 非空源码行数，不计 docstring、提示词及其他字符串；排除依赖、数据集、测试、前端和维护脚本。要求整个范围汇总严格大于 20%，不要求每个文件单独达标。
+
 ## Contract-3 teaching configuration
 
 Contract-3 intentionally leaves rule gaps for a detector-optimization exercise. Use the measured per-category results to calibrate student difficulty; reset enables the full reference solution. Contract-5 and ordinary scans keep full rules. See [教学难度指南](合同-3-静态分析难度调节指南.md) and [逐类复核说明](合同-3-复核说明.md).

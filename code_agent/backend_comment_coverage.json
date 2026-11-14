@@ -1,0 +1,620 @@
+{
+  "scope": "Git-tracked code_agent/*.py (except test_*) and agent_core/, api/, plugins/, rag/ Python modules, including RAG support and offline utilities.",
+  "exclusions": [
+    "dependencies and vendored code",
+    "datasets/artifacts",
+    "tests",
+    "frontend and VS Code JavaScript",
+    "maintenance scripts",
+    "untracked/generated files"
+  ],
+  "method": "Count each line containing a Python COMMENT token once, including inline comments. Docstrings and all other string literals are excluded. Aggregate across the entire inventory; not a per-file threshold.",
+  "formula": "comment_lines / nonblank_lines * 100",
+  "threshold_percent_exclusive": 20,
+  "file_count": 85,
+  "totals": {
+    "physical_lines": 47444,
+    "nonblank_lines": 43964,
+    "comment_lines": 19025
+  },
+  "comment_percent": 43.274,
+  "comment_percent_including_blank_lines": 40.0999,
+  "passes": true,
+  "files": [
+    {
+      "path": "__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "physical_lines": 0,
+      "nonblank_lines": 0,
+      "comment_lines": 0
+    },
+    {
+      "path": "agent_core/__init__.py",
+      "sha256": "bea6748e42b11f0610c76db35085eeafd6d7735a4cb3058a051ebb39e3335740",
+      "physical_lines": 30,
+      "nonblank_lines": 28,
+      "comment_lines": 5
+    },
+    {
+      "path": "agent_core/compaction.py",
+      "sha256": "50a99e40a3cc62fe72899063a83f3d6d2169e9c42e50ac787d7b4b5ce24bd6d9",
+      "physical_lines": 2110,
+      "nonblank_lines": 2041,
+      "comment_lines": 678
+    },
+    {
+      "path": "agent_core/compaction_prompts.py",
+      "sha256": "906859e824326583bd13e3771192056f8f3e65cb31589b633c7ea10db7723854",
+      "physical_lines": 208,
+      "nonblank_lines": 189,
+      "comment_lines": 42
+    },
+    {
+      "path": "agent_core/context_builder.py",
+      "sha256": "8b742c2019dc74d46bd873baacda30c3399ae5f911667bda85d0d92214d8c732",
+      "physical_lines": 830,
+      "nonblank_lines": 797,
+      "comment_lines": 278
+    },
+    {
+      "path": "agent_core/contracts.py",
+      "sha256": "fcbf23ca02b0de04df6a1fb1e8fe6ad21857267122a933e1e88e957056d24298",
+      "physical_lines": 439,
+      "nonblank_lines": 398,
+      "comment_lines": 212
+    },
+    {
+      "path": "agent_core/evaluation.py",
+      "sha256": "cb9400bfbb27f19a4f16771497a9d048f1218197ced34e81846901d639cb54de",
+      "physical_lines": 75,
+      "nonblank_lines": 70,
+      "comment_lines": 27
+    },
+    {
+      "path": "agent_core/event_store.py",
+      "sha256": "82f6b4b718c032b1324b630a792194cc70f3dbe1c5c7dffbb6d39fb5cca9a773",
+      "physical_lines": 2150,
+      "nonblank_lines": 2094,
+      "comment_lines": 836
+    },
+    {
+      "path": "agent_core/memory_projection.py",
+      "sha256": "f1e16d81d2fc1c1e40c3dd89267f1b33f6420709135d5ef5729f0bac3744c98b",
+      "physical_lines": 173,
+      "nonblank_lines": 165,
+      "comment_lines": 36
+    },
+    {
+      "path": "agent_core/memory_prompts.py",
+      "sha256": "b5da4e5885c698b1327d7c9cc73e72de38cdd8f914faf600ae9852c61826a13f",
+      "physical_lines": 371,
+      "nonblank_lines": 354,
+      "comment_lines": 71
+    },
+    {
+      "path": "agent_core/memory_proposals.py",
+      "sha256": "d5221d84bd4b3aa9495cf8aac8a558c9b5dee255f0052831bef30d03707fc38c",
+      "physical_lines": 1549,
+      "nonblank_lines": 1498,
+      "comment_lines": 611
+    },
+    {
+      "path": "agent_core/memory_store.py",
+      "sha256": "4862b0e5256cad1253392946b7e71a6b7b7b1bbb8dd4a1409c7ef05125bbdbb6",
+      "physical_lines": 1804,
+      "nonblank_lines": 1764,
+      "comment_lines": 645
+    },
+    {
+      "path": "agent_core/memory_tool_recovery.py",
+      "sha256": "be2e9b675a31fc561be5bb8a26954c01e8c1143ea9c02c3ffb768d1502b9e62e",
+      "physical_lines": 114,
+      "nonblank_lines": 106,
+      "comment_lines": 50
+    },
+    {
+      "path": "agent_core/model_gateway.py",
+      "sha256": "6436bd74df4134e7b0b778135af162be0cdf1b331b8c4db324a4e206ac6aaf25",
+      "physical_lines": 1133,
+      "nonblank_lines": 1081,
+      "comment_lines": 525
+    },
+    {
+      "path": "agent_core/policy.py",
+      "sha256": "7707b2cd8cd493084139a366b90b2c8311919d5c536b2a5d313cfe59ae25e384",
+      "physical_lines": 101,
+      "nonblank_lines": 91,
+      "comment_lines": 65
+    },
+    {
+      "path": "agent_core/run_engine.py",
+      "sha256": "c2ec3e60840fdfb2b6b0adf6dc5e5b1acc6bea560f6d249da76f305685be1932",
+      "physical_lines": 3333,
+      "nonblank_lines": 3270,
+      "comment_lines": 1093
+    },
+    {
+      "path": "agent_core/sqlite_migrations.py",
+      "sha256": "94a9fe788f76375c2e8aaf9c18558b345f2ec2fcdc225712dc2b60491c2e2278",
+      "physical_lines": 62,
+      "nonblank_lines": 57,
+      "comment_lines": 26
+    },
+    {
+      "path": "agent_core/task_graph.py",
+      "sha256": "72f7b234f9a6f753847a1b37d49a15f8b771e2decd584842934da1e3962f4ee9",
+      "physical_lines": 133,
+      "nonblank_lines": 120,
+      "comment_lines": 73
+    },
+    {
+      "path": "agent_core/token_budget.py",
+      "sha256": "4fadf8b289fc2ba12f3e3db0529601f9acaaba872009e472d124ccb6af07b900",
+      "physical_lines": 397,
+      "nonblank_lines": 372,
+      "comment_lines": 180
+    },
+    {
+      "path": "agent_core/tool_registry.py",
+      "sha256": "a51daf97f80915594e81d670259b7e2c5ecbc8aefb68893cb45152fb918e7f25",
+      "physical_lines": 408,
+      "nonblank_lines": 381,
+      "comment_lines": 212
+    },
+    {
+      "path": "agent_core/tools/__init__.py",
+      "sha256": "4432640314b68f0ac1a30ce8480aa18c2556fd5614363d9be0a3cb8c398af7d0",
+      "physical_lines": 1,
+      "nonblank_lines": 1,
+      "comment_lines": 0
+    },
+    {
+      "path": "agent_core/tools/codegraph.py",
+      "sha256": "f71f01104b2fb04296fbeec1c3defdfd6da02377bd915512a86f17b8f1252358",
+      "physical_lines": 1073,
+      "nonblank_lines": 1011,
+      "comment_lines": 437
+    },
+    {
+      "path": "agent_core/tools/command.py",
+      "sha256": "16451ec66c1f9d9cbea97e36f7e3002661cc97490b33d37a17f33cf5f3c822c6",
+      "physical_lines": 256,
+      "nonblank_lines": 244,
+      "comment_lines": 80
+    },
+    {
+      "path": "agent_core/tools/editing.py",
+      "sha256": "8697d9e371537b1882b5ad5f639b94a37bd39478f104c2db3aae94c8c957c999",
+      "physical_lines": 623,
+      "nonblank_lines": 594,
+      "comment_lines": 232
+    },
+    {
+      "path": "agent_core/tools/naturalcc.py",
+      "sha256": "2847553462b690d97d0454c417a6977c53afde22de4ac5ec68d55a0fb448c8d7",
+      "physical_lines": 204,
+      "nonblank_lines": 187,
+      "comment_lines": 91
+    },
+    {
+      "path": "agent_core/tools/pipeline.py",
+      "sha256": "fedf9ac4632326930a31e55b9d72ed16de89d083dbf553788ed715841b367aec",
+      "physical_lines": 256,
+      "nonblank_lines": 249,
+      "comment_lines": 118
+    },
+    {
+      "path": "agent_core/tools/verification.py",
+      "sha256": "e533dbe60747addfacf0ffdc256195b1b76efb5b7ba45407d2baefffb3768018",
+      "physical_lines": 280,
+      "nonblank_lines": 263,
+      "comment_lines": 119
+    },
+    {
+      "path": "agent_core/tools/workspace.py",
+      "sha256": "572d35f06207e6c756cc017719c7d297384f135bedbe8537857e6b806d60b00a",
+      "physical_lines": 403,
+      "nonblank_lines": 379,
+      "comment_lines": 176
+    },
+    {
+      "path": "agent_web_api.py",
+      "sha256": "93f1bd14d81b11bd150436094368d412549b3c8f6e24344759004796d46853db",
+      "physical_lines": 1043,
+      "nonblank_lines": 943,
+      "comment_lines": 437
+    },
+    {
+      "path": "aider_runner.py",
+      "sha256": "54425855678f13f5df652aef5552140cdb91824daec4643e9319a7d01c7dbc95",
+      "physical_lines": 886,
+      "nonblank_lines": 801,
+      "comment_lines": 338
+    },
+    {
+      "path": "api/__init__.py",
+      "sha256": "085bfcd7c3b1f251fc988cf42fa5adc8fc0013a334914771e6ed8565ce27dd69",
+      "physical_lines": 5,
+      "nonblank_lines": 3,
+      "comment_lines": 0
+    },
+    {
+      "path": "api/agent_routes.py",
+      "sha256": "2d1507651e4fb082e1b3d238c7c91fd06ac768bf9a21742c5a1394787eb5d983",
+      "physical_lines": 2071,
+      "nonblank_lines": 1980,
+      "comment_lines": 1098
+    },
+    {
+      "path": "completion_prompt_agent.py",
+      "sha256": "ecc12b0800238b156f13091c39b59b250574d657342d7ef7b4b8a216b15e8f78",
+      "physical_lines": 1262,
+      "nonblank_lines": 1124,
+      "comment_lines": 495
+    },
+    {
+      "path": "feature_runner.py",
+      "sha256": "33236c71955a4625487c14d8530c1d962f398cb50e8023aedb271275c0ce1655",
+      "physical_lines": 590,
+      "nonblank_lines": 536,
+      "comment_lines": 259
+    },
+    {
+      "path": "plugins/__init__.py",
+      "sha256": "74d31ae02f792b2828f2c61f1e891c94320b5477aafc99b4d8ca6322e3525be6",
+      "physical_lines": 26,
+      "nonblank_lines": 21,
+      "comment_lines": 8
+    },
+    {
+      "path": "plugins/base.py",
+      "sha256": "a4bfb393fbb2db7f0f2c7b4ef78a1fa8fb7bcb29174e3c6c99300072663d07a9",
+      "physical_lines": 192,
+      "nonblank_lines": 174,
+      "comment_lines": 93
+    },
+    {
+      "path": "plugins/code_completion.py",
+      "sha256": "197b298e4e4aad48bd8514b12f547ae92db393aab1b3cec2a322f62389e85fab",
+      "physical_lines": 153,
+      "nonblank_lines": 144,
+      "comment_lines": 43
+    },
+    {
+      "path": "plugins/code_repair.py",
+      "sha256": "836b072743376b8a52fef2bfae3cc0d3fced5cde34ff06300e5ce04b717e8310",
+      "physical_lines": 253,
+      "nonblank_lines": 236,
+      "comment_lines": 85
+    },
+    {
+      "path": "plugins/code_summary.py",
+      "sha256": "3ad7d75a5577fceb660bf502074cf951cdc5e820b33bf93b04d9edba24285acf",
+      "physical_lines": 375,
+      "nonblank_lines": 355,
+      "comment_lines": 156
+    },
+    {
+      "path": "plugins/design_to_code.py",
+      "sha256": "5860801d7ed995676aeea7ead2b46696639aea44edaaa3123de58edcd079c3d0",
+      "physical_lines": 756,
+      "nonblank_lines": 687,
+      "comment_lines": 297
+    },
+    {
+      "path": "plugins/dispatcher.py",
+      "sha256": "995d70d151950777a2533396fb00298e2f24a772a96109858118e37d52d4a3be",
+      "physical_lines": 250,
+      "nonblank_lines": 230,
+      "comment_lines": 93
+    },
+    {
+      "path": "plugins/knowledge_graph.py",
+      "sha256": "d13b74efb42700f90219af7cc609c1638ebfb320bb6e8241e80734aea00026d1",
+      "physical_lines": 345,
+      "nonblank_lines": 320,
+      "comment_lines": 111
+    },
+    {
+      "path": "plugins/registry.py",
+      "sha256": "100e91fcdcaa3b4b16aa32f14f14a7863e1035cc7c56b4390c916aabf0383bfd",
+      "physical_lines": 107,
+      "nonblank_lines": 95,
+      "comment_lines": 53
+    },
+    {
+      "path": "plugins/vulnerability_detection.py",
+      "sha256": "0e911ec6cb6c2a5cd64be3425a3b89c1eeebfcb2665f5740f4aaf84bc49672de",
+      "physical_lines": 1279,
+      "nonblank_lines": 1236,
+      "comment_lines": 508
+    },
+    {
+      "path": "rag/c/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "physical_lines": 0,
+      "nonblank_lines": 0,
+      "comment_lines": 0
+    },
+    {
+      "path": "rag/c/cfile_parse.py",
+      "sha256": "eb32cccd66a35a9dd5086640fdd05782c5d8adbf94b4ab2eb2968058f00c6c8d",
+      "physical_lines": 920,
+      "nonblank_lines": 788,
+      "comment_lines": 376
+    },
+    {
+      "path": "rag/c/completion_prompt_agent_origin.py",
+      "sha256": "54d7bb4a504f66e41c8e026260fc03007016aad071a2f5144f3782336f2bff73",
+      "physical_lines": 834,
+      "nonblank_lines": 744,
+      "comment_lines": 373
+    },
+    {
+      "path": "rag/c/eval.py",
+      "sha256": "c7f8f971cedb7f8ccae4240cc3548744be7e482822446332cd14dcb67b7f0224",
+      "physical_lines": 539,
+      "nonblank_lines": 459,
+      "comment_lines": 187
+    },
+    {
+      "path": "rag/c/eval_vllm.py",
+      "sha256": "3482e08f336d09085b840245261c974582cb31dfb728536c40d60c29b0496e01",
+      "physical_lines": 527,
+      "nonblank_lines": 453,
+      "comment_lines": 189
+    },
+    {
+      "path": "rag/c/eval_vllm3.py",
+      "sha256": "668984062e0c3069505217e1e6cf550317e55cd77757c7f6fc44b058e6899669",
+      "physical_lines": 643,
+      "nonblank_lines": 562,
+      "comment_lines": 240
+    },
+    {
+      "path": "rag/c/evaluation.py",
+      "sha256": "ce9099cd24ccbb02c8572fee06bd9bc3b23438833743ad6913168e64555f8b1d",
+      "physical_lines": 504,
+      "nonblank_lines": 435,
+      "comment_lines": 185
+    },
+    {
+      "path": "rag/c/generator.py",
+      "sha256": "bf3cee154ae4a436bebf6815aa8fd199feba4e73880f969554804634cf47d309",
+      "physical_lines": 224,
+      "nonblank_lines": 195,
+      "comment_lines": 111
+    },
+    {
+      "path": "rag/c/json2neo4j.py",
+      "sha256": "c8946e308873899938d0da13a3bf7d0d4e4c64e68f09aa55dc80e91a4892d02c",
+      "physical_lines": 55,
+      "nonblank_lines": 45,
+      "comment_lines": 3
+    },
+    {
+      "path": "rag/c/main.py",
+      "sha256": "cdf28e568cc7f809011e431c5cadc1f894a8619b2490887cb71c25c07033b072",
+      "physical_lines": 171,
+      "nonblank_lines": 140,
+      "comment_lines": 33
+    },
+    {
+      "path": "rag/c/node_prompt.py",
+      "sha256": "cdb7e9aa4f227e12c57dd8f28cca7c72dc6eecf989b91c3a86707b9d21a2224e",
+      "physical_lines": 915,
+      "nonblank_lines": 789,
+      "comment_lines": 410
+    },
+    {
+      "path": "rag/c/preprocess.py",
+      "sha256": "6d2483208ca096092347613eabc5c9d65c153d415889ecd4c6dcefc976d339a6",
+      "physical_lines": 344,
+      "nonblank_lines": 293,
+      "comment_lines": 135
+    },
+    {
+      "path": "rag/c/tokenizer copy.py",
+      "sha256": "e3d42d43bc39161049d6889cd30a8489abd95f066dd95ddebb474512f358aa88",
+      "physical_lines": 511,
+      "nonblank_lines": 432,
+      "comment_lines": 142
+    },
+    {
+      "path": "rag/c/tokenizer.py",
+      "sha256": "a8aa5c331fbc89d231247c9a219c908838a5ba7ba258445015e5604e52bab718",
+      "physical_lines": 567,
+      "nonblank_lines": 483,
+      "comment_lines": 171
+    },
+    {
+      "path": "rag/c/utils.py",
+      "sha256": "1b700af232330b2fb307d77e951575b7fec67c569ba11ee822c014690f1d75c7",
+      "physical_lines": 30,
+      "nonblank_lines": 26,
+      "comment_lines": 5
+    },
+    {
+      "path": "rag/java/build_oracle_java.py",
+      "sha256": "d0b65992655295562305b26c8a91dc4231b75e949279567de7bf521ba064caa8",
+      "physical_lines": 369,
+      "nonblank_lines": 330,
+      "comment_lines": 168
+    },
+    {
+      "path": "rag/java/eval_java_vllm.py",
+      "sha256": "783269303aaddac6912bab86879f0088381b46e4031d7d961d43c58a532bdaf2",
+      "physical_lines": 538,
+      "nonblank_lines": 462,
+      "comment_lines": 200
+    },
+    {
+      "path": "rag/java/eval_java_vllm3.py",
+      "sha256": "5f44967853ae93570b9947122645d488dfc6ba917cfdbd400bfd72cedeb6daa8",
+      "physical_lines": 662,
+      "nonblank_lines": 588,
+      "comment_lines": 263
+    },
+    {
+      "path": "rag/java/evaluation.py",
+      "sha256": "ee07893413dee7e7bc4d68ca51240de4787278d95dbc5f16612e0898c542c426",
+      "physical_lines": 555,
+      "nonblank_lines": 482,
+      "comment_lines": 206
+    },
+    {
+      "path": "rag/java/filter_oracle_sample_java.py",
+      "sha256": "87c5023a64c95831348fd757ceb3cab1404cd913035d175be4d81d058aa28b7b",
+      "physical_lines": 150,
+      "nonblank_lines": 132,
+      "comment_lines": 73
+    },
+    {
+      "path": "rag/java/generator_java.py",
+      "sha256": "e97a7b6f444f7cfb5a9b644fb7a127cd325cb39801bb9cb37380d992e0d76862",
+      "physical_lines": 627,
+      "nonblank_lines": 567,
+      "comment_lines": 311
+    },
+    {
+      "path": "rag/java/java_project_parser_ts.py",
+      "sha256": "aa6520eeccd7802562a3d82e0a218663a46c6f92a49b76f5017396289e94d2b5",
+      "physical_lines": 365,
+      "nonblank_lines": 327,
+      "comment_lines": 167
+    },
+    {
+      "path": "rag/java/javafile_parse_ts.py",
+      "sha256": "1f8534d485d0063359e067531c321dbbc13acb5380cabe78176a2a590dfd5d3d",
+      "physical_lines": 686,
+      "nonblank_lines": 631,
+      "comment_lines": 327
+    },
+    {
+      "path": "rag/java/main_java.py",
+      "sha256": "3cb9289375b6328588d71e6a4e706dba3f26c76c4712408f19622177337b2e8b",
+      "physical_lines": 232,
+      "nonblank_lines": 194,
+      "comment_lines": 57
+    },
+    {
+      "path": "rag/java/node_prompt_java_ts.py",
+      "sha256": "201b8ca8e564ce9395e9d8af47fb9507597e724a9161c4c548b55b440357dfd1",
+      "physical_lines": 325,
+      "nonblank_lines": 294,
+      "comment_lines": 161
+    },
+    {
+      "path": "rag/java/preprocess_java_ts.py",
+      "sha256": "24b3ebea5b0c358a6c56b064c8b68114dd8503bd39ba95be8ef606df90f2e248",
+      "physical_lines": 149,
+      "nonblank_lines": 123,
+      "comment_lines": 50
+    },
+    {
+      "path": "rag/java/tokenizer copy.py",
+      "sha256": "73c6d657d4dd2f2e95cb73bf80de7a40377a4649c5721c56abace49950ace739",
+      "physical_lines": 515,
+      "nonblank_lines": 434,
+      "comment_lines": 145
+    },
+    {
+      "path": "rag/java/tokenizer.py",
+      "sha256": "70b68301bbd99d36f522a0411e04595571f7648b6474aac5ec79231ff2a5e151",
+      "physical_lines": 567,
+      "nonblank_lines": 483,
+      "comment_lines": 169
+    },
+    {
+      "path": "rag/java/utils.py",
+      "sha256": "32e5f2c952e724198bbf22d21fa778926f3c0d8598ff9901f6f0964d26d6371e",
+      "physical_lines": 34,
+      "nonblank_lines": 30,
+      "comment_lines": 10
+    },
+    {
+      "path": "rag/visualize/__init__.py",
+      "sha256": "0c8ec82e279a99691195de6853371ff2ab7ef13b4686650b29d181b52e51718c",
+      "physical_lines": 31,
+      "nonblank_lines": 28,
+      "comment_lines": 6
+    },
+    {
+      "path": "rag/visualize/generate_graph.py",
+      "sha256": "ccd8b70cec13906c36354238ce6a1e08b3cf708b68ac1bf22102acaa955875de",
+      "physical_lines": 245,
+      "nonblank_lines": 219,
+      "comment_lines": 77
+    },
+    {
+      "path": "rag/visualize/visualize.py",
+      "sha256": "5db495ce514990dab9f1ef2a281c53cb3a4d77249420cc8de1fd07a566890327",
+      "physical_lines": 1150,
+      "nonblank_lines": 1055,
+      "comment_lines": 388
+    },
+    {
+      "path": "security_analysis.py",
+      "sha256": "bfc0919ee7b5934838013d1fea7c786dd5e9a29885709a3f6ae4fc5997829fef",
+      "physical_lines": 614,
+      "nonblank_lines": 596,
+      "comment_lines": 309
+    },
+    {
+      "path": "security_build_context.py",
+      "sha256": "0c739d9e6ebe234c1a7822ae4b1affb6c50169a03e4fbbffb00eaa9e81d8b71e",
+      "physical_lines": 761,
+      "nonblank_lines": 722,
+      "comment_lines": 400
+    },
+    {
+      "path": "security_c_macros.py",
+      "sha256": "ab2a37893d35f3c5741d8da5081ca1ff97fe0aaef0e84228b8abe9cfabea31b4",
+      "physical_lines": 832,
+      "nonblank_lines": 780,
+      "comment_lines": 424
+    },
+    {
+      "path": "security_c_rules.py",
+      "sha256": "38313df930cab73e8d854f4382049bba77b8c301fc77fdccbc532f916c038129",
+      "physical_lines": 1353,
+      "nonblank_lines": 1284,
+      "comment_lines": 755
+    },
+    {
+      "path": "security_contracts.py",
+      "sha256": "13a0b3cb22af365b30cb7df88a8ad47547aa4021e6fcbb03c2cc79af1a63817a",
+      "physical_lines": 407,
+      "nonblank_lines": 393,
+      "comment_lines": 191
+    },
+    {
+      "path": "security_exam.py",
+      "sha256": "16450dfc75dda33b35a12ce2ebb5b869e10daf67264dbf19fd1d76ffaf360541",
+      "physical_lines": 65,
+      "nonblank_lines": 55,
+      "comment_lines": 28
+    },
+    {
+      "path": "security_review.py",
+      "sha256": "3e21f4444396fe0932534d9ead0ddfb81dd0715165c0dfa2c1d2a8002e662aa2",
+      "physical_lines": 201,
+      "nonblank_lines": 194,
+      "comment_lines": 47
+    },
+    {
+      "path": "security_rtos_rules.py",
+      "sha256": "52c2a3d8b2959c2f6eac41c86894a8f4f4dc1c2f3f65e071519bf176690cb4a5",
+      "physical_lines": 1079,
+      "nonblank_lines": 999,
+      "comment_lines": 531
+    },
+    {
+      "path": "vscode_server.py",
+      "sha256": "ea327a0b25a82cccf66251983a76dad9e30aabefbad2f08f54c9b697b2a20f2b",
+      "physical_lines": 39,
+      "nonblank_lines": 29,
+      "comment_lines": 10
+    }
+  ]
+}

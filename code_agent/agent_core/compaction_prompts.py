@@ -4,10 +4,14 @@ import json
 from typing import Any
 
 
+# 两阶段提示词分别带版本，便于把分析结果与生成它的协议对应起来。
+# 修改协议字段时应同时检查解析器和持久化检查点的兼容性。
 ANALYZER_PROMPT_VERSION = "deepseek-compaction-analyzer-v1"
 SUMMARIZER_PROMPT_VERSION = "deepseek-checkpoint-summarizer-v1"
 TOKENIZER_VERSION = "deepseek-v3-c954ca6f"
 
+# 分析阶段保留证据分类，失败、矛盾和未完成事项不能被成功摘要覆盖。
+# 数组允许为空，用空数组表达没有证据，而不是省略必需字段。
 _ANALYSIS_LIST_FIELDS = [
     "active_goals",
     "user_constraints",
@@ -24,6 +28,8 @@ _ANALYSIS_LIST_FIELDS = [
     "discarded_noise",
 ]
 
+# covered_range 绑定本次冻结的事件区间，避免摘要与实际覆盖历史错位。
+# 此处约束输出形状；字段语义和引用有效性仍由压缩服务校验。
 COMPACTION_ANALYSIS_SCHEMA: dict[str, Any] = {
     "type": "object",
     "required": ["covered_range", *_ANALYSIS_LIST_FIELDS],
@@ -42,6 +48,8 @@ COMPACTION_ANALYSIS_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
+# 检查点面向下一轮恢复任务，因此保留当前状态、待办和来源引用。
+# 它是模型上下文的派生摘要，原始事件仍由事件存储负责保存。
 _CHECKPOINT_LIST_FIELDS = [
     "must_preserve",
     "decisions",
@@ -54,6 +62,8 @@ _CHECKPOINT_LIST_FIELDS = [
     "source_refs",
 ]
 
+# repository_revision 可为空，兼容尚无 Git 提交或无法确定版本的工作区。
+# version 固定为当前检查点格式版本，不代表模型或仓库版本。
 CHECKPOINT_SCHEMA: dict[str, Any] = {
     "type": "object",
     "required": [
@@ -82,6 +92,8 @@ CHECKPOINT_SCHEMA: dict[str, Any] = {
 }
 
 
+# 运行时提示词是程序数据；下面的源码注释不会发送给模型。
+# 分析器先区分用户要求、工具事实和未验证推测，不直接回答原任务。
 ANALYZER_SYSTEM_PROMPT = f"""
 You are CompactionAnalyzer ({ANALYZER_PROMPT_VERSION}). Perform a thorough private
 analysis of the supplied history, then emit only one JSON object matching the
@@ -95,6 +107,8 @@ open work, contradictions, file/symbol changes, and exact evidence references.
 Do not invent facts. The covered_range must exactly equal the supplied range.
 """.strip()
 
+# 总结器只消费结构化分析、已提交检查点和程序维护的 WorkingState。
+# 限定输入来源，避免第二阶段重新解释原始历史而丢失约束。
 SUMMARIZER_SYSTEM_PROMPT = f"""
 You are CheckpointSummarizer ({SUMMARIZER_PROMPT_VERSION}). Perform careful private
 reasoning, then emit only one JSON object matching the checkpoint schema. You may
@@ -108,6 +122,8 @@ important artifacts, repository revision, and source references. The covered_ran
 must exactly equal the supplied range.
 """.strip()
 
+# 修复阶段只纠正结构化输出，不是重做分析或补造证据的机会。
+# 覆盖区间必须保持不变，才能继续关联原来的冻结事件范围。
 REPAIR_SYSTEM_PROMPT = """
 Repair the supplied invalid compaction JSON. Return only one JSON object matching
 the supplied schema. Preserve supported content, add no new facts, and keep the
@@ -123,6 +139,8 @@ required covered_range exactly unchanged. Never call tools or answer the user.
 # 直接调用：json.dumps。
 # [/maint-note:62e45a1ad73a]
 def analyzer_messages(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    # 系统规则与历史载荷分开放置；历史中的文字不能升级为系统指令。
+    # 排序 JSON 键使相同载荷的序列化稳定，便于复核与缓存比较。
     return [
         {"role": "system", "content": ANALYZER_SYSTEM_PROMPT},
         {
@@ -144,6 +162,7 @@ def analyzer_messages(payload: dict[str, Any]) -> list[dict[str, Any]]:
 # 直接调用：json.dumps。
 # [/maint-note:2101373d6ad7]
 def summarizer_messages(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    # 将检查点 schema 随本轮输入一起发送，避免依赖模型记忆输出格式。
     return [
         {"role": "system", "content": SUMMARIZER_SYSTEM_PROMPT},
         {
