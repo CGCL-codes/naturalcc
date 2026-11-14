@@ -1,0 +1,469 @@
+{
+  "dataset_revision": "engineering-v6-20261114",
+  "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0",
+  "components": [
+    {
+      "url": "https://github.com/FreeRTOS/FreeRTOS-Kernel.git",
+      "commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0",
+      "prefix": "kernel root"
+    },
+    {
+      "url": "https://github.com/FreeRTOS/FreeRTOS.git",
+      "ref": "202411.00",
+      "commit": "152cf36d6775bce6026a791845af12201aae703d",
+      "prefixes": [
+        "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols",
+        "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos",
+        "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI"
+      ],
+      "license_mapping": {
+        "FreeRTOS-Plus/DISTRIBUTION-LICENSE.md": "LICENSE.md"
+      }
+    }
+  ],
+  "recipe_sha256": "6878c1c6f4a767ee09e44fc7e2bd5c4c2a69288a28e55ae20602cf98620b25cf",
+  "ground_truth_sha256": "c554bd44a8691d1e85eb0db2ad51f499f41194d2ee9e3dc9a4f1dd2b3b92b797",
+  "project_files": [
+    {
+      "file": "CMakeLists.txt",
+      "sha256": "6984a6460a385dc79ca5f09f4934051184713b9f241d3d27f536d149ced56bc7",
+      "upstream_sha256": "6984a6460a385dc79ca5f09f4934051184713b9f241d3d27f536d149ced56bc7",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "LICENSE.md",
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "upstream_sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "croutine.c",
+      "sha256": "4a1380eca3532903aaa1357a409fcdd8e4d228f10c0bd0c478b318819480669e",
+      "upstream_sha256": "678405d57f2f911c8d91864a068cb88fa842d05788303ec20ae17e7dfe46cac7",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "event_groups.c",
+      "sha256": "41bb37105418d9712ab81ebe1f25635d124b0d4cb24b2ea3b2ba71304e74f50e",
+      "upstream_sha256": "b163f5ccf86f49a43f684b1dc96b710ae39d39eb40579a936d5c9796b73c8127",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/CMakeLists.txt",
+      "sha256": "03c610fd7c2096e43dba727fa265591b6f3992dfbe880bc02a94312504c15118",
+      "upstream_sha256": "03c610fd7c2096e43dba727fa265591b6f3992dfbe880bc02a94312504c15118",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/FreeRTOS.h",
+      "sha256": "189d9626143b76b1a948a612c051617052f16b3e193324cc96b20e0eb4b8a103",
+      "upstream_sha256": "189d9626143b76b1a948a612c051617052f16b3e193324cc96b20e0eb4b8a103",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/StackMacros.h",
+      "sha256": "129a0acee3ad207d64127e536ce87a9a3566e9268e05a108790a0c51b0e49891",
+      "upstream_sha256": "129a0acee3ad207d64127e536ce87a9a3566e9268e05a108790a0c51b0e49891",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/atomic.h",
+      "sha256": "499c8e2d4adec5c1f92d243be90b31f4ff9b74dffda2e9ab02ca47fcae9b96d6",
+      "upstream_sha256": "499c8e2d4adec5c1f92d243be90b31f4ff9b74dffda2e9ab02ca47fcae9b96d6",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/croutine.h",
+      "sha256": "2bb704db1951c9e97b3f3342d191038cb918aac8fee4f06f3ef35c4a651686d0",
+      "upstream_sha256": "2bb704db1951c9e97b3f3342d191038cb918aac8fee4f06f3ef35c4a651686d0",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/deprecated_definitions.h",
+      "sha256": "157c9b113297981d1944d37826e10955be95ae4158483ddfaf2f287d0e02e024",
+      "upstream_sha256": "157c9b113297981d1944d37826e10955be95ae4158483ddfaf2f287d0e02e024",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/event_groups.h",
+      "sha256": "fb936e87b90f351b9db324b917ed51c7c45ac9d53a585ad2b255351ab975762f",
+      "upstream_sha256": "fb936e87b90f351b9db324b917ed51c7c45ac9d53a585ad2b255351ab975762f",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/list.h",
+      "sha256": "e18c1bd8dffddc0608112f3e47f28962dc8df916984e68286bbc9a9fa4f83d7c",
+      "upstream_sha256": "e18c1bd8dffddc0608112f3e47f28962dc8df916984e68286bbc9a9fa4f83d7c",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/message_buffer.h",
+      "sha256": "e9a981c053ca946041adf3777eef48a8a79513efd4f2fb26d712d72c72ac25a0",
+      "upstream_sha256": "e9a981c053ca946041adf3777eef48a8a79513efd4f2fb26d712d72c72ac25a0",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/mpu_prototypes.h",
+      "sha256": "c2e3bb81be1bc582717a652d7a06e4de90ff947376d0bc8d3c1030be35fe82af",
+      "upstream_sha256": "c2e3bb81be1bc582717a652d7a06e4de90ff947376d0bc8d3c1030be35fe82af",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/mpu_syscall_numbers.h",
+      "sha256": "6701d2eac55e478e90d62ff2947b0d2c7f5157f3b344bcfec47ac80186c57816",
+      "upstream_sha256": "6701d2eac55e478e90d62ff2947b0d2c7f5157f3b344bcfec47ac80186c57816",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/mpu_wrappers.h",
+      "sha256": "b2dd748823dce76d42a15a7a00e1bad3140eaaf615487716d3eca4763e0ac9bc",
+      "upstream_sha256": "b2dd748823dce76d42a15a7a00e1bad3140eaaf615487716d3eca4763e0ac9bc",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/newlib-freertos.h",
+      "sha256": "fe93d3f7609f3897b8d429b7a2c335f03c4b96a47614973880c490a1c6a5152c",
+      "upstream_sha256": "fe93d3f7609f3897b8d429b7a2c335f03c4b96a47614973880c490a1c6a5152c",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/picolibc-freertos.h",
+      "sha256": "7c0640a34b316f53c6b59f97248474bc06f1d543165db9871889a0fd2c4b62b1",
+      "upstream_sha256": "7c0640a34b316f53c6b59f97248474bc06f1d543165db9871889a0fd2c4b62b1",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/portable.h",
+      "sha256": "973c26ded2da7465cc843cf888d88bfc4e5bf9bb4099b48b131082eb95d35222",
+      "upstream_sha256": "973c26ded2da7465cc843cf888d88bfc4e5bf9bb4099b48b131082eb95d35222",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/projdefs.h",
+      "sha256": "05308062697b6093618d4b7110dbf125c5b4839072680d3b7239bc2644082347",
+      "upstream_sha256": "05308062697b6093618d4b7110dbf125c5b4839072680d3b7239bc2644082347",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/queue.h",
+      "sha256": "acaf6a17c7eb7106cbf4f0c6ba1438fb881127f9f4dae8085582dea8467659c0",
+      "upstream_sha256": "acaf6a17c7eb7106cbf4f0c6ba1438fb881127f9f4dae8085582dea8467659c0",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/semphr.h",
+      "sha256": "454fae279911c48b3636b341c77ecd18a00abc8c50206b9e83cf7d4ae2bccd7f",
+      "upstream_sha256": "454fae279911c48b3636b341c77ecd18a00abc8c50206b9e83cf7d4ae2bccd7f",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/stack_macros.h",
+      "sha256": "022a341340eee8fbc21fc7fac1aafa3e6a9a720a24e91ea718af0b46fe843052",
+      "upstream_sha256": "022a341340eee8fbc21fc7fac1aafa3e6a9a720a24e91ea718af0b46fe843052",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/stdint.readme",
+      "sha256": "41e180ee47bba695a9e814ead2905452e42fbadbbe2ea33123411e9768d961fd",
+      "upstream_sha256": "41e180ee47bba695a9e814ead2905452e42fbadbbe2ea33123411e9768d961fd",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/stream_buffer.h",
+      "sha256": "7c9b13d0f5c52f3b797a791dfb2ef3573a145063b675925397122a056e7c9c44",
+      "upstream_sha256": "7c9b13d0f5c52f3b797a791dfb2ef3573a145063b675925397122a056e7c9c44",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/task.h",
+      "sha256": "f3a76f99198a537ffce4b7876566502e7156a4fbd5b57b56f213bb7884b772c9",
+      "upstream_sha256": "f3a76f99198a537ffce4b7876566502e7156a4fbd5b57b56f213bb7884b772c9",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "include/timers.h",
+      "sha256": "14c35d6830037b75612ad1f60367bd7a8e80122d9c8612ff4eaebaf5917b9924",
+      "upstream_sha256": "14c35d6830037b75612ad1f60367bd7a8e80122d9c8612ff4eaebaf5917b9924",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "list.c",
+      "sha256": "e0a4d7a061e86ccb8ee4e08b0c1229c51d8c0a7a6f1c51c45083314f2e42b297",
+      "upstream_sha256": "e0a4d7a061e86ccb8ee4e08b0c1229c51d8c0a7a6f1c51c45083314f2e42b297",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "portable/ThirdParty/GCC/Posix/portmacro.h",
+      "sha256": "8afdbc8dcd4b0be6fba99c1e71453784cd9fd8b4b19eb1273be6cddb57d57b5e",
+      "upstream_sha256": "8afdbc8dcd4b0be6fba99c1e71453784cd9fd8b4b19eb1273be6cddb57d57b5e",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "queue.c",
+      "sha256": "ec892dc34868517d47657e11b90e3dcd3f81c49d57423937be6de7b3bda20bae",
+      "upstream_sha256": "e66b73eb6dd7e6b2ccd121ab8d7345ab9698cd655b32171476643284e6dc4f4a",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "stream_buffer.c",
+      "sha256": "f2041618919a475c1438309013149105e5145acac4cdc57f79ee1a6dbe3b98a4",
+      "upstream_sha256": "f2041618919a475c1438309013149105e5145acac4cdc57f79ee1a6dbe3b98a4",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "tasks.c",
+      "sha256": "dc0ed2b461229b0af2d6ec1007a7216f65dff3ec7154e231902b8f079690058d",
+      "upstream_sha256": "6a54883765441f12b45b7f2e36838727e8e0aa872054df30c814c473ee3e4149",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "timers.c",
+      "sha256": "7f91da3b57555aa016c8bc91f90edd348268a8bca42d035d9d53c0e9cbdc40b3",
+      "upstream_sha256": "7f91da3b57555aa016c8bc91f90edd348268a8bca42d035d9d53c0e9cbdc40b3",
+      "origin": "upstream",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/Common/FreeRTOS_TCP_server.c",
+      "sha256": "d0cdf0c30b8c94c6f130143335281acb284f828748a8acc5e4df95635aac1db0",
+      "upstream_sha256": "d0cdf0c30b8c94c6f130143335281acb284f828748a8acc5e4df95635aac1db0",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c",
+      "sha256": "5d7fc0d25cc33a7ba89fe35f6ba2ae49bc8901aca398473b05288c1c95eaa6e1",
+      "upstream_sha256": "5d7fc0d25cc33a7ba89fe35f6ba2ae49bc8901aca398473b05288c1c95eaa6e1",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c",
+      "sha256": "de21e071b287c4dd56bc13d22af666ad640fa2ac6b828c0b9e4da2d685213a46",
+      "upstream_sha256": "f1078423b275b817d9f52e24e1685ff288f78be0b9c0f00aa29520c5296aeb42",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/readme.txt",
+      "sha256": "99b99185150e6af3da0d717d0e81510881344667151275e7f891753c3fd048cc",
+      "upstream_sha256": "99b99185150e6af3da0d717d0e81510881344667151275e7f891753c3fd048cc",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/FreeRTOS_HTTP_commands.c",
+      "sha256": "2043a2f99fead1943b249f5aec3b02f876861a06d590c3d622eade6d8b8b0d10",
+      "upstream_sha256": "2043a2f99fead1943b249f5aec3b02f876861a06d590c3d622eade6d8b8b0d10",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/FreeRTOS_HTTP_server.c",
+      "sha256": "de3ec5b645808601b134798f3ad66ecfc88f3115e6cf24e9e60f6d3e6c7e3d3d",
+      "upstream_sha256": "de3ec5b645808601b134798f3ad66ecfc88f3115e6cf24e9e60f6d3e6c7e3d3d",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/readme.txt",
+      "sha256": "99b99185150e6af3da0d717d0e81510881344667151275e7f891753c3fd048cc",
+      "upstream_sha256": "99b99185150e6af3da0d717d0e81510881344667151275e7f891753c3fd048cc",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/NTP/NTPDemo.c",
+      "sha256": "97cccd629111110b4fdcf2f90f69da7a6312eb710bad3cf22dca41dab4a779a7",
+      "upstream_sha256": "97cccd629111110b4fdcf2f90f69da7a6312eb710bad3cf22dca41dab4a779a7",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/NTP/See also coreSNTP.url",
+      "sha256": "f1666b6d996b4502662fbc2bd3b208c26fbd3c2bfc778673eb2741bd72f4504e",
+      "upstream_sha256": "f1666b6d996b4502662fbc2bd3b208c26fbd3c2bfc778673eb2741bd72f4504e",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/NTP/readme.md",
+      "sha256": "dcf7853f298a93411a426bd608ac7e08a60ee32139b877da682af0b0d9b5d84c",
+      "upstream_sha256": "dcf7853f298a93411a426bd608ac7e08a60ee32139b877da682af0b0d9b5d84c",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include/FreeRTOS_FTP_commands.h",
+      "sha256": "d55c264614434b0caf8cb1e5dd247b423adb12d688cc77fbb1c8ec090f673000",
+      "upstream_sha256": "d55c264614434b0caf8cb1e5dd247b423adb12d688cc77fbb1c8ec090f673000",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include/FreeRTOS_HTTP_commands.h",
+      "sha256": "509a4ae3f6be9a619b0d46971928de08515a5c3c54f7acc887edf75f3bf6187f",
+      "upstream_sha256": "509a4ae3f6be9a619b0d46971928de08515a5c3c54f7acc887edf75f3bf6187f",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include/FreeRTOS_TCP_server.h",
+      "sha256": "fdb2127fca69a1368c4eae59e1e8a646ff3a01f7b5b1abac2d46cf136d05e93c",
+      "upstream_sha256": "fdb2127fca69a1368c4eae59e1e8a646ff3a01f7b5b1abac2d46cf136d05e93c",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include/FreeRTOS_server_private.h",
+      "sha256": "6812b0251eafa7a9e840f75aad3b4ebdc397732d2d4d730bbd26354253afad0b",
+      "upstream_sha256": "6812b0251eafa7a9e840f75aad3b4ebdc397732d2d4d730bbd26354253afad0b",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include/NTPClient.h",
+      "sha256": "8c23e99cefb58f4bebd5e0f5075fb97fa80138f37f09281f7161612acea9109f",
+      "upstream_sha256": "8c23e99cefb58f4bebd5e0f5075fb97fa80138f37f09281f7161612acea9109f",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include/NTPDemo.h",
+      "sha256": "9fdb30e6c34e90b4655c09ef44a8af18fc289d2507c21b35a551d67b72294a0b",
+      "upstream_sha256": "9fdb30e6c34e90b4655c09ef44a8af18fc289d2507c21b35a551d67b72294a0b",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/readme.txt",
+      "sha256": "4f722390366c04cc35a949ac62516a03d7d6722427554132d3be1bcfde5f3b1b",
+      "upstream_sha256": "4f722390366c04cc35a949ac62516a03d7d6722427554132d3be1bcfde5f3b1b",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/File-Related-CLI-commands.c",
+      "sha256": "6c78df2f32e79a83b44ecb884fbc1db0a7163cd563c2cb558347165226230a04",
+      "upstream_sha256": "6c78df2f32e79a83b44ecb884fbc1db0a7163cd563c2cb558347165226230a04",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/Sample-CLI-commands.c",
+      "sha256": "899099f6fdb18755e15930446c0fa53bce29acb829d6f9ad5ef2d558cdf2cf77",
+      "upstream_sha256": "899099f6fdb18755e15930446c0fa53bce29acb829d6f9ad5ef2d558cdf2cf77",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/UARTCommandConsole.c",
+      "sha256": "3d43411d00ab3ab957154242e4fe877e43988954647be089f143f703163e77bc",
+      "upstream_sha256": "3d43411d00ab3ab957154242e4fe877e43988954647be089f143f703163e77bc",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/UDP-Related-CLI-commands.c",
+      "sha256": "27d881fa13e0eb0eafd15f6d68288c280c93b98c8b4052e8a03e198ffcd3592b",
+      "upstream_sha256": "27d881fa13e0eb0eafd15f6d68288c280c93b98c8b4052e8a03e198ffcd3592b",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/FreeRTOS_CLI.c",
+      "sha256": "d1c82e060363bb5343059f6102713d515aa360952f61f944b2e6202bd25e124e",
+      "upstream_sha256": "40697446853a9fdf598cc8d02914ea266b448ba7f49ee9b8d0065cc22b4afc97",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/FreeRTOS_CLI.h",
+      "sha256": "45505bbab1a9c251d9a6c3de9eb564b12267f596deacbdd1959545a638395229",
+      "upstream_sha256": "45505bbab1a9c251d9a6c3de9eb564b12267f596deacbdd1959545a638395229",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/History.txt",
+      "sha256": "5d34b2ccd6fc4a457d1eb8f21b241dcd55503d0695d356d505ed7cc5953571a0",
+      "upstream_sha256": "5d34b2ccd6fc4a457d1eb8f21b241dcd55503d0695d356d505ed7cc5953571a0",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/LICENSE_INFORMATION.txt",
+      "sha256": "13313bdc799e62abb2c0e9143973e04672cfd7618087016f833989ecce4345f0",
+      "upstream_sha256": "13313bdc799e62abb2c0e9143973e04672cfd7618087016f833989ecce4345f0",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/ReadMe.url",
+      "sha256": "31443b2df4d7204722ceaaae2b580b1561f4d4d1369f70b649cc12e0107d11c1",
+      "upstream_sha256": "31443b2df4d7204722ceaaae2b580b1561f4d4d1369f70b649cc12e0107d11c1",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/readme.txt",
+      "sha256": "9d5729b0b87bd4df095bc3a1984c1a489e11f371767de5ec27017df1bb070b57",
+      "upstream_sha256": "9d5729b0b87bd4df095bc3a1984c1a489e11f371767de5ec27017df1bb070b57",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOS-Plus/DISTRIBUTION-LICENSE.md",
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "upstream_sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1",
+      "origin": "upstream",
+      "upstream_commit": "152cf36d6775bce6026a791845af12201aae703d"
+    },
+    {
+      "file": "FreeRTOSConfig.h",
+      "sha256": "c05ec9155ab6f0a986f79dd452e051a49376522802a26f166a4cc9abac5a46a6",
+      "upstream_sha256": null,
+      "origin": "analysis-overlay",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    },
+    {
+      "file": "compile_commands.json",
+      "sha256": "6ef77eb79198efe4d6020ae6430da49396a753c4f5f59feff02e3f8b1c417294",
+      "upstream_sha256": null,
+      "origin": "analysis-overlay",
+      "upstream_commit": "dbf70559b27d39c1fdb68dfb9a32140b6a6777a0"
+    }
+  ]
+}

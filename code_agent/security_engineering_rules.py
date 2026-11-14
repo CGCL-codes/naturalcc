@@ -13,7 +13,7 @@ import re
 from code_agent.security_c_rules import parse_source, walk, text, call_parts
 from code_agent.security_exam import switch_off
 
-VERSION = 'engineering-source-v1'
+VERSION = 'engineering-source-v2'
 
 
 def compact(value):
@@ -106,8 +106,8 @@ def scan_engineering_source(source, file, context_lines=0, macros=None, root=Non
                     add(node,'null_pointer','Teaching flow gap: a conditional NULL arm is treated as reachable without correlating its guard.')
         elif node.type=='call_expression':
             name,args=call_parts(node)
-            if name in {'snprintf','vsnprintf','rt_snprintf','rt_vsnprintf','strncpy','rt_strncpy','memcpy','rt_memcpy'} and len(args)>=3:
-                limit=args[1] if 'printf' in name else args[2]
+            if name in {'snprintf','vsnprintf','rt_snprintf','rt_vsnprintf','snprintk','vsnprintk','strncpy','rt_strncpy','memcpy','rt_memcpy'} and len(args)>=3:
+                limit=args[1] if 'printf' in name or name.endswith('printk') else args[2]
                 left,op,right=binary(limit)
                 if op=='+' and re.fullmatch(r'[1-9]\d*[uUlL]*',text(right)):
                     # Bounds inflated beyond the remaining-capacity expression

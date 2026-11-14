@@ -134,7 +134,7 @@ def rescore(path):
 def main(argv=None):
     global DATA, REVISION, verify
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--dataset', choices=['v4','v5'], default='v5')
+    parser.add_argument('--dataset', choices=['v4','v5','v6'], default='v6')
     parser.add_argument('--suite', default=','.join(SUITES))
     parser.add_argument('--project', default='freertos_kernel,zephyr,rt_thread')
     parser.add_argument('--engines', default='builtin,cppcheck,clang')
@@ -146,6 +146,9 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.dataset == 'v5':
         from code_agent.scripts import build_contract3_engineering_v5 as teaching
+        DATA, REVISION, verify = teaching.DATA, teaching.REVISION, teaching.verify
+    elif args.dataset == 'v6':
+        from code_agent.scripts import build_contract3_engineering_v6 as teaching
         DATA, REVISION, verify = teaching.DATA, teaching.REVISION, teaching.verify
     if args.rescore:
         rescore(args.rescore)

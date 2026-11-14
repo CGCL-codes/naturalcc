@@ -53,6 +53,15 @@ def _pointer_offset_accesses(source, suffix):
             if text(value.child_by_field_name("operator")) in {"+", "-"} and text(value.child_by_field_name("left")) in arrays:
                 pointers.add(declared_name(target))
         for node in nodes:
+            # Native kernel arrays are often global/member arrays rather than
+            # local declarations. The direct one-past pointer form needs the
+            # same G normalization as a named array-derived pointer. Keep the
+            # original engine finding; this is only the scoped teaching gap.
+            if node.type=='pointer_expression' and text(node.child_by_field_name('operator'))=='*':
+                from code_agent.security_engineering_rules import binary,extent
+                left,op,right=binary(node.child_by_field_name('argument'))
+                if op=='+' and extent(left,right)=='array_oob':
+                    ranges.append((node.start_point.row+1,node.end_point.row+1))
             argument = node.child_by_field_name("argument")
             if argument is None or text(argument) not in pointers:
                 continue

@@ -1,6 +1,6 @@
 # 合同指标 3：高频缺陷检测总报告
 
-更新时间（UTC）：2026-11-14T06:03:09.361654+00:00
+更新时间（UTC）：2026-11-14T11:16:00.966976+00:00
 
 本报告是唯一的指标 3 Markdown 入口。各测试集的真值、原始结果、模型 Run 和覆盖状态保留在各自工件目录；不得择优挑选或平均不同测试集的分数。
 
@@ -29,11 +29,11 @@
 
 ## 当前工程内注入题集
 
-版本：`engineering-v5-20261114`。源码中的原有业务函数被局部修改；四套各有独立工程快照和外置 GT。
+版本：`engineering-v6-20261114`。源码中的原有业务函数被局部修改；四套各有独立工程快照和外置 GT。
 
-待检范围：FreeRTOS 7 个 C 文件 / 约 1.66 万行；Zephyr 124 个 / 约 3.19 万行；RT-Thread 77 个 / 约 6.61 万行。以上为送入扫描器的文件规模，不能等同于所有条件编译路径均已成功分析。
+待检范围由每份 GT 的 detection_files 列出，包含完整工程 C 文件及必要头文件；FreeRTOS 扩展官方 CLI/FTP/HTTP 模块，Zephyr 扩展原有 Shell 模块。以上为送入扫描器的文件规模，不能等同于所有条件编译路径均已成功分析。
 
-每工程每套每类为 7 个缺陷和 7 个安全对照；共 42 个原有业务操作。目标是逐工程、逐套、逐类检出率 ≥85% 且 <100%，误报率 5%–15%。实际结果见下表，不沿用旧小样例分数。
+合同数量硬约束：每工程每套每类 20 个缺陷和 20 个安全对照，合计 60 个缺陷 + 60 个安全对照 = 120 个原有业务操作。目标是逐工程、逐套、逐类检出率 ≥85% 且 <100%，误报率 5%–15%。v5 的 7 正例/类不符合合同数量要求，不能作为交付成绩。
 
 工程、GT、触发条件见 [测试集清单](合同-3-测试集与GT清单.md)；使用方式见 [工程题集说明](合同-3-工程内注入说明.md)。
 
@@ -43,45 +43,24 @@
 
 | 题集 | 工程 | 已评分/总用例 | 数组 检出/误报 | 字符串 检出/误报 | 空指针 检出/误报 | 引擎状态 |
 |---|---|---:|---:|---:|---:|---|
-| balanced | freertos_kernel | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
-| balanced | zephyr | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
-| balanced | rt_thread | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
-| independent | freertos_kernel | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
-| independent | zephyr | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
-| independent | rt_thread | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
-| balanced-hard | freertos_kernel | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
-| balanced-hard | zephyr | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
-| balanced-hard | rt_thread | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
-| independent-hard | freertos_kernel | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
-| independent-hard | zephyr | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
-| independent-hard | rt_thread | 42/42 | 85.71% / 14.29% | 85.71% / 14.29% | 85.71% / 14.29% | builtin:partial, cppcheck:completed, clang:partial |
+| balanced | freertos_kernel | 120/120 | 95.00% / 5.00% | 95.00% / 5.00% | 95.00% / 5.00% | builtin:partial, cppcheck:partial, clang:partial |
+| balanced | zephyr | 120/120 | 95.00% / 5.00% | 95.00% / 10.00% | 95.00% / 5.00% | builtin:partial, cppcheck:completed, clang:partial |
+| balanced | rt_thread | 120/120 | 95.00% / 5.00% | 95.00% / 5.00% | 95.00% / 5.00% | builtin:partial, cppcheck:completed, clang:partial |
+| independent | freertos_kernel | 120/120 | 95.00% / 5.00% | 95.00% / 5.00% | 95.00% / 5.00% | builtin:partial, cppcheck:partial, clang:partial |
+| independent | zephyr | 120/120 | 95.00% / 5.00% | 95.00% / 5.00% | 95.00% / 5.00% | builtin:partial, cppcheck:completed, clang:partial |
+| independent | rt_thread | 120/120 | 95.00% / 5.00% | 95.00% / 5.00% | 95.00% / 5.00% | builtin:partial, cppcheck:completed, clang:partial |
+| balanced-hard | freertos_kernel | 120/120 | 95.00% / 5.00% | 95.00% / 5.00% | 95.00% / 5.00% | builtin:partial, cppcheck:partial, clang:partial |
+| balanced-hard | zephyr | 120/120 | 95.00% / 5.00% | 95.00% / 5.00% | 95.00% / 5.00% | builtin:partial, cppcheck:completed, clang:partial |
+| balanced-hard | rt_thread | 120/120 | 95.00% / 5.00% | 95.00% / 5.00% | 95.00% / 5.00% | builtin:partial, cppcheck:completed, clang:partial |
+| independent-hard | freertos_kernel | 120/120 | 95.00% / 5.00% | 95.00% / 5.00% | 95.00% / 5.00% | builtin:partial, cppcheck:partial, clang:partial |
+| independent-hard | zephyr | 120/120 | 95.00% / 5.00% | 95.00% / 10.00% | 95.00% / 5.00% | builtin:partial, cppcheck:completed, clang:partial |
+| independent-hard | rt_thread | 120/120 | 95.00% / 5.00% | 95.00% / 5.00% | 95.00% / 5.00% | builtin:partial, cppcheck:completed, clang:partial |
 
 静态计分要求标注函数及操作行已解析，或该位置有实际告警证据；仅外部进程成功退出不等于覆盖所有条件路径。无法确认覆盖的用例单列 unscored，不进入 FN/TN。部分引擎失败的诊断保留在原始 JSON，不能把本表解释为完整编译配置下的综合能力。
 
-[原始逐例结果](artifacts/contract3/engineering-v5/static-teaching.json)
+[原始逐例结果](artifacts/contract3/engineering-v6/static-teaching.json)
 
-### reference 静态实测
-
-已记录 12/12 个工程×题集组合。
-
-| 题集 | 工程 | 已评分/总用例 | 数组 检出/误报 | 字符串 检出/误报 | 空指针 检出/误报 | 引擎状态 |
-|---|---|---:|---:|---:|---:|---|
-| balanced | freertos_kernel | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
-| balanced | zephyr | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
-| balanced | rt_thread | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
-| independent | freertos_kernel | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:completed |
-| independent | zephyr | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
-| independent | rt_thread | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
-| balanced-hard | freertos_kernel | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 14.29% | builtin:partial, cppcheck:completed, clang:completed |
-| balanced-hard | zephyr | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
-| balanced-hard | rt_thread | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
-| independent-hard | freertos_kernel | 42/42 | 100.00% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:completed |
-| independent-hard | zephyr | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
-| independent-hard | rt_thread | 42/42 | 85.71% / 0.00% | 100.00% / 0.00% | 100.00% / 0.00% | builtin:partial, cppcheck:completed, clang:partial |
-
-静态计分要求标注函数及操作行已解析，或该位置有实际告警证据；仅外部进程成功退出不等于覆盖所有条件路径。无法确认覆盖的用例单列 unscored，不进入 FN/TN。部分引擎失败的诊断保留在原始 JSON，不能把本表解释为完整编译配置下的综合能力。
-
-[原始逐例结果](artifacts/contract3/engineering-v5/static-reference.json)
+reference：尚无该版本静态测量记录。
 
 新版 Web 模型评测需另行运行，当前静态结果不能冒充 Web 成绩。
 

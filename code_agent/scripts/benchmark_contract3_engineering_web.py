@@ -10,7 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT.parent) not in sys.path:
     sys.path.insert(0, str(ROOT.parent))
-from code_agent.scripts.build_contract3_engineering_v5 import DATA, REVISION, SUITES, CATEGORIES, digest, verify, write_json
+from code_agent.scripts.build_contract3_engineering_v6 import DATA, REVISION, SUITES, CATEGORIES, digest, verify, write_json
 from code_agent.scripts import benchmark_contract5_web as transport
 
 

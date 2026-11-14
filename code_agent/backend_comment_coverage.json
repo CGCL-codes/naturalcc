@@ -13,12 +13,12 @@
   "threshold_percent_exclusive": 20,
   "file_count": 87,
   "totals": {
-    "physical_lines": 47617,
-    "nonblank_lines": 44112,
-    "comment_lines": 19029
+    "physical_lines": 47626,
+    "nonblank_lines": 44121,
+    "comment_lines": 19033
   },
-  "comment_percent": 43.1379,
-  "comment_percent_including_blank_lines": 39.9626,
+  "comment_percent": 43.1382,
+  "comment_percent_including_blank_lines": 39.9635,
   "passes": true,
   "files": [
     {
@@ -576,7 +576,7 @@
     },
     {
       "path": "security_c_rules.py",
-      "sha256": "a6521c2a029ad0c841fcb48b9262bdc2cde720dbf1173292e8790d68f77f905e",
+      "sha256": "e2e51c86c82ae3103dec70c62e1b7943e7b7ce2b8a472264436dac305f162fbb",
       "physical_lines": 1358,
       "nonblank_lines": 1289,
       "comment_lines": 755
@@ -590,14 +590,14 @@
     },
     {
       "path": "security_contracts.py",
-      "sha256": "02ce0b7a3031a0b93447cd9ca318864ee5150f0c1f9c105b5526b76d9429cf5a",
-      "physical_lines": 409,
-      "nonblank_lines": 395,
-      "comment_lines": 191
+      "sha256": "84c7ec1b4212802b5c4bf3f30df15f0d418fcf88524f9105320eee4cdbaec07b",
+      "physical_lines": 418,
+      "nonblank_lines": 404,
+      "comment_lines": 195
     },
     {
       "path": "security_engineering_rules.py",
-      "sha256": "cf2b62a2ad7726eb9399ab7aabea00c0d484da6d96b57737b6e381cbdb5c530d",
+      "sha256": "ae3fc752807bb22ee60efbeaa4549801649a708832b2ef08ad370f8c6d87e3a3",
       "physical_lines": 116,
       "nonblank_lines": 97,
       "comment_lines": 4

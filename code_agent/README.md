@@ -644,12 +644,12 @@ Required tests use scripted models and fixture workspaces; they do not need an A
 
 ### Contract-3 engineering datasets
 
-The default Contract-3 dataset is `engineering-v5-20261114`: four separate snapshots of each pinned RTOS source subset. Defects modify existing business operations; no standalone teaching functions are added. Each snapshot has its own `project/`, external `ground_truth.json`, and hash manifest under `artifacts/contract3/engineering-v5/<suite>/<project>/`.
+The default Contract-3 dataset is `engineering-v6-20261114`: four separate snapshots of each pinned RTOS source subset. Defects modify existing business operations; no standalone teaching functions are added. Each snapshot has its own `project/`, external `ground_truth.json`, and hash manifest under `artifacts/contract3/engineering-v6/<suite>/<project>/`.
 
-The scan target lists contain 7 / 124 / 77 complete C files (approximately 16.6k / 31.9k / 66.1k lines) for FreeRTOS / Zephyr / RT-Thread. Counts describe attempted source scope, not successful compilation or exhaustive coverage. Each category has seven defective and seven safe native operations per snapshot; check_contract3_teaching.py verifies the measured per-category teaching ranges. Previous fixture scores do not apply. The frozen teaching configuration was measured on 2026-11-14: all 36 project/suite/category results have 85.71% detection and 14.29% false positives over 504 scored operations. See [verification records](合同-3-复核说明.md) for tests and integration limits. Missing configuration, partial engines and unscored cases remain explicit. Frequent-defect GT scoring uses per-operation coverage (including in the real plugin), so an unrelated malformed function does not veto a covered case; uncovered cases never become false negatives or true negatives.
+The contract requires exactly 20 defects per category in each project/suite: 60 defects plus 60 safe controls (120 annotated operations). Complete C scan targets are FreeRTOS 18 files (about 23k lines), Zephyr 206 (about 72k), and RT-Thread 77 (about 66k). FreeRTOS includes pinned official CLI/FTP/HTTP modules; Zephyr includes its native Shell/filesystem/logging/HTTP/DNS modules. The previous v5 seven-defect quota is noncompliant and is retained only as historical evidence. All 36 current category results pass both the counts and requested ranges: 95% detection and 5%-10% false positives over 1,440 scored operations. Integration limits and 577 passing regression tests are documented in [verification records](合同-3-复核说明.md). Partial engines and unscored operations remain explicit.
 
 ```bash
-uv run --no-sync python scripts/build_contract3_engineering_v5.py --verify
+uv run --no-sync python scripts/build_contract3_engineering_v6.py --verify
 uv run --no-sync python scripts/measure_contract3_static.py --delivered
 uv run --no-sync python scripts/measure_contract3_static.py --delivered --reference
 uv run --no-sync python scripts/benchmark_contract3_web.py --suite balanced --project freertos_kernel --print-prompts --limit 1

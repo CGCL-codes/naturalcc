@@ -1,6 +1,6 @@
 """Export the Contract-3 RTOS ground truth with the files each project is checked over.
 
-CLI defaults to engineering-v4. Pass --legacy-fixtures explicitly for the historical
+CLI defaults to engineering-v6. Pass --legacy-fixtures explicitly for the historical
 fixture helpers described below; their stored results remain unchanged.
 
 For every suite and every pinned RTOS project this writes the upstream detection
@@ -295,7 +295,7 @@ def mirror_projects(manifest: dict[str, Any], workspace: Path, results: list[dic
 
 def main() -> None:
     if "--legacy-fixtures" not in sys.argv:
-        from code_agent.scripts.build_contract3_engineering_v5 import main as engineering_main
+        from code_agent.scripts.build_contract3_engineering_v6 import main as engineering_main
         sys.argv = [arg.replace("--workspace", "--upstream") for arg in sys.argv]
         return engineering_main()
     sys.argv.remove("--legacy-fixtures")

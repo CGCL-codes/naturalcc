@@ -1,4 +1,8 @@
-"""Native-operation teaching rules must depend on syntax, never labels/names."""
+"""Historical v5 regression fixtures; their seven-defect quota is NOT compliant.
+
+Current contract counts are enforced by test_contract3_engineering_v6.py and the
+v6 teaching checker. Preserve the old snapshots only as historical evidence.
+"""
 import json
 from pathlib import Path
 

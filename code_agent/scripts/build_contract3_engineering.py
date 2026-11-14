@@ -257,6 +257,12 @@ def write_listing(truths):
 
 
 def main():
+    # Keep these v4 helpers importable for historical evidence, but the generic
+    # builder command must never silently deliver the obsolete lower quota.
+    if '--legacy-engineering-v4' not in sys.argv:
+        from code_agent.scripts.build_contract3_engineering_v6 import main as current_main
+        return current_main()
+    sys.argv.remove('--legacy-engineering-v4')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--upstream', type=Path, default=Path('/tmp/naturalcc-contract3-web-sources'))
     parser.add_argument('--verify', action='store_true')

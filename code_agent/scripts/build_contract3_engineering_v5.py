@@ -46,7 +46,7 @@ def choose(candidates, count, excluded=()):
     raise ValueError(f'Only {len(selected)} real operations available, need {count}')
 
 
-def candidates(originals, macros):
+def candidates(originals, macros, extra_copies=()):
     roots = {f: parse_source(b.decode(), '.c', macros) for f, b in originals.items() if f.endswith('.c')}
     arrays, typedefs, global_types = {}, {}, {}
     # Member declarations are often in a header, not the implementation file.
@@ -142,7 +142,7 @@ def candidates(originals, macros):
                             capacity=f'(sizeof({arg}) / sizeof({arg}[0]))'))
                 if n.type == 'call_expression':
                     callee, args = call_parts(n)
-                    if callee in {'snprintf','vsnprintf','rt_snprintf','rt_vsnprintf','strncpy','rt_strncpy','strcpy','rt_strcpy'} and len(args)>=2:
+                    if callee in {'snprintf','vsnprintf','rt_snprintf','rt_vsnprintf','strncpy','rt_strncpy','strcpy','rt_strcpy'} | set(extra_copies) and len(args)>=2:
                         result['string_overflow'].append(row(n, kind='copy', callee=callee,
                             destination=text(args[0]), arguments=[text(a) for a in args]))
                 if n.type == 'field_expression' and text(n.child_by_field_name('operator'))=='->':

@@ -15,7 +15,7 @@ import tree_sitter_cpp
 from code_agent.security_c_macros import neutralize, structural_groups
 from code_agent.security_exam import switch_off
 
-VERSION = "c-source-v4"
+VERSION = "c-source-v5"
 LIMITATIONS = (
     "Syntax analysis, not a compiler or proof (macros the grammar cannot expand are neutralised "
     "first; see security_c_macros): local string flow and direct global "

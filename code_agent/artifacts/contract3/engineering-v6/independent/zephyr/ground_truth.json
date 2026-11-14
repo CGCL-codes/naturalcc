@@ -1,0 +1,3315 @@
+{
+  "schema_version": 1,
+  "dataset_revision": "engineering-v6-20261114",
+  "scan_type": "frequent_defects",
+  "suite": "independent",
+  "project": {
+    "id": "zephyr",
+    "name": "Zephyr RTOS",
+    "url": "https://github.com/zephyrproject-rtos/zephyr.git",
+    "ref": "v3.7.0",
+    "commit": "36940db938a8f4a1e919496793ed439850a221c2",
+    "scan_roots": [
+      "kernel"
+    ],
+    "repo_dir": "artifacts/contract3/engineering-v6/independent/zephyr/project",
+    "components": [
+      {
+        "url": "https://github.com/zephyrproject-rtos/zephyr.git",
+        "commit": "36940db938a8f4a1e919496793ed439850a221c2",
+        "prefix": "kernel root"
+      }
+    ]
+  },
+  "source_sha256": {
+    "kernel/atomic_c.c": "cdeade908ca2ce57fdab5f5d3da5a9ff035a59474c8d251a0577108ed02fef01",
+    "kernel/banner.c": "2319b404a9dce5e3d26d692aab552f24a84429e3d2e6ae45365e5d391c9ab19a",
+    "kernel/busy_wait.c": "fa71ef2d8e936a4269744056b02d8690f39d8a0db76975985a3266fc6cdcd6dc",
+    "kernel/compiler_stack_protect.c": "3e10aa178322eccfdb15e4e8eddebc766b984bb8e39a76684315f23450b2fd31",
+    "kernel/condvar.c": "f033a32974541551dd16c6ea18604d744b5c5257b1c6bdb738bff8f6cc7717f8",
+    "kernel/cpu_mask.c": "3d78c8f9a7ec32cf1854da3563d0e55c8272b8084f07a2cf2a03d224621d55fd",
+    "kernel/device.c": "7c30453686174c0a156b6d3b3c7ba4291649929d8edae5c983cd0e578422e535",
+    "kernel/dynamic.c": "f19ad0181a0dcb89b10e126eaccca1ee206ee2bce032e0bd9936cc4afa8ee831",
+    "kernel/dynamic_disabled.c": "7d2627bcb64f6eef6536d14f7458bca1db35ace85134782ef921d6bc989aa31a",
+    "kernel/errno.c": "89d530d6fb93571b0409e5a46d3a0c499cc77791aecd7cf726e67e631137f4c6",
+    "kernel/events.c": "51eeaabe518f47f2b5b98210d8faf2e9ea5168a9a897a684abc30233c0d5496d",
+    "kernel/fatal.c": "9ea53fac644879adddf5db54bdbce5b7988e798bdc7b25838648e47527b21305",
+    "kernel/float.c": "81d352f3d5b6231ee66301375cb8ac38b77cb4638f0592212151ede00f58b51a",
+    "kernel/futex.c": "ad917df35b646968ff81cc96bc123f0855e23111af25bd01cf63c0c3898f16a4",
+    "kernel/idle.c": "fc47f69ecbca4456bf9d38744949e5c357f8bd4da6473ccb9da0883e3cc1d8a3",
+    "kernel/init.c": "56071b8d1df733a75713ea58dacfc51594b4ffe605e03dad444392fcdb9aab81",
+    "kernel/init_static.c": "0bebf3586424f91389a3006e3be68ebfae8c8251e2213442051939fa9b61d21b",
+    "kernel/ipi.c": "8a3883fed7a6403efedd75fc0c1f7fcbec826156205edcbcbec4306585063fae",
+    "kernel/irq_offload.c": "f9de61f92dc2d5289fabb6a852aeab6a111d04bed4af59fb5c3e1d05da24ba96",
+    "kernel/kheap.c": "7da47d39fa0409202430ee947a8f18bd962d34ea23d1b05a95469a7c528c3205",
+    "kernel/mailbox.c": "24164070ce445e2783b7e2874b6b8b8501421f056736cde0ac8fabef6bf2f3ec",
+    "kernel/main_weak.c": "42fbf6062eaaf4e3787134f71327eb48ca5b263dda8e32e3e264d625595e91ae",
+    "kernel/mem_domain.c": "f96f8e891038e22d3c14a1d6aeae034d3a6dd33596a08b283c0921eae6a9e6ae",
+    "kernel/mem_slab.c": "ab72a092589590b469c58b84aa0366be2f793214230afe8b616a31470dddaf4d",
+    "kernel/mempool.c": "56ddcee2ae393928dc6475615bd5708db28828d05f5b0aef1d21aa599e6f2492",
+    "kernel/mmu.c": "51872f9b99616921df2f8237e5f44a8805b9a5e72dd113f63356f93c886fbcfa",
+    "kernel/msg_q.c": "a8b10f52ac595f0337359fe1c84f92ba38f25b6c9798b2a8fb637d783a0f9fe6",
+    "kernel/mutex.c": "cfff2ecfed5ed0b3976b49d4a1a368d82daa3a0c4c55d581d82dc471351e00f2",
+    "kernel/nothread.c": "4626658cb047937eb2a1ef9d1d62aec18dc4ac2c48bdb8abb442ca9f5427d407",
+    "kernel/obj_core.c": "451df414775122ba8fd9a838bcdb4d9084c14d07b27448375b91a3e7937a1bff",
+    "kernel/paging/statistics.c": "93f4061b133db46e11704e5515a5f3490ec09932167e255534bf78a80f746306",
+    "kernel/pipes.c": "b070e00167427858d51d20572e679da4a23c0aa115a073f6614bb97f7077ea3b",
+    "kernel/poll.c": "1db51e1cda1ff5b18f6b30b881f0f1943cd817b1c6252f31372fffb356802bbd",
+    "kernel/priority_queues.c": "01fef29611b2c43deefe75585c5cbe1c842b00307ec96780e92dd37b47a088ad",
+    "kernel/queue.c": "654c3d3104c002b7f5f6a45a888a6a8a3e4f3d81defe32bb15f2e5ca62ec1066",
+    "kernel/sched.c": "bd552f59cafc126b9c960828027c03d24ddd173e2638e480dc570de6151bdc4e",
+    "kernel/sem.c": "77cb51518571b90a00b7ffb7f29678585ac7bdb982918a39a2aee3e6b9480fa0",
+    "kernel/smp.c": "14124194205f1a5c171fe320bb259c00943e3480d8ca9ae1325c1bb874e21af1",
+    "kernel/spinlock_validate.c": "7980d6708a7e72792ff6defe5e92c7b8a6cd6d2774a9a07e4fd4782828439bf0",
+    "kernel/stack.c": "bbcf461676853264d838d1c1f49a62c41048c7169fcca424781fb6654a4ddeb4",
+    "kernel/system_work_q.c": "ba05d4b60f7451377736b186ae1f237a1cb4ec0ec752df2f4b7f757bc571f61d",
+    "kernel/thread.c": "3028b68ea2227c320a2df06021277ef05184187cb34d0b8ce9f1bd136df64ac5",
+    "kernel/thread_monitor.c": "4e380e87f7a9c7dd87bd5d9fd4b980ceea7ccdee43f2a49fd8a828ba37f239eb",
+    "kernel/timeout.c": "1f594f1b609cf815786a104a0c74285f7303d71522249820b81bb0bbae7b3897",
+    "kernel/timer.c": "ced91dc3ce7f7ae0ead6056cf141bac5f05a86537b81d407b86cd0a649c94f9d",
+    "kernel/timeslicing.c": "45a248abfde95df6319a541cdb4b6f15871a66e0d5c325de8e3da737ba84348c",
+    "kernel/usage.c": "d8f55b55891561f72f0f5ed5b3e0f69d8682a443e06a447cb70a44e90091728a",
+    "kernel/userspace.c": "16070ecea216ce299f96366c1893a904f8fdf4b5c302b9f3119888f960e38995",
+    "kernel/userspace_handler.c": "e5204ac75cf966d025ed9924979ef98059382a40b92898bc86a629ad0c56cbba",
+    "kernel/version.c": "c03c0e0b32c550cd044490a6efa1ef0fc6b5b550cbdb191fc024a7a2c3cb0314",
+    "kernel/work.c": "6db1113c9967f9520c1063b065456dd996002794524575cc9450ec9e6a83c19f",
+    "kernel/xip.c": "a6091e5ed1e5036402c85d18087fda69caa332a26660819a6ac6ff1f6e02eee7",
+    "lib/libc/minimal/source/math/sqrt.c": "623fa4840e4e5a5539e66ffe53785ef6a5a3340e08bd5192f917d9efc2952b26",
+    "lib/libc/minimal/source/math/sqrtf.c": "9338f11aed1f433956172ff21697a4710d2ab68bd7403e72aa80e839ae8491fd",
+    "lib/libc/minimal/source/stdlib/atoi.c": "d22c5e68f0bf9b0835305ab54b4d1050e23cc1855f9072f7988dc0e437ea3ab6",
+    "lib/libc/minimal/source/stdlib/bsearch.c": "ca21a31e86d4c5f5d9a3a27dfa55961e950e56f45ef2a394c2d9d8c096c0cc35",
+    "lib/libc/minimal/source/stdlib/exit.c": "aadbe4382783a22f5d0fe295d3e395287a7a224de2e23af89933db2fdd588825",
+    "lib/libc/minimal/source/stdlib/qsort.c": "1738862040f18eb3c3ebcfea84e0124b36b72c1aa5a8de44dfdec0dbc67728b0",
+    "lib/libc/minimal/source/stdlib/rand.c": "2a0f13ac39e179846fb86b41e926dcc85703893a4bb494348a8ebad65ad5b278",
+    "lib/libc/minimal/source/stdlib/strtol.c": "aa6391e3ede6a562dba6d162a5677a114fe7452f9829b5db9593c3cabbe9f751",
+    "lib/libc/minimal/source/stdlib/strtoll.c": "c1d54d5fd1d4f7da64cbef0a8b47292ba0fa3654996f9449db1b94fa99b3ec27",
+    "lib/libc/minimal/source/stdlib/strtoul.c": "9f77d06e5d2b60b6e4c3bbdbadb49779cefd862bd44b83067ed97c182cd80a3f",
+    "lib/libc/minimal/source/stdlib/strtoull.c": "dc79f122f0d3f78f0954b1912afa8322fccca882a3482508a1b390b14222a8a7",
+    "lib/libc/minimal/source/stdout/fprintf.c": "7be71d5afdd733a2fb66ecfb55cab4c5e0c6add4b1622544fbc6368d8871c27a",
+    "lib/libc/minimal/source/stdout/sprintf.c": "497c8383a68072ff8489b419a0abaa2040ab47a068aa269217b7dedfc306e788",
+    "lib/libc/minimal/source/stdout/stdout_console.c": "d590fda19f2bef3f7e02432a5db4a09da4e7bb80cf124c2ff0182c1435f3a499",
+    "lib/libc/minimal/source/string/strerror.c": "794f5fb234a30f71769eed1b8dac607852b0acadc80b90d00c7e766a3d9bacc4",
+    "lib/libc/minimal/source/string/string.c": "af1d4c13ed369c1dca8036fa52525d0a5993e5201648f9a254551bfa610f1674",
+    "lib/libc/minimal/source/string/strncasecmp.c": "d556fd15e56c51cda6eb7c03a066738208236c191305d4c717244063f0918e68",
+    "lib/libc/minimal/source/string/strspn.c": "adeb339ba5b658185c81391f31173928a6a93baea9fa7c950bdd8db2f2275f9a",
+    "lib/libc/minimal/source/string/strstr.c": "3d6617fca85b64d97911dc3acc0acd3a042b47d1f881a43453455e5965b17557",
+    "lib/libc/minimal/source/time/gmtime.c": "9975d305bcea3883d51781ab63080acb1cd1144b734e821a602dadc9f9a07e54",
+    "lib/posix/options/aio.c": "aeff853ae4b2e7811a51589daa945fe22788123988ca0531b38ce9eb9437c2a4",
+    "lib/posix/options/barrier.c": "9bcce47e243e8c2c1252f959b6f022462b95e746b141a60b66ae7afeed9eaeff",
+    "lib/posix/options/clock.c": "fd12d58658aeae4c9d6ec845030a18cc751e5bd4e7a11d4181a671e8719047bf",
+    "lib/posix/options/cond.c": "55c8600dd3aaa089f4e03b51856d7658930bfb8342fbdab0e9d0f6dd48578f50",
+    "lib/posix/options/confstr.c": "85d7729ad4f86be791c5cb97ef7a5da6b2909856f3fc501af53344e14aaf0963",
+    "lib/posix/options/device_io.c": "ea446c652f58c867881d2d60cfbd881718388784d28ffb2dfea8dbe94085969b",
+    "lib/posix/options/env.c": "7c96f25ba9ec21a1546f6f3db563e6af91c6525b8f1d65cdd9740c7b5778bca0",
+    "lib/posix/options/eventfd.c": "54967513b8b5213ba03330663194b058d7e08be3b26305f819f1cd2e7098e00b",
+    "lib/posix/options/fd_mgmt.c": "f1a6b012ee0e06d9619c7bcb476da08670a99e8fc0672c84962e145883690aaf",
+    "lib/posix/options/fnmatch.c": "3c3efc604085464878b4bbe53cce4070ca30b22017c552bbafab5ee9f208b53e",
+    "lib/posix/options/fs.c": "ecfbaa3aabe5acffdeb3218d2ecc2139e84af137b728987f56c364dabf5f9162",
+    "lib/posix/options/fsync.c": "d3f3e6d5253c8d82d33643bbba4d05ad57ecc8caa2120abfb2c06ea99647d7ef",
+    "lib/posix/options/getentropy.c": "bcb824c2fbf67db6c4fa6557eef8366961fc3ae22981360fbb1689b17b0541a4",
+    "lib/posix/options/getopt/getopt.c": "17a189bff86a52743bbc6d44db9fc6053610f6c47f6ab3459af81ef03395758f",
+    "lib/posix/options/getopt/getopt_common.c": "937cd733e72935d77c70e8e5fb3d920361b52c767e385ac7f2e3c83742c7663b",
+    "lib/posix/options/getopt/getopt_long.c": "7614646ee7ececda7f8066066c294e83e3d63ec0543f7dd59869201495f1c3a0",
+    "lib/posix/options/key.c": "62219989bda0fbfa2f42f6d020b9af5c32b8f73304f153f6d5d94c3726d69164",
+    "lib/posix/options/mlock.c": "ab837630576a44055b277bb7e73682d00041df740e4f8309b558a84866c99813",
+    "lib/posix/options/mlockall.c": "06514c7870e8b5f7f39731d373358381986b8f1ae24979f32dc7e9cfa87af255",
+    "lib/posix/options/mmap.c": "1078190c85619607fcd44f64bdd2298fad55034a08a8acc75ab4cc9aba144a26",
+    "lib/posix/options/mprotect.c": "90f0728551119462689ceddbbe2d26e1695117656bcec9f7bdd930ddadbde38c",
+    "lib/posix/options/mqueue.c": "a72ebd5fc2dfc0f0c5a21e0c35afac09adedfc56c1119585230b170a2b906441",
+    "lib/posix/options/multi_process.c": "5ba85f23618b708f2ceeaf099bd13cca97b37ab8676ee14bff66bf4c802a297a",
+    "lib/posix/options/mutex.c": "cb95d86b40b0694fa4606cd994eed2358d3af3024f1a0fbe133ece0c2c106ab8",
+    "lib/posix/options/net.c": "004e0347bead9904ab11d0ddb7a2b914c9b15ae50d5217faede6f692cf41740f",
+    "lib/posix/options/perror.c": "6316cdd343b3f1045f4eed97143a20bfe761b9d7aa81a25592ad55c56001ada6",
+    "lib/posix/options/pthread.c": "b458fb272188da50900426ac0bf8342986d81e525be0a5bd974e92002c1a199a",
+    "lib/posix/options/rwlock.c": "da4920406da3237db5891819dd55771aa30b22bc4ea3af48bc9bf8a579cee48c",
+    "lib/posix/options/sched.c": "cd4ddc8a88ccccbe4e8cc5014e2b3e2423d2b88888856b6b421db3ba96a3fc76",
+    "lib/posix/options/semaphore.c": "b3c6d8c8a9fcec56cf66cd8c9c00a0c44707e98cd63ee8b77a9fdf2b89aa9670",
+    "lib/posix/options/shm.c": "f474234500711051c9dbdc1a6807d40e3729a13678bfa7c94f752a1f34d81d80",
+    "lib/posix/options/signal.c": "59ceea72aaef52400fed9ad92e8c667294a098f8c8d46b8d05e1c9f3258b1331",
+    "lib/posix/options/sleep.c": "6e1513153c48e21696301a041024dfb73c4be42cf7fa4ceba2d69fc6b2eebb56",
+    "lib/posix/options/spinlock.c": "01232034554c2bf3e5601686124510a2fa926f688e78276b782bee2ebf5a948f",
+    "lib/posix/options/stropts.c": "5f8e82dc54b6d9180006d3065197ee0e85aeac138de9202ba0f0d17a5d0c394b",
+    "lib/posix/options/sysconf.c": "ba7f5b4e8230cdada4a32e14fbab71ff8850d86c757d8c82a27223d12636b0f3",
+    "lib/posix/options/syslog.c": "08ea62174b5d45205280f0c06728f87b75f26dd53a816f660fcdae0814d21b1b",
+    "lib/posix/options/timer.c": "f09ad8756ad130ca21b30b1c11cf73c34805bcbf1d7ec15544dd877b90a24fbd",
+    "lib/posix/options/timespec_to_timeout.c": "93caa3f64c343b32dc9de53c9d42eb9b499cf45358753a623fb110d15d9430a4",
+    "lib/posix/options/uname.c": "c7537c01880da22f8630b592ccc454415ae7ce96b461fbec35fde69d36187557",
+    "lib/utils/base64.c": "9ee11d74bea7ba8f5a9cb2ac079f01dd993821bd954f277aedce143a0dbaa4a8",
+    "lib/utils/bitarray.c": "a453a5883eb8ff9e809ea9962079a793082f2ad4d4a98d646c8f88596223670d",
+    "lib/utils/dec.c": "b6991d4a5dd46650e0b3a85ed0adcdb87842832bc4c5108fc0918f125316ade0",
+    "lib/utils/hex.c": "3500c88db0350a67e9c8e84d6ae71daa78d0792f71938773744946ab2e8c390d",
+    "lib/utils/json.c": "39f12e957022f9b1fa7e89fe9cd731af0dd5296efc156314e47892ac52d1c622",
+    "lib/utils/notify.c": "878e02b64f185cc5669bf87f5a3b8d502a4bcf8c05fe8ebdd25cce76a64c33dc",
+    "lib/utils/onoff.c": "c856b683caaacc42c85a82b55da84f44d73ee1ec5088f204d3c3d2bdc1dd2446",
+    "lib/utils/rb.c": "78f49598b2fad9a423c6ff58f1972cc72e7a4e609f613b8c50ee130ac41edb29",
+    "lib/utils/ring_buffer.c": "df3ca1af333940e018a3f5b0e5dc0101e8ede2e200db8e8f5b8bd6f601747562",
+    "lib/utils/timeutil.c": "4c94e929f6c75a774bd3bfb91909839e50461bb56fae203c9e8edc01b38c9585",
+    "lib/utils/utf8.c": "a6c040f98d15e84e7bb3b9337fa9a475e9892d386fa8ee235eb0ab75dce6f061",
+    "lib/utils/winstream.c": "39627582d82894505585f67e0ffe2530e21a5a8ec6d0660657f67be8fb1d1aef",
+    "subsys/fs/ext2/ext2_bitmap.c": "a991ceac17ba4fed5fa6026995a2dc651df8b7c28c676e2e1ebd0d55cd14d8c8",
+    "subsys/fs/ext2/ext2_disk_access.c": "f8480ea8ae29eec23e7304d3bc8e5b50a945801dc15cf61ac2f827ab6b74086d",
+    "subsys/fs/ext2/ext2_diskops.c": "50b553e596932470ec974e5f426aa1236e775e083b934eae31a84e9de6c52366",
+    "subsys/fs/ext2/ext2_format.c": "1689070dfd4f56cc589ccd1a55c08e9f40ea3a548144dd7b4dce48f6704d9446",
+    "subsys/fs/ext2/ext2_impl.c": "afebf2f5501e9401140ad9f480e348b124b53c87833b4bbf5dd412755185fbd3",
+    "subsys/fs/ext2/ext2_ops.c": "e501cee2e17524dd7767a161d69d3450e8c81d06af2ce0961fa09d0c0bc6b4bf",
+    "subsys/fs/fat_fs.c": "ae9f2d766d163fa1ef6e00c786f3be66a1f5c0de32d7c98e55851bfe5b1c85a0",
+    "subsys/fs/fcb/fcb.c": "dbb65462157ed9b74dbd7283eae401468d06b241e30c08af40084fb87fa034f2",
+    "subsys/fs/fcb/fcb_append.c": "6f2d3ab3177c2e04c1aec38bdbe00c2bc50ef8b1cc8781c9160b11a2bd95fd29",
+    "subsys/fs/fcb/fcb_elem_info.c": "f0f9f19e29a5a0f299f198d182e6afb77fd0a92d63f1085cd97c4428161a3b6a",
+    "subsys/fs/fcb/fcb_getnext.c": "3d3aa248d6271458feb9c907f5f10231f1c280a1ec16f1e270d6abf52c58c533",
+    "subsys/fs/fcb/fcb_rotate.c": "887db9ae798af149fe495e863d00b8022d30f4d9d1810b0e2c6371dfbf7ceb70",
+    "subsys/fs/fcb/fcb_walk.c": "27b14f63534b1f5237afa8d41992edf31839e8e2d76666231782424914211944",
+    "subsys/fs/fs.c": "e3e5aa4e4aea9445317221ad542c2aa55ea578060cb30a6d6c0ed6b743bcffa5",
+    "subsys/fs/fs_impl.c": "cc7e635660232cffea1e159e21a57d4b78f3a7267b55a968f6b4b766ac659226",
+    "subsys/fs/fuse_fs_access.c": "17d9a7bb2bb073977ed4c76b0aea3778be08e5dc0378e475c43062fa8acf7c3b",
+    "subsys/fs/littlefs_fs.c": "74788746ec0e96d70e7ad9e62e270435cfa44c7d542d6e8a91c86eedf85ed9a1",
+    "subsys/fs/nvs/nvs.c": "236b2adf5e92e946d3457480f1fa884b73ceff3b1bbfd43322c4f0d0e697ea15",
+    "subsys/fs/shell.c": "3c2f53097130353995660a14c0a621927eea795461a62a2712354fa5607197cd",
+    "subsys/logging/backends/log_backend_adsp.c": "39d830d94864cbb78cd4bcd5769004038b52e561b02713f45d1ab512359da28b",
+    "subsys/logging/backends/log_backend_adsp_mtrace.c": "2891af792291b318a8cf7d7f3d2c7ac20fb28bdb6f68260d5e908a84781a4b01",
+    "subsys/logging/backends/log_backend_ble.c": "1425ef315c03c4c80d716b8c45b205bf3d0796a916ce217aa3e5aab502b1acdc",
+    "subsys/logging/backends/log_backend_efi_console.c": "e9538332dec04ce296bb5bb0bf446c520bc6b48185f4ca5a8688cc27b9bea14e",
+    "subsys/logging/backends/log_backend_fs.c": "248f864fc13f5ddeb56c3677bfc5dca18f9a66d262ad39a8dad2a531a2f37dae",
+    "subsys/logging/backends/log_backend_ipc_service.c": "d05ce85b370db70e3db23055c1da0b0562ee4693c1dd5b44dd371bd11c60c2d9",
+    "subsys/logging/backends/log_backend_native_posix.c": "a864d94b17c21758942cf884f83e7704a58663ce4aa7381aa5dcb82650117e7c",
+    "subsys/logging/backends/log_backend_net.c": "825b7931a8953613c8e044fe8e5f88c14c06425b733b4bd7695a416f9adb68e8",
+    "subsys/logging/backends/log_backend_rtt.c": "52f00e5341bcbd5d558a8eabadd96b38284e08c689955b1b51ab8778ed27da90",
+    "subsys/logging/backends/log_backend_spinel.c": "12b9657a7c9e29609f6282b69a01123fa59095b4ce802dc606163ca6c84eccdb",
+    "subsys/logging/backends/log_backend_swo.c": "dd254c8084e1777c70a640bc50e4d62b70ee32db56b2d7b50dafc79a11679444",
+    "subsys/logging/backends/log_backend_uart.c": "d10b5c5f92a8229bff5a04b34c3a0133c2c800b2edef49fb8ad6f923a4979f73",
+    "subsys/logging/backends/log_backend_xtensa_sim.c": "71139bbccec5d21e124b9d61d5f062bc36a5c89719ce551b4f31d08c71d692f3",
+    "subsys/logging/backends/log_multidomain_backend.c": "4c6384f7ac8aa8a94e3070bc5a15cf79bb57c33c3c503fc47b3cc91ee4271cc8",
+    "subsys/logging/log_cache.c": "db31bafa9a65e6f0e5bd0fbeba946512e2d2549c8524ef99c5d68e77d666a555",
+    "subsys/logging/log_cmds.c": "43283fe133db43d03694b2df1a5370ab9daa709f86ca0d02d7a62a5c9fbb9d01",
+    "subsys/logging/log_core.c": "679a652e519f080a05f19842acdd1b2061627676c2fa0dcf30e66b46a43ea85b",
+    "subsys/logging/log_frontend_dict_uart.c": "b64946996309535afa4f7ef1616f1a9b60eeaca1400f3bc55a2635c370aa640e",
+    "subsys/logging/log_link_ipc_service.c": "45c7c18d685ce0b43c86f4a5edd07e48c7fcab564e782b7e1ced239f23f04549",
+    "subsys/logging/log_mgmt.c": "9169054fcff32e78541a3b5cf8e50a4ab3b3d49ea4ea833fc1d5cf6f22a7ee8b",
+    "subsys/logging/log_minimal.c": "c655df5f81b55c91616c3dbce690d35f6fb529bf4fc1c6674743920976e01175",
+    "subsys/logging/log_msg.c": "2668e8f15ee8b10fd0bbe250be6de08f3c6730d457b4eeb6cd682ce3bd2935ef",
+    "subsys/logging/log_multidomain_link.c": "fc7375837a6aa072d06950a93067a8bfacd941f4e00ec9469f8665657f14a014",
+    "subsys/logging/log_output.c": "3a40effbd5b7e30176e2ab706fafc708a102ba83768930355c58044cc24ba5d7",
+    "subsys/logging/log_output_custom.c": "966b4e3df9a30f24da675d6f8b785d61e957d5f2e27cb7d6bca12c590892bcf7",
+    "subsys/logging/log_output_dict.c": "0bbefcec27d6048ede07ac35f3bdfdeffc28dd50180660cd45f39e382dedcd4d",
+    "subsys/logging/log_output_syst.c": "ba963886dad4ba9a4454cf29ff108a6db11e20cc6589e8d2cd48a6a476098a58",
+    "subsys/net/lib/dns/dispatcher.c": "bdbcbcb16515b3196ef5c3f3082b52cd8abd8b67850ed1129c1f5b3b24f56bae",
+    "subsys/net/lib/dns/dns_cache.c": "ff9b128ca5be846eaad04de64645374a2896ec963f57a6c5113115f99be9577f",
+    "subsys/net/lib/dns/dns_pack.c": "41e9e680dbd4f8fe341dd0a6122916f77115bb0e7401aed6a452dd0320b614fa",
+    "subsys/net/lib/dns/dns_sd.c": "5e02d163c2a4ee03abfc57e4059a86fd7d4c7cce1effe40eb6c766b126782d98",
+    "subsys/net/lib/dns/llmnr_responder.c": "dda3cc9c0ff69301ec252bc17ba485f70dc5e9a99e8cbd6bae6deb813280d001",
+    "subsys/net/lib/dns/mdns_responder.c": "5bfbd2865bf0ad34bc0c920f94c171537303b0037783f93af0713ae2a34ad737",
+    "subsys/net/lib/dns/resolve.c": "c37242f9bf6715082f4ddbd68ce5a17c2f9240f7f83ee3f5d86821804782916f",
+    "subsys/net/lib/http/http_client.c": "4d24557e74d685b38eae2a73ed4f8256d9003fa7da72c0880b04f680cf6de3e0",
+    "subsys/net/lib/http/http_hpack.c": "b07c76740380e8d00bffc64b8860f0a9f85e4cbb58f4a18c363a035bc83decd7",
+    "subsys/net/lib/http/http_huffman.c": "d6c05474eb91edec0b775003922d70b044f2c47f1edc8e9c9dd47f271d7cc5de",
+    "subsys/net/lib/http/http_parser.c": "92a793f077b143be20ebd282ccf5a8a944b3b66e66dede61182097e19dd60dfe",
+    "subsys/net/lib/http/http_parser_url.c": "59ba0b7b3bc3511bf9b7665b002b84f0ebe5aaa4882b7cc2117b64067062aba0",
+    "subsys/net/lib/http/http_server_core.c": "53ba1ec8f8a9722e1f00956cc032508be79784809b901771e9644777048231ee",
+    "subsys/net/lib/http/http_server_http1.c": "6f31657f654e0dc4162febb13de28eb9620b272495b494c1ad69a1e9b61bba90",
+    "subsys/net/lib/http/http_server_http2.c": "5f70c9ab390660de5da05f1f5566d6b3b14e6fc2aa84f53c28f4421dc4b83856",
+    "subsys/net/lib/http/http_server_ws.c": "147087bae9c7a96bf17bff529f0f670b0c53f37a3d8c948eb485bc77c99b1b07",
+    "subsys/shell/backends/shell_adsp_memory_window.c": "d784f11214bc8417e447fc41eeea70e52b24949584bb9e19c61395f6020a82fa",
+    "subsys/shell/backends/shell_dummy.c": "40d5cb69c4cd28146eaf33ea79ec4ed9dbbf0ee3cd1412712cf7c82e0f022683",
+    "subsys/shell/backends/shell_mqtt.c": "e7d16f771499132f58fde87cf086dfbf617cdd63ec748bf4b0939f9eba0d9354",
+    "subsys/shell/backends/shell_rpmsg.c": "afe67e1f6585d9981afaf0943e30db9431304305d6f0ce0037a2d2a12b42068c",
+    "subsys/shell/backends/shell_rtt.c": "61350e169c5b4639f8b255909637a049f07bec6bd6b45ed8aecef06880010b86",
+    "subsys/shell/backends/shell_telnet.c": "b614c4bffc05146d0aa5529248fdb5a0532d28030333bf28c352f4ea7dc9d51c",
+    "subsys/shell/backends/shell_uart.c": "dd860c60cc2a888dce8c856e31b9dc032b2e78180a72a02845286d656c5124ae",
+    "subsys/shell/modules/date_service.c": "c898c2b08148df8d5b51bb5070a1fabfc9770c52c9c4f20a09d73f22c4e7bf65",
+    "subsys/shell/modules/device_service.c": "574f4e349385bc696846ba2bfb935e858b2e9997c3c347316545d9d07dc67aeb",
+    "subsys/shell/modules/devmem_service.c": "cbc8cde7d70574a59f0bb21dddbc009a17cccf427dca7fb91d8fc8248d616c8d",
+    "subsys/shell/modules/kernel_service.c": "8c2d8dfec7412d00f5989ebd2ddcf04e18dfbf7a9c4040b9133eccafa4ea3503",
+    "subsys/shell/shell.c": "caf48d44f85a546c91e630e404259ec19c2f4c456b7398ffe0a0624d052a2ecb",
+    "subsys/shell/shell_cmds.c": "d196787108f2f98cdffbe32ce6d98536d2faf40682ed9c7493ea6c51525b2d1b",
+    "subsys/shell/shell_fprintf.c": "d3a93271115433529de5d1a4a2039c4fb283839cfa4c7b686734ddda871997c3",
+    "subsys/shell/shell_help.c": "6f707d377c7db102c5112de34d391933aeb0952ba5eae7bf006263578fef93da",
+    "subsys/shell/shell_history.c": "53115ba945ca92f48a01b6df83c8dc260b28b6854c9e04f59928826f1f9e6bf0",
+    "subsys/shell/shell_log_backend.c": "08045a33a8a5c740f37f1ad81b6bccef8637a40755186102f974d51651cae400",
+    "subsys/shell/shell_ops.c": "c7b92d77395164ea5706963ca5df395655912a887d13d67aafec76f062dffeeb",
+    "subsys/shell/shell_utils.c": "d16c62b9d343d19fd5ede0d29abcdecf82d2e14dd6b4c8ab00c05ffaa034ff73",
+    "subsys/shell/shell_wildcard.c": "4067fd2847f113ee79ee55bf4f08cc25657b710e4aa9b1fc4ebb893b06152fe6"
+  },
+  "detection_files": [
+    {
+      "path": "kernel/atomic_c.c",
+      "lines": 414,
+      "sha256": "cdeade908ca2ce57fdab5f5d3da5a9ff035a59474c8d251a0577108ed02fef01"
+    },
+    {
+      "path": "kernel/banner.c",
+      "lines": 48,
+      "sha256": "2319b404a9dce5e3d26d692aab552f24a84429e3d2e6ae45365e5d391c9ab19a"
+    },
+    {
+      "path": "kernel/busy_wait.c",
+      "lines": 56,
+      "sha256": "fa71ef2d8e936a4269744056b02d8690f39d8a0db76975985a3266fc6cdcd6dc"
+    },
+    {
+      "path": "kernel/compiler_stack_protect.c",
+      "lines": 64,
+      "sha256": "3e10aa178322eccfdb15e4e8eddebc766b984bb8e39a76684315f23450b2fd31"
+    },
+    {
+      "path": "kernel/condvar.c",
+      "lines": 158,
+      "sha256": "f033a32974541551dd16c6ea18604d744b5c5257b1c6bdb738bff8f6cc7717f8"
+    },
+    {
+      "path": "kernel/cpu_mask.c",
+      "lines": 76,
+      "sha256": "3d78c8f9a7ec32cf1854da3563d0e55c8272b8084f07a2cf2a03d224621d55fd"
+    },
+    {
+      "path": "kernel/device.c",
+      "lines": 196,
+      "sha256": "7c30453686174c0a156b6d3b3c7ba4291649929d8edae5c983cd0e578422e535"
+    },
+    {
+      "path": "kernel/dynamic.c",
+      "lines": 181,
+      "sha256": "f19ad0181a0dcb89b10e126eaccca1ee206ee2bce032e0bd9936cc4afa8ee831"
+    },
+    {
+      "path": "kernel/dynamic_disabled.c",
+      "lines": 25,
+      "sha256": "7d2627bcb64f6eef6536d14f7458bca1db35ace85134782ef921d6bc989aa31a"
+    },
+    {
+      "path": "kernel/errno.c",
+      "lines": 57,
+      "sha256": "89d530d6fb93571b0409e5a46d3a0c499cc77791aecd7cf726e67e631137f4c6"
+    },
+    {
+      "path": "kernel/events.c",
+      "lines": 367,
+      "sha256": "51eeaabe518f47f2b5b98210d8faf2e9ea5168a9a897a684abc30233c0d5496d"
+    },
+    {
+      "path": "kernel/fatal.c",
+      "lines": 178,
+      "sha256": "9ea53fac644879adddf5db54bdbce5b7988e798bdc7b25838648e47527b21305"
+    },
+    {
+      "path": "kernel/float.c",
+      "lines": 47,
+      "sha256": "81d352f3d5b6231ee66301375cb8ac38b77cb4638f0592212151ede00f58b51a"
+    },
+    {
+      "path": "kernel/futex.c",
+      "lines": 101,
+      "sha256": "ad917df35b646968ff81cc96bc123f0855e23111af25bd01cf63c0c3898f16a4"
+    },
+    {
+      "path": "kernel/idle.c",
+      "lines": 102,
+      "sha256": "fc47f69ecbca4456bf9d38744949e5c357f8bd4da6473ccb9da0883e3cc1d8a3"
+    },
+    {
+      "path": "kernel/init.c",
+      "lines": 755,
+      "sha256": "56071b8d1df733a75713ea58dacfc51594b4ffe605e03dad444392fcdb9aab81"
+    },
+    {
+      "path": "kernel/init_static.c",
+      "lines": 87,
+      "sha256": "0bebf3586424f91389a3006e3be68ebfae8c8251e2213442051939fa9b61d21b"
+    },
+    {
+      "path": "kernel/ipi.c",
+      "lines": 108,
+      "sha256": "8a3883fed7a6403efedd75fc0c1f7fcbec826156205edcbcbec4306585063fae"
+    },
+    {
+      "path": "kernel/irq_offload.c",
+      "lines": 23,
+      "sha256": "f9de61f92dc2d5289fabb6a852aeab6a111d04bed4af59fb5c3e1d05da24ba96"
+    },
+    {
+      "path": "kernel/kheap.c",
+      "lines": 161,
+      "sha256": "7da47d39fa0409202430ee947a8f18bd962d34ea23d1b05a95469a7c528c3205"
+    },
+    {
+      "path": "kernel/mailbox.c",
+      "lines": 461,
+      "sha256": "24164070ce445e2783b7e2874b6b8b8501421f056736cde0ac8fabef6bf2f3ec"
+    },
+    {
+      "path": "kernel/main_weak.c",
+      "lines": 30,
+      "sha256": "42fbf6062eaaf4e3787134f71327eb48ca5b263dda8e32e3e264d625595e91ae"
+    },
+    {
+      "path": "kernel/mem_domain.c",
+      "lines": 368,
+      "sha256": "f96f8e891038e22d3c14a1d6aeae034d3a6dd33596a08b283c0921eae6a9e6ae"
+    },
+    {
+      "path": "kernel/mem_slab.c",
+      "lines": 334,
+      "sha256": "ab72a092589590b469c58b84aa0366be2f793214230afe8b616a31470dddaf4d"
+    },
+    {
+      "path": "kernel/mempool.c",
+      "lines": 178,
+      "sha256": "56ddcee2ae393928dc6475615bd5708db28828d05f5b0aef1d21aa599e6f2492"
+    },
+    {
+      "path": "kernel/mmu.c",
+      "lines": 1680,
+      "sha256": "51872f9b99616921df2f8237e5f44a8805b9a5e72dd113f63356f93c886fbcfa"
+    },
+    {
+      "path": "kernel/msg_q.c",
+      "lines": 442,
+      "sha256": "a8b10f52ac595f0337359fe1c84f92ba38f25b6c9798b2a8fb637d783a0f9fe6"
+    },
+    {
+      "path": "kernel/mutex.c",
+      "lines": 314,
+      "sha256": "cfff2ecfed5ed0b3976b49d4a1a368d82daa3a0c4c55d581d82dc471351e00f2"
+    },
+    {
+      "path": "kernel/nothread.c",
+      "lines": 52,
+      "sha256": "4626658cb047937eb2a1ef9d1d62aec18dc4ac2c48bdb8abb442ca9f5427d407"
+    },
+    {
+      "path": "kernel/obj_core.c",
+      "lines": 327,
+      "sha256": "451df414775122ba8fd9a838bcdb4d9084c14d07b27448375b91a3e7937a1bff"
+    },
+    {
+      "path": "kernel/paging/statistics.c",
+      "lines": 251,
+      "sha256": "93f4061b133db46e11704e5515a5f3490ec09932167e255534bf78a80f746306"
+    },
+    {
+      "path": "kernel/pipes.c",
+      "lines": 832,
+      "sha256": "b070e00167427858d51d20572e679da4a23c0aa115a073f6614bb97f7077ea3b"
+    },
+    {
+      "path": "kernel/poll.c",
+      "lines": 815,
+      "sha256": "1db51e1cda1ff5b18f6b30b881f0f1943cd817b1c6252f31372fffb356802bbd"
+    },
+    {
+      "path": "kernel/priority_queues.c",
+      "lines": 30,
+      "sha256": "01fef29611b2c43deefe75585c5cbe1c842b00307ec96780e92dd37b47a088ad"
+    },
+    {
+      "path": "kernel/queue.c",
+      "lines": 480,
+      "sha256": "654c3d3104c002b7f5f6a45a888a6a8a3e4f3d81defe32bb15f2e5ca62ec1066"
+    },
+    {
+      "path": "kernel/sched.c",
+      "lines": 1602,
+      "sha256": "bd552f59cafc126b9c960828027c03d24ddd173e2638e480dc570de6151bdc4e"
+    },
+    {
+      "path": "kernel/sem.c",
+      "lines": 231,
+      "sha256": "77cb51518571b90a00b7ffb7f29678585ac7bdb982918a39a2aee3e6b9480fa0"
+    },
+    {
+      "path": "kernel/smp.c",
+      "lines": 250,
+      "sha256": "14124194205f1a5c171fe320bb259c00943e3480d8ca9ae1325c1bb874e21af1"
+    },
+    {
+      "path": "kernel/spinlock_validate.c",
+      "lines": 47,
+      "sha256": "7980d6708a7e72792ff6defe5e92c7b8a6cd6d2774a9a07e4fd4782828439bf0"
+    },
+    {
+      "path": "kernel/stack.c",
+      "lines": 222,
+      "sha256": "bbcf461676853264d838d1c1f49a62c41048c7169fcca424781fb6654a4ddeb4"
+    },
+    {
+      "path": "kernel/system_work_q.c",
+      "lines": 37,
+      "sha256": "ba05d4b60f7451377736b186ae1f237a1cb4ec0ec752df2f4b7f757bc571f61d"
+    },
+    {
+      "path": "kernel/thread.c",
+      "lines": 1109,
+      "sha256": "3028b68ea2227c320a2df06021277ef05184187cb34d0b8ce9f1bd136df64ac5"
+    },
+    {
+      "path": "kernel/thread_monitor.c",
+      "lines": 85,
+      "sha256": "4e380e87f7a9c7dd87bd5d9fd4b980ceea7ccdee43f2a49fd8a828ba37f239eb"
+    },
+    {
+      "path": "kernel/timeout.c",
+      "lines": 340,
+      "sha256": "1f594f1b609cf815786a104a0c74285f7303d71522249820b81bb0bbae7b3897"
+    },
+    {
+      "path": "kernel/timer.c",
+      "lines": 365,
+      "sha256": "ced91dc3ce7f7ae0ead6056cf141bac5f05a86537b81d407b86cd0a649c94f9d"
+    },
+    {
+      "path": "kernel/timeslicing.c",
+      "lines": 131,
+      "sha256": "45a248abfde95df6319a541cdb4b6f15871a66e0d5c325de8e3da737ba84348c"
+    },
+    {
+      "path": "kernel/usage.c",
+      "lines": 485,
+      "sha256": "d8f55b55891561f72f0f5ed5b3e0f69d8682a443e06a447cb70a44e90091728a"
+    },
+    {
+      "path": "kernel/userspace.c",
+      "lines": 1017,
+      "sha256": "16070ecea216ce299f96366c1893a904f8fdf4b5c302b9f3119888f960e38995"
+    },
+    {
+      "path": "kernel/userspace_handler.c",
+      "lines": 89,
+      "sha256": "e5204ac75cf966d025ed9924979ef98059382a40b92898bc86a629ad0c56cbba"
+    },
+    {
+      "path": "kernel/version.c",
+      "lines": 21,
+      "sha256": "c03c0e0b32c550cd044490a6efa1ef0fc6b5b550cbdb191fc024a7a2c3cb0314"
+    },
+    {
+      "path": "kernel/work.c",
+      "lines": 1146,
+      "sha256": "6db1113c9967f9520c1063b065456dd996002794524575cc9450ec9e6a83c19f"
+    },
+    {
+      "path": "kernel/xip.c",
+      "lines": 75,
+      "sha256": "a6091e5ed1e5036402c85d18087fda69caa332a26660819a6ac6ff1f6e02eee7"
+    },
+    {
+      "path": "lib/libc/minimal/source/math/sqrt.c",
+      "lines": 56,
+      "sha256": "623fa4840e4e5a5539e66ffe53785ef6a5a3340e08bd5192f917d9efc2952b26"
+    },
+    {
+      "path": "lib/libc/minimal/source/math/sqrtf.c",
+      "lines": 56,
+      "sha256": "9338f11aed1f433956172ff21697a4710d2ab68bd7403e72aa80e839ae8491fd"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/atoi.c",
+      "lines": 59,
+      "sha256": "d22c5e68f0bf9b0835305ab54b4d1050e23cc1855f9072f7988dc0e437ea3ab6"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/bsearch.c",
+      "lines": 46,
+      "sha256": "ca21a31e86d4c5f5d9a3a27dfa55961e950e56f45ef2a394c2d9d8c096c0cc35"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/exit.c",
+      "lines": 16,
+      "sha256": "aadbe4382783a22f5d0fe295d3e395287a7a224de2e23af89933db2fdd588825"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/qsort.c",
+      "lines": 126,
+      "sha256": "1738862040f18eb3c3ebcfea84e0124b36b72c1aa5a8de44dfdec0dbc67728b0"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/rand.c",
+      "lines": 33,
+      "sha256": "2a0f13ac39e179846fb86b41e926dcc85703893a4bb494348a8ebad65ad5b278"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/strtol.c",
+      "lines": 128,
+      "sha256": "aa6391e3ede6a562dba6d162a5677a114fe7452f9829b5db9593c3cabbe9f751"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/strtoll.c",
+      "lines": 127,
+      "sha256": "c1d54d5fd1d4f7da64cbef0a8b47292ba0fa3654996f9449db1b94fa99b3ec27"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/strtoul.c",
+      "lines": 106,
+      "sha256": "9f77d06e5d2b60b6e4c3bbdbadb49779cefd862bd44b83067ed97c182cd80a3f"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdlib/strtoull.c",
+      "lines": 105,
+      "sha256": "dc79f122f0d3f78f0954b1912afa8322fccca882a3482508a1b390b14222a8a7"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdout/fprintf.c",
+      "lines": 56,
+      "sha256": "7be71d5afdd733a2fb66ecfb55cab4c5e0c6add4b1622544fbc6368d8871c27a"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdout/sprintf.c",
+      "lines": 103,
+      "sha256": "497c8383a68072ff8489b419a0abaa2040ab47a068aa269217b7dedfc306e788"
+    },
+    {
+      "path": "lib/libc/minimal/source/stdout/stdout_console.c",
+      "lines": 124,
+      "sha256": "d590fda19f2bef3f7e02432a5db4a09da4e7bb80cf124c2ff0182c1435f3a499"
+    },
+    {
+      "path": "lib/libc/minimal/source/string/strerror.c",
+      "lines": 64,
+      "sha256": "794f5fb234a30f71769eed1b8dac607852b0acadc80b90d00c7e766a3d9bacc4"
+    },
+    {
+      "path": "lib/libc/minimal/source/string/string.c",
+      "lines": 399,
+      "sha256": "af1d4c13ed369c1dca8036fa52525d0a5993e5201648f9a254551bfa610f1674"
+    },
+    {
+      "path": "lib/libc/minimal/source/string/strncasecmp.c",
+      "lines": 28,
+      "sha256": "d556fd15e56c51cda6eb7c03a066738208236c191305d4c717244063f0918e68"
+    },
+    {
+      "path": "lib/libc/minimal/source/string/strspn.c",
+      "lines": 32,
+      "sha256": "adeb339ba5b658185c81391f31173928a6a93baea9fa7c950bdd8db2f2275f9a"
+    },
+    {
+      "path": "lib/libc/minimal/source/string/strstr.c",
+      "lines": 60,
+      "sha256": "3d6617fca85b64d97911dc3acc0acd3a042b47d1f881a43453455e5965b17557"
+    },
+    {
+      "path": "lib/libc/minimal/source/time/gmtime.c",
+      "lines": 17,
+      "sha256": "9975d305bcea3883d51781ab63080acb1cd1144b734e821a602dadc9f9a07e54"
+    },
+    {
+      "path": "lib/posix/options/aio.c",
+      "lines": 82,
+      "sha256": "aeff853ae4b2e7811a51589daa945fe22788123988ca0531b38ce9eb9437c2a4"
+    },
+    {
+      "path": "lib/posix/options/barrier.c",
+      "lines": 212,
+      "sha256": "9bcce47e243e8c2c1252f959b6f022462b95e746b141a60b66ae7afeed9eaeff"
+    },
+    {
+      "path": "lib/posix/options/clock.c",
+      "lines": 320,
+      "sha256": "fd12d58658aeae4c9d6ec845030a18cc751e5bd4e7a11d4181a671e8719047bf"
+    },
+    {
+      "path": "lib/posix/options/cond.c",
+      "lines": 259,
+      "sha256": "55c8600dd3aaa089f4e03b51856d7658930bfb8342fbdab0e9d0f6dd48578f50"
+    },
+    {
+      "path": "lib/posix/options/confstr.c",
+      "lines": 21,
+      "sha256": "85d7729ad4f86be791c5cb97ef7a5da6b2909856f3fc501af53344e14aaf0963"
+    },
+    {
+      "path": "lib/posix/options/device_io.c",
+      "lines": 64,
+      "sha256": "ea446c652f58c867881d2d60cfbd881718388784d28ffb2dfea8dbe94085969b"
+    },
+    {
+      "path": "lib/posix/options/env.c",
+      "lines": 267,
+      "sha256": "7c96f25ba9ec21a1546f6f3db563e6af91c6525b8f1d65cdd9740c7b5778bca0"
+    },
+    {
+      "path": "lib/posix/options/eventfd.c",
+      "lines": 23,
+      "sha256": "54967513b8b5213ba03330663194b058d7e08be3b26305f819f1cd2e7098e00b"
+    },
+    {
+      "path": "lib/posix/options/fd_mgmt.c",
+      "lines": 50,
+      "sha256": "f1a6b012ee0e06d9619c7bcb476da08670a99e8fc0672c84962e145883690aaf"
+    },
+    {
+      "path": "lib/posix/options/fnmatch.c",
+      "lines": 261,
+      "sha256": "3c3efc604085464878b4bbe53cce4070ca30b22017c552bbafab5ee9f208b53e"
+    },
+    {
+      "path": "lib/posix/options/fs.c",
+      "lines": 430,
+      "sha256": "ecfbaa3aabe5acffdeb3218d2ecc2139e84af137b728987f56c364dabf5f9162"
+    },
+    {
+      "path": "lib/posix/options/fsync.c",
+      "lines": 18,
+      "sha256": "d3f3e6d5253c8d82d33643bbba4d05ad57ecc8caa2120abfb2c06ea99647d7ef"
+    },
+    {
+      "path": "lib/posix/options/getentropy.c",
+      "lines": 45,
+      "sha256": "bcb824c2fbf67db6c4fa6557eef8366961fc3ae22981360fbb1689b17b0541a4"
+    },
+    {
+      "path": "lib/posix/options/getopt/getopt.c",
+      "lines": 165,
+      "sha256": "17a189bff86a52743bbc6d44db9fc6053610f6c47f6ab3459af81ef03395758f"
+    },
+    {
+      "path": "lib/posix/options/getopt/getopt_common.c",
+      "lines": 68,
+      "sha256": "937cd733e72935d77c70e8e5fb3d920361b52c767e385ac7f2e3c83742c7663b"
+    },
+    {
+      "path": "lib/posix/options/getopt/getopt_long.c",
+      "lines": 626,
+      "sha256": "7614646ee7ececda7f8066066c294e83e3d63ec0543f7dd59869201495f1c3a0"
+    },
+    {
+      "path": "lib/posix/options/key.c",
+      "lines": 289,
+      "sha256": "62219989bda0fbfa2f42f6d020b9af5c32b8f73304f153f6d5d94c3726d69164"
+    },
+    {
+      "path": "lib/posix/options/mlock.c",
+      "lines": 24,
+      "sha256": "ab837630576a44055b277bb7e73682d00041df740e4f8309b558a84866c99813"
+    },
+    {
+      "path": "lib/posix/options/mlockall.c",
+      "lines": 25,
+      "sha256": "06514c7870e8b5f7f39731d373358381986b8f1ae24979f32dc7e9cfa87af255"
+    },
+    {
+      "path": "lib/posix/options/mmap.c",
+      "lines": 128,
+      "sha256": "1078190c85619607fcd44f64bdd2298fad55034a08a8acc75ab4cc9aba144a26"
+    },
+    {
+      "path": "lib/posix/options/mprotect.c",
+      "lines": 21,
+      "sha256": "90f0728551119462689ceddbbe2d26e1695117656bcec9f7bdd930ddadbde38c"
+    },
+    {
+      "path": "lib/posix/options/mqueue.c",
+      "lines": 527,
+      "sha256": "a72ebd5fc2dfc0f0c5a21e0c35afac09adedfc56c1119585230b170a2b906441"
+    },
+    {
+      "path": "lib/posix/options/multi_process.c",
+      "lines": 23,
+      "sha256": "5ba85f23618b708f2ceeaf099bd13cca97b37ab8676ee14bff66bf4c802a297a"
+    },
+    {
+      "path": "lib/posix/options/mutex.c",
+      "lines": 395,
+      "sha256": "cb95d86b40b0694fa4606cd994eed2358d3af3024f1a0fbe133ece0c2c106ab8"
+    },
+    {
+      "path": "lib/posix/options/net.c",
+      "lines": 400,
+      "sha256": "004e0347bead9904ab11d0ddb7a2b914c9b15ae50d5217faede6f692cf41740f"
+    },
+    {
+      "path": "lib/posix/options/perror.c",
+      "lines": 18,
+      "sha256": "6316cdd343b3f1045f4eed97143a20bfe761b9d7aa81a25592ad55c56001ada6"
+    },
+    {
+      "path": "lib/posix/options/pthread.c",
+      "lines": 1467,
+      "sha256": "b458fb272188da50900426ac0bf8342986d81e525be0a5bd974e92002c1a199a"
+    },
+    {
+      "path": "lib/posix/options/rwlock.c",
+      "lines": 451,
+      "sha256": "da4920406da3237db5891819dd55771aa30b22bc4ea3af48bc9bf8a579cee48c"
+    },
+    {
+      "path": "lib/posix/options/sched.c",
+      "lines": 100,
+      "sha256": "cd4ddc8a88ccccbe4e8cc5014e2b3e2423d2b88888856b6b421db3ba96a3fc76"
+    },
+    {
+      "path": "lib/posix/options/semaphore.c",
+      "lines": 388,
+      "sha256": "b3c6d8c8a9fcec56cf66cd8c9c00a0c44707e98cd63ee8b77a9fdf2b89aa9670"
+    },
+    {
+      "path": "lib/posix/options/shm.c",
+      "lines": 396,
+      "sha256": "f474234500711051c9dbdc1a6807d40e3729a13678bfa7c94f752a1f34d81d80"
+    },
+    {
+      "path": "lib/posix/options/signal.c",
+      "lines": 120,
+      "sha256": "59ceea72aaef52400fed9ad92e8c667294a098f8c8d46b8d05e1c9f3258b1331"
+    },
+    {
+      "path": "lib/posix/options/sleep.c",
+      "lines": 25,
+      "sha256": "6e1513153c48e21696301a041024dfb73c4be42cf7fa4ceba2d69fc6b2eebb56"
+    },
+    {
+      "path": "lib/posix/options/spinlock.c",
+      "lines": 161,
+      "sha256": "01232034554c2bf3e5601686124510a2fa926f688e78276b782bee2ebf5a948f"
+    },
+    {
+      "path": "lib/posix/options/stropts.c",
+      "lines": 97,
+      "sha256": "5f8e82dc54b6d9180006d3065197ee0e85aeac138de9202ba0f0d17a5d0c394b"
+    },
+    {
+      "path": "lib/posix/options/sysconf.c",
+      "lines": 274,
+      "sha256": "ba7f5b4e8230cdada4a32e14fbab71ff8850d86c757d8c82a27223d12636b0f3"
+    },
+    {
+      "path": "lib/posix/options/syslog.c",
+      "lines": 93,
+      "sha256": "08ea62174b5d45205280f0c06728f87b75f26dd53a816f660fcdae0814d21b1b"
+    },
+    {
+      "path": "lib/posix/options/timer.c",
+      "lines": 342,
+      "sha256": "f09ad8756ad130ca21b30b1c11cf73c34805bcbf1d7ec15544dd877b90a24fbd"
+    },
+    {
+      "path": "lib/posix/options/timespec_to_timeout.c",
+      "lines": 31,
+      "sha256": "93caa3f64c343b32dc9de53c9d42eb9b499cf45358753a623fb110d15d9430a4"
+    },
+    {
+      "path": "lib/posix/options/uname.c",
+      "lines": 53,
+      "sha256": "c7537c01880da22f8630b592ccc454415ae7ce96b461fbec35fde69d36187557"
+    },
+    {
+      "path": "lib/utils/base64.c",
+      "lines": 216,
+      "sha256": "9ee11d74bea7ba8f5a9cb2ac079f01dd993821bd954f277aedce143a0dbaa4a8"
+    },
+    {
+      "path": "lib/utils/bitarray.c",
+      "lines": 784,
+      "sha256": "a453a5883eb8ff9e809ea9962079a793082f2ad4d4a98d646c8f88596223670d"
+    },
+    {
+      "path": "lib/utils/dec.c",
+      "lines": 33,
+      "sha256": "b6991d4a5dd46650e0b3a85ed0adcdb87842832bc4c5108fc0918f125316ade0"
+    },
+    {
+      "path": "lib/utils/hex.c",
+      "lines": 91,
+      "sha256": "3500c88db0350a67e9c8e84d6ae71daa78d0792f71938773744946ab2e8c390d"
+    },
+    {
+      "path": "lib/utils/json.c",
+      "lines": 1182,
+      "sha256": "39f12e957022f9b1fa7e89fe9cd731af0dd5296efc156314e47892ac52d1c622"
+    },
+    {
+      "path": "lib/utils/notify.c",
+      "lines": 84,
+      "sha256": "878e02b64f185cc5669bf87f5a3b8d502a4bcf8c05fe8ebdd25cce76a64c33dc"
+    },
+    {
+      "path": "lib/utils/onoff.c",
+      "lines": 655,
+      "sha256": "c856b683caaacc42c85a82b55da84f44d73ee1ec5088f204d3c3d2bdc1dd2446"
+    },
+    {
+      "path": "lib/utils/rb.c",
+      "lines": 606,
+      "sha256": "78f49598b2fad9a423c6ff58f1972cc72e7a4e609f613b8c50ee130ac41edb29"
+    },
+    {
+      "path": "lib/utils/ring_buffer.c",
+      "lines": 270,
+      "sha256": "df3ca1af333940e018a3f5b0e5dc0101e8ede2e200db8e8f5b8bd6f601747562"
+    },
+    {
+      "path": "lib/utils/timeutil.c",
+      "lines": 190,
+      "sha256": "4c94e929f6c75a774bd3bfb91909839e50461bb56fae203c9e8edc01b38c9585"
+    },
+    {
+      "path": "lib/utils/utf8.c",
+      "lines": 81,
+      "sha256": "a6c040f98d15e84e7bb3b9337fa9a475e9892d386fa8ee235eb0ab75dce6f061"
+    },
+    {
+      "path": "lib/utils/winstream.c",
+      "lines": 129,
+      "sha256": "39627582d82894505585f67e0ffe2530e21a5a8ec6d0660657f67be8fb1d1aef"
+    },
+    {
+      "path": "subsys/fs/ext2/ext2_bitmap.c",
+      "lines": 88,
+      "sha256": "a991ceac17ba4fed5fa6026995a2dc651df8b7c28c676e2e1ebd0d55cd14d8c8"
+    },
+    {
+      "path": "subsys/fs/ext2/ext2_disk_access.c",
+      "lines": 181,
+      "sha256": "f8480ea8ae29eec23e7304d3bc8e5b50a945801dc15cf61ac2f827ab6b74086d"
+    },
+    {
+      "path": "subsys/fs/ext2/ext2_diskops.c",
+      "lines": 1162,
+      "sha256": "50b553e596932470ec974e5f426aa1236e775e083b934eae31a84e9de6c52366"
+    },
+    {
+      "path": "subsys/fs/ext2/ext2_format.c",
+      "lines": 441,
+      "sha256": "1689070dfd4f56cc589ccd1a55c08e9f40ea3a548144dd7b4dce48f6704d9446"
+    },
+    {
+      "path": "subsys/fs/ext2/ext2_impl.c",
+      "lines": 1545,
+      "sha256": "afebf2f5501e9401140ad9f480e348b124b53c87833b4bbf5dd412755185fbd3"
+    },
+    {
+      "path": "subsys/fs/ext2/ext2_ops.c",
+      "lines": 661,
+      "sha256": "e501cee2e17524dd7767a161d69d3450e8c81d06af2ce0961fa09d0c0bc6b4bf"
+    },
+    {
+      "path": "subsys/fs/fat_fs.c",
+      "lines": 565,
+      "sha256": "ae9f2d766d163fa1ef6e00c786f3be66a1f5c0de32d7c98e55851bfe5b1c85a0"
+    },
+    {
+      "path": "subsys/fs/fcb/fcb.c",
+      "lines": 358,
+      "sha256": "dbb65462157ed9b74dbd7283eae401468d06b241e30c08af40084fb87fa034f2"
+    },
+    {
+      "path": "subsys/fs/fcb/fcb_append.c",
+      "lines": 140,
+      "sha256": "6f2d3ab3177c2e04c1aec38bdbe00c2bc50ef8b1cc8781c9160b11a2bd95fd29"
+    },
+    {
+      "path": "subsys/fs/fcb/fcb_elem_info.c",
+      "lines": 149,
+      "sha256": "f0f9f19e29a5a0f299f198d182e6afb77fd0a92d63f1085cd97c4428161a3b6a"
+    },
+    {
+      "path": "subsys/fs/fcb/fcb_getnext.c",
+      "lines": 121,
+      "sha256": "3d3aa248d6271458feb9c907f5f10231f1c280a1ec16f1e270d6abf52c58c533"
+    },
+    {
+      "path": "subsys/fs/fcb/fcb_rotate.c",
+      "lines": 45,
+      "sha256": "887db9ae798af149fe495e863d00b8022d30f4d9d1810b0e2c6371dfbf7ceb70"
+    },
+    {
+      "path": "subsys/fs/fcb/fcb_walk.c",
+      "lines": 49,
+      "sha256": "27b14f63534b1f5237afa8d41992edf31839e8e2d76666231782424914211944"
+    },
+    {
+      "path": "subsys/fs/fs.c",
+      "lines": 901,
+      "sha256": "e3e5aa4e4aea9445317221ad542c2aa55ea578060cb30a6d6c0ed6b743bcffa5"
+    },
+    {
+      "path": "subsys/fs/fs_impl.c",
+      "lines": 22,
+      "sha256": "cc7e635660232cffea1e159e21a57d4b78f3a7267b55a968f6b4b766ac659226"
+    },
+    {
+      "path": "subsys/fs/fuse_fs_access.c",
+      "lines": 557,
+      "sha256": "17d9a7bb2bb073977ed4c76b0aea3778be08e5dc0378e475c43062fa8acf7c3b"
+    },
+    {
+      "path": "subsys/fs/littlefs_fs.c",
+      "lines": 1117,
+      "sha256": "74788746ec0e96d70e7ad9e62e270435cfa44c7d542d6e8a91c86eedf85ed9a1"
+    },
+    {
+      "path": "subsys/fs/nvs/nvs.c",
+      "lines": 1360,
+      "sha256": "236b2adf5e92e946d3457480f1fa884b73ceff3b1bbfd43322c4f0d0e697ea15"
+    },
+    {
+      "path": "subsys/fs/shell.c",
+      "lines": 864,
+      "sha256": "3c2f53097130353995660a14c0a621927eea795461a62a2712354fa5607197cd"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_adsp.c",
+      "lines": 98,
+      "sha256": "39d830d94864cbb78cd4bcd5769004038b52e561b02713f45d1ab512359da28b"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_adsp_mtrace.c",
+      "lines": 229,
+      "sha256": "2891af792291b318a8cf7d7f3d2c7ac20fb28bdb6f68260d5e908a84781a4b01"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_ble.c",
+      "lines": 210,
+      "sha256": "1425ef315c03c4c80d716b8c45b205bf3d0796a916ce217aa3e5aab502b1acdc"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_efi_console.c",
+      "lines": 88,
+      "sha256": "e9538332dec04ce296bb5bb0bf446c520bc6b48185f4ca5a8688cc27b9bea14e"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_fs.c",
+      "lines": 503,
+      "sha256": "248f864fc13f5ddeb56c3677bfc5dca18f9a66d262ad39a8dad2a531a2f37dae"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_ipc_service.c",
+      "lines": 90,
+      "sha256": "d05ce85b370db70e3db23055c1da0b0562ee4693c1dd5b44dd371bd11c60c2d9"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_native_posix.c",
+      "lines": 98,
+      "sha256": "a864d94b17c21758942cf884f83e7704a58663ce4aa7381aa5dcb82650117e7c"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_net.c",
+      "lines": 356,
+      "sha256": "825b7931a8953613c8e044fe8e5f88c14c06425b733b4bd7695a416f9adb68e8"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_rtt.c",
+      "lines": 311,
+      "sha256": "52f00e5341bcbd5d558a8eabadd96b38284e08c689955b1b51ab8778ed27da90"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_spinel.c",
+      "lines": 112,
+      "sha256": "12b9657a7c9e29609f6282b69a01123fa59095b4ce802dc606163ca6c84eccdb"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_swo.c",
+      "lines": 147,
+      "sha256": "dd254c8084e1777c70a640bc50e4d62b70ee32db56b2d7b50dafc79a11679444"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_uart.c",
+      "lines": 253,
+      "sha256": "d10b5c5f92a8229bff5a04b34c3a0133c2c800b2edef49fb8ad6f923a4979f73"
+    },
+    {
+      "path": "subsys/logging/backends/log_backend_xtensa_sim.c",
+      "lines": 75,
+      "sha256": "71139bbccec5d21e124b9d61d5f062bc36a5c89719ce551b4f31d08c71d692f3"
+    },
+    {
+      "path": "subsys/logging/backends/log_multidomain_backend.c",
+      "lines": 249,
+      "sha256": "4c6384f7ac8aa8a94e3070bc5a15cf79bb57c33c3c503fc47b3cc91ee4271cc8"
+    },
+    {
+      "path": "subsys/logging/log_cache.c",
+      "lines": 111,
+      "sha256": "db31bafa9a65e6f0e5bd0fbeba946512e2d2549c8524ef99c5d68e77d666a555"
+    },
+    {
+      "path": "subsys/logging/log_cmds.c",
+      "lines": 485,
+      "sha256": "43283fe133db43d03694b2df1a5370ab9daa709f86ca0d02d7a62a5c9fbb9d01"
+    },
+    {
+      "path": "subsys/logging/log_core.c",
+      "lines": 978,
+      "sha256": "679a652e519f080a05f19842acdd1b2061627676c2fa0dcf30e66b46a43ea85b"
+    },
+    {
+      "path": "subsys/logging/log_frontend_dict_uart.c",
+      "lines": 356,
+      "sha256": "b64946996309535afa4f7ef1616f1a9b60eeaca1400f3bc55a2635c370aa640e"
+    },
+    {
+      "path": "subsys/logging/log_link_ipc_service.c",
+      "lines": 97,
+      "sha256": "45c7c18d685ce0b43c86f4a5edd07e48c7fcab564e782b7e1ced239f23f04549"
+    },
+    {
+      "path": "subsys/logging/log_mgmt.c",
+      "lines": 663,
+      "sha256": "9169054fcff32e78541a3b5cf8e50a4ab3b3d49ea4ea833fc1d5cf6f22a7ee8b"
+    },
+    {
+      "path": "subsys/logging/log_minimal.c",
+      "lines": 68,
+      "sha256": "c655df5f81b55c91616c3dbce690d35f6fb529bf4fc1c6674743920976e01175"
+    },
+    {
+      "path": "subsys/logging/log_msg.c",
+      "lines": 417,
+      "sha256": "2668e8f15ee8b10fd0bbe250be6de08f3c6730d457b4eeb6cd682ce3bd2935ef"
+    },
+    {
+      "path": "subsys/logging/log_multidomain_link.c",
+      "lines": 327,
+      "sha256": "fc7375837a6aa072d06950a93067a8bfacd941f4e00ec9469f8665657f14a014"
+    },
+    {
+      "path": "subsys/logging/log_output.c",
+      "lines": 769,
+      "sha256": "3a40effbd5b7e30176e2ab706fafc708a102ba83768930355c58044cc24ba5d7"
+    },
+    {
+      "path": "subsys/logging/log_output_custom.c",
+      "lines": 43,
+      "sha256": "966b4e3df9a30f24da675d6f8b785d61e957d5f2e27cb7d6bca12c590892bcf7"
+    },
+    {
+      "path": "subsys/logging/log_output_dict.c",
+      "lines": 74,
+      "sha256": "0bbefcec27d6048ede07ac35f3bdfdeffc28dd50180660cd45f39e382dedcd4d"
+    },
+    {
+      "path": "subsys/logging/log_output_syst.c",
+      "lines": 900,
+      "sha256": "ba963886dad4ba9a4454cf29ff108a6db11e20cc6589e8d2cd48a6a476098a58"
+    },
+    {
+      "path": "subsys/net/lib/dns/dispatcher.c",
+      "lines": 284,
+      "sha256": "bdbcbcb16515b3196ef5c3f3082b52cd8abd8b67850ed1129c1f5b3b24f56bae"
+    },
+    {
+      "path": "subsys/net/lib/dns/dns_cache.c",
+      "lines": 161,
+      "sha256": "ff9b128ca5be846eaad04de64645374a2896ec963f57a6c5113115f99be9577f"
+    },
+    {
+      "path": "subsys/net/lib/dns/dns_pack.c",
+      "lines": 608,
+      "sha256": "41e9e680dbd4f8fe341dd0a6122916f77115bb0e7401aed6a452dd0320b614fa"
+    },
+    {
+      "path": "subsys/net/lib/dns/dns_sd.c",
+      "lines": 1161,
+      "sha256": "5e02d163c2a4ee03abfc57e4059a86fd7d4c7cce1effe40eb6c766b126782d98"
+    },
+    {
+      "path": "subsys/net/lib/dns/llmnr_responder.c",
+      "lines": 729,
+      "sha256": "dda3cc9c0ff69301ec252bc17ba485f70dc5e9a99e8cbd6bae6deb813280d001"
+    },
+    {
+      "path": "subsys/net/lib/dns/mdns_responder.c",
+      "lines": 903,
+      "sha256": "5bfbd2865bf0ad34bc0c920f94c171537303b0037783f93af0713ae2a34ad737"
+    },
+    {
+      "path": "subsys/net/lib/dns/resolve.c",
+      "lines": 1720,
+      "sha256": "c37242f9bf6715082f4ddbd68ce5a17c2f9240f7f83ee3f5d86821804782916f"
+    },
+    {
+      "path": "subsys/net/lib/http/http_client.c",
+      "lines": 760,
+      "sha256": "4d24557e74d685b38eae2a73ed4f8256d9003fa7da72c0880b04f680cf6de3e0"
+    },
+    {
+      "path": "subsys/net/lib/http/http_hpack.c",
+      "lines": 633,
+      "sha256": "b07c76740380e8d00bffc64b8860f0a9f85e4cbb58f4a18c363a035bc83decd7"
+    },
+    {
+      "path": "subsys/net/lib/http/http_huffman.c",
+      "lines": 480,
+      "sha256": "d6c05474eb91edec0b775003922d70b044f2c47f1edc8e9c9dd47f271d7cc5de"
+    },
+    {
+      "path": "subsys/net/lib/http/http_parser.c",
+      "lines": 2391,
+      "sha256": "92a793f077b143be20ebd282ccf5a8a944b3b66e66dede61182097e19dd60dfe"
+    },
+    {
+      "path": "subsys/net/lib/http/http_parser_url.c",
+      "lines": 576,
+      "sha256": "59ba0b7b3bc3511bf9b7665b002b84f0ebe5aaa4882b7cc2117b64067062aba0"
+    },
+    {
+      "path": "subsys/net/lib/http/http_server_core.c",
+      "lines": 787,
+      "sha256": "53ba1ec8f8a9722e1f00956cc032508be79784809b901771e9644777048231ee"
+    },
+    {
+      "path": "subsys/net/lib/http/http_server_http1.c",
+      "lines": 642,
+      "sha256": "6f31657f654e0dc4162febb13de28eb9620b272495b494c1ad69a1e9b61bba90"
+    },
+    {
+      "path": "subsys/net/lib/http/http_server_http2.c",
+      "lines": 1540,
+      "sha256": "5f70c9ab390660de5da05f1f5566d6b3b14e6fc2aa84f53c28f4421dc4b83856"
+    },
+    {
+      "path": "subsys/net/lib/http/http_server_ws.c",
+      "lines": 122,
+      "sha256": "147087bae9c7a96bf17bff529f0f670b0c53f37a3d8c948eb485bc77c99b1b07"
+    },
+    {
+      "path": "subsys/shell/backends/shell_adsp_memory_window.c",
+      "lines": 140,
+      "sha256": "d784f11214bc8417e447fc41eeea70e52b24949584bb9e19c61395f6020a82fa"
+    },
+    {
+      "path": "subsys/shell/backends/shell_dummy.c",
+      "lines": 138,
+      "sha256": "40d5cb69c4cd28146eaf33ea79ec4ed9dbbf0ee3cd1412712cf7c82e0f022683"
+    },
+    {
+      "path": "subsys/shell/backends/shell_mqtt.c",
+      "lines": 844,
+      "sha256": "e7d16f771499132f58fde87cf086dfbf617cdd63ec748bf4b0939f9eba0d9354"
+    },
+    {
+      "path": "subsys/shell/backends/shell_rpmsg.c",
+      "lines": 202,
+      "sha256": "afe67e1f6585d9981afaf0943e30db9431304305d6f0ce0037a2d2a12b42068c"
+    },
+    {
+      "path": "subsys/shell/backends/shell_rtt.c",
+      "lines": 201,
+      "sha256": "61350e169c5b4639f8b255909637a049f07bec6bd6b45ed8aecef06880010b86"
+    },
+    {
+      "path": "subsys/shell/backends/shell_telnet.c",
+      "lines": 795,
+      "sha256": "b614c4bffc05146d0aa5529248fdb5a0532d28030333bf28c352f4ea7dc9d51c"
+    },
+    {
+      "path": "subsys/shell/backends/shell_uart.c",
+      "lines": 562,
+      "sha256": "dd860c60cc2a888dce8c856e31b9dc032b2e78180a72a02845286d656c5124ae"
+    },
+    {
+      "path": "subsys/shell/modules/date_service.c",
+      "lines": 215,
+      "sha256": "c898c2b08148df8d5b51bb5070a1fabfc9770c52c9c4f20a09d73f22c4e7bf65"
+    },
+    {
+      "path": "subsys/shell/modules/device_service.c",
+      "lines": 167,
+      "sha256": "574f4e349385bc696846ba2bfb935e858b2e9997c3c347316545d9d07dc67aeb"
+    },
+    {
+      "path": "subsys/shell/modules/devmem_service.c",
+      "lines": 375,
+      "sha256": "cbc8cde7d70574a59f0bb21dddbc009a17cccf427dca7fb91d8fc8248d616c8d"
+    },
+    {
+      "path": "subsys/shell/modules/kernel_service.c",
+      "lines": 479,
+      "sha256": "8c2d8dfec7412d00f5989ebd2ddcf04e18dfbf7a9c4040b9133eccafa4ea3503"
+    },
+    {
+      "path": "subsys/shell/shell.c",
+      "lines": 1825,
+      "sha256": "caf48d44f85a546c91e630e404259ec19c2f4c456b7398ffe0a0624d052a2ecb"
+    },
+    {
+      "path": "subsys/shell/shell_cmds.c",
+      "lines": 556,
+      "sha256": "d196787108f2f98cdffbe32ce6d98536d2faf40682ed9c7493ea6c51525b2d1b"
+    },
+    {
+      "path": "subsys/shell/shell_fprintf.c",
+      "lines": 49,
+      "sha256": "d3a93271115433529de5d1a4a2039c4fb283839cfa4c7b686734ddda871997c3"
+    },
+    {
+      "path": "subsys/shell/shell_help.c",
+      "lines": 206,
+      "sha256": "6f707d377c7db102c5112de34d391933aeb0952ba5eae7bf006263578fef93da"
+    },
+    {
+      "path": "subsys/shell/shell_history.c",
+      "lines": 214,
+      "sha256": "53115ba945ca92f48a01b6df83c8dc260b28b6854c9e04f59928826f1f9e6bf0"
+    },
+    {
+      "path": "subsys/shell/shell_log_backend.c",
+      "lines": 269,
+      "sha256": "08045a33a8a5c740f37f1ad81b6bccef8637a40755186102f974d51651cae400"
+    },
+    {
+      "path": "subsys/shell/shell_ops.c",
+      "lines": 545,
+      "sha256": "c7b92d77395164ea5706963ca5df395655912a887d13d67aafec76f062dffeeb"
+    },
+    {
+      "path": "subsys/shell/shell_utils.c",
+      "lines": 614,
+      "sha256": "d16c62b9d343d19fd5ede0d29abcdecf82d2e14dd6b4c8ab00c05ffaa034ff73"
+    },
+    {
+      "path": "subsys/shell/shell_wildcard.c",
+      "lines": 191,
+      "sha256": "4067fd2847f113ee79ee55bf4f08cc25657b710e4aa9b1fc4ebb893b06152fe6"
+    }
+  ],
+  "cases": [
+    {
+      "file": "kernel/mailbox.c",
+      "function": "init_mbox_module",
+      "function_start": 54,
+      "function_end": 81,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-01",
+      "site_id": "array_oob-01",
+      "line_start": 74,
+      "line_end": 74,
+      "defect_line": 74,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/paging/statistics.c",
+      "function": "z_paging_histogram_inc",
+      "function_start": 171,
+      "function_end": 184,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-02",
+      "site_id": "array_oob-02",
+      "line_start": 179,
+      "line_end": 179,
+      "defect_line": 179,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/timeslicing.c",
+      "function": "slice_timeout",
+      "function_start": 54,
+      "function_end": 66,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-03",
+      "site_id": "array_oob-03",
+      "line_start": 58,
+      "line_end": 58,
+      "defect_line": 58,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/timeslicing.c",
+      "function": "z_reset_time_slice",
+      "function_start": 68,
+      "function_end": 78,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-04",
+      "site_id": "array_oob-04",
+      "line_start": 73,
+      "line_end": 73,
+      "defect_line": 73,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/timeslicing.c",
+      "function": "z_time_slice",
+      "function_start": 103,
+      "function_end": 131,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-05",
+      "site_id": "array_oob-05",
+      "line_start": 117,
+      "line_end": 117,
+      "defect_line": 117,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/userspace.c",
+      "function": "thread_idx_alloc",
+      "function_start": 267,
+      "function_end": 296,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-06",
+      "site_id": "array_oob-06",
+      "line_start": 275,
+      "line_end": 275,
+      "defect_line": 275,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/userspace.c",
+      "function": "thread_idx_free",
+      "function_start": 308,
+      "function_end": 318,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-07",
+      "site_id": "array_oob-07",
+      "line_start": 314,
+      "line_end": 314,
+      "defect_line": 314,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/barrier.c",
+      "function": "pthread_barrier_pool_init",
+      "function_start": 198,
+      "function_end": 211,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-08",
+      "site_id": "array_oob-08",
+      "line_start": 204,
+      "line_end": 204,
+      "defect_line": 204,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/fs.c",
+      "function": "posix_fs_alloc_obj",
+      "function_start": 38,
+      "function_end": 55,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-09",
+      "site_id": "array_oob-09",
+      "line_start": 45,
+      "line_end": 45,
+      "defect_line": 45,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/mutex.c",
+      "function": "acquire_mutex",
+      "function_start": 107,
+      "function_end": 184,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-10",
+      "site_id": "array_oob-10",
+      "line_start": 126,
+      "line_end": 126,
+      "defect_line": 126,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/mutex.c",
+      "function": "pthread_mutex_init",
+      "function_start": 214,
+      "function_end": 237,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-11",
+      "site_id": "array_oob-11",
+      "line_start": 229,
+      "line_end": 229,
+      "defect_line": 229,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/pthread.c",
+      "function": "pthread_setname_np",
+      "function_start": 1356,
+      "function_end": 1378,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-12",
+      "site_id": "array_oob-12",
+      "line_start": 1366,
+      "line_end": 1366,
+      "defect_line": 1366,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/pthread.c",
+      "function": "pthread_getname_np",
+      "function_start": 1380,
+      "function_end": 1403,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-13",
+      "site_id": "array_oob-13",
+      "line_start": 1395,
+      "line_end": 1395,
+      "defect_line": 1395,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/spinlock.c",
+      "function": "pthread_spin_lock",
+      "function_start": 114,
+      "function_end": 129,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-14",
+      "site_id": "array_oob-14",
+      "line_start": 126,
+      "line_end": 126,
+      "defect_line": 126,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/spinlock.c",
+      "function": "pthread_spin_unlock",
+      "function_start": 146,
+      "function_end": 161,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-15",
+      "site_id": "array_oob-15",
+      "line_start": 158,
+      "line_end": 158,
+      "defect_line": 158,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/utils/base64.c",
+      "function": "base64_encode",
+      "function_start": 60,
+      "function_end": 119,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-16",
+      "site_id": "array_oob-16",
+      "line_start": 93,
+      "line_end": 93,
+      "defect_line": 93,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/utils/base64.c",
+      "function": "base64_decode",
+      "function_start": 124,
+      "function_end": 216,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-17",
+      "site_id": "array_oob-17",
+      "line_start": 162,
+      "line_end": 162,
+      "defect_line": 162,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/utils/rb.c",
+      "function": "get_child",
+      "function_start": 21,
+      "function_end": 32,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-18",
+      "site_id": "array_oob-18",
+      "line_start": 25,
+      "line_end": 25,
+      "defect_line": 25,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/utils/rb.c",
+      "function": "set_child",
+      "function_start": 34,
+      "function_end": 45,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-19",
+      "site_id": "array_oob-19",
+      "line_start": 38,
+      "line_end": 38,
+      "defect_line": 38,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/utils/rb.c",
+      "function": "get_color",
+      "function_start": 47,
+      "function_end": 51,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "control",
+      "case_id": "zephyr-array_oob-20",
+      "site_id": "array_oob-20",
+      "line_start": 50,
+      "line_end": 50,
+      "defect_line": 50,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/utils/rb.c",
+      "function": "rb_insert",
+      "function_start": 219,
+      "function_end": 257,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-21",
+      "site_id": "array_oob-21",
+      "line_start": 239,
+      "line_end": 239,
+      "defect_line": 239,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/utils/rb.c",
+      "function": "rb_remove",
+      "function_start": 372,
+      "function_end": 501,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-22",
+      "site_id": "array_oob-22",
+      "line_start": 383,
+      "line_end": 383,
+      "defect_line": 383,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_diskops.c",
+      "function": "fill_inode",
+      "function_start": 106,
+      "function_end": 115,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-23",
+      "site_id": "array_oob-23",
+      "line_start": 113,
+      "line_end": 113,
+      "defect_line": 113,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_diskops.c",
+      "function": "fill_disk_inode",
+      "function_start": 117,
+      "function_end": 126,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-24",
+      "site_id": "array_oob-24",
+      "line_start": 124,
+      "line_end": 124,
+      "defect_line": 124,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_diskops.c",
+      "function": "fetch_level_blocks",
+      "function_start": 405,
+      "function_end": 445,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-25",
+      "site_id": "array_oob-25",
+      "line_start": 409,
+      "line_end": 409,
+      "defect_line": 409,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_diskops.c",
+      "function": "ext2_fetch_inode_block",
+      "function_start": 447,
+      "function_end": 477,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-26",
+      "site_id": "array_oob-26",
+      "line_start": 475,
+      "line_end": 475,
+      "defect_line": 475,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_diskops.c",
+      "function": "ext2_inode_remove_blocks",
+      "function_start": 662,
+      "function_end": 711,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-27",
+      "site_id": "array_oob-27",
+      "line_start": 678,
+      "line_end": 678,
+      "defect_line": 678,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_diskops.c",
+      "function": "alloc_level_blocks",
+      "function_start": 712,
+      "function_end": 757,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-28",
+      "site_id": "array_oob-28",
+      "line_start": 721,
+      "line_end": 721,
+      "defect_line": 721,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_format.c",
+      "function": "validate_config",
+      "function_start": 21,
+      "function_end": 43,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-29",
+      "site_id": "array_oob-29",
+      "line_start": 31,
+      "line_end": 31,
+      "defect_line": 31,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_impl.c",
+      "function": "ext2_close_fs",
+      "function_start": 362,
+      "function_end": 391,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-30",
+      "site_id": "array_oob-30",
+      "line_start": 368,
+      "line_end": 368,
+      "defect_line": 368,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_impl.c",
+      "function": "ext2_inode_sync",
+      "function_start": 778,
+      "function_end": 797,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-31",
+      "site_id": "array_oob-31",
+      "line_start": 784,
+      "line_end": 784,
+      "defect_line": 784,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_impl.c",
+      "function": "ext2_del_direntry",
+      "function_start": 1138,
+      "function_end": 1221,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-32",
+      "site_id": "array_oob-32",
+      "line_start": 1160,
+      "line_end": 1160,
+      "defect_line": 1160,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_impl.c",
+      "function": "ext2_inode_get",
+      "function_start": 1439,
+      "function_end": 1481,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-33",
+      "site_id": "array_oob-33",
+      "line_start": 1445,
+      "line_end": 1445,
+      "defect_line": 1445,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_impl.c",
+      "function": "ext2_inode_drop",
+      "function_start": 1483,
+      "function_end": 1537,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-34",
+      "site_id": "array_oob-34",
+      "line_start": 1504,
+      "line_end": 1504,
+      "defect_line": 1504,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_impl.c",
+      "function": "ext2_inode_drop_blocks",
+      "function_start": 1539,
+      "function_end": 1545,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-35",
+      "site_id": "array_oob-35",
+      "line_start": 1542,
+      "line_end": 1542,
+      "defect_line": 1542,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/fuse_fs_access.c",
+      "function": "get_new_file_handle",
+      "function_start": 44,
+      "function_end": 56,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-36",
+      "site_id": "array_oob-36",
+      "line_start": 49,
+      "line_end": 49,
+      "defect_line": 49,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/fuse_fs_access.c",
+      "function": "release_file_handle",
+      "function_start": 58,
+      "function_end": 63,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-37",
+      "site_id": "array_oob-37",
+      "line_start": 61,
+      "line_end": 61,
+      "defect_line": 61,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/nvs/nvs.c",
+      "function": "nvs_flash_ate_wrt",
+      "function_start": 160,
+      "function_end": 175,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-38",
+      "site_id": "array_oob-38",
+      "line_start": 169,
+      "line_end": 169,
+      "defect_line": 169,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/nvs/nvs.c",
+      "function": "nvs_flash_cmp_const",
+      "function_start": 268,
+      "function_end": 295,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-39",
+      "site_id": "array_oob-39",
+      "line_start": 286,
+      "line_end": 286,
+      "defect_line": 286,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/nvs/nvs.c",
+      "function": "nvs_gc",
+      "function_start": 630,
+      "function_end": 751,
+      "kind": "array-index",
+      "category": "array_oob",
+      "expected": "defect",
+      "case_id": "zephyr-array_oob-40",
+      "site_id": "array_oob-40",
+      "line_start": 680,
+      "line_end": 680,
+      "defect_line": 680,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/thread.c",
+      "function": "z_impl_k_thread_name_set",
+      "function_start": 138,
+      "function_end": 159,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-01",
+      "site_id": "string_overflow-01",
+      "line_start": 146,
+      "line_end": 146,
+      "defect_line": 146,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/fs.c",
+      "function": "readdir",
+      "function_start": 287,
+      "function_end": 315,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-02",
+      "site_id": "string_overflow-02",
+      "line_start": 313,
+      "line_end": 313,
+      "defect_line": 313,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/thread.c",
+      "function": "z_impl_k_thread_name_set",
+      "function_start": 138,
+      "function_end": 159,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-03",
+      "site_id": "string_overflow-03",
+      "line_start": 145,
+      "line_end": 145,
+      "defect_line": 145,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/thread.c",
+      "function": "z_impl_k_thread_name_copy",
+      "function_start": 199,
+      "function_end": 210,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-04",
+      "site_id": "string_overflow-04",
+      "line_start": 202,
+      "line_end": 202,
+      "defect_line": 202,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/thread.c",
+      "function": "z_setup_new_thread",
+      "function_start": 517,
+      "function_end": 654,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-05",
+      "site_id": "string_overflow-05",
+      "line_start": 607,
+      "line_end": 608,
+      "defect_line": 607,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/libc/minimal/source/string/strerror.c",
+      "function": "strerror_r",
+      "function_start": 38,
+      "function_end": 64,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-06",
+      "site_id": "string_overflow-06",
+      "line_start": 56,
+      "line_end": 56,
+      "defect_line": 56,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/net.c",
+      "function": "inet_ntoa",
+      "function_start": 77,
+      "function_end": 85,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-07",
+      "site_id": "string_overflow-07",
+      "line_start": 82,
+      "line_end": 82,
+      "defect_line": 82,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/signal.c",
+      "function": "strsignal",
+      "function_start": 78,
+      "function_end": 102,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-08",
+      "site_id": "string_overflow-08",
+      "line_start": 89,
+      "line_end": 89,
+      "defect_line": 89,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/uname.c",
+      "function": "uname",
+      "function_start": 45,
+      "function_end": 53,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-09",
+      "site_id": "string_overflow-09",
+      "line_start": 49,
+      "line_end": 49,
+      "defect_line": 49,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/utils/json.c",
+      "function": "num_encode",
+      "function_start": 968,
+      "function_end": 983,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-10",
+      "site_id": "string_overflow-10",
+      "line_start": 974,
+      "line_end": 974,
+      "defect_line": 974,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/utils/utf8.c",
+      "function": "utf8_lcpy",
+      "function_start": 69,
+      "function_end": 81,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-11",
+      "site_id": "string_overflow-11",
+      "line_start": 72,
+      "line_end": 72,
+      "defect_line": 72,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_impl.c",
+      "function": "ext2_lookup_inode",
+      "function_start": 408,
+      "function_end": 534,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-12",
+      "site_id": "string_overflow-12",
+      "line_start": 445,
+      "line_end": 445,
+      "defect_line": 445,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/ext2/ext2_impl.c",
+      "function": "ext2_get_direntry",
+      "function_start": 799,
+      "function_end": 867,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-13",
+      "site_id": "string_overflow-13",
+      "line_start": 803,
+      "line_end": 803,
+      "defect_line": 803,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/fuse_fs_access.c",
+      "function": "is_mount_point",
+      "function_start": 65,
+      "function_end": 78,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-14",
+      "site_id": "string_overflow-14",
+      "line_start": 76,
+      "line_end": 76,
+      "defect_line": 76,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/fuse_fs_access.c",
+      "function": "fuse_fs_access_readdir",
+      "function_start": 163,
+      "function_end": 249,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-15",
+      "site_id": "string_overflow-15",
+      "line_start": 194,
+      "line_end": 194,
+      "defect_line": 194,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/littlefs_fs.c",
+      "function": "info_to_dirent",
+      "function_start": 492,
+      "function_end": 499,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-16",
+      "site_id": "string_overflow-16",
+      "line_start": 497,
+      "line_end": 497,
+      "defect_line": 497,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/littlefs_fs.c",
+      "function": "littlefs_readdir",
+      "function_start": 501,
+      "function_end": 520,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-17",
+      "site_id": "string_overflow-17",
+      "line_start": 516,
+      "line_end": 516,
+      "defect_line": 516,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/shell.c",
+      "function": "create_abs_path",
+      "function_start": 87,
+      "function_end": 115,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-18",
+      "site_id": "string_overflow-18",
+      "line_start": 90,
+      "line_end": 90,
+      "defect_line": 90,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/shell.c",
+      "function": "cmd_cd",
+      "function_start": 117,
+      "function_end": 158,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-19",
+      "site_id": "string_overflow-19",
+      "line_start": 154,
+      "line_end": 154,
+      "defect_line": 154,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/fs/shell.c",
+      "function": "cmd_ls",
+      "function_start": 160,
+      "function_end": 202,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "control",
+      "case_id": "zephyr-string_overflow-20",
+      "site_id": "string_overflow-20",
+      "line_start": 167,
+      "line_end": 167,
+      "defect_line": 167,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/thread.c",
+      "function": "z_setup_new_thread",
+      "function_start": 517,
+      "function_end": 654,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-21",
+      "site_id": "string_overflow-21",
+      "line_start": 610,
+      "line_end": 610,
+      "defect_line": 610,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "lib/posix/options/uname.c",
+      "function": "uname",
+      "function_start": 45,
+      "function_end": 53,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-22",
+      "site_id": "string_overflow-22",
+      "line_start": 50,
+      "line_end": 50,
+      "defect_line": 50,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/logging/backends/log_backend_fs.c",
+      "function": "create_log_dir",
+      "function_start": 59,
+      "function_end": 108,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-23",
+      "site_id": "string_overflow-23",
+      "line_start": 90,
+      "line_end": 90,
+      "defect_line": 90,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/logging/backends/log_backend_fs.c",
+      "function": "allocate_new_file",
+      "function_start": 256,
+      "function_end": 417,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-24",
+      "site_id": "string_overflow-24",
+      "line_start": 344,
+      "line_end": 344,
+      "defect_line": 344,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/logging/backends/log_backend_fs.c",
+      "function": "del_oldest_log",
+      "function_start": 419,
+      "function_end": 444,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-25",
+      "site_id": "string_overflow-25",
+      "line_start": 425,
+      "line_end": 425,
+      "defect_line": 425,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/logging/backends/log_backend_native_posix.c",
+      "function": "preprint_char",
+      "function_start": 22,
+      "function_end": 46,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-26",
+      "site_id": "string_overflow-26",
+      "line_start": 31,
+      "line_end": 31,
+      "defect_line": 31,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/logging/backends/log_backend_net.c",
+      "function": "line_out",
+      "function_start": 45,
+      "function_end": 87,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-27",
+      "site_id": "string_overflow-27",
+      "line_start": 61,
+      "line_end": 61,
+      "defect_line": 61,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/logging/backends/log_backend_net.c",
+      "function": "do_net_init",
+      "function_start": 91,
+      "function_end": 197,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-28",
+      "site_id": "string_overflow-28",
+      "line_start": 133,
+      "line_end": 133,
+      "defect_line": 133,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/logging/backends/log_backend_net.c",
+      "function": "log_backend_net_hostname_set",
+      "function_start": 297,
+      "function_end": 301,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-29",
+      "site_id": "string_overflow-29",
+      "line_start": 299,
+      "line_end": 299,
+      "defect_line": 299,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/logging/log_core.c",
+      "function": "log_set_tag",
+      "function_start": 845,
+      "function_end": 867,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-30",
+      "site_id": "string_overflow-30",
+      "line_start": 856,
+      "line_end": 856,
+      "defect_line": 856,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/logging/log_output.c",
+      "function": "log_output_dropped_process",
+      "function_start": 731,
+      "function_end": 748,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-31",
+      "site_id": "string_overflow-31",
+      "line_start": 741,
+      "line_end": 741,
+      "defect_line": 741,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/logging/log_output_syst.c",
+      "function": "hexdump_line_print",
+      "function_start": 552,
+      "function_end": 596,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-32",
+      "site_id": "string_overflow-32",
+      "line_start": 557,
+      "line_end": 557,
+      "defect_line": 557,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/net/lib/dns/dns_cache.c",
+      "function": "dns_cache_add",
+      "function_start": 25,
+      "function_end": 72,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-33",
+      "site_id": "string_overflow-33",
+      "line_start": 64,
+      "line_end": 64,
+      "defect_line": 64,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/net/lib/dns/mdns_responder.c",
+      "function": "init_listener",
+      "function_start": 694,
+      "function_end": 873,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-34",
+      "site_id": "string_overflow-34",
+      "line_start": 747,
+      "line_end": 747,
+      "defect_line": 747,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/net/lib/dns/resolve.c",
+      "function": "dns_resolve_init_default",
+      "function_start": 1630,
+      "function_end": 1713,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-35",
+      "site_id": "string_overflow-35",
+      "line_start": 1644,
+      "line_end": 1644,
+      "defect_line": 1644,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/net/lib/http/http_client.c",
+      "function": "http_send_data",
+      "function_start": 66,
+      "function_end": 137,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-36",
+      "site_id": "string_overflow-36",
+      "line_start": 91,
+      "line_end": 91,
+      "defect_line": 91,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/net/lib/http/http_client.c",
+      "function": "print_header_field",
+      "function_start": 154,
+      "function_end": 171,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-37",
+      "site_id": "string_overflow-37",
+      "line_start": 167,
+      "line_end": 167,
+      "defect_line": 167,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/net/lib/http/http_client.c",
+      "function": "on_header_value",
+      "function_start": 239,
+      "function_end": 274,
+      "kind": "char-index",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-38",
+      "site_id": "string_overflow-38",
+      "line_start": 252,
+      "line_end": 252,
+      "defect_line": 252,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/net/lib/http/http_client.c",
+      "function": "http_client_req",
+      "function_start": 553,
+      "function_end": 760,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-39",
+      "site_id": "string_overflow-39",
+      "line_start": 669,
+      "line_end": 669,
+      "defect_line": 669,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "subsys/net/lib/http/http_server_http1.c",
+      "function": "handle_http1_static_resource",
+      "function_start": 31,
+      "function_end": 80,
+      "kind": "copy",
+      "category": "string_overflow",
+      "expected": "defect",
+      "case_id": "zephyr-string_overflow-40",
+      "site_id": "string_overflow-40",
+      "line_start": 56,
+      "line_end": 57,
+      "defect_line": 56,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/condvar.c",
+      "function": "z_impl_k_condvar_init",
+      "function_start": 21,
+      "function_end": 33,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-01",
+      "site_id": "null_pointer-01",
+      "line_start": 23,
+      "line_end": 23,
+      "defect_line": 23,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/condvar.c",
+      "function": "z_impl_k_condvar_signal",
+      "function_start": 44,
+      "function_end": 65,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-02",
+      "site_id": "null_pointer-02",
+      "line_start": 50,
+      "line_end": 50,
+      "defect_line": 50,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/condvar.c",
+      "function": "z_impl_k_condvar_broadcast",
+      "function_start": 76,
+      "function_end": 99,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-03",
+      "site_id": "null_pointer-03",
+      "line_start": 87,
+      "line_end": 87,
+      "defect_line": 87,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/condvar.c",
+      "function": "z_impl_k_condvar_wait",
+      "function_start": 109,
+      "function_end": 126,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-04",
+      "site_id": "null_pointer-04",
+      "line_start": 120,
+      "line_end": 120,
+      "defect_line": 120,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/device.c",
+      "function": "z_impl_device_get_binding",
+      "function_start": 29,
+      "function_end": 56,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-05",
+      "site_id": "null_pointer-05",
+      "line_start": 44,
+      "line_end": 44,
+      "defect_line": 44,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/device.c",
+      "function": "z_impl_device_get_by_dt_nodelabel",
+      "function_start": 82,
+      "function_end": 115,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-06",
+      "site_id": "null_pointer-06",
+      "line_start": 105,
+      "line_end": 105,
+      "defect_line": 105,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/device.c",
+      "function": "z_impl_device_is_ready",
+      "function_start": 142,
+      "function_end": 153,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-07",
+      "site_id": "null_pointer-07",
+      "line_start": 152,
+      "line_end": 152,
+      "defect_line": 152,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/dynamic.c",
+      "function": "dyn_cb",
+      "function_start": 111,
+      "function_end": 120,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-08",
+      "site_id": "null_pointer-08",
+      "line_start": 115,
+      "line_end": 115,
+      "defect_line": 115,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/errno.c",
+      "function": "z_impl_z_errno",
+      "function_start": 34,
+      "function_end": 40,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-09",
+      "site_id": "null_pointer-09",
+      "line_start": 39,
+      "line_end": 39,
+      "defect_line": 39,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/events.c",
+      "function": "z_impl_k_event_init",
+      "function_start": 52,
+      "function_end": 66,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-10",
+      "site_id": "null_pointer-10",
+      "line_start": 54,
+      "line_end": 54,
+      "defect_line": 54,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/events.c",
+      "function": "event_walk_op",
+      "function_start": 101,
+      "function_end": 129,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-11",
+      "site_id": "null_pointer-11",
+      "line_start": 106,
+      "line_end": 106,
+      "defect_line": 106,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/events.c",
+      "function": "k_event_post_internal",
+      "function_start": 131,
+      "function_end": 180,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-12",
+      "site_id": "null_pointer-12",
+      "line_start": 140,
+      "line_end": 140,
+      "defect_line": 140,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/events.c",
+      "function": "k_event_wait_internal",
+      "function_start": 240,
+      "function_end": 304,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-13",
+      "site_id": "null_pointer-13",
+      "line_start": 261,
+      "line_end": 261,
+      "defect_line": 261,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/fatal.c",
+      "function": "z_fatal_error",
+      "function_start": 85,
+      "function_end": 178,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-14",
+      "site_id": "null_pointer-14",
+      "line_start": 99,
+      "line_end": 99,
+      "defect_line": 99,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/futex.c",
+      "function": "k_futex_find_data",
+      "function_start": 15,
+      "function_end": 25,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-15",
+      "site_id": "null_pointer-15",
+      "line_start": 20,
+      "line_end": 20,
+      "defect_line": 20,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/futex.c",
+      "function": "z_impl_k_futex_wake",
+      "function_start": 27,
+      "function_end": 53,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-16",
+      "site_id": "null_pointer-16",
+      "line_start": 39,
+      "line_end": 39,
+      "defect_line": 39,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/futex.c",
+      "function": "z_impl_k_futex_wait",
+      "function_start": 65,
+      "function_end": 90,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-17",
+      "site_id": "null_pointer-17",
+      "line_start": 77,
+      "line_end": 77,
+      "defect_line": 77,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/init.c",
+      "function": "z_init_static_threads",
+      "function_start": 65,
+      "function_end": 112,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-18",
+      "site_id": "null_pointer-18",
+      "line_start": 69,
+      "line_end": 69,
+      "defect_line": 69,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/init.c",
+      "function": "do_device_init",
+      "function_start": 306,
+      "function_end": 335,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-19",
+      "site_id": "null_pointer-19",
+      "line_start": 308,
+      "line_end": 308,
+      "defect_line": 308,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/init.c",
+      "function": "z_sys_init_run_level",
+      "function_start": 348,
+      "function_end": 376,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "control",
+      "case_id": "zephyr-null_pointer-20",
+      "site_id": "null_pointer-20",
+      "line_start": 365,
+      "line_end": 365,
+      "defect_line": 365,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/init.c",
+      "function": "z_impl_device_init",
+      "function_start": 379,
+      "function_end": 392,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-21",
+      "site_id": "null_pointer-21",
+      "line_start": 386,
+      "line_end": 386,
+      "defect_line": 386,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/ipi.c",
+      "function": "ipi_mask_create",
+      "function_start": 26,
+      "function_end": 67,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-22",
+      "site_id": "null_pointer-22",
+      "line_start": 34,
+      "line_end": 34,
+      "defect_line": 34,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/kheap.c",
+      "function": "k_heap_init",
+      "function_start": 15,
+      "function_end": 21,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-23",
+      "site_id": "null_pointer-23",
+      "line_start": 17,
+      "line_end": 17,
+      "defect_line": 17,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/kheap.c",
+      "function": "statics_init",
+      "function_start": 23,
+      "function_end": 54,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-24",
+      "site_id": "null_pointer-24",
+      "line_start": 41,
+      "line_end": 41,
+      "defect_line": 41,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/kheap.c",
+      "function": "k_heap_aligned_alloc",
+      "function_start": 65,
+      "function_end": 106,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-25",
+      "site_id": "null_pointer-25",
+      "line_start": 71,
+      "line_end": 71,
+      "defect_line": 71,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/kheap.c",
+      "function": "k_heap_realloc",
+      "function_start": 119,
+      "function_end": 147,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-26",
+      "site_id": "null_pointer-26",
+      "line_start": 124,
+      "line_end": 124,
+      "defect_line": 124,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/kheap.c",
+      "function": "k_heap_free",
+      "function_start": 149,
+      "function_end": 161,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-27",
+      "site_id": "null_pointer-27",
+      "line_start": 151,
+      "line_end": 151,
+      "defect_line": 151,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mailbox.c",
+      "function": "k_mbox_init",
+      "function_start": 87,
+      "function_end": 98,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-28",
+      "site_id": "null_pointer-28",
+      "line_start": 89,
+      "line_end": 89,
+      "defect_line": 89,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mailbox.c",
+      "function": "mbox_message_match",
+      "function_start": 112,
+      "function_end": 146,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-29",
+      "site_id": "null_pointer-29",
+      "line_start": 117,
+      "line_end": 117,
+      "defect_line": 117,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mailbox.c",
+      "function": "mbox_message_dispose",
+      "function_start": 155,
+      "function_end": 194,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-30",
+      "site_id": "null_pointer-30",
+      "line_start": 161,
+      "line_end": 161,
+      "defect_line": 161,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mailbox.c",
+      "function": "mbox_message_put",
+      "function_start": 210,
+      "function_end": 293,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-31",
+      "site_id": "null_pointer-31",
+      "line_start": 219,
+      "line_end": 219,
+      "defect_line": 219,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mailbox.c",
+      "function": "k_mbox_put",
+      "function_start": 295,
+      "function_end": 308,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-32",
+      "site_id": "null_pointer-32",
+      "line_start": 299,
+      "line_end": 299,
+      "defect_line": 299,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mailbox.c",
+      "function": "k_mbox_async_put",
+      "function_start": 311,
+      "function_end": 332,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-33",
+      "site_id": "null_pointer-33",
+      "line_start": 324,
+      "line_end": 324,
+      "defect_line": 324,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mailbox.c",
+      "function": "k_mbox_data_get",
+      "function_start": 335,
+      "function_end": 349,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-34",
+      "site_id": "null_pointer-34",
+      "line_start": 339,
+      "line_end": 339,
+      "defect_line": 339,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mailbox.c",
+      "function": "mbox_message_data_check",
+      "function_start": 367,
+      "function_end": 380,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-35",
+      "site_id": "null_pointer-35",
+      "line_start": 372,
+      "line_end": 372,
+      "defect_line": 372,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mailbox.c",
+      "function": "k_mbox_get",
+      "function_start": 382,
+      "function_end": 439,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-36",
+      "site_id": "null_pointer-36",
+      "line_start": 391,
+      "line_end": 391,
+      "defect_line": 391,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mem_domain.c",
+      "function": "check_add_partition",
+      "function_start": 24,
+      "function_end": 86,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-37",
+      "site_id": "null_pointer-37",
+      "line_start": 40,
+      "line_end": 40,
+      "defect_line": 40,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mem_domain.c",
+      "function": "add_thread_locked",
+      "function_start": 259,
+      "function_end": 277,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-38",
+      "site_id": "null_pointer-38",
+      "line_start": 268,
+      "line_end": 268,
+      "defect_line": 268,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mem_domain.c",
+      "function": "remove_thread_locked",
+      "function_start": 279,
+      "function_end": 293,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-39",
+      "site_id": "null_pointer-39",
+      "line_start": 285,
+      "line_end": 285,
+      "defect_line": 285,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    },
+    {
+      "file": "kernel/mem_domain.c",
+      "function": "z_mem_domain_init_thread",
+      "function_start": 296,
+      "function_end": 307,
+      "kind": "pointer",
+      "category": "null_pointer",
+      "expected": "defect",
+      "case_id": "zephyr-null_pointer-40",
+      "site_id": "null_pointer-40",
+      "line_start": 302,
+      "line_end": 302,
+      "defect_line": 302,
+      "trigger": "Enable the containing feature; arrays have positive extent, copy bounds are positive and equal to caller-provided capacity. Reach the marked native operation; the defective index/destination is one-past or the pointer is zero.",
+      "control_reason": "This marked operation respects its original bounds/nonnull preconditions; other operations are outside this label.",
+      "fix": "Restore the native expression from the external site recipe."
+    }
+  ],
+  "line_totals": {
+    "detection_files": 72388
+  },
+  "required_counts": {
+    "defects_per_category": 20,
+    "controls_per_category": 20,
+    "defects_total": 60,
+    "cases_total": 120
+  }
+}

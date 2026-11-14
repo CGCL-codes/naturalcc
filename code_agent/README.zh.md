@@ -711,12 +711,12 @@ code_agent/
 
 ## 17. 合同指标 3：工程内注入教学题
 
-当前默认版本为 `engineering-v5-20261114`。三工程 × 四套分别提供工程源码快照、外置 GT 和哈希清单，缺陷修改原有业务操作，不再新增三个独立样例文件。每工程每套每类为 7 个缺陷与 7 个安全对照；按实际操作行计分，逐类目标为检出率 ≥85% 且 <100%、误报率 5%–15%。旧 v3 的成绩不混用。 2026-11-14 实测 36/36 项达标，均为检出率 85.71%、误报率 14.29%；验证记录见[复核说明](合同-3-复核说明.md)。
+当前默认版本为 `engineering-v6-20261114`。**每工程每套：数组越界 20 个、字符串溢出 20 个、空指针 20 个，共 60 个缺陷；另有每类 20 个安全对照，总计 120 个标注操作。**保留原有业务函数内注入，源码、GT、manifest 成套使用。v5 的每类 7 个正例不符合合同数量要求，撤销交付资格；当前 36/36 项已复测通过：检出率均为 95%，误报率 5%–10%，详见[复核说明](合同-3-复核说明.md)。
 
-实际送检 C 文件数为 FreeRTOS 7、Zephyr 124、RT-Thread 77，行数分别约为 1.66 万、3.19 万、6.61 万。成功解析和条件编译覆盖另行报告，不能把送检规模当作全部成功覆盖。真实插件按标注操作的覆盖证据计分，无关函数解析错误不再否决已覆盖用例；未覆盖操作保留在 unscored_cases，不计为漏检或正确对照。
+实际送检为 FreeRTOS 18 个完整 C 文件（约 2.3 万行）、Zephyr 206 个（约 7.2 万行）、RT-Thread 77 个（约 6.6 万行）。扩展使用上游工程已有的 CLI/FTP/HTTP、Shell/文件系统/日志等模块。解析、条件编译及未评分情况单独记录，不把送检行数等同于全部编译覆盖。
 
 ```bash
-uv run --no-sync python scripts/build_contract3_engineering_v5.py --verify
+uv run --no-sync python scripts/build_contract3_engineering_v6.py --verify
 uv run --no-sync python scripts/measure_contract3_static.py --delivered
 uv run --no-sync python scripts/measure_contract3_static.py --delivered --reference
 uv run --no-sync python scripts/benchmark_contract3_web.py --suite balanced --project freertos_kernel --print-prompts --limit 1

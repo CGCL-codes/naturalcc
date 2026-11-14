@@ -2,7 +2,7 @@
 
 > 2026-11-14 更新：合同三默认改为工程内注入版。当前用法见 [工程题集说明](合同-3-工程内注入说明.md)。下文“9 个工程×类别组”和 fixture 手工演示仅保留为旧版复现，命令已加 `--legacy-fixtures`；合同五流程不变。
 
-当前合同三先选择 `artifacts/contract3/engineering-v5/<suite>/<project>/project/` 作为工作区，GT 保存在其外层。Web 评测按完整 C 文件逐个运行，而非按三个小样例文件运行。可离线预览：
+当前合同三先选择 `artifacts/contract3/engineering-v6/<suite>/<project>/project/` 作为工作区，GT 保存在其外层。Web 评测按完整 C 文件逐个运行，而非按三个小样例文件运行。可离线预览：
 
 ```bash
 uv run --no-sync python scripts/benchmark_contract3_web.py \

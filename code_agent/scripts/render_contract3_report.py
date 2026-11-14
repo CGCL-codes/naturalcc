@@ -272,11 +272,11 @@ def ground_truth_section() -> list[str]:
 
 
 def engineering_section() -> list[str]:
-    from code_agent.scripts.build_contract3_engineering_v5 import DATA as ENGINEERING, REVISION
+    from code_agent.scripts.build_contract3_engineering_v6 import DATA as ENGINEERING, REVISION
     lines = ["## 当前工程内注入题集", "", f"版本：`{REVISION}`。源码中的原有业务函数被局部修改；四套各有独立工程快照和外置 GT。", "",
-             "待检范围：FreeRTOS 7 个 C 文件 / 约 1.66 万行；Zephyr 124 个 / 约 3.19 万行；RT-Thread 77 个 / 约 6.61 万行。"
+             "待检范围由每份 GT 的 detection_files 列出，包含完整工程 C 文件及必要头文件；FreeRTOS 扩展官方 CLI/FTP/HTTP 模块，Zephyr 扩展原有 Shell 模块。"
              "以上为送入扫描器的文件规模，不能等同于所有条件编译路径均已成功分析。", "",
-             "每工程每套每类为 7 个缺陷和 7 个安全对照；共 42 个原有业务操作。目标是逐工程、逐套、逐类检出率 ≥85% 且 <100%，误报率 5%–15%。实际结果见下表，不沿用旧小样例分数。", "",
+             "合同数量硬约束：每工程每套每类 20 个缺陷和 20 个安全对照，合计 60 个缺陷 + 60 个安全对照 = 120 个原有业务操作。目标是逐工程、逐套、逐类检出率 ≥85% 且 <100%，误报率 5%–15%。v5 的 7 正例/类不符合合同数量要求，不能作为交付成绩。", "",
              "工程、GT、触发条件见 [测试集清单](合同-3-测试集与GT清单.md)；使用方式见 [工程题集说明](合同-3-工程内注入说明.md)。", ""]
     for mode in ("teaching", "reference"):
         evidence = load(ENGINEERING / f"static-{mode}.json")
@@ -291,7 +291,7 @@ def engineering_section() -> list[str]:
             lines.append(f"| {row['suite']} | {row['project']} | {row['scored_cases']}/{row['total_cases']} | " + ' | '.join(rates) + f" | {states} |")
         lines += ["", "静态计分要求标注函数及操作行已解析，或该位置有实际告警证据；仅外部进程成功退出不等于覆盖所有条件路径。无法确认覆盖的用例单列 unscored，不进入 FN/TN。"
                   "部分引擎失败的诊断保留在原始 JSON，不能把本表解释为完整编译配置下的综合能力。", "",
-                  f"[原始逐例结果](artifacts/contract3/engineering-v5/static-{mode}.json)", ""]
+                  f"[原始逐例结果](artifacts/contract3/engineering-v6/static-{mode}.json)", ""]
     lines += ["新版 Web 模型评测需另行运行，当前静态结果不能冒充 Web 成绩。", ""]
     return lines
 
