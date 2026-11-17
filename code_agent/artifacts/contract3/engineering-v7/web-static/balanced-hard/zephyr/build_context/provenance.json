@@ -1,0 +1,830 @@
+{
+  "board": "native_posix/native/64",
+  "zephyr_commit": "36940db938a8f4a1e919496793ed439850a221c2",
+  "files": {
+    "kernel/atomic_c.c": {
+      "profile": "atomic-c",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/banner.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/busy_wait.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/compiler_stack_protect.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/condvar.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/cpu_mask.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/device.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/dynamic.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/dynamic_disabled.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/errno.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/events.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/fatal.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/float.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/futex.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/idle.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/init.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/init_static.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/ipi.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/irq_offload.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/kheap.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/mailbox.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/main_weak.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/mem_domain.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/mem_slab.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/mempool.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/mmu.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/msg_q.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/mutex.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/nothread.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/obj_core.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/paging/statistics.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/pipes.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/poll.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/priority_queues.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/queue.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/sched.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/sem.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/smp.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/spinlock_validate.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/stack.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/system_work_q.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/thread.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/thread_monitor.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/timeout.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/timer.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/timeslicing.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/usage.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/userspace.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/userspace_handler.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "kernel/version.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/work.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "kernel/xip.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/math/sqrt.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/math/sqrtf.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdlib/atoi.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdlib/bsearch.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdlib/exit.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdlib/qsort.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdlib/rand.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdlib/strtol.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdlib/strtoll.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdlib/strtoul.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdlib/strtoull.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdout/fprintf.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdout/sprintf.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/stdout/stdout_console.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/string/strerror.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/string/string.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/string/strncasecmp.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/string/strspn.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/string/strstr.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/libc/minimal/source/time/gmtime.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/aio.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/barrier.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/clock.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/cond.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/confstr.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/device_io.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/env.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/eventfd.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/fd_mgmt.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/fnmatch.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/fs.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/fsync.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/getentropy.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/getopt/getopt.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/getopt/getopt_common.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/getopt/getopt_long.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/key.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/mlock.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/mlockall.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/mmap.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/mprotect.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/mqueue.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/multi_process.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/mutex.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/net.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/perror.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/pthread.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/rwlock.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/sched.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/semaphore.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/shm.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/signal.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/sleep.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/spinlock.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/stropts.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/sysconf.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/syslog.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/timer.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/timespec_to_timeout.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/posix/options/uname.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/utils/base64.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/utils/bitarray.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "lib/utils/dec.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "lib/utils/hex.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "lib/utils/json.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/utils/notify.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/utils/onoff.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/utils/rb.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "lib/utils/ring_buffer.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/utils/timeutil.c": {
+      "profile": "native64",
+      "origin": "cmake-real-entry"
+    },
+    "lib/utils/utf8.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "lib/utils/winstream.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/ext2/ext2_bitmap.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/ext2/ext2_disk_access.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/ext2/ext2_diskops.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/ext2/ext2_format.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/ext2/ext2_impl.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/ext2/ext2_ops.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/fat_fs.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/fcb/fcb.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/fcb/fcb_append.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/fcb/fcb_elem_info.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/fcb/fcb_getnext.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/fcb/fcb_rotate.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/fcb/fcb_walk.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/fs.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/fs_impl.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/fuse_fs_access.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/littlefs_fs.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/nvs/nvs.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/fs/shell.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_adsp.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_adsp_mtrace.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_ble.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_efi_console.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_fs.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_ipc_service.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_native_posix.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_net.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_rtt.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_spinel.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_swo.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_uart.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_backend_xtensa_sim.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/backends/log_multidomain_backend.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_cache.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_cmds.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_core.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_frontend_dict_uart.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_link_ipc_service.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_mgmt.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_minimal.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_msg.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_multidomain_link.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_output.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_output_custom.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_output_dict.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/logging/log_output_syst.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/dns/dispatcher.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/dns/dns_cache.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/dns/dns_pack.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/dns/dns_sd.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/dns/llmnr_responder.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/dns/mdns_responder.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/dns/resolve.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/http/http_client.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/http/http_hpack.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/http/http_huffman.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/http/http_parser.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/http/http_parser_url.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/http/http_server_core.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/http/http_server_http1.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/http/http_server_http2.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/net/lib/http/http_server_ws.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/backends/shell_adsp_memory_window.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/backends/shell_dummy.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/backends/shell_mqtt.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/backends/shell_rpmsg.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/backends/shell_rtt.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/backends/shell_telnet.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/backends/shell_uart.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/modules/date_service.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/modules/device_service.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/modules/devmem_service.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/modules/kernel_service.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/shell.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/shell_cmds.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/shell_fprintf.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/shell_help.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/shell_history.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/shell_log_backend.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/shell_ops.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/shell_utils.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    },
+    "subsys/shell/shell_wildcard.c": {
+      "profile": "native64",
+      "origin": "derived-source-audit-profile"
+    }
+  }
+}

@@ -13,7 +13,7 @@ import re
 from code_agent.security_c_rules import parse_source, walk, text, call_parts
 from code_agent.security_exam import switch_off
 
-VERSION = 'engineering-source-v3'
+VERSION = 'engineering-source-v4'
 
 
 def compact(value):
@@ -123,4 +123,6 @@ def scan_engineering_source(source, file, context_lines=0, macros=None, root=Non
                     # Bounds inflated beyond the remaining-capacity expression
                     # are candidates; this remains a heuristic for unknown APIs.
                     add(node,'string_overflow',f'{name} inflates its length bound {text(left)} by {text(right)}; verify the native destination capacity and full-length input.')
+    from code_agent.security_c_local_flow import scan_local_value_flow
+    scan_local_value_flow(root, add)
     return findings,root.has_error

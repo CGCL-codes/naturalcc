@@ -1,0 +1,19 @@
+{
+  "source": "derived-source-audit-profile",
+  "upstream_kconfig": "subsys/fs/ext2/Kconfig",
+  "kconfig_sha256": "c099c9d8f3c05e9636fb3c528061a8f99533773c60c8bd6690744550542a1fe4",
+  "defaults": {
+    "CONFIG_MAX_FILES": 10,
+    "CONFIG_EXT2_MAX_BLOCK_SIZE": 4096,
+    "CONFIG_EXT2_MAX_BLOCK_COUNT": 10
+  },
+  "files": [
+    "subsys/fs/ext2/ext2_bitmap.c",
+    "subsys/fs/ext2/ext2_disk_access.c",
+    "subsys/fs/ext2/ext2_diskops.c",
+    "subsys/fs/ext2/ext2_format.c",
+    "subsys/fs/ext2/ext2_impl.c",
+    "subsys/fs/ext2/ext2_ops.c"
+  ],
+  "scope": "Pinned upstream Kconfig defaults for ext2 source analysis, not a full board build."
+}

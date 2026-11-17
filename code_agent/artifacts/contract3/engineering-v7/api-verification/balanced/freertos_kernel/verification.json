@@ -1,0 +1,147 @@
+{
+  "dataset_revision": "engineering-v7-20261118-r4",
+  "manifest_sha256": "4206b9ed49f258f69c402b5197f3a1111cd0f44c2d92a391a238e7825dacca88",
+  "rule_sha256": {
+    "security_exam.py": "f530019e6b6441f65172847f76d2bbe35f8875dadb7c059eeb319fa009141566",
+    "security_c_rules.py": "e2e51c86c82ae3103dec70c62e1b7943e7b7ce2b8a472264436dac305f162fbb",
+    "security_c_local_flow.py": "9d471fecbcf9778f0cc779525927f8424a03edcad22a7c945a6865d47d975f23",
+    "security_rtos_rules.py": "52c2a3d8b2959c2f6eac41c86894a8f4f4dc1c2f3f65e071519bf176690cb4a5",
+    "security_engineering_rules.py": "1f883201e0b263f8c818f64bf691cba724c360e29b1d87c55c4700dad308cc7e",
+    "security_contracts.py": "a415bd6f20a0bba916f8d99382936f60a2c3f2fb07068aaa31d0bb677f63af2d",
+    "security_analysis.py": "95b72b4a9c55da9f0058a706312fdc6b835448119e65f8c31e4b766e4fb83fa1",
+    "security_build_context.py": "0c739d9e6ebe234c1a7822ae4b1affb6c50169a03e4fbbffb00eaa9e81d8b71e",
+    "security_c_macros.py": "ab2a37893d35f3c5741d8da5081ca1ff97fe0aaef0e84228b8abe9cfabea31b4",
+    "scripts/measure_contract3_engineering.py": "16cc116eb936f951843ae1a557ad8de6115d4dead5989fff0d492adeb398c4fc"
+  },
+  "api_code_sha256": {
+    "agent_web_api.py": "e69e251e5376d54e76b906e021da458b3e48689425520b4c9c40b98a5dd3b817",
+    "plugins/vulnerability_detection.py": "ff569ffe8811dd91aa6cf634961d53d4b51ffb8d0bdb2adf32cabc25556f36c8",
+    "plugins/dispatcher.py": "995d70d151950777a2533396fb00298e2f24a772a96109858118e37d52d4a3be",
+    "security_case_coverage.py": "e7b9636f47a1db051a22ba7808cc439c8a915e0911a77a0443489d8ac71fb4ef",
+    "scripts/verify_contract3_v7_api.py": "b07d86f04a6d883286e41be00469403c06675e6e5fe319692fb34e38e7cdce08"
+  },
+  "scope": "Current local API handlers and real analyzers; not customer server acceptance.",
+  "passed": true,
+  "results": [
+    {
+      "encoding": "json",
+      "display_limit": 1,
+      "finding_summary": {
+        "candidate_count": 369,
+        "returned_count": 1,
+        "truncated": true,
+        "max_findings": 1
+      },
+      "overall": {
+        "tp": 56,
+        "fn": 4,
+        "fp": 6,
+        "tn": 54,
+        "detection_rate": 0.9333333333333333,
+        "warning_accuracy": 0.9032258064516129,
+        "false_positive_rate": 0.1,
+        "false_discovery_rate": 0.0967741935483871,
+        "accuracy": 0.9166666666666666
+      },
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 2,
+          "tn": 18,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.9047619047619048,
+          "false_positive_rate": 0.1,
+          "false_discovery_rate": 0.09523809523809523,
+          "accuracy": 0.925
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 2,
+          "tn": 18,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.9047619047619048,
+          "false_positive_rate": 0.1,
+          "false_discovery_rate": 0.09523809523809523,
+          "accuracy": 0.925
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 18,
+          "fn": 2,
+          "fp": 2,
+          "tn": 18,
+          "detection_rate": 0.9,
+          "warning_accuracy": 0.9,
+          "false_positive_rate": 0.1,
+          "false_discovery_rate": 0.1,
+          "accuracy": 0.9
+        }
+      },
+      "coverage_incomplete": true
+    },
+    {
+      "encoding": "form",
+      "display_limit": 100,
+      "finding_summary": {
+        "candidate_count": 369,
+        "returned_count": 100,
+        "truncated": true,
+        "max_findings": 100
+      },
+      "overall": {
+        "tp": 56,
+        "fn": 4,
+        "fp": 6,
+        "tn": 54,
+        "detection_rate": 0.9333333333333333,
+        "warning_accuracy": 0.9032258064516129,
+        "false_positive_rate": 0.1,
+        "false_discovery_rate": 0.0967741935483871,
+        "accuracy": 0.9166666666666666
+      },
+      "by_category": {
+        "array_oob": {
+          "label": "数组越界",
+          "tp": 19,
+          "fn": 1,
+          "fp": 2,
+          "tn": 18,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.9047619047619048,
+          "false_positive_rate": 0.1,
+          "false_discovery_rate": 0.09523809523809523,
+          "accuracy": 0.925
+        },
+        "string_overflow": {
+          "label": "字符串溢出",
+          "tp": 19,
+          "fn": 1,
+          "fp": 2,
+          "tn": 18,
+          "detection_rate": 0.95,
+          "warning_accuracy": 0.9047619047619048,
+          "false_positive_rate": 0.1,
+          "false_discovery_rate": 0.09523809523809523,
+          "accuracy": 0.925
+        },
+        "null_pointer": {
+          "label": "空指针调用",
+          "tp": 18,
+          "fn": 2,
+          "fp": 2,
+          "tn": 18,
+          "detection_rate": 0.9,
+          "warning_accuracy": 0.9,
+          "false_positive_rate": 0.1,
+          "false_discovery_rate": 0.1,
+          "accuracy": 0.9
+        }
+      },
+      "coverage_incomplete": true
+    }
+  ]
+}

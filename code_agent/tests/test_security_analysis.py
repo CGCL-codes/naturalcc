@@ -37,7 +37,7 @@ def test_cppcheck_maps_bounds_null_and_leak_diagnostics(tmp_path, monkeypatch):
     assert coverage["status"] == "completed"
 
 
-@pytest.mark.parametrize("stderr,code,status", [("not XML", 0, "failed"), ("failed", 1, "failed"), ('<results><errors><error id="syntaxError" msg="bad syntax"/></errors></results>', 0, "partial")])
+@pytest.mark.parametrize("stderr,code,status", [("not XML", 0, "failed"), ("failed", 1, "failed"), ('<results><errors><error id="syntaxError" msg="bad syntax"/></errors></results>', 0, "failed")])
 def test_analyzer_errors_are_not_clean_reports(tmp_path, monkeypatch, stderr, code, status):
     source = tmp_path / "main.c"
     source.write_text("invalid", encoding="utf-8")
@@ -45,6 +45,22 @@ def test_analyzer_errors_are_not_clean_reports(tmp_path, monkeypatch, stderr, co
     monkeypatch.setattr(security_analysis.subprocess, "run", lambda *a, **kw: SimpleNamespace(returncode=code, stderr=stderr))
     _, coverage = security_analysis.cppcheck_scan([str(source)], str(tmp_path), 1)
     assert coverage["status"] == status
+
+
+@pytest.mark.parametrize("origin,failed", [("", ["a.c", "b.c"]), (' file0="a.c"', ["a.c"])])
+def test_cppcheck_zero_exit_header_error_marks_failed_units(tmp_path, monkeypatch, origin, failed):
+    paths = [tmp_path / name for name in ("a.c", "b.c")]
+    for path in paths:
+        path.write_text('#include "toolchain.h"\n')
+    xml = ('<results><errors><error id="preprocessorErrorDirective" msg="unsupported compiler"'
+           + origin + '><location file="include/toolchain.h" line="7"/></error></errors></results>')
+    monkeypatch.setattr(security_analysis.shutil, "which", lambda name: "cppcheck")
+    monkeypatch.setattr(security_analysis.subprocess, "run",
+                        lambda *a, **kw: SimpleNamespace(returncode=0, stderr=xml))
+    findings, report = security_analysis.cppcheck_scan([str(p) for p in paths], str(tmp_path), 0)
+    assert not findings
+    assert report["failed_files"] == failed
+    assert report["status"] == ("failed" if len(failed) == 2 else "partial")
 
 
 def test_required_analyzer_missing_is_failure(tmp_path, monkeypatch):
@@ -219,6 +235,19 @@ def test_real_cppcheck_bounds_null_and_leak(tmp_path):
     assert coverage["status"] in {"completed", "partial"}
 
 
+@pytest.mark.skipif(not shutil.which('cppcheck') or not shutil.which('clang'), reason='Real analyzer tools required')
+def test_cppcheck_macro_preprocessing_fallback_keeps_source_location(tmp_path):
+    source = tmp_path / 'native.c'
+    source.write_text('#define CHECK(x) do { (void)(x); } while (0)\n'
+                      'int actual(void) {\nCHECK(\n#if 1\n1\n#else\n2\n#endif\n);\n'
+                      'int *p=0;\nreturn *p;\n}\n')
+    findings, coverage = security_analysis.cppcheck_scan([str(source)], str(tmp_path), 0, 60)
+    assert coverage['status'] == 'completed'
+    assert coverage['preprocessing'][0]['mode'] == 'preprocess_only'
+    assert any(f['file'] == 'native.c' and f['line'] == 11 and f['analyzer_id'] == 'nullPointer'
+               for f in findings)
+
+
 # --- compile context (include directories, macros, compile_commands.json) -------------
 
 def make_layered_project(root: Path) -> Path:
@@ -277,6 +306,7 @@ def test_cppcheck_flag_translation():
     assert security_analysis._cppcheck_flags(
         ["-I", "/p/a", "-idirafter", "/p/libc", "-iquote", "/p/q", "-include", "/p/cfg.h", "-DX=1", "-UY", "-std=gnu99"]
     ) == ["-I", "/p/a", "-I", "/p/q", "-I", "/p/libc", "--include=/p/cfg.h", "-DX=1", "-UY", "--std=c99"]
+    assert security_analysis._cppcheck_flags(['-imacros', '/p/autoconf.h']) == ['--include=/p/autoconf.h']
 
 
 @pytest.mark.parametrize("config, message", [

@@ -1,0 +1,327 @@
+[
+  {
+    "directory": ".",
+    "file": "croutine.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "croutine.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "event_groups.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "event_groups.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "list.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "list.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "queue.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "queue.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "stream_buffer.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "stream_buffer.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "tasks.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "tasks.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "timers.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "timers.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/Common/FreeRTOS_TCP_server.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/Common/FreeRTOS_TCP_server.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/FreeRTOS_HTTP_commands.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/FreeRTOS_HTTP_commands.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/FreeRTOS_HTTP_server.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/FreeRTOS_HTTP_server.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/NTP/NTPDemo.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/NTP/NTPDemo.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/File-Related-CLI-commands.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/File-Related-CLI-commands.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/Sample-CLI-commands.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/Sample-CLI-commands.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/UARTCommandConsole.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/UARTCommandConsole.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/UDP-Related-CLI-commands.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/UDP-Related-CLI-commands.c"
+    ]
+  },
+  {
+    "directory": ".",
+    "file": "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/FreeRTOS_CLI.c",
+    "arguments": [
+      "cc",
+      "-include",
+      "build_context/cppcheck-toolchain.h",
+      "-I.",
+      "-Iinclude",
+      "-Iportable/ThirdParty/GCC/Posix",
+      "-IFreeRTOS-Plus/Source/FreeRTOS-Plus-CLI",
+      "-IFreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/include",
+      "-DipconfigUSE_FTP=1",
+      "-DipconfigUSE_HTTP=1",
+      "-DffconfigTIME_SUPPORT=1",
+      "-D_POSIX_C_SOURCE=200809L",
+      "-c",
+      "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/FreeRTOS_CLI.c"
+    ]
+  }
+]

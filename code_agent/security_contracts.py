@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from collections import Counter
 from pathlib import Path
 
 from code_agent.security_exam import switch_off
 from code_agent.security_c_rules import call_parts, declared_name, parse_source, text, walk
 
-TAXONOMY_VERSION = "contract-categories-v2"
+TAXONOMY_VERSION = "contract-categories-v3"
 CATEGORIES = {
     "array_oob": "数组越界", "string_overflow": "字符串溢出", "null_pointer": "空指针调用",
     "buffer_overflow": "缓冲区溢出", "data_race": "多线程竞争",
@@ -28,6 +29,53 @@ FORMULAS = {
 }
 STRING_CALLS = {"strcpy", "strncpy", "strcat", "strncat", "sprintf", "snprintf", "gets", "scanf", "fscanf", "sscanf"}
 BUFFER_CALLS = {"memcpy", "memmove", "memset", "read", "recv", "fread"}
+
+
+def _character_write_ranges(source, suffix):
+    """Distinguish string-buffer writes from numeric array accesses.
+
+    The external checker establishes the bounds violation. This function only
+    classifies its operation using local C types; it never reads GT labels.
+    Reads from a char array remain array accesses, and an unknown type is not
+    guessed to be a string buffer.
+    """
+    ranges = []
+    for function in walk(parse_source(source, suffix)):
+        if function.type != "function_definition":
+            continue
+        declarations = {}
+        for node in walk(function):
+            if node.type in ("declaration", "parameter_declaration"):
+                scope = node.parent
+                while scope is not None and scope.type not in (
+                        "compound_statement", "for_statement", "function_definition"):
+                    scope = scope.parent
+                for child in node.named_children:
+                    if child.type in ("identifier", "array_declarator", "pointer_declarator", "init_declarator"):
+                        target = child.child_by_field_name("declarator") if child.type == "init_declarator" else child
+                        if target is not None and scope is not None:
+                            is_character = (text(node.child_by_field_name("type")) == "char"
+                                            and target.type in ("array_declarator", "pointer_declarator"))
+                            declarations.setdefault(declared_name(target), []).append(
+                                (node.start_byte, scope.start_byte, scope.end_byte, is_character))
+        for node in walk(function):
+            if node.type == "assignment_expression":
+                target = node.child_by_field_name("left")
+                if target is None or target.type not in ("subscript_expression", "pointer_expression"):
+                    continue
+                base = target.child_by_field_name("argument")
+                words = re.findall(r"[A-Za-z_]\w*", text(base))
+                # Respect local shadowing: a numeric array in an inner block
+                # must not inherit the classification of an outer char buffer.
+                candidates = [r for r in declarations.get(words[0], [])
+                              if r[0] < node.start_byte and r[1] <= node.start_byte < r[2]] if words else []
+                if candidates and max(candidates, key=lambda r: r[0])[3]:
+                    ranges.append((node.start_point.row + 1, node.end_point.row + 1))
+            elif node.type == "call_expression":
+                name, _ = call_parts(node)
+                if name in STRING_CALLS:
+                    ranges.append((node.start_point.row + 1, node.end_point.row + 1))
+    return ranges
 
 
 def _pointer_offset_accesses(source, suffix):
@@ -124,6 +172,7 @@ def _pointer_offset_accesses(source, suffix):
 def classify_findings(findings, project_dir):
     operations = {}
     pointer_accesses = {}
+    character_writes = {}
     for finding in findings:
         category, eligible, basis = None, False, "Unmapped diagnostic; CWE alone is insufficient"
         identifier = finding.get("analyzer_id", "")
@@ -148,6 +197,14 @@ def classify_findings(findings, project_dir):
                     identifier = "memleak"
             if identifier in {"arrayIndexOutOfBounds", "arrayIndexOutOfBoundsCond", "negativeIndex"}:
                 category = "array_oob"
+                file = finding["file"]
+                if file not in character_writes:
+                    path = (Path(project_dir) / file).resolve()
+                    path.relative_to(Path(project_dir).resolve())
+                    character_writes[file] = _character_write_ranges(
+                        path.read_text(encoding="utf-8", errors="replace"), path.suffix.lower())
+                if any(a <= finding["line"] <= b for a, b in character_writes[file]):
+                    category = "string_overflow"
             elif identifier in {"nullPointer", "nullPointerRedundantCheck", "nullPointerDefaultArg"}:
                 category = "null_pointer"
             elif identifier in {"memleak", "memleakOnRealloc"}:

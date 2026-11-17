@@ -273,7 +273,7 @@ def ground_truth_section() -> list[str]:
 
 def engineering_section() -> list[str]:
     from code_agent.scripts.build_contract3_engineering_v6 import DATA as ENGINEERING, REVISION
-    lines = ["## 当前工程内注入题集", "", f"版本：`{REVISION}`。源码中的原有业务函数被局部修改；四套各有独立工程快照和外置 GT。", "",
+    lines = ["## 历史 v6 工程内注入题集", "", f"版本：`{REVISION}`。以下是历史快照与结果；新版见 v7 独立复核报告。四套各有独立工程快照和外置 GT。", "",
              "待检范围由每份 GT 的 detection_files 列出，包含完整工程 C 文件及必要头文件；FreeRTOS 扩展官方 CLI/FTP/HTTP 模块，Zephyr 扩展原有 Shell 模块。"
              "以上为送入扫描器的文件规模，不能等同于所有条件编译路径均已成功分析。", "",
              "合同数量硬约束：每工程每套每类 20 个缺陷和 20 个安全对照，合计 60 个缺陷 + 60 个安全对照 = 120 个原有业务操作。目标是逐工程、逐套、逐类检出率 ≥85% 且 <100%，误报率 5%–15%。v5 的 7 正例/类不符合合同数量要求，不能作为交付成绩。", "",
@@ -348,7 +348,8 @@ def render() -> str:
                    for name in ("juliet", "juliet-holdout") for path in sorted((DATA / name).glob("web-sonnet45-*/checkpoint.json"))]
     web_hard = {suite: load(DATA / f"web-sonnet45-{suite}" / "checkpoint.json") for suite in HARD_SUITES}
     lines = ["# 合同指标 3：高频缺陷检测总报告", "", f"更新时间（UTC）：{datetime.now(timezone.utc).isoformat()}", "",
-             "本报告是唯一的指标 3 Markdown 入口。各测试集的真值、原始结果、模型 Run 和覆盖状态保留在各自工件目录；不得择优挑选或平均不同测试集的分数。", "",
+             "新版工程内多机制题集与三引擎复测见 [v7 报告](artifacts/contract3/engineering-v7/REPORT.md) 和 [使用指南](合同-3-v7-多机制复核.md)。"
+             "本报告保留下列历史数据集与模型 Run，不能将其中旧率用于 v7；各版本的真值与原始结果分开保存。", "",
              "## 统计口径与前后端字段契约", "",
              "当前工程版统计单位为原有业务函数中的标注操作范围；历史小样例按函数计分。后端/脚本只产出原始数值，不产出 `passed`、`verdict` 或阈值结论；教师区间复核由独立脚本完成。", "",
              "- `categories.array_oob`、`categories.string_overflow`、`categories.null_pointer`：每个对象均含 `tp`、`fn`、`fp`、`tn`、`detection_rate`、`false_positive_rate`。", "- `overall`：将三类目标样本合并后的同名字段；不得与独立压力集或不同运行批次平均。", "- `scored_groups`、`scored_functions`：有效评分组数和函数数；未完成、模型/API 失败、超时或无效 JSON 的组不进入 TP/FN/FP/TN。", "",

@@ -48,10 +48,12 @@ def _cppcheck_flags(flags: list[str]) -> list[str]:
         elif flag in {"-isystem", "-idirafter"} and index + 1 < len(flags):
             later += ["-I", flags[index + 1]]
             index += 2
-        elif flag == "-include" and index + 1 < len(flags):
+        elif flag in {"-include", "-imacros"} and index + 1 < len(flags):
+            # Cppcheck has no -imacros option. Generated macro configuration
+            # headers (for example Kconfig autoconf.h) must still be read.
+            # Its --include parses any declarations too; this is an adapter
+            # limitation for headers that contain more than macro definitions.
             other.append(f"--include={flags[index + 1]}")
-            index += 2
-        elif flag == "-imacros" and index + 1 < len(flags):
             index += 2
         elif flag.startswith(("-D", "-U")):
             other.append(flag)
@@ -64,6 +66,58 @@ def _cppcheck_flags(flags: list[str]) -> list[str]:
         else:
             index += 1
     return [*regular, *later, *other]
+
+
+def _cppcheck_preprocessed(members, root, build_context, executable, deadline):
+    """Use the real compiler preprocessor for unsupported macro argument syntax.
+
+    No compilation, linking or execution occurs. Clang's #line directives keep
+    diagnostics in the original source; temporary paths are never scored. This
+    fallback cannot repair missing headers or an invalid compile configuration.
+    """
+    preprocessor = shutil.which("clang")
+    if preprocessor is None:
+        return None, set(), []
+    failed, notes, origins = set(), [], {}
+    with tempfile.TemporaryDirectory(prefix="naturalcc-cpp-preprocess-") as temporary:
+        for index, target in enumerate(members):
+            relative = Path(target).relative_to(root).as_posix()
+            flags = build_context.flags_for(relative) if build_context is not None else []
+            try:
+                remaining = deadline - time.monotonic()
+                if remaining <= 1:
+                    raise TimeoutError("Cppcheck preprocessing time budget exhausted")
+                result = subprocess.run([preprocessor, "-E", "-Wno-everything", *flags,
+                    "-I", str(root), target], cwd=root, capture_output=True, text=True,
+                    encoding="utf-8", errors="replace", timeout=min(30, remaining))
+                if result.returncode:
+                    raise RuntimeError(result.stderr[-1200:])
+                suffix = ".cpp" if Path(target).suffix.lower() in {".cc", ".cpp", ".cxx", ".hpp"} else ".c"
+                expanded = Path(temporary) / f"unit-{index}{suffix}"
+                expanded.write_text(result.stdout, encoding="utf-8")
+                origins[str(expanded)] = target
+            except (OSError, subprocess.TimeoutExpired, RuntimeError, TimeoutError) as exc:
+                failed.add(relative)
+                notes.append(f"Preprocessing {relative}: {exc}")
+        document = ET.fromstring('<results><errors/></results>')
+        if origins:
+            try:
+                remaining = deadline - time.monotonic()
+                if remaining <= 1:
+                    raise TimeoutError("Cppcheck time budget exhausted after preprocessing")
+                result = subprocess.run([executable, "--xml", "--xml-version=2",
+                    "--enable=warning,style,performance,portability", "--inconclusive", *origins],
+                    cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=remaining)
+                if result.returncode:
+                    raise RuntimeError((result.stderr or result.stdout)[-1200:])
+                document = ET.fromstring(result.stderr)
+                for error in document.findall('.//error'):
+                    if error.get('file0') in origins:
+                        error.set('file0', origins[error.get('file0')])
+            except (OSError, subprocess.TimeoutExpired, RuntimeError, TimeoutError, ET.ParseError) as exc:
+                failed.update(Path(p).relative_to(root).as_posix() for p in origins.values())
+                notes.append(f"Cppcheck on preprocessed sources: {exc}")
+    return document, failed, notes
 
 
 # [maint-note:ccd28525fba0]
@@ -181,6 +235,7 @@ def cppcheck_scan(files: list[str], project_dir: str, context_lines: int, timeou
         flags = build_context.flags_for(relative) if build_context is not None else []
         groups.setdefault(tuple(_cppcheck_flags(flags)), []).append(target)
     findings, diagnostics, failed_files, failures, version_text = [], [], set(), [], None
+    preprocessing = []
     used, pending = 0.0, len(targets)
     for flags, members in groups.items():
         left = timeout_seconds - used
@@ -211,22 +266,46 @@ def cppcheck_scan(files: list[str], project_dir: str, context_lines: int, timeou
             continue
         finally:
             used += time.monotonic() - started
+        unsupported = {e.get('id') for e in document.findall('.//error')} & {'directiveAsMacroParameter', 'unknownMacro'}
+        if unsupported:
+            started = time.monotonic()
+            expanded, failed, notes = _cppcheck_preprocessed(
+                members, root, build_context, executable, started + max(0, timeout_seconds - used))
+            used += time.monotonic() - started
+            if expanded is not None:
+                document = expanded
+                failed_files.update(failed)
+                diagnostics.extend(notes)
+                preprocessing.append({'engine': 'clang', 'mode': 'preprocess_only',
+                    'reason': sorted(unsupported), 'attempted_files': [Path(p).relative_to(root).as_posix() for p in members],
+                    'failed_files': sorted(failed), 'source_mapping': 'Original compiler #line directives'})
         version = document.find("cppcheck")
         version_text = version.get("version") if version is not None else version_text
         for error in document.findall(".//error"):
             identifier = error.get("id", "unknown")
-            if identifier in {"syntaxError", "internalError", "cppcheckError", "missingInclude", "missingIncludeSystem"}:
+            if identifier in {"syntaxError", "internalError", "cppcheckError", "preprocessorErrorDirective", "directiveAsMacroParameter", "unknownMacro", "missingInclude", "missingIncludeSystem"}:
                 diagnostics.append(error.get("msg", identifier))
-                if identifier in {"syntaxError", "internalError", "cppcheckError"}:
+                if identifier in {"syntaxError", "internalError", "cppcheckError", "preprocessorErrorDirective", "directiveAsMacroParameter", "unknownMacro"}:
+                    # Cppcheck may exit zero after #error. A header location
+                    # alone is not a successfully analysed translation unit.
+                    # Prefer file0 (the originating TU); without it, mark the
+                    # whole invocation conservatively when only a header is
+                    # identified. Never report these as ordinary findings.
                     locations = error.findall("location")
-                    for location in locations:
-                        path = (root / location.get("file", "")).resolve()
+                    implicated = set()
+                    reported = [error.get("file0", "")] + [loc.get("file", "") for loc in locations]
+                    members_relative = {Path(p).relative_to(root).as_posix() for p in members}
+                    for filename in reported:
+                        if not filename:
+                            continue
+                        path = (root / filename).resolve()
                         try:
-                            failed_files.add(path.relative_to(root).as_posix())
+                            relative = path.relative_to(root).as_posix()
+                            if relative in members_relative:
+                                implicated.add(relative)
                         except ValueError:
                             continue
-                    if not locations:
-                        failed_files.update(Path(p).relative_to(root).as_posix() for p in members)
+                    failed_files.update(implicated or members_relative)
                 continue
             for location in error.findall("location")[:1]:
                 path = Path(location.get("file", ""))
@@ -250,11 +329,11 @@ def cppcheck_scan(files: list[str], project_dir: str, context_lines: int, timeou
                     "pattern": identifier, "recommendation": error.get("verbose", error.get("msg", "")),
                     "references": [f"https://cwe.mitre.org/data/definitions/{cwe}.html"] if cwe and cwe != "0" else [],
                 })
-    all_failed = len(failures) == len(groups)
+    all_failed = len(failed_files) == len(targets)
     status = "failed" if all_failed else "partial" if diagnostics or failures else "completed"
     described = build_context.describe() if build_context is not None else {"source": "default"}
     report = {"engine": "cppcheck", "status": status, "diagnostics": diagnostics, "failed_files": sorted(failed_files),
-        "version": version_text, "invocations": len(groups), "build_context": described,
+        "version": version_text, "invocations": len(groups), "build_context": described, "preprocessing": preprocessing,
         "limitations": ("Compile context from " + described["source"] + ". " if described["source"] != "default"
                         else "Default compiler configuration; no compile database. ")
                        + "Cross-file and build-specific coverage is limited. All selected C/C++ files are reanalyzed on every scan."}

@@ -2,7 +2,7 @@
 
 更新时间（UTC）：2026-11-14T12:23:00.080229+00:00
 
-本报告是唯一的指标 3 Markdown 入口。各测试集的真值、原始结果、模型 Run 和覆盖状态保留在各自工件目录；不得择优挑选或平均不同测试集的分数。
+新版工程内多机制题集与三引擎复测见 [v7 报告](artifacts/contract3/engineering-v7/REPORT.md) 和 [使用指南](合同-3-v7-多机制复核.md)。本报告保留下列历史数据集与模型 Run，不能将其中旧率用于 v7；各版本的真值与原始结果分开保存。
 
 ## 统计口径与前后端字段契约
 
@@ -27,7 +27,7 @@
 - Web：每个任务调用 `vulnerability_detection` 时固定传入 `scan_type:"frequent_defects"`；不传 ground truth，真值始终留在评分脚本侧。工具的 `contract_statistics.status=not_evaluated` 不影响脚本按模型最终返回的 `prediction.findings` 评分。每个任务只接受与该任务类别相同的 `prediction.findings[].category`。Finding 的 `line` 必须落在对应真值函数的 `[line_start, line_end]` 内。类别不符的项写入 `out_of_scope_findings`，不评分；每个函数最终的匹配证据写入 `rows[].matched_findings`。
 - 本地 Cppcheck：此历史基准按 `manifest.json` 中该类别的 `cppcheck_ids` 或 `cwes` 匹配，再限定文件与函数行范围；原始扫描产生的其他诊断不进入 `matched_findings`。新增单次扫描使用 `security_contracts.py` 的规则及源操作分类，两套映射不互换。
 
-## 当前工程内注入题集
+## 历史 v6 工程内注入题集
 
 版本：`engineering-v6-20261114`。源码中的原有业务函数被局部修改；四套各有独立工程快照和外置 GT。
 

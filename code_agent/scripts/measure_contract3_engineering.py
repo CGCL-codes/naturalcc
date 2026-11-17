@@ -111,6 +111,48 @@ def score_evidence(gt, findings, reports):
     return evaluate_contract(findings, 'frequent_defects', scored), [c for c in gt['cases'] if c['case_id'] not in covered]
 
 
+def engine_ablations(gt, findings, reports):
+    """Compare independent findings on one fixed, source-covered case universe.
+
+    These are end-to-end yields, not conditional recall of successfully compiled
+    units. Failed units stay explicit in coverage. Removing them from one
+    engine's denominator would make the comparison spuriously optimistic.
+    The authoritative case matcher and formula implementation are the backend's.
+    """
+    _, unscored = score_evidence(gt, findings, reports)
+    excluded = {c['case_id'] for c in unscored}
+    truth = {**gt, 'cases': [c for c in gt['cases'] if c['case_id'] not in excluded]}
+    engines = {r['engine']: r for r in reports}
+    groups = {name: [f for f in findings if (f.get('analyzer') == 'c-source'
+                if name == 'builtin' else f.get('analyzer') == name)] for name in engines}
+    statistics = {name: evaluate_contract(found, 'frequent_defects', truth)
+                  for name, found in groups.items()}
+    cases = []
+    for c in truth['cases']:
+        hits = {name: sorted({f['line'] for f in found if f.get('metric_eligible')
+                and f.get('category') == c['category'] and f.get('file') == c['file']
+                and c['line_start'] <= f.get('line', 0) <= c['line_end']})
+                for name, found in groups.items()}
+        cases.append({**{k: c[k] for k in ('case_id', 'file', 'function', 'line_start',
+                     'line_end', 'category', 'expected', 'mechanism')}, 'hit_lines': hits,
+                     'file_analysis_failed': {name: c['file'] in r.get('failed_files', [])
+                      or r['status'] in ('failed', 'unavailable') for name, r in engines.items()}})
+    return dict(scope='Fixed source-covered GT operations; end-to-end detection includes analysis failures. '
+                      'No external checker is credited with conditional-site coverage merely for exiting zero.',
+                source_covered_cases=len(cases), unscored_case_ids=sorted(excluded),
+                statistics=statistics, cases=cases,
+                mechanisms={category: {mechanism: {
+                    name: evaluate_contract(found, 'frequent_defects',
+                        {**truth, 'cases': [c for c in truth['cases'] if c['category'] == category
+                                            and c['mechanism'] == mechanism]})
+                    for name, found in groups.items()}
+                    for mechanism in sorted({c['mechanism'] for c in cases if c['category'] == category})}
+                    for category in CATEGORIES},
+                added_defects={name: [c['case_id'] for c in cases if c['expected'] == 'defect'
+                    and c['hit_lines'][name] and not c['hit_lines'].get('builtin')]
+                    for name in engines if name != 'builtin'})
+
+
 def rescore(path):
     document = json.loads(path.read_text())
     if document['dataset_revision'] != REVISION:
@@ -134,7 +176,7 @@ def rescore(path):
 def main(argv=None):
     global DATA, REVISION, verify
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--dataset', choices=['v4','v5','v6'], default='v6')
+    parser.add_argument('--dataset', choices=['v4','v5','v6','v7'], default='v6')
     parser.add_argument('--suite', default=','.join(SUITES))
     parser.add_argument('--project', default='freertos_kernel,zephyr,rt_thread')
     parser.add_argument('--engines', default='builtin,cppcheck,clang')
@@ -150,6 +192,9 @@ def main(argv=None):
     elif args.dataset == 'v6':
         from code_agent.scripts import build_contract3_engineering_v6 as teaching
         DATA, REVISION, verify = teaching.DATA, teaching.REVISION, teaching.verify
+    elif args.dataset == 'v7':
+        from code_agent.scripts import build_contract3_engineering_v7 as teaching
+        DATA, REVISION, verify = teaching.DATA, teaching.REVISION, teaching.verify
     if args.rescore:
         rescore(args.rescore)
         return
@@ -160,9 +205,10 @@ def main(argv=None):
     output = args.output or DATA / f'static-{mode}.json'
     if args.reference:
         security_exam.CONTRACT3_OFF = frozenset()
-    product = ['security_exam.py','security_c_rules.py','security_rtos_rules.py','security_engineering_rules.py','security_contracts.py','security_analysis.py','security_build_context.py','security_c_macros.py', 'scripts/measure_contract3_engineering.py']
+    product = ['security_exam.py','security_c_rules.py','security_c_local_flow.py','security_rtos_rules.py','security_engineering_rules.py','security_contracts.py','security_analysis.py','security_build_context.py','security_c_macros.py', 'scripts/measure_contract3_engineering.py']
     document = {'dataset_revision': REVISION, 'created_at': datetime.now(timezone.utc).isoformat(),
                 'mode': mode, 'switches_off': sorted(security_exam.CONTRACT3_OFF), 'requested_engines': engines,
+                'analysis_timeout_seconds': args.timeout,
                 'scope': 'All declared C targets attempted; only covered annotated operations scored. Unlabelled alerts remain unscored. No Web model invoked.',
                 'rule_sha256': {f: digest((ROOT/f).read_bytes()) for f in product}, 'results': []}
     reusable = {}
@@ -170,7 +216,9 @@ def main(argv=None):
         old = json.loads(args.reuse_evidence.read_text())
         stable_rules = {f: h for f,h in old['rule_sha256'].items() if f != 'scripts/measure_contract3_engineering.py'}
         expected_rules = {f: h for f,h in document['rule_sha256'].items() if f != 'scripts/measure_contract3_engineering.py'}
-        if old['mode'] != mode or old['requested_engines'] != engines or old['switches_off'] != document['switches_off'] or stable_rules != expected_rules:
+        if (old['dataset_revision'] != REVISION or old.get('analysis_timeout_seconds') != args.timeout
+                or old['mode'] != mode or old['requested_engines'] != engines
+                or old['switches_off'] != document['switches_off'] or stable_rules != expected_rules):
             raise ValueError('Incompatible raw evidence')
         reusable = {(r['suite'], r['project']): r for r in old['results']}
     for suite in suites:
@@ -186,11 +234,15 @@ def main(argv=None):
                 row['reused_evidence_sha256'] = digest(args.reuse_evidence.read_bytes())
             else:
                 row = measure(destination, engines, args.timeout)
+            if args.dataset == 'v7':
+                row['engine_ablations'] = engine_ablations(verify(destination), row['findings'], row['engines'])
             document['results'].append(row)
             write_json(output, document)
             print(f"  {row['scored_cases']}/{row['total_cases']} covered; " + str({c: {k: v for k,v in m.items() if k in ('tp','fn','fp','tn')} for c,m in row['statistics'].get('by_category',{}).items()}), flush=True)
-    from code_agent.scripts.render_contract3_report import write_report
-    write_report()
+    # Candidate experiments must not rewrite the current release's report.
+    if args.dataset != 'v7':
+        from code_agent.scripts.render_contract3_report import write_report
+        write_report()
 
 
 if __name__ == '__main__':

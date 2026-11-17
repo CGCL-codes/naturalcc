@@ -1,0 +1,36 @@
+{
+  "project_dir": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/web-static/independent/freertos_kernel",
+  "feature": "vulnerability_detection",
+  "target_files": [
+    "croutine.c",
+    "event_groups.c",
+    "list.c",
+    "queue.c",
+    "stream_buffer.c",
+    "tasks.c",
+    "timers.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/Common/FreeRTOS_TCP_server.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/FreeRTOS_HTTP_commands.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/FreeRTOS_HTTP_server.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/NTP/NTPDemo.c",
+    "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/File-Related-CLI-commands.c",
+    "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/Sample-CLI-commands.c",
+    "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/UARTCommandConsole.c",
+    "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/UDP-Related-CLI-commands.c",
+    "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/FreeRTOS_CLI.c"
+  ],
+  "feature_config": {
+    "detection_mode": "static",
+    "analyzer": "comprehensive",
+    "rule_profile": "c_cpp",
+    "scan_scope": "targets",
+    "scan_type": "frequent_defects",
+    "ground_truth_file": "ground_truth.json",
+    "auto_fix": false,
+    "max_findings": 100,
+    "severity_threshold": "medium",
+    "analysis_timeout_seconds": "600"
+  }
+}

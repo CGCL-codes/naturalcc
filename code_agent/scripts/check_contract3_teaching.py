@@ -11,9 +11,15 @@ from code_agent.scripts.build_contract3_engineering_v6 import DATA,REVISION,SUIT
 
 
 def main():
+    global DATA, REVISION, verify
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--evidence',type=Path,default=DATA/'static-teaching.json')
-    args=p.parse_args(); document=read_json(args.evidence)
+    p.add_argument('--dataset',choices=['v6','v7'],default='v6')
+    p.add_argument('--evidence',type=Path)
+    args=p.parse_args()
+    if args.dataset=='v7':
+        from code_agent.scripts import build_contract3_engineering_v7 as candidate
+        DATA,REVISION,verify=candidate.DATA,candidate.REVISION,candidate.verify
+    document=read_json(args.evidence or DATA/'static-teaching.json')
     assert document['dataset_revision']==REVISION and document['mode']=='teaching'
     for name,sha in document['rule_sha256'].items():
         assert digest((ROOT/name).read_bytes())==sha, f'Stale analyzer evidence: {name}'

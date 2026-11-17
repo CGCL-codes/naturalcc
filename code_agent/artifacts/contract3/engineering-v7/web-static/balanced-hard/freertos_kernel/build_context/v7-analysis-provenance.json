@@ -1,0 +1,17 @@
+{
+  "source": "derived-source-audit-profile",
+  "files": [
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/Common/FreeRTOS_TCP_server.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_commands.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/FTP/FreeRTOS_FTP_server.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/FreeRTOS_HTTP_commands.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/HTTP_Server/FreeRTOS_HTTP_server.c",
+    "FreeRTOS-Plus/Demo/Common/Demo_IP_Protocols/NTP/NTPDemo.c",
+    "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/File-Related-CLI-commands.c",
+    "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/Sample-CLI-commands.c",
+    "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/UARTCommandConsole.c",
+    "FreeRTOS-Plus/Demo/Common/FreeRTOS_Plus_CLI_Demos/UDP-Related-CLI-commands.c",
+    "FreeRTOS-Plus/Source/FreeRTOS-Plus-CLI/FreeRTOS_CLI.c"
+  ],
+  "scope": "Kernel/POSIX and real CLI/protocol headers; enable FTP/HTTP module paths for this source audit. Optional TCP/filesystem dependencies remain reported, not stubbed."
+}

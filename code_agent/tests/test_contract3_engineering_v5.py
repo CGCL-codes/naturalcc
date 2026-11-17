@@ -22,13 +22,15 @@ def detected(source, full=False):
 
 
 @pytest.mark.parametrize('name',['slots','renamed_store'])
-def test_array_pointer_and_last_slot_learning_gaps(name):
+def test_array_pointer_flow_and_last_slot_learning_gap(name):
     pre=f'int {name}[9]; void work(void) {{ '
     count=f'(sizeof({name}) / sizeof({name}[0]))'
     assert detected(pre+f'{name}[{count}] = 7; }}')=={'array_oob'}
     assert detected(pre+f'{name}[{count} - 1] = 7; }}')=={'array_oob'}
     assert detected(pre+f'{name}[{count} - 1] = 7; }}',True)==set()
-    assert detected(pre+f'*({name} + {count}) = 7; }}')==set()
+    # v7 local flow now follows typed array aliases even in teaching mode;
+    # the older syntactic pointer-normalization gap is no longer decisive.
+    assert detected(pre+f'*({name} + {count}) = 7; }}')=={'array_oob'}
     assert detected(pre+f'*({name} + {count}) = 7; }}',True)=={'array_oob'}
 
 
@@ -45,7 +47,9 @@ def test_string_typed_view_and_pointer_arithmetic():
 def test_pointer_constant_folding_and_conditional_flow():
     pre='struct Obj { int size; }; void use(struct Obj *item) { '
     assert detected(pre+'((__typeof__(item))0)->size = 1; }')=={'null_pointer'}
-    assert detected(pre+'((__typeof__(item))(0 + 0))->size = 1; }')==set()
+    # Constant local values are propagated by v7 independently of the older
+    # literal-pattern exercise. Unknown library returns still remain unknown.
+    assert detected(pre+'((__typeof__(item))(0 + 0))->size = 1; }')=={'null_pointer'}
     assert detected(pre+'((__typeof__(item))(0 + 0))->size = 1; }',True)=={'null_pointer'}
     assert detected(pre+'(item ? item : (__typeof__(item))0)->size = 1; }')=={'null_pointer'}
     assert detected(pre+'(item ? item : (__typeof__(item))0)->size = 1; }',True)==set()
