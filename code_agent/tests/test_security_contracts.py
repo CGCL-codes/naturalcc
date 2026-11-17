@@ -104,3 +104,41 @@ def test_incremental_metrics_include_candidates_beyond_old_internal_limit(tmp_pa
         assert result.artifacts["contract_statistics"]["overall"]["tp"] == 1002
         assert result.artifacts["finding_summary"]["returned_count"] == 1
     assert result.artifacts["coverage"][0]["reused_files"] == 1
+
+
+def test_builtin_gt_scores_misses_and_prioritizes_targets_before_display_cap(tmp_path, monkeypatch):
+    from code_agent import security_analysis
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError('Explicit builtin evaluation must not invoke external analyzers')
+
+    monkeypatch.setattr(security_analysis, 'cppcheck_scan', forbidden)
+    monkeypatch.setattr(security_analysis, 'clang_scan', forbidden)
+    source = ('#include <string.h>\n'
+              'void extra(char *input) { system(input); }\n'
+              'void hit(void) { int *p = 0; *p = 1; }\n'
+              'void missed(void) { int *p = (int *)strspn("x", "y"); *p = 1; }\n')
+    (tmp_path/'a.c').write_text(source)
+    truth = dict(schema_version=1, scan_type='frequent_defects',
+                 source_sha256={'a.c': hashlib.sha256(source.encode()).hexdigest()},
+                 cases=[case('detected', 'null_pointer', 'defect', 3),
+                        case('missed', 'null_pointer', 'defect', 4)])
+    (tmp_path/'truth.json').write_text(json.dumps(truth))
+    payload = dict(project_dir=str(tmp_path), target_files=['a.c'], feature='vulnerability_detection',
+                   feature_config=dict(analyzer='builtin', scan_type='frequent_defects',
+                                       ground_truth_file='truth.json', max_findings=1))
+    results = []
+    for limit in (1, 100):
+        payload['feature_config']['max_findings'] = limit
+        reply = TestClient(app).post('/api/run', json=payload)
+        done = json.loads(reply.text.splitlines()[-1])
+        assert done['status'] == 'success'
+        results.append(done['artifacts'])
+    stats = results[0]['contract_statistics']
+    assert stats['status'] == 'evaluated'
+    assert stats['by_category']['null_pointer']['tp'] == 1
+    assert stats['by_category']['null_pointer']['fn'] == 1
+    assert stats['overall'] == results[1]['contract_statistics']['overall']
+    assert len(results[0]['findings']) == 1
+    assert results[0]['findings'][0]['category'] == 'null_pointer'
+    assert any(f['category'] == 'command_execution' for f in results[1]['findings'])

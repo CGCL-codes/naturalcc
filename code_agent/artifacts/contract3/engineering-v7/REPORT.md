@@ -66,7 +66,7 @@ Cppcheck 遇到不支持的宏参数条件指令时会使用 Clang 的 `-E` 预�
 | 套题 | 工程 | C 文件 / 行数 | Cppcheck 失败文件 | Clang 失败文件 | Cppcheck 比内置新增正例 | Clang 比内置新增正例 |
 |---|---|---:|---:|---:|---:|---:|
 | balanced | freertos_kernel | 18 / 23757 | 0 | 8 | 0 | 0 |
-| balanced | zephyr | 206 / 73120 | 49 | 89 | 2 | 3 |
+| balanced | zephyr | 206 / 73120 | 49 | 90 | 2 | 3 |
 | balanced | rt_thread | 77 / 66871 | 0 | 54 | 0 | 2 |
 | independent | freertos_kernel | 18 / 23758 | 0 | 8 | 0 | 0 |
 | independent | zephyr | 206 / 73121 | 49 | 89 | 2 | 3 |

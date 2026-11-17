@@ -7,7 +7,7 @@
     "security_c_local_flow.py": "9d471fecbcf9778f0cc779525927f8424a03edcad22a7c945a6865d47d975f23",
     "security_rtos_rules.py": "52c2a3d8b2959c2f6eac41c86894a8f4f4dc1c2f3f65e071519bf176690cb4a5",
     "security_engineering_rules.py": "1f883201e0b263f8c818f64bf691cba724c360e29b1d87c55c4700dad308cc7e",
-    "security_contracts.py": "a415bd6f20a0bba916f8d99382936f60a2c3f2fb07068aaa31d0bb677f63af2d",
+    "security_contracts.py": "c5d5bc3f254963624e1d3860593ae16c77cc133705839ca55827738eac9eb644",
     "security_analysis.py": "95b72b4a9c55da9f0058a706312fdc6b835448119e65f8c31e4b766e4fb83fa1",
     "security_build_context.py": "0c739d9e6ebe234c1a7822ae4b1affb6c50169a03e4fbbffb00eaa9e81d8b71e",
     "security_c_macros.py": "ab2a37893d35f3c5741d8da5081ca1ff97fe0aaef0e84228b8abe9cfabea31b4",
@@ -15,7 +15,7 @@
   },
   "api_code_sha256": {
     "agent_web_api.py": "e69e251e5376d54e76b906e021da458b3e48689425520b4c9c40b98a5dd3b817",
-    "plugins/vulnerability_detection.py": "ff569ffe8811dd91aa6cf634961d53d4b51ffb8d0bdb2adf32cabc25556f36c8",
+    "plugins/vulnerability_detection.py": "8d8712411568d14e5dd92087748dfeaef8c0ee09c7e3e732b4964f608726f15e",
     "plugins/dispatcher.py": "995d70d151950777a2533396fb00298e2f24a772a96109858118e37d52d4a3be",
     "security_case_coverage.py": "e7b9636f47a1db051a22ba7808cc439c8a915e0911a77a0443489d8ac71fb4ef",
     "scripts/verify_contract3_v7_api.py": "b07d86f04a6d883286e41be00469403c06675e6e5fe319692fb34e38e7cdce08"

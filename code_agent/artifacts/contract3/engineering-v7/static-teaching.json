@@ -1,6 +1,6 @@
 {
   "dataset_revision": "engineering-v7-20261118-r4",
-  "created_at": "2026-11-17T16:36:39.533474+00:00",
+  "created_at": "2026-11-17T18:26:29.609018+00:00",
   "mode": "teaching",
   "switches_off": [
     "A",
@@ -25,7 +25,7 @@
     "security_c_local_flow.py": "9d471fecbcf9778f0cc779525927f8424a03edcad22a7c945a6865d47d975f23",
     "security_rtos_rules.py": "52c2a3d8b2959c2f6eac41c86894a8f4f4dc1c2f3f65e071519bf176690cb4a5",
     "security_engineering_rules.py": "1f883201e0b263f8c818f64bf691cba724c360e29b1d87c55c4700dad308cc7e",
-    "security_contracts.py": "a415bd6f20a0bba916f8d99382936f60a2c3f2fb07068aaa31d0bb677f63af2d",
+    "security_contracts.py": "c5d5bc3f254963624e1d3860593ae16c77cc133705839ca55827738eac9eb644",
     "security_analysis.py": "95b72b4a9c55da9f0058a706312fdc6b835448119e65f8c31e4b766e4fb83fa1",
     "security_build_context.py": "0c739d9e6ebe234c1a7822ae4b1affb6c50169a03e4fbbffb00eaa9e81d8b71e",
     "security_c_macros.py": "ab2a37893d35f3c5741d8da5081ca1ff97fe0aaef0e84228b8abe9cfabea31b4",
@@ -15804,7 +15804,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x78c2a8327180>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x7ca6dab7b180>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -16024,7 +16024,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x78c2a8327180>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x7ca6dab7b180>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -105386,6 +105386,7 @@
             "lib/posix/options/timer.c",
             "lib/posix/options/timespec_to_timeout.c",
             "lib/posix/options/uname.c",
+            "lib/utils/ring_buffer.c",
             "subsys/fs/ext2/ext2_disk_access.c",
             "subsys/fs/ext2/ext2_format.c",
             "subsys/fs/fat_fs.c",
@@ -105616,7 +105617,11 @@
             },
             {
               "file": "lib/posix/options/uname.c",
-              "message": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/lib/posix/options/uname.c:43:14: error: static assertion failed due to requirement 'sizeof (z_name.version) >= sizeof (\"v3.7.0 Nov 18 2026 00:29:41\")': \n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/lib/posix/options/uname.c:43:37: note: expression evaluates to '1 >= 28'\n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n1 error generated.\n"
+              "message": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/lib/posix/options/uname.c:43:14: error: static assertion failed due to requirement 'sizeof (z_name.version) >= sizeof (\"v3.7.0 Nov 18 2026 02:24:01\")': \n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/lib/posix/options/uname.c:43:37: note: expression evaluates to '1 >= 28'\n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n1 error generated.\n"
+            },
+            {
+              "file": "lib/utils/ring_buffer.c",
+              "message": "Command '['/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin/clang', '--analyze', '-Wno-everything', '-include', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/build_context/cppcheck-toolchain.h', '-DKERNEL', '-DK_HEAP_MEM_POOL_SIZE=0', '-D__ZEPHYR_SUPERVISOR__', '-D__ZEPHYR__=1', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/kernel/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/arch/posix/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/build_context/native64/zephyr/include/generated/zephyr', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/build_context/native64/zephyr/include/generated', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/soc/native/inf_clock', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/boards/native/native_posix', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/arch/posix/core/nsi_compat', '-imacros', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/build_context/native64/zephyr/include/generated/zephyr/autoconf.h', '-include', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/arch/posix/include/posix_cheats.h', '-std=c11', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project', '-Xanalyzer', '-analyzer-checker=core,unix,cplusplus,alpha.security.ArrayBoundV2,alpha.security.ArrayBound,alpha.unix.cstring.OutOfBounds,alpha.security.taint.TaintPropagation', '-Xanalyzer', '-analyzer-output=plist-multi-file', '-o', '/tmp/naturalcc-clang-3hnn_z9n/findings.plist', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/lib/utils/ring_buffer.c']' timed out after 15.0 seconds"
             },
             {
               "file": "subsys/fs/ext2/ext2_disk_access.c",
@@ -105625,10 +105630,6 @@
             {
               "file": "subsys/fs/ext2/ext2_format.c",
               "message": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/subsys/fs/ext2/ext2_format.c:128:15: error: use of undeclared identifier 'CONFIG_EXT2_DISK_STARTING_SECTOR'\n  128 |         fs_memory -= CONFIG_EXT2_DISK_STARTING_SECTOR * fs->write_size;\n      |                      ^\n1 error generated.\n"
-            },
-            {
-              "file": "subsys/fs/fat_fs.c",
-              "message": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/zephyr/project/subsys/fs/fat_fs.c:17:10: fatal error: 'ff.h' file not found\n   17 | #include <ff.h>\n      |          ^~~~~~\n1 error generated.\n"
             }
           ],
           "experimental_checkers": [
@@ -105689,7 +105690,7 @@
           }
         },
         "eligible_finding_count": 142,
-        "excluded_finding_count": 7629,
+        "excluded_finding_count": 7627,
         "overall": {
           "tp": 53,
           "fn": 7,
@@ -110368,7 +110369,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x7acd45f7a560>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x739f0a57a560>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -110908,7 +110909,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x7acd45f7a560>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x739f0a57a560>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -280130,60 +280131,6 @@
           "taxonomy_version": "contract-categories-v3"
         },
         {
-          "rule_id": "clang-deadcode.DeadStores",
-          "rule_name": "Value stored to 'err' is never read",
-          "analyzer": "clang",
-          "analyzer_id": "deadcode.DeadStores",
-          "diagnostic_type": "Dead assignment",
-          "severity": "high",
-          "confidence": "medium",
-          "experimental": false,
-          "file": "lib/utils/ring_buffer.c",
-          "line": 200,
-          "snippet": "\terr = ring_buf_put_claim(buf, &dst, sizeof(struct ring_element));",
-          "context": "200: \terr = ring_buf_put_claim(buf, &dst, sizeof(struct ring_element));",
-          "evidence": [
-            "Value stored to 'err' is never read"
-          ],
-          "pattern": "deadcode.DeadStores",
-          "recommendation": "Value stored to 'err' is never read",
-          "references": [
-            "https://clang.llvm.org/docs/analyzer/checkers.html"
-          ],
-          "category": null,
-          "category_label": "其他诊断",
-          "metric_eligible": false,
-          "classification_basis": "Analyzer diagnostic ID/type and operation at diagnostic location",
-          "taxonomy_version": "contract-categories-v3"
-        },
-        {
-          "rule_id": "clang-deadcode.DeadStores",
-          "rule_name": "Value stored to 'err' is never read",
-          "analyzer": "clang",
-          "analyzer_id": "deadcode.DeadStores",
-          "diagnostic_type": "Dead assignment",
-          "severity": "high",
-          "confidence": "medium",
-          "experimental": false,
-          "file": "lib/utils/ring_buffer.c",
-          "line": 237,
-          "snippet": "\terr = ring_buf_get_claim(buf, &src, sizeof(struct ring_element));",
-          "context": "237: \terr = ring_buf_get_claim(buf, &src, sizeof(struct ring_element));",
-          "evidence": [
-            "Value stored to 'err' is never read"
-          ],
-          "pattern": "deadcode.DeadStores",
-          "recommendation": "Value stored to 'err' is never read",
-          "references": [
-            "https://clang.llvm.org/docs/analyzer/checkers.html"
-          ],
-          "category": null,
-          "category_label": "其他诊断",
-          "metric_eligible": false,
-          "classification_basis": "Analyzer diagnostic ID/type and operation at diagnostic location",
-          "taxonomy_version": "contract-categories-v3"
-        },
-        {
           "rule_id": "cwe-119",
           "rule_name": "Out of bound access to memory preceding the field 'blocks'",
           "analyzer": "clang",
@@ -287998,7 +287945,7 @@
               }
             },
             "eligible_finding_count": 39,
-            "excluded_finding_count": 35,
+            "excluded_finding_count": 33,
             "overall": {
               "tp": 19,
               "fn": 41,
@@ -294221,7 +294168,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -294804,7 +294751,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -295419,7 +295366,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -296018,7 +295965,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -296625,7 +296572,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -297240,7 +297187,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -297831,7 +297778,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -298422,7 +298369,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -299021,7 +298968,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -299620,7 +299567,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 2,
                   "fn": 0,
@@ -300221,7 +300168,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -300812,7 +300759,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -301403,7 +301350,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -302032,7 +301979,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -302639,7 +302586,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -303230,7 +303177,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -303873,7 +303820,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 2,
                   "fn": 0,
@@ -304480,7 +304427,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -305095,7 +305042,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -305686,7 +305633,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -306287,7 +306234,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -306886,7 +306833,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -307485,7 +307432,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -308084,7 +308031,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -308691,7 +308638,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 1,
                   "fn": 1,
@@ -309274,7 +309221,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -309865,7 +309812,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -310464,7 +310411,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 2,
                   "fn": 0,
@@ -311071,7 +311018,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -311670,7 +311617,7 @@
                   }
                 },
                 "eligible_finding_count": 39,
-                "excluded_finding_count": 35,
+                "excluded_finding_count": 33,
                 "overall": {
                   "tp": 0,
                   "fn": 2,
@@ -358670,7 +358617,7 @@
             },
             {
               "file": "components/dfs/dfs_v2/filesystems/elmfat/ff.c",
-              "message": "Command '['/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin/clang', '--analyze', '-Wno-everything', '-include', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/build_context/cppcheck-toolchain.h', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/finsh', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/dfs/dfs_v2/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/dfs/dfs_v2/filesystems/devfs', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/drivers/include', '-idirafter', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/libc/compilers/common/include', '-D__RTTHREAD__', '-D_GNU_SOURCE', '-DO_EXEC=O_PATH', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project', '-Xanalyzer', '-analyzer-checker=core,unix,cplusplus,alpha.security.ArrayBoundV2,alpha.security.ArrayBound,alpha.unix.cstring.OutOfBounds,alpha.security.taint.TaintPropagation', '-Xanalyzer', '-analyzer-output=plist-multi-file', '-o', '/tmp/naturalcc-clang-5vkdf383/findings.plist', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/dfs/dfs_v2/filesystems/elmfat/ff.c']' timed out after 15.584415584415584 seconds"
+              "message": "Command '['/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin/clang', '--analyze', '-Wno-everything', '-include', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/build_context/cppcheck-toolchain.h', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/finsh', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/dfs/dfs_v2/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/dfs/dfs_v2/filesystems/devfs', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/drivers/include', '-idirafter', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/libc/compilers/common/include', '-D__RTTHREAD__', '-D_GNU_SOURCE', '-DO_EXEC=O_PATH', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project', '-Xanalyzer', '-analyzer-checker=core,unix,cplusplus,alpha.security.ArrayBoundV2,alpha.security.ArrayBound,alpha.unix.cstring.OutOfBounds,alpha.security.taint.TaintPropagation', '-Xanalyzer', '-analyzer-output=plist-multi-file', '-o', '/tmp/naturalcc-clang-02ixqyca/findings.plist', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced/rt_thread/project/components/dfs/dfs_v2/filesystems/elmfat/ff.c']' timed out after 15.584415584415584 seconds"
             },
             {
               "file": "components/dfs/dfs_v2/filesystems/procfs/proc.c",
@@ -432558,7 +432505,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x706e0e77aea0>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x7c36c0d7aea0>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -433123,7 +433070,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x706e0e77aea0>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x7c36c0d7aea0>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -522195,7 +522142,7 @@
             },
             {
               "file": "lib/posix/options/uname.c",
-              "message": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/zephyr/project/lib/posix/options/uname.c:43:14: error: static assertion failed due to requirement 'sizeof (z_name.version) >= sizeof (\"v3.7.0 Nov 18 2026 00:29:57\")': \n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/zephyr/project/lib/posix/options/uname.c:43:37: note: expression evaluates to '1 >= 28'\n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n1 error generated.\n"
+              "message": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/zephyr/project/lib/posix/options/uname.c:43:14: error: static assertion failed due to requirement 'sizeof (z_name.version) >= sizeof (\"v3.7.0 Nov 18 2026 02:23:51\")': \n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/zephyr/project/lib/posix/options/uname.c:43:37: note: expression evaluates to '1 >= 28'\n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n1 error generated.\n"
             },
             {
               "file": "subsys/fs/ext2/ext2_disk_access.c",
@@ -527548,7 +527495,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x7e2227b7a560>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x733f3f17a560>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -775548,7 +775495,7 @@
             },
             {
               "file": "components/dfs/dfs_v2/filesystems/elmfat/ff.c",
-              "message": "Command '['/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin/clang', '--analyze', '-Wno-everything', '-include', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/build_context/cppcheck-toolchain.h', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/finsh', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/dfs/dfs_v2/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/dfs/dfs_v2/filesystems/devfs', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/drivers/include', '-idirafter', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/libc/compilers/common/include', '-D__RTTHREAD__', '-D_GNU_SOURCE', '-DO_EXEC=O_PATH', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project', '-Xanalyzer', '-analyzer-checker=core,unix,cplusplus,alpha.security.ArrayBoundV2,alpha.security.ArrayBound,alpha.unix.cstring.OutOfBounds,alpha.security.taint.TaintPropagation', '-Xanalyzer', '-analyzer-output=plist-multi-file', '-o', '/tmp/naturalcc-clang-nr930vme/findings.plist', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/dfs/dfs_v2/filesystems/elmfat/ff.c']' timed out after 15.584415584415584 seconds"
+              "message": "Command '['/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin/clang', '--analyze', '-Wno-everything', '-include', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/build_context/cppcheck-toolchain.h', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/finsh', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/dfs/dfs_v2/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/dfs/dfs_v2/filesystems/devfs', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/drivers/include', '-idirafter', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/libc/compilers/common/include', '-D__RTTHREAD__', '-D_GNU_SOURCE', '-DO_EXEC=O_PATH', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project', '-Xanalyzer', '-analyzer-checker=core,unix,cplusplus,alpha.security.ArrayBoundV2,alpha.security.ArrayBound,alpha.unix.cstring.OutOfBounds,alpha.security.taint.TaintPropagation', '-Xanalyzer', '-analyzer-output=plist-multi-file', '-o', '/tmp/naturalcc-clang-fyknj17p/findings.plist', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent/rt_thread/project/components/dfs/dfs_v2/filesystems/elmfat/ff.c']' timed out after 15.584415584415584 seconds"
             },
             {
               "file": "components/dfs/dfs_v2/filesystems/procfs/proc.c",
@@ -780142,7 +780089,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x74139c82e270>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x79431b3de270>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -782724,7 +782671,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x74139c82e270>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x79431b3de270>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -849248,7 +849195,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x75baa8f7aea0>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x71383bf7aea0>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -849560,7 +849507,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x75baa8f7aea0>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x71383bf7aea0>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -939048,7 +938995,7 @@
             },
             {
               "file": "lib/posix/options/uname.c",
-              "message": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/zephyr/project/lib/posix/options/uname.c:43:14: error: static assertion failed due to requirement 'sizeof (z_name.version) >= sizeof (\"v3.7.0 Nov 18 2026 00:29:43\")': \n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/zephyr/project/lib/posix/options/uname.c:43:37: note: expression evaluates to '1 >= 28'\n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n1 error generated.\n"
+              "message": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/zephyr/project/lib/posix/options/uname.c:43:14: error: static assertion failed due to requirement 'sizeof (z_name.version) >= sizeof (\"v3.7.0 Nov 18 2026 02:24:10\")': \n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/zephyr/project/lib/posix/options/uname.c:43:37: note: expression evaluates to '1 >= 28'\n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n1 error generated.\n"
             },
             {
               "file": "subsys/fs/ext2/ext2_disk_access.c",
@@ -944102,7 +944049,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x71e98a37a560>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x73bc45b7a560>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -1192248,7 +1192195,7 @@
             },
             {
               "file": "components/dfs/dfs_v2/filesystems/elmfat/ff.c",
-              "message": "Command '['/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin/clang', '--analyze', '-Wno-everything', '-include', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/build_context/cppcheck-toolchain.h', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/finsh', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/dfs/dfs_v2/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/dfs/dfs_v2/filesystems/devfs', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/drivers/include', '-idirafter', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/libc/compilers/common/include', '-D__RTTHREAD__', '-D_GNU_SOURCE', '-DO_EXEC=O_PATH', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project', '-Xanalyzer', '-analyzer-checker=core,unix,cplusplus,alpha.security.ArrayBoundV2,alpha.security.ArrayBound,alpha.unix.cstring.OutOfBounds,alpha.security.taint.TaintPropagation', '-Xanalyzer', '-analyzer-output=plist-multi-file', '-o', '/tmp/naturalcc-clang-sxg15leq/findings.plist', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/dfs/dfs_v2/filesystems/elmfat/ff.c']' timed out after 15.584415584415584 seconds"
+              "message": "Command '['/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin/clang', '--analyze', '-Wno-everything', '-include', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/build_context/cppcheck-toolchain.h', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/finsh', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/dfs/dfs_v2/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/dfs/dfs_v2/filesystems/devfs', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/drivers/include', '-idirafter', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/libc/compilers/common/include', '-D__RTTHREAD__', '-D_GNU_SOURCE', '-DO_EXEC=O_PATH', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project', '-Xanalyzer', '-analyzer-checker=core,unix,cplusplus,alpha.security.ArrayBoundV2,alpha.security.ArrayBound,alpha.unix.cstring.OutOfBounds,alpha.security.taint.TaintPropagation', '-Xanalyzer', '-analyzer-output=plist-multi-file', '-o', '/tmp/naturalcc-clang-20aflndm/findings.plist', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/balanced-hard/rt_thread/project/components/dfs/dfs_v2/filesystems/elmfat/ff.c']' timed out after 15.584415584415584 seconds"
             },
             {
               "file": "components/dfs/dfs_v2/filesystems/procfs/proc.c",
@@ -1265933,7 +1265880,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x76465e37aea0>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x7be8d297aea0>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -1355858,7 +1355805,7 @@
             },
             {
               "file": "lib/posix/options/uname.c",
-              "message": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/zephyr/project/lib/posix/options/uname.c:43:14: error: static assertion failed due to requirement 'sizeof (z_name.version) >= sizeof (\"v3.7.0 Nov 18 2026 00:29:54\")': \n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/zephyr/project/lib/posix/options/uname.c:43:37: note: expression evaluates to '1 >= 28'\n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n1 error generated.\n"
+              "message": "/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/zephyr/project/lib/posix/options/uname.c:43:14: error: static assertion failed due to requirement 'sizeof (z_name.version) >= sizeof (\"v3.7.0 Nov 18 2026 02:23:49\")': \n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/zephyr/project/lib/posix/options/uname.c:43:37: note: expression evaluates to '1 >= 28'\n   43 | BUILD_ASSERT(sizeof(z_name.version) >= sizeof(UTSNAME_VERSION(VERSION_BUILD)));\n      | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/zephyr/project/include/zephyr/toolchain/gcc.h:87:52: note: expanded from macro 'BUILD_ASSERT'\n   87 | #define BUILD_ASSERT(EXPR, MSG...) _Static_assert((EXPR), \"\" MSG)\n      |                                                    ^~~~\n1 error generated.\n"
             },
             {
               "file": "subsys/fs/ext2/ext2_disk_access.c",
@@ -1360997,7 +1360944,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x72245717a560>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x75398d57a560>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -1361383,7 +1361330,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x72245717a560>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x75398d57a560>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -1609136,7 +1609083,7 @@
             },
             {
               "file": "components/dfs/dfs_v2/filesystems/elmfat/ff.c",
-              "message": "Command '['/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin/clang', '--analyze', '-Wno-everything', '-include', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/build_context/cppcheck-toolchain.h', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/finsh', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/dfs/dfs_v2/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/dfs/dfs_v2/filesystems/devfs', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/drivers/include', '-idirafter', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/libc/compilers/common/include', '-D__RTTHREAD__', '-D_GNU_SOURCE', '-DO_EXEC=O_PATH', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project', '-Xanalyzer', '-analyzer-checker=core,unix,cplusplus,alpha.security.ArrayBoundV2,alpha.security.ArrayBound,alpha.unix.cstring.OutOfBounds,alpha.security.taint.TaintPropagation', '-Xanalyzer', '-analyzer-output=plist-multi-file', '-o', '/tmp/naturalcc-clang-s4q5vd7c/findings.plist', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/dfs/dfs_v2/filesystems/elmfat/ff.c']' timed out after 15.584415584415584 seconds"
+              "message": "Command '['/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin/clang', '--analyze', '-Wno-everything', '-include', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/build_context/cppcheck-toolchain.h', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/finsh', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/dfs/dfs_v2/include', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/dfs/dfs_v2/filesystems/devfs', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/drivers/include', '-idirafter', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/libc/compilers/common/include', '-D__RTTHREAD__', '-D_GNU_SOURCE', '-DO_EXEC=O_PATH', '-I', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project', '-Xanalyzer', '-analyzer-checker=core,unix,cplusplus,alpha.security.ArrayBoundV2,alpha.security.ArrayBound,alpha.unix.cstring.OutOfBounds,alpha.security.taint.TaintPropagation', '-Xanalyzer', '-analyzer-output=plist-multi-file', '-o', '/tmp/naturalcc-clang-5u7owaku/findings.plist', '/home/sub4-wy/wangchen/ncc/naturalcc/code_agent/artifacts/contract3/engineering-v7/independent-hard/rt_thread/project/components/dfs/dfs_v2/filesystems/elmfat/ff.c']' timed out after 15.584415584415584 seconds"
             },
             {
               "file": "components/dfs/dfs_v2/filesystems/procfs/proc.c",
@@ -1613667,7 +1613614,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x709ee33da270>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x763dd41da270>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -1614642,7 +1614589,7 @@
           "snippet": "    strncpy(segment, rendered, limit);",
           "context": "    strncpy(segment, rendered, limit);",
           "evidence": [
-            "Local value flow reaches segment with offset 0, write/access size <object object at 0x709ee33da270>, capacity 8."
+            "Local value flow reaches segment with offset 0, write/access size <object object at 0x763dd41da270>, capacity 8."
           ],
           "pattern": "engineering-source-v4",
           "recommendation": "Restore the valid native bound or pointer, and retain the original operation preconditions.",
@@ -1666518,18 +1666465,18 @@
     }
   ],
   "input_evidence_sha256": [
-    "2611bce3954b70c3e9ba04cf79b872cb63ec4e0f452f161f07907dfced89c1e7",
-    "ec38bc7837123deabe44fbc6c82a49bd6b003986b9651e834b17e9da7bba00c8",
-    "12bd4fcc9505bb9c6d10e249372d56835d1cc7b37acc32f328d78ebe361df6a9",
-    "46b8c28304edd2ff9937254d89baa0bc7d3f22ab4993ac4fd71a84766a83efc7",
-    "fdf091705247fcf1a18e2838f3bff6bbd98d358dfab8510dc10ddfb594c8d077",
-    "e1089bce62187a9c7e7d1fdf15f1faacdc651a69341731462aa4978ca0b6e725",
-    "0ed909e7acb58237fa5ab9ed1bb3dff30c4245f833aa15905305f4c9b6b07b12",
-    "e15526913f90a2fb03b3d5734ad6697c1b35afd0d1c5fdf484df400eed84cdff",
-    "dfa05601d7333acb77d36f89296ed9c2df59ead2135422a3f9b31ab245f0caa9",
-    "50d4466676350e3611abecc5dfa1a3f0498d73477c69c8272266d76b813cc3e1",
-    "63391a75c394c2488d19c505c9ff9651d3c149c8908a31ad8a1dd79710c27cef",
-    "583b0cd2fba41d9237e4df2d0ef5d8fd499d9382c4ece88cb4ce2a5f6a7564b0"
+    "9e3f3f8b41f2181608581f48f345e456566e51dfe9c1d10196a2ee22186f9893",
+    "8b29a06b9410332e176371a806f2d58fc2b3e9c5f0e6d0fd40b5f861f9c958a2",
+    "63ed41c851b7a9969a3fcdcd5280eec6dc34a9edbdef015c9b99c38491a0ea37",
+    "3d946dbdac8a40bb0ae4f079a3ee8d663665b12f1c5da2996873abcd43bdb3bf",
+    "961052237e2f01ff102631a427e066b495871cde329d0393bb5a7faa918ebe5c",
+    "01029fde01f5e748900a0806511d5cdd8f555fec164b86429ca212451b9bbd28",
+    "d0b7b2555f1a7a070ef7ba51f3f4220f18b8c9ffb3a8ad2c83d05e8c2f412bfc",
+    "759365e8e7e5d24276aa93d66e6a86de7c13348e1b360aef8634acf70bbb1a4d",
+    "0380817a7fdf32306adff204ef1815163bf9ac59b4d2d73577f5c74ea4007f09",
+    "8ab05a184d5b7c45c3ba6f3f120409d0d0ded370a8f60c22a28fcbe25691bca4",
+    "5dd21ec3a446bf15e14bcebe14e5568ebdfeac78df9745e1255f4903b1ef9ba8",
+    "2d26a399714de7a096ccdc3887d267bc5fe2ae28a423841029bc306849e7922b"
   ],
   "acceptance": {
     "passed": true,

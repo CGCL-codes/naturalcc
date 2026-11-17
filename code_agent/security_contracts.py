@@ -473,3 +473,13 @@ def evaluate_contract(findings, scan_type, ground_truth=None, *, unavailable_rea
         cases=rows, unscored_target_finding_count=len(eligible) - len(used),
         scope="Only annotated cases are scored. Unannotated target findings are reported separately; this is not whole-project accuracy.")
     return result
+
+
+def prioritize_target_findings(findings, scan_type):
+    """Keep scan-type targets first while preserving order inside both groups."""
+    categories = set(SCAN_CATEGORIES.get(scan_type, ()))
+    if not categories:
+        return list(findings)
+    target = [finding for finding in findings if finding.get("category") in categories]
+    extra = [finding for finding in findings if finding.get("category") not in categories]
+    return [*target, *extra]

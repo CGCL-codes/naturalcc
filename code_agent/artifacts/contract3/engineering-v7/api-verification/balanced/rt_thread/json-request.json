@@ -1,5 +1,5 @@
 {
-  "project_dir": "/tmp/contract3-v7-api-mo1p_8tn/project",
+  "project_dir": "/tmp/contract3-v7-api-p3c18msh/project",
   "feature": "vulnerability_detection",
   "target_files": [
     "components/dfs/dfs_v2/filesystems/cromfs/dfs_cromfs.c",

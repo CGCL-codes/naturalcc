@@ -1,0 +1,58 @@
+
+> naturalcc-agent-webui@0.1.0 test
+> node --test src/*.test.js
+
+✔ missing run stops approval before any mutation request (1.794778ms)
+✔ changed approval and terminal runs cannot be approved from old UI state (0.276412ms)
+✔ approval is bound to the verified pending tool call (0.218836ms)
+✔ agent event stream parses NDJSON split across network chunks (26.319354ms)
+✔ terminal and paused events clear stale approval controls (1.091659ms)
+✔ current snapshot overrides old approval events (0.239314ms)
+✔ agent event reducer tracks approval, changed files, verification and completion (1.176003ms)
+✔ agent event reducer exposes uncertain interrupted tools as paused (0.224389ms)
+✔ failed verification remains required (0.142872ms)
+✔ budget exhaustion keeps reason and unexecuted tool proposal (0.109182ms)
+✔ reasoning deltas are grouped by model call and duplicate events are ignored (0.205039ms)
+✔ approval message includes risk, tool name and command arguments (1.034689ms)
+✔ generic tool calls show structured arguments (0.165232ms)
+✔ send-triggered agent runs do not append duplicate user messages (0.901267ms)
+✔ agent create run payload includes selected target files (0.783957ms)
+✔ budget exhausted message explains reason and unexecuted tool (0.177024ms)
+✔ terminal agent statuses do not expose pause or cancel controls (0.128949ms)
+✔ verification failure explains why the run stopped (0.153324ms)
+✔ agent runtime stack only occupies space when agent content exists (0.150919ms)
+✔ model input remains controlled while focused (0.123352ms)
+✔ budgetProgress exposes warning thresholds and clamps visual percentage (1.821132ms)
+✔ normalizeBudgetDraft keeps supported non-negative integer limits (0.332621ms)
+✔ normalizeBudgetDraft round-trips backend maintenance and token limits (0.207318ms)
+✔ default web budget exposes the backend input-token limit (0.208085ms)
+✔ validateBudgetChange rejects limits below current usage (0.380455ms)
+✔ validateBudgetChange rejects input-token limit below consumed tokens (0.185886ms)
+✔ groupThreads separates today, previous week and earlier conversations (2.267122ms)
+✔ hydrateConversationMessages restores stable chat cards from API records (0.381163ms)
+✔ refresh keeps a visible assistant card while the last run is streaming (1.087115ms)
+✔ detectContextCandidate recognizes mentions and Windows absolute paths (0.410532ms)
+✔ buildThreadMessagePayload includes context paths and external authorization (0.438783ms)
+✔ selectThreadAfterDeletion moves only when the active thread was deleted (0.191341ms)
+✔ selectThreadAfterDeletion returns an empty selection after deleting the last thread (0.153842ms)
+✔ threadNeedsCancellation recognizes every protected active run status (0.22471ms)
+✔ clampLayoutValue keeps panel sizes inside explicit bounds (0.773966ms)
+✔ loadLayoutPrefs falls back for missing or invalid persisted values (0.804175ms)
+✔ saveLayoutPrefs stores clamped values and toLayoutStyle emits css variables (0.222089ms)
+✔ normal review DTO drops internal model protocol fields (0.789093ms)
+✔ message evidence selection is unique and reversible (0.743468ms)
+✔ reviews are grouped by governance state (0.194289ms)
+✔ refresh restores the selected OpenRouter thread even when DeepSeek is first in history (0.914632ms)
+✔ missing or deleted saved conversation leaves launch defaults in place (0.153774ms)
+✔ editing thread settings preserves routing fields without mutating launch defaults (0.638398ms)
+✔ normalizeTheme accepts only light and dark (0.723325ms)
+✔ loadThemePref falls back to dark for missing or invalid storage values (0.189687ms)
+✔ saveThemePref persists normalized theme and nextTheme toggles two modes (0.159956ms)
+ℹ tests 46
+ℹ suites 0
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.887259

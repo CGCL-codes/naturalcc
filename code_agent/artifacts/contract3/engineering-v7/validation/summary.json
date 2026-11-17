@@ -1,22 +1,22 @@
 {
   "dataset_revision": "engineering-v7-20261118-r4",
-  "created_at": "2026-11-17T16:42:38.379244+00:00",
+  "created_at": "2026-11-17T18:36:46.452127+00:00",
   "scope": "Current local backend code and static teaching datasets; not customer deployment acceptance. Active backend service was not restarted.",
-  "static_evidence_sha256": "66ad51c127cf6f203e09e17dee0c85c6586b1591d5f304efc8f30691c5a8b5e9",
+  "static_evidence_sha256": "aa084b90b8a08f7cb669e6d07745781c48d309d93a0cdba504c21f5f2d798f55",
   "rule_sha256": {
     "security_exam.py": "f530019e6b6441f65172847f76d2bbe35f8875dadb7c059eeb319fa009141566",
     "security_c_rules.py": "e2e51c86c82ae3103dec70c62e1b7943e7b7ce2b8a472264436dac305f162fbb",
     "security_c_local_flow.py": "9d471fecbcf9778f0cc779525927f8424a03edcad22a7c945a6865d47d975f23",
     "security_rtos_rules.py": "52c2a3d8b2959c2f6eac41c86894a8f4f4dc1c2f3f65e071519bf176690cb4a5",
     "security_engineering_rules.py": "1f883201e0b263f8c818f64bf691cba724c360e29b1d87c55c4700dad308cc7e",
-    "security_contracts.py": "a415bd6f20a0bba916f8d99382936f60a2c3f2fb07068aaa31d0bb677f63af2d",
+    "security_contracts.py": "c5d5bc3f254963624e1d3860593ae16c77cc133705839ca55827738eac9eb644",
     "security_analysis.py": "95b72b4a9c55da9f0058a706312fdc6b835448119e65f8c31e4b766e4fb83fa1",
     "security_build_context.py": "0c739d9e6ebe234c1a7822ae4b1affb6c50169a03e4fbbffb00eaa9e81d8b71e",
     "security_c_macros.py": "ab2a37893d35f3c5741d8da5081ca1ff97fe0aaef0e84228b8abe9cfabea31b4",
     "scripts/measure_contract3_engineering.py": "16cc116eb936f951843ae1a557ad8de6115d4dead5989fff0d492adeb398c4fc"
   },
   "backend_tests": {
-    "passed": 670,
+    "passed": 672,
     "failed": 0,
     "command": "PATH=/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin:$PATH uv run --no-sync --project . pytest tests test_vulnerability_detection.py -q"
   },
@@ -33,9 +33,9 @@
   },
   "comment_coverage": {
     "passed": true,
-    "percent": 42.304,
+    "percent": 42.2842,
     "files": 90,
-    "report_sha256": "a1d3532f3f4aed2c84fb01032e66af5734f310bc04297dc8d8517aea22c8b6b7"
+    "report_sha256": "be27210e1a1fbe5a144f0289645d917e6762b1d3ea8719fddac58710726f6717"
   },
   "mechanism_witnesses": {
     "passed": 86,
@@ -51,7 +51,7 @@
   "api_verification": {
     "freertos_kernel": {
       "verification": "api-verification/balanced/freertos_kernel/verification.json",
-      "sha256": "d586bf33af5cd426dea790d54dbb5057a0f8b6974fa3fe775bcc0c9880f561dc",
+      "sha256": "2c1b2edf07c3f36db040ad1101a7ad69bf79a466338be3a15b3262c38d53443d",
       "requests": 2,
       "display_limits": [
         1,
@@ -72,7 +72,7 @@
     },
     "zephyr": {
       "verification": "api-verification/balanced/zephyr/verification.json",
-      "sha256": "0825be582e149e1db89384c55ae52a1fb69307f9e44ecb7190467457bee2e1a0",
+      "sha256": "3905c217c6fd8ad64351ec600a1d1fdb9180dac45401f25de2b680e71465352b",
       "requests": 2,
       "display_limits": [
         1,
@@ -93,7 +93,7 @@
     },
     "rt_thread": {
       "verification": "api-verification/balanced/rt_thread/verification.json",
-      "sha256": "bcfeb8b0c6f868eb8e2ff0c70053cbb2d01e5a36e82cd235662182cbd8f6f98e",
+      "sha256": "769b39a511f49c0aa0bee96a1538484bb827a2e2bac7e91e66393ace5e7f96c3",
       "requests": 2,
       "display_limits": [
         1,
@@ -123,11 +123,20 @@
     "api-freertos_kernel.log": "07073429176a90abbda7c5be0705cce8dfeefcd0bdf55664728063d5ede4426e",
     "api-rt_thread.log": "4b5ac0cfc711b62288c4c1285c8256d51dca329d5149ce43d3ab655158545f10",
     "api-zephyr.log": "2f32f6bad97d63c3cf664d5e75be6babdb7354d1fd4aadc65b4c8e54e5ce4428",
-    "backend-comments.log": "db4097d48c86cfae87c66a236cc54d7f9f3b6787db8abb49451c816af46fffd9",
-    "backend-tests.log": "b1cb5be5447fedb128dccaaf5c70b76a9316c56a19757d97cfe24de400511a08",
-    "frontend-build.log": "6c2606f457720883803de8b8095b497950286bbde013918c964b914ab0d625af",
-    "frontend-tests.log": "06da3ef780e200e55b63bae53ccb7c6add690decc474839127d31005478f2a61",
+    "backend-comments.log": "5db8401a89b4d423b3c6309a2b6535c239dbf1c48d6c42891e4a5fc543b0b9b6",
+    "backend-tests.log": "4c0789b526ee2e92103a20bb386880ed2e134545cbb29cd111f280e7fe1ad5f4",
+    "frontend-build.log": "f208fb5fe6d330b8200ed7a56d3d6c1999e0953264e57a5dcaa4ccadbce1402a",
+    "frontend-tests.log": "1c1e2d17f933e47508433df77320614fdf1415bb8562843aae5bd647038fbb7a",
     "mechanism-witnesses.log": "8acb79d07ce495a9526804d3ddb88505b5329e9370c957726465698b69960016",
     "static-workspaces.log": "ff29302e244d2c9a60b9b1c3c6627933674e41a0f0a888333d20692a6562e5e8"
+  },
+  "remote_integration": {
+    "upstream_commit": "f023784b51892d611271fae9d5cf9237828a40bb",
+    "v7_commit": "a9a4b7c860fc34c8f8de71abf4aa742a04b02a09",
+    "scope": "Full static matrix and all six local API requests rerun after integrating upstream analyzer-selection and target-first presentation changes.",
+    "regression_test_sha256": {
+      "tests/test_security_contracts.py": "116f999eb02dd7e8cd42c485eceac6909afbddc8680fec73a21d79ea2a2fe548",
+      "tests/test_model_vulnerability_scan.py": "8a23e82d2b61f8a6b8702f7eec2caff62656659a70b720c1be113cb8c76f46b7"
+    }
   }
 }

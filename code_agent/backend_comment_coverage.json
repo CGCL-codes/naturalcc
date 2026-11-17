@@ -13,12 +13,12 @@
   "threshold_percent_exclusive": 20,
   "file_count": 90,
   "totals": {
-    "physical_lines": 48733,
-    "nonblank_lines": 45147,
-    "comment_lines": 19099
+    "physical_lines": 48768,
+    "nonblank_lines": 45180,
+    "comment_lines": 19104
   },
-  "comment_percent": 42.304,
-  "comment_percent_including_blank_lines": 39.1911,
+  "comment_percent": 42.2842,
+  "comment_percent_including_blank_lines": 39.1732,
   "passes": true,
   "files": [
     {
@@ -268,9 +268,9 @@
     },
     {
       "path": "model_vulnerability_scan.py",
-      "sha256": "d868b2d8b12c4bfa0a27f38d8f1c40bd03826e77a1ccc4efbbd4f3e032a33cfc",
-      "physical_lines": 352,
-      "nonblank_lines": 336,
+      "sha256": "7bed62733e29a1da2f8ae694aa0303d8e89c518a311664c0d6f61c51308eca53",
+      "physical_lines": 359,
+      "nonblank_lines": 343,
       "comment_lines": 27
     },
     {
@@ -338,10 +338,10 @@
     },
     {
       "path": "plugins/vulnerability_detection.py",
-      "sha256": "ff569ffe8811dd91aa6cf634961d53d4b51ffb8d0bdb2adf32cabc25556f36c8",
-      "physical_lines": 1291,
-      "nonblank_lines": 1248,
-      "comment_lines": 508
+      "sha256": "8d8712411568d14e5dd92087748dfeaef8c0ee09c7e3e732b4964f608726f15e",
+      "physical_lines": 1309,
+      "nonblank_lines": 1266,
+      "comment_lines": 513
     },
     {
       "path": "rag/c/__init__.py",
@@ -611,9 +611,9 @@
     },
     {
       "path": "security_contracts.py",
-      "sha256": "a415bd6f20a0bba916f8d99382936f60a2c3f2fb07068aaa31d0bb677f63af2d",
-      "physical_lines": 475,
-      "nonblank_lines": 458,
+      "sha256": "c5d5bc3f254963624e1d3860593ae16c77cc133705839ca55827738eac9eb644",
+      "physical_lines": 485,
+      "nonblank_lines": 466,
       "comment_lines": 197
     },
     {
