@@ -46,7 +46,10 @@ def classify(cases, prediction):
 
 
 def main(argv=None):
+    global DATA, REVISION, verify
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--dataset', choices=['v6', 'v7'], default='v7',
+                        help='Engineering dataset (default: v7)')
     parser.add_argument('--suite', choices=SUITES, default='balanced')
     parser.add_argument('--project', choices=['freertos_kernel','zephyr','rt_thread'], default='freertos_kernel')
     parser.add_argument('--base-url', default='http://127.0.0.1:7860')
@@ -56,6 +59,11 @@ def main(argv=None):
     parser.add_argument('--print-prompts', action='store_true')
     parser.add_argument('--report-only', action='store_true')
     args = parser.parse_args(argv)
+    if args.dataset == 'v7':
+        from code_agent.scripts import build_contract3_engineering_v7 as dataset
+    else:
+        from code_agent.scripts import build_contract3_engineering_v6 as dataset
+    DATA, REVISION, verify = dataset.DATA, dataset.REVISION, dataset.verify
     if args.limit is not None and args.limit < 1:
         parser.error('--limit must be positive')
     destination = DATA / args.suite / args.project
@@ -64,7 +72,7 @@ def main(argv=None):
     if args.print_prompts:
         for target in targets:
             print(goal(target['path']))
-        print(f"{len(targets)} target files; full snapshot workspace; GT excluded")
+        print(f"{REVISION}: {len(targets)} target files; full snapshot workspace; GT excluded")
         return
     if not args.model:
         parser.error('--model is required for an actual run or saved model report')

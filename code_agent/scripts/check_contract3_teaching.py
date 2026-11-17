@@ -13,7 +13,8 @@ from code_agent.scripts.build_contract3_engineering_v6 import DATA,REVISION,SUIT
 def main():
     global DATA, REVISION, verify
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--dataset',choices=['v6','v7'],default='v6')
+    p.add_argument('--dataset',choices=['v6','v7'],default='v7',
+                   help='Engineering dataset (default: v7)')
     p.add_argument('--evidence',type=Path)
     args=p.parse_args()
     if args.dataset=='v7':

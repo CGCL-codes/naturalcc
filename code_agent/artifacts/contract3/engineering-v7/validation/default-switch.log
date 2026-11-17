@@ -1,0 +1,13 @@
+Contract-3 default dataset: engineering-v7-20261118-r4
+7 entrypoint help commands declare default v7: engineering/static measurement, teaching check, GT export, engineering/Web benchmark, report.
+Default static wrapper: all 12 snapshots rescored from preserved raw findings; all raw engine data and case statistics identical to the previous commit.
+Measurement AST unchanged except --dataset default/help; all analyzer and API implementation hashes unchanged.
+Default GT export --verify: all 12 v7 snapshots passed; explicit --dataset v6 --verify: all 12 historical snapshots passed.
+Default Web --print-prompts --limit 1 selects v7; explicit --dataset v6 selects v6. No model requests.
+Default report renderer: v7 full matrix validated, 36/36 passing categories.
+Explicit v6 report renderer: verified in an isolated output file; historical repository report preserved.
+Default teaching check (no --dataset): 36/36 category results within range.
+Backend tests: 672 passed; frontend tests: 46 passed; frontend production build passed.
+Existing six real local API requests and 86 sanitizer witnesses retained unchanged; no service restart.
+Original raw evidence: c624927df7ad1bf2d5ef44e3007b62b4eac827f6:code_agent/artifacts/contract3/engineering-v7/static-teaching.json
+Original raw evidence SHA256: aa084b90b8a08f7cb669e6d07745781c48d309d93a0cdba504c21f5f2d798f55

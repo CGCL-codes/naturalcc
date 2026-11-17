@@ -176,7 +176,8 @@ def rescore(path):
 def main(argv=None):
     global DATA, REVISION, verify
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--dataset', choices=['v4','v5','v6','v7'], default='v6')
+    parser.add_argument('--dataset', choices=['v4','v5','v6','v7'], default='v7',
+                        help='Engineering dataset (default: v7); use v6 for historical snapshots')
     parser.add_argument('--suite', default=','.join(SUITES))
     parser.add_argument('--project', default='freertos_kernel,zephyr,rt_thread')
     parser.add_argument('--engines', default='builtin,cppcheck,clang')
@@ -239,7 +240,7 @@ def main(argv=None):
             document['results'].append(row)
             write_json(output, document)
             print(f"  {row['scored_cases']}/{row['total_cases']} covered; " + str({c: {k: v for k,v in m.items() if k in ('tp','fn','fp','tn')} for c,m in row['statistics'].get('by_category',{}).items()}), flush=True)
-    # Candidate experiments must not rewrite the current release's report.
+    # v7 has its own report; historical runs keep their separate renderer.
     if args.dataset != 'v7':
         from code_agent.scripts.render_contract3_report import write_report
         write_report()

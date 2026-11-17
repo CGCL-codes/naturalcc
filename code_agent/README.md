@@ -658,17 +658,17 @@ Required tests use scripted models and fixture workspaces; they do not need an A
 
 ### Contract-3 engineering datasets
 
-The new multi-mechanism dataset is `engineering-v7-20261118-r4`; all 36 local teaching checks pass (85%–95% detection, 5%–15% false positives). Each category has 10 mechanisms, each represented by 2 defects and 2 controls in native engineering functions. Independent builtin, Cppcheck and Clang results, fixed-denominator case matching, compile failures and the 36 acceptance checks are in the [v7 audit](artifacts/contract3/engineering-v7/REPORT.md). Use `scripts/measure_contract3_engineering.py --dataset v7 --timeout 600`; [the guide](合同-3-v7-多机制复核.md) covers generation, sanitizer witnesses and real local API checks. Separate static teacher workspaces and exact requests are under `artifacts/contract3/engineering-v7/web-static/`. Local verification does not establish customer deployment acceptance. Compatibility commands without `--dataset v7` still select v6; historical v6 rates do not describe v7 or prove customer deployment acceptance.
+The default multi-mechanism dataset is `engineering-v7-20261118-r4`; all 36 local teaching checks pass (85%–95% detection, 5%–15% false positives). Each category has 10 mechanisms, each represented by 2 defects and 2 controls in native engineering functions. Independent builtin, Cppcheck and Clang results, fixed-denominator case matching, compile failures and the 36 acceptance checks are in the [v7 audit](artifacts/contract3/engineering-v7/REPORT.md). Use `scripts/measure_contract3_engineering.py --timeout 600`; [the guide](合同-3-v7-多机制复核.md) covers generation, sanitizer witnesses and real local API checks. Separate static teacher workspaces and exact requests are under `artifacts/contract3/engineering-v7/web-static/`. Local verification does not establish customer deployment acceptance. Measurement, teaching checks, GT export, report and Web benchmark commands default to v7. Pass `--dataset v6` explicitly to select historical engineering data; historical v6 rates do not describe v7 or prove customer deployment acceptance.
 
 The archived compatibility dataset is `engineering-v6-20261114`: four separate snapshots of each pinned RTOS source subset. Defects modify existing business operations; no standalone teaching functions are added. Each snapshot has its own `project/`, external `ground_truth.json`, and hash manifest under `artifacts/contract3/engineering-v6/<suite>/<project>/`.
 
 The contract requires exactly 20 defects per category in each project/suite: 60 defects plus 60 safe controls (120 annotated operations). Complete C scan targets are FreeRTOS 18 files (about 23k lines), Zephyr 206 (about 72k), and RT-Thread 77 (about 66k). FreeRTOS includes pinned official CLI/FTP/HTTP modules; Zephyr includes its native Shell/filesystem/logging/HTTP/DNS modules. The previous v5 seven-defect quota is noncompliant and is retained only as historical evidence. The November 14 v6 run reported 95% detection and 5%-10% false positives; these are archived results under that run's source/rule hashes. Its integration limits and 616 regression tests are documented in [historical verification records](合同-3-复核说明.md). The v6 context includes real generated Zephyr headers and portable per-file native64/atomic-C profiles. Historical full-source Clang coverage was partial (113–114/206 files); see [the audit and limits](合同-3-v6-Clang复核.md). Re-run against the current analyzer implementation before making a current claim.
 
 ```bash
-uv run --no-sync python scripts/build_contract3_engineering_v7.py --verify
-uv run --no-sync python scripts/measure_contract3_static.py --dataset v7 --delivered --timeout 600
-uv run --no-sync python scripts/measure_contract3_static.py --dataset v7 --delivered --timeout 600 --reference
-uv run --no-sync python scripts/check_contract3_teaching.py --dataset v7
+uv run --no-sync python scripts/export_contract3_ground_truth.py --verify
+uv run --no-sync python scripts/measure_contract3_static.py --delivered --timeout 600
+uv run --no-sync python scripts/measure_contract3_static.py --delivered --timeout 600 --reference
+uv run --no-sync python scripts/check_contract3_teaching.py
 uv run --no-sync python scripts/prepare_contract3_v7_static_workspaces.py --suite all
 ```
 

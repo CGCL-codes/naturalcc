@@ -1,8 +1,8 @@
 {
   "dataset_revision": "engineering-v7-20261118-r4",
-  "created_at": "2026-11-17T18:36:46.452127+00:00",
+  "created_at": "2026-11-17T18:55:14.549381+00:00",
   "scope": "Current local backend code and static teaching datasets; not customer deployment acceptance. Active backend service was not restarted.",
-  "static_evidence_sha256": "aa084b90b8a08f7cb669e6d07745781c48d309d93a0cdba504c21f5f2d798f55",
+  "static_evidence_sha256": "ab2b36ec40e92b688ad6bd8861bf0d8e77482efe249747b334673fe657af2079",
   "rule_sha256": {
     "security_exam.py": "f530019e6b6441f65172847f76d2bbe35f8875dadb7c059eeb319fa009141566",
     "security_c_rules.py": "e2e51c86c82ae3103dec70c62e1b7943e7b7ce2b8a472264436dac305f162fbb",
@@ -13,7 +13,7 @@
     "security_analysis.py": "95b72b4a9c55da9f0058a706312fdc6b835448119e65f8c31e4b766e4fb83fa1",
     "security_build_context.py": "0c739d9e6ebe234c1a7822ae4b1affb6c50169a03e4fbbffb00eaa9e81d8b71e",
     "security_c_macros.py": "ab2a37893d35f3c5741d8da5081ca1ff97fe0aaef0e84228b8abe9cfabea31b4",
-    "scripts/measure_contract3_engineering.py": "16cc116eb936f951843ae1a557ad8de6115d4dead5989fff0d492adeb398c4fc"
+    "scripts/measure_contract3_engineering.py": "70441f0eb7dae8943112c232697ef9af3fe37d7edc16730085bf71ed74964461"
   },
   "backend_tests": {
     "passed": 672,
@@ -124,9 +124,10 @@
     "api-rt_thread.log": "4b5ac0cfc711b62288c4c1285c8256d51dca329d5149ce43d3ab655158545f10",
     "api-zephyr.log": "2f32f6bad97d63c3cf664d5e75be6babdb7354d1fd4aadc65b4c8e54e5ce4428",
     "backend-comments.log": "5db8401a89b4d423b3c6309a2b6535c239dbf1c48d6c42891e4a5fc543b0b9b6",
-    "backend-tests.log": "4c0789b526ee2e92103a20bb386880ed2e134545cbb29cd111f280e7fe1ad5f4",
-    "frontend-build.log": "f208fb5fe6d330b8200ed7a56d3d6c1999e0953264e57a5dcaa4ccadbce1402a",
-    "frontend-tests.log": "1c1e2d17f933e47508433df77320614fdf1415bb8562843aae5bd647038fbb7a",
+    "backend-tests.log": "dc2a9bf9636baea6eafe4a04475f5ae5fa5b2215283d4dd31204c44db6d6fefe",
+    "default-switch.log": "15521a4e6ccaf03e54a738c5d8e6b453535c90bc66148083f438693da4a909f7",
+    "frontend-build.log": "a73dba29d4106f97925358c43f15edb3baa5357b0c488016fc8b313355d3ca37",
+    "frontend-tests.log": "7178db76586c62a967a54a0a63671455ebb228a91d4299f6eed8a32b6acf7737",
     "mechanism-witnesses.log": "8acb79d07ce495a9526804d3ddb88505b5329e9370c957726465698b69960016",
     "static-workspaces.log": "ff29302e244d2c9a60b9b1c3c6627933674e41a0f0a888333d20692a6562e5e8"
   },
@@ -138,5 +139,22 @@
       "tests/test_security_contracts.py": "116f999eb02dd7e8cd42c485eceac6909afbddc8680fec73a21d79ea2a2fe548",
       "tests/test_model_vulnerability_scan.py": "8a23e82d2b61f8a6b8702f7eec2caff62656659a70b720c1be113cb8c76f46b7"
     }
+  },
+  "default_dataset_promotion": {
+    "dataset": "v7",
+    "previous_default": "v6",
+    "base_commit": "c624927df7ad1bf2d5ef44e3007b62b4eac827f6",
+    "original_evidence_file": "code_agent/artifacts/contract3/engineering-v7/static-teaching.json",
+    "original_evidence_sha256": "aa084b90b8a08f7cb669e6d07745781c48d309d93a0cdba504c21f5f2d798f55",
+    "measurement": "Existing --reuse-evidence path; raw findings, engine results and all case scores verified identical. No new analyzer scan.",
+    "api_evidence": "Existing API responses retained with original hashes. All API and analyzer code is unchanged; only the measurement CLI hash differs from the original API verification metadata. No new API request or deployment acceptance claimed.",
+    "prior_measurement_script_sha256": "16cc116eb936f951843ae1a557ad8de6115d4dead5989fff0d492adeb398c4fc",
+    "current_measurement_script_sha256": "70441f0eb7dae8943112c232697ef9af3fe37d7edc16730085bf71ed74964461",
+    "entrypoint_help_checks": 7,
+    "default_matrix_checks": 36,
+    "explicit_v6_gt_verification": true,
+    "explicit_v6_web_prompt_selection": true,
+    "explicit_v6_report_rendering": true,
+    "log": "default-switch.log"
   }
 }

@@ -469,7 +469,7 @@ uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite balan
 uv run python scripts/benchmark_contract3_web.py --legacy-fixtures --suite independent-hard
 
 # 不发模型请求，仅从已有原始工件刷新本报告
-uv run python scripts/render_contract3_report.py
+uv run python scripts/render_contract3_report.py --dataset v6
 ```
 
 ## 工件索引

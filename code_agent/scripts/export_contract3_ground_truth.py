@@ -1,6 +1,7 @@
 """Export the Contract-3 RTOS ground truth with the files each project is checked over.
 
-CLI defaults to engineering-v6. Pass --legacy-fixtures explicitly for the historical
+CLI defaults to engineering-v7; use --dataset v6 for the previous engineering set.
+Pass --legacy-fixtures explicitly for the historical
 fixture helpers described below; their stored results remain unchanged.
 
 For every suite and every pinned RTOS project this writes the upstream detection
@@ -295,8 +296,17 @@ def mirror_projects(manifest: dict[str, Any], workspace: Path, results: list[dic
 
 def main() -> None:
     if "--legacy-fixtures" not in sys.argv:
-        from code_agent.scripts.build_contract3_engineering_v6 import main as engineering_main
-        sys.argv = [arg.replace("--workspace", "--upstream") for arg in sys.argv]
+        parser = argparse.ArgumentParser(add_help=False)
+        parser.add_argument("--dataset", choices=["v6", "v7"], default="v7",
+                            help="Engineering dataset (default: v7)")
+        selection, remaining = parser.parse_known_args()
+        if "--help" in remaining or "-h" in remaining:
+            parser.print_help()
+        if selection.dataset == "v7":
+            from code_agent.scripts.build_contract3_engineering_v7 import main as engineering_main
+        else:
+            from code_agent.scripts.build_contract3_engineering_v6 import main as engineering_main
+        sys.argv = [sys.argv[0], *[arg.replace("--workspace", "--upstream") for arg in remaining]]
         return engineering_main()
     sys.argv.remove("--legacy-fixtures")
     # Explicit legacy regeneration must not overwrite the current engineering listing.

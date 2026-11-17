@@ -1,6 +1,7 @@
 """Static-only Contract-3 score: product analyzers, no model, no network.
 
-CLI defaults to engineering-v6. Pass --legacy-fixtures explicitly for the historical
+CLI defaults to engineering-v7; use --dataset v6 for the previous engineering set.
+Pass --legacy-fixtures explicitly for the historical
 fixture helpers described below; their stored results remain unchanged.
 
 Runs the comprehensive engines (built-in C rules, Cppcheck, Clang) on the frozen

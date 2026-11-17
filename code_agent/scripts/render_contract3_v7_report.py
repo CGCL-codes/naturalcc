@@ -121,10 +121,15 @@ def render(document):
               "```bash", "export PATH=/mnt/onelab0/sub4-wy/luokaic/conda_envs/ncc-static/bin:$PATH",
               "uv run --no-sync python scripts/build_contract3_engineering_v7.py --verify",
               "uv run --no-sync python scripts/verify_contract3_v7_mechanisms.py",
-              "uv run --no-sync python scripts/measure_contract3_engineering.py --dataset v7 --timeout 600",
-              "uv run --no-sync python scripts/render_contract3_v7_report.py",
+              "uv run --no-sync python scripts/measure_contract3_engineering.py --timeout 600",
+              "uv run --no-sync python scripts/render_contract3_report.py",
               "uv run --no-sync python scripts/verify_contract3_v7_api.py --project freertos_kernel", "```", "",
-              "以上是本地静态和 API 验证，不是客户部署验收。当前正式入口仍指向 v6；v6 的旧率属于旧题集/旧规则证据，不能用于说明 v7。"]
+              "合同三测量、验收、GT 导出、报告和 Web 基准入口默认选择 v7；历史工程集须显式传入 `--dataset v6`。"
+              "以上是本地静态和 API 验证，不是客户部署验收；更改脚本默认题集不会重启运行中的服务。"]
+    if any(row.get('reused_evidence_sha256') for row in document['results']):
+        lines += ["", "本轮使用 `--reuse-evidence` 对已保存的三引擎原始结果重新计分；"
+                  "源码、GT、检测规则、引擎配置和分析预算保持一致，来源哈希记录在每个结果中。"
+                  "这不是一次新的外部引擎扫描；默认入口切换的验证记录见 `validation/summary.json`。"]
     validation = build.DATA / 'validation' / 'summary.json'
     if validation.exists():
         lines += ["", "## 本地回归与 API 复核", "",
@@ -137,10 +142,10 @@ def render(document):
     return '\n'.join(lines) + '\n', csv_rows, failures
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--inputs', nargs='+', type=Path, default=[build.DATA / 'static-teaching.json'])
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     document = merge(args.inputs)
     report, rows, failures = render(document)
     document['acceptance'] = dict(passed=not failures, passing_categories=36-len(failures),

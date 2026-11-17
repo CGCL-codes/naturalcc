@@ -2,7 +2,7 @@
 
 > 2026-11-14 更新：合同三默认改为工程内注入版。当前用法见 [工程题集说明](合同-3-工程内注入说明.md)。下文“9 个工程×类别组”和 fixture 手工演示仅保留为旧版复现，命令已加 `--legacy-fixtures`；合同五流程不变。
 
-当前合同三先选择 `artifacts/contract3/engineering-v6/<suite>/<project>/project/` 作为工作区，GT 保存在其外层。Web 评测按完整 C 文件逐个运行，而非按三个小样例文件运行。可离线预览：
+当前合同三默认使用 v7，先选择 `artifacts/contract3/engineering-v7/<suite>/<project>/project/` 作为工作区，GT 保存在其外层。Web 评测按完整 C 文件逐个运行，而非按三个小样例文件运行。可离线预览：
 
 ```bash
 uv run --no-sync python scripts/benchmark_contract3_web.py \
@@ -100,7 +100,7 @@ uv run python scripts/benchmark_contract5_web.py
 各脚本会保存已评分结果；再次执行会跳过已评分样本，不会为同一结果重复发起模型调用。指标 3 不发起模型请求、只根据已有工件刷新总报告：
 
 ```bash
-uv run python scripts/render_contract3_report.py
+uv run python scripts/render_contract3_report.py --dataset v6
 ```
 
 指标 3 的 Web 脚本会在终端逐组打印“排队/运行/已保存”状态；如果结果已存在，也会明确打印“跳过（已有结果）”。结束时会打印各类别 TP/FN/FP/TN、检出率、误报率、判定以及报告和 checkpoint 路径，因此无需只打开 Markdown 才能查看结果。使用 `--report-only` 时不调用模型，只打印已有结果摘要：

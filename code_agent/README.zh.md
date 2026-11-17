@@ -719,9 +719,9 @@ code_agent/
 
 ## 17. 合同指标 3：工程内注入教学题
 
-新版为 `engineering-v7-20261118-r4`，本地 36/36 项门槛通过（检出率 85%–95%，误报率 5%–15%）：每类 10 种机制，每种 2 个缺陷 + 2 个对照，注入原工程业务函数。内置规则、Cppcheck、Clang 分别实测，全部率由后端 GT Case 匹配生成；固定分母、失败文件和 36 项合同门槛见 [v7 实测报告](artifacts/contract3/engineering-v7/REPORT.md)。显式运行 `scripts/measure_contract3_engineering.py --dataset v7 --timeout 600`，生成、sanitizer 见证和真实本地 API 检查见 [复核指南](合同-3-v7-多机制复核.md)。前端可直接使用的静态评分副本和完整请求在 `artifacts/contract3/engineering-v7/web-static/`。本地验证不等于客户部署验收。
+默认题集为 `engineering-v7-20261118-r4`，本地 36/36 项门槛通过（检出率 85%–95%，误报率 5%–15%）：每类 10 种机制，每种 2 个缺陷 + 2 个对照，注入原工程业务函数。内置规则、Cppcheck、Clang 分别实测，全部率由后端 GT Case 匹配生成；固定分母、失败文件和 36 项合同门槛见 [v7 实测报告](artifacts/contract3/engineering-v7/REPORT.md)。运行 `scripts/measure_contract3_engineering.py --timeout 600` 默认使用 v7，生成、sanitizer 见证和真实本地 API 检查见 [复核指南](合同-3-v7-多机制复核.md)。前端可直接使用的静态评分副本和完整请求在 `artifacts/contract3/engineering-v7/web-static/`。本地验证不等于客户部署验收。
 
-兼容入口默认仍为 `engineering-v6-20261114`。**每工程每套：数组越界 20 个、字符串溢出 20 个、空指针 20 个，共 60 个缺陷；另有每类 20 个安全对照，总计 120 个标注操作。**保留原有业务函数内注入，源码、GT、manifest 成套使用。v5 的每类 7 个正例不符合合同数量要求。v6 在 2026-11-14 的历史记录为 36/36 项通过、检出率 95%、误报率 5%–10%，详见[历史复核说明](合同-3-复核说明.md)；不能用它说明 v7 或当前规则已经达标，也不能代替客户部署验收。
+测量、验收、GT 导出、报告和 Web 基准入口均默认使用 v7；历史 `engineering-v6-20261114` 须显式传入 `--dataset v6`。**每工程每套：数组越界 20 个、字符串溢出 20 个、空指针 20 个，共 60 个缺陷；另有每类 20 个安全对照，总计 120 个标注操作。**保留原有业务函数内注入，源码、GT、manifest 成套使用。v5 的每类 7 个正例不符合合同数量要求。v6 在 2026-11-14 的历史记录为 36/36 项通过、检出率 95%、误报率 5%–10%，详见[历史复核说明](合同-3-复核说明.md)；不能用它说明 v7 或当前规则已经达标，也不能代替客户部署验收。
 
 实际送检为 FreeRTOS 18 个完整 C 文件（约 2.3 万行）、Zephyr 206 个（约 7.2 万行）、RT-Thread 77 个（约 6.6 万行）。扩展使用上游工程已有的 CLI/FTP/HTTP、Shell/文件系统/日志等模块。解析、条件编译及未评分情况单独记录，不把送检行数等同于全部编译覆盖。
 
@@ -729,10 +729,10 @@ code_agent/
 
 
 ```bash
-uv run --no-sync python scripts/build_contract3_engineering_v7.py --verify
-uv run --no-sync python scripts/measure_contract3_static.py --dataset v7 --delivered --timeout 600
-uv run --no-sync python scripts/measure_contract3_static.py --dataset v7 --delivered --timeout 600 --reference
-uv run --no-sync python scripts/check_contract3_teaching.py --dataset v7
+uv run --no-sync python scripts/export_contract3_ground_truth.py --verify
+uv run --no-sync python scripts/measure_contract3_static.py --delivered --timeout 600
+uv run --no-sync python scripts/measure_contract3_static.py --delivered --timeout 600 --reference
+uv run --no-sync python scripts/check_contract3_teaching.py
 uv run --no-sync python scripts/prepare_contract3_v7_static_workspaces.py --suite all
 ```
 

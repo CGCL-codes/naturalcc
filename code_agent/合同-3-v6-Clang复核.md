@@ -1,5 +1,7 @@
 # 合同三 v6：Clang 配置修复与教学指标复核
 
+本文保留 v6 的历史说明与结果。当前默认题集为 v7，见 [v7 使用指南](合同-3-v7-多机制复核.md)；以下 v6 复现命令显式选择 `--dataset v6`，历史比例不代表当前规则的复测结果。
+
 当前为 `engineering-v6-20261114` 的 Clang 配置修订。原版提交 `09096e7` 的问题及未采用候选仍保留在 [历史核查证据](artifacts/contract3/clang-v6-review/review.json)，不用于当前成绩。
 
 ## 修复内容
@@ -25,7 +27,7 @@
 
 实际插件另行复测三个 balanced 工程及两套 Zephyr 压力题，共五组合、600/600 操作通过，见 [插件原始记录](artifacts/contract3/engineering-v6/product-plugin-validation.json)。其余七组合仅做离线矩阵验证。
 
-所有十二组合的三个引擎均重新执行，没有复用旧比例或旧原始结果。哈希和数量区间统一通过 `scripts/check_contract3_teaching.py` 核查。见 [最新静态原始矩阵](artifacts/contract3/engineering-v6/static-teaching.json)及 [总报告](合同-3-result.md)。这是教学校准题集的静态结果，不作为独立泛化成绩或 Web 模型成绩。
+所有十二组合的三个引擎均重新执行，没有复用旧比例或旧原始结果。哈希和数量区间统一通过 `scripts/check_contract3_teaching.py --dataset v6` 核查。见 [最新静态原始矩阵](artifacts/contract3/engineering-v6/static-teaching.json)及 [总报告](合同-3-result.md)。这是教学校准题集的静态结果，不作为独立泛化成绩或 Web 模型成绩。
 
 ## 仍存在的解析边界
 
