@@ -46,6 +46,8 @@ There is no legacy UI path; keep graphical work centered on `agent_web_api.py` a
 
 ## Runtime Notes
 
+- `security_gt_assisted.py` implements the opt-in v7 built-in replay with 108 GT presets and 12 source-measured cases. Preserve hash-bound prepared contexts, case and finding origins, `analysis_provenance`, separate `measured_subset_statistics`, and `independent_measurement=false` on mixed results. See `GT_ASSISTED_V7.md`.
+
 - Runtime Threads carry an explicit `runtime_model_config` (provider, model, endpoint, window, and routing preferences); each Run snapshots it. API keys remain request-scoped memory only.
 - For offline platform indicators 1/3/5, indicator 1 uses the Agent Gateway and approved Aider edit tools with local Ollama; indicators 3/5 use `/api/run` scanning and must keep `auto_fix=false` to avoid Aider/model calls. Keep both paths independent; follow `OFFLINE_PLATFORM_1_3_5.md` for dependency prep, smoke checks, and the no-acceptance boundary.
 - UI refresh restores only the last selected Thread after Bootstrap; New conversation uses the separately stored Bootstrap Runtime defaults. Thread settings must never overwrite those launch defaults.

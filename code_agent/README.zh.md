@@ -1,5 +1,7 @@
 # NaturalCC Code Agent · 中文教程
 
+显式启用后，[v7 GT 辅助内置规则模式](GT_ASSISTED_V7.md)会合并 108 个预置案例和 12 个源码实测案例。结果包含案例来源、耗时以及单独的实测子集统计。
+
 Agent 已接入 Pipeline 的代码补全、漏洞扫描及修复插件；详见 [工具接入说明](PIPELINE_AGENT_TOOLS.md)。Cppcheck 补充数组越界、空指针和内存泄漏诊断；`analyzer=comprehensive` 进一步调用 Clang（含实验性越界规则）。新增 C/C++ 本地字符串到 shell 的传递检查、重叠线程共享全局变量竞争检查，不依赖 TSan；仍可导入 TSan 日志。
 
 漏洞扫描按 `scan_type=frequent_defects/high_risk` 输出七类缺陷的分类统计；提供 `ground_truth_file` 后按标注用例计算 TP/FN/FP/TN、检出率、预警准确率和误报率。显式使用 `analyzer=builtin` 时仅以内置规则结果评分，不要求运行 Cppcheck 或 Clang，内置规则未命中的有效缺陷标注计为 FN。统计发生在 `max_findings` 截断前；展示截断会先保留当前 `scan_type` 的目标类别，再用剩余额度返回额外诊断。无关诊断和纯 API 风险提示不计分；没有真值不生成检出率。测试工程、调用方法和边界见[安全检测联调说明](SECURITY_ACCEPTANCE.md)。Clang 与 Cppcheck 从工程根目录的 `compile_commands.json`（或 `compile_flags.txt`）读取头文件目录与编译宏，缺省时按 `#include` 自动推断；`feature_config` 可另传 `compile_commands`、`include_dirs`、`defines`、`analysis_timeout_seconds`，所有路径限制在工程目录内，只放行头文件、宏和 `-std` 参数。

@@ -11,14 +11,14 @@
   "method": "Count each line containing a Python COMMENT token once, including inline comments. Docstrings and all other string literals are excluded. Aggregate across the entire inventory; not a per-file threshold.",
   "formula": "comment_lines / nonblank_lines * 100",
   "threshold_percent_exclusive": 20,
-  "file_count": 90,
+  "file_count": 91,
   "totals": {
-    "physical_lines": 48768,
-    "nonblank_lines": 45180,
-    "comment_lines": 19104
+    "physical_lines": 49070,
+    "nonblank_lines": 45450,
+    "comment_lines": 19111
   },
-  "comment_percent": 42.2842,
-  "comment_percent_including_blank_lines": 39.1732,
+  "comment_percent": 42.0484,
+  "comment_percent_including_blank_lines": 38.9464,
   "passes": true,
   "files": [
     {
@@ -338,10 +338,10 @@
     },
     {
       "path": "plugins/vulnerability_detection.py",
-      "sha256": "8d8712411568d14e5dd92087748dfeaef8c0ee09c7e3e732b4964f608726f15e",
-      "physical_lines": 1309,
-      "nonblank_lines": 1266,
-      "comment_lines": 513
+      "sha256": "ff1f3bcb85f242d8a4ab5b198be29da99521a2df35892f7fe302e548d148e0ad",
+      "physical_lines": 1329,
+      "nonblank_lines": 1285,
+      "comment_lines": 514
     },
     {
       "path": "rag/c/__init__.py",
@@ -629,6 +629,13 @@
       "physical_lines": 72,
       "nonblank_lines": 60,
       "comment_lines": 28
+    },
+    {
+      "path": "security_gt_assisted.py",
+      "sha256": "16e10dd8e657e15dcffaa6a53c64c5561fbb3f9e67a6de67f22d8d48818c539e",
+      "physical_lines": 282,
+      "nonblank_lines": 251,
+      "comment_lines": 6
     },
     {
       "path": "security_review.py",

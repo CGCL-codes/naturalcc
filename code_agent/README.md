@@ -1,5 +1,7 @@
 # NaturalCC Code Agent
 
+The [v7 GT-assisted built-in mode](GT_ASSISTED_V7.md) combines 108 preset cases with 12 source-measured cases when explicitly enabled. Results include case origins, timing and separate measured-subset statistics.
+
 Agent now exposes the Pipeline completion and vulnerability plugins as approved
 tools. See [Pipeline Agent tools](PIPELINE_AGENT_TOOLS.md) for usage, Cppcheck
 setup, incremental scanning, race analysis coverage and limitations.
