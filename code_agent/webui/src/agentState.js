@@ -67,6 +67,7 @@ export function reduceAgentEvent(state, event) {
     next.budget = event.payload?.budget || null;
   } else if (event.type === "run.started" || event.type === "run.resumed") {
     next.status = "running";
+    next.uncertainTool = null;
   } else if (event.type === "approval.requested") {
     next.status = "waiting_approval";
     next.pendingApproval = event.payload;

@@ -36,6 +36,8 @@ import { approveAgentAction, approvalErrorMessage } from "./agentApproval.js";
 import {
   buildAgentRunMessage,
   canControlAgentRun,
+  formatPromptCacheUsage,
+  formatToolCall,
   modelInputValue,
   shouldAppendUserMessage
 } from "./agentUi.js";
@@ -57,6 +59,7 @@ import { loadLayoutPrefs, saveLayoutPrefs, toLayoutStyle } from "./layoutPrefs.j
 import { loadThemePref, nextTheme, saveThemePref } from "./themePrefs.js";
 import { readActiveThreadId, rememberActiveThread, threadToRestore, runtimeConfigForEdit } from "./runtimeSettings.js";
 import { MemoryReviewPanel } from "./MemoryReviewPanel.jsx";
+import { McpServersPanel } from "./McpServersPanel.jsx";
 import {
   buildMemoryProposalSelection,
   normalizeMemoryReview,
@@ -447,12 +450,7 @@ function App() {
     agentRunState?.input_tokens || 0,
     budgetDraft.max_input_tokens
   );
-  const promptCacheHitTokens = agentRunState?.prompt_cache_hit_tokens || 0;
-  const promptCacheMissTokens = agentRunState?.prompt_cache_miss_tokens || 0;
-  const promptCacheMeasuredTokens = promptCacheHitTokens + promptCacheMissTokens;
-  const promptCacheLabel = promptCacheMeasuredTokens
-    ? `${promptCacheHitTokens.toLocaleString()} / ${promptCacheMeasuredTokens.toLocaleString()} (${((promptCacheHitTokens / promptCacheMeasuredTokens) * 100).toFixed(1)}%)`
-    : "not reported";
+  const promptCacheLabel = formatPromptCacheUsage(agentRunState);
 
   const payload = useMemo(
     () => {
@@ -3185,6 +3183,15 @@ function App() {
                   <span className={classNames("run-status-pill", agentState.status)}>{agentState.status}</span>
                   {agentState.runId && <span>{agentState.events.length} events</span>}
                 </div>
+                {agentState.pendingApproval?.tool_call && (
+                  <pre className="approval-tool-details">{formatToolCall(agentState.pendingApproval.tool_call)}</pre>
+                )}
+                {agentState.status === "paused" && agentState.uncertainTool?.reason === "mcp_outcome_unknown" && (
+                  <div className="error-box" role="alert">
+                    The result of {agentState.uncertainTool.tool_call?.name || "the MCP call"} is unknown.
+                    Check the external service before resuming this run.
+                  </div>
+                )}
                 {agentState.runId && agentRunControllable && (
                   <div className="run-control-actions">
                     {agentState.pendingApproval && (
@@ -3219,7 +3226,7 @@ function App() {
                 <BudgetMeter label="Input tokens" progress={inputTokenBudgetProgress} />
                 <dl className="info-list">
                   <Info label="Tokens" value={(agentRunState?.input_tokens || 0) + (agentRunState?.output_tokens || 0)} />
-                  <Info label="Prompt cache hit" value={promptCacheLabel} />
+                  <Info label="Agent prompt cache hit" value={promptCacheLabel} />
                   <Info label="Cost" value={`$${Number(agentRunState?.cost_usd || 0).toFixed(4)}`} />
                 </dl>
               </section>
@@ -3438,6 +3445,8 @@ function App() {
                   </div>
                 )}
               </section>
+
+              <McpServersPanel requestJson={requestJson} />
 
               <section style={{ marginBottom: 16 }}>
                 <div className="section-heading">

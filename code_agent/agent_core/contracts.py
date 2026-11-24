@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from threading import Event
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 
 # [maint-note:bc72d6e34268]
@@ -126,6 +126,10 @@ class ModelResponse:
     model: str | None = None
     reasoning: str = ""
     reasoning_details: list[dict[str, Any]] = field(default_factory=list)
+    # None permits gateways using the original numeric-only response contract.
+    prompt_cache_usage_status: Literal["reported", "partial", "unreported", "invalid"] | None = None
+    served_model: str | None = None
+    served_provider: str | None = None
 
     # [maint-note:9a228e831551]
     # 维护导航：to_message；下列为本函数源码中的接口与路径索引。
@@ -366,6 +370,7 @@ class ToolSpec:
     parallel_safe: bool = True
     default_timeout_seconds: int = 30
     max_output_chars: int = 12_000
+    validate_input: Callable[[dict[str, Any]], None] | None = None
 
     # [maint-note:055fb167a961]
     # 维护导航：__post_init__；下列为本函数源码中的接口与路径索引。

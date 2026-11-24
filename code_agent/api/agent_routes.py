@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 import json
 import logging
@@ -585,10 +586,19 @@ def create_agent_router(
     memory_store: MemoryStore | None = None,
     *,
     auto_memory_mode: str = "off",
+    mcp_config_error: bool = False,
 ) -> APIRouter:
     if auto_memory_mode not in {"off", "review", "auto"}:
         raise ValueError("CODE_AGENT_AUTO_MEMORY_MODE must be off, review, or auto")
-    router = APIRouter(prefix="/api/agent", tags=["agent"])
+    @asynccontextmanager
+    async def lifespan(_app: Any):
+        try:
+            yield
+        finally:
+            if engine.mcp_service:
+                await asyncio.to_thread(engine.mcp_service.close)
+
+    router = APIRouter(prefix="/api/agent", tags=["agent"], lifespan=lifespan)
     engine.store.migrate_legacy_runs()
     proposal_service = (
         MemoryProposalService(
@@ -604,6 +614,31 @@ def create_agent_router(
         engine.auto_memory = AutoMemoryWorker(
             proposal_service, auto_apply=auto_memory_mode == "auto"
         )
+
+    @router.get("/mcp/servers")
+    async def list_mcp_servers() -> dict[str, Any]:
+        if mcp_config_error:
+            raise HTTPException(status_code=503, detail="MCP server configuration could not be loaded.")
+        service = engine.mcp_service
+        return {"servers": await asyncio.to_thread(service.statuses) if service else []}
+
+    @router.post("/mcp/servers/{name}/{action}")
+    async def control_mcp_server(name: str, action: str, request: Request) -> dict[str, Any]:
+        origin = request.headers.get("origin")
+        if origin and origin not in {
+            str(request.base_url).rstrip("/"),
+            "http://localhost:5173", "http://127.0.0.1:5173",
+            "http://localhost:7860", "http://127.0.0.1:7860",
+        }:
+            raise HTTPException(status_code=403, detail="Cross-origin MCP server control is forbidden.")
+        service = engine.mcp_service
+        if service is None or action not in {"connect", "disconnect", "reconnect"}:
+            raise HTTPException(status_code=404, detail="MCP server or action not found.")
+        operation = service.disconnect if action == "disconnect" else service.reconnect
+        try:
+            return {"server": await asyncio.to_thread(operation, name)}
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="MCP server not found.") from exc
 
     # [maint-note:715f423c1839]
     # 维护导航：create_thread；下列为本函数源码中的接口与路径索引。
@@ -2056,6 +2091,16 @@ def build_default_agent_router() -> APIRouter:
         serializer=context_runtime.serializer,
         profile=context_runtime.profile,
     )
+    mcp_service = None
+    mcp_config_error = False
+    if config_path := os.environ.get("CODE_AGENT_MCP_CONFIG", "").strip():
+        from code_agent.agent_core.mcp_service import McpService
+
+        try:
+            mcp_service = McpService.from_file(config_path)
+        except (OSError, ValueError):
+            mcp_config_error = True
+            logging.getLogger(__name__).error("Could not load the configured MCP server definitions.")
     engine = RunEngine(
         store,
         build_default_registry(include_mutating=True),
@@ -2064,8 +2109,10 @@ def build_default_agent_router() -> APIRouter:
         context_planner=planner,
         compaction_service=compaction_service,
         default_runtime_model_config=context_runtime.default_model_config,
+        mcp_service=mcp_service,
     )
     return create_agent_router(
         engine, memory,
         auto_memory_mode=os.environ.get("CODE_AGENT_AUTO_MEMORY_MODE", "auto").strip().lower(),
+        mcp_config_error=mcp_config_error,
     )

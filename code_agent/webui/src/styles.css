@@ -3383,6 +3383,87 @@ button:disabled {
   margin-bottom: 16px;
 }
 
+.mcp-servers-settings {
+  margin-bottom: 16px;
+}
+
+.mcp-servers-heading > span {
+  flex: 1;
+}
+
+.mcp-server-list,
+.mcp-tools ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mcp-server-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mcp-server {
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.mcp-server-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text);
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.mcp-server-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.mcp-server-actions:empty {
+  display: none;
+}
+
+.mcp-tools {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.73rem;
+}
+
+.mcp-tools summary {
+  cursor: pointer;
+}
+
+.mcp-tools ul {
+  max-height: 12rem;
+  overflow: auto;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.approval-tool-details {
+  max-height: 12rem;
+  overflow: auto;
+  margin: 8px 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.74rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 /* [maint-note:469e61e5d48f]
  * 样式作用域：.codegraph-switch > span:nth-child(2)。
  * 布局位置：flex=1。

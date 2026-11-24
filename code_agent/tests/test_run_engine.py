@@ -164,7 +164,10 @@ def test_reported_model_cost_stops_run_before_next_tool(tmp_path: Path):
     assert all(event.type != "tool.started" for event in store.list_events(run_id))
 
 
-def test_run_accumulates_prompt_cache_usage_and_records_trace(tmp_path: Path):
+@pytest.mark.parametrize("prior_miss_tokens", [0, 100])
+def test_run_accumulates_prompt_cache_usage_and_records_trace(
+    tmp_path: Path, prior_miss_tokens: int,
+):
     model = ScriptedModelGateway(
         [
             ModelResponse(
@@ -179,17 +182,33 @@ def test_run_accumulates_prompt_cache_usage_and_records_trace(tmp_path: Path):
     store = EventStore(tmp_path / "agent.db")
     engine = RunEngine(store, build_default_registry(include_mutating=False), model)
     run_id = engine.create_run(tmp_path, "measure prompt cache")
+    if prior_miss_tokens:
+        previous = engine.get_state(run_id)
+        previous.pop("prompt_cache_usage")
+        previous["prompt_cache_miss_tokens"] = prior_miss_tokens
+        store.save_snapshot(run_id, previous, expected_version=previous["version"])
 
     result = engine.run(run_id)
 
     assert result["prompt_cache_hit_tokens"] == 90
-    assert result["prompt_cache_miss_tokens"] == 30
+    assert result["prompt_cache_miss_tokens"] == 30 + prior_miss_tokens
+    assert result["prompt_cache_usage"] == {
+        "legacy_calls_excluded": bool(prior_miss_tokens),
+        "by_purpose": {"agent": {
+            "completed_calls": 1, "reported_calls": 1, "input_tokens": 120,
+            "hit_tokens": 90, "miss_tokens": 30,
+        }},
+    }
     usage_events = [
         event for event in store.list_events(run_id)
         if event.type == "model.usage_recorded"
     ]
     assert usage_events[0].payload["prompt_cache_hit_tokens"] == 90
     assert usage_events[0].payload["prompt_cache_miss_tokens"] == 30
+    assert usage_events[0].payload["prompt_cache_usage_status"] == "reported"
+    assert usage_events[0].payload["purpose"] == "agent"
+    assert usage_events[0].payload["configured_provider"] == "deepseek"
+    assert usage_events[0].payload["served_provider"] is None
 
 
 def test_run_uses_context_builder_without_creating_ungoverned_memory(tmp_path: Path):
@@ -280,7 +299,11 @@ def test_chinese_paraphrase_semantic_recall_is_scoped_and_rechecked(tmp_path: Pa
     assert memory.search(goal, project_id=project) == []
     (tmp_path / "README.md").write_text("Some current evidence", encoding="utf-8")
     model = ScriptedModelGateway([
-        ModelResponse(content=json.dumps({"ids": [foreign, expected, expired, expected, pinned]}), input_tokens=50, output_tokens=10),
+        ModelResponse(
+            content=json.dumps({"ids": [foreign, expected, expired, expected, pinned]}),
+            input_tokens=50, output_tokens=10, prompt_cache_hit_tokens=30,
+            prompt_cache_miss_tokens=20, prompt_cache_usage_status="reported",
+        ),
         ModelResponse(tool_calls=[ToolCall("read", "workspace.read", {"path": "README.md"})]),
         ModelResponse(content="done"),
     ])
@@ -307,6 +330,11 @@ def test_chinese_paraphrase_semantic_recall_is_scoped_and_rechecked(tmp_path: Pa
     assert state["status"] == "completed"
     assert state["llm_calls"] == 3
     assert state["input_tokens"] == 50 and state["output_tokens"] == 10
+    usage = state["prompt_cache_usage"]["by_purpose"]
+    assert usage["agent"]["completed_calls"] == 2
+    assert usage["agent"]["reported_calls"] == 0
+    assert usage["memory_recall"]["reported_calls"] == 1
+    assert usage["memory_recall"]["hit_tokens"] == 30
     assert [request.purpose for request in model.requests] == ["memory_recall", "agent", "agent"]
     assert expected not in model.requests[-1].messages[-1]["content"]
     requests = [event.payload for event in store.list_events(run_id) if event.type == "model.requested"]
@@ -332,11 +360,12 @@ def test_bad_semantic_selector_falls_back_to_normal_answer(tmp_path: Path):
         store, build_default_registry(include_mutating=False), model,
         memory_store=memory, context_planner=planner,
     )
-    run_id = engine.create_run(tmp_path, "二分查找为什么要求有序？")
+    run_id = engine.create_run(tmp_path, "二分查找为什么要求有序？", RunBudget(max_llm_calls=2))
     assert engine.run(run_id)["final_answer"] == "normal answer"
     trace = next(event for event in store.list_events(run_id) if event.type == "memory.recall_evaluated")
     assert trace.payload["selected_ids"] == []
     assert trace.payload["outcome"] == "JSONDecodeError"
+    assert trace.payload["selection_source"] == "lexical_fallback"
 
 
 def test_target_files_are_persisted_and_visible_to_model(tmp_path: Path):
@@ -838,6 +867,73 @@ def test_active_run_budget_can_only_increase_above_usage(tmp_path: Path):
     assert store.list_events(run_id)[-1].type == "run.budget_updated"
     with pytest.raises(ValueError, match="below current usage"):
         engine.update_budget(run_id, {"max_llm_calls": 1})
+
+
+def test_planned_run_preserves_cross_turn_request_prefix(tmp_path: Path):
+    store = EventStore(tmp_path / "agent.db")
+    thread_id = store.create_thread("Service", workspace=str(tmp_path))
+    serializer = DeepSeekRequestSerializer()
+    tokenizer = Path(__file__).resolve().parents[1] / "resources" / "deepseek_v3_tokenizer"
+    planner = ContextPlanner(
+        DeepSeekTokenCounter.from_directory(tokenizer), serializer, DeepSeekModelProfile()
+    )
+    model = ScriptedModelGateway([
+        ModelResponse(content="The service exposes two methods."),
+        ModelResponse(content="The second method validates the input."),
+        ModelResponse(content="Old snapshot completed."),
+    ])
+    engine = RunEngine(
+        store, build_default_registry(include_mutating=False), model, context_planner=planner
+    )
+
+    first_id = engine.create_run(tmp_path, "Describe the service.", thread_id=thread_id)
+    assert engine.run(first_id)["status"] == "completed"
+    second_id = engine.create_run(tmp_path, "Explain the second method.", thread_id=thread_id)
+    assert engine.run(second_id)["status"] == "completed"
+
+    first, second = model.requests
+    first_messages = serializer.serialize_messages(first.messages)
+    second_messages = serializer.serialize_messages(second.messages)
+    assert first_messages[:-1] == second_messages[: len(first_messages) - 1]
+    assert serializer.serialize_tools(first.tools) == serializer.serialize_tools(second.tools)
+    assert "[USER_GOAL]" not in second_messages[0]["content"]
+    assert second_messages[-2]["content"] == "Explain the second method."
+    assert '"current_objective": "Explain the second method."' in second_messages[-1]["content"]
+
+    legacy_id = engine.create_run(tmp_path, "Resume old layout.")
+    legacy_state = engine.get_state(legacy_id)
+    legacy_state.pop("prompt_layout_version")
+    engine._record(legacy_state, "test.legacy_snapshot", {})
+    assert engine.run(legacy_id)["status"] == "completed"
+    assert "[USER_GOAL]\nResume old layout." in model.requests[-1].messages[0]["content"]
+
+
+def test_planned_run_freezes_target_repository_instructions(tmp_path: Path):
+    source = tmp_path / "src"
+    source.mkdir()
+    (tmp_path / "AGENTS.md").write_text("Root repository rule.", encoding="utf-8")
+    (source / "AGENTS.md").write_text("Scoped original rule.", encoding="utf-8")
+    (source / "main.py").touch()
+    tokenizer = Path(__file__).resolve().parents[1] / "resources" / "deepseek_v3_tokenizer"
+    planner = ContextPlanner(
+        DeepSeekTokenCounter.from_directory(tokenizer),
+        DeepSeekRequestSerializer(),
+        DeepSeekModelProfile(),
+    )
+    store = EventStore(tmp_path / "agent.db")
+    registry = build_default_registry(include_mutating=False)
+    model = ScriptedModelGateway([ModelResponse(content="Checked.")])
+    engine = RunEngine(store, registry, model, context_planner=planner)
+
+    run_id = engine.create_run(tmp_path, "Inspect the target.", target_files=["src/main.py"])
+    (source / "AGENTS.md").write_text("Scoped changed rule.", encoding="utf-8")
+    resumed = RunEngine(store, registry, model, context_planner=planner)
+    assert resumed.run(run_id)["status"] == "completed"
+
+    system = model.requests[0].messages[0]["content"]
+    assert system.index("Root repository rule.") < system.index("Scoped original rule.")
+    assert 'source="src/AGENTS.md"' in system
+    assert "Scoped changed rule." not in system
 
 
 def test_thread_budget_exhaustion_persists_visible_terminal_message(tmp_path: Path):

@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sqlite3
 import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from unicodedata import normalize
 
 from .contracts import now_iso
 from .memory_tool_recovery import TOOL_RECOVERY_VERSION
@@ -36,6 +39,45 @@ RECALL_VISIBILITY = """
         OR (m.scope='run' AND m.source_run_id=?)
     )
 """
+
+_SEARCH_FORMAT = "lexical-v1"
+_CODE_TERM_PREFIX = "nccidentifier"
+_HAN_RUN = re.compile(r"([\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\U00020000-\U000323af]+)")
+_WORD = re.compile(r"\w+(?:[./-]\w+)*")
+_IDENTIFIER_SEPARATOR = re.compile(r"[._/-]+|(?<=[a-z0-9])(?=[A-Z])")
+_STOP_WORDS = frozenset(
+    "a an and are as be by do for from how i in is it of on or please should that "
+    "the this to use was we what when which who why will with would you".split()
+)
+_COMMON_HAN_PAIRS = frozenset("请问 如何 什么 怎么 是否 可以 使用 这个 那个 我们 需要 之前 之后 以后".split())
+
+
+def _lexical_terms(value: str) -> Iterator[str]:
+    for index, part in enumerate(_HAN_RUN.split(normalize("NFKC", value))):
+        if index % 2:
+            for offset in range(max(1, len(part) - 1)):
+                term = part[offset : offset + 2]
+                if term not in _COMMON_HAN_PAIRS:
+                    yield term
+            continue
+        for match in _WORD.finditer(part):
+            word = match.group()
+            pieces = _IDENTIFIER_SEPARATOR.split(word)
+            if len(pieces) > 1 and len(word) <= 160:
+                yield _CODE_TERM_PREFIX + word.casefold().encode("utf-8").hex()
+                if word.isalnum():
+                    yield word.casefold()
+            for piece in pieces:
+                term = piece.casefold()
+                if len(term) > 1 and term not in _STOP_WORDS:
+                    yield term
+
+
+@dataclass(frozen=True)
+class MemorySearchResult:
+    matches: list[dict[str, Any]]
+    strong_matches: list[dict[str, Any]]
+    has_query_terms: bool
 
 
 # [maint-note:275ec3447b35]
@@ -96,6 +138,10 @@ class MemoryStore:
                     updated_at TEXT NOT NULL
                 );
                 CREATE VIRTUAL TABLE IF NOT EXISTS memory_fts USING fts5(id UNINDEXED, subject, content);
+                CREATE TABLE IF NOT EXISTS memory_search_format (
+                    singleton INTEGER PRIMARY KEY CHECK (singleton=1),
+                    version TEXT NOT NULL
+                );
                 CREATE TABLE IF NOT EXISTS memory_proposals (
                     id TEXT PRIMARY KEY,
                     operation TEXT NOT NULL,
@@ -162,6 +208,7 @@ class MemoryStore:
                     ON memory_review_actions(proposal_id, created_at);
                 """
             )
+            connection.execute("BEGIN IMMEDIATE")
             columns = {row["name"] for row in connection.execute("PRAGMA table_info(memories)").fetchall()}
             if "thread_id" not in columns:
                 connection.execute("ALTER TABLE memories ADD COLUMN thread_id TEXT")
@@ -176,6 +223,7 @@ class MemoryStore:
             for name, definition in memory_additions.items():
                 if name not in columns:
                     connection.execute(f"ALTER TABLE memories ADD COLUMN {name} {definition}")
+            self._rebuild_search_index(connection)
             connection.execute("PRAGMA user_version=6")
             connection.commit()
         self._migrate_legacy_candidates()
@@ -214,6 +262,31 @@ class MemoryStore:
     # 直接调用：json.loads。
     # 直接调用：value.pop。
     # [/maint-note:06278c900f55]
+    @staticmethod
+    def _index_values(memory_id: str, subject: str, content: str) -> tuple[str, str, str]:
+        return memory_id, " ".join(_lexical_terms(subject)), " ".join(_lexical_terms(content))
+
+    def _rebuild_search_index(self, connection: sqlite3.Connection) -> None:
+        current = connection.execute("SELECT version FROM memory_search_format WHERE singleton=1").fetchone()
+        if current is not None and current["version"] == _SEARCH_FORMAT:
+            return
+        connection.execute("DELETE FROM memory_fts")
+        rows = connection.execute("SELECT id, subject, content FROM memories WHERE status='active'")
+        connection.executemany(
+            "INSERT INTO memory_fts(id, subject, content) VALUES(?,?,?)",
+            (self._index_values(row["id"], row["subject"], row["content"]) for row in rows),
+        )
+        connection.execute(
+            "INSERT OR REPLACE INTO memory_search_format(singleton, version) VALUES(1,?)",
+            (_SEARCH_FORMAT,),
+        )
+
+    def _index_memory(self, connection: sqlite3.Connection, memory_id: str, subject: str, content: str) -> None:
+        connection.execute(
+            "INSERT INTO memory_fts(id, subject, content) VALUES(?,?,?)",
+            self._index_values(memory_id, subject, content),
+        )
+
     @staticmethod
     def _decode_proposal_row(row: sqlite3.Row) -> dict[str, Any]:
         value = dict(row)
@@ -455,10 +528,7 @@ class MemoryStore:
             connection.execute("UPDATE memories SET status=?, updated_at=? WHERE id=?", (status, now_iso(), memory_id))
             connection.execute("DELETE FROM memory_fts WHERE id=?", (memory_id,))
             if status == "active":
-                connection.execute(
-                    "INSERT INTO memory_fts(id, subject, content) VALUES(?,?,?)",
-                    (memory_id, row["subject"], row["content"]),
-                )
+                self._index_memory(connection, memory_id, row["subject"], row["content"])
             connection.commit()
 
     # [maint-note:76861372b3c4]
@@ -559,10 +629,7 @@ class MemoryStore:
             )
             connection.execute("DELETE FROM memory_fts WHERE id=?", (memory_id,))
             if row["status"] == "active":
-                connection.execute(
-                    "INSERT INTO memory_fts(id, subject, content) VALUES(?,?,?)",
-                    (memory_id, subject, content),
-                )
+                self._index_memory(connection, memory_id, subject, content)
             connection.commit()
 
     # [maint-note:348c9bace0db]
@@ -607,10 +674,25 @@ class MemoryStore:
         limit: int = 5,
         exclude_kinds: set[str] | frozenset[str] | None = None,
     ) -> list[dict[str, Any]]:
-        raw_terms = [part for part in query.replace('"', " ").split() if part]
-        terms = " OR ".join(f'"{part.replace(chr(34), chr(34) * 2)}"' for part in raw_terms)
-        if not terms:
-            return []
+        return self.search_with_quality(
+            query, project_id=project_id, thread_id=thread_id, run_id=run_id,
+            limit=limit, exclude_kinds=exclude_kinds,
+        ).matches
+
+    def search_with_quality(
+        self,
+        query: str,
+        *,
+        project_id: str | None = None,
+        thread_id: str | None = None,
+        run_id: str | None = None,
+        limit: int = 5,
+        exclude_kinds: set[str] | frozenset[str] | None = None,
+    ) -> MemorySearchResult:
+        query_terms = list(dict.fromkeys(_lexical_terms(query[:4_000])))[:40]
+        if not query_terms:
+            return MemorySearchResult([], [], False)
+        terms = " OR ".join(f'"{term}"' for term in query_terms)
         exclusions = sorted(exclude_kinds or ())
         exclusion_sql = ""
         params: list[Any] = [terms, project_id, thread_id, run_id]
@@ -622,17 +704,37 @@ class MemoryStore:
         with self._connect() as connection:
             rows = connection.execute(
                 f"""
-                SELECT m.*, bm25(memory_fts) AS rank
+                SELECT m.*, bm25(memory_fts, 0.0, 2.0, 1.0) AS rank,
+                       memory_fts.subject AS search_subject, memory_fts.content AS search_content
                 FROM memory_fts JOIN memories m ON m.id=memory_fts.id
                 WHERE memory_fts MATCH ?
                   AND {RECALL_VISIBILITY}
                   {exclusion_sql}
-                ORDER BY rank, m.confidence DESC, m.updated_at DESC
+                ORDER BY rank, m.confidence DESC, m.updated_at DESC, m.id
                 LIMIT ?
                 """,
                 params,
             ).fetchall()
-        return [dict(row) for row in rows]
+        matches = []
+        strong_matches = []
+        query_term_set = set(query_terms)
+        query_identifiers = {term for term in query_term_set if term.startswith(_CODE_TERM_PREFIX)}
+        min_overlap = max(2, (len(query_term_set) + 1) // 2)
+        for row in rows:
+            match = dict(row)
+            subject_terms = set(match.pop("search_subject").split())
+            content_terms = set(match.pop("search_content").split())
+            overlap = query_term_set & (subject_terms | content_terms)
+            matches.append(match)
+            # A partial identifier match is not strong. For prose, require a
+            # substantial share of query terms or an exact subject match.
+            strong = (
+                bool(overlap & query_identifiers) if query_identifiers
+                else query_term_set == subject_terms or len(overlap) >= min_overlap
+            )
+            if strong:
+                strong_matches.append(match)
+        return MemorySearchResult(matches, strong_matches, True)
 
     # [maint-note:9e0e6c3cfc07]
     # 维护导航：semantic_recall_candidates；下列为本函数源码中的接口与路径索引。
@@ -667,6 +769,7 @@ class MemoryStore:
         thread_id: str | None,
         run_id: str,
         selected_ids: list[str] | None = None,
+        preferred_ids: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """Bound a semantic scan and revalidate cached IDs before each use."""
         if selected_ids == []:
@@ -675,18 +778,24 @@ class MemoryStore:
         placeholders = ",".join("?" for _ in pinned)
         params: list[Any] = [project_id, thread_id, run_id, *pinned]
         id_filter = ""
+        preferred_order = ""
         if selected_ids is not None:
             id_filter = f"AND m.id IN ({','.join('?' for _ in selected_ids)})"
             params.extend(selected_ids)
+        elif preferred_ids:
+            preferred_ids = list(dict.fromkeys(preferred_ids))[:16]
+            preferred_order = f"CASE WHEN m.id IN ({','.join('?' for _ in preferred_ids)}) THEN 0 ELSE 1 END,"
+            params.extend(preferred_ids)
         with self._connect() as connection:
             rows = connection.execute(
                 f"""SELECT m.* FROM memories m WHERE {RECALL_VISIBILITY}
                     AND m.kind NOT IN ({placeholders}) {id_filter}
-                    ORDER BY m.updated_at DESC, m.id LIMIT 16""",
+                    ORDER BY {preferred_order} m.updated_at DESC, m.id LIMIT 16""",
                 params,
             ).fetchall()
         if selected_ids is None:
-            return [dict(row) for row in rows]
+            priority = {memory_id: index for index, memory_id in enumerate(preferred_ids or [])}
+            return [dict(row) for row in sorted(rows, key=lambda row: priority.get(row["id"], len(priority)))]
         by_id = {row["id"]: dict(row) for row in rows}
         return [by_id[item] for item in selected_ids if item in by_id]
 
@@ -1648,10 +1757,7 @@ class MemoryStore:
                     connection.execute("DELETE FROM memory_fts WHERE id=?", (target_id,))
             if applied_memory_id:
                 connection.execute("DELETE FROM memory_fts WHERE id=?", (applied_memory_id,))
-                connection.execute(
-                    "INSERT INTO memory_fts(id, subject, content) VALUES(?,?,?)",
-                    (applied_memory_id, row["subject"], row["canonical_content"]),
-                )
+                self._index_memory(connection, applied_memory_id, row["subject"], row["canonical_content"])
             connection.execute(
                 """
                 UPDATE memory_proposals SET

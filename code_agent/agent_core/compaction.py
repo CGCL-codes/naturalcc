@@ -83,6 +83,7 @@ class FrozenCompactionSource:
     working_state: dict[str, Any]
     old_checkpoint: dict[str, Any] | None
     source_hash: str
+    tool_result_replacements: dict[str, str] | None = None
 
     # [maint-note:996cf37f88d4]
     # 维护导航：freeze；下列为本函数源码中的接口与路径索引。
@@ -124,6 +125,7 @@ class FrozenCompactionSource:
         messages: list[dict[str, Any]],
         working_state: dict[str, Any],
         old_checkpoint: dict[str, Any] | None,
+        tool_result_replacements: dict[str, str] | None = None,
     ) -> "FrozenCompactionSource":
         if covered_from < 0 or covered_to < covered_from:
             raise ValueError("frozen compaction range is invalid")
@@ -154,6 +156,11 @@ class FrozenCompactionSource:
             working_state=frozen_state,
             old_checkpoint=frozen_checkpoint,
             source_hash=canonical_message_hash(covered),
+            tool_result_replacements={
+                str(index): tool_result_replacements[str(index)]
+                for index in range(covered_from, covered_to + 1)
+                if tool_result_replacements and str(index) in tool_result_replacements
+            },
         )
 
     # [maint-note:c592c71d0ec2]
@@ -164,6 +171,15 @@ class FrozenCompactionSource:
     @property
     def covered_range(self) -> dict[str, int]:
         return {"from": self.covered_from, "to": self.covered_to}
+
+    def prompt_messages(self) -> list[dict[str, Any]]:
+        replacements = self.tool_result_replacements or {}
+        return [
+            {**message, "content": replacements[key]}
+            if message.get("role") == "tool" and (key := str(self.covered_from + index)) in replacements
+            else message
+            for index, message in enumerate(self.covered_messages)
+        ]
 
 
 # [maint-note:22325c4cf295]
@@ -550,7 +566,7 @@ class CompactionService:
                             "ref": f"message:{source.covered_from + index}",
                             "message": message,
                         }
-                        for index, message in enumerate(source.covered_messages)
+                        for index, message in enumerate(source.prompt_messages())
                     ],
                     "working_state": source.working_state,
                 }
@@ -819,7 +835,7 @@ class CompactionService:
                                 "message": message,
                             }
                             for index, message in enumerate(
-                                source.covered_messages
+                                source.prompt_messages()
                             )
                         ],
                         "working_state": source.working_state,
@@ -1734,7 +1750,7 @@ def _deterministic_analysis(source: FrozenCompactionSource) -> dict[str, Any]:
     user_constraints = []
     completed_actions = []
     tool_findings = []
-    for index, message in enumerate(source.covered_messages):
+    for index, message in enumerate(source.prompt_messages()):
         absolute_index = source.covered_from + index
         content = " ".join(str(message.get("content", "")).split())[:400]
         if message.get("role") == "user" and content:

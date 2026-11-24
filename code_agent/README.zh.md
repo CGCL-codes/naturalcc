@@ -522,6 +522,12 @@ VS Code 中 `Extensions: Install from VSIX...` 安装后，命令面板可用：
 
 `max_compaction_calls` 默认值为每个 Run 16 次（计数单位是压缩维护模型调用，而非完整压缩轮数）。压缩预算不足以进行两阶段模型压缩时，运行时会对安全的已完成历史前缀生成确定性 checkpoint，不直接恢复整段未压缩历史。256k 是 NaturalCC 对所有供应商和模型采用的本地运行默认值，不代表模型 API 的最大窗口；若所选模型实际窗口较小，请显式调低该值。
 
+新建 Web Run 会快照项目根及选定目标目录中适用的 `AGENTS.md` 和 `CLAUDE.md`。更具体的目录规则优先，同目录优先采用 `AGENTS.md`。当前目标作为用户消息进入连续历史，运行时状态与动态召回保留在尾部，减少跨轮修改目标带来的前缀变化。旧 Run 恢复时沿用原提示布局。
+
+过大的已完成工具结果会在模型上下文中显示为有限预览。模型可通过 `tool_result.read` 分页回读同一 Run 中保存的结果。原始消息继续用于审计和检查点校验。供应商在返回任何模型输出前明确报告上下文超限时，运行时可在剩余预算内缩小请求并重试一次。
+
+固定记忆保留在稳定前缀。其余有效记忆按目标通过 FTS5 召回，覆盖英文词、中文字符组和代码标识符。词法结果薄弱或缺失时，可在预算内做无工具的候选选择。选择器输出无效时最多修复一次，并为前台模型调用保留预算。有效的空结果表示没有适用记忆。`memory.recall_evaluated` 区分模型选择和词法回退。**Run details → Usage** 显示主模型的缓存命中率和上报覆盖率，明确区分未上报与已上报的 `0%`。记忆召回用量单独统计。
+
 **CodeGraph**
 
 | 变量 | 默认值 | 说明 |
@@ -531,11 +537,34 @@ VS Code 中 `Extensions: Install from VSIX...` 安装后，命令面板可用：
 | `CODE_AGENT_CODEGRAPH_NO_DOWNLOAD` | `true` | 调用时设置 `CODEGRAPH_NO_DOWNLOAD=1`，禁止运行期静默下载 |
 | `CODE_AGENT_CODEGRAPH_NO_DAEMON` | `true` | 调用时设置 `CODEGRAPH_NO_DAEMON=1`，禁止运行期启动常驻守护进程 |
 
+### Web Agent 外部工具（MCP）
+
+把 MCP 配置保存在后端运维者控制的位置，并在启动 Web 后端前把 `CODE_AGENT_MCP_CONFIG` 指向该文件。首版使用 stdio。`command` 必须是本机可执行文件的绝对路径，Windows 可用 `python.exe` 或 `node.exe`。`args` 由后端配置。凭据放在环境变量里，使用 `env_allowlist` 按名称传给子进程。
+
+```json
+{
+  "mcpServers": {
+    "notes": {
+      "command": "C:/path/to/python.exe",
+      "args": ["C:/path/to/notes_mcp_server.py"],
+      "env_allowlist": ["NOTES_API_TOKEN"],
+      "allowed_tools": ["lookup", "write_note"],
+      "read_only_tools": ["lookup"],
+      "resources": true,
+      "timeout_seconds": 10,
+      "enabled": true
+    }
+  }
+}
+```
+
+在 Web **Settings → MCP servers** 点 **Connect**，确认发现到的工具后发起新 Run。工具名按服务隔离，例如 `mcp__notes__lookup`。配置的只读工具可直接使用，其他外部工具逐次审批。`resources_list` 提供已发现的资源，`resources_read` 按资源 ID 请求审批和读取。断开、重连或服务目录变化会令旧工具版本失效。已发出但结果未知的有副作用调用会暂停 Run，恢复后继续剩余步骤。
+
 ---
 
 ## 9. 内置工具清单
 
-Agent 模式下模型可以调用 21 个工具：
+Agent 模式下可用工具随运行配置而定：
 
 | 模块 | 工具 | 风险等级 | 用途 |
 |---|---|---|---|
@@ -543,6 +572,7 @@ Agent 模式下模型可以调用 21 个工具：
 | | `workspace.read` | READ | 读文件（默认前 20,000 字符） |
 | | `workspace.search` | READ | 文本搜索（大小写不敏感，默认 100 条） |
 | | `workspace.stat` | READ | 文件 / 目录元信息 |
+| 工具结果 | `tool_result.read` | READ | 按引用分页回读同一 Run 中保存的工具结果 |
 | 工作区（写） | `workspace.create_directory` | WRITE | 建目录（`parents=true` 可递归） |
 | | `workspace.create_file` | WRITE | 新建文件（上限 1MB，不覆盖已有文件） |
 | | `workspace.apply_patch` | WRITE | 精确替换一段文本（`old_text` 必须唯一匹配，可回滚） |

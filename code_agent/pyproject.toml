@@ -28,6 +28,8 @@ dependencies = [
     "tiktoken",
     "attridict",
     "jsonlines",
+    "jsonschema",
+    "referencing",
     "regex",
     "psutil",
     "openai",

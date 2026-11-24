@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import os
 import ipaddress
+import re
+import time
 from abc import ABC, abstractmethod
 from collections import deque
 from dataclasses import dataclass, field
@@ -38,6 +40,39 @@ class ModelGateway(ABC):
     def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
         # Existing gateways and offline tests continue to use the Harness contract.
         yield ModelStreamEvent("completed", response=self.generate(request))
+
+
+class ProviderContextOverflow(RuntimeError):
+    """The provider explicitly rejected a request for exceeding its context window."""
+
+    def __init__(self, limit_tokens: int | None = None, *, partial: bool = False) -> None:
+        self.limit_tokens = limit_tokens
+        self.partial = partial
+        super().__init__("The model provider rejected the request because its context window was exceeded.")
+
+
+def _provider_context_overflow(
+    error: Exception, *, partial: bool = False
+) -> ProviderContextOverflow | None:
+    status = getattr(error, "status_code", None)
+    if status is not None and status not in {400, 413, 422}:
+        return None
+    body = getattr(error, "body", None)
+    if isinstance(body, dict) and isinstance(body.get("error"), dict):
+        body = body["error"]
+    code = (body.get("code") if isinstance(body, dict) else None) or getattr(error, "code", None)
+    message = (body.get("message") if isinstance(body, dict) else None) or getattr(error, "message", "")
+    message = str(message).casefold()
+    limit = re.search(
+        r"(?:max(?:imum)? context (?:length|window)[^\d]{0,25}|tokens\s*>\s*)([0-9][0-9,]{0,15})\s*(?:tokens|maximum)",
+        message,
+    )
+    if code in ("context_length_exceeded", "context_window_exceeded", "max_context_length_exceeded", "prompt_too_long") or (
+        status in {400, 413, 422}
+        and (limit or re.search(r"\b(?:prompt is too long|context (?:length|window) (?:was )?exceeded)\b", message))
+    ):
+        return ProviderContextOverflow(int(limit[1].replace(",", "")) if limit else None, partial=partial)
+    return None
 
 
 # [maint-note:bebf4d24eee3]
@@ -107,35 +142,78 @@ def _visible_reasoning(value: Any) -> str:
     return str(_field(value, "reasoning", "") or _field(value, "reasoning_content", "") or "")
 
 
-# [maint-note:e20ccef43c0f]
-# 维护导航：_usage_numbers；下列为本函数源码中的接口与路径索引。
-# 输入 usage：Any。
-# 返回契约：tuple[int, int, int, int]。
-# 返回路径：int(_field(usage, name, 0) or 0)。
-# 返回路径：(prompt, completion, hit, miss)。
-# 直接调用：int。
-# 直接调用：_field。
-# 直接调用：number。
-# 直接调用：max。
-# [/maint-note:e20ccef43c0f]
-def _usage_numbers(usage: Any) -> tuple[int, int, int, int]:
-    # [maint-note:5c61e4c735f3]
-    # 维护导航：number；下列为本函数源码中的接口与路径索引。
-    # 输入 name：str。
-    # 返回契约：int。
-    # 返回路径：int(_field(usage, name, 0) or 0)。
-    # 直接调用：int。
-    # 直接调用：_field。
-    # [/maint-note:5c61e4c735f3]
-    def number(name: str) -> int:
-        return int(_field(usage, name, 0) or 0)
+# [maint-note:5c61e4c735f3]
+# 维护导航：_token_count；下列为本函数源码中的接口与路径索引。
+# 输入 value：Any。
+# 返回契约：int | None。
+# 分支条件：值为非负整数且不是布尔值。
+# 返回路径：符合条件的值或 None。
+# 直接调用：isinstance。
+# [/maint-note:5c61e4c735f3]
+def _token_count(value: Any) -> int | None:
+    if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+        return value
+    return None
 
-    prompt = number("prompt_tokens")
-    completion = number("completion_tokens")
+
+# [maint-note:e20ccef43c0f]
+# 维护导航：_usage_fields；下列为本函数源码中的接口与路径索引。
+# 输入 usage：Any。
+# 返回契约：dict[str, Any]。
+# 分支条件：优先读取供应商的顶层命中与未命中数，缺失时读取 cached_tokens。
+# 分支条件：用有效的输入总数补齐一个缺失计数，保留显式 0。
+# 返回路径：输入、输出、缓存数和 reported、partial、unreported 或 invalid 状态。
+# 直接调用：_field。
+# 直接调用：_token_count。
+# [/maint-note:e20ccef43c0f]
+def _usage_fields(usage: Any) -> dict[str, Any]:
+    raw_prompt = _field(usage, "prompt_tokens")
+    prompt = _token_count(raw_prompt)
     details = _field(usage, "prompt_tokens_details", {}) or {}
-    hit = number("prompt_cache_hit_tokens") or int(_field(details, "cached_tokens", 0) or 0)
-    miss = number("prompt_cache_miss_tokens") or max(0, prompt - hit)
-    return prompt, completion, hit, miss
+    raw_hit = _field(usage, "prompt_cache_hit_tokens")
+    raw_miss = _field(usage, "prompt_cache_miss_tokens")
+    if raw_hit is None and raw_miss is None:
+        raw_hit = _field(details, "cached_tokens")
+
+    hit = _token_count(raw_hit)
+    miss = _token_count(raw_miss)
+    status = "unreported"
+    if raw_hit is not None or raw_miss is not None:
+        if (
+            (raw_prompt is not None and prompt is None)
+            or (raw_hit is not None and hit is None)
+            or (raw_miss is not None and miss is None)
+        ):
+            status = "invalid"
+        elif hit is not None and miss is not None:
+            if prompt is None:
+                prompt = hit + miss
+            status = "reported" if hit + miss == prompt else "invalid"
+        elif prompt is None:
+            status = "partial"
+        elif (hit if hit is not None else miss or 0) > prompt:
+            status = "invalid"
+        else:
+            if hit is None:
+                hit = prompt - (miss or 0)
+            if miss is None:
+                miss = prompt - hit
+            status = "reported"
+
+    return {
+        "input_tokens": prompt or 0,
+        "output_tokens": _token_count(_field(usage, "completion_tokens")) or 0,
+        "prompt_cache_hit_tokens": (hit or 0) if status != "invalid" else 0,
+        "prompt_cache_miss_tokens": (miss or 0) if status != "invalid" else 0,
+        "prompt_cache_usage_status": status,
+    }
+
+
+def _route_label(value: Any, name: str) -> str | None:
+    label = _field(value, name)
+    if isinstance(label, str) and label.strip() and label.isprintable() and len(label) <= 128:
+        return label.strip()
+    return None
 
 
 # [maint-note:2d632614dc66]
@@ -234,6 +312,29 @@ _PROVIDER_DEFAULTS = {
         "safety_margin_tokens": 512,
     },
 }
+
+_DEEPSEEK_RECALL_MODELS = frozenset({
+    "deepseek-v4-pro",
+    "deepseek-flash",
+    "deepseek-v4-flash",
+    "deepseek-v4-flash-vision-exp",
+})
+
+
+def _supports_deepseek_recall(config: RuntimeModelConfig) -> bool:
+    if config.provider != "deepseek" or config.model not in _DEEPSEEK_RECALL_MODELS:
+        return False
+    try:
+        endpoint = urlsplit(config.base_url)
+    except ValueError:
+        return False
+    return (
+        endpoint.scheme == "https"
+        and endpoint.netloc.lower() in {"api.deepseek.com", "api.deepseek.com:443"}
+        and endpoint.path in {"", "/", "/v1", "/v1/"}
+        and not endpoint.query
+        and not endpoint.fragment
+    )
 
 
 # [maint-note:359a339d691e]
@@ -679,20 +780,23 @@ class OpenAICompatibleGateway(ModelGateway):
     # [maint-note:d62ffa343317]
     # 维护导航：generate；下列为本函数源码中的接口与路径索引。
     # 输入 request：ModelRequest。
+    # 输入 non_thinking_recall：bool；缺省表达式 False。
     # 返回契约：ModelResponse。
     # 分支条件：not key。
     # 分支条件：request.response_format is not None。
     # 分支条件：request_extra_body and (not isinstance(request_extra_body, dict))。
+    # 分支条件：non_thinking_recall。
     # 分支条件：extra_body。
     # 分支条件：timeout is not None。
     # 分支条件：not self.use_request_api_key。
     # 分支条件：not self.use_request_api_key or timeout is not None。
-    # 返回路径：ModelResponse(content=message.content or '', tool_calls=_parsed_tool_calls(message.tool_calls), input_tokens=prompt, output_tokens=completion, prompt_cache_hit_tokens=hit, prompt_cache_miss_tokens=miss, model=getattr(response, 'model', None。
+    # 返回路径：ModelResponse 包含消息、结构化工具调用、供应商路由标签和用量字段。
     # 显式抛出：ValueError('No API key configured for the model gateway')。
     # 显式抛出：ValueError('request extra_body must be an object')。
     # 显式抛出：继续抛出当前异常。
     # 捕获异常：Exception。
     # 写入目标：options['response_format']。
+    # 写入目标：extra_body['thinking'] 与 options['temperature']。
     # 写入目标：options['extra_body']。
     # 写入目标：client_options['http_client']。
     # 直接调用：str(request.metadata.get('api_key') or '').strip。
@@ -709,10 +813,11 @@ class OpenAICompatibleGateway(ModelGateway):
     # 直接调用：client.chat.completions.create。
     # 直接调用：self.serializer.serialize_messages。
     # 直接调用：client.close。
-    # 直接调用：_usage_numbers。
+    # 直接调用：_provider_context_overflow。
+    # 直接调用：_usage_fields。
     # 直接调用：ModelResponse。
     # 直接调用：_parsed_tool_calls。
-    # 直接调用：getattr。
+    # 直接调用：_route_label。
     # 直接调用：_visible_reasoning。
     # 直接调用：_reasoning_details。
     # 表达式分流：self.use_request_api_key；真值与假值分支分别计算，不同时执行。
@@ -721,7 +826,7 @@ class OpenAICompatibleGateway(ModelGateway):
     # 清理边界：本函数含 finally；正常返回和异常展开都经过清理块。
     # 表达式分流：serialized_tools；真值与假值分支分别计算，不同时执行。
     # [/maint-note:d62ffa343317]
-    def generate(self, request: ModelRequest) -> ModelResponse:
+    def generate(self, request: ModelRequest, *, non_thinking_recall: bool = False) -> ModelResponse:
         from openai import OpenAI
 
         key = (
@@ -745,6 +850,10 @@ class OpenAICompatibleGateway(ModelGateway):
         if request_extra_body and not isinstance(request_extra_body, dict):
             raise ValueError("request extra_body must be an object")
         extra_body = {**self.extra_body, **request_extra_body}
+        if non_thinking_recall:
+            extra_body["thinking"] = {"type": "disabled"}
+            extra_body.pop("temperature", None)
+            options["temperature"] = 0
         if extra_body:
             options["extra_body"] = extra_body
         client_options: dict[str, Any] = {"api_key": key, "base_url": self.base_url,
@@ -770,21 +879,24 @@ class OpenAICompatibleGateway(ModelGateway):
                 max_tokens=request.max_output_tokens,
                 **options,
             )
+        except Exception as exc:
+            if overflow := _provider_context_overflow(exc):
+                raise overflow from exc
+            raise
         finally:
             if not self.use_request_api_key or timeout is not None:
                 client.close()
         message = response.choices[0].message
-        prompt, completion, hit, miss = _usage_numbers(response.usage)
+        served_model = _route_label(response, "model")
         return ModelResponse(
             content=message.content or "",
             tool_calls=_parsed_tool_calls(message.tool_calls),
-            input_tokens=prompt,
-            output_tokens=completion,
-            prompt_cache_hit_tokens=hit,
-            prompt_cache_miss_tokens=miss,
-            model=getattr(response, "model", None) or self.model,
+            model=served_model or self.model,
             reasoning=_visible_reasoning(message),
             reasoning_details=_reasoning_details(message),
+            served_model=served_model,
+            served_provider=_route_label(response, "provider"),
+            **_usage_fields(response.usage),
         )
 
     # [maint-note:8d726e70b4b1]
@@ -795,7 +907,9 @@ class OpenAICompatibleGateway(ModelGateway):
     # 分支条件：request.response_format is not None。
     # 分支条件：request_extra_body and (not isinstance(request_extra_body, dict))。
     # 分支条件：extra_body。
+    # 分支条件：timeout is not None；按剩余预算设置客户端超时。
     # 分支条件：not self.use_request_api_key。
+    # 分支条件：deadline is not None and time.monotonic() >= deadline。
     # 分支条件：delta is None。
     # 分支条件：raw_details。
     # 分支条件：not visible。
@@ -840,7 +954,9 @@ class OpenAICompatibleGateway(ModelGateway):
     # 直接调用：tool_parts.setdefault。
     # 直接调用：sorted。
     # 直接调用：tool_parts.items。
-    # 直接调用：_usage_numbers。
+    # 直接调用：_provider_context_overflow。
+    # 直接调用：_usage_fields。
+    # 直接调用：_route_label。
     # 直接调用：ModelResponse。
     # 直接调用：_parsed_tool_calls。
     # 表达式分流：self.use_request_api_key；真值与假值分支分别计算，不同时执行。
@@ -852,7 +968,7 @@ class OpenAICompatibleGateway(ModelGateway):
     # 生成器交付：ModelStreamEvent('reasoning', visible)。
     # 生成器交付：ModelStreamEvent('content', str(part))。
     # 集合派生：(_, part) 来自 sorted(tool_parts.items())。
-    # 生成器交付：ModelStreamEvent('completed', response=ModelResponse(content=''.join(content), reasoning=''.join(reasoning), reasoning_details=[item for item in details if item], tool_calls=_parsed_tool_calls(raw_calls), input_tokens=prompt, output_tokens=。
+    # 生成器交付：completed 事件携带已汇总的消息、工具调用、路由标签和用量字段。
     # 集合派生：item 来自 details；过滤 item。
     # [/maint-note:8d726e70b4b1]
     def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
@@ -881,6 +997,11 @@ class OpenAICompatibleGateway(ModelGateway):
             options["extra_body"] = extra_body
         client_options: dict[str, Any] = {"api_key": key, "base_url": self.base_url,
             "default_headers": self.default_headers or None}
+        timeout = request.metadata.get("timeout_seconds")
+        deadline = None
+        if timeout is not None:
+            client_options.update(timeout=timeout, max_retries=0)
+            deadline = time.monotonic() + timeout
         if not self.use_request_api_key:
             import httpx
             client_options["http_client"] = httpx.Client(trust_env=False)
@@ -901,20 +1022,26 @@ class OpenAICompatibleGateway(ModelGateway):
                 stream_options={"include_usage": True},
                 **options,
             )
-        except Exception:
-            if not self.use_request_api_key:
+        except Exception as exc:
+            if not self.use_request_api_key or timeout is not None:
                 client.close()
+            if overflow := _provider_context_overflow(exc):
+                raise overflow from exc
             raise
         content: list[str] = []
         reasoning: list[str] = []
         details: list[dict[str, Any]] = []
         tool_parts: dict[int, dict[str, Any]] = {}
         usage = None
-        model = self.model
+        served_model = None
+        served_provider = None
         try:
             for chunk in chunks:
+                if deadline is not None and time.monotonic() >= deadline:
+                    raise TimeoutError("The model stream exceeded the request time budget.")
                 usage = _field(chunk, "usage") or usage
-                model = _field(chunk, "model") or model
+                served_model = _route_label(chunk, "model") or served_model
+                served_provider = _route_label(chunk, "provider") or served_provider
                 for choice in _field(chunk, "choices", []) or []:
                     delta = _field(choice, "delta")
                     if delta is None:
@@ -942,24 +1069,28 @@ class OpenAICompatibleGateway(ModelGateway):
                         function = _field(raw_call, "function", {}) or {}
                         current["name"] += str(_field(function, "name", "") or "")
                         current["arguments"] += str(_field(function, "arguments", "") or "")
+        except Exception as exc:
+            if overflow := _provider_context_overflow(
+                exc, partial=bool(content or reasoning or details or tool_parts)
+            ):
+                raise overflow from exc
+            raise
         finally:
-            if not self.use_request_api_key:
+            if not self.use_request_api_key or timeout is not None:
                 client.close()
         raw_calls = [
             {"id": part["id"], "function": {"name": part["name"], "arguments": part["arguments"]}}
             for _, part in sorted(tool_parts.items())
         ]
-        prompt, completion, hit, miss = _usage_numbers(usage)
         yield ModelStreamEvent("completed", response=ModelResponse(
             content="".join(content),
             reasoning="".join(reasoning),
             reasoning_details=[item for item in details if item],
             tool_calls=_parsed_tool_calls(raw_calls),
-            input_tokens=prompt,
-            output_tokens=completion,
-            prompt_cache_hit_tokens=hit,
-            prompt_cache_miss_tokens=miss,
-            model=model,
+            model=served_model or self.model,
+            served_model=served_model,
+            served_provider=served_provider,
+            **_usage_fields(usage),
         ))
 
 
@@ -1001,6 +1132,7 @@ class RoutedModelGateway(ModelGateway):
     # 直接调用：os.environ.get('OPENROUTER_APP_TITLE', 'NaturalCC Agent').strip。
     # 直接调用：OpenAICompatibleGateway。
     # 直接调用：config.openrouter_extra_body。
+    # 直接调用：_supports_deepseek_recall。
     # 直接调用：gateway.generate。
     # 表达式分流：config.provider == 'ollama'；真值与假值分支分别计算，不同时执行。
     # [/maint-note:f365a6855f02]
@@ -1027,7 +1159,12 @@ class RoutedModelGateway(ModelGateway):
             extra_body=config.openrouter_extra_body(),
             default_headers=headers,
         )
-        response = gateway.generate(request)
+        response = gateway.generate(
+            request,
+            non_thinking_recall=(
+                request.purpose == "memory_recall" and _supports_deepseek_recall(config)
+            ),
+        )
         # OpenRouter may resolve a fallback model. Preserve the provider-reported
         # model whenever the SDK exposes it, otherwise retain the configured one.
         return response

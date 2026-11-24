@@ -340,18 +340,25 @@ class ToolRegistry:
         spec = self._specs.get(canonical_name)
         if spec is None:
             return ToolResult.failure(f"unknown tool: {name}", "UnknownTool")
+        return self.execute_spec(spec, arguments, context)
+
+    @staticmethod
+    def execute_spec(spec: ToolSpec, arguments: dict[str, Any], context: ToolContext) -> ToolResult:
         if spec.approval_required and spec.risk_level not in context.approved_risks:
             return ToolResult.failure(
-                f"approval required for {spec.risk_level.value} tool: {canonical_name}",
+                f"approval required for {spec.risk_level.value} tool: {spec.name}",
                 "ApprovalRequired",
             )
         if context.cancellation.is_set():
             return ToolResult("cancelled", "run cancelled before tool execution")
         try:
-            validate_arguments(arguments, spec.input_schema)
+            if spec.validate_input is None:
+                validate_arguments(arguments, spec.input_schema)
+            else:
+                spec.validate_input(arguments)
             result = spec.execute(context, arguments)
         except Exception as exc:
-            return ToolResult.failure(str(exc), type(exc).__name__)
+            result = ToolResult.failure(str(exc), type(exc).__name__)
         result.summary = redact_sensitive_text(result.summary)
         result.data = redact_sensitive_value(result.data)
         if result.error:
@@ -386,6 +393,7 @@ def build_default_registry(include_mutating: bool = True) -> ToolRegistry:
     from .tools.naturalcc import naturalcc_tool_specs
     from .tools.workspace import workspace_tool_specs
     from .tools.pipeline import pipeline_tool_specs
+    from .tool_results import tool_result_read_spec
 
     registry = ToolRegistry()
     for spec in [
@@ -393,6 +401,7 @@ def build_default_registry(include_mutating: bool = True) -> ToolRegistry:
         *naturalcc_tool_specs(),
         *codegraph_tool_specs(),
         *pipeline_tool_specs(include_mutating),
+        tool_result_read_spec(),
     ]:
         registry.register(spec)
     if include_mutating:

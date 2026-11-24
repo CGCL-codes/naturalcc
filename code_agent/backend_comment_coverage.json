@@ -11,14 +11,14 @@
   "method": "Count each line containing a Python COMMENT token once, including inline comments. Docstrings and all other string literals are excluded. Aggregate across the entire inventory; not a per-file threshold.",
   "formula": "comment_lines / nonblank_lines * 100",
   "threshold_percent_exclusive": 20,
-  "file_count": 91,
+  "file_count": 95,
   "totals": {
-    "physical_lines": 49070,
-    "nonblank_lines": 45450,
-    "comment_lines": 19111
+    "physical_lines": 51099,
+    "nonblank_lines": 47293,
+    "comment_lines": 19126
   },
-  "comment_percent": 42.0484,
-  "comment_percent_including_blank_lines": 38.9464,
+  "comment_percent": 40.4415,
+  "comment_percent_including_blank_lines": 37.4293,
   "passes": true,
   "files": [
     {
@@ -37,9 +37,9 @@
     },
     {
       "path": "agent_core/compaction.py",
-      "sha256": "50a99e40a3cc62fe72899063a83f3d6d2169e9c42e50ac787d7b4b5ce24bd6d9",
-      "physical_lines": 2110,
-      "nonblank_lines": 2041,
+      "sha256": "d30696ec571da3f5bdfad49a77e2e2e0344456f71e5a28a33d6721db36644dfc",
+      "physical_lines": 2126,
+      "nonblank_lines": 2056,
       "comment_lines": 678
     },
     {
@@ -51,17 +51,17 @@
     },
     {
       "path": "agent_core/context_builder.py",
-      "sha256": "8b742c2019dc74d46bd873baacda30c3399ae5f911667bda85d0d92214d8c732",
-      "physical_lines": 830,
-      "nonblank_lines": 797,
+      "sha256": "d351a09be3b44f094a0934992653655212d5c46befb161b0ad3ce4a604a4c20c",
+      "physical_lines": 863,
+      "nonblank_lines": 827,
       "comment_lines": 278
     },
     {
       "path": "agent_core/contracts.py",
-      "sha256": "fcbf23ca02b0de04df6a1fb1e8fe6ad21857267122a933e1e88e957056d24298",
-      "physical_lines": 439,
-      "nonblank_lines": 398,
-      "comment_lines": 212
+      "sha256": "56f1e72ad637846c15dcca27a0c3f441b09aa34b4113bb44452f89faa7d8c5c3",
+      "physical_lines": 444,
+      "nonblank_lines": 403,
+      "comment_lines": 213
     },
     {
       "path": "agent_core/evaluation.py",
@@ -78,6 +78,20 @@
       "comment_lines": 836
     },
     {
+      "path": "agent_core/mcp_service.py",
+      "sha256": "0494e7e04ede18c38d85163ff28149806f57c7cf04ea6589e1abcd659dd93c35",
+      "physical_lines": 608,
+      "nonblank_lines": 537,
+      "comment_lines": 2
+    },
+    {
+      "path": "agent_core/mcp_stdio.py",
+      "sha256": "8f0b9c6ad6e32ae1b654ae7d0b626b97ae2ee8886c25f9d0a2b64a5f2b4ba58d",
+      "physical_lines": 421,
+      "nonblank_lines": 382,
+      "comment_lines": 1
+    },
+    {
       "path": "agent_core/memory_projection.py",
       "sha256": "f1e16d81d2fc1c1e40c3dd89267f1b33f6420709135d5ef5729f0bac3744c98b",
       "physical_lines": 173,
@@ -86,9 +100,9 @@
     },
     {
       "path": "agent_core/memory_prompts.py",
-      "sha256": "b5da4e5885c698b1327d7c9cc73e72de38cdd8f914faf600ae9852c61826a13f",
-      "physical_lines": 371,
-      "nonblank_lines": 354,
+      "sha256": "906df0e201ea24f10f814e4fd83bfbc4e43eff9a0ed0dcb86b65675d493f9063",
+      "physical_lines": 376,
+      "nonblank_lines": 359,
       "comment_lines": 71
     },
     {
@@ -100,10 +114,10 @@
     },
     {
       "path": "agent_core/memory_store.py",
-      "sha256": "4862b0e5256cad1253392946b7e71a6b7b7b1bbb8dd4a1409c7ef05125bbdbb6",
-      "physical_lines": 1804,
-      "nonblank_lines": 1764,
-      "comment_lines": 645
+      "sha256": "f6fb2d50c1eb152bd93d2d9c17cd94eb4f0bfe51754d183270d909d080c7fe69",
+      "physical_lines": 1910,
+      "nonblank_lines": 1861,
+      "comment_lines": 647
     },
     {
       "path": "agent_core/memory_tool_recovery.py",
@@ -114,10 +128,10 @@
     },
     {
       "path": "agent_core/model_gateway.py",
-      "sha256": "6436bd74df4134e7b0b778135af162be0cdf1b331b8c4db324a4e206ac6aaf25",
-      "physical_lines": 1133,
-      "nonblank_lines": 1081,
-      "comment_lines": 525
+      "sha256": "ed94c4847c24aeb29154d621d87b40a0ac222f914db12d21ab887e025fe2d652",
+      "physical_lines": 1270,
+      "nonblank_lines": 1205,
+      "comment_lines": 533
     },
     {
       "path": "agent_core/policy.py",
@@ -127,11 +141,18 @@
       "comment_lines": 65
     },
     {
+      "path": "agent_core/repository_instructions.py",
+      "sha256": "ddd088785d2de6319eebdf984497da81326e9280a6bed5fb2feea49452bdb8dc",
+      "physical_lines": 73,
+      "nonblank_lines": 65,
+      "comment_lines": 0
+    },
+    {
       "path": "agent_core/run_engine.py",
-      "sha256": "c2ec3e60840fdfb2b6b0adf6dc5e5b1acc6bea560f6d249da76f305685be1932",
-      "physical_lines": 3333,
-      "nonblank_lines": 3270,
-      "comment_lines": 1093
+      "sha256": "d5bfc42e6aa213b5cf3c6c409e0b9f1ffc804d49b6ff30e52d2328cd8902adc1",
+      "physical_lines": 3742,
+      "nonblank_lines": 3662,
+      "comment_lines": 1094
     },
     {
       "path": "agent_core/sqlite_migrations.py",
@@ -156,10 +177,17 @@
     },
     {
       "path": "agent_core/tool_registry.py",
-      "sha256": "a51daf97f80915594e81d670259b7e2c5ecbc8aefb68893cb45152fb918e7f25",
-      "physical_lines": 408,
-      "nonblank_lines": 381,
+      "sha256": "a166ccf0bf2272275bca5f4d2a1ec17e473864b06a69ad1e37e943cf33069006",
+      "physical_lines": 417,
+      "nonblank_lines": 389,
       "comment_lines": 212
+    },
+    {
+      "path": "agent_core/tool_results.py",
+      "sha256": "b7614c2347aa94486f2d395443efe914b580f0a365435ec02eec891116e5fd8d",
+      "physical_lines": 160,
+      "nonblank_lines": 140,
+      "comment_lines": 0
     },
     {
       "path": "agent_core/tools/__init__.py",
@@ -240,9 +268,9 @@
     },
     {
       "path": "api/agent_routes.py",
-      "sha256": "2d1507651e4fb082e1b3d238c7c91fd06ac768bf9a21742c5a1394787eb5d983",
-      "physical_lines": 2071,
-      "nonblank_lines": 1980,
+      "sha256": "ee60451c88a521aeef8cb48924050d9842481cfdb085005bb219a717e930af16",
+      "physical_lines": 2118,
+      "nonblank_lines": 2023,
       "comment_lines": 1098
     },
     {

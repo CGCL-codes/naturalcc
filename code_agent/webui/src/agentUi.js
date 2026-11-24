@@ -17,6 +17,25 @@ export function modelInputValue(model) {
   return typeof model === "string" ? model : "";
 }
 
+export function formatPromptCacheUsage(runState) {
+  const usage = runState?.prompt_cache_usage;
+  const agent = usage?.by_purpose?.agent;
+  if (!agent?.completed_calls) {
+    return "Not reported";
+  }
+  const scope = usage.legacy_calls_excluded ? " since tracking began" : "";
+  const coverage = `${agent.reported_calls}/${agent.completed_calls} calls reported${scope}`;
+  if (!agent.reported_calls) {
+    return `Not reported · ${coverage}`;
+  }
+  const hits = agent.hit_tokens;
+  const measured = hits + agent.miss_tokens;
+  if (!measured) {
+    return `No measured input tokens · ${coverage}`;
+  }
+  return `${hits.toLocaleString()} / ${measured.toLocaleString()} (${((hits / measured) * 100).toFixed(1)}%) · ${coverage}`;
+}
+
 
 const TERMINAL_AGENT_STATUSES = new Set(["completed", "failed", "cancelled", "budget_exhausted"]);
 

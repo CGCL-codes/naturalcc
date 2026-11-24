@@ -5,11 +5,29 @@ import {
   buildCreateRunPayload,
   buildAgentRunMessage,
   canControlAgentRun,
+  formatPromptCacheUsage,
   formatToolCall,
   hasAgentRuntimeContent,
   modelInputValue,
   shouldAppendUserMessage
 } from "./agentUi.js";
+
+test("prompt cache display separates unknown, zero hits and partial coverage", () => {
+  assert.equal(formatPromptCacheUsage({ prompt_cache_miss_tokens: 100 }), "Not reported");
+
+  const run = { prompt_cache_usage: { by_purpose: {
+    agent: { completed_calls: 2, reported_calls: 0, hit_tokens: 0, miss_tokens: 0 },
+    memory_recall: { completed_calls: 1, reported_calls: 1, hit_tokens: 50, miss_tokens: 0 }
+  } } };
+  assert.equal(formatPromptCacheUsage(run), "Not reported · 0/2 calls reported");
+
+  Object.assign(run.prompt_cache_usage.by_purpose.agent, { reported_calls: 1, miss_tokens: 100 });
+  assert.equal(formatPromptCacheUsage(run), "0 / 100 (0.0%) · 1/2 calls reported");
+
+  run.prompt_cache_usage.legacy_calls_excluded = true;
+  Object.assign(run.prompt_cache_usage.by_purpose.agent, { hit_tokens: 60, miss_tokens: 40 });
+  assert.equal(formatPromptCacheUsage(run), "60 / 100 (60.0%) · 1/2 calls reported since tracking began");
+});
 
 
 test("approval message includes risk, tool name and command arguments", () => {
@@ -42,6 +60,12 @@ test("generic tool calls show structured arguments", () => {
 
   assert.match(text, /Tool: workspace\.read/);
   assert.match(text, /"path": "README\.md"/);
+});
+
+test("external tool approval keeps the qualified name and arguments", () => {
+  const text = formatToolCall({ name: "mcp__notes__search", args: { query: "architecture" } });
+  assert.match(text, /Tool: mcp__notes__search/);
+  assert.match(text, /"query": "architecture"/);
 });
 
 
