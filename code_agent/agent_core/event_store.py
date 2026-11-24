@@ -1231,25 +1231,68 @@ class EventStore:
                 if existing is not None:
                     connection.rollback()
                     return self._row_to_event(existing)
-            row = connection.execute("SELECT version, status FROM runs WHERE id=?", (run_id,)).fetchone()
-            if row is None:
-                connection.rollback()
-                raise KeyError(f"unknown run: {run_id}")
-            version = int(row["version"])
-            if expected_version is not None and version != expected_version:
-                connection.rollback()
-                raise VersionConflict(f"expected version {expected_version}, found {version}")
-            sequence = version + 1
-            timestamp = now_iso()
-            connection.execute(
-                "INSERT INTO events(run_id, sequence, type, payload_json, idempotency_key, created_at) VALUES(?,?,?,?,?,?)",
-                (run_id, sequence, event_type, json.dumps(payload, ensure_ascii=False), idempotency_key, timestamp),
-            )
-            connection.execute(
-                "UPDATE runs SET version=?, status=?, updated_at=? WHERE id=?",
-                (sequence, status or row["status"], timestamp, run_id),
+            event = self._append_run_event(
+                connection, run_id, event_type, payload,
+                expected_version=expected_version, idempotency_key=idempotency_key, status=status,
             )
             connection.commit()
+        return event
+
+    def append_event_and_snapshot(
+        self,
+        run_id: str,
+        state: dict[str, Any],
+        event_type: str,
+        payload: dict[str, Any],
+        *,
+        status: str,
+    ) -> AgentEvent:
+        """Publish a Run event and its new snapshot in the same transaction."""
+        if state.get("run_id", run_id) != run_id:
+            raise ValueError("snapshot belongs to a different run")
+        expected_version = state.get("version")
+        if type(expected_version) is not int or expected_version < 0:
+            raise ValueError("snapshot must have a nonnegative version")
+        if not isinstance(status, str) or not status:
+            raise ValueError("snapshot must have a run status")
+        with self._connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            event = self._append_run_event(
+                connection, run_id, event_type, payload, expected_version=expected_version, status=status,
+            )
+            next_state = {**state, "version": event.sequence, "status": status}
+            self._write_snapshot(connection, run_id, next_state, event.sequence, event.created_at)
+            connection.commit()
+        state.update(version=event.sequence, status=status)
+        return event
+
+    @staticmethod
+    def _append_run_event(
+        connection: sqlite3.Connection,
+        run_id: str,
+        event_type: str,
+        payload: dict[str, Any],
+        *,
+        expected_version: int | None,
+        idempotency_key: str | None = None,
+        status: str | None,
+    ) -> AgentEvent:
+        row = connection.execute("SELECT version, status FROM runs WHERE id=?", (run_id,)).fetchone()
+        if row is None:
+            raise KeyError(f"unknown run: {run_id}")
+        version = int(row["version"])
+        if expected_version is not None and version != expected_version:
+            raise VersionConflict(f"expected version {expected_version}, found {version}")
+        sequence = version + 1
+        timestamp = now_iso()
+        connection.execute(
+            "INSERT INTO events(run_id, sequence, type, payload_json, idempotency_key, created_at) VALUES(?,?,?,?,?,?)",
+            (run_id, sequence, event_type, json.dumps(payload, ensure_ascii=False), idempotency_key, timestamp),
+        )
+        connection.execute(
+            "UPDATE runs SET version=?, status=?, updated_at=? WHERE id=?",
+            (sequence, status or row["status"], timestamp, run_id),
+        )
         return AgentEvent(run_id, sequence, event_type, payload, timestamp, idempotency_key)
 
     # [maint-note:dd9ba511b6d7]
@@ -1324,14 +1367,24 @@ class EventStore:
                 connection.rollback()
                 found = None if row is None else int(row["version"])
                 raise VersionConflict(f"expected version {expected_version}, found {found}")
-            connection.execute(
-                """
-                INSERT INTO snapshots(run_id, version, state_json, updated_at) VALUES(?,?,?,?)
-                ON CONFLICT(run_id) DO UPDATE SET version=excluded.version, state_json=excluded.state_json, updated_at=excluded.updated_at
-                """,
-                (run_id, expected_version, json.dumps(state, ensure_ascii=False), now_iso()),
-            )
+            self._write_snapshot(connection, run_id, state, expected_version, now_iso())
             connection.commit()
+
+    @staticmethod
+    def _write_snapshot(
+        connection: sqlite3.Connection,
+        run_id: str,
+        state: dict[str, Any],
+        version: int,
+        timestamp: str,
+    ) -> None:
+        connection.execute(
+            """
+            INSERT INTO snapshots(run_id, version, state_json, updated_at) VALUES(?,?,?,?)
+            ON CONFLICT(run_id) DO UPDATE SET version=excluded.version, state_json=excluded.state_json, updated_at=excluded.updated_at
+            """,
+            (run_id, version, json.dumps(state, ensure_ascii=False), timestamp),
+        )
 
     # [maint-note:412bce9ddf09]
     # 维护导航：load_snapshot；下列为本函数源码中的接口与路径索引。

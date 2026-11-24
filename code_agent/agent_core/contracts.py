@@ -40,6 +40,7 @@ class RunStatus(str, Enum):
     QUEUED = "queued"
     RUNNING = "running"
     WAITING_APPROVAL = "waiting_approval"
+    WAITING_INPUT = "waiting_input"
     PAUSED = "paused"
     COMPLETED = "completed"
     FAILED = "failed"

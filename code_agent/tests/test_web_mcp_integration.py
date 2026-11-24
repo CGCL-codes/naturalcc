@@ -85,7 +85,10 @@ def test_real_web_router_lists_calls_and_reads_mcp_with_exact_approval(tmp_path,
             ModelResponse(content="Read the authorized resource."),
         ])
 
-        assert client.post(f"{run}/reject").status_code == 200
+        stale_reject = client.post(f"{run}/reject", json={"tool_call_id": "docs-read"})
+        assert stale_reject.status_code == 409
+        assert client.get(run).json()["pending_approval"]["tool_call"]["id"] == "reject"
+        assert client.post(f"{run}/reject", json={"tool_call_id": "reject"}).status_code == 200
         state = client.post(f"{run}/run").json()
         assert state["pending_approval"]["risk"] == "network"
         assert client.post(f"{run}/approve", json={"risk": "network", "tool_call_id": "wrong"}).status_code == 409
@@ -114,6 +117,8 @@ def test_mcp_disconnect_invalidates_old_approval_and_does_not_replay(tmp_path, m
         old_run = _create(client, tmp_path)
         assert client.post(f"{old_run}/run").json()["status"] == "waiting_approval"
         assert client.post(f"{server}/disconnect").json()["server"]["status"] == "disconnected"
+        revoked = client.get(old_run).json()["pending_approval"]
+        assert revoked["status"] == "revoked" and revoked["scope"] == "call"
         assert client.post(f"{server}/connect").json()["server"]["status"] == "connected"
         assert client.post(f"{old_run}/approve", json={"risk": "execute", "tool_call_id": "old"}).status_code == 409
         assert client.post(f"{old_run}/reject").status_code == 200
@@ -127,7 +132,18 @@ def test_mcp_disconnect_invalidates_old_approval_and_does_not_replay(tmp_path, m
         assert state["status"] == "paused"
         assert _result(state, "drop")["status"] == "uncertain"
         assert client.get("/api/agent/mcp/servers").json()["servers"][0]["tools"] == []
-        assert client.post(f"{run}/resume").status_code == 200
+        assert client.post(f"{run}/resume").status_code == 409
+        pending_uncertain = state["pending_uncertain_tool"]
+        resolution = {
+            "tool_call_id": "drop", "expected_version": pending_uncertain["version"],
+            "outcome": "unknown", "note": "The external service outcome could not be verified.",
+        }
+        assert client.post(f"{run}/uncertain/resolve", json={**resolution, "tool_call_id": "old"}).status_code == 409
+        assert client.post(f"{run}/uncertain/resolve", json={**resolution, "outcome": "retry"}).status_code == 422
+        assert client.post(f"{run}/uncertain/resolve", json={**resolution, "note": "x" * 2_001}).status_code == 422
+        resolved = client.post(f"{run}/uncertain/resolve", json=resolution)
+        assert resolved.status_code == 200, resolved.text
+        assert not resolved.json().get("pending_uncertain_tool")
         assert client.post(f"{run}/run").json()["status"] == "completed"
         assert [entry["params"]["arguments"]["note"] for entry in _ledger(tmp_path, "notes")] == ["once"]
 

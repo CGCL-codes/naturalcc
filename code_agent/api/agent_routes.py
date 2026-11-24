@@ -8,17 +8,18 @@ import logging
 import os
 import sqlite3
 from pathlib import Path
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Literal
 
 import psutil
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import FileResponse, StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StrictBool, StrictStr
 
 from code_agent.agent_core.contracts import RiskLevel, RunBudget
 from code_agent.agent_core.compaction import CompactionService
 from code_agent.agent_core.context_builder import ContextPlanner
 from code_agent.agent_core.event_store import EventStore, ThreadActiveConflict, VersionConflict
+from code_agent.agent_core.human_input import HumanInputValidationError
 from code_agent.agent_core.memory_proposals import (
     AutoMemoryWorker,
     MemoryProposalGenerationError,
@@ -358,6 +359,29 @@ class BudgetPatchRequest(BaseModel):
 class ApprovalRequest(BaseModel):
     risk: RiskLevel
     tool_call_id: str | None = None
+
+
+class RejectionRequest(BaseModel):
+    tool_call_id: StrictStr | None = Field(default=None, min_length=1)
+
+
+class RunContinuationRequest(BaseModel):
+    api_key: StrictStr | None = None
+
+
+class HumanInputAnswerRequest(BaseModel):
+    request_id: StrictStr = Field(min_length=1, max_length=128)
+    expected_version: int = Field(ge=0, strict=True)
+    answer: StrictStr | StrictBool
+    api_key: StrictStr | None = None
+
+
+class UncertainToolResolutionRequest(BaseModel):
+    tool_call_id: StrictStr = Field(min_length=1)
+    expected_version: int = Field(ge=0, strict=True)
+    outcome: Literal["completed", "failed", "unknown"]
+    note: StrictStr | None = Field(default=None, max_length=2_000)
+    api_key: StrictStr | None = None
 
 
 # [maint-note:24ba3027434b]
@@ -1394,11 +1418,39 @@ def create_agent_router(
     # 等待边界：asyncio.to_thread(engine.run, run_id)；异常在此 await 返回给当前协程。
     # [/maint-note:ab0f93f90b13]
     @router.post("/runs/{run_id}/run")
-    async def run_until_pause(run_id: str) -> dict[str, Any]:
+    async def run_until_pause(run_id: str, request: RunContinuationRequest | None = None) -> dict[str, Any]:
         try:
+            if request is not None and request.api_key is not None:
+                return await asyncio.to_thread(engine.run, run_id, api_key=request.api_key)
             return await asyncio.to_thread(engine.run, run_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except (ValueError, VersionConflict) as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @router.get("/runs/{run_id}/input")
+    async def get_run_input(run_id: str) -> dict[str, Any]:
+        try:
+            state = await asyncio.to_thread(engine.get_state, run_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except (ValueError, VersionConflict) as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+        status = state["status"]
+        return {"status": status, "request": state.get("pending_user_input") if status == "waiting_input" else None}
+
+    @router.post("/runs/{run_id}/input")
+    async def answer_run_input(run_id: str, request: HumanInputAnswerRequest) -> dict[str, Any]:
+        try:
+            request_options = {"api_key": request.api_key} if request.api_key is not None else {}
+            return await asyncio.to_thread(
+                engine.answer_user_input, run_id, request.request_id, request.expected_version, request.answer,
+                **request_options,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except HumanInputValidationError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
         except (ValueError, VersionConflict) as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
 
@@ -1443,12 +1495,14 @@ def create_agent_router(
     # 等待边界：asyncio.to_thread(engine.reject, run_id)；异常在此 await 返回给当前协程。
     # [/maint-note:1448848d5b12]
     @router.post("/runs/{run_id}/reject")
-    async def reject_run(run_id: str) -> dict[str, Any]:
+    async def reject_run(run_id: str, request: RejectionRequest | None = None) -> dict[str, Any]:
         try:
+            if request is not None and request.tool_call_id is not None:
+                return await asyncio.to_thread(engine.reject, run_id, request.tool_call_id)
             return await asyncio.to_thread(engine.reject, run_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
+        except (ValueError, VersionConflict) as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     # [maint-note:3ad5c8a05fbf]
@@ -1472,7 +1526,7 @@ def create_agent_router(
             return await asyncio.to_thread(engine.pause, run_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
+        except (ValueError, VersionConflict) as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     # [maint-note:b98bcd1c8c2e]
@@ -1496,7 +1550,22 @@ def create_agent_router(
             return await asyncio.to_thread(engine.resume, run_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
+        except (ValueError, VersionConflict) as exc:
+            raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    @router.post("/runs/{run_id}/uncertain/resolve")
+    async def resolve_uncertain_tool(run_id: str, request: UncertainToolResolutionRequest) -> dict[str, Any]:
+        try:
+            request_options = {"api_key": request.api_key} if request.api_key is not None else {}
+            return await asyncio.to_thread(
+                engine.resolve_uncertain_tool, run_id, request.tool_call_id,
+                request.expected_version, request.outcome, request.note, **request_options,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except HumanInputValidationError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except (ValueError, VersionConflict) as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     # [maint-note:912bbd4a684e]
@@ -1520,7 +1589,7 @@ def create_agent_router(
             return await asyncio.to_thread(engine.cancel, run_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except ValueError as exc:
+        except (ValueError, VersionConflict) as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     # [maint-note:7a0a1b136ad8]
@@ -1623,7 +1692,7 @@ def create_agent_router(
         # 维护导航：generate；下列为本函数源码中的接口与路径索引。
         # 返回契约：AsyncIterator[str]。
         # 异步边界：调用方需等待协程；异常沿 await 链传播或被上层捕获。
-        # 分支条件：run['status'] in {'completed', 'failed', 'cancelled', 'budget_exhausted', 'waiting_approval', 'paused'}。
+        # 分支条件：run['status'] in {'completed', 'failed', 'cancelled', 'budget_exhausted', 'waiting_approval', 'waiting_input', 'paused'}。
         # 分支条件：now - last_heartbeat >= 10。
         # 遍历边界：not await request.is_disconnected()。
         # 遍历边界：event ← events。
@@ -1645,12 +1714,14 @@ def create_agent_router(
             cursor = after
             last_heartbeat = asyncio.get_running_loop().time()
             while not await request.is_disconnected():
+                run = await asyncio.to_thread(engine.store.get_run, run_id)
                 events = await asyncio.to_thread(engine.store.list_events, run_id, cursor)
                 for event in events:
                     cursor = event.sequence
                     yield json.dumps(event.to_dict(), ensure_ascii=False) + "\n"
-                run = await asyncio.to_thread(engine.store.get_run, run_id)
-                if run["status"] in {"completed", "failed", "cancelled", "budget_exhausted", "waiting_approval", "paused"}:
+                if run["status"] in {
+                    "completed", "failed", "cancelled", "budget_exhausted", "waiting_approval", "waiting_input", "paused",
+                }:
                     break
                 now = asyncio.get_running_loop().time()
                 if now - last_heartbeat >= 10:
@@ -2110,6 +2181,7 @@ def build_default_agent_router() -> APIRouter:
         compaction_service=compaction_service,
         default_runtime_model_config=context_runtime.default_model_config,
         mcp_service=mcp_service,
+        enable_user_input=True,
     )
     return create_agent_router(
         engine, memory,

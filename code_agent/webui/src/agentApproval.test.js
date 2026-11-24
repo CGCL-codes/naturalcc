@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { approveAgentAction, approvalErrorMessage } from "./agentApproval.js";
+import { approveAgentAction, approvalErrorMessage, rejectAgentAction } from "./agentApproval.js";
 
 const approval = { risk: "write", tool_call: { id: "mkdir-1", name: "workspace.create_directory" } };
 
@@ -19,7 +19,9 @@ test("changed approval and terminal runs cannot be approved from old UI state", 
   for (const snapshot of [
     { status: "completed", pending_approval: null },
     { status: "waiting_approval", pending_approval: { ...approval, tool_call: { id: "different" } } },
-    { status: "waiting_approval", pending_approval: { ...approval, risk: "execute" } }
+    { status: "waiting_approval", pending_approval: { ...approval, risk: "execute" } },
+    { status: "waiting_approval", pending_approval: { ...approval, status: "expired" } },
+    { status: "waiting_approval", pending_approval: { ...approval, status: "revoked" } }
   ]) {
     let calls = 0;
     await assert.rejects(approveAgentAction(async () => {
@@ -39,4 +41,14 @@ test("approval is bound to the verified pending tool call", async () => {
   assert.equal(result.status, "running");
   assert.equal(calls[1].path, "/api/agent/runs/run-1/approve");
   assert.deepEqual(JSON.parse(calls[1].options.body), { risk: "write", tool_call_id: "mkdir-1" });
+});
+
+test("rejection sends the verified pending tool call ID without granting risk", async () => {
+  const calls = [];
+  await rejectAgentAction(async (path, options) => {
+    calls.push({ path, options });
+    return options ? { status: "running" } : { status: "waiting_approval", pending_approval: approval };
+  }, "run-1", approval);
+  assert.equal(calls[1].path, "/api/agent/runs/run-1/reject");
+  assert.deepEqual(JSON.parse(calls[1].options.body), { tool_call_id: "mkdir-1" });
 });

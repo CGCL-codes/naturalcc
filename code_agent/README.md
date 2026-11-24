@@ -206,8 +206,8 @@ In the UI, open **Settings -> Knowledge graph**:
 3. Type `@filename` in the composer to search workspace files, or paste an absolute path and choose **Add context**. Explicit external paths are marked as read/write context.
 4. Use **Budget** to set LLM-call and tool-call limits. The header meters show current usage; an active limit cannot be lowered below usage.
 5. Send instructions normally. Every user turn creates an auditable run while inheriting the committed ThreadCheckpoint and the continuous conversation tail after its watermark.
-6. Open **Run details** for approvals, pause/resume/cancel, events, changed files, verification, and governed project memories.
-7. Hover a history row and use its delete action to permanently remove the conversation and its run records. For queued, running, paused, or approval-waiting work, choose **Cancel task first** in the confirmation dialog, then confirm permanent deletion.
+6. Answer an Agent clarification in the conversation or **Run details** to continue the same Run. The details drawer also shows approvals, pause/resume/cancel controls, events, changed files, verification, and governed project memories.
+7. Hover a history row and use its delete action to permanently remove the conversation and its run records. For queued, running, paused, or waiting work, choose **Cancel task first** in the confirmation dialog, then confirm permanent deletion.
 8. Select **Pipeline** in the header to use the legacy NaturalCC prompt → Aider runtime.
 
 ## Using The CLI
@@ -505,6 +505,14 @@ The project now has two independent runtimes:
 - **Agent** uses a persisted state machine at `/api/agent/*`. It can choose read/search/NaturalCC tools, request approval for edits or commands, resume after a process restart, enforce budgets, record an auditable event stream, and create governed long-term-memory proposals from user-selected evidence.
 
 Conversation messages, run state, events, snapshots, approvals, and memories are stored in `outputs/agent_runtime.db` by default. Override it with `CODE_AGENT_DB`.
+
+### Human-in-the-loop
+
+The Web Agent uses `user_ask` when the model needs a required detail or decision. It can request text, a choice, or a yes/no answer. The question survives refresh and backend restart in `waiting_input`. The original Run resumes after the answer, and the time spent waiting is excluded from its execution budget.
+
+Clients can read `GET /api/agent/runs/{run_id}/input` and submit `request_id`, `expected_version`, and `answer` to the matching POST endpoint, then continue with `POST /api/agent/runs/{run_id}/run`. Both POST requests accept an optional provider `api_key` for a restarted backend. Identical answer retries are idempotent. Tool approvals remain separate and show their scope, expiration, and current status.
+
+When a tool's execution outcome is unknown, **Run details** asks the user to record what they observed before continuing. The runtime retains the uncertain result and does not replay the original call.
 
 ### Terminal provider and model selection
 

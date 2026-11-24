@@ -128,6 +128,7 @@ export function formatToolCall(toolCall) {
 // 输入 agentState：类型由调用方与函数体约束。
 // 分支条件：runState?.final_answer。
 // 分支条件：runState?.status === "waiting_approval"。
+// 分支条件：runState?.status === "waiting_input"。
 // 分支条件：runState?.status === "budget_exhausted"。
 // 分支条件：proposal。
 // 分支条件：runState?.status === "failed"。
@@ -163,6 +164,12 @@ export function buildAgentRunMessage(runState, agentState) {
       status: "waiting_approval",
       approval
     };
+  }
+  if (runState?.status === "waiting_input") {
+    return { content: "Waiting for your answer.", status: "waiting_input", approval: null };
+  }
+  if (runState?.status === "paused" && agentState?.uncertainTool?.status === "pending") {
+    return { content: "Waiting for a tool outcome check.", status: "paused", approval: null };
   }
   if (runState?.status === "budget_exhausted") {
     const budget = agentState?.budgetExhausted || {};

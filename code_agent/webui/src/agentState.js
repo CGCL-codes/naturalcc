@@ -7,6 +7,7 @@ export const initialAgentState = {
   streamedContent: "",
   streamedContentCall: 0,
   pendingApproval: null,
+  pendingUserInput: null,
   changedFiles: [],
   verification: { required: false, results: [] },
   finalAnswer: "",
@@ -25,6 +26,7 @@ export const initialAgentState = {
 // 分支条件：event.type === "run.started" || event.type === "run.resumed"。
 // 分支条件：event.type === "approval.requested"。
 // 分支条件：event.type === "approval.resolved"。
+// 分支条件：event.type === "user_input.requested" 或 "user_input.resolved"。
 // 分支条件：event.type === "tool.finished"。
 // 分支条件：event.type === "model.reasoning.delta"。
 // 分支条件：event.type === "model.content.delta"。
@@ -35,6 +37,7 @@ export const initialAgentState = {
 // 分支条件：event.type === "run.cancelled"。
 // 分支条件：event.type === "run.paused"。
 // 分支条件：event.type === "tool.uncertain"。
+// 分支条件：event.type === "tool.uncertain_resolved"。
 // 分支条件：event.type === "run.budget_exhausted"。
 // 分支条件：next.status !== "waiting_approval"。
 // 返回路径：state。
@@ -42,6 +45,7 @@ export const initialAgentState = {
 // 写入目标：next.status。
 // 写入目标：next.budget。
 // 写入目标：next.pendingApproval。
+// 写入目标：next.pendingUserInput。
 // 写入目标：next.changedFiles。
 // 写入目标：next.thinking。
 // 写入目标：next.streamedContent。
@@ -74,6 +78,12 @@ export function reduceAgentEvent(state, event) {
   } else if (event.type === "approval.resolved") {
     next.status = "running";
     next.pendingApproval = null;
+  } else if (event.type === "user_input.requested") {
+    next.status = "waiting_input";
+    next.pendingUserInput = event.payload;
+  } else if (event.type === "user_input.resolved") {
+    next.status = "running";
+    next.pendingUserInput = null;
   } else if (event.type === "tool.finished") {
     next.changedFiles = Array.from(new Set([
       ...next.changedFiles,
@@ -112,12 +122,21 @@ export function reduceAgentEvent(state, event) {
   } else if (event.type === "tool.uncertain") {
     next.status = "paused";
     next.uncertainTool = event.payload || {};
+  } else if (event.type === "tool.uncertain_resolved") {
+    next.status = "running";
+    next.uncertainTool = null;
   } else if (event.type === "run.budget_exhausted") {
     next.status = "budget_exhausted";
     next.budgetExhausted = event.payload || {};
   }
   if (next.status !== "waiting_approval") {
     next.pendingApproval = null;
+  }
+  if (next.status !== "waiting_input") {
+    next.pendingUserInput = null;
+  }
+  if (next.status !== "paused") {
+    next.uncertainTool = null;
   }
   return next;
 }
@@ -139,7 +158,7 @@ export function reduceAgentEvents(state, events) {
 // 输入 runId：类型由调用方与函数体约束。
 // 输入 events：类型由调用方与函数体约束。
 // 输入 snapshot：类型由调用方与函数体约束。
-// 返回路径：{ ...state, status: snapshot.status, pendingApproval: snapshot.status === "waiting_approval" ? snapshot.pending_approval : null }。
+// 返回路径：以当前快照为准恢复 Run 状态、待审批、待输入和待核对调用。
 // 直接调用：reduceAgentEvents。
 // [/maint-note:08ae9b9689dc]
 export function hydrateAgentState(runId, events, snapshot) {
@@ -147,6 +166,10 @@ export function hydrateAgentState(runId, events, snapshot) {
   return {
     ...state,
     status: snapshot.status,
-    pendingApproval: snapshot.status === "waiting_approval" ? snapshot.pending_approval : null
+    pendingApproval: snapshot.status === "waiting_approval" ? snapshot.pending_approval : null,
+    pendingUserInput: snapshot.status === "waiting_input" ? snapshot.pending_user_input : null,
+    uncertainTool: snapshot.status === "paused"
+      ? (Object.hasOwn(snapshot, "pending_uncertain_tool") ? snapshot.pending_uncertain_tool : state.uncertainTool)
+      : null
   };
 }

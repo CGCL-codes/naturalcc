@@ -5,7 +5,7 @@ const TERMINAL_STATUS_MAP = {
   budget_exhausted: "error"
 };
 
-const ACTIVE_RUN_STATUSES = new Set(["queued", "running", "waiting_approval", "paused"]);
+const ACTIVE_RUN_STATUSES = new Set(["queued", "running", "waiting_approval", "waiting_input", "paused"]);
 
 
 // [maint-note:d8cc6b28248a]
@@ -56,10 +56,10 @@ export function groupThreads(threads = [], now = new Date()) {
 // 维护导航：hydrateConversationMessages；下列为本函数源码中的接口与路径索引。
 // 输入 records：类型由调用方与函数体约束；缺省表达式 []。
 // 输入 lastRun：类型由调用方与函数体约束；缺省表达式 null。
-// 分支条件：lastRun?.run_id && ["queued", "running", "waiting_approval", "paused"].includes(lastRun.status) && !messages.some((message) => message.type === "assistant" && message.runId === lastRun.run_id)。
+// 分支条件：lastRun 仍处于活动状态且没有对应的助手消息。
 // 返回路径：messages。
 // 直接调用：records.map。
-// 直接调用：["queued", "running", "waiting_approval", "paused"].includes。
+// 直接调用：ACTIVE_RUN_STATUSES.has。
 // 直接调用：messages.some。
 // 直接调用：messages.push。
 // 直接调用：["queued", "running"].includes。
@@ -75,12 +75,12 @@ export function hydrateConversationMessages(records = [], lastRun = null) {
     kind: record.kind || "message",
     metadata: record.metadata || {}
   }));
-  if (lastRun?.run_id && ["queued", "running", "waiting_approval", "paused"].includes(lastRun.status)
+  if (lastRun?.run_id && ACTIVE_RUN_STATUSES.has(lastRun.status)
       && !messages.some((message) => message.type === "assistant" && message.runId === lastRun.run_id)) {
     messages.push({
       id: `pending-${lastRun.run_id}`,
       type: "assistant",
-      content: "Agent run in progress...",
+      content: lastRun.status === "waiting_input" ? "Waiting for your answer." : "Agent run in progress...",
       timestamp: new Date(),
       status: ["queued", "running"].includes(lastRun.status) ? "running" : "attention",
       runId: lastRun.run_id,

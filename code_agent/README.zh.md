@@ -558,7 +558,15 @@ VS Code 中 `Extensions: Install from VSIX...` 安装后，命令面板可用：
 }
 ```
 
-在 Web **Settings → MCP servers** 点 **Connect**，确认发现到的工具后发起新 Run。工具名按服务隔离，例如 `mcp__notes__lookup`。配置的只读工具可直接使用，其他外部工具逐次审批。`resources_list` 提供已发现的资源，`resources_read` 按资源 ID 请求审批和读取。断开、重连或服务目录变化会令旧工具版本失效。已发出但结果未知的有副作用调用会暂停 Run，恢复后继续剩余步骤。
+在 Web **Settings → MCP servers** 点 **Connect**，确认发现到的工具后发起新 Run。工具名按服务隔离，例如 `mcp__notes__lookup`。配置的只读工具可直接使用，其他外部工具逐次审批。`resources_list` 提供已发现的资源，`resources_read` 按资源 ID 请求审批和读取。断开、重连或服务目录变化会令旧工具版本失效。已发出但结果未知的调用会暂停 Run，等待人工核对。
+
+### Web Agent 人工参与
+
+需要用户补充信息或作决定时，模型可以调用 `user_ask` 发出文本题、单选题或是非题。Run 进入 `waiting_input`，刷新页面或重启服务后仍可在对话区和 **Run details** 查看问题。提交后原 Run 继续执行，等待时间不计入运行时限。
+
+API 客户端可用 `GET /api/agent/runs/{run_id}/input` 读取当前问题，用同路径的 POST 提交 `request_id`、`expected_version` 和 `answer` 后，通过 `POST /api/agent/runs/{run_id}/run` 继续执行。后端重启后，可在这两个 POST 请求中提供当前模型服务的 `api_key`。同一请求的相同答案只生效一次。
+
+工具审批单独显示授权范围、有效期和当前状态。工具执行结果不确定时，先在 **Run details** 记录观察到的结果，再继续 Run。原调用不会由运行时自动重放。
 
 ---
 
@@ -611,7 +619,7 @@ Agent 的每一步写操作都受三层约束：
 ```
 QUEUED → RUNNING → COMPLETED / FAILED / CANCELLED / BUDGET_EXHAUSTED
               ↓
-      WAITING_APPROVAL（等待审批）/ PAUSED（暂停，可恢复）
+      WAITING_APPROVAL（等待审批）/ WAITING_INPUT（等待回答）/ PAUSED（暂停，可恢复）
 ```
 
 一次 Run 从你的指令（goal）开始：构建上下文 → 调用模型 → 解析工具调用 → 策略检查（审批/白名单）→ 执行工具 → 记录事件，循环直到模型给出最终答复或命中终态。

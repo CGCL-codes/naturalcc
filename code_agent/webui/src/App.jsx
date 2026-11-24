@@ -32,7 +32,9 @@ import {
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { initialAgentState, hydrateAgentState, reduceAgentEvent } from "./agentState.js";
 import { followAgentEvents } from "./agentEventStream.js";
-import { approveAgentAction, approvalErrorMessage } from "./agentApproval.js";
+import { approveAgentAction, approvalErrorMessage, rejectAgentAction } from "./agentApproval.js";
+import { approvalContext, getRunInteraction, needsInteractionContinuation, resolveRunInteraction } from "./agentInteraction.js";
+import { AgentInteractionForm } from "./AgentInteractionForm.jsx";
 import {
   buildAgentRunMessage,
   canControlAgentRun,
@@ -393,6 +395,9 @@ function App() {
   const [runtimeMode, setRuntimeMode] = useState("agent");
   const [agentState, setAgentState] = useState(initialAgentState);
   const [agentRunState, setAgentRunState] = useState(null);
+  const [interactionDraft, setInteractionDraft] = useState(null);
+  const [interactionBusy, setInteractionBusy] = useState(false);
+  const [interactionError, setInteractionError] = useState(null);
   const [agentRuns, setAgentRuns] = useState([]);
   const [agentMemories, setAgentMemories] = useState([]);
   const [memoryProposals, setMemoryProposals] = useState([]);
@@ -423,6 +428,7 @@ function App() {
   // Ref to prevent duplicate user messages when Send triggers Run
   const userMessageAddedRef = useRef(false);
   const approvalBusyRef = useRef(false);
+  const runViewVersionRef = useRef(0);
 
   // New UI states
   const [messages, setMessages] = useState([]);
@@ -434,6 +440,17 @@ function App() {
   const messagesAreaRef = useRef(null);
   const messagesEndRef = useRef(null);
   const agentRunControllable = canControlAgentRun(agentState.status);
+  const agentInteraction = getRunInteraction(agentState);
+  const currentInteractionError = interactionError?.runId === agentState.runId ? interactionError : null;
+  const canContinueInteraction = ["queued", "running"].includes(agentState.status)
+    && (currentInteractionError?.canContinue || needsInteractionContinuation(agentState));
+  const waitingForUser = runtimeMode === "agent"
+    && (agentState.status === "waiting_input" || agentInteraction?.kind === "uncertain" || canContinueInteraction);
+  const currentInteractionDraft = interactionDraft && interactionDraft.key === agentInteraction?.key
+    ? interactionDraft
+    : { value: null, note: "" };
+  const pendingApprovalContext = approvalContext(agentState.pendingApproval);
+  const approvalUnavailable = ["expired", "revoked"].includes(agentState.pendingApproval?.status);
   const filteredThreads = useMemo(() => {
     const query = threadSearch.trim().toLowerCase();
     if (!query) return agentThreads;
@@ -1223,6 +1240,7 @@ function App() {
   // 直接调用：setSidebarOpen。
   // [/maint-note:bad84b66a197]
   async function loadAgentThread(threadId) {
+    runViewVersionRef.current += 1;
     setConversationLoading(true);
     setLastError("");
     setAgentState(initialAgentState);
@@ -1299,6 +1317,7 @@ function App() {
     if (!projectDir.trim()) {
       throw new Error("Set a workspace before creating a conversation.");
     }
+    runViewVersionRef.current += 1;
     const payload = await requestJson("/api/agent/threads", {
       method: "POST",
       body: JSON.stringify({
@@ -1401,6 +1420,7 @@ function App() {
   // 直接调用：setConversationLoading。
   // [/maint-note:107432de0719]
   function resetConversationView() {
+    runViewVersionRef.current += 1;
     setActiveThread(null);
     rememberActiveThread(null);
     setRuntimeProvider(defaultRuntimeConfig?.provider || "deepseek");
@@ -1780,7 +1800,7 @@ function App() {
   // 直接调用：(proposalsPayload.proposals || []).map。
   // 直接调用：setMode。
   // [/maint-note:dcdf7b0a37b8]
-  async function refreshAgentState(runId, memoryProjectId = projectDir) {
+  async function refreshAgentState(runId, memoryProjectId = projectDir, shouldApply = () => true) {
     const [eventPayload, runState, runsPayload, memoriesPayload, proposalsPayload] = await Promise.all([
       requestJson(`/api/agent/runs/${runId}/events`),
       requestJson(`/api/agent/runs/${runId}`),
@@ -1788,6 +1808,7 @@ function App() {
       requestJson(`/api/agent/memories?project_id=${encodeURIComponent(memoryProjectId)}`),
       requestJson(`/api/agent/memory-proposals?project_id=${encodeURIComponent(memoryProjectId)}`)
     ]);
+    if (!shouldApply()) return null;
     const next = hydrateAgentState(runId, eventPayload.events || [], runState);
     setAgentState(next);
     setAgentRunState(runState);
@@ -1799,7 +1820,7 @@ function App() {
         ? "success"
         : next.status === "failed" || next.status === "cancelled" || next.status === "budget_exhausted"
           ? "error"
-          : next.status === "waiting_approval" || next.status === "paused"
+          : next.status === "waiting_approval" || next.status === "waiting_input" || next.status === "paused"
             ? "attention"
             : "running"
     );
@@ -1834,6 +1855,7 @@ function App() {
   // 直接调用：refreshThreadList。
   // [/maint-note:8606e347e375]
   async function handleAgentRun() {
+    if (waitingForUser || interactionBusy) return;
     const submittedInstruction = instruction.trim();
     if (!submittedInstruction) {
       setLastError("Please enter an instruction first.");
@@ -2021,7 +2043,8 @@ function App() {
   // 直接调用：handleApprovalError。
   // [/maint-note:b8da650c76ca]
   async function handleAgentApproval() {
-    if (busy || conversationLoading || approvalBusyRef.current || !agentState.runId || !agentState.pendingApproval?.risk) return;
+    if (busy || conversationLoading || approvalBusyRef.current || approvalUnavailable
+        || !agentState.runId || !agentState.pendingApproval?.risk) return;
     approvalBusyRef.current = true;
     setBusy(true);
     setLastError("");
@@ -2104,7 +2127,7 @@ function App() {
     approvalBusyRef.current = true;
     setBusy(true);
     try {
-      await requestJson(`/api/agent/runs/${agentState.runId}/reject`, { method: "POST" });
+      await rejectAgentAction(requestJson, agentState.runId, agentState.pendingApproval);
       setAgentState((current) => ({ ...current, status: "running", pendingApproval: null }));
       const state = await requestJson(`/api/agent/runs/${agentState.runId}/run`, { method: "POST" });
       const next = await refreshAgentState(agentState.runId);
@@ -2138,8 +2161,82 @@ function App() {
   // 直接调用：refreshAgentState。
   // 直接调用：setLastError。
   // [/maint-note:dccff7cef2c2]
+  async function handleAgentInteraction(continueOnly = false) {
+    const { runId } = agentState;
+    if (busy || conversationLoading || approvalBusyRef.current || !runId
+        || (!continueOnly && !agentInteraction)) return;
+    if (continueOnly && !canContinueInteraction) return;
+
+    const viewVersion = runViewVersionRef.current;
+    const isCurrentView = () => runViewVersionRef.current === viewVersion;
+    approvalBusyRef.current = true;
+    setInteractionBusy(true);
+    setInteractionError(null);
+    setLastError("");
+    let acknowledged = continueOnly;
+    let replyId = messages.findLast((message) => message.type === "assistant" && message.runId === runId)?.id;
+    try {
+      let state = agentRunState;
+      if (!continueOnly) {
+        state = await resolveRunInteraction(requestJson, runId, agentInteraction,
+          currentInteractionDraft.value, currentInteractionDraft.note, apiKey);
+        acknowledged = true;
+        setInteractionDraft((draft) => draft?.key === agentInteraction.key ? null : draft);
+      }
+      if (["queued", "running"].includes(state?.status)) {
+        if (isCurrentView()) {
+          setAgentRunState(state);
+          setAgentState((current) => current.runId === runId
+            ? hydrateAgentState(runId, current.events, state) : current);
+          setMode("running");
+          const runningMessage = { content: "Continuing Agent run…", status: "running", approval: null };
+          if (replyId) {
+            updateMessage(replyId, runningMessage);
+          } else {
+            replyId = addMessage("assistant", runningMessage.content, runningMessage.status, { runId });
+          }
+        }
+        const options = { method: "POST" };
+        if (apiKey.trim()) options.body = JSON.stringify({ api_key: apiKey.trim() });
+        state = await requestJson(`/api/agent/runs/${runId}/run`, options);
+      }
+      if (!isCurrentView()) return;
+      const next = await refreshAgentState(runId, projectDir, isCurrentView);
+      if (!next) return;
+      const message = buildAgentRunMessage(state, next);
+      if (replyId) {
+        updateMessage(replyId, message);
+      } else {
+        addMessage("assistant", message.content, message.status, { approval: message.approval, runId });
+      }
+      if (next.status === "completed" && activeThread?.id) {
+        await loadAgentThread(activeThread.id);
+      } else {
+        await refreshThreadList();
+      }
+    } catch (error) {
+      if (!isCurrentView()) return;
+      const next = await refreshAgentState(runId, projectDir, isCurrentView).catch(() => null);
+      if (!isCurrentView()) return;
+      const canContinue = (acknowledged && ["queued", "running"].includes(next?.status))
+        || needsInteractionContinuation(next);
+      const message = error.status === 409
+        ? "This request has changed. Review the current run."
+        : error.status === 404
+          ? "This run is unavailable. Reload the conversation."
+          : acknowledged || canContinue
+            ? "The response was recorded. Continue the current run."
+            : "Could not submit the response. Check the request and try again.";
+      setInteractionError({ runId, message, canContinue });
+      setLastError(message);
+    } finally {
+      approvalBusyRef.current = false;
+      setInteractionBusy(false);
+    }
+  }
+
   async function handleAgentControl(action) {
-    if (!agentState.runId) return;
+    if (!agentState.runId || busy || interactionBusy) return;
     setBusy(true);
     try {
       await requestJson(`/api/agent/runs/${agentState.runId}/${action}`, { method: "POST" });
@@ -2159,6 +2256,7 @@ function App() {
   // 直接调用：refreshAgentState。
   // [/maint-note:d181af9cd1cb]
   async function loadAgentRun(runId) {
+    runViewVersionRef.current += 1;
     setRuntimeMode("agent");
     await refreshAgentState(runId);
   }
@@ -2449,7 +2547,7 @@ function App() {
   // 直接调用：requestAnimationFrame。
   // [/maint-note:c6d8815d7d6f]
   function handleSend() {
-    if (busy) return;
+    if (busy || waitingForUser || interactionBusy) return;
     if (!instruction.trim() && !canRunWithoutInstruction()) {
       setLastError("Please enter an instruction first.");
       return;
@@ -2604,6 +2702,29 @@ function App() {
     setTheme((current) => saveThemePref(globalThis.localStorage, nextTheme(current)));
   }
 
+  const interactionControl = runtimeMode === "agent" && !conversationLoading && (
+    agentInteraction ? (
+      <AgentInteractionForm
+        interaction={agentInteraction}
+        draft={currentInteractionDraft}
+        busy={busy || interactionBusy}
+        error={currentInteractionError?.message}
+        onChange={(changes) => setInteractionDraft({ ...currentInteractionDraft, ...changes, key: agentInteraction.key })}
+        onSubmit={() => handleAgentInteraction()}
+      />
+    ) : canContinueInteraction ? (
+      <div className="agent-interaction">
+        {currentInteractionError?.message
+          ? <p className="agent-interaction-error" role="alert">{currentInteractionError.message}</p>
+          : <p className="agent-interaction-question">Response recorded.</p>}
+        <button type="button" className="secondary-button compact-button"
+          disabled={busy || interactionBusy} onClick={() => handleAgentInteraction(true)}>
+          Continue run
+        </button>
+      </div>
+    ) : null
+  );
+
   // ── Render ──
 
   return (
@@ -2731,7 +2852,7 @@ function App() {
                               {thread.title || "Untitled task"}
                             </span>
                             <small>
-                              {thread.last_status || "ready"}
+                              {thread.last_status?.replaceAll("_", " ") || "ready"}
                               {thread.run_count ? ` · ${thread.run_count} run${thread.run_count === 1 ? "" : "s"}` : ""}
                             </small>
                           </button>
@@ -2886,7 +3007,7 @@ function App() {
             >
               <Activity size={14} />
               Run details
-              {agentState.runId && <span className={classNames("run-status-pill", agentState.status)}>{agentState.status}</span>}
+              {agentState.runId && <span className={classNames("run-status-pill", agentState.status)}>{agentState.status.replaceAll("_", " ")}</span>}
             </button>
           </section>
         )}
@@ -2948,26 +3069,29 @@ function App() {
                       <pre className="terminal-body">{msg.content}</pre>
                       {msg.approval && agentState.runId === msg.runId && agentState.pendingApproval
                         && msg.approval.tool_call?.id === agentState.pendingApproval.tool_call?.id && (
-                        <div className="message-action-row">
-                          <button
-                            type="button"
-                            className="message-primary-action"
-                            disabled={busy}
-                            onClick={handleAgentApproval}
-                          >
-                            <Check size={13} />
-                            Approve {msg.approval.risk}
-                          </button>
-                          <button
-                            type="button"
-                            className="message-action-btn"
-                            disabled={busy}
-                            onClick={handleAgentRejection}
-                          >
-                            <X size={13} />
-                            Reject
-                          </button>
-                        </div>
+                        <>
+                          {pendingApprovalContext && <p className="field-help">{pendingApprovalContext}</p>}
+                          <div className="message-action-row">
+                            <button
+                              type="button"
+                              className="message-primary-action"
+                              disabled={busy || interactionBusy || approvalUnavailable}
+                              onClick={handleAgentApproval}
+                            >
+                              <Check size={13} />
+                              Approve {msg.approval.risk}
+                            </button>
+                            <button
+                              type="button"
+                              className="message-action-btn"
+                              disabled={busy || interactionBusy}
+                              onClick={handleAgentRejection}
+                            >
+                              <X size={13} />
+                              Reject
+                            </button>
+                          </div>
+                        </>
                       )}
                       {msg.command && (
                         <button
@@ -3033,6 +3157,7 @@ function App() {
               </div>
             ))
           )}
+          {!runDetailsOpen && interactionControl && <div className="agent-interaction-inline">{interactionControl}</div>}
           <div ref={messagesEndRef} />
         </div>
 
@@ -3092,7 +3217,9 @@ function App() {
                 requestAnimationFrame(autoResizeTextarea);
               }}
               onKeyDown={handleKeyDown}
-              placeholder="Describe what you want to do..."
+              disabled={waitingForUser}
+              placeholder={canContinueInteraction ? "Continue the current run first."
+                : waitingForUser ? "Respond to the current request first." : "Describe what you want to do..."}
               rows={1}
             />
             <div className="composer-actions">
@@ -3114,7 +3241,7 @@ function App() {
               <button
                 type="button"
                 className="chat-send-btn"
-                disabled={busy || (!instruction.trim() && !canRunWithoutInstruction())}
+                disabled={busy || interactionBusy || waitingForUser || (!instruction.trim() && !canRunWithoutInstruction())}
                 onClick={handleSend}
                 title="Send"
               >
@@ -3180,13 +3307,17 @@ function App() {
             <div className="drawer-body">
               <section className="run-detail-section">
                 <div className="run-detail-heading">
-                  <span className={classNames("run-status-pill", agentState.status)}>{agentState.status}</span>
+                  <span className={classNames("run-status-pill", agentState.status)}>{agentState.status.replaceAll("_", " ")}</span>
                   {agentState.runId && <span>{agentState.events.length} events</span>}
                 </div>
                 {agentState.pendingApproval?.tool_call && (
-                  <pre className="approval-tool-details">{formatToolCall(agentState.pendingApproval.tool_call)}</pre>
+                  <>
+                    <pre className="approval-tool-details">{formatToolCall(agentState.pendingApproval.tool_call)}</pre>
+                    {pendingApprovalContext && <p className="field-help">{pendingApprovalContext}</p>}
+                  </>
                 )}
-                {agentState.status === "paused" && agentState.uncertainTool?.reason === "mcp_outcome_unknown" && (
+                {interactionControl}
+                {!agentInteraction && agentState.status === "paused" && agentState.uncertainTool?.reason === "mcp_outcome_unknown" && (
                   <div className="error-box" role="alert">
                     The result of {agentState.uncertainTool.tool_call?.name || "the MCP call"} is unknown.
                     Check the external service before resuming this run.
@@ -3196,23 +3327,25 @@ function App() {
                   <div className="run-control-actions">
                     {agentState.pendingApproval && (
                       <>
-                        <button type="button" className="primary-button" disabled={busy} onClick={handleAgentApproval}>
+                        <button type="button" className="primary-button" disabled={busy || interactionBusy || approvalUnavailable} onClick={handleAgentApproval}>
                           Approve {agentState.pendingApproval.risk}
                         </button>
-                        <button type="button" className="secondary-button" disabled={busy} onClick={handleAgentRejection}>
+                        <button type="button" className="secondary-button" disabled={busy || interactionBusy} onClick={handleAgentRejection}>
                           Reject
                         </button>
                       </>
                     )}
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      disabled={busy}
-                      onClick={() => handleAgentControl(agentState.status === "paused" ? "resume" : "pause")}
-                    >
-                      {agentState.status === "paused" ? "Resume" : "Pause"}
-                    </button>
-                    <button type="button" className="secondary-button" disabled={busy} onClick={() => handleAgentControl("cancel")}>
+                    {!waitingForUser && agentState.status !== "waiting_approval" && (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        disabled={busy || interactionBusy}
+                        onClick={() => handleAgentControl(agentState.status === "paused" ? "resume" : "pause")}
+                      >
+                        {agentState.status === "paused" ? "Resume" : "Pause"}
+                      </button>
+                    )}
+                    <button type="button" className="secondary-button" disabled={busy || interactionBusy} onClick={() => handleAgentControl("cancel")}>
                       Cancel
                     </button>
                   </div>
@@ -3580,7 +3713,7 @@ function App() {
               </p>
               <p className="confirmation-hint">
                 {threadNeedsCancellation(threadPendingDelete.active_status)
-                  ? `This conversation has an active ${threadPendingDelete.active_status} task. Cancel it before deleting.`
+                  ? `This conversation has an active task with status ${threadPendingDelete.active_status.replaceAll("_", " ")}. Cancel it before deleting.`
                   : "This conversation has no active task and can now be deleted."}
               </p>
               {threadDeleteError && (

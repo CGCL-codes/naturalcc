@@ -21,6 +21,58 @@ test("current snapshot overrides old approval events", () => {
   assert.equal(state.pendingApproval, null);
 });
 
+const inputRequest = {
+  request_id: "ask-1",
+  version: 3,
+  question: "Run the release check?",
+  answer_type: "confirm",
+  options: [],
+  tool_call_id: "call-1"
+};
+
+test("user input wait is versioned, cleared on resolution and protected by snapshot hydration", () => {
+  const requested = { sequence: 3, type: "user_input.requested", payload: inputRequest };
+  const waiting = reduceAgentEvents(initialAgentState, [requested]);
+  assert.equal(waiting.status, "waiting_input");
+  assert.deepEqual(waiting.pendingUserInput, inputRequest);
+
+  const nextRequest = { ...inputRequest, request_id: "ask-2", version: 7 };
+  const hydrated = hydrateAgentState("run-1", [requested], {
+    status: "waiting_input", pending_user_input: nextRequest
+  });
+  assert.deepEqual(hydrated.pendingUserInput, nextRequest);
+  assert.equal(hydrateAgentState("run-1", [requested], { status: "cancelled" }).pendingUserInput, null);
+
+  const done = reduceAgentEvents(waiting, [
+    { sequence: 4, type: "user_input.resolved", payload: { request_id: "ask-1" } }
+  ]);
+  assert.equal(done.status, "running");
+  assert.equal(done.pendingUserInput, null);
+  assert.equal(reduceAgentEvents(waiting, [{ type: "run.failed" }]).pendingUserInput, null);
+});
+
+test("uncertain tool reconciliation is restored from the snapshot and cleared on resolution", () => {
+  const pending = {
+    tool_call: { id: "call-1", name: "mcp__notes__write", args: { text: "note" } },
+    reason: "mcp_outcome_unknown", version: 8, status: "pending"
+  };
+  const unresolved = hydrateAgentState("run-1", [], {
+    status: "paused", pending_uncertain_tool: pending
+  });
+  assert.deepEqual(unresolved.uncertainTool, pending);
+
+  const oldEvent = { sequence: 8, type: "tool.uncertain", payload: pending };
+  const resolved = reduceAgentEvents(initialAgentState, [
+    oldEvent,
+    { sequence: 9, type: "tool.uncertain_resolved", payload: { tool_call_id: "call-1" } }
+  ]);
+  assert.equal(resolved.status, "running");
+  assert.equal(resolved.uncertainTool, null);
+  assert.equal(hydrateAgentState("run-1", [oldEvent], {
+    status: "paused", pending_uncertain_tool: null
+  }).uncertainTool, null);
+});
+
 
 test("agent event reducer tracks approval, changed files, verification and completion", () => {
   const state = reduceAgentEvents(initialAgentState, [

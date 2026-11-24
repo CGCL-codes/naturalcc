@@ -11,14 +11,14 @@
   "method": "Count each line containing a Python COMMENT token once, including inline comments. Docstrings and all other string literals are excluded. Aggregate across the entire inventory; not a per-file threshold.",
   "formula": "comment_lines / nonblank_lines * 100",
   "threshold_percent_exclusive": 20,
-  "file_count": 95,
+  "file_count": 96,
   "totals": {
-    "physical_lines": 51099,
-    "nonblank_lines": 47293,
-    "comment_lines": 19126
+    "physical_lines": 51675,
+    "nonblank_lines": 47830,
+    "comment_lines": 19129
   },
-  "comment_percent": 40.4415,
-  "comment_percent_including_blank_lines": 37.4293,
+  "comment_percent": 39.9937,
+  "comment_percent_including_blank_lines": 37.0179,
   "passes": true,
   "files": [
     {
@@ -58,9 +58,9 @@
     },
     {
       "path": "agent_core/contracts.py",
-      "sha256": "56f1e72ad637846c15dcca27a0c3f441b09aa34b4113bb44452f89faa7d8c5c3",
-      "physical_lines": 444,
-      "nonblank_lines": 403,
+      "sha256": "82a2130c88bf8892d06d5b9301e0e37b9eeb089874be78468c8d7aa2ca6f02a7",
+      "physical_lines": 445,
+      "nonblank_lines": 404,
       "comment_lines": 213
     },
     {
@@ -72,10 +72,17 @@
     },
     {
       "path": "agent_core/event_store.py",
-      "sha256": "82f6b4b718c032b1324b630a792194cc70f3dbe1c5c7dffbb6d39fb5cca9a773",
-      "physical_lines": 2150,
-      "nonblank_lines": 2094,
+      "sha256": "1d9e1575b3d7186880ec2de22d0ddbf74178049f5a27f96f5182e261efd0b99d",
+      "physical_lines": 2203,
+      "nonblank_lines": 2144,
       "comment_lines": 836
+    },
+    {
+      "path": "agent_core/human_input.py",
+      "sha256": "e7ef711be68dae4635d04e1f495db0826cc2f14c3e97da51c5a33c1c9ffa15db",
+      "physical_lines": 110,
+      "nonblank_lines": 96,
+      "comment_lines": 0
     },
     {
       "path": "agent_core/mcp_service.py",
@@ -149,10 +156,10 @@
     },
     {
       "path": "agent_core/run_engine.py",
-      "sha256": "d5bfc42e6aa213b5cf3c6c409e0b9f1ffc804d49b6ff30e52d2328cd8902adc1",
-      "physical_lines": 3742,
-      "nonblank_lines": 3662,
-      "comment_lines": 1094
+      "sha256": "a60ad21009be8af3cd583dd833c59478e6109a10b8ac78e6088db3337a9c5464",
+      "physical_lines": 4082,
+      "nonblank_lines": 3991,
+      "comment_lines": 1097
     },
     {
       "path": "agent_core/sqlite_migrations.py",
@@ -268,9 +275,9 @@
     },
     {
       "path": "api/agent_routes.py",
-      "sha256": "ee60451c88a521aeef8cb48924050d9842481cfdb085005bb219a717e930af16",
-      "physical_lines": 2118,
-      "nonblank_lines": 2023,
+      "sha256": "39c0acffa9b493b50424eec2c6c9dcdb6790fa98c47c4ad03cc5db5c3d38e7a7",
+      "physical_lines": 2190,
+      "nonblank_lines": 2084,
       "comment_lines": 1098
     },
     {

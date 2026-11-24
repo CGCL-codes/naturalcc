@@ -3464,6 +3464,79 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.run-status-pill.waiting_input {
+  color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 14%, transparent);
+}
+
+.agent-interaction-inline {
+  align-self: center;
+  width: min(100%, 900px);
+}
+
+.agent-interaction {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.run-detail-section > .agent-interaction {
+  margin-top: 8px;
+}
+
+.agent-interaction h4,
+.agent-interaction-question,
+.agent-interaction-error,
+.agent-interaction .approval-tool-details {
+  margin: 0;
+}
+
+.agent-interaction h4 {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.agent-interaction-question {
+  color: var(--text);
+  font-size: 0.83rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.agent-interaction-error {
+  color: var(--danger);
+  font-size: 0.73rem;
+}
+
+.agent-interaction > button {
+  justify-self: start;
+}
+
+.agent-interaction-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.agent-interaction-confirm legend {
+  margin-bottom: 5px;
+}
+
+.agent-interaction-confirm label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 /* [maint-note:469e61e5d48f]
  * 样式作用域：.codegraph-switch > span:nth-child(2)。
  * 布局位置：flex=1。

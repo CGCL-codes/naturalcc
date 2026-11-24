@@ -5,6 +5,7 @@ import threading
 import time
 import uuid
 from dataclasses import replace
+from datetime import datetime, timezone
 from html import escape
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -24,6 +25,7 @@ from .contracts import (
     ToolContext,
     ToolResult,
     ToolSpec,
+    now_iso,
 )
 from .context_builder import (
     CURRENT_PROMPT_LAYOUT,
@@ -32,6 +34,13 @@ from .context_builder import (
     ContextPlanner,
 )
 from .event_store import EventStore, VersionConflict
+from .human_input import (
+    USER_INPUT_TOOL_NAME,
+    HumanInputValidationError,
+    user_input_tool_definition,
+    validate_answer,
+    validate_question,
+)
 from .memory_prompts import build_recall_messages
 from .memory_proposals import AutoMemoryWorker
 from .memory_store import PINNED_MEMORY_KINDS, MemoryStore
@@ -53,6 +62,11 @@ TERMINAL = {
     RunStatus.FAILED.value,
     RunStatus.CANCELLED.value,
     RunStatus.BUDGET_EXHAUSTED.value,
+}
+WAITING = {
+    RunStatus.WAITING_APPROVAL.value,
+    RunStatus.WAITING_INPUT.value,
+    RunStatus.PAUSED.value,
 }
 
 
@@ -224,6 +238,7 @@ class RunEngine:
         compaction_service: CompactionService | None = None,
         default_runtime_model_config: RuntimeModelConfig | dict[str, Any] | None = None,
         mcp_service: McpService | None = None,
+        enable_user_input: bool = False,
     ) -> None:
         self.store = store
         self.registry = registry
@@ -235,6 +250,7 @@ class RunEngine:
         self.context_planner = context_planner
         self.compaction_service = compaction_service
         self.mcp_service = mcp_service
+        self.enable_user_input = enable_user_input
         self._active_mcp_calls: dict[str, threading.Event] = {}
         self._active_mcp_calls_guard = threading.Lock()
         if isinstance(default_runtime_model_config, RuntimeModelConfig):
@@ -771,6 +787,8 @@ class RunEngine:
             "final_answer": "",
             "pending_tool_calls": [],
             "pending_approval": None,
+            "pending_user_input": None,
+            "pending_uncertain_tool": None,
             "verification_pending": False,
             "verification_commands": [],
             # Files with a net workspace mutation that still need a successful
@@ -839,6 +857,24 @@ class RunEngine:
                 default_safety_margin_tokens=self.default_runtime_model_config.safety_margin_tokens,
             ).to_dict()
         state["pending_approval"] = self._pending_approval_for_state(state)
+        if (
+            self.enable_user_input
+            and state["status"] == RunStatus.PAUSED.value
+            and "pending_uncertain_tool" not in state
+        ):
+            # Recover pauses written before the explicit reconciliation DTO existed.
+            pause = next(
+                (event for event in reversed(self.store.list_events(run_id))
+                 if event.type in {"run.paused", "tool.uncertain", "tool.uncertain_resolved"}),
+                None,
+            )
+            if pause and pause.type == "tool.uncertain" and isinstance(pause.payload.get("tool_call"), dict):
+                state["pending_uncertain_tool"] = {
+                    "tool_call": pause.payload["tool_call"],
+                    "version": pause.sequence,
+                    "reason": pause.payload["reason"],
+                    "status": "pending",
+                }
         return state
 
     # [maint-note:9676a7db5241]
@@ -847,6 +883,7 @@ class RunEngine:
     # 输入 event_type：str。
     # 输入 payload：dict[str, Any]。
     # 输入 status：str | None；缺省表达式 None。
+    # atomic 为真时，在同一事务内写入事件、Run 状态和快照。
     # 返回契约：None。
     # 分支条件：status。
     # 分支条件：status in TERMINAL and event_type != 'run.completed'。
@@ -858,18 +895,27 @@ class RunEngine:
     # 直接调用：self._terminal_conversation_text。
     # 直接调用：self._persist_conversation_reply。
     # [/maint-note:9676a7db5241]
-    def _record(self, state: dict[str, Any], event_type: str, payload: dict[str, Any], status: str | None = None) -> None:
-        event = self.store.append_event(
-            state["run_id"],
-            event_type,
-            payload,
-            expected_version=state["version"],
-            status=status,
-        )
-        state["version"] = event.sequence
-        if status:
-            state["status"] = status
-        self.store.save_snapshot(state["run_id"], state, expected_version=state["version"])
+    def _record(
+        self,
+        state: dict[str, Any],
+        event_type: str,
+        payload: dict[str, Any],
+        status: str | None = None,
+        *,
+        atomic: bool = False,
+    ) -> None:
+        if atomic:
+            self.store.append_event_and_snapshot(
+                state["run_id"], state, event_type, payload, status=status or state["status"]
+            )
+        else:
+            event = self.store.append_event(
+                state["run_id"], event_type, payload, expected_version=state["version"], status=status
+            )
+            state["version"] = event.sequence
+            if status:
+                state["status"] = status
+            self.store.save_snapshot(state["run_id"], state, expected_version=state["version"])
         if status in TERMINAL and event_type != "run.completed":
             terminal_text = self._terminal_conversation_text(event_type, payload)
             if terminal_text:
@@ -1023,11 +1069,13 @@ class RunEngine:
     # 直接调用：self._step_unlocked。
     # 资源作用域：self._lock_for_run(run_id)；退出该 with 时调用对应上下文清理。
     # [/maint-note:4b21ce310727]
-    def run(self, run_id: str) -> dict[str, Any]:
+    def run(self, run_id: str, *, api_key: str | None = None) -> dict[str, Any]:
         with self._lock_for_run(run_id):
+            if api_key and self.get_state(run_id)["status"] in {RunStatus.QUEUED.value, RunStatus.RUNNING.value}:
+                self._remember_api_key(run_id, api_key)
             while True:
                 state = self._step_unlocked(run_id)
-                if state["status"] in TERMINAL | {RunStatus.WAITING_APPROVAL.value, RunStatus.PAUSED.value}:
+                if state["status"] in TERMINAL | WAITING:
                     return state
 
     # [maint-note:9d5c4e5b51e5]
@@ -1165,27 +1213,28 @@ class RunEngine:
         if state["status"] in TERMINAL:
             self.store.release_workspace_lease(state["workspace"], run_id)
             return state
-        if state["status"] in {RunStatus.WAITING_APPROVAL.value, RunStatus.PAUSED.value}:
+        if state["status"] in WAITING:
             return state
         events = self.store.list_events(run_id)
-        if events and events[-1].type == "tool.started":
-            call = events[-1].payload.get("tool_call")
-            if isinstance(call, dict) and events[-1].payload.get("mcp_tool_version"):
+        latest_tool_event = events[-1] if events else None
+        if self.enable_user_input:
+            latest_tool_event = next(
+                (event for event in reversed(events)
+                 if event.type in {"tool.started", "tool.finished", "tool.uncertain"}),
+                None,
+            )
+        if latest_tool_event and latest_tool_event.type == "tool.started":
+            call = latest_tool_event.payload.get("tool_call")
+            if isinstance(call, dict) and latest_tool_event.payload.get("mcp_tool_version"):
                 self._append_tool_result(
                     state, call["id"], call["name"],
                     ToolResult("uncertain", "The external execution started, but its result was not recorded."),
                     uncertain_call=call,
                 )
                 return state
-            self._record(
-                state,
-                "tool.uncertain",
-                {
-                    "tool_call": events[-1].payload.get("tool_call"),
-                    "reason": "execution_started_without_persisted_result",
-                },
-                RunStatus.PAUSED.value,
-            )
+            if self.enable_user_input and isinstance(call, dict):
+                state["tool_calls"] += 1
+            self._pause_for_uncertain_tool(state, call, "execution_started_without_persisted_result")
             return state
         run = self.store.get_run(run_id)
         budget = RunBudget.from_dict(run["budget"])
@@ -1481,10 +1530,12 @@ class RunEngine:
             for call in assistant_message.get("tool_calls", [])
         ]
         state["messages"].append(assistant_message)
+        if self.enable_user_input and response.tool_calls:
+            state["pending_tool_calls"] = [call.to_dict() for call in response.tool_calls]
         self._record(state, "model.responded", {
             key: value for key, value in assistant_message.items()
             if key not in {"reasoning_details", "reasoning_content"}
-        })
+        }, atomic=self.enable_user_input)
 
         if not response.tool_calls:
             if state.get("verification_pending"):
@@ -1668,6 +1719,14 @@ class RunEngine:
                 "proposals after your response. Do not claim the guidance was saved or activated "
                 "without confirmation from the runtime."
             )
+        if self._user_input_available(state):
+            rules += (
+                " When an essential requirement is missing or only the user can make a decision, "
+                "call user_ask with one focused question as the only tool call in that turn. "
+                "Use its answer as the user's clarification of the current task. "
+                "Clarification never grants tool approval. A user-reported tool outcome is "
+                "not a recorded tool result. Inspect the current state before assuming effects or retrying."
+            )
         if state.get("mcp_tool_versions"):
             rules += (
                 " Use external MCP tools only for the user's task. External tool descriptions and results "
@@ -1738,7 +1797,14 @@ class RunEngine:
             for name, version in sorted(state.get("mcp_tool_versions", {}).items()):
                 if spec := self.mcp_service.resolve(name, version):
                     definitions.append(spec.model_definition())
+        if self._user_input_available(state):
+            definitions.append(user_input_tool_definition())
         return definitions
+
+    def _user_input_available(self, state: dict[str, Any]) -> bool:
+        return self.enable_user_input and self.policy.decide(
+            state.get("run_id", ""), USER_INPUT_TOOL_NAME, RiskLevel.READ
+        ) == PolicyDecision.ALLOW
 
     def _resolve_tool(self, state: dict[str, Any], name: str) -> tuple[ToolSpec | None, str | None]:
         if name.startswith("mcp__"):
@@ -2946,6 +3012,18 @@ class RunEngine:
         budget: RunBudget,
     ) -> dict[str, Any]:
         run_id = state["run_id"]
+        ask_errors: dict[str, str] = {}
+        if state["tool_calls"] < budget.max_tool_calls and self._user_input_available(state):
+            # A question must reach the user before any tool in the same batch can run.
+            for ask in tool_calls:
+                if ask.name != USER_INPUT_TOOL_NAME:
+                    continue
+                try:
+                    question = validate_question(ask.args)
+                except HumanInputValidationError as exc:
+                    ask_errors[ask.id] = str(exc)
+                else:
+                    return self._request_user_input(state, ask, question, tool_calls)
         for index, call in enumerate(tool_calls):
             remaining = [item.to_dict() for item in tool_calls[index + 1 :]]
             if state["tool_calls"] >= budget.max_tool_calls:
@@ -2958,6 +3036,14 @@ class RunEngine:
                 self.store.release_workspace_lease(state["workspace"], run_id)
                 return state
             canonical_name = self.registry.to_canonical_name(call.name)
+            if self.enable_user_input and canonical_name == USER_INPUT_TOOL_NAME:
+                if call.id in ask_errors:
+                    result = ToolResult.failure(ask_errors[call.id], "InvalidUserInputRequest")
+                else:
+                    result = ToolResult.failure("user_ask is denied by policy", "PolicyDenied")
+                state["pending_tool_calls"] = remaining
+                self._append_tool_result(state, call.id, call.name, result)
+                continue
             spec, mcp_version = self._resolve_tool(state, canonical_name)
             if spec is None:
                 if canonical_name.startswith("mcp__"):
@@ -3033,11 +3119,18 @@ class RunEngine:
                 }
                 if mcp_version:
                     state["pending_approval"]["mcp_tool_version"] = mcp_version
+                if self.enable_user_input:
+                    state["pending_approval"].update(
+                        scope="call" if mcp_version else "run_risk",
+                        status="pending",
+                        expires_at=self._approval_expiry(state, budget),
+                    )
                 self._record(
                     state,
                     "approval.requested",
                     state["pending_approval"],
                     RunStatus.WAITING_APPROVAL.value,
+                    atomic=self.enable_user_input,
                 )
                 return state
 
@@ -3065,7 +3158,7 @@ class RunEngine:
                     state["pending_tool_calls"] = remaining
                     self._append_tool_result(state, call.id, call.name, result)
                     continue
-            self._record(state, "tool.started", {"tool_call": call.to_dict()})
+            self._record(state, "tool.started", {"tool_call": call.to_dict()}, atomic=self.enable_user_input)
             context = ToolContext(
                 run_id,
                 Path(state["workspace"]),
@@ -3249,9 +3342,10 @@ class RunEngine:
             state.pop("approved_mcp_call", None)
             state["pending_tool_calls"] = remaining
             state["tool_calls"] += 1
-            self._record(state, "tool.started", {
-                "tool_call": call.to_dict(), "mcp_tool_version": version,
-            })
+            self._record(
+                state, "tool.started", {"tool_call": call.to_dict(), "mcp_tool_version": version},
+                atomic=self.enable_user_input,
+            )
             context = ToolContext(
                 run_id,
                 Path(state["workspace"]),
@@ -3272,18 +3366,16 @@ class RunEngine:
                 self._active_mcp_calls.pop(run_id, None)
 
     # [maint-note:dc7f115bbc08]
-    # 维护导航：_append_tool_result；下列为本函数源码中的接口与路径索引。
+    # 维护导航：_remember_tool_result；下列为本函数源码中的接口与路径索引。
     # 输入 state：dict[str, Any]。
     # 输入 call_id：str。
     # 输入 tool_name：str。
     # 输入 result：ToolResult。
-    # 输入 uncertain_call：dict[str, Any] | None；缺省表达式 None。
     # 返回契约：None。
     # 分支条件：path not in working['changed_files']。
     # 分支条件：canonical_name in {'workspace.read', 'workspace.list', 'workspace.search', 'codegraph.explore'}。
     # 分支条件：isinstance(value, str) and value not in working['inspected_files']。
     # 分支条件：result.status != 'success'。
-    # 分支条件：uncertain_call is not None；记录 tool.uncertain，并持久化 Run 暂停状态。
     # 遍历边界：path ← result.changed_files。
     # 遍历边界：value ← result.data.values()。
     # 写入目标：working['completed_tool_calls']。
@@ -3302,17 +3394,14 @@ class RunEngine:
     # 直接调用：json.dumps。
     # 直接调用：result.to_dict。
     # 直接调用：state['messages'].append。
-    # 直接调用：self._record。
     # 表达式分流：state.get('pending_tool_calls')；真值与假值分支分别计算，不同时执行。
     # [/maint-note:dc7f115bbc08]
-    def _append_tool_result(
+    def _remember_tool_result(
         self,
         state: dict[str, Any],
         call_id: str,
         tool_name: str,
         result: ToolResult,
-        *,
-        uncertain_call: dict[str, Any] | None = None,
     ) -> None:
         working = self._refresh_working_state(state)
         working["completed_tool_calls"].append(
@@ -3356,15 +3445,201 @@ class RunEngine:
             "content": json.dumps(result.to_dict(), ensure_ascii=False),
         }
         state["messages"].append(message)
+
+    def _append_tool_result(
+        self,
+        state: dict[str, Any],
+        call_id: str,
+        tool_name: str,
+        result: ToolResult,
+        *,
+        uncertain_call: dict[str, Any] | None = None,
+    ) -> None:
+        self._remember_tool_result(state, call_id, tool_name, result)
         if uncertain_call is not None:
-            self._record(
-                state,
-                "tool.uncertain",
-                {"tool_call": uncertain_call, "reason": "mcp_outcome_unknown", "result": result.to_dict()},
-                RunStatus.PAUSED.value,
-            )
+            self._pause_for_uncertain_tool(state, uncertain_call, "mcp_outcome_unknown", result)
             return
-        self._record(state, "tool.finished", {"tool_call_id": call_id, "tool": tool_name, "result": result.to_dict()})
+        self._record(
+            state, "tool.finished", {"tool_call_id": call_id, "tool": tool_name, "result": result.to_dict()},
+            atomic=self.enable_user_input,
+        )
+
+    def _pause_for_uncertain_tool(
+        self,
+        state: dict[str, Any],
+        call: dict[str, Any] | None,
+        reason: str,
+        result: ToolResult | None = None,
+    ) -> None:
+        payload = {"tool_call": call, "reason": reason}
+        if self.enable_user_input and call is not None:
+            state["pending_tool_calls"] = [
+                item for item in state["pending_tool_calls"] if item["id"] != call["id"]
+            ]
+            payload.update(status="pending", version=state["version"] + 1, created_at=now_iso())
+            state["pending_uncertain_tool"] = dict(payload)
+        if result is not None:
+            payload["result"] = result.to_dict()
+        self._record(
+            state, "tool.uncertain", payload, RunStatus.PAUSED.value,
+            atomic=self.enable_user_input,
+        )
+
+    def _request_user_input(
+        self,
+        state: dict[str, Any],
+        call: ToolCall,
+        question: dict[str, Any],
+        batch: list[ToolCall],
+    ) -> dict[str, Any]:
+        pending = {
+            **question,
+            "request_id": uuid.uuid4().hex,
+            "version": state["version"] + 1,
+            "created_at": now_iso(),
+            "tool_call_id": call.id,
+        }
+        # Keep the full assistant tool batch so the answer can close every tool call
+        # in provider message order without executing actions planned before the answer.
+        state["user_input_wait"] = {
+            "started_at_epoch": time.time(),
+            "calls": [{"id": item.id, "name": item.name} for item in batch],
+        }
+        state["pending_tool_calls"] = []
+        state["pending_user_input"] = pending
+        state["tool_calls"] += 1
+        self._refresh_working_state(state)["next_expected_action"] = "wait for user input"
+        self._record(state, "user_input.requested", pending, RunStatus.WAITING_INPUT.value, atomic=True)
+        return state
+
+    def _redact_human_text(self, run_id: str, value: str, api_key: str | None) -> str:
+        for key in (self._run_api_keys.get(run_id), api_key):
+            if key and key.strip():
+                value = value.replace(key.strip(), "[REDACTED]")
+        if self.mcp_service:
+            value = self.mcp_service.redact(value)
+        return redact_sensitive_text(value)
+
+    def _remember_api_key(self, run_id: str, api_key: str | None) -> None:
+        if api_key and api_key.strip():
+            self._run_api_keys[run_id] = api_key.strip()
+
+    def _matches_resolved_input(
+        self, run_id: str, request_id: str, version: int, answer: str | bool, api_key: str | None,
+    ) -> bool:
+        for event in self.store.list_events(run_id, version, event_type="user_input.resolved"):
+            data = event.payload
+            if data["request_id"] != request_id or data["version"] != version:
+                continue
+            if data["answer_type"] == "text" and isinstance(answer, str):
+                answer = self._redact_human_text(run_id, answer.strip(), api_key)
+            return type(answer) is type(data["answer"]) and answer == data["answer"]
+        return False
+
+    def answer_user_input(
+        self, run_id: str, request_id: str, expected_version: int, answer: str | bool,
+        *, api_key: str | None = None,
+    ) -> dict[str, Any]:
+        with self._lock_for_run(run_id):
+            state = self.get_state(run_id)
+            pending = state.get("pending_user_input")
+            if (
+                state["status"] != RunStatus.WAITING_INPUT.value
+                or not pending
+                or pending["request_id"] != request_id
+                or pending["version"] != expected_version
+            ):
+                if self._matches_resolved_input(run_id, request_id, expected_version, answer, api_key):
+                    if state["status"] == RunStatus.RUNNING.value and run_id not in self._run_api_keys:
+                        self._remember_api_key(run_id, api_key)
+                    return state
+                raise ValueError("user input request is stale or already answered; refresh the run")
+
+            answer = validate_answer(pending, answer)
+            if pending["answer_type"] == "text":
+                answer = self._redact_human_text(run_id, str(answer), api_key)
+            data = {
+                "request_id": request_id,
+                "version": expected_version,
+                "tool_call_id": pending["tool_call_id"],
+                "answer_type": pending["answer_type"],
+                "answer": answer,
+            }
+            if pending["answer_type"] == "choice":
+                data["answer_label"] = next(item["label"] for item in pending["options"] if item["id"] == answer)
+            wait = state.pop("user_input_wait")
+            state["started_at_epoch"] += max(0.0, time.time() - wait["started_at_epoch"])
+            state["pending_user_input"] = None
+            for item in wait["calls"]:
+                if item["id"] == pending["tool_call_id"]:
+                    result = ToolResult("success", "The user answered the clarification.", data=data)
+                else:
+                    result = ToolResult.failure(
+                        "This action was not executed because the user needed to clarify the task. "
+                        "Reassess it using the answer and propose it again if needed.",
+                        "UserInputRequired",
+                    )
+                self._remember_tool_result(state, item["id"], item["name"], result)
+            try:
+                self._record(state, "user_input.resolved", data, RunStatus.RUNNING.value, atomic=True)
+            except VersionConflict:
+                if not self._matches_resolved_input(run_id, request_id, expected_version, answer, api_key):
+                    raise
+                state = self.get_state(run_id)
+            self._remember_api_key(run_id, api_key)
+            return state
+
+    def resolve_uncertain_tool(
+        self, run_id: str, tool_call_id: str, expected_version: int, outcome: str,
+        note: str | None = None, *, api_key: str | None = None,
+    ) -> dict[str, Any]:
+        if outcome not in {"completed", "failed", "unknown"}:
+            raise HumanInputValidationError("invalid user-reported tool outcome")
+        with self._lock_for_run(run_id):
+            state = self.get_state(run_id)
+            pending = state.get("pending_uncertain_tool")
+            if (
+                state["status"] != RunStatus.PAUSED.value
+                or not pending
+                or pending["tool_call"]["id"] != tool_call_id
+                or pending["version"] != expected_version
+            ):
+                raise ValueError("tool reconciliation request is stale; refresh the run")
+            call = pending["tool_call"]
+            data = {
+                "tool_call_id": tool_call_id,
+                "tool": call["name"],
+                "version": expected_version,
+                "outcome": outcome,
+                "note": self._redact_human_text(run_id, (note or "").strip(), api_key),
+            }
+            # Older local-tool pauses retain the in-flight call in the pending queue.
+            remaining = [item for item in state["pending_tool_calls"] if item["id"] != tool_call_id]
+            state["pending_tool_calls"] = []
+            state["pending_uncertain_tool"] = None
+            if not any(
+                message.get("role") == "tool" and message.get("tool_call_id") == tool_call_id
+                for message in state["messages"]
+            ):
+                self._remember_tool_result(
+                    state, tool_call_id, call["name"],
+                    ToolResult("uncertain", "Execution has no recorded result. The user reported an outcome.", data=data),
+                )
+            for item in remaining:
+                self._remember_tool_result(
+                    state, item["id"], item["name"], ToolResult.failure(
+                        "This action was not executed after an earlier tool's outcome became uncertain. "
+                        "Reassess it using the user-reported outcome before proposing it again.",
+                        "UncertainToolOutcome",
+                    ),
+                )
+            working = self._refresh_working_state(state)
+            resolutions = working.setdefault("uncertain_tool_resolutions", [])
+            resolutions.append(data)
+            working["uncertain_tool_resolutions"] = resolutions[-10:]
+            self._record(state, "tool.uncertain_resolved", data, RunStatus.RUNNING.value, atomic=True)
+            self._remember_api_key(run_id, api_key)
+            return state
 
     # [maint-note:1791a2006a74]
     # 维护导航：_pending_approval_for_state；下列为本函数源码中的接口与路径索引。
@@ -3389,21 +3664,47 @@ class RunEngine:
             return None
         existing = state.get("pending_approval")
         if isinstance(existing, dict) and existing.get("tool_call") and existing.get("risk"):
-            return existing
-        pending = state.get("pending_tool_calls") or []
-        if not pending:
-            return None
-        call_data = pending[0]
-        spec, version = self._resolve_tool(state, str(call_data.get("name", "")))
-        if spec is None:
-            return None
-        approval = {
-            "tool_call": call_data,
-            "risk": spec.risk_level.value,
-        }
-        if version:
-            approval["mcp_tool_version"] = version
+            approval = dict(existing)
+        else:
+            pending = state.get("pending_tool_calls") or []
+            if not pending:
+                return None
+            call_data = pending[0]
+            spec, version = self._resolve_tool(state, str(call_data.get("name", "")))
+            if spec is None:
+                return None
+            approval = {"tool_call": call_data, "risk": spec.risk_level.value}
+            if version:
+                approval["mcp_tool_version"] = version
+        if self.enable_user_input:
+            call = approval["tool_call"]
+            mcp_version = approval.get("mcp_tool_version")
+            name = self.registry.to_canonical_name(call["name"])
+            spec, current_version = self._resolve_tool(state, name)
+            approval["scope"] = "call" if mcp_version else "run_risk"
+            expires_at = approval.get("expires_at")
+            if expires_at is None:
+                budget = RunBudget.from_dict(self.store.get_run(state["run_id"])["budget"])
+                expires_at = self._approval_expiry(state, budget)
+                approval["expires_at"] = expires_at
+            if (
+                spec is None
+                or current_version != mcp_version
+                or self.policy.decide(state["run_id"], name, RiskLevel(approval["risk"])) == PolicyDecision.DENY
+            ):
+                approval["status"] = "revoked"
+            elif datetime.fromisoformat(expires_at).timestamp() <= time.time():
+                approval["status"] = "expired"
+            else:
+                approval["status"] = "pending"
         return approval
+
+    @staticmethod
+    def _approval_expiry(state: dict[str, Any], budget: RunBudget) -> str:
+        start = float(state["started_at_epoch"])
+        last_utc_second = datetime(9999, 12, 31, 23, 59, 59, tzinfo=timezone.utc).timestamp()
+        deadline = start + min(budget.max_seconds, int(last_utc_second - start))
+        return datetime.fromtimestamp(deadline, timezone.utc).isoformat()
 
     # [maint-note:20fce84e623d]
     # 维护导航：approve；下列为本函数源码中的接口与路径索引。
@@ -3441,7 +3742,7 @@ class RunEngine:
             state = self.get_state(run_id)
             if state["status"] != RunStatus.WAITING_APPROVAL.value:
                 return state
-            pending = self._pending_approval_for_state(state)
+            pending = state["pending_approval"]
             if pending is None:
                 raise ValueError("run has no pending approval")
             if tool_call_id is not None and pending["tool_call"].get("id") != tool_call_id:
@@ -3449,6 +3750,8 @@ class RunEngine:
             required_risk = RiskLevel(str(pending["risk"]))
             if required_risk != risk:
                 raise ValueError(f"pending approval requires {required_risk.value} risk")
+            if pending.get("status", "pending") != "pending":
+                raise ValueError(f"approval is {pending['status']}; reject this call or cancel the Run")
             version = pending.get("mcp_tool_version")
             if version:
                 call = pending["tool_call"]
@@ -3473,8 +3776,10 @@ class RunEngine:
                         "decision": "approved",
                         "tool_call_id": pending["tool_call"].get("id"),
                         **({"mcp_tool_version": version} if version else {}),
+                        **({"scope": pending["scope"]} if self.enable_user_input else {}),
                     },
                     RunStatus.RUNNING.value,
+                    atomic=self.enable_user_input,
                 )
             except VersionConflict:
                 return self.get_state(run_id)
@@ -3501,16 +3806,21 @@ class RunEngine:
     # 资源作用域：self._lock_for_run(run_id)；退出该 with 时调用对应上下文清理。
     # 表达式分流：spec；真值与假值分支分别计算，不同时执行。
     # [/maint-note:789d1e607e5d]
-    def reject(self, run_id: str) -> dict[str, Any]:
+    def reject(self, run_id: str, tool_call_id: str | None = None) -> dict[str, Any]:
         with self._lock_for_run(run_id):
             state = self.get_state(run_id)
             if state["status"] != RunStatus.WAITING_APPROVAL.value or not state["pending_tool_calls"]:
                 raise ValueError("run has no pending approval")
             call_data = state["pending_tool_calls"][0]
             call = ToolCall(call_data["id"], call_data["name"], call_data.get("args", {}))
-            pending = self._pending_approval_for_state(state)
+            if tool_call_id is not None and tool_call_id != call.id:
+                raise ValueError("pending approval has changed; refresh the run before rejecting")
+            pending = state["pending_approval"]
             state["pending_tool_calls"] = state["pending_tool_calls"][1:]
             state["pending_approval"] = None
+            result = ToolResult.failure(f"action rejected by user: {call.name}", "UserRejected")
+            if self.enable_user_input:
+                self._remember_tool_result(state, call.id, call.name, result)
             self._record(
                 state,
                 "approval.resolved",
@@ -3518,15 +3828,19 @@ class RunEngine:
                     "risk": pending.get("risk") if pending else None,
                     "decision": "rejected",
                     "tool_call_id": call.id,
+                    **({"scope": pending["scope"], "previous_status": pending["status"]}
+                       if self.enable_user_input and pending else {}),
                 },
                 RunStatus.RUNNING.value,
+                atomic=self.enable_user_input,
             )
-            self._append_tool_result(
-                state,
-                call.id,
-                call.name,
-                ToolResult.failure(f"action rejected by user: {call.name}", "UserRejected"),
-            )
+            if self.enable_user_input:
+                self._record(
+                    state, "tool.finished", {"tool_call_id": call.id, "tool": call.name, "result": result.to_dict()},
+                    atomic=True,
+                )
+            else:
+                self._append_tool_result(state, call.id, call.name, result)
             return state
 
     # [maint-note:0f8f4602019b]
@@ -3547,6 +3861,11 @@ class RunEngine:
             state = self.get_state(run_id)
             if state["status"] in TERMINAL:
                 raise ValueError("cannot pause a terminal run")
+            if self.enable_user_input and (
+                state["status"] in {RunStatus.WAITING_APPROVAL.value, RunStatus.WAITING_INPUT.value}
+                or state.get("pending_uncertain_tool")
+            ):
+                raise ValueError("resolve the pending request or cancel the Run")
             self._record(state, "run.paused", {"reason": "user"}, RunStatus.PAUSED.value)
             return state
 
@@ -3568,6 +3887,8 @@ class RunEngine:
             state = self.get_state(run_id)
             if state["status"] != RunStatus.PAUSED.value:
                 raise ValueError("run is not paused")
+            if state.get("pending_uncertain_tool"):
+                raise ValueError("reconcile the uncertain tool outcome before resuming")
             self._record(state, "run.resumed", {}, RunStatus.RUNNING.value)
             return state
 
@@ -3597,11 +3918,27 @@ class RunEngine:
         if state["status"] in TERMINAL:
             return state
         cancel_run_commands(run_id)
+        if self.enable_user_input and state["status"] in WAITING:
+            with self._lock_for_run(run_id):
+                return self._cancel_state(self.get_state(run_id))
         return self._cancel_state(state)
 
     def _cancel_state(self, state: dict[str, Any]) -> dict[str, Any]:
         if state["status"] not in TERMINAL:
-            self._record(state, "run.cancelled", {}, RunStatus.CANCELLED.value)
+            payload = {}
+            if self.enable_user_input:
+                if approval := state.get("pending_approval"):
+                    payload["revoked_approval"] = {**approval, "status": "revoked"}
+                if pending := state.get("pending_user_input"):
+                    payload["revoked_input_request_id"] = pending["request_id"]
+                state["pending_approval"] = None
+                state["pending_user_input"] = None
+                state["pending_uncertain_tool"] = None
+                state.pop("user_input_wait", None)
+            self._record(
+                state, "run.cancelled", payload, RunStatus.CANCELLED.value,
+                atomic=self.enable_user_input,
+            )
             self.store.release_workspace_lease(state["workspace"], state["run_id"])
         return state
 
@@ -3734,9 +4071,12 @@ class RunEngine:
             limit = values[name]
             if limit is not None and limit < used:
                 raise ValueError(f"{name} cannot be below current usage")
-        elapsed = time.time() - float(state.get("started_at_epoch", time.time()))
+        now = time.time()
+        elapsed = state.get("user_input_wait", {}).get("started_at_epoch", now) - float(
+            state.get("started_at_epoch", now)
+        )
         if values["max_seconds"] < elapsed:
             raise ValueError("max_seconds cannot be below current usage")
         self.store.update_run_budget(run_id, values)
-        self._record(state, "run.budget_updated", {"budget": values})
+        self._record(state, "run.budget_updated", {"budget": values}, atomic=self.enable_user_input)
         return {**state, "budget": values}

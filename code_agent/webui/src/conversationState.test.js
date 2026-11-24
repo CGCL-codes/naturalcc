@@ -63,6 +63,13 @@ test("refresh keeps a visible assistant card while the last run is streaming", (
   assert.equal(messages[1].status, "running");
 });
 
+test("refresh shows an attention card while a run is waiting for the user's answer", () => {
+  const [message] = hydrateConversationMessages([], { run_id: "run-2", status: "waiting_input" });
+  assert.equal(message.runId, "run-2");
+  assert.equal(message.status, "attention");
+  assert.equal(message.content, "Waiting for your answer.");
+});
+
 
 test("detectContextCandidate recognizes mentions and Windows absolute paths", () => {
   assert.deepEqual(
@@ -122,7 +129,7 @@ test("selectThreadAfterDeletion returns an empty selection after deleting the la
 
 
 test("threadNeedsCancellation recognizes every protected active run status", () => {
-  for (const status of ["queued", "running", "waiting_approval", "paused"]) {
+  for (const status of ["queued", "running", "waiting_approval", "waiting_input", "paused"]) {
     assert.equal(threadNeedsCancellation(status), true);
   }
   for (const status of ["completed", "failed", "cancelled", "budget_exhausted", null]) {
